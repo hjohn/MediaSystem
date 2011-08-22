@@ -1,0 +1,95 @@
+package hs.mediasystem.screens.videoplaying;
+
+import hs.mediasystem.Controller;
+import hs.mediasystem.screens.AbstractBlock;
+import hs.smartlayout.Anchor;
+import hs.sublight.SublightSubtitleClient;
+import hs.sublight.SubtitleDescriptor;
+import hs.ui.AcceleratorScope;
+import hs.ui.ControlListener;
+import hs.ui.controls.AbstractGroup;
+import hs.ui.controls.Button;
+import hs.ui.controls.HorizontalGroup;
+import hs.ui.controls.Label;
+import hs.ui.controls.VerticalGroup;
+
+import java.awt.Color;
+import java.awt.event.KeyEvent;
+import java.util.Date;
+import java.util.List;
+
+import javax.swing.KeyStroke;
+
+public class VideoPlayingMenu extends AbstractBlock {
+  private final SublightSubtitleClient client;
+
+  public VideoPlayingMenu(SublightSubtitleClient client) {
+    this.client = client;
+  }
+  
+  @Override
+  protected AbstractGroup<?> create(final Controller controller) {
+    return new VerticalGroup() {{      
+      setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), AcceleratorScope.ANCESTOR_WINDOW, new ControlListener<VerticalGroup>() {
+        @Override
+        public void onEvent(VerticalGroup control) {
+          System.out.println("Home was pressed");
+          System.out.println("Looking for subtitles!");
+          
+          Integer year = null;
+          try {
+            year = Integer.parseInt(controller.getCurrentItem().getYear());
+          }
+          catch(NumberFormatException e) {
+          }
+          
+          List<SubtitleDescriptor> subtitleList2 = 
+            client.getSubtitleList(controller.getCurrentItem().getTitle(), year, null, null, "English");
+//          client.getSubtitleList(controller.getCurrentItem().getTitle(), null, (short)1, 3, "English");
+          System.out.println(subtitleList2);
+          
+          controller.subtitles.clear();
+          controller.subtitles.addAll(subtitleList2);
+
+          
+          controller.forward("VideoOptions");
+        }
+      });
+      weightX().set(1.0);
+      weightY().set(1.0);
+      opaque().set(false);
+      add(new HorizontalGroup() {{
+        add(new Label() {{
+          fgColor().set(new Color(155, 190, 255));
+          text().set("Media System");
+        }});
+        anchor().set(Anchor.CENTER);
+        weightY().set(0.25);
+      }});
+      add(new HorizontalGroup() {{
+        weightX().set(1.0);
+        weightY().set(1.0);
+        maxWidth().set(10000);
+        add(new VerticalGroup() {{
+          weightX().set(0.25);
+        }});
+        add(new VerticalGroup() {{
+          weightX().set(1.0);
+          weightY().set(1.0);
+        }});
+        add(new VerticalGroup() {{
+          weightX().set(0.25);
+          add(new Button()); // TODO Here so something can get focus... HACK!  Need to figure out a better way
+        }});
+      }});
+      add(new HorizontalGroup() {{
+        add(new Label() {{
+          fgColor().set(new Color(155, 190, 255));
+          text().set("" + new Date());
+        }});
+        anchor().set(Anchor.CENTER);
+        weightY().set(0.25);
+      }});
+    }};
+  }
+}

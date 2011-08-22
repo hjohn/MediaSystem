@@ -1,0 +1,354 @@
+package hs.mediasystem;
+
+import hs.mediasystem.screens.movie.MovieElement;
+import hs.models.BasicListModel;
+import hs.models.ListModel;
+import hs.sublight.SubtitleDescriptor;
+import hs.ui.AcceleratorScope;
+import hs.ui.ControlListener;
+import hs.ui.controls.AbstractGroup;
+import hs.ui.controls.VerticalGroup;
+import hs.ui.frames.AbstractFrame;
+import hs.ui.swing.Painter;
+
+import java.awt.Color;
+import java.awt.DefaultKeyboardFocusManager;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
+import java.awt.event.KeyEvent;
+import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.swing.ImageIcon;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+
+public class Controller {
+  private final Player player;
+  private final VerticalGroup mainGroup;
+  private final Image background;
+  private final List<String> screenStack = new ArrayList<String>();
+  
+  private int currentStackIndex = -1;
+  private boolean backgroundActive = true;
+  
+  private final Map<Integer, KeyHandler> keyHandlers = new HashMap<Integer, KeyHandler>() {{
+//    put(KeyEvent.VK_ESCAPE, new KeyHandler() {
+//      @Override
+//      public void keyPressed() {
+//        System.out.println("CONTROLLER: Exiting, escape pressed");
+//        getMediaPlayer().dispose();
+//        parentFrame.dispose();
+//      }
+//    });
+
+    put(KeyEvent.VK_SPACE, new KeyHandler() {
+      @Override
+      public void keyPressed() {
+        getMediaPlayer().pause();
+      }
+    });
+    
+    put(KeyEvent.VK_LEFT, new KeyHandler() {
+      @Override
+      public void keyPressed() {
+        long time = getMediaPlayer().getPosition();
+        
+        time -= 10 * 1000;
+        
+        if(time < 0) {
+          time = 0;
+        }
+        
+        getMediaPlayer().setPosition(time);
+//        System.out.println("isFinished() : " + getMediaPlayer().isPlaying() + " : " + getMediaPlayer().getPosition() + " : " + getMediaPlayer().getTime());
+//        if(!getMediaPlayer().isPlaying()) {
+//          getMediaPlayer().play();
+//        }
+      }
+    });
+    
+    put(KeyEvent.VK_RIGHT, new KeyHandler() {
+      @Override
+      public void keyPressed() {
+        long time = getMediaPlayer().getPosition();
+        
+        time += 10 * 1000;
+        
+        if(time > getMediaPlayer().getLength() - 1000) {
+          time = getMediaPlayer().getLength() - 1000;
+          
+          if(time < 0) {
+            time = 0;
+          }
+        }
+        
+        getMediaPlayer().setPosition(time);
+//        System.out.println("isFinished() : " + getMediaPlayer().isPlaying() + " : " + getMediaPlayer().getPosition() + " : " + getMediaPlayer().getTime());
+      }
+    });
+    
+    put(KeyEvent.VK_S, new KeyHandler() {
+      @Override
+      public void keyPressed() {
+        getMediaPlayer().stop();
+        setBackground(true);
+        if(activeScreen().equals("VideoPlayingMenu")) {
+          back();
+        }
+        else {
+          mainGroup.repaint();
+        }
+      }
+    });
+  }};
+  
+  private final AbstractFrame<?> parentFrame;
+  private final Thread windowToFrontThread;
+  
+  private abstract class KeyHandler {
+    public abstract void keyPressed();
+  }
+  
+  public Controller(final Player player, final AbstractFrame<?> parentFrame) {
+    this.player = player;
+    this.parentFrame = parentFrame;
+    
+    DefaultKeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+      @Override
+      public boolean dispatchKeyEvent(KeyEvent e) {
+        //System.out.println("Key: '" + e.getKeyChar() + "'; code = " + e.getKeyCode());
+        
+        if(e.getID() == KeyEvent.KEY_PRESSED && !backgroundActive) {
+          KeyHandler handler = keyHandlers.get(e.getKeyCode());
+          
+          if(handler != null) {
+            handler.keyPressed();
+            return true;
+          }
+        }
+        
+        return false;
+      }
+    });
+    
+//    DefaultKeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor(new KeyEventPostProcessor() {
+//      @Override
+//      public boolean postProcessKeyEvent(KeyEvent e) {
+//        if(!e.isConsumed()) {
+//          System.out.println("NOT CONSUMED : post process key: " + e);
+//        }
+//        else {
+//          System.out.println("CONSUMED : post process key: " + e);
+//        }
+//        return false;
+//      }
+//    });
+
+    background = new ImageIcon("images/Media Center background.jpg").getImage();
+    mainGroup = new VerticalGroup() {{
+      setPainter(new Painter() {
+        @Override
+        public void paint(Graphics2D g, int width, int height) {
+          if(backgroundActive) {
+            g.drawImage(background, 0, 0, null);
+          }
+          else {
+            g.setBackground(new Color(0, 0, 0, 1));
+            g.clearRect(0, 0, width, height);
+          }
+        }
+      });
+      overrideWeightX(1.0);
+      overrideWeightY(1.0);
+      bgColor().set(new Color(0, 0, 0, 0));
+//      bgColor().set(Color.BLACK);
+      opaque().set(true);
+    }};
+    
+    mainGroup.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), AcceleratorScope.ANCESTOR_WINDOW, new ControlListener<VerticalGroup>() {
+      @Override
+      public void onEvent(VerticalGroup control) {
+        back();
+      }
+    });
+    
+    mainGroup.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), AcceleratorScope.ANCESTOR_WINDOW, new ControlListener<VerticalGroup>() {
+      @Override
+      public void onEvent(VerticalGroup control) {
+        System.out.println("CONTROLLER: Exiting, escape pressed");
+        getMediaPlayer().dispose();
+        parentFrame.dispose();
+      }
+    });
+    
+    parentFrame.add(mainGroup);
+    
+//    new Thread() {
+//      public void run() {
+//        for(;;) {
+//          try {
+//            Thread.sleep(2000);
+//          }
+//          catch(InterruptedException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//          }
+//          KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+//          System.out.println("--> " + manager.getFocusOwner());
+//          
+//        }
+//      }
+//    }.start();
+    
+    windowToFrontThread = new Thread() {
+      @Override
+      public void run() {
+        for(;;) {
+          try {
+            Thread.sleep(2L << windowToFrontDelay.getAndIncrement());
+            parentFrame.toFront();
+          }
+          catch(InterruptedException e) {
+            // occurs when windowToFrontDelay changed
+          }
+        }
+      }
+    };
+    
+    windowToFrontThread.setDaemon(true);
+    windowToFrontThread.setName("WindowToFront");
+    windowToFrontThread.start();
+  }
+  
+  private final AtomicInteger windowToFrontDelay = new AtomicInteger(8);
+  
+  private void emptyMainGroup() {
+    mainGroup.removeAll();
+  }
+
+  public void back() {
+    if(currentStackIndex > 0) {
+      emptyMainGroup();
+  
+      currentStackIndex--;
+      
+      AbstractGroup<?> content = getContent(screenStack.get(currentStackIndex));
+      mainGroup.add(content);
+      
+      parentFrame.validate();
+//      frame.getOverlayFrame().validate();
+      mainGroup.repaint();
+      setDefaultFocus();
+      parentFrame.toFront();
+    }
+  }
+  
+  public void forward(String screenName) {
+    while(screenStack.size() - 1 > currentStackIndex) {
+      screenStack.remove(screenStack.size() - 1);
+    }
+    
+    emptyMainGroup();
+
+    screenStack.add(screenName);
+    currentStackIndex++;
+    
+    AbstractGroup<?> content = getContent(screenStack.get(currentStackIndex));
+    mainGroup.add(content);
+    parentFrame.validate();
+//    frame.getOverlayFrame().validate();
+    mainGroup.repaint();
+
+    setDefaultFocus();
+    
+//    System.out.println("--> " + manager.getFocusOwner());
+//    manager.focusNextComponent();
+//    System.out.println("--> " + manager.getFocusOwner());
+    
+    parentFrame.toFront();
+  }
+  
+  private void setDefaultFocus() {
+    final KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+    System.out.println("FOCUS: Before RequestFocus " + manager.getFocusOwner());
+    mainGroup.requestFocus();
+    System.out.println("FOCUS: After RequestFocus " + manager.getFocusOwner());
+    
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        manager.focusNextComponent();
+        System.out.println("FOCUS: After FocusNext " + manager.getFocusOwner());
+      }
+    });
+  }
+  
+  public void setBackground(boolean active) {
+    this.backgroundActive = active;
+  }
+  
+  private Player getMediaPlayer() {
+    return player;
+  }
+  
+  private final Map<String, Screen> screens = new HashMap<String, Screen>();
+  
+  public void registerScreen(String name, Screen screen) {
+    screens.put(name, screen);
+  }
+  
+  private AbstractGroup<?> getContent(String name) {
+    return screens.get(name).getContent(this);
+  }
+  
+  public String activeScreen() {
+    return screenStack.get(currentStackIndex); 
+  }
+
+  private MovieElement currentItem;
+  
+  public void playMedia(MovieElement item) {
+    currentItem = item;
+    player.play(item);
+    
+    windowToFrontDelay.set(8);
+    windowToFrontThread.interrupt();
+  }
+  
+  public MovieElement getCurrentItem() {
+    return currentItem;
+  }
+  
+  public final ListModel<SubtitleDescriptor> subtitles = new BasicListModel<SubtitleDescriptor>(new ArrayList<SubtitleDescriptor>());
+
+  public void setSubtitle(SubtitleDescriptor item) {
+    try {
+      ByteBuffer fetch = item.fetch();
+      
+      FileOutputStream os = new FileOutputStream("tempsubtitle.srt");
+      
+      os.getChannel().write(fetch);
+      os.close();
+      
+      getMediaPlayer().showSubtitle("tempsubtitle.srt");
+      
+//      System.out.println("sub track = " + getMediaPlayer().getSpu());
+//      getMediaPlayer().setSubTitleFile("file:///d:/tempsubtitle.srt");
+//      getMediaPlayer().addMediaOptions("sub-delay=-3000", "sub-file=file:///d:/tempsubtitle.srt");
+//      System.out.println("sub track2= " + getMediaPlayer().getSpu());
+//      getMediaPlayer().setSpu(1);
+//      System.out.println("sub track3= " + getMediaPlayer().getSpu());
+    }
+    catch(Exception e) {
+      e.printStackTrace();
+    }
+  } 
+}
