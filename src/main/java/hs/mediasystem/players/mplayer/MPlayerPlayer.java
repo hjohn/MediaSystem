@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MPlayerPlayer implements Player {
-  private static final String MPLAYER = "D:/Dev/Workspaces/Personal/MPlayer/mplayer.exe";
   private static final Pattern GET_PROPERTY_PATTERN = Pattern.compile("ANS_[a-zA-Z_]+=(.*)");
   private static final Pattern SUB_LOAD_RESPONSE = Pattern.compile("SUB: Added subtitle file \\(([0-9]+)\\):.*");
   
@@ -24,10 +24,10 @@ public class MPlayerPlayer implements Player {
   
   private boolean isPlaying;
   
-  public MPlayerPlayer() {
+  public MPlayerPlayer(Path mplayerPath) {
     try {
       final String[] commands = new String[] {
-          MPLAYER,
+          mplayerPath.toString(),
   //        "-nokeepaspect",
   //        "-geometry", "0:0",
   //        "-colorkey", "0x101010",

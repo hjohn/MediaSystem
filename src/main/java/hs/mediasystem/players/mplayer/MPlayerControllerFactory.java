@@ -6,6 +6,7 @@ import hs.ui.frames.Frame;
 
 import java.awt.Color;
 import java.awt.Window;
+import java.nio.file.Path;
 
 import javax.swing.JFrame;
 
@@ -13,7 +14,12 @@ import javax.swing.JFrame;
  * Handles the main window(s) and media playback
  */
 public class MPlayerControllerFactory implements ControllerFactory {
-   
+  private final Path mplayerPath;
+
+  public MPlayerControllerFactory(Path mplayerPath) {
+    this.mplayerPath = mplayerPath;
+  }
+  
   @Override
   public Controller create() {
     Frame overlayFrame = new Frame();
@@ -28,6 +34,6 @@ public class MPlayerControllerFactory implements ControllerFactory {
     overlayFrame.maximized().set(true);
     overlayFrame.visible().set(true);
     
-    return new Controller(new MPlayerPlayer(), overlayFrame);
+    return new Controller(new MPlayerPlayer(mplayerPath), overlayFrame);
   }
 }

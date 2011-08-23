@@ -52,7 +52,7 @@ public class MediaSystem {
     
     Section section = ini.getSection("general");
     
-    Path libraryPath = Paths.get(section.get("library.path"), "movies");
+    Path libraryPath = Paths.get(section.get("movies.path"));
     //section.get("temp.path");
     String sublightKey = section.get("sublight.key");
     String sublightClientName = section.get("sublight.client");
@@ -62,7 +62,7 @@ public class MediaSystem {
     GeneralSettings.setLogStream(System.out);
     
     //new VLCMainFrame();
-    ControllerFactory controllerFactory = new MPlayerControllerFactory();
+    ControllerFactory controllerFactory = new MPlayerControllerFactory(Paths.get(section.get("mplayer.path")));
     
     Controller controller = controllerFactory.create();
 
