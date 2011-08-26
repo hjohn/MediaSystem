@@ -95,7 +95,7 @@ public class MPlayerPlayer implements Player {
   }
   
   private String getProperty(String propertyName) throws MPlayerIllegalStateException {
-    String result = sendCommandAndGetResult("get_property " + propertyName);
+    String result = sendCommandAndGetResult("pausing_keep_force get_property " + propertyName);
     
     if(!result.startsWith("ANS_ERROR=")) {
       Matcher matcher = GET_PROPERTY_PATTERN.matcher(result);
@@ -105,6 +105,10 @@ public class MPlayerPlayer implements Player {
     }
     
     throw new MPlayerIllegalStateException();
+  }
+  
+  private void setProperty(String propertyName, Object value) {
+    sendCommand("pausing_keep_force set_property " + propertyName + " " + value);
   }
   
   private String sendCommandAndGetResult(String command, Object... parameters) { 
@@ -129,7 +133,7 @@ public class MPlayerPlayer implements Player {
   
   @Override
   public void play(MovieElement item) {
-    sendCommand("loadfile \"" + item.getPath().toString() + "\"");
+    sendCommand("loadfile \"" + item.getPath().toString().replaceAll("\\\\", "\\\\\\\\") + "\"");
   }
 
   @Override
@@ -186,5 +190,60 @@ public class MPlayerPlayer implements Player {
     if(matcher.matches()) {
       sendCommand("sub_select " + matcher.group(1));
     }
+  }
+
+  private int cachedVolume = -1;
+  private int subtitleDelay = 0;
+  
+  @Override
+  public int getVolume() {
+    if(cachedVolume == -1) {
+      try {
+        cachedVolume = (int)(Float.parseFloat(getProperty("volume")) + 0.5);
+      }
+      catch(MPlayerIllegalStateException e) {
+        cachedVolume = 0;
+      }
+    }
+    
+    return cachedVolume;
+  }
+
+  @Override
+  public void setVolume(int volume) {
+    if(volume < 0 || volume > 100) {
+      throw new IllegalArgumentException("parameter 'volume' must be in the range 0...100");
+    }
+    
+    setProperty("volume", volume);
+    sendCommand("osd_show_text \"volume: %d%%\"", volume);
+    cachedVolume = volume;
+  }
+
+  @Override
+  public boolean isMute() {
+    try {
+      return getProperty("mute").equals("yes");
+    }
+    catch(MPlayerIllegalStateException e) {
+      return false;
+    }
+  }
+
+  @Override
+  public void setMute(boolean mute) {
+    setProperty("mute", mute ? "1" : "0");
+  }
+
+  @Override
+  public int getSubtitleDelay() {
+    return subtitleDelay;
+  }
+
+  @Override
+  public void setSubtitleDelay(int delay) {
+    setProperty("subtitle_delay", ((float)delay) / 1000);
+    sendCommand("osd_show_text \"subtitle delay: %4.1f s\"", ((float)delay) / 1000);
+    subtitleDelay = delay;
   }
 }

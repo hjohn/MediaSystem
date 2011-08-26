@@ -32,4 +32,12 @@ public interface Player {
 
   void showSubtitle(String fileName);
   
+  int getVolume();
+  void setVolume(int volume);
+  
+  boolean isMute();
+  void setMute(boolean mute);
+
+  int getSubtitleDelay();
+  void setSubtitleDelay(int delay);
 }

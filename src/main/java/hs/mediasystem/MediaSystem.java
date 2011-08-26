@@ -7,6 +7,7 @@ import hs.mediasystem.screens.Header;
 import hs.mediasystem.screens.MainMenu;
 import hs.mediasystem.screens.MediaSystemBorder;
 import hs.mediasystem.screens.movie.MovieMenu;
+import hs.mediasystem.screens.movie.MovieMenu.Mode;
 import hs.mediasystem.screens.videoplaying.VideoOptionsScreen;
 import hs.mediasystem.screens.videoplaying.VideoPlayingMenu;
 import hs.mediasystem.util.ini.Ini;
@@ -21,29 +22,37 @@ import net.sf.jtmdb.GeneralSettings;
 
 // Minimal working system:
 // TODO Make clock in standard border
-// TODO ListBox as basis instead of JTable
 // TODO Series display
-// TODO Download + show subtitles
+// TODO Download + show subtitles, also multiple different ones should work without problem; store them with file I guess
 // TODO Lirc support
 // TODO Something to show length of movie/time left
-// TODO Subtitle timing adjustment
 // TODO Brightness adjustment
-// TODO Mute/Volume controls
 
 // TODO Display list of video files with IMDB info
 
-// Key                 Action                         On Remote Control
+// Keyboard            Action                         On Remote Control
 // ====================================================================
-// ' '               = video: pause/play          --> Pause
-// Cursor up/down    = video: ffwd/rew            --> Ffwd/rew
-// Cursor left/right = video: jump +/- 10 secs    --> Left/right
+// Space             = video: pause/play          --> Pause
+// Num4/6            = video: jump +/- 10 secs    --> Ffwd/rew
+// Num2/8            = video: jump +/- 60 secs    --> Next/Previous chapter
 // 's'               = video: stop                --> Stop
+// '9'               = video: volume down         --> Volume Down
+// '0'               = video: volume up           --> Volume Up
+// '1'               = video: brightness down     --> Previous Channel
+// '2'               = video: brightness up       --> Next Channel
+// 'x'               = video: subtitle -0.1       --> Left
+// 'z'               = video: subtitle +0.1       --> Right
+// '['               = video: speed -10%          --> Down
+// ']                = video: speed +10%          --> Up
+// 'm'               = video: mute                --> Mute
+// 'i'               = video: info (display time) --> Info
 // --------------------------------------------------------------------
 // Cursor right      = open submenu               --> Right
 // Cursor up/down    = navigate up/down           --> Up/down
 // Backspace         = back to previous page/menu --> Back
 // Enter             = select                     --> OK (nav.center)
 // Home              = menu                       --> Home (windows)
+// 't'               = video: sub title menu      --> Teletext 
 
 public class MediaSystem {
   
@@ -52,7 +61,8 @@ public class MediaSystem {
     
     Section section = ini.getSection("general");
     
-    Path libraryPath = Paths.get(section.get("movies.path"));
+    Path moviesPath = Paths.get(section.get("movies.path"));
+    Path seriesPath = Paths.get(section.get("series.path"));
     //section.get("temp.path");
     String sublightKey = section.get("sublight.key");
     String sublightClientName = section.get("sublight.client");
@@ -70,7 +80,8 @@ public class MediaSystem {
     final AbstractBlock header = new Header();
     final AbstractBlock clock = new Clock();
     final MainMenu mainOptions = new MainMenu();
-    final MovieMenu movieSelection = new MovieMenu(libraryPath);
+    final MovieMenu movieSelection = new MovieMenu(moviesPath, Mode.LIST);
+    final MovieMenu serieSelection = new MovieMenu(seriesPath, Mode.LIST);
     
 //    controller.registerScreen("MainMenu", new Configuration(mediaSystemBorder) {{
 //      setExtension(MediaSystemBorder.Extension.TOP, new Configuration(header));
@@ -89,6 +100,13 @@ public class MediaSystem {
       addExtension("center", new Screen(movieSelection));
       addExtension("bottom", new Screen(clock));
     }}));
+    
+    controller.registerScreen("SerieSelection", new Screen(mediaSystemBorder, new Extensions() {{
+      addExtension("top", new Screen(header));
+      addExtension("center", new Screen(serieSelection));
+      addExtension("bottom", new Screen(clock));
+    }}));
+
     
 //    controller.registerScreen("MainMenu", new MainMenu(controller));
     //controller.registerScreen("MovieMenu", new MovieMenu(controller));

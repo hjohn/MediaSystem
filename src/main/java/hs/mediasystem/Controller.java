@@ -39,7 +39,7 @@ public class Controller {
   private int currentStackIndex = -1;
   private boolean backgroundActive = true;
   
-  private final Map<Integer, KeyHandler> keyHandlers = new HashMap<Integer, KeyHandler>() {{
+  private final Map<Integer, KeyHandler> videoKeyHandlers = new HashMap<Integer, KeyHandler>() {{
 //    put(KeyEvent.VK_ESCAPE, new KeyHandler() {
 //      @Override
 //      public void keyPressed() {
@@ -56,7 +56,7 @@ public class Controller {
       }
     });
     
-    put(KeyEvent.VK_LEFT, new KeyHandler() {
+    put(KeyEvent.VK_NUMPAD4, new KeyHandler() {
       @Override
       public void keyPressed() {
         long time = getMediaPlayer().getPosition();
@@ -75,7 +75,7 @@ public class Controller {
       }
     });
     
-    put(KeyEvent.VK_RIGHT, new KeyHandler() {
+    put(KeyEvent.VK_NUMPAD6, new KeyHandler() {
       @Override
       public void keyPressed() {
         long time = getMediaPlayer().getPosition();
@@ -108,6 +108,65 @@ public class Controller {
         }
       }
     });
+
+    put(KeyEvent.VK_9, new KeyHandler() {
+      @Override
+      public void keyPressed() {
+        int volume = getMediaPlayer().getVolume();
+        
+        volume--;
+        
+        if(volume < 0) {
+          volume = 0;
+        }
+        
+        getMediaPlayer().setVolume(volume);
+      }
+    });
+
+    put(KeyEvent.VK_0, new KeyHandler() {
+      @Override
+      public void keyPressed() {
+        int volume = getMediaPlayer().getVolume();
+        
+        volume++;
+        
+        if(volume > 100) {
+          volume = 100;
+        }
+        
+        getMediaPlayer().setVolume(volume);
+      }
+    });
+    
+    put(KeyEvent.VK_X, new KeyHandler() {
+      @Override
+      public void keyPressed() {
+        int delay = getMediaPlayer().getSubtitleDelay();
+        
+        delay -= 100;
+        
+        getMediaPlayer().setSubtitleDelay(delay);
+      }
+    });
+
+    put(KeyEvent.VK_Z, new KeyHandler() {
+      @Override
+      public void keyPressed() {
+        int delay = getMediaPlayer().getSubtitleDelay();
+        
+        delay += 100;
+        
+        getMediaPlayer().setSubtitleDelay(delay);
+      }
+    });
+    
+    put(KeyEvent.VK_M, new KeyHandler() {
+      @Override
+      public void keyPressed() {
+        getMediaPlayer().setMute(!getMediaPlayer().isMute());
+      }
+    });
   }};
   
   private final AbstractFrame<?> parentFrame;
@@ -122,16 +181,21 @@ public class Controller {
     this.parentFrame = parentFrame;
     
     DefaultKeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+      private long lastKeyProcessedTime;  // used to avoid flooding MPlayer...
+      
       @Override
       public boolean dispatchKeyEvent(KeyEvent e) {
         //System.out.println("Key: '" + e.getKeyChar() + "'; code = " + e.getKeyCode());
         
         if(e.getID() == KeyEvent.KEY_PRESSED && !backgroundActive) {
-          KeyHandler handler = keyHandlers.get(e.getKeyCode());
+          KeyHandler handler = videoKeyHandlers.get(e.getKeyCode());
           
           if(handler != null) {
-            handler.keyPressed();
-            return true;
+            if(lastKeyProcessedTime + 100 < System.currentTimeMillis()) { 
+              handler.keyPressed();
+              lastKeyProcessedTime = System.currentTimeMillis();
+              return true;
+            }
           }
         }
         

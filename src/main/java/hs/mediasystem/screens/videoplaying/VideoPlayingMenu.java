@@ -55,6 +55,23 @@ public class VideoPlayingMenu extends AbstractBlock {
           controller.forward("VideoOptions");
         }
       });
+   // '9'               = video: volume down         --> Volume Down
+   // '0'               = video: volume up           --> Volume Up
+   // '1'               = video: brightness down     --> Previous Channel
+   // '2'               = video: brightness up       --> Next Channel
+   // 'x'               = video: subtitle -0.1       --> Left
+   // 'z'               = video: subtitle +0.1       --> Right
+   // '['               = video: speed -10%          --> Down
+   // ']                = video: speed +10%          --> Up
+   // 'm'               = video: mute                --> Mute
+   // 'i'               = video: info (display time) --> Info
+//      setAccelerator(KeyStroke.getKeyStroke('9'), AcceleratorScope.ANCESTOR_WINDOW, new ControlListener<VerticalGroup>() {
+//        @Override
+//        public void onEvent(VerticalGroup control) {
+//          throw new UnsupportedOperationException("Method not implemented");
+//        }
+//      });
+      
       weightX().set(1.0);
       weightY().set(1.0);
       opaque().set(false);

@@ -51,6 +51,8 @@ import javax.swing.ListCellRenderer;
 import javax.swing.border.EmptyBorder;
 
 public class MovieMenu extends AbstractBlock {
+  public enum Mode {BANNER, LIST}
+  
   private static final int HEIGHT = 48;
   private static final int SUBTITLE_HEIGHT = 16;
   private static final int TITLE_HEIGHT = HEIGHT - SUBTITLE_HEIGHT;
@@ -62,11 +64,13 @@ public class MovieMenu extends AbstractBlock {
   private final Model<String> runtime = new ValueModel<String>();
   private final ItemProvider itemProvider = new CachedItemProvider(new TmdbItemProvider());
   private final Path moviesPath;
+  private final Mode mode;
 
   //private static final BufferedImage EMPTY_IMAGE
 
-  public MovieMenu(Path moviesPath) {
+  public MovieMenu(Path moviesPath, Mode mode) {
     this.moviesPath = moviesPath;
+    this.mode = mode;
   }
   
   @Override
