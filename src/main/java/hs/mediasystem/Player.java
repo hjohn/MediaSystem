@@ -1,10 +1,10 @@
 package hs.mediasystem;
 
-import hs.mediasystem.screens.movie.MovieElement;
+import java.nio.file.Path;
 
 public interface Player {
 
-  void play(MovieElement item);
+  void play(Path path);
 
   void pause();
 

@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MovieElementDecoder {
+public class MovieElementDecoder implements Decoder {
   private static String ALL_BUT_SEPARATOR = "(?:[^ ]+| (?!(?:- |\\[)))+";
   private static String SEPARATOR_PLUS_SEQUENCE_NUMBER = "(?: - ([0-9]+))?";
   private static String SEPARATOR_PLUS_SUBTITLE = "(?: - )?((?:[^ ]*| (?!\\[))*)";

@@ -1,5 +1,7 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.screens.movie.Element;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +17,11 @@ import net.sf.jtmdb.MoviePoster;
 import org.json.JSONException;
 
 public class TmdbItemProvider implements ItemProvider {
+
+  @Override
+  public Item getItem(Element element) throws ItemNotFoundException {
+    return getItem(element.getPath().toString(), element.getTitle(), element.getYear(), element.getImdbNumber());
+  }
 
   @Override
   public Item getItem(final String fileName, String title, String year, String imdbNumber) throws ItemNotFoundException {

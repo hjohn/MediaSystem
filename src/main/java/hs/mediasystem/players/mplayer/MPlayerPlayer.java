@@ -1,7 +1,6 @@
 package hs.mediasystem.players.mplayer;
 
 import hs.mediasystem.Player;
-import hs.mediasystem.screens.movie.MovieElement;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -132,8 +131,8 @@ public class MPlayerPlayer implements Player {
   }
   
   @Override
-  public void play(MovieElement item) {
-    sendCommand("loadfile \"" + item.getPath().toString().replaceAll("\\\\", "\\\\\\\\") + "\"");
+  public void play(Path path) {
+    sendCommand("loadfile \"" + path.toString().replaceAll("\\\\", "\\\\\\\\") + "\"");
   }
 
   @Override

@@ -80,8 +80,8 @@ public class MediaSystem {
     final AbstractBlock header = new Header();
     final AbstractBlock clock = new Clock();
     final MainMenu mainOptions = new MainMenu();
-    final MovieMenu movieSelection = new MovieMenu(moviesPath, Mode.LIST);
-    final MovieMenu serieSelection = new MovieMenu(seriesPath, Mode.LIST);
+    final MovieMenu movieSelection = new MovieMenu(moviesPath, new MovieScanner(), Mode.LIST);
+    final MovieMenu serieSelection = new MovieMenu(seriesPath, new MovieScanner(), Mode.LIST);
     
 //    controller.registerScreen("MainMenu", new Configuration(mediaSystemBorder) {{
 //      setExtension(MediaSystemBorder.Extension.TOP, new Configuration(header));

@@ -377,17 +377,17 @@ public class Controller {
     return screenStack.get(currentStackIndex); 
   }
 
-  private MovieElement currentItem;
+  private Episode currentItem;
   
-  public void playMedia(MovieElement item) {
-    currentItem = item;
-    player.play(item);
+  public void playMedia(Episode episode) {
+    currentItem = episode;
+    player.play(episode.getPath());
     
     windowToFrontDelay.set(8);
     windowToFrontThread.interrupt();
   }
   
-  public MovieElement getCurrentItem() {
+  public Episode getCurrentItem() {
     return currentItem;
   }
   

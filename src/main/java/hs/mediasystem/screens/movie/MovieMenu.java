@@ -1,12 +1,14 @@
 package hs.mediasystem.screens.movie;
 
 import hs.mediasystem.Controller;
+import hs.mediasystem.Episode;
+import hs.mediasystem.EpisodeGroup;
+import hs.mediasystem.Scanner;
+import hs.mediasystem.Serie;
 import hs.mediasystem.SizeFormatter;
 import hs.mediasystem.SwingWorker2;
+import hs.mediasystem.TitleGrouper;
 import hs.mediasystem.Worker;
-import hs.mediasystem.db.CachedItemProvider;
-import hs.mediasystem.db.ItemProvider;
-import hs.mediasystem.db.TmdbItemProvider;
 import hs.mediasystem.screens.AbstractBlock;
 import hs.models.BasicListModel;
 import hs.models.Model;
@@ -35,15 +37,10 @@ import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -58,70 +55,37 @@ public class MovieMenu extends AbstractBlock {
   private static final int TITLE_HEIGHT = HEIGHT - SUBTITLE_HEIGHT;
   private static final Color TITLE_COLOR = new Color(155, 190, 255, 200);
 
-  private final BasicListModel<MovieElement> menuModel = new BasicListModel<MovieElement>(new ArrayList<MovieElement>());
+  private final BasicListModel<Episode> menuModel = new BasicListModel<Episode>(new ArrayList<Episode>());
   private final Model<String> plot = new ValueModel<String>();
   private final Model<BufferedImage> cover = new ValueModel<BufferedImage>();
   private final Model<String> runtime = new ValueModel<String>();
-  private final ItemProvider itemProvider = new CachedItemProvider(new TmdbItemProvider());
   private final Path moviesPath;
   private final Mode mode;
+  private final Scanner scanner;
 
   //private static final BufferedImage EMPTY_IMAGE
 
-  public MovieMenu(Path moviesPath, Mode mode) {
+  public MovieMenu(Path moviesPath, Scanner scanner, Mode mode) {
     this.moviesPath = moviesPath;
+    this.scanner = scanner;
     this.mode = mode;
   }
   
   @Override
   protected AbstractGroup<?> create(final Controller controller) {
-    try {
-      DirectoryStream<Path> dirStream = Files.newDirectoryStream(moviesPath);
-      Map<String, MovieElement> map = new HashMap<String, MovieElement>();
-
-      for(Path path : dirStream) {
-        MovieElement movieElement = new MovieElement(path, itemProvider);
-        MovieElement existingElement = map.get(movieElement.getTitle());
-
-        if(existingElement != null) {
-          SerieElement parentElement;
-
-          if(existingElement instanceof SerieElement) {
-            parentElement = (SerieElement) existingElement;
-          }
-          else {
-            parentElement = new SerieElement(movieElement.getTitle() + ".avi", itemProvider);
-            parentElement.addSubElement(existingElement);
-            map.put(movieElement.getTitle(), parentElement);
-            existingElement.setParent(parentElement);
-          }
-
-          parentElement.addSubElement(movieElement);
-          movieElement.setParent(parentElement);
-        }
-        else {
-          map.put(movieElement.getTitle(), movieElement);
-        }
-
-        //menuModel.add(new MovieElement(path.getFileName().toString(), itemProvider));
-      }
-
-      for(MovieElement movieElement : map.values()) {
-        menuModel.add(movieElement);
-      }
-
-      Collections.sort(menuModel, new Comparator<MovieElement>() {
-        @Override
-        public int compare(MovieElement o1, MovieElement o2) {
-          return o1.getTitle().compareTo(o2.getTitle());
-        }
-      });
-    }
-    catch(IOException e) {
-      // TODO handle error by showing something visible in UI
-      e.printStackTrace();
+    Serie serie = scanner.scan(moviesPath);
+    
+    for(Episode episode : serie.episodes(new TitleGrouper())) {
+      menuModel.add(episode);
     }
 
+    Collections.sort(menuModel, new Comparator<Episode>() {
+      @Override
+      public int compare(Episode o1, Episode o2) {
+        return o1.getTitle().compareTo(o2.getTitle());
+      }
+    });
+    
     final MyCellRenderer cellRenderer = new MyCellRenderer();
 
     final SwingWorker2 movieUpdater = new SwingWorker2();
@@ -154,7 +118,7 @@ public class MovieMenu extends AbstractBlock {
             font().set(new Font("Sans Serif", Font.BOLD, 14));
           }});
         }});
-        add(new SimpleList<MovieElement>() {{
+        add(new SimpleList<Episode>() {{
           weightX().set(1.0);
           fgColor().set(new Color(155, 190, 255, 200));
           bgColor().set(new Color(0, 0, 0, 0));
@@ -169,20 +133,20 @@ public class MovieMenu extends AbstractBlock {
           rowHeight().set(HEIGHT);
           setCellRenderer(cellRenderer);
           selectFirstItem();
-          onItemDoubleClick().call(new EventListener<ItemsEvent<MovieElement>>() {
+          onItemDoubleClick().call(new EventListener<ItemsEvent<Episode>>() {
             @Override
-            public void onEvent(ItemsEvent<MovieElement> event) {
-              final MovieElement item = event.getFirstItem();
+            public void onEvent(ItemsEvent<Episode> event) {
+              final Episode item = event.getFirstItem();
 
               controller.setBackground(false);
               controller.playMedia(item);
               controller.forward("VideoPlayingMenu");
             }
           });
-          onItemSelected().call(new EventListener<ItemsEvent<MovieElement>>() {
+          onItemSelected().call(new EventListener<ItemsEvent<Episode>>() {
             @Override
-            public void onEvent(ItemsEvent<MovieElement> event) {
-              final MovieElement item = event.getFirstItem();
+            public void onEvent(ItemsEvent<Episode> event) {
+              final Episode item = event.getFirstItem();
 
               plot.set("");
               cover.set(null);
@@ -215,40 +179,20 @@ public class MovieMenu extends AbstractBlock {
                 System.out.println("Expand");
 
                 @SuppressWarnings("unchecked")
-                MovieElement activeRow = ((ListBox2<MovieElement>) event.getSource()).getActiveRow();
+                Episode activeRow = ((SimpleList<Episode>) event.getSource()).getActiveRow();
 
-                if(activeRow instanceof SerieElement) {
-                  menuModel.addAll(menuModel.indexOf(activeRow) + 1, ((SerieElement) activeRow).getSubElements());
+                if(activeRow instanceof EpisodeGroup) {
+                  menuModel.addAll(menuModel.indexOf(activeRow) + 1, ((EpisodeGroup) activeRow).episodes());
                 }
               }
             }
           });
-//          setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), AcceleratorScope.WINDOW, new ControlListener<ListBox2<MovieElement>>() {
-//            @Override
-//            public void onEvent(ListBox2 control) {
-//              System.out.println("back space pressed");
-//            }
-//          });
-//          
-//          setAccelerator(KeyStroke.getKeyStroke("F6"), AcceleratorScope.WINDOW, new ControlListener<ListBox2<MovieElement>>() {
-//            @Override
-//            public void onEvent(ListBox2 control) {
-//              System.out.println("back space pressed2");
-//            }
-//          });
-//
-//          setAccelerator(KeyStroke.getKeyStroke("B"), AcceleratorScope.ANCESTOR_WINDOW, new ControlListener<ListBox2<MovieElement>>() {
-//            @Override
-//            public void onEvent(ListBox2 control) {
-//              System.out.println("back space pressed3");
-//            }
-//          });
         }});
       }});
     }};
   }
 
-  private static class MyCellRenderer implements ListCellRenderer<MovieElement> {
+  private static class MyCellRenderer implements ListCellRenderer<Episode> {
     private final JPaintablePanel panel = new JPaintablePanel(new SmartLayout(true, 1, 0, 0)) {
       @Override
       public boolean isVisible() {
@@ -287,10 +231,11 @@ public class MovieMenu extends AbstractBlock {
     
 
     @Override
-    public Component getListCellRendererComponent(JList<? extends MovieElement> list, MovieElement value, int index, boolean isSelected, boolean cellHasFocus) {
-      MovieElement entry = value;
-
-      if(entry.getParent() != null) {
+    public Component getListCellRendererComponent(JList<? extends Episode> list, Episode value, int index, boolean isSelected, boolean cellHasFocus) {
+      Episode entry = value;
+      boolean subItemDisplay = entry.getEpisodeGroup() != null;
+      
+      if(subItemDisplay) {
         if(!isSelected) {
           line1.setForeground(TITLE_COLOR);
           line2.setForeground(TITLE_COLOR);

@@ -1,5 +1,7 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.screens.movie.Element;
+
 
 public class CachedItemProvider implements ItemProvider {
   private final ItemsDao itemsDao;
@@ -48,5 +50,10 @@ public class CachedItemProvider implements ItemProvider {
       
       return item;
     }
+  }
+
+  @Override
+  public Item getItem(Element element) throws ItemNotFoundException {
+    return getItem(element.getPath().getFileName().toString(), element.getTitle(), element.getYear(), element.getImdbNumber());
   }
 }
