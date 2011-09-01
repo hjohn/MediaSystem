@@ -1,5 +1,6 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.Levenshtein;
 import hs.mediasystem.screens.movie.Element;
 
 import java.io.ByteArrayOutputStream;
@@ -7,8 +8,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.TreeSet;
 
 import net.sf.jtmdb.Movie;
 import net.sf.jtmdb.MovieImages;
@@ -20,11 +23,15 @@ public class TmdbItemProvider implements ItemProvider {
 
   @Override
   public Item getItem(Element element) throws ItemNotFoundException {
-    return getItem(element.getPath().toString(), element.getTitle(), element.getYear(), element.getImdbNumber());
+    return getItem(element.getPath().getFileName().toString(), element.getTitle(), element.getSequence(), element.getSubtitle(), element.getYear(), element.getImdbNumber());
   }
 
   @Override
   public Item getItem(final String fileName, String title, String year, String imdbNumber) throws ItemNotFoundException {
+    return getItem(fileName, title, 0, "", year, imdbNumber);
+  }
+
+  public Item getItem(final String fileName, String title, int sequence, String subtitle, String year, String imdbNumber) {
     try {
       String bestMatchingImdbNumber = null;
       
@@ -33,26 +40,45 @@ public class TmdbItemProvider implements ItemProvider {
       }
       
       if(bestMatchingImdbNumber == null) {
+        TreeSet<Score> scores = new TreeSet<Score>(new Comparator<Score>() {
+          @Override
+          public int compare(Score o1, Score o2) {
+            return Double.compare(o2.score, o1.score);
+          }
+        });
+        
         for(Movie movie : Movie.search(title)) {
-          String possibleImdbNumber = movie.getImdbID();
+          String movieYear = extractYear(movie.getReleasedDate());
+          double score = 0;
+
+          if(movieYear.equals(year) && movieYear.length() > 0) {
+            score += 100;
+          }
+          if(movie.getImdbID() != null) {
+            score += 50;
+          }
+
+          String searchString = title;
           
-          System.out.println("Checking possible number : " + movie.getImdbID() + " : " + movie.getName());
-  //        db.search(possibleImdbNumber);
-          
-          if(bestMatchingImdbNumber == null) {
-            bestMatchingImdbNumber = possibleImdbNumber;
+          if(sequence > 1) {
+            searchString += " " + sequence;
+          }
+          if(subtitle.length() > 0) {
+            searchString += " " + subtitle;
           }
           
-          Date date = movie.getReleasedDate();
-          GregorianCalendar gc = new GregorianCalendar();
-          gc.setTime(date);
+          System.out.println(movie.getName() + " -vs- " + searchString);
+          double matchScore = Levenshtein.compare(movie.getName().toLowerCase(), searchString.toLowerCase());
           
-          String imdbYear = "" + gc.get(Calendar.YEAR);
-          
-          if(year == null || imdbYear.equals(year)) {
-            bestMatchingImdbNumber = possibleImdbNumber;
-            break;
-          }
+          score += matchScore * 90;
+
+          scores.add(new Score(movie, score));
+          System.out.println(new Score(movie, score));
+        }
+        
+        if(!scores.isEmpty()) {
+          bestMatchingImdbNumber = scores.first().movie.getImdbID();
+          System.out.println("Best was: " + scores.first());
         }
       }
       
@@ -109,6 +135,33 @@ public class TmdbItemProvider implements ItemProvider {
     catch(JSONException e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  private static class Score {
+    private final Movie movie;
+    private final double score;
+
+    public Score(Movie movie, double score) {
+      this.movie = movie;
+      this.score = score;
+    }
+    
+    @Override
+    public String toString() {
+      return String.format("Score[%10.2f, " + movie.getImdbID() + " : " + movie.getName() + " : " + movie.getReleasedDate() + "]", score); 
+    }
+  }
+  
+
+  
+  private String extractYear(Date date) {
+    if(date == null) {
+      return "";
+    }
+    
+    GregorianCalendar gc = new GregorianCalendar();
+    gc.setTime(date);
+    return "" + gc.get(Calendar.YEAR);
   }
   
   private static final byte[] readURL(URL url) {

@@ -1771,7 +1771,6 @@ public class Movie implements Serializable {
 				released = new SimpleDateFormat("yyyy-MM-dd").parse(jsonObject
 						.getString("released"));
 			} catch (ParseException e) {
-				Log.log(e, Verbosity.ERROR);
 			}
 			if (released != null) {
 				setReleasedDate(released);

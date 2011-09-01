@@ -152,7 +152,7 @@ public class MovieMenu extends AbstractBlock {
               cover.set(null);
               runtime.set("");
 
-              movieUpdater.doTask(250, new Worker() {
+              movieUpdater.doTask(400, new Worker() {
                 @Override
                 public void doInBackground() {
                   item.getPlot();

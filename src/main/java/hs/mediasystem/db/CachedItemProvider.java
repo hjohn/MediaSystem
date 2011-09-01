@@ -54,6 +54,37 @@ public class CachedItemProvider implements ItemProvider {
 
   @Override
   public Item getItem(Element element) throws ItemNotFoundException {
-    return getItem(element.getPath().getFileName().toString(), element.getTitle(), element.getYear(), element.getImdbNumber());
+    String fileName = element.getPath().getFileName().toString();
+    
+    try {
+      System.out.println("[FINE] Resolving from database cache: " + fileName);
+      Item item = itemsDao.getItem(fileName);
+      
+      if(item.getVersion() < ItemsDao.VERSION) {
+        System.out.println("[FINE] Old version, updating from cached provider: " + fileName);
+        Item updatedItem = providerToCache.getItem(element);
+        
+        item.setBackground(updatedItem.getBackground());
+        item.setCover(updatedItem.getCover());
+        item.setImdbId(updatedItem.getImdbId());
+        item.setPlot(updatedItem.getPlot());
+        item.setTitle(updatedItem.getTitle());
+        item.setRating(updatedItem.getRating());
+        item.setReleaseDate(updatedItem.getReleaseDate());
+        item.setRuntime(updatedItem.getRuntime());
+        
+        itemsDao.updateItem(item);
+      }
+      
+      return item;
+    }
+    catch(ItemNotFoundException e) {
+      System.out.println("[FINE] Cache miss, falling back to cached provider: " + fileName);
+      Item item = providerToCache.getItem(element);
+      
+      itemsDao.storeItem(item);
+      
+      return item;
+    }
   }
 }
