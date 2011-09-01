@@ -22,7 +22,6 @@ import hs.ui.controls.HorizontalGroup;
 import hs.ui.controls.MultiLineDynamicLabel;
 import hs.ui.controls.Picture;
 import hs.ui.controls.VerticalGroup;
-import hs.ui.controls.listbox.ListBox2;
 import hs.ui.controls.listbox.SimpleList;
 import hs.ui.events.ItemsEvent;
 import hs.ui.events.KeyPressedEvent;
@@ -41,6 +40,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -61,11 +61,11 @@ public class MovieMenu extends AbstractBlock {
   private final Model<String> runtime = new ValueModel<String>();
   private final Path moviesPath;
   private final Mode mode;
-  private final Scanner scanner;
+  private final Scanner<Episode> scanner;
 
   //private static final BufferedImage EMPTY_IMAGE
 
-  public MovieMenu(Path moviesPath, Scanner scanner, Mode mode) {
+  public MovieMenu(Path moviesPath, Scanner<Episode> scanner, Mode mode) {
     this.moviesPath = moviesPath;
     this.scanner = scanner;
     this.mode = mode;
@@ -73,7 +73,10 @@ public class MovieMenu extends AbstractBlock {
   
   @Override
   protected AbstractGroup<?> create(final Controller controller) {
-    Serie serie = scanner.scan(moviesPath);
+    List<Episode> episodes = scanner.scan(moviesPath);
+    Serie serie = new Serie(moviesPath, "");
+    
+    serie.addAll(episodes);
     
     for(Episode episode : serie.episodes(new TitleGrouper())) {
       menuModel.add(episode);

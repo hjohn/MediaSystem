@@ -3,6 +3,7 @@ package hs.mediasystem;
 import hs.mediasystem.db.ItemProvider;
 import hs.mediasystem.screens.movie.Element;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,6 +13,13 @@ import java.util.Map;
 
 public class Serie {
   private final List<Episode> episodes = new ArrayList<Episode>();
+  private final Path path;
+  private final String name;
+  
+  public Serie(Path path, String name) {
+    this.path = path;
+    this.name = name;
+  }
   
   public Episode addEpisode(Element element, ItemProvider itemProvider) {
     Episode episode = new Episode(element, itemProvider);
@@ -21,6 +29,10 @@ public class Serie {
     return episode;
   }
 
+  public void addAll(Collection<Episode> episodes) {
+    episodes.addAll(episodes);
+  }
+  
   public Collection<Episode> episodes() {
     return Collections.unmodifiableList(episodes);
   }

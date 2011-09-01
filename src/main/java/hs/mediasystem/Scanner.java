@@ -3,6 +3,6 @@ package hs.mediasystem;
 import java.nio.file.Path;
 import java.util.List;
 
-public interface Scanner {
-  Serie scan(Path path);
+public interface Scanner<T> {
+  List<T> scan(Path path);
 }

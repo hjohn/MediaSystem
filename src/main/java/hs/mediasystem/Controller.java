@@ -1,6 +1,5 @@
 package hs.mediasystem;
 
-import hs.mediasystem.screens.movie.MovieElement;
 import hs.models.BasicListModel;
 import hs.models.ListModel;
 import hs.sublight.SubtitleDescriptor;
