@@ -16,12 +16,12 @@ import java.util.ArrayList;
 import javax.swing.border.EmptyBorder;
 
 public class MainMenu extends AbstractBlock {
-  private BasicListModel<MenuElement> menuModel = new BasicListModel<MenuElement>(new ArrayList<MenuElement>());
+  private final BasicListModel<MenuElement> menuModel = new BasicListModel<MenuElement>(new ArrayList<MenuElement>());
   
   @Override
   protected AbstractGroup<?> create(final Controller controller) {
     menuModel.add(new MenuElement("Movies", IconHelper.readIcon("images/aktion.png", 32, 32), "MovieMenu"));
-    menuModel.add(new MenuElement("Series", IconHelper.readIcon("images/aktion.png", 32, 32), "SerieMenu"));
+    menuModel.add(new MenuElement("Series", IconHelper.readIcon("images/aktion.png", 32, 32), "SerieSelection"));
     menuModel.add(new MenuElement("YouTube", IconHelper.readIcon("images/password.png", 32, 32), "MovieMenu"));
     menuModel.add(new MenuElement("TV", IconHelper.readIcon("images/tv.png", 32, 32), "MovieMenu"));
     menuModel.add(new MenuElement("Web", IconHelper.readIcon("images/browser.png", 32, 32), "MovieMenu"));

@@ -1,24 +1,46 @@
 package hs.mediasystem;
 
+import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.db.ItemProvider;
+import hs.mediasystem.db.SerieProvider;
+import hs.mediasystem.db.SerieRecord;
 import hs.mediasystem.screens.movie.Element;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class Serie {
+import javax.imageio.ImageIO;
+
+public class Serie extends NamedItem {
   private final List<Episode> episodes = new ArrayList<Episode>();
   private final Path path;
-  private final String name;
+  private final SerieProvider serieProvider;
   
-  public Serie(Path path, String name) {
+  public Serie(Path path, String name, SerieProvider serieProvider) {
+    super(name);
     this.path = path;
-    this.name = name;
+    this.serieProvider = serieProvider;
+  }
+  
+  public BufferedImage getBanner() {
+    ensureDataLoaded();
+    
+    try {
+      if(record.getBanner() != null) {
+        return ImageIO.read(new ByteArrayInputStream(record.getBanner()));
+      }
+    }
+    catch(IOException e) {
+      // Ignore
+    }
+    
+    return new BufferedImage(1, 1, BufferedImage.TYPE_4BYTE_ABGR);
   }
   
   public Episode addEpisode(Element element, ItemProvider itemProvider) {
@@ -37,35 +59,21 @@ public class Serie {
     return Collections.unmodifiableList(episodes);
   }
   
-  public Collection<? extends Episode> episodes(Grouper grouper) {
-    Map<Object, EpisodeGroup> groupedEpisodes = new HashMap<Object, EpisodeGroup>();
-    
-    for(Episode episode : episodes) {
-      Object group = grouper.getGroup(episode);
-      
-      EpisodeGroup episodeGroup = groupedEpisodes.get(group);
-      
-      if(episodeGroup == null) {
-        episodeGroup = new EpisodeGroup(new Element(null, episode.getTitle(), "", null, null, null), null);
-        groupedEpisodes.put(group, episodeGroup);
+  private SerieRecord record;
+  
+  private void ensureDataLoaded() {
+    if(record == null) {
+      try {
+        if(serieProvider != null) {
+          record = serieProvider.getSerie(getTitle());
+        }
+        else {
+          record = new SerieRecord();
+        }
       }
-      
-      episodeGroup.add(episode);
-    }
-    
-    List<Episode> episodes = new ArrayList<Episode>();
-    
-    for(EpisodeGroup episodeGroup : groupedEpisodes.values()) {
-      if(episodeGroup.size() > 1) {
-        episodes.add(episodeGroup);
-      }
-      else {
-        Episode episode = episodeGroup.episodes().iterator().next();
-        episode.episodeGroup = null;
-        episodes.add(episode);
+      catch(ItemNotFoundException e) {
+        record = new SerieRecord();
       }
     }
-    
-    return episodes;
   }
 }

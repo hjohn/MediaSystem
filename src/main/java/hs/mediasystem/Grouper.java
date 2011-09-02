@@ -1,5 +1,5 @@
 package hs.mediasystem;
 
-public interface Grouper {
-  Object getGroup(Episode episode);
+public interface Grouper<T> {
+  Object getGroup(T item);
 }

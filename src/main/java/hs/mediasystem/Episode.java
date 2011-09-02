@@ -12,7 +12,7 @@ import java.nio.file.Path;
 
 import javax.imageio.ImageIO;
 
-public class Episode {
+public class Episode extends NamedItem {
   protected EpisodeGroup episodeGroup;
 
   private final Element element;
@@ -21,6 +21,7 @@ public class Episode {
   private Item item;
   
   public Episode(Element element, ItemProvider itemProvider) {
+    super(element.getTitle());
     this.element = element;
     this.itemProvider = itemProvider;
   }
@@ -29,10 +30,6 @@ public class Episode {
     return element.getPath();
   }
   
-  public String getTitle() {
-    return element.getTitle();
-  }
-
   public String getSubtitle() {
     return element.getSubtitle();
   }

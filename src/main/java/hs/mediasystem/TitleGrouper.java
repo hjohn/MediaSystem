@@ -1,10 +1,10 @@
 package hs.mediasystem;
 
-public class TitleGrouper implements Grouper {
+public class TitleGrouper implements Grouper<NamedItem> {
 
   @Override
-  public Object getGroup(Episode episode) {
-    return episode.getTitle();
+  public Object getGroup(NamedItem item) {
+    return item.getTitle();
   }
 
 }

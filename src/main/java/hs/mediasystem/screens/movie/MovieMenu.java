@@ -3,6 +3,8 @@ package hs.mediasystem.screens.movie;
 import hs.mediasystem.Controller;
 import hs.mediasystem.Episode;
 import hs.mediasystem.EpisodeGroup;
+import hs.mediasystem.Groups;
+import hs.mediasystem.NamedItem;
 import hs.mediasystem.Scanner;
 import hs.mediasystem.Serie;
 import hs.mediasystem.SizeFormatter;
@@ -38,6 +40,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -55,17 +58,17 @@ public class MovieMenu extends AbstractBlock {
   private static final int TITLE_HEIGHT = HEIGHT - SUBTITLE_HEIGHT;
   private static final Color TITLE_COLOR = new Color(155, 190, 255, 200);
 
-  private final BasicListModel<Episode> menuModel = new BasicListModel<Episode>(new ArrayList<Episode>());
+  private final BasicListModel<NamedItem> menuModel = new BasicListModel<NamedItem>(new ArrayList<NamedItem>());
   private final Model<String> plot = new ValueModel<String>();
   private final Model<BufferedImage> cover = new ValueModel<BufferedImage>();
   private final Model<String> runtime = new ValueModel<String>();
   private final Path moviesPath;
   private final Mode mode;
-  private final Scanner<Episode> scanner;
+  private final Scanner<? extends NamedItem> scanner;
 
   //private static final BufferedImage EMPTY_IMAGE
 
-  public MovieMenu(Path moviesPath, Scanner<Episode> scanner, Mode mode) {
+  public MovieMenu(Path moviesPath, Scanner<? extends NamedItem> scanner, Mode mode) {
     this.moviesPath = moviesPath;
     this.scanner = scanner;
     this.mode = mode;
@@ -73,18 +76,28 @@ public class MovieMenu extends AbstractBlock {
   
   @Override
   protected AbstractGroup<?> create(final Controller controller) {
-    List<Episode> episodes = scanner.scan(moviesPath);
-    Serie serie = new Serie(moviesPath, "");
+    List<? extends NamedItem> episodes = scanner.scan(moviesPath);
+
+    Collection<List<NamedItem>> groupedItems = Groups.group(episodes, new TitleGrouper());
     
-    serie.addAll(episodes);
-    
-    for(Episode episode : serie.episodes(new TitleGrouper())) {
-      menuModel.add(episode);
+    for(List<NamedItem> group : groupedItems) {
+      if(group.size() > 1) {
+        EpisodeGroup g = new EpisodeGroup(group.get(0).getTitle());
+        
+        for(NamedItem item : group) {
+          g.add(item);
+        }
+        
+        menuModel.add(g);
+      }
+      else {
+        menuModel.add(group.get(0));
+      }
     }
 
-    Collections.sort(menuModel, new Comparator<Episode>() {
+    Collections.sort(menuModel, new Comparator<NamedItem>() {
       @Override
-      public int compare(Episode o1, Episode o2) {
+      public int compare(NamedItem o1, NamedItem o2) {
         return o1.getTitle().compareTo(o2.getTitle());
       }
     });
@@ -121,7 +134,7 @@ public class MovieMenu extends AbstractBlock {
             font().set(new Font("Sans Serif", Font.BOLD, 14));
           }});
         }});
-        add(new SimpleList<Episode>() {{
+        add(new SimpleList<NamedItem>() {{
           weightX().set(1.0);
           fgColor().set(new Color(155, 190, 255, 200));
           bgColor().set(new Color(0, 0, 0, 0));
@@ -136,41 +149,47 @@ public class MovieMenu extends AbstractBlock {
           rowHeight().set(HEIGHT);
           setCellRenderer(cellRenderer);
           selectFirstItem();
-          onItemDoubleClick().call(new EventListener<ItemsEvent<Episode>>() {
+          onItemDoubleClick().call(new EventListener<ItemsEvent<NamedItem>>() {
             @Override
-            public void onEvent(ItemsEvent<Episode> event) {
-              final Episode item = event.getFirstItem();
+            public void onEvent(ItemsEvent<NamedItem> event) {
+              final NamedItem item = event.getFirstItem();
 
-              controller.setBackground(false);
-              controller.playMedia(item);
-              controller.forward("VideoPlayingMenu");
+              if(item instanceof Episode) {
+                controller.setBackground(false);
+                controller.playMedia((Episode)item);
+                controller.forward("VideoPlayingMenu");
+              }
             }
           });
-          onItemSelected().call(new EventListener<ItemsEvent<Episode>>() {
+          onItemSelected().call(new EventListener<ItemsEvent<NamedItem>>() {
             @Override
-            public void onEvent(ItemsEvent<Episode> event) {
-              final Episode item = event.getFirstItem();
+            public void onEvent(ItemsEvent<NamedItem> event) {
+              final NamedItem item = event.getFirstItem();
 
               plot.set("");
               cover.set(null);
               runtime.set("");
 
-              movieUpdater.doTask(400, new Worker() {
-                @Override
-                public void doInBackground() {
-                  item.getPlot();
-                }
-
-                @Override
-                public void done() {
-                  plot.set(item.getPlot());
-                  cover.set(item.getImage());
-
-                  if(item.getRuntime() != 0) {
-                    runtime.set(SizeFormatter.DURATION.format(item.getRuntime() * 60));
+              if(item instanceof Episode) {
+                final Episode episode = (Episode)item;
+                
+                movieUpdater.doTask(400, new Worker() {
+                  @Override
+                  public void doInBackground() {
+                    episode.getPlot();
                   }
-                }
-              });
+  
+                  @Override
+                  public void done() {
+                    plot.set(episode.getPlot());
+                    cover.set(episode.getImage());
+  
+                    if(episode.getRuntime() != 0) {
+                      runtime.set(SizeFormatter.DURATION.format(episode.getRuntime() * 60));
+                    }
+                  }
+                });
+              }
 
               //getController().setContent(item.getScreen());
             }
@@ -182,10 +201,10 @@ public class MovieMenu extends AbstractBlock {
                 System.out.println("Expand");
 
                 @SuppressWarnings("unchecked")
-                Episode activeRow = ((SimpleList<Episode>) event.getSource()).getActiveRow();
+                NamedItem activeRow = ((SimpleList<NamedItem>) event.getSource()).getActiveRow();
 
                 if(activeRow instanceof EpisodeGroup) {
-                  menuModel.addAll(menuModel.indexOf(activeRow) + 1, ((EpisodeGroup) activeRow).episodes());
+                  menuModel.addAll(menuModel.indexOf(activeRow) + 1, ((EpisodeGroup) activeRow).children());
                 }
               }
             }
@@ -195,7 +214,7 @@ public class MovieMenu extends AbstractBlock {
     }};
   }
 
-  private static class MyCellRenderer implements ListCellRenderer<Episode> {
+  private static class MyCellRenderer implements ListCellRenderer<NamedItem> {
     private final JPaintablePanel panel = new JPaintablePanel(new SmartLayout(true, 1, 0, 0)) {
       @Override
       public boolean isVisible() {
@@ -234,52 +253,59 @@ public class MovieMenu extends AbstractBlock {
     
 
     @Override
-    public Component getListCellRendererComponent(JList<? extends Episode> list, Episode value, int index, boolean isSelected, boolean cellHasFocus) {
-      Episode entry = value;
-      boolean subItemDisplay = entry.getEpisodeGroup() != null;
+    public Component getListCellRendererComponent(JList<? extends NamedItem> list, NamedItem value, int index, boolean isSelected, boolean cellHasFocus) {
+      NamedItem item = value;
       
-      if(subItemDisplay) {
-        if(!isSelected) {
-          line1.setForeground(TITLE_COLOR);
-          line2.setForeground(TITLE_COLOR);
-          panel.setBackground(list.getBackground());
-        }
-        else {
-          line1.setForeground(TITLE_COLOR.brighter());
-          line2.setForeground(TITLE_COLOR.brighter());
-          panel.setBackground(new Color(255, 255, 255, 60));
-        }
-
-        line1.setText(entry.getTitle() + " " + entry.getSequence());
-        if(entry.getSubtitle().isEmpty()) {
-          line2.setText(entry.getTitle() + (entry.getSequence() < 2 ? "" : " " + toRomanLiteral(entry.getSequence())));
-        }
-        else {
-          line2.setText(entry.getSubtitle());
-        }
-        line2.setFont(new Font("Sans Serif", Font.PLAIN, TITLE_HEIGHT - 4));
-        line1.setFont(new Font("Sans Serif", Font.PLAIN, SUBTITLE_HEIGHT - 4));
-        line1.setIconTextGap(25);
-        line2.setIconTextGap(35);
+      if(!isSelected) {
+        line1.setForeground(TITLE_COLOR);
+        line2.setForeground(TITLE_COLOR);
+        panel.setBackground(list.getBackground());
       }
       else {
-        if(!isSelected) {
-          line1.setForeground(TITLE_COLOR);
-          line2.setForeground(TITLE_COLOR);
-          panel.setBackground(list.getBackground());
+        line1.setForeground(TITLE_COLOR.brighter());
+        line2.setForeground(TITLE_COLOR.brighter());
+        panel.setBackground(new Color(255, 255, 255, 60));
+      }
+
+      line1.setFont(new Font("Sans Serif", Font.PLAIN, TITLE_HEIGHT - 4));
+      line2.setFont(new Font("Sans Serif", Font.PLAIN, SUBTITLE_HEIGHT - 4));
+      line1.setIconTextGap(0);
+      line2.setIconTextGap(10);
+
+      if(item instanceof Episode) {
+        Episode episode = (Episode)item;
+        boolean subItemDisplay = episode.getParent() != null;
+        
+        if(subItemDisplay) {
+          line1.setText(episode.getTitle() + " " + episode.getSequence());
+          if(episode.getSubtitle().isEmpty()) {
+            line2.setText(episode.getTitle() + (episode.getSequence() < 2 ? "" : " " + toRomanLiteral(episode.getSequence())));
+          }
+          else {
+            line2.setText(episode.getSubtitle());
+          }
+          line2.setFont(new Font("Sans Serif", Font.PLAIN, TITLE_HEIGHT - 4));
+          line1.setFont(new Font("Sans Serif", Font.PLAIN, SUBTITLE_HEIGHT - 4));
+          line1.setIconTextGap(25);
+          line2.setIconTextGap(35);
         }
         else {
-          line1.setForeground(TITLE_COLOR.brighter());
-          line2.setForeground(TITLE_COLOR.brighter());
-          panel.setBackground(new Color(255, 255, 255, 60));
+          line1.setText(episode.getTitle());
+          line2.setText(episode.getSubtitle());
         }
+      }
+      else if(item instanceof Serie) {
+        Serie serie = (Serie)item;
 
-        line1.setText(entry.getTitle());
-        line2.setText(entry.getSubtitle());
-        line1.setFont(new Font("Sans Serif", Font.PLAIN, TITLE_HEIGHT - 4));
-        line2.setFont(new Font("Sans Serif", Font.PLAIN, SUBTITLE_HEIGHT - 4));
-        line1.setIconTextGap(0);
-        line2.setIconTextGap(10);
+        Picture pic = new Picture();
+        pic.image.set(serie.getBanner());
+        pic.bgColor().set(Color.BLACK);
+        
+        return pic.getComponent();
+      }
+      else {
+        line1.setText(item.getTitle());
+        line2.setText("");
       }
 
       return panel;
