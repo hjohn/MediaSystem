@@ -7,7 +7,6 @@ import hs.mediasystem.screens.Header;
 import hs.mediasystem.screens.MainMenu;
 import hs.mediasystem.screens.MediaSystemBorder;
 import hs.mediasystem.screens.movie.MovieMenu;
-import hs.mediasystem.screens.movie.MovieMenu.Mode;
 import hs.mediasystem.screens.videoplaying.VideoOptionsScreen;
 import hs.mediasystem.screens.videoplaying.VideoPlayingMenu;
 import hs.mediasystem.util.ini.Ini;
@@ -80,8 +79,8 @@ public class MediaSystem {
     final AbstractBlock header = new Header();
     final AbstractBlock clock = new Clock();
     final MainMenu mainOptions = new MainMenu();
-    final MovieMenu movieSelection = new MovieMenu(moviesPath, new MovieScanner(), Mode.LIST);
-    final MovieMenu serieSelection = new MovieMenu(seriesPath, new SerieScanner(), Mode.LIST);
+    final MovieMenu movieSelection = new MovieMenu(new MoviesMediaTree(moviesPath));
+    final MovieMenu serieSelection = new MovieMenu(new SeriesMediaTree(seriesPath));
     
 //    controller.registerScreen("MainMenu", new Configuration(mediaSystemBorder) {{
 //      setExtension(MediaSystemBorder.Extension.TOP, new Configuration(header));

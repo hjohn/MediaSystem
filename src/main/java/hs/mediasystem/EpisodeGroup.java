@@ -24,4 +24,9 @@ public class EpisodeGroup extends NamedItem {
   public Collection<? extends NamedItem> children() {
     return Collections.unmodifiableCollection(children);
   }
+
+  @Override
+  public boolean isGroup() {
+    return true;
+  }
 }
