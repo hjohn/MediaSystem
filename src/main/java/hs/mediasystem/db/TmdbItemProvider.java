@@ -24,7 +24,9 @@ public class TmdbItemProvider implements ItemProvider {
     return getItem(element.getPath().getFileName().toString(), element.getTitle(), element.getSequence(), element.getSubtitle(), element.getYear(), element.getImdbNumber());
   }
 
-  public Item getItem(final String fileName, String title, int sequence, String subtitle, String year, String imdbNumber) {
+  public Item getItem(final String fileName, String title, String sequence, String subtitle, String year, String imdbNumber) {
+    int seq = sequence != null && sequence.length() > 0 ? Integer.parseInt(sequence) : 1;
+    
     try {
       String bestMatchingImdbNumber = null;
       
@@ -53,7 +55,7 @@ public class TmdbItemProvider implements ItemProvider {
 
           String searchString = title;
           
-          if(sequence > 1) {
+          if(seq > 1) {
             searchString += " " + sequence;
           }
           if(subtitle.length() > 0) {

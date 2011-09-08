@@ -21,4 +21,14 @@ public class NamedItem implements MediaItem {
   public boolean isGroup() {
     return false;
   }
+  
+  @Override
+  public boolean isRoot() {
+    return false;
+  }
+  
+  @Override
+  public MediaTree getRoot() {
+    return null;
+  }
 }

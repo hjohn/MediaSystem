@@ -19,6 +19,7 @@ public class MovieElementDecoder implements Decoder {
       "(?: \\[(" + RELEASE_YEAR + ")?(?: ?(?:" + IMDB + ")?)?.*\\])?" + EXTENSION
   );
   
+  @Override
   public Element decode(Path path) {
     Matcher matcher = PATTERN.matcher(path.getFileName().toString());
     

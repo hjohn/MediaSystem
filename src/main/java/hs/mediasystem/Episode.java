@@ -38,8 +38,14 @@ public class Episode extends NamedItem {
     return element.getYear();
   }
   
-  public int getSequence() {
+  public String getSequence() {
     return element.getSequence();
+  }
+  
+  public int getSequenceAsInt() {
+    String sequence = getSequence();
+    
+    return sequence != null && sequence.length() > 0 ? Integer.parseInt(sequence) : 1;
   }
   
   public BufferedImage getBackground() {

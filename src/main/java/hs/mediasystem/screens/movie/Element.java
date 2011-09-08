@@ -5,7 +5,7 @@ import java.nio.file.Path;
 public class Element {
   private final Path path;
   private final String title;
-  private final int sequence;
+  private final String sequence;
   private final String subtitle;
   private final String year;
   private final String imdbNumber;
@@ -14,7 +14,7 @@ public class Element {
     this.path = path;
     this.title = title;
     this.subtitle = subtitle;
-    this.sequence = (sequence == null || sequence.length() == 0) ? 1 : Integer.parseInt(sequence);
+    this.sequence = sequence;
     this.year = year;
     this.imdbNumber = imdbNumber;
   }
@@ -35,7 +35,7 @@ public class Element {
     return year;
   }
   
-  public int getSequence() {
+  public String getSequence() {
     return sequence;
   }
   

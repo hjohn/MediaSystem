@@ -38,11 +38,6 @@ public class SeriesMediaTree implements MediaTree {
   }
 
   @Override
-  public MediaTree getRoot(MediaItem item) {
-    throw new UnsupportedOperationException("Method not implemented");
-  }
-
-  @Override
   public MediaTree parent() {
     return null;
   }

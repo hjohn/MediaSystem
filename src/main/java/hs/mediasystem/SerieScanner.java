@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SerieScanner implements Scanner<Serie> {
-  private final MovieScanner episodeScanner = new MovieScanner();
+  private final MovieScanner episodeScanner = new MovieScanner(new EpisodeDecoder());
   
   @Override
   public List<Serie> scan(Path scanPath) {

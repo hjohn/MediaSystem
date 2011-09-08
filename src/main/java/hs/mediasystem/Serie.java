@@ -28,6 +28,16 @@ public class Serie extends NamedItem {
     this.serieProvider = serieProvider;
   }
   
+  @Override
+  public boolean isRoot() {
+    return true;
+  }
+  
+  @Override
+  public MediaTree getRoot() {
+    return new EpisodesMediaTree(path);
+  }
+  
   public BufferedImage getBanner() {
     ensureDataLoaded();
     

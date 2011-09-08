@@ -12,10 +12,14 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO this can probably be used genericly for all types of files
 public class MovieScanner implements Scanner<Episode> {
-  private static final MovieElementDecoder DECODER = new MovieElementDecoder();
   private static final ItemProvider ITEM_PROVIDER = new CachedItemProvider(new TmdbItemProvider());
+
+  private final Decoder decoder;
+  
+  public MovieScanner(Decoder decoder) {
+    this.decoder = decoder;
+  }
   
   @Override
   public List<Episode> scan(Path scanPath) {
@@ -24,7 +28,7 @@ public class MovieScanner implements Scanner<Episode> {
       DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath);
   
       for(Path path : dirStream) {
-        Element element = DECODER.decode(path);
+        Element element = decoder.decode(path);
         
         if(element != null) {
           episodes.add(new Episode(element, ITEM_PROVIDER));

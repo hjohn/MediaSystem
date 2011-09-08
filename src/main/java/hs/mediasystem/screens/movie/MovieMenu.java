@@ -54,25 +54,6 @@ public class MovieMenu extends AbstractBlock {
   
   @Override
   protected AbstractGroup<?> create(final Controller controller) {
-//    List<? extends NamedItem> episodes = scanner.scan(moviesPath);
-//
-//    Collection<List<NamedItem>> groupedItems = Groups.group(episodes, new TitleGrouper());
-//    
-//    for(List<NamedItem> group : groupedItems) {
-//      if(group.size() > 1) {
-//        EpisodeGroup g = new EpisodeGroup(group.get(0).getTitle());
-//        
-//        for(NamedItem item : group) {
-//          g.add(item);
-//        }
-//        
-//        menuModel.add(g);
-//      }
-//      else {
-//        menuModel.add(group.get(0));
-//      }
-//    }
-    
     menuModel.addAll(mediaTree.children());
     
     final SwingWorker2 movieUpdater = new SwingWorker2();
@@ -129,6 +110,13 @@ public class MovieMenu extends AbstractBlock {
                 controller.setBackground(false);
                 controller.playMedia((Episode)item);
                 controller.forward("VideoPlayingMenu");
+              }
+              else if(item.isRoot()) {
+                System.out.println("MovieMenu: Clicked on root: " + item);
+                menuModel.clear();
+                MediaTree tree = item.getRoot();
+                setCellRenderer(new MyCellRenderer(tree.getRenderer()));
+                menuModel.addAll(tree.children());
               }
             }
           });

@@ -13,7 +13,6 @@ public interface MediaTree {
   Style getStyle();
 
   List<? extends MediaItem> children();
-  MediaTree getRoot(MediaItem item);
   MediaTree parent();
   
   Renderer<MediaItem> getRenderer();
