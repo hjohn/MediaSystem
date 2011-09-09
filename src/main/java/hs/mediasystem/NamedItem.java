@@ -18,11 +18,6 @@ public class NamedItem implements MediaItem {
   }
 
   @Override
-  public boolean isGroup() {
-    return false;
-  }
-  
-  @Override
   public boolean isRoot() {
     return false;
   }

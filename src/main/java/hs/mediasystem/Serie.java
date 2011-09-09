@@ -1,30 +1,23 @@
 package hs.mediasystem;
 
+import hs.mediasystem.db.Item;
 import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.db.ItemProvider;
-import hs.mediasystem.db.SerieProvider;
-import hs.mediasystem.db.SerieRecord;
-import hs.mediasystem.screens.movie.Element;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 
 public class Serie extends NamedItem {
-  private final List<Episode> episodes = new ArrayList<Episode>();
-  private final Path path;
-  private final SerieProvider serieProvider;
+  private final ItemProvider serieProvider;
   
-  public Serie(Path path, String name, SerieProvider serieProvider) {
-    super(name);
-    this.path = path;
+  private final Item item;
+  
+  public Serie(Item item, ItemProvider serieProvider) {
+    super(item.getTitle());
+    this.item = item;
     this.serieProvider = serieProvider;
   }
   
@@ -35,15 +28,15 @@ public class Serie extends NamedItem {
   
   @Override
   public MediaTree getRoot() {
-    return new EpisodesMediaTree(path);
+    return new EpisodesMediaTree(item.getPath(), this);
   }
   
   public BufferedImage getBanner() {
     ensureDataLoaded();
     
     try {
-      if(record.getBanner() != null) {
-        return ImageIO.read(new ByteArrayInputStream(record.getBanner()));
+      if(record.getCover() != null) {
+        return ImageIO.read(new ByteArrayInputStream(record.getCover()));
       }
     }
     catch(IOException e) {
@@ -53,36 +46,32 @@ public class Serie extends NamedItem {
     return new BufferedImage(1, 1, BufferedImage.TYPE_4BYTE_ABGR);
   }
   
-  public Episode addEpisode(Element element, ItemProvider itemProvider) {
-    Episode episode = new Episode(element, itemProvider);
+  public String getProvider() {
+    ensureDataLoaded();
     
-    episodes.add(episode);
-    
-    return episode;
-  }
-
-  public void addAll(Collection<Episode> episodes) {
-    episodes.addAll(episodes);
+    return record.getProvider();
   }
   
-  public Collection<Episode> episodes() {
-    return Collections.unmodifiableList(episodes);
+  public String getProviderId() {
+    ensureDataLoaded();
+    
+    return record.getProviderId();
   }
   
-  private SerieRecord record;
+  private Item record;
   
   private void ensureDataLoaded() {
     if(record == null) {
       try {
         if(serieProvider != null) {
-          record = serieProvider.getSerie(getTitle());
+          record = serieProvider.getItem(item);
         }
         else {
-          record = new SerieRecord();
+          record = new Item(item.getPath());
         }
       }
       catch(ItemNotFoundException e) {
-        record = new SerieRecord();
+        record = new Item(item.getPath());
       }
     }
   }

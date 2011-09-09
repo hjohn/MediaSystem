@@ -1,5 +1,6 @@
 package hs.mediasystem.db;
 
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -28,7 +29,9 @@ public class ItemsDao {
     return connection;
   }
   
-  public Item getItem(String fileName) throws ItemNotFoundException {
+  public Item getItem(Path path) throws ItemNotFoundException {
+    String fileName = path.getFileName().toString();
+    
     try {
       Connection connection = getConnection();
       
@@ -39,19 +42,24 @@ public class ItemsDao {
       final ResultSet rs = statement.executeQuery();
       
       if(rs.next()) {
-        return new Item() {{
+        return new Item(path) {{
           setId(rs.getInt("id"));
           setLocalName(rs.getString("localname"));
           setImdbId(rs.getString("imdbid"));
-          setTmdbId(rs.getString("tmdbid"));
+          setProvider(rs.getString("provider"));
+          setProviderId(rs.getString("providerid"));
           setTitle(rs.getString("title"));
           //setReleaseDate(rs.getDate("releasedate"));
-          setRating(rs.getFloat("tmdbrating"));
+          setRating(rs.getFloat("rating"));
           setPlot(rs.getString("plot"));
 //          setCover(ImageIO.read(new ByteArrayInputStream(rs.getBytes("cover"))));
           setCover(rs.getBytes("cover"));
           setRuntime(rs.getInt("runtime"));
           setVersion(rs.getInt("version"));
+          setSeason(rs.getInt("season"));
+          setEpisode(rs.getInt("episode"));
+          setType(rs.getString("type"));
+          setSubtitle(rs.getString("subtitle"));
         }};
       }
       
@@ -146,8 +154,9 @@ public class ItemsDao {
     
     columns.put("localname", item.getLocalName());
     columns.put("imdbid", item.getImdbId());
-    columns.put("tmdbid", item.getTmdbId());
-    columns.put("tmdbrating", item.getRating());
+    columns.put("provider", item.getProvider());
+    columns.put("providerid", item.getProviderId());
+    columns.put("rating", item.getRating());
     columns.put("title", item.getTitle());
     columns.put("plot", item.getPlot());
     columns.put("cover", item.getCover());
@@ -157,6 +166,10 @@ public class ItemsDao {
     columns.put("releasedate", item.getReleaseDate());
     columns.put("runtime", item.getRuntime());
     columns.put("version", VERSION);
+    columns.put("season", item.getSeason());
+    columns.put("episode", item.getEpisode());
+    columns.put("type", item.getType());
+    columns.put("subtitle", item.getSubtitle());
     
     return columns;
   }

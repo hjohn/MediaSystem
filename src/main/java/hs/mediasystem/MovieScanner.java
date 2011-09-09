@@ -1,9 +1,7 @@
 package hs.mediasystem;
 
-import hs.mediasystem.db.CachedItemProvider;
+import hs.mediasystem.db.Item;
 import hs.mediasystem.db.ItemProvider;
-import hs.mediasystem.db.TmdbItemProvider;
-import hs.mediasystem.screens.movie.Element;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -13,12 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MovieScanner implements Scanner<Episode> {
-  private static final ItemProvider ITEM_PROVIDER = new CachedItemProvider(new TmdbItemProvider());
-
   private final Decoder decoder;
+  private final ItemProvider itemProvider;
   
-  public MovieScanner(Decoder decoder) {
+  public MovieScanner(Decoder decoder, ItemProvider itemProvider) {
     this.decoder = decoder;
+    this.itemProvider = itemProvider;
   }
   
   @Override
@@ -28,10 +26,10 @@ public class MovieScanner implements Scanner<Episode> {
       DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath);
   
       for(Path path : dirStream) {
-        Element element = decoder.decode(path);
+        Item item = decoder.decode(path);
         
-        if(element != null) {
-          episodes.add(new Episode(element, ITEM_PROVIDER));
+        if(item != null) {
+          episodes.add(new Episode(item, itemProvider));
         }
         else {
           System.err.println("MovieScanner: Could not decode as movie: " + path);

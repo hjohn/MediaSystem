@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class Season extends NamedItem {
+public class Season extends NamedItem implements Group {
   private final List<NamedItem> children = new ArrayList<NamedItem>();
   
   public Season(String title) {
@@ -21,12 +21,8 @@ public class Season extends NamedItem {
     return children.size();
   }
 
+  @Override
   public Collection<? extends NamedItem> children() {
     return Collections.unmodifiableCollection(children);
-  }
-
-  @Override
-  public boolean isGroup() {
-    return true;
   }
 }

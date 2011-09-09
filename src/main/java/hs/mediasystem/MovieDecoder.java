@@ -1,12 +1,13 @@
 package hs.mediasystem;
 
-import hs.mediasystem.screens.movie.Element;
+import hs.mediasystem.db.Item;
 
 import java.nio.file.Path;
+import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MovieElementDecoder implements Decoder {
+public class MovieDecoder implements Decoder {
   private static String ALL_BUT_SEPARATOR = "(?:[^ ]+| (?!(?:- |\\[)))+";
   private static String SEPARATOR_PLUS_SEQUENCE_NUMBER = "(?: - ([0-9]+))?";
   private static String SEPARATOR_PLUS_SUBTITLE = "(?: - )?((?:[^ ]*| (?!\\[))*)";
@@ -20,7 +21,7 @@ public class MovieElementDecoder implements Decoder {
   );
   
   @Override
-  public Element decode(Path path) {
+  public Item decode(Path path) {
     Matcher matcher = PATTERN.matcher(path.getFileName().toString());
     
     if(!matcher.matches()) {
@@ -42,6 +43,19 @@ public class MovieElementDecoder implements Decoder {
       imdbNumber = null;
     }
     
-    return new Element(path, title, subtitle, sequence, year, imdbNumber); 
+    Item item = new Item(path);
+    
+    item.setTitle(title);
+    item.setImdbId(imdbNumber);
+    item.setSubtitle(subtitle == null ? "" : subtitle);
+    item.setSeason(0);
+    item.setEpisode(sequence == null ? 1 : Integer.parseInt(sequence));
+    
+    if(year != null) {
+      GregorianCalendar gc = new GregorianCalendar(Integer.parseInt(year), 0, 1);
+      item.setReleaseDate(gc.getTime());
+    }
+    
+    return item; 
   }
 }

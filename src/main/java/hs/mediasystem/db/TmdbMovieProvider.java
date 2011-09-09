@@ -1,10 +1,10 @@
 package hs.mediasystem.db;
 
 import hs.mediasystem.Levenshtein;
-import hs.mediasystem.screens.movie.Element;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -17,21 +17,22 @@ import net.sf.jtmdb.MoviePoster;
 
 import org.json.JSONException;
 
-public class TmdbItemProvider implements ItemProvider {
+public class TmdbMovieProvider implements ItemProvider {
 
   @Override
-  public Item getItem(Element element) throws ItemNotFoundException {
-    return getItem(element.getPath().getFileName().toString(), element.getTitle(), element.getSequence(), element.getSubtitle(), element.getYear(), element.getImdbNumber());
-  }
-
-  public Item getItem(final String fileName, String title, String sequence, String subtitle, String year, String imdbNumber) {
-    int seq = sequence != null && sequence.length() > 0 ? Integer.parseInt(sequence) : 1;
+  public Item getItem(Item item) {
+    Path path = item.getPath();
+    final String fileName = item.getPath().getFileName().toString();
+    String title = item.getTitle();
+    String subtitle = item.getSubtitle();
+    String year = extractYear(item.getReleaseDate());
+    int seq = item.getSeason();
     
     try {
       String bestMatchingImdbNumber = null;
       
-      if(imdbNumber != null) {
-        bestMatchingImdbNumber = imdbNumber;
+      if(item.getImdbId() != null) {
+        bestMatchingImdbNumber = item.getImdbId();
       }
       
       if(bestMatchingImdbNumber == null) {
@@ -56,7 +57,7 @@ public class TmdbItemProvider implements ItemProvider {
           String searchString = title;
           
           if(seq > 1) {
-            searchString += " " + sequence;
+            searchString += " " + seq;
           }
           if(subtitle.length() > 0) {
             searchString += " " + subtitle;
@@ -99,9 +100,10 @@ public class TmdbItemProvider implements ItemProvider {
         
         final byte[] cover = url != null ? Downloader.readURL(url) : null;
 
-        return new Item() {{
+        return new Item(path) {{
           setImdbId(movie.getImdbID());
-          setTmdbId("" + movie.getID());
+          setProvider("TMDB");
+          setProviderId("" + movie.getID());
           setTitle(movie.getName());
           setLocalName(fileName);
           setCover(cover);
@@ -109,6 +111,7 @@ public class TmdbItemProvider implements ItemProvider {
           setRating((float)movie.getRating());
           setReleaseDate(movie.getReleasedDate());
           setRuntime(movie.getRuntime());
+          setType("movie");
           
 //          for(CastInfo castInfo : movie.getCast()) {
 //            castInfo.getCharacterName();

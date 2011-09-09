@@ -7,10 +7,12 @@ import java.util.List;
 import com.moviejukebox.thetvdb.TheTVDB;
 import com.moviejukebox.thetvdb.model.Series;
 
-public class TvdbSerieProvider implements SerieProvider {
+public class TvdbSerieProvider implements ItemProvider {
 
   @Override
-  public SerieRecord getSerie(final String name) {
+  public Item getItem(final Item item) {
+    final String name = item.getTitle();
+    
     TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
     
     List<Series> results = tvDB.searchSeries(name, "en");
@@ -21,12 +23,16 @@ public class TvdbSerieProvider implements SerieProvider {
     final Series series = tvDB.getSeries(results.get(0).getId(), "en");
     
     try {
-      return new SerieRecord() {{
+      return new Item(item.getPath()) {{
         byte[] poster = Downloader.readURL(new URL(series.getBanner()));
         
+        setLocalName(item.getPath().getFileName().toString());
         setTitle(name);
-        setOverview(series.getOverview());
-        setBanner(poster);
+        setPlot(series.getOverview());
+        setCover(poster);
+        setProvider("TVDB");
+        setProviderId(series.getId());
+        setType("serie");
       }};
     }
     catch(MalformedURLException e) {

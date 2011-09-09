@@ -1,6 +1,5 @@
 package hs.mediasystem.db;
 
-import hs.mediasystem.screens.movie.Element;
 
 public class CachedItemProvider implements ItemProvider {
   private final ItemsDao itemsDao;
@@ -18,38 +17,42 @@ public class CachedItemProvider implements ItemProvider {
   }
 
   @Override
-  public Item getItem(Element element) throws ItemNotFoundException {
-    String fileName = element.getPath().getFileName().toString();
+  public Item getItem(Item item) throws ItemNotFoundException {
+    String fileName = item.getPath().getFileName().toString();
     
     try {
       System.out.println("[FINE] Resolving from database cache: " + fileName);
-      Item item = itemsDao.getItem(fileName);
+      Item cachedItem = itemsDao.getItem(item.getPath());
       
-      if(item.getVersion() < ItemsDao.VERSION) {
+      if(cachedItem.getVersion() < ItemsDao.VERSION) {
         System.out.println("[FINE] Old version, updating from cached provider: " + fileName);
-        Item updatedItem = providerToCache.getItem(element);
+        Item updatedItem = providerToCache.getItem(item);
         
-        item.setBackground(updatedItem.getBackground());
-        item.setCover(updatedItem.getCover());
-        item.setImdbId(updatedItem.getImdbId());
-        item.setPlot(updatedItem.getPlot());
-        item.setTitle(updatedItem.getTitle());
-        item.setRating(updatedItem.getRating());
-        item.setReleaseDate(updatedItem.getReleaseDate());
-        item.setRuntime(updatedItem.getRuntime());
+        cachedItem.setBackground(updatedItem.getBackground());
+        cachedItem.setCover(updatedItem.getCover());
+        cachedItem.setImdbId(updatedItem.getImdbId());
+        cachedItem.setPlot(updatedItem.getPlot());
+        cachedItem.setTitle(updatedItem.getTitle());
+        cachedItem.setRating(updatedItem.getRating());
+        cachedItem.setReleaseDate(updatedItem.getReleaseDate());
+        cachedItem.setRuntime(updatedItem.getRuntime());
+        cachedItem.setSeason(updatedItem.getSeason());
+        cachedItem.setEpisode(updatedItem.getEpisode());
+        cachedItem.setType(updatedItem.getType());
+        cachedItem.setSubtitle(updatedItem.getSubtitle());
         
-        itemsDao.updateItem(item);
+        itemsDao.updateItem(cachedItem);
       }
       
-      return item;
+      return cachedItem;
     }
     catch(ItemNotFoundException e) {
       System.out.println("[FINE] Cache miss, falling back to cached provider: " + fileName);
-      Item item = providerToCache.getItem(element);
+      Item cachedItem = providerToCache.getItem(item);
       
-      itemsDao.storeItem(item);
+      itemsDao.storeItem(cachedItem);
       
-      return item;
+      return cachedItem;
     }
   }
 }

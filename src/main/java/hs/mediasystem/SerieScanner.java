@@ -1,5 +1,7 @@
 package hs.mediasystem;
 
+import hs.mediasystem.db.CachedItemProvider;
+import hs.mediasystem.db.Item;
 import hs.mediasystem.db.TvdbSerieProvider;
 
 import java.io.IOException;
@@ -10,8 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SerieScanner implements Scanner<Serie> {
-  private final MovieScanner episodeScanner = new MovieScanner(new EpisodeDecoder());
-  
+
   @Override
   public List<Serie> scan(Path scanPath) {
     List<Serie> series = new ArrayList<Serie>();
@@ -21,9 +22,11 @@ public class SerieScanner implements Scanner<Serie> {
   
       for(Path path : dirStream) {
         if(Files.isDirectory(path)) {
-          Serie serie = new Serie(path, path.getFileName().toString(), new TvdbSerieProvider());
+          Item item = new Item(path);
           
-          serie.addAll(episodeScanner.scan(path));
+          item.setTitle(path.getFileName().toString());
+          
+          Serie serie = new Serie(item, new CachedItemProvider(new TvdbSerieProvider()));
           
           series.add(serie);
         }

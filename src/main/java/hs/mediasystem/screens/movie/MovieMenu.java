@@ -3,7 +3,7 @@ package hs.mediasystem.screens.movie;
 import hs.mediasystem.Constants;
 import hs.mediasystem.Controller;
 import hs.mediasystem.Episode;
-import hs.mediasystem.EpisodeGroup;
+import hs.mediasystem.Group;
 import hs.mediasystem.MediaItem;
 import hs.mediasystem.MediaTree;
 import hs.mediasystem.Renderer;
@@ -120,7 +120,7 @@ public class MovieMenu extends AbstractBlock {
               }
             }
           });
-          onItemSelected().call(new EventListener<ItemsEvent<MediaItem>>() {
+          onItemFocused().call(new EventListener<ItemsEvent<MediaItem>>() {
             @Override
             public void onEvent(ItemsEvent<MediaItem> event) {
               final MediaItem item = event.getFirstItem();
@@ -160,10 +160,11 @@ public class MovieMenu extends AbstractBlock {
                 System.out.println("Expand");
 
                 @SuppressWarnings("unchecked")
-                MediaItem activeRow = ((SimpleList<MediaItem>) event.getSource()).getActiveRow();
-
-                if(activeRow.isGroup()) {
-                  menuModel.addAll(menuModel.indexOf(activeRow) + 1, ((EpisodeGroup) activeRow).children());
+                MediaItem activeRow = ((SimpleList<MediaItem>)event.getSource()).getActiveRow();
+                
+                if(activeRow instanceof Group) {
+                  Group group = (Group)activeRow;
+                  menuModel.addAll(menuModel.indexOf(activeRow) + 1, group.children());
                 }
               }
             }

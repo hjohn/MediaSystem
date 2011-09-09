@@ -3,49 +3,53 @@ package hs.mediasystem;
 import hs.mediasystem.db.Item;
 import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.db.ItemProvider;
-import hs.mediasystem.screens.movie.Element;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import javax.imageio.ImageIO;
 
 public class Episode extends NamedItem {
-  protected EpisodeGroup episodeGroup;
-
-  private final Element element;
   private final ItemProvider itemProvider;
   
   private Item item;
   
-  public Episode(Element element, ItemProvider itemProvider) {
-    super(element.getTitle());
-    this.element = element;
+  public Episode(Item item, ItemProvider itemProvider) {
+    super(item.getTitle());
+    this.item = item;
     this.itemProvider = itemProvider;
   }
 
   public Path getPath() {
-    return element.getPath();
+    return item.getPath();
   }
   
   public String getSubtitle() {
-    return element.getSubtitle();
+    return item.getSubtitle() == null ? "" : item.getSubtitle();
   }
   
   public String getYear() {
-    return element.getYear();
+    GregorianCalendar gc = new GregorianCalendar(2000, 0, 1);
+    gc.setTime(item.getReleaseDate());
+    return "" + gc.get(Calendar.YEAR);
   }
   
-  public String getSequence() {
-    return element.getSequence();
+  public int getSeason() {
+    return item.getSeason();
   }
   
-  public int getSequenceAsInt() {
-    String sequence = getSequence();
+  public int getEpisode() {
+    return item.getEpisode();
+  }
+  
+  public String getEpisodeName() {
+    ensureDataLoaded();
     
-    return sequence != null && sequence.length() > 0 ? Integer.parseInt(sequence) : 1;
+    return item.getSubtitle();
   }
   
   public BufferedImage getBackground() {
@@ -83,24 +87,19 @@ public class Episode extends NamedItem {
     return item.getRuntime();
   }
   
-  
   private void ensureDataLoaded() {
-    if(item == null) {
+    if(item.getId() == 0) {
       try {
         if(itemProvider != null) {
-          item = itemProvider.getItem(element);
+          item = itemProvider.getItem(item);
         }
         else {
-          item = new Item();
+          item = new Item(getPath());
         }
       }
       catch(ItemNotFoundException e) {
-        item = new Item();
+        item = new Item(getPath());
       }
     }
-  }
-  
-  public EpisodeGroup getEpisodeGroup() {
-    return episodeGroup;
   }
 }

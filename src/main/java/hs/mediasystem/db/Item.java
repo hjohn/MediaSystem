@@ -1,27 +1,29 @@
 package hs.mediasystem.db;
 
+import java.nio.file.Path;
 import java.util.Date;
 
-public class Item {
-  private int id;
+public class Item extends AbstractRecord {
   private String localName;
-  private String title;
   private String imdbId;
-  private String tmdbId;
   private String plot;
   private byte[] cover;
   private byte[] background;
   private float rating;
   private Date releaseDate;
   private int runtime;
-  private int version;
+  private int season;
+  private int episode;
+  private String subtitle;
   
-  public int getId() {
-    return id;
+  private final Path path;
+  
+  public Item(Path path) {
+    this.path = path;
   }
   
-  public void setId(int id) {
-    this.id = id;
+  public Path getPath() {
+    return path;
   }
   
   public String getLocalName() {
@@ -32,28 +34,12 @@ public class Item {
     this.localName = localName;
   }
   
-  public String getTitle() {
-    return title;
-  }
-  
-  public void setTitle(String title) {
-    this.title = title;
-  }
-  
   public String getImdbId() {
     return imdbId;
   }
   
   public void setImdbId(String imdbId) {
     this.imdbId = imdbId;
-  }
-  
-  public String getTmdbId() {
-    return tmdbId;
-  }
-  
-  public void setTmdbId(String tmdbId) {
-    this.tmdbId = tmdbId;
   }
   
   public String getPlot() {
@@ -103,12 +89,28 @@ public class Item {
   public void setRuntime(int runtime) {
     this.runtime = runtime;
   }
-  
-  public int getVersion() {
-    return version;
+
+  public int getSeason() {
+    return season;
   }
   
-  public void setVersion(int version) {
-    this.version = version;
+  public void setSeason(int season) {
+    this.season = season;
+  }
+  
+  public int getEpisode() {
+    return episode;
+  }
+  
+  public void setEpisode(int episode) {
+    this.episode = episode;
+  }
+  
+  public String getSubtitle() {
+    return subtitle;
+  }
+  
+  public void setSubtitle(String subtitle) {
+    this.subtitle = subtitle;
   }
 }
