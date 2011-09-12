@@ -1,6 +1,7 @@
 package hs.mediasystem;
 
 import hs.mediasystem.screens.AbstractBlock;
+import hs.mediasystem.screens.movie.State;
 import hs.ui.controls.AbstractGroup;
 
 public class Screen {
@@ -18,5 +19,9 @@ public class Screen {
 
   public AbstractGroup<?> getContent(Controller controller) {
     return block.getContent(controller, extensions);
+  }
+  
+  public State getState() {
+    return block.getState(extensions);
   }
 }

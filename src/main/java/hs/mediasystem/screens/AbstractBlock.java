@@ -3,20 +3,23 @@ package hs.mediasystem.screens;
 import hs.mediasystem.Controller;
 import hs.mediasystem.Extensions;
 import hs.mediasystem.Screen;
+import hs.mediasystem.screens.movie.State;
 import hs.ui.Container;
 import hs.ui.controls.AbstractGroup;
 import hs.ui.controls.GUIControl;
 import hs.ui.controls.HorizontalGroup;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
 
 public abstract class AbstractBlock {
   private AbstractGroup<?> content;
-  
+    
   public AbstractGroup<?> getContent(Controller controller, Extensions extensions) {
     if(content == null) {
       content = create(controller);
@@ -41,6 +44,35 @@ public abstract class AbstractBlock {
     }
     
     return content;
+  }
+  
+  public State getState(final Extensions extensions) {
+    return new State() {
+      private final List<State> states = new ArrayList<State>();
+      
+      {
+        states.add(currentState());
+
+        for(Screen screen : extensions) {
+          states.add(screen.getState());
+        }
+      }
+      
+      @Override
+      public void apply() {
+        for(State state : states) {
+          state.apply();
+        }
+      }
+    };
+  }
+  
+  protected State currentState() {
+    return new State() {
+      @Override
+      public void apply() {
+      }
+    };
   }
   
   protected abstract AbstractGroup<?> create(Controller controller);

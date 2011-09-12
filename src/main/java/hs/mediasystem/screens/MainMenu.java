@@ -2,6 +2,7 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.Controller;
 import hs.mediasystem.IconHelper;
+import hs.mediasystem.MediaSystem;
 import hs.models.BasicListModel;
 import hs.models.events.EventListener;
 import hs.ui.controls.AbstractGroup;
@@ -20,12 +21,12 @@ public class MainMenu extends AbstractBlock {
   
   @Override
   protected AbstractGroup<?> create(final Controller controller) {
-    menuModel.add(new MenuElement("Movies", IconHelper.readIcon("images/aktion.png", 32, 32), "MovieMenu"));
-    menuModel.add(new MenuElement("Series", IconHelper.readIcon("images/aktion.png", 32, 32), "SerieSelection"));
-    menuModel.add(new MenuElement("YouTube", IconHelper.readIcon("images/password.png", 32, 32), "MovieMenu"));
-    menuModel.add(new MenuElement("TV", IconHelper.readIcon("images/tv.png", 32, 32), "MovieMenu"));
-    menuModel.add(new MenuElement("Web", IconHelper.readIcon("images/browser.png", 32, 32), "MovieMenu"));
-    menuModel.add(new MenuElement("Exit", IconHelper.readIcon("images/logout.png", 32, 32), "MovieMenu"));
+    menuModel.add(new MenuElement("Movies", IconHelper.readIcon("images/aktion.png", 32, 32), MediaSystem.MOVIES));
+    menuModel.add(new MenuElement("Series", IconHelper.readIcon("images/aktion.png", 32, 32), MediaSystem.SERIES));
+    menuModel.add(new MenuElement("YouTube", IconHelper.readIcon("images/password.png", 32, 32), MediaSystem.MOVIES));
+    menuModel.add(new MenuElement("TV", IconHelper.readIcon("images/tv.png", 32, 32), MediaSystem.MOVIES));
+    menuModel.add(new MenuElement("Web", IconHelper.readIcon("images/browser.png", 32, 32), MediaSystem.MOVIES));
+    menuModel.add(new MenuElement("Exit", IconHelper.readIcon("images/logout.png", 32, 32), MediaSystem.MOVIES));
     
     final MyListCellRenderer cellRenderer = new MyListCellRenderer();
     
@@ -39,7 +40,7 @@ public class MainMenu extends AbstractBlock {
         bgColor().set(new Color(0, 0, 0, 0));
         opaque().set(false);
         border().set(new EmptyBorder(0, 0, 0, 0));
-        setCellRenderer(cellRenderer);
+        listCellRenderer().set(cellRenderer);
 //        columns().add(new Column<MenuElement>() {{
 //          convertor().set(new Convertor<MenuElement, Object>() {
 //            @Override
@@ -65,7 +66,7 @@ public class MainMenu extends AbstractBlock {
           public void onEvent(ItemsEvent<MenuElement> event) {
             MenuElement item = event.getFirstItem();
             
-            controller.forward(item.getScreenName());
+            controller.forward(item.getScreen());
           }
         });
       }});

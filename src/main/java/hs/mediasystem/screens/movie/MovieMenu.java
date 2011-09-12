@@ -5,6 +5,7 @@ import hs.mediasystem.Controller;
 import hs.mediasystem.Episode;
 import hs.mediasystem.Group;
 import hs.mediasystem.MediaItem;
+import hs.mediasystem.MediaSystem;
 import hs.mediasystem.MediaTree;
 import hs.mediasystem.Renderer;
 import hs.mediasystem.SizeFormatter;
@@ -38,23 +39,52 @@ import javax.swing.ListCellRenderer;
 import javax.swing.border.EmptyBorder;
 
 public class MovieMenu extends AbstractBlock {
-  private static final int HEIGHT = 48;
-  
   private final BasicListModel<MediaItem> menuModel = new BasicListModel<MediaItem>(new ArrayList<MediaItem>());
   private final Model<String> plot = new ValueModel<String>();
   private final Model<BufferedImage> cover = new ValueModel<BufferedImage>();
   private final Model<String> runtime = new ValueModel<String>();
-  private final MediaTree mediaTree;
+  private final Model<Integer> rowHeight = new ValueModel<Integer>(20);
+  private final Model<ListCellRenderer<? super MediaItem>> listCellRenderer = new ValueModel<ListCellRenderer<? super MediaItem>>();
+  
+  private MediaTree mediaTree;
 
   //private static final BufferedImage EMPTY_IMAGE
-
+  
+  @Override
+  public State currentState() {
+    return new InternalState(mediaTree);
+  }
+  
+  private class InternalState implements State {
+    private final MediaTree mediaTree;
+    
+    public InternalState(MediaTree mediaTree) {
+      this.mediaTree = mediaTree;
+    }
+    
+    @Override
+    public void apply() {
+      MovieMenu.this.mediaTree = mediaTree;
+      
+      Renderer<MediaItem> renderer = mediaTree.getRenderer();
+      
+      listCellRenderer.set(new MyCellRenderer(renderer));
+      rowHeight.set(renderer.getPreferredHeight());
+      
+      menuModel.clear();
+      menuModel.addAll(mediaTree.children());
+    }
+  }
+  
   public MovieMenu(MediaTree mediaTree) {
     this.mediaTree = mediaTree;
   }
   
   @Override
   protected AbstractGroup<?> create(final Controller controller) {
-    menuModel.addAll(mediaTree.children());
+    new InternalState(mediaTree).apply(); 
+//    menuModel.addAll(mediaTree.children());
+//    listCellRenderer.set(new MyCellRenderer(mediaTree.getRenderer()));
     
     final SwingWorker2 movieUpdater = new SwingWorker2();
 
@@ -98,8 +128,8 @@ public class MovieMenu extends AbstractBlock {
           //maxHeight().set(30000);
           minWidth().set(50);
           maxWidth().set(30000);
-          rowHeight().set(HEIGHT);
-          setCellRenderer(new MyCellRenderer(mediaTree.getRenderer()));
+          rowHeight().link(rowHeight);
+          listCellRenderer().link(listCellRenderer);
           selectFirstItem();
           onItemDoubleClick().call(new EventListener<ItemsEvent<MediaItem>>() {
             @Override
@@ -109,14 +139,10 @@ public class MovieMenu extends AbstractBlock {
               if(item instanceof Episode) {
                 controller.setBackground(false);
                 controller.playMedia((Episode)item);
-                controller.forward("VideoPlayingMenu");
+                controller.forward(MediaSystem.VIDEO_PLAYING);
               }
               else if(item.isRoot()) {
-                System.out.println("MovieMenu: Clicked on root: " + item);
-                menuModel.clear();
-                MediaTree tree = item.getRoot();
-                setCellRenderer(new MyCellRenderer(tree.getRenderer()));
-                menuModel.addAll(tree.children());
+                controller.forward(new InternalState(item.getRoot()));
               }
             }
           });
@@ -174,7 +200,7 @@ public class MovieMenu extends AbstractBlock {
     }};
   }
   
-  private class MyCellRenderer implements ListCellRenderer<MediaItem> {
+  public static class MyCellRenderer implements ListCellRenderer<MediaItem> {
     private final Renderer<MediaItem> renderer;
 
     public MyCellRenderer(Renderer<MediaItem> renderer) {

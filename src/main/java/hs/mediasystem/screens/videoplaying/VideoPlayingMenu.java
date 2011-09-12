@@ -1,6 +1,7 @@
 package hs.mediasystem.screens.videoplaying;
 
 import hs.mediasystem.Controller;
+import hs.mediasystem.MediaSystem;
 import hs.mediasystem.screens.AbstractBlock;
 import hs.smartlayout.Anchor;
 import hs.sublight.SublightSubtitleClient;
@@ -52,7 +53,7 @@ public class VideoPlayingMenu extends AbstractBlock {
           controller.subtitles.addAll(subtitleList2);
 
           
-          controller.forward("VideoOptions");
+          controller.forward(MediaSystem.VIDEO_OPTIONS);
         }
       });
    // '9'               = video: volume down         --> Volume Down

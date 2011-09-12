@@ -116,4 +116,9 @@ public class DuoLineRenderer implements Renderer<MediaItem> {
     
     return panel;
   }
+
+  @Override
+  public int getPreferredHeight() {
+    return HEIGHT;
+  }
 }

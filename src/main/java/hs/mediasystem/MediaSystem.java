@@ -54,8 +54,15 @@ import net.sf.jtmdb.GeneralSettings;
 // 't'               = video: sub title menu      --> Teletext 
 
 public class MediaSystem {
+  public static final Screen MAIN_MENU;
+  public static final Screen MOVIES;
+  public static final Screen SERIES;
+  public static final Screen VIDEO_PLAYING;
+  public static final Screen VIDEO_OPTIONS;
   
-  public static void main(String[] args) {
+  private static final ControllerFactory CONTROLLER_FACTORY;
+  
+  static {
     Ini ini = new Ini(new File("mediasystem.ini"));
     
     Section section = ini.getSection("general");
@@ -70,11 +77,8 @@ public class MediaSystem {
     GeneralSettings.setLogEnabled(true);
     GeneralSettings.setLogStream(System.out);
     
-    //new VLCMainFrame();
-    ControllerFactory controllerFactory = new MPlayerControllerFactory(Paths.get(section.get("mplayer.path")));
-    
-    Controller controller = controllerFactory.create();
-
+    CONTROLLER_FACTORY = new MPlayerControllerFactory(Paths.get(section.get("mplayer.path")));
+        
     final AbstractBlock mediaSystemBorder = new MediaSystemBorder();
     final AbstractBlock header = new Header();
     final AbstractBlock clock = new Clock();
@@ -82,37 +86,49 @@ public class MediaSystem {
     final MovieMenu movieSelection = new MovieMenu(new MoviesMediaTree(moviesPath));
     final MovieMenu serieSelection = new MovieMenu(new SeriesMediaTree(seriesPath));
     
+    MAIN_MENU = new Screen(mediaSystemBorder, new Extensions() {{
+      addExtension("top", new Screen(header));
+      addExtension("center", new Screen(mainOptions));
+      addExtension("bottom", new Screen(clock));
+    }});
+    
+    MOVIES = new Screen(mediaSystemBorder, new Extensions() {{
+      addExtension("top", new Screen(header));
+      addExtension("center", new Screen(movieSelection));
+      addExtension("bottom", new Screen(clock));
+    }});
+    
+    SERIES = new Screen(mediaSystemBorder, new Extensions() {{
+      addExtension("top", new Screen(header));
+      addExtension("center", new Screen(serieSelection));
+      addExtension("bottom", new Screen(clock));
+    }});
+
+    
+//    controller.registerScreen("MainMenu", new MainMenu(controller));
+    //controller.registerScreen("MovieMenu", new MovieMenu(controller));
+    VIDEO_PLAYING = new Screen(new VideoPlayingMenu(new SublightSubtitleClient(sublightClientName, sublightKey)));
+
+    VIDEO_OPTIONS = new Screen(new VideoOptionsScreen());
+  }
+  
+  public static void main(String[] args) {
+
+    
+    //new VLCMainFrame();
+
+
+
+    
 //    controller.registerScreen("MainMenu", new Configuration(mediaSystemBorder) {{
 //      setExtension(MediaSystemBorder.Extension.TOP, new Configuration(header));
 //      setExtension(MediaSystemBorder.Extension.CENTER, new Configuration(mainOptions));
 //      setExtension(MediaSystemBorder.Extension.BOTTOM, new Configuration(clock));
 //    }});
     
-    controller.registerScreen("MainMenu", new Screen(mediaSystemBorder, new Extensions() {{
-      addExtension("top", new Screen(header));
-      addExtension("center", new Screen(mainOptions));
-      addExtension("bottom", new Screen(clock));
-    }}));
-    
-    controller.registerScreen("MovieMenu", new Screen(mediaSystemBorder, new Extensions() {{
-      addExtension("top", new Screen(header));
-      addExtension("center", new Screen(movieSelection));
-      addExtension("bottom", new Screen(clock));
-    }}));
-    
-    controller.registerScreen("SerieSelection", new Screen(mediaSystemBorder, new Extensions() {{
-      addExtension("top", new Screen(header));
-      addExtension("center", new Screen(serieSelection));
-      addExtension("bottom", new Screen(clock));
-    }}));
 
+    Controller controller = CONTROLLER_FACTORY.create();
     
-//    controller.registerScreen("MainMenu", new MainMenu(controller));
-    //controller.registerScreen("MovieMenu", new MovieMenu(controller));
-    controller.registerScreen("VideoPlayingMenu", new Screen(new VideoPlayingMenu(new SublightSubtitleClient(sublightClientName, sublightKey))));
-
-    controller.registerScreen("VideoOptions", new Screen(new VideoOptionsScreen()));
-    
-    controller.forward("MainMenu");
+    controller.forward(MAIN_MENU);
   }
 }

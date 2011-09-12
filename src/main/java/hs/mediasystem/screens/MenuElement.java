@@ -1,16 +1,18 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.Screen;
+
 import javax.swing.Icon;
 
 public class MenuElement {
   private final String title;
   private final Icon icon;
-  private final String screenName;
+  private final Screen screen;
 
-  public MenuElement(String title, Icon icon, String screenName) {
+  public MenuElement(String title, Icon icon, Screen screen) {
     this.title = title;
     this.icon = icon;
-    this.screenName = screenName;
+    this.screen = screen;
   }
   
   public String getTitle() {
@@ -21,7 +23,7 @@ public class MenuElement {
     return icon;
   }
 
-  public String getScreenName() {
-    return screenName;
+  public Screen getScreen() {
+    return screen;
   }
 }

@@ -1,5 +1,6 @@
 package hs.mediasystem;
 
+import hs.mediasystem.screens.movie.State;
 import hs.models.BasicListModel;
 import hs.models.ListModel;
 import hs.sublight.SubtitleDescriptor;
@@ -21,7 +22,6 @@ import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,9 +33,8 @@ public class Controller {
   private final Player player;
   private final VerticalGroup mainGroup;
   private final Image background;
-  private final List<String> screenStack = new ArrayList<String>();
+  private final NavigationHistory<ScreenAndState> navigationHistory = new NavigationHistory<ScreenAndState>();
   
-  private int currentStackIndex = -1;
   private boolean backgroundActive = true;
   
   private final Map<Integer, KeyHandler> videoKeyHandlers = new HashMap<Integer, KeyHandler>() {{
@@ -99,7 +98,7 @@ public class Controller {
       public void keyPressed() {
         getMediaPlayer().stop();
         setBackground(true);
-        if(activeScreen().equals("VideoPlayingMenu")) {
+        if(activeScreen() == MediaSystem.VIDEO_PLAYING) {
           back();
         }
         else {
@@ -297,46 +296,48 @@ public class Controller {
     mainGroup.removeAll();
   }
 
-  public void back() {
-    if(currentStackIndex > 0) {
-      emptyMainGroup();
+  private void changeScreen(ScreenAndState screenAndState) {
+    emptyMainGroup();
+    
+    AbstractGroup<?> content = getContent(screenAndState.getScreen());
+    mainGroup.add(content);
+    
+    if(screenAndState.getState() != null) {
+      screenAndState.getState().apply();
+    }
+    
+    parentFrame.validate();
+    mainGroup.repaint();
+    setDefaultFocus();
+    parentFrame.toFront();
+  }
   
-      currentStackIndex--;
-      
-      AbstractGroup<?> content = getContent(screenStack.get(currentStackIndex));
-      mainGroup.add(content);
-      
-      parentFrame.validate();
-//      frame.getOverlayFrame().validate();
-      mainGroup.repaint();
-      setDefaultFocus();
-      parentFrame.toFront();
+  public void back() {
+    ScreenAndState screenAndState = navigationHistory.back();
+    
+    if(screenAndState != null) {
+      changeScreen(screenAndState);
     }
   }
   
-  public void forward(String screenName) {
-    while(screenStack.size() - 1 > currentStackIndex) {
-      screenStack.remove(screenStack.size() - 1);
+  public void forward(Screen screen, State state) {
+    if(!navigationHistory.isEmpty()) {
+      navigationHistory.current().updateState();
     }
     
-    emptyMainGroup();
-
-    screenStack.add(screenName);
-    currentStackIndex++;
+    ScreenAndState screenAndState = new ScreenAndState(screen, state);
     
-    AbstractGroup<?> content = getContent(screenStack.get(currentStackIndex));
-    mainGroup.add(content);
-    parentFrame.validate();
-//    frame.getOverlayFrame().validate();
-    mainGroup.repaint();
-
-    setDefaultFocus();
+    navigationHistory.forward(screenAndState);
     
-//    System.out.println("--> " + manager.getFocusOwner());
-//    manager.focusNextComponent();
-//    System.out.println("--> " + manager.getFocusOwner());
-    
-    parentFrame.toFront();
+    changeScreen(screenAndState);
+  }
+  
+  public void forward(Screen screen) {
+    forward(screen, null);
+  }
+  
+  public void forward(State state) {
+    forward(activeScreen(), state);
   }
   
   private void setDefaultFocus() {
@@ -361,19 +362,13 @@ public class Controller {
   private Player getMediaPlayer() {
     return player;
   }
-  
-  private final Map<String, Screen> screens = new HashMap<String, Screen>();
-  
-  public void registerScreen(String name, Screen screen) {
-    screens.put(name, screen);
+    
+  private AbstractGroup<?> getContent(Screen screen) {
+    return screen.getContent(this);
   }
   
-  private AbstractGroup<?> getContent(String name) {
-    return screens.get(name).getContent(this);
-  }
-  
-  public String activeScreen() {
-    return screenStack.get(currentStackIndex); 
+  public Screen activeScreen() {
+    return navigationHistory.current().getScreen(); 
   }
 
   private Episode currentItem;

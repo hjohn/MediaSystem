@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import javax.swing.JComponent;
+import javax.swing.border.EmptyBorder;
 
 public class SeriesMediaTree implements MediaTree {
   private final Path root;
@@ -52,9 +53,22 @@ public class SeriesMediaTree implements MediaTree {
         Serie serie = (Serie)item;
         
         pic.image.set(serie.getBanner());
-        pic.bgColor().set(Color.BLACK);
+        pic.bgColor().set(new Color(0, 0, 0, 0));
+        pic.maxHeight().set(78);
+        
+        if(hasFocus) {
+          pic.border().set(new GlowBorder(Constants.MAIN_TEXT_COLOR.get(), 4));
+        }
+        else {
+          pic.border().set(new EmptyBorder(4, 4, 4, 4));
+        }
         
         return pic.getComponent();
+      }
+
+      @Override
+      public int getPreferredHeight() {
+        return 70 + 8; // 758x140
       }
     };
   }
