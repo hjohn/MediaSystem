@@ -49,7 +49,7 @@ public class MovieMenu extends AbstractBlock {
   private MediaTree mediaTree;
 
   //private static final BufferedImage EMPTY_IMAGE
-  
+
   @Override
   public State currentState() {
     return new InternalState(mediaTree);

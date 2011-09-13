@@ -33,7 +33,7 @@ public class Controller {
   private final Player player;
   private final VerticalGroup mainGroup;
   private final Image background;
-  private final NavigationHistory<ScreenAndState> navigationHistory = new NavigationHistory<ScreenAndState>();
+  private final NavigationHistory<View> navigationHistory = new NavigationHistory<View>();
   
   private boolean backgroundActive = true;
   
@@ -296,7 +296,7 @@ public class Controller {
     mainGroup.removeAll();
   }
 
-  private void changeScreen(ScreenAndState screenAndState) {
+  private void changeScreen(View screenAndState) {
     emptyMainGroup();
     
     AbstractGroup<?> content = getContent(screenAndState.getScreen());
@@ -313,7 +313,7 @@ public class Controller {
   }
   
   public void back() {
-    ScreenAndState screenAndState = navigationHistory.back();
+    View screenAndState = navigationHistory.back();
     
     if(screenAndState != null) {
       changeScreen(screenAndState);
@@ -325,7 +325,7 @@ public class Controller {
       navigationHistory.current().updateState();
     }
     
-    ScreenAndState screenAndState = new ScreenAndState(screen, state);
+    View screenAndState = new View(screen, state);
     
     navigationHistory.forward(screenAndState);
     

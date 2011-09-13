@@ -21,7 +21,6 @@ import net.sf.jtmdb.GeneralSettings;
 
 // Minimal working system:
 // TODO Make clock in standard border
-// TODO Series display
 // TODO Download + show subtitles, also multiple different ones should work without problem; store them with file I guess
 // TODO Lirc support
 // TODO Something to show length of movie/time left
@@ -113,20 +112,6 @@ public class MediaSystem {
   }
   
   public static void main(String[] args) {
-
-    
-    //new VLCMainFrame();
-
-
-
-    
-//    controller.registerScreen("MainMenu", new Configuration(mediaSystemBorder) {{
-//      setExtension(MediaSystemBorder.Extension.TOP, new Configuration(header));
-//      setExtension(MediaSystemBorder.Extension.CENTER, new Configuration(mainOptions));
-//      setExtension(MediaSystemBorder.Extension.BOTTOM, new Configuration(clock));
-//    }});
-    
-
     Controller controller = CONTROLLER_FACTORY.create();
     
     controller.forward(MAIN_MENU);
