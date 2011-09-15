@@ -1,6 +1,10 @@
 package hs.mediasystem;
 
-import hs.mediasystem.screens.movie.State;
+import hs.mediasystem.framework.Player;
+import hs.mediasystem.framework.Screen;
+import hs.mediasystem.framework.State;
+import hs.mediasystem.framework.View;
+import hs.mediasystem.fs.Episode;
 import hs.models.BasicListModel;
 import hs.models.ListModel;
 import hs.sublight.SubtitleDescriptor;
@@ -34,6 +38,7 @@ public class Controller {
   private final VerticalGroup mainGroup;
   private final Image background;
   private final NavigationHistory<View> navigationHistory = new NavigationHistory<View>();
+  private final StateCache stateCache = new StateCache();
   
   private boolean backgroundActive = true;
   
@@ -296,14 +301,18 @@ public class Controller {
     mainGroup.removeAll();
   }
 
-  private void changeScreen(View screenAndState) {
+  private void changeView(View view) {
     emptyMainGroup();
     
-    AbstractGroup<?> content = getContent(screenAndState.getScreen());
+    AbstractGroup<?> content = getContent(view.getScreen());
     mainGroup.add(content);
     
-    if(screenAndState.getState() != null) {
-      screenAndState.getState().apply();
+    view.applyConfig();
+    
+    State state = stateCache.getState(navigationHistory.getKey());
+    
+    if(state != null) {
+      state.apply();
     }
     
     parentFrame.validate();
@@ -313,31 +322,21 @@ public class Controller {
   }
   
   public void back() {
-    View screenAndState = navigationHistory.back();
+    View view = navigationHistory.back();
     
-    if(screenAndState != null) {
-      changeScreen(screenAndState);
+    if(view != null) {
+      changeView(view);
     }
   }
   
-  public void forward(Screen screen, State state) {
+  public void forward(View view) {
     if(!navigationHistory.isEmpty()) {
-      navigationHistory.current().updateState();
+      stateCache.putState(navigationHistory.getKey(), navigationHistory.current().getScreen().getState());
     }
     
-    View screenAndState = new View(screen, state);
+    navigationHistory.forward(view);
     
-    navigationHistory.forward(screenAndState);
-    
-    changeScreen(screenAndState);
-  }
-  
-  public void forward(Screen screen) {
-    forward(screen, null);
-  }
-  
-  public void forward(State state) {
-    forward(activeScreen(), state);
+    changeView(view);
   }
   
   private void setDefaultFocus() {
@@ -408,5 +407,9 @@ public class Controller {
     catch(Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public View cloneCurrentView() {
+    return navigationHistory.current().copy();
   } 
 }

@@ -1,12 +1,15 @@
 package hs.mediasystem;
 
+import hs.mediasystem.framework.AbstractBlock;
+import hs.mediasystem.framework.Extensions;
+import hs.mediasystem.framework.Screen;
+import hs.mediasystem.framework.View;
 import hs.mediasystem.players.mplayer.MPlayerControllerFactory;
-import hs.mediasystem.screens.AbstractBlock;
 import hs.mediasystem.screens.Clock;
 import hs.mediasystem.screens.Header;
 import hs.mediasystem.screens.MainMenu;
 import hs.mediasystem.screens.MediaSystemBorder;
-import hs.mediasystem.screens.movie.MovieMenu;
+import hs.mediasystem.screens.movie.MediaSelection;
 import hs.mediasystem.screens.videoplaying.VideoOptionsScreen;
 import hs.mediasystem.screens.videoplaying.VideoPlayingMenu;
 import hs.mediasystem.util.ini.Ini;
@@ -54,8 +57,7 @@ import net.sf.jtmdb.GeneralSettings;
 
 public class MediaSystem {
   public static final Screen MAIN_MENU;
-  public static final Screen MOVIES;
-  public static final Screen SERIES;
+  public static final Screen MEDIA_SELECTION;
   public static final Screen VIDEO_PLAYING;
   public static final Screen VIDEO_OPTIONS;
   
@@ -78,12 +80,11 @@ public class MediaSystem {
     
     CONTROLLER_FACTORY = new MPlayerControllerFactory(Paths.get(section.get("mplayer.path")));
         
-    final AbstractBlock mediaSystemBorder = new MediaSystemBorder();
-    final AbstractBlock header = new Header();
-    final AbstractBlock clock = new Clock();
-    final MainMenu mainOptions = new MainMenu();
-    final MovieMenu movieSelection = new MovieMenu(new MoviesMediaTree(moviesPath));
-    final MovieMenu serieSelection = new MovieMenu(new SeriesMediaTree(seriesPath));
+    final AbstractBlock<?> mediaSystemBorder = new MediaSystemBorder();
+    final AbstractBlock<?> header = new Header();
+    final AbstractBlock<?> clock = new Clock();
+    final MainMenu mainOptions = new MainMenu(moviesPath, seriesPath);
+    final MediaSelection mediaSelection = new MediaSelection();
     
     MAIN_MENU = new Screen(mediaSystemBorder, new Extensions() {{
       addExtension("top", new Screen(header));
@@ -91,19 +92,12 @@ public class MediaSystem {
       addExtension("bottom", new Screen(clock));
     }});
     
-    MOVIES = new Screen(mediaSystemBorder, new Extensions() {{
+    MEDIA_SELECTION = new Screen(mediaSystemBorder, new Extensions() {{
       addExtension("top", new Screen(header));
-      addExtension("center", new Screen(movieSelection));
+      addExtension("center", new Screen(mediaSelection));
       addExtension("bottom", new Screen(clock));
     }});
-    
-    SERIES = new Screen(mediaSystemBorder, new Extensions() {{
-      addExtension("top", new Screen(header));
-      addExtension("center", new Screen(serieSelection));
-      addExtension("bottom", new Screen(clock));
-    }});
-
-    
+        
 //    controller.registerScreen("MainMenu", new MainMenu(controller));
     //controller.registerScreen("MovieMenu", new MovieMenu(controller));
     VIDEO_PLAYING = new Screen(new VideoPlayingMenu(new SublightSubtitleClient(sublightClientName, sublightKey)));
@@ -114,6 +108,6 @@ public class MediaSystem {
   public static void main(String[] args) {
     Controller controller = CONTROLLER_FACTORY.create();
     
-    controller.forward(MAIN_MENU);
+    controller.forward(new View(MAIN_MENU));
   }
 }

@@ -1,6 +1,6 @@
 package hs.mediasystem.players.mplayer;
 
-import hs.mediasystem.Player;
+import hs.mediasystem.framework.Player;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

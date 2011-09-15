@@ -3,6 +3,12 @@ package hs.mediasystem.screens;
 import hs.mediasystem.Controller;
 import hs.mediasystem.IconHelper;
 import hs.mediasystem.MediaSystem;
+import hs.mediasystem.framework.AbstractBlock;
+import hs.mediasystem.framework.NoConfig;
+import hs.mediasystem.framework.View;
+import hs.mediasystem.fs.MoviesMediaTree;
+import hs.mediasystem.fs.SeriesMediaTree;
+import hs.mediasystem.screens.movie.MediaSelectionConfig;
 import hs.models.BasicListModel;
 import hs.models.events.EventListener;
 import hs.ui.controls.AbstractGroup;
@@ -12,21 +18,32 @@ import hs.ui.events.ItemsEvent;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import javax.swing.border.EmptyBorder;
 
-public class MainMenu extends AbstractBlock {
+public class MainMenu extends AbstractBlock<NoConfig> {
   private final BasicListModel<MenuElement> menuModel = new BasicListModel<MenuElement>(new ArrayList<MenuElement>());
+  private final Path moviesPath;
+  private final Path seriesPath;
+
+  public MainMenu(Path moviesPath, Path seriesPath) {
+    this.moviesPath = moviesPath;
+    this.seriesPath = seriesPath;
+  }
   
   @Override
   protected AbstractGroup<?> create(final Controller controller) {
-    menuModel.add(new MenuElement("Movies", IconHelper.readIcon("images/aktion.png", 32, 32), MediaSystem.MOVIES));
-    menuModel.add(new MenuElement("Series", IconHelper.readIcon("images/aktion.png", 32, 32), MediaSystem.SERIES));
-    menuModel.add(new MenuElement("YouTube", IconHelper.readIcon("images/password.png", 32, 32), MediaSystem.MOVIES));
-    menuModel.add(new MenuElement("TV", IconHelper.readIcon("images/tv.png", 32, 32), MediaSystem.MOVIES));
-    menuModel.add(new MenuElement("Web", IconHelper.readIcon("images/browser.png", 32, 32), MediaSystem.MOVIES));
-    menuModel.add(new MenuElement("Exit", IconHelper.readIcon("images/logout.png", 32, 32), MediaSystem.MOVIES));
+    View moviesView = new View(MediaSystem.MEDIA_SELECTION, new MediaSelectionConfig(new MoviesMediaTree(moviesPath)));
+    View seriesView = new View(MediaSystem.MEDIA_SELECTION, new MediaSelectionConfig(new SeriesMediaTree(seriesPath)));
+    
+    menuModel.add(new MenuElement("Movies", IconHelper.readIcon("images/aktion.png", 32, 32), moviesView));
+    menuModel.add(new MenuElement("Series", IconHelper.readIcon("images/aktion.png", 32, 32), seriesView));
+    menuModel.add(new MenuElement("YouTube", IconHelper.readIcon("images/password.png", 32, 32), moviesView));
+    menuModel.add(new MenuElement("TV", IconHelper.readIcon("images/tv.png", 32, 32), moviesView));
+    menuModel.add(new MenuElement("Web", IconHelper.readIcon("images/browser.png", 32, 32), moviesView));
+    menuModel.add(new MenuElement("Exit", IconHelper.readIcon("images/logout.png", 32, 32), moviesView));
     
     final MyListCellRenderer cellRenderer = new MyListCellRenderer();
     
@@ -66,7 +83,7 @@ public class MainMenu extends AbstractBlock {
           public void onEvent(ItemsEvent<MenuElement> event) {
             MenuElement item = event.getFirstItem();
             
-            controller.forward(item.getScreen());
+            controller.forward(item.getView());
           }
         });
       }});

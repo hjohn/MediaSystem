@@ -2,6 +2,8 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.Constants;
 import hs.mediasystem.Controller;
+import hs.mediasystem.framework.AbstractBlock;
+import hs.mediasystem.framework.NoConfig;
 import hs.models.Model;
 import hs.models.ValueModel;
 import hs.ui.controls.AbstractGroup;
@@ -10,7 +12,7 @@ import hs.ui.controls.HorizontalGroup;
 
 import java.util.Date;
 
-public class Clock extends AbstractBlock {
+public class Clock extends AbstractBlock<NoConfig> {
   private final Model<String> currentTime = new ValueModel<String>(" ");
 
   @Override

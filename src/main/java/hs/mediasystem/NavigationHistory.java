@@ -27,8 +27,18 @@ public class NavigationHistory<T> {
     currentStackIndex++;
   }
   
+  public Object getKey() {
+    StringBuilder builder = new StringBuilder();
+    
+    for(int index = 0; index <= currentStackIndex; index++) {
+      builder.append(stack.get(index) + " > ");
+    }
+    
+    return builder.toString();
+  }
+
   public T current() {
-    return stack.get(currentStackIndex);
+    return currentStackIndex >= 0 ? stack.get(currentStackIndex) : null;
   }
 
   public boolean isEmpty() {

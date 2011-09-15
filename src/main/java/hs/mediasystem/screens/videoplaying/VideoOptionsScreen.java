@@ -1,7 +1,8 @@
 package hs.mediasystem.screens.videoplaying;
 
 import hs.mediasystem.Controller;
-import hs.mediasystem.screens.AbstractBlock;
+import hs.mediasystem.framework.AbstractBlock;
+import hs.mediasystem.framework.NoConfig;
 import hs.models.Convertor;
 import hs.models.events.EventListener;
 import hs.smartlayout.Anchor;
@@ -31,7 +32,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-public class VideoOptionsScreen extends AbstractBlock {
+public class VideoOptionsScreen extends AbstractBlock<NoConfig> {
       
   //private static final BufferedImage EMPTY_IMAGE
 

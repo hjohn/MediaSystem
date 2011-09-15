@@ -2,11 +2,13 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.Constants;
 import hs.mediasystem.Controller;
+import hs.mediasystem.framework.AbstractBlock;
+import hs.mediasystem.framework.NoConfig;
 import hs.ui.controls.AbstractGroup;
 import hs.ui.controls.DynamicLabel;
 import hs.ui.controls.HorizontalGroup;
 
-public class Header extends AbstractBlock {
+public class Header extends AbstractBlock<NoConfig> {
 
   @Override
   protected AbstractGroup<?> create(Controller controller) {

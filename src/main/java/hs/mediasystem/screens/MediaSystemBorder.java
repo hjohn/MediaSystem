@@ -1,10 +1,12 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.Controller;
+import hs.mediasystem.framework.AbstractBlock;
+import hs.mediasystem.framework.NoConfig;
 import hs.ui.controls.AbstractGroup;
 import hs.ui.controls.VerticalGroup;
 
-public class MediaSystemBorder extends AbstractBlock {
+public class MediaSystemBorder extends AbstractBlock<NoConfig> {
   
   // Make methods to assign new values to Extensions
   // Keep track of extensions when created a piece of UI

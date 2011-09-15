@@ -2,7 +2,9 @@ package hs.mediasystem.screens.videoplaying;
 
 import hs.mediasystem.Controller;
 import hs.mediasystem.MediaSystem;
-import hs.mediasystem.screens.AbstractBlock;
+import hs.mediasystem.framework.AbstractBlock;
+import hs.mediasystem.framework.NoConfig;
+import hs.mediasystem.framework.View;
 import hs.smartlayout.Anchor;
 import hs.sublight.SublightSubtitleClient;
 import hs.sublight.SubtitleDescriptor;
@@ -21,7 +23,7 @@ import java.util.List;
 
 import javax.swing.KeyStroke;
 
-public class VideoPlayingMenu extends AbstractBlock {
+public class VideoPlayingMenu extends AbstractBlock<NoConfig> {
   private final SublightSubtitleClient client;
 
   public VideoPlayingMenu(SublightSubtitleClient client) {
@@ -51,9 +53,8 @@ public class VideoPlayingMenu extends AbstractBlock {
           
           controller.subtitles.clear();
           controller.subtitles.addAll(subtitleList2);
-
           
-          controller.forward(MediaSystem.VIDEO_OPTIONS);
+          controller.forward(new View(MediaSystem.VIDEO_OPTIONS));
         }
       });
    // '9'               = video: volume down         --> Volume Down
