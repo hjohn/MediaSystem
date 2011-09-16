@@ -108,6 +108,6 @@ public class MediaSystem {
   public static void main(String[] args) {
     Controller controller = CONTROLLER_FACTORY.create();
     
-    controller.forward(new View(MAIN_MENU));
+    controller.forward(new View("Root", MAIN_MENU));
   }
 }

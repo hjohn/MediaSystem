@@ -35,8 +35,8 @@ public class MainMenu extends AbstractBlock<NoConfig> {
   
   @Override
   protected AbstractGroup<?> create(final Controller controller) {
-    View moviesView = new View(MediaSystem.MEDIA_SELECTION, new MediaSelectionConfig(new MoviesMediaTree(moviesPath)));
-    View seriesView = new View(MediaSystem.MEDIA_SELECTION, new MediaSelectionConfig(new SeriesMediaTree(seriesPath)));
+    View moviesView = new View("Movies", MediaSystem.MEDIA_SELECTION, new MediaSelectionConfig(new MoviesMediaTree(moviesPath)));
+    View seriesView = new View("Series", MediaSystem.MEDIA_SELECTION, new MediaSelectionConfig(new SeriesMediaTree(seriesPath)));
     
     menuModel.add(new MenuElement("Movies", IconHelper.readIcon("images/aktion.png", 32, 32), moviesView));
     menuModel.add(new MenuElement("Series", IconHelper.readIcon("images/aktion.png", 32, 32), seriesView));
@@ -45,7 +45,7 @@ public class MainMenu extends AbstractBlock<NoConfig> {
     menuModel.add(new MenuElement("Web", IconHelper.readIcon("images/browser.png", 32, 32), moviesView));
     menuModel.add(new MenuElement("Exit", IconHelper.readIcon("images/logout.png", 32, 32), moviesView));
     
-    final MyListCellRenderer cellRenderer = new MyListCellRenderer();
+    final MyListCellRenderer myCellRenderer = new MyListCellRenderer();
     
     return new VerticalGroup() {{
       weightX().set(1.0);
@@ -57,7 +57,7 @@ public class MainMenu extends AbstractBlock<NoConfig> {
         bgColor().set(new Color(0, 0, 0, 0));
         opaque().set(false);
         border().set(new EmptyBorder(0, 0, 0, 0));
-        listCellRenderer().set(cellRenderer);
+        cellRenderer.set(myCellRenderer);
 //        columns().add(new Column<MenuElement>() {{
 //          convertor().set(new Convertor<MenuElement, Object>() {
 //            @Override
@@ -70,13 +70,13 @@ public class MainMenu extends AbstractBlock<NoConfig> {
 //          renderer().set(cellRenderer);
 //          anchor().set(Anchor.CENTER);
 //        }});
-        items().link(menuModel);
+        model.link(menuModel);
         font().set(new Font("Sans Serif", Font.PLAIN, 32));
         minHeight().set(400);
         maxHeight().set(400);
         minWidth().set(300);
         maxWidth().set(300);
-        rowHeight().set(40);
+        rowHeight.set(40);
         selectFirstItem();
         onItemDoubleClick().call(new EventListener<ItemsEvent<MenuElement>>() {
           @Override

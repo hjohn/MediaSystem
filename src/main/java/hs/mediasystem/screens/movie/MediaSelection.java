@@ -11,6 +11,7 @@ import hs.mediasystem.framework.Group;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Renderer;
+import hs.mediasystem.framework.State;
 import hs.mediasystem.framework.View;
 import hs.mediasystem.fs.Episode;
 import hs.models.BasicListModel;
@@ -31,6 +32,7 @@ import hs.ui.events.KeyPressedEvent;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -44,15 +46,28 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
   private final Model<String> plot = new ValueModel<String>();
   private final Model<BufferedImage> cover = new ValueModel<BufferedImage>();
   private final Model<String> runtime = new ValueModel<String>();
-  private final Model<Integer> rowHeight = new ValueModel<Integer>(20);
+  private final Model<Integer> listRowHeight = new ValueModel<Integer>(20);
   private final Model<ListCellRenderer<? super MediaItem>> listCellRenderer = new ValueModel<ListCellRenderer<? super MediaItem>>();
+  private final Model<Integer> listFirstSelectedIndex = new ValueModel<Integer>(0);
+  private final Model<Rectangle> listVisibleRectangle = new ValueModel<Rectangle>();
+  
+  @Override
+  public State currentState() {
+    return new State() {
+      private final Rectangle savedVisibleRectangle = listVisibleRectangle.get();
+      private final int selectedIndex = listFirstSelectedIndex.get();
 
-  //private static final BufferedImage EMPTY_IMAGE
-
-//  @Override
-//  public State currentState() {
-//    return null;
-//  }
+      {
+        System.out.println(">>> Creating State, selectedIndex = " + selectedIndex);
+      }
+      
+      @Override
+      public void apply() {
+        listVisibleRectangle.set(savedVisibleRectangle);
+        listFirstSelectedIndex.set(selectedIndex);
+      }
+    };
+  }
     
   @Override
   public void applyConfig(MediaSelectionConfig config) {
@@ -61,10 +76,14 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
     Renderer<MediaItem> renderer = mediaTree.getRenderer();
     
     listCellRenderer.set(new MyCellRenderer(renderer));
-    rowHeight.set(renderer.getPreferredHeight());
+    listRowHeight.set(renderer.getPreferredHeight());
     
     menuModel.clear();
     menuModel.addAll(mediaTree.children());
+    
+    plot.set("");
+    cover.set(null);
+    runtime.set("");
   }
     
   @Override
@@ -109,14 +128,16 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
           bgColor().set(new Color(0, 0, 0, 0));
           opaque().set(false);
           border().set(new EmptyBorder(0, 0, 0, 0));
-          items().link(menuModel);
+          model.link(menuModel);
           font().set(new Font("Sans Serif", Font.PLAIN, 32));
           minHeight().set(400);
           //maxHeight().set(30000);
           minWidth().set(50);
           maxWidth().set(30000);
-          rowHeight().link(rowHeight);
-          listCellRenderer().link(listCellRenderer);
+          rowHeight.link(listRowHeight);
+          cellRenderer.link(listCellRenderer);
+          visibleRectangle.proxy(listVisibleRectangle);
+          firstSelectedIndex.link(listFirstSelectedIndex);
           selectFirstItem();
           onItemDoubleClick().call(new EventListener<ItemsEvent<MediaItem>>() {
             @Override
@@ -126,10 +147,10 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
               if(item instanceof Episode) {
                 controller.setBackground(false);
                 controller.playMedia((Episode)item);
-                controller.forward(new View(MediaSystem.VIDEO_PLAYING));
+                controller.forward(new View("Play", MediaSystem.VIDEO_PLAYING));
               }
               else if(item.isRoot()) {
-                View view = controller.cloneCurrentView();
+                View view = controller.cloneCurrentView("" + item); // TODO use descriptive name here
                 MediaSelectionConfig config = view.replaceConfig(MediaSelectionConfig.class);
                 config.setMediaTree(item.getRoot());
                 controller.forward(view);

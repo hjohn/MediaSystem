@@ -14,6 +14,7 @@ public class StateCache {
   };
   
   public void putState(Object key, State state) {
+    System.out.println("[FINE] StateCache: adding state with key: " + key);
     states.put(key, state);
   }
   

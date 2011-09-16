@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -309,7 +310,7 @@ public class Controller {
     
     view.applyConfig();
     
-    State state = stateCache.getState(navigationHistory.getKey());
+    State state = stateCache.getState(generateKey(navigationHistory.getPath()));
     
     if(state != null) {
       state.apply();
@@ -322,6 +323,10 @@ public class Controller {
   }
   
   public void back() {
+    if(!navigationHistory.isEmpty()) {
+      stateCache.putState(generateKey(navigationHistory.getPath()), navigationHistory.current().getScreen().getState());
+    }
+    
     View view = navigationHistory.back();
     
     if(view != null) {
@@ -331,12 +336,22 @@ public class Controller {
   
   public void forward(View view) {
     if(!navigationHistory.isEmpty()) {
-      stateCache.putState(navigationHistory.getKey(), navigationHistory.current().getScreen().getState());
+      stateCache.putState(generateKey(navigationHistory.getPath()), navigationHistory.current().getScreen().getState());
     }
     
     navigationHistory.forward(view);
     
     changeView(view);
+  }
+  
+  private static Object generateKey(List<View> stack) {
+    String key = "";
+    
+    for(View view : stack) {
+      key += view.getName() + " > ";
+    }
+    
+    return key;
   }
   
   private void setDefaultFocus() {
@@ -409,7 +424,7 @@ public class Controller {
     }
   }
 
-  public View cloneCurrentView() {
-    return navigationHistory.current().copy();
+  public View cloneCurrentView(String name) {
+    return navigationHistory.current().copy(name);
   } 
 }

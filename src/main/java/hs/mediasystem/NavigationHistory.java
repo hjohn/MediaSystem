@@ -27,14 +27,14 @@ public class NavigationHistory<T> {
     currentStackIndex++;
   }
   
-  public Object getKey() {
-    StringBuilder builder = new StringBuilder();
+  public List<T> getPath() {
+    List<T> list = new ArrayList<T>();
     
     for(int index = 0; index <= currentStackIndex; index++) {
-      builder.append(stack.get(index) + " > ");
+      list.add(stack.get(index));
     }
     
-    return builder.toString();
+    return list;
   }
 
   public T current() {

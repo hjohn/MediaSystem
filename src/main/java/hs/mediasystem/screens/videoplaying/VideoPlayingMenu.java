@@ -54,7 +54,7 @@ public class VideoPlayingMenu extends AbstractBlock<NoConfig> {
           controller.subtitles.clear();
           controller.subtitles.addAll(subtitleList2);
           
-          controller.forward(new View(MediaSystem.VIDEO_OPTIONS));
+          controller.forward(new View("Playback Options", MediaSystem.VIDEO_OPTIONS));
         }
       });
    // '9'               = video: volume down         --> Volume Down

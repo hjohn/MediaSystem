@@ -9,8 +9,10 @@ import java.util.Map;
 public class View {
   private final Screen screen;
   private final Map<Class<?>, Config<?>> configs = new HashMap<Class<?>, Config<?>>();
+  private final String name;
 
-  public View(Screen screen, Config<?>... configs) {
+  public View(String name, Screen screen, Config<?>... configs) {
+    this.name = name;
     this.screen = screen;
     
     for(Config<?> config : configs) {
@@ -18,12 +20,16 @@ public class View {
     }
   }
   
+  public String getName() {
+    return name;
+  }
+  
   public Screen getScreen() {
     return screen;
   }
 
-  public View copy() {
-    return new View(screen, configs.values().toArray(new Config<?>[] {}));
+  public View copy(String newName) {
+    return new View(newName, screen, configs.values().toArray(new Config<?>[] {}));
   }
 
   public void applyConfig() {
