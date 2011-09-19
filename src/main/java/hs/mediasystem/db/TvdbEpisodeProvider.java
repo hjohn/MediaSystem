@@ -32,7 +32,7 @@ public class TvdbEpisodeProvider implements ItemProvider {
         setSubtitle(episode.getEpisodeName());
         setSeason(item.getSeason());
         setEpisode(item.getEpisode());
-        setCover(poster);
+        setPoster(poster);
         setType("episode");
       }};
     }

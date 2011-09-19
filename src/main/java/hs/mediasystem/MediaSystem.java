@@ -28,6 +28,14 @@ import net.sf.jtmdb.GeneralSettings;
 // TODO Lirc support
 // TODO Something to show length of movie/time left
 // TODO Brightness adjustment
+// TODO Include year in duoline
+// TODO Season should be opened with OK
+// TODO Episode title should appear immediatetely
+// TODO Add breadcrumb
+// TODO Auto-scroll plot/overview
+// TODO Display Series with titles first, then gradually replace with images!
+// TODO Possibly with Series, information about episode count
+// TODO Display Genre, Rating, First Aired, etc.. for all types
 
 // TODO Display list of video files with IMDB info
 

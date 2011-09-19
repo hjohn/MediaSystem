@@ -7,8 +7,9 @@ public class Item extends AbstractRecord {
   private String localName;
   private String imdbId;
   private String plot;
-  private byte[] cover;
+  private byte[] poster;
   private byte[] background;
+  private byte[] banner;
   private float rating;
   private Date releaseDate;
   private int runtime;
@@ -50,12 +51,12 @@ public class Item extends AbstractRecord {
     this.plot = plot;
   }
   
-  public byte[] getCover() {
-    return cover;
+  public byte[] getPoster() {
+    return poster;
   }
   
-  public void setCover(byte[] cover) {
-    this.cover = cover;
+  public void setPoster(byte[] poster) {
+    this.poster = poster;
   }
   
   public byte[] getBackground() {
@@ -112,5 +113,13 @@ public class Item extends AbstractRecord {
   
   public void setSubtitle(String subtitle) {
     this.subtitle = subtitle;
+  }
+  
+  public byte[] getBanner() {
+    return banner;
+  }
+  
+  public void setBanner(byte[] banner) {
+    this.banner = banner;
   }
 }

@@ -2,6 +2,8 @@ package hs.mediasystem;
 
 import hs.models.Model;
 import hs.models.ValueModel;
+import hs.ui.controls.DynamicLabel;
+import hs.ui.controls.Label;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -9,4 +11,16 @@ import java.awt.Font;
 public class Constants {
   public static final Model<Color> MAIN_TEXT_COLOR = new ValueModel<Color>(new Color(155, 190, 255, 200));
   public static final Model<Font> HEADER_FONT = new ValueModel<Font>(new Font("sans serif", Font.BOLD, 14));
+  public static final Model<Font> INFO_HEADER_FONT = new ValueModel<Font>(new Font("sans serif", Font.BOLD, 12));
+  public static final Model<Font> INFO_TEXT_FONT = new ValueModel<Font>(new Font("sans serif", Font.PLAIN, 14));
+  
+  public static void styleInfoHeader(Label label) {
+    label.fgColor().set(MAIN_TEXT_COLOR.get());
+    label.font().set(INFO_HEADER_FONT.get());
+  }
+  
+  public static void styleInfoText(DynamicLabel label) {
+    label.fgColor().set(MAIN_TEXT_COLOR.get().brighter());
+    label.font().set(INFO_TEXT_FONT.get());
+  }
 }

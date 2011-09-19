@@ -98,7 +98,7 @@ public class TmdbMovieProvider implements ItemProvider {
           url = poster.getLargestImage();
         }
         
-        final byte[] cover = url != null ? Downloader.readURL(url) : null;
+        final byte[] poster = url != null ? Downloader.readURL(url) : null;
 
         return new Item(path) {{
           setImdbId(movie.getImdbID());
@@ -106,7 +106,7 @@ public class TmdbMovieProvider implements ItemProvider {
           setProviderId("" + movie.getID());
           setTitle(movie.getName());
           setLocalName(fileName);
-          setCover(cover);
+          setPoster(poster);
           setPlot(movie.getOverview());
           setRating((float)movie.getRating());
           setReleaseDate(movie.getReleasedDate());
@@ -150,9 +150,7 @@ public class TmdbMovieProvider implements ItemProvider {
     }
   }
   
-
-  
-  private String extractYear(Date date) {
+  private static String extractYear(Date date) {
     if(date == null) {
       return "";
     }

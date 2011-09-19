@@ -14,14 +14,15 @@ import hs.mediasystem.framework.Renderer;
 import hs.mediasystem.framework.State;
 import hs.mediasystem.framework.View;
 import hs.mediasystem.fs.Episode;
+import hs.mediasystem.fs.NamedItem;
 import hs.models.BasicListModel;
 import hs.models.Model;
 import hs.models.ValueModel;
 import hs.models.events.EventListener;
-import hs.ui.HorizontalAlignment;
 import hs.ui.controls.AbstractGroup;
 import hs.ui.controls.DynamicLabel;
 import hs.ui.controls.HorizontalGroup;
+import hs.ui.controls.Label;
 import hs.ui.controls.MultiLineDynamicLabel;
 import hs.ui.controls.Picture;
 import hs.ui.controls.VerticalGroup;
@@ -44,7 +45,7 @@ import javax.swing.border.EmptyBorder;
 public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
   private final BasicListModel<MediaItem> menuModel = new BasicListModel<MediaItem>(new ArrayList<MediaItem>());
   private final Model<String> plot = new ValueModel<String>();
-  private final Model<BufferedImage> cover = new ValueModel<BufferedImage>();
+  private final Model<BufferedImage> poster = new ValueModel<BufferedImage>();
   private final Model<String> runtime = new ValueModel<String>();
   private final Model<Integer> listRowHeight = new ValueModel<Integer>(20);
   private final Model<ListCellRenderer<? super MediaItem>> listCellRenderer = new ValueModel<ListCellRenderer<? super MediaItem>>();
@@ -82,8 +83,8 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
     menuModel.addAll(mediaTree.children());
     
     plot.set("");
-    cover.set(null);
-    runtime.set("");
+    poster.set(null);
+    runtime.set(" ");
   }
     
   @Override
@@ -103,23 +104,66 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
         weightY().set(1.0);
         add(new VerticalGroup() {{
           border().set(new EmptyBorder(10, 10, 10, 10));
-          weightX().set(1.0);
-          add(new Picture() {{
-            image.link(cover);
-            opaque().set(false);
+          overrideWeightX(1.0);
+          add(new HorizontalGroup() {{
+            add(new Picture() {{
+              weightX().set(2.0);
+              image.link(poster);
+              opaque().set(false);
+            }});
+            add(new VerticalGroup() {{
+              overrideWeightX(1);
+              add(new DynamicLabel() {{
+                Constants.styleInfoText(this);
+              }});
+              add(new Label());
+              add(new Label() {{
+                text().set("GENRE");
+                Constants.styleInfoHeader(this);
+              }});
+              add(new DynamicLabel() {{
+                Constants.styleInfoText(this);
+              }});
+              add(new Label());
+              add(new Label() {{
+                text().set("DIRECTOR");
+                Constants.styleInfoHeader(this);
+              }});
+              add(new DynamicLabel() {{
+                Constants.styleInfoText(this);
+              }});
+              add(new Label());
+              add(new Label() {{
+                text().set("WRITER");
+                Constants.styleInfoHeader(this);
+              }});
+              add(new DynamicLabel() {{
+                Constants.styleInfoText(this);
+              }});
+              add(new Label());
+              add(new Label() {{
+                text().set("RUNTIME");
+                Constants.styleInfoHeader(this);
+              }});
+              add(new DynamicLabel() {{
+                text().link(runtime);
+                Constants.styleInfoText(this);
+              }});
+              add(new Label());
+              add(new Label() {{
+                text().set("RATING");
+                Constants.styleInfoHeader(this);
+              }});
+              add(new DynamicLabel() {{
+              }});
+            }});
           }});
           //          add(new DynamicLabel().icon().link(cover));
           add(new MultiLineDynamicLabel() {{
             text.link(plot);
-            weightY().set(0.2);
+            weightY().set(0.35);
             fgColor().link(Constants.MAIN_TEXT_COLOR);
             font().set(new Font("Sans Serif", Font.PLAIN, 16));
-          }});
-          add(new DynamicLabel() {{
-            text().link(runtime);
-            fgColor().link(Constants.MAIN_TEXT_COLOR);
-            horizontalAlignment.set(HorizontalAlignment.RIGHT);
-            font().set(new Font("Sans Serif", Font.BOLD, 14));
           }});
         }});
         add(new SimpleList<MediaItem>() {{
@@ -163,25 +207,25 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
               final MediaItem item = event.getFirstItem();
 
               plot.set("");
-              cover.set(null);
-              runtime.set("");
+              poster.set(null);
+              runtime.set(" ");
 
-              if(item instanceof Episode) {
-                final Episode episode = (Episode)item;
+              if(item instanceof NamedItem) {
+                final NamedItem namedItem = (NamedItem)item;
                 
                 movieUpdater.doTask(400, new Worker() {
                   @Override
                   public void doInBackground() {
-                    episode.getPlot();
+                    namedItem.getPlot();
                   }
   
                   @Override
                   public void done() {
-                    plot.set(episode.getPlot());
-                    cover.set(episode.getImage());
+                    plot.set(namedItem.getPlot());
+                    poster.set(namedItem.getPoster());
   
-                    if(episode.getRuntime() != 0) {
-                      runtime.set(SizeFormatter.DURATION.format(episode.getRuntime() * 60));
+                    if(namedItem.getRuntime() != 0) {
+                      runtime.set(SizeFormatter.DURATION.format(namedItem.getRuntime() * 60));
                     }
                   }
                 });

@@ -1,6 +1,7 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.framework.Group;
+import hs.mediasystem.framework.MediaTree;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,5 +27,15 @@ public class Season extends NamedItem implements Group {
   @Override
   public Collection<? extends NamedItem> children() {
     return Collections.unmodifiableCollection(children);
+  }
+  
+  @Override
+  public boolean isRoot() {
+    return false;
+  }
+  
+  @Override
+  public MediaTree getRoot() {
+    return null;
   }
 }

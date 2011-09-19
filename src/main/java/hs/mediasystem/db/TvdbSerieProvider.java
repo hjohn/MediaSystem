@@ -24,12 +24,16 @@ public class TvdbSerieProvider implements ItemProvider {
     
     try {
       return new Item(item.getPath()) {{
-        byte[] poster = Downloader.readURL(new URL(series.getBanner()));
-        
+        byte[] banner = Downloader.readURL(new URL(series.getBanner()));
+        byte[] poster = Downloader.readURL(new URL(series.getPoster()));
+        byte[] background = Downloader.readURL(new URL(series.getFanart()));
+
         setLocalName(item.getPath().getFileName().toString());
         setTitle(name);
         setPlot(series.getOverview());
-        setCover(poster);
+        setBanner(banner);
+        setPoster(poster);
+        setBackground(background);
         setProvider("TVDB");
         setProviderId(series.getId());
         setType("serie");

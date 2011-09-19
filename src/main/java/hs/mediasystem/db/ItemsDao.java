@@ -52,8 +52,9 @@ public class ItemsDao {
           //setReleaseDate(rs.getDate("releasedate"));
           setRating(rs.getFloat("rating"));
           setPlot(rs.getString("plot"));
-//          setCover(ImageIO.read(new ByteArrayInputStream(rs.getBytes("cover"))));
-          setCover(rs.getBytes("cover"));
+          setPoster(rs.getBytes("poster"));
+          setBanner(rs.getBytes("banner"));
+          setBackground(rs.getBytes("background"));
           setRuntime(rs.getInt("runtime"));
           setVersion(rs.getInt("version"));
           setSeason(rs.getInt("season"));
@@ -159,7 +160,9 @@ public class ItemsDao {
     columns.put("rating", item.getRating());
     columns.put("title", item.getTitle());
     columns.put("plot", item.getPlot());
-    columns.put("cover", item.getCover());
+    columns.put("poster", item.getPoster());
+    columns.put("banner", item.getBanner());
+    columns.put("background", item.getBackground());
     columns.put("lasthit", new Date());
     columns.put("lastupdated", new Date());
     columns.put("lastchecked", new Date());

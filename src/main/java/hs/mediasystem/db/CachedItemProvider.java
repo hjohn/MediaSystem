@@ -29,7 +29,8 @@ public class CachedItemProvider implements ItemProvider {
         Item updatedItem = providerToCache.getItem(item);
         
         cachedItem.setBackground(updatedItem.getBackground());
-        cachedItem.setCover(updatedItem.getCover());
+        cachedItem.setPoster(updatedItem.getPoster());
+        cachedItem.setBanner(updatedItem.getBanner());
         cachedItem.setImdbId(updatedItem.getImdbId());
         cachedItem.setPlot(updatedItem.getPlot());
         cachedItem.setTitle(updatedItem.getTitle());
