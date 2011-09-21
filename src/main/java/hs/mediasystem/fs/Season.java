@@ -11,8 +11,8 @@ import java.util.List;
 public class Season extends NamedItem implements Group {
   private final List<NamedItem> children = new ArrayList<NamedItem>();
   
-  public Season(String title) {
-    super(title);
+  public Season(MediaTree mediaTree, String title) {
+    super(mediaTree, title);
   }
 
   public void add(NamedItem child) {

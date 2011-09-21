@@ -2,6 +2,7 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.Constants;
 import hs.mediasystem.RomanLiteral;
+import hs.mediasystem.framework.Group;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.Renderer;
 import hs.smartlayout.SmartLayout;
@@ -19,9 +20,6 @@ import javax.swing.JLabel;
 import javax.swing.border.EmptyBorder;
 
 public class DuoLineRenderer implements Renderer<MediaItem> {
-  private static final int HEIGHT = 48;
-  private static final int SUBTITLE_HEIGHT = 16;
-  private static final int TITLE_HEIGHT = HEIGHT - SUBTITLE_HEIGHT;
   
   private final JPaintablePanel panel = new JPaintablePanel(new SmartLayout(true, 1, 0, 0)) {
     @Override
@@ -32,6 +30,9 @@ public class DuoLineRenderer implements Renderer<MediaItem> {
   
   private final JLabel line1 = new JLabel();
   private final JLabel line2 = new JLabel();
+
+  private String rating;
+  private boolean collectionMarker;
   
   public DuoLineRenderer() {
     panel.setPainter(new Painter() {
@@ -45,7 +46,7 @@ public class DuoLineRenderer implements Renderer<MediaItem> {
 
         g.setFont(line1.getFont());
         g.setColor(line1.getForeground());
-        g.drawString(line1.getText(), line1.getIconTextGap() + 5, (int)-stringBounds.getY() + (line2.getText().isEmpty() ? (SUBTITLE_HEIGHT - 4)/ 2 : 0));
+        g.drawString(line1.getText(), line1.getIconTextGap() + 5, (int)-stringBounds.getY() + (line2.getText().isEmpty() ? (Constants.SUBTITLE_HEIGHT - 4)/ 2 : 0));
 
         if(!line2.getText().isEmpty()) {
           stringBounds = line2.getFont().getStringBounds(line2.getText(), g.getFontRenderContext());
@@ -54,14 +55,59 @@ public class DuoLineRenderer implements Renderer<MediaItem> {
           g.setColor(line2.getForeground());
           g.drawString(line2.getText(), line2.getIconTextGap() + 5, (int)-stringBounds.getY() + lineHeight - 4);
         }
+
+        if(rating != null) {
+          Rectangle2D ratingBounds = Constants.LIST_LARGE_FONT.getStringBounds(rating, g.getFontRenderContext());
+          
+          g.drawString(rating, (int)(width - 40 - ratingBounds.getWidth()), (int)((height - ratingBounds.getHeight()) / 2 - ratingBounds.getY()));
+        }
+        
+        if(collectionMarker) {
+          int u = height / 6;
+          int x = width - 40;
+          int y = height / 2 - u;
+          int w = u;
+          int h = u * 2;
+          
+          g.fillPolygon(new int[] {x, x, x + w}, new int[] {y, y + h, y + h / 2}, 3);
+        }
       }
     });
 
     panel.setBorder(new EmptyBorder(5, 10, 5, 10));
   }
+  
+  enum Style {MOVIE, SEASON, EPISODE, COLLECTION, COLLECTION_ITEM}
 
   @Override
-  public JComponent render(MediaItem item, boolean hasFocus) {
+  public JComponent render(MediaItem mediaItem, boolean hasFocus) {
+    NamedItem item = (NamedItem)mediaItem;
+    
+    Style style;
+    
+    if(item instanceof Group) {
+      style = Style.COLLECTION;
+    }
+    else if(item instanceof Episode) {
+      if(item.getSeason() == 0) {
+        if(item.getParent() != null) {
+          style = Style.COLLECTION_ITEM;
+        }
+        else {
+          style = Style.MOVIE;
+        }
+      }
+      else {
+        style = Style.EPISODE;
+      }
+    }
+    else if(item instanceof Season) {
+      style = Style.SEASON;
+    }
+    else {
+      style = Style.MOVIE;
+    }
+    
     if(!hasFocus) {
       line1.setForeground(Constants.MAIN_TEXT_COLOR.get());
       line2.setForeground(Constants.MAIN_TEXT_COLOR.get());
@@ -73,56 +119,56 @@ public class DuoLineRenderer implements Renderer<MediaItem> {
       panel.setBackground(new Color(255, 255, 255, 60));
     }
 
-    line1.setFont(new Font("Sans Serif", Font.PLAIN, TITLE_HEIGHT - 4));
-    line2.setFont(new Font("Sans Serif", Font.PLAIN, SUBTITLE_HEIGHT - 4));
-    line1.setIconTextGap(0);
-    line2.setIconTextGap(10);
-
-    if(item instanceof Episode) {
-      Episode episode = (Episode)item;
-      boolean subItemDisplay = episode.getParent() != null;
-
-      if(subItemDisplay) {
-        line1.setIconTextGap(25);
-        line2.setIconTextGap(35);
-      }
-      
-      if(episode.getSeason() == 0) {
-        if(subItemDisplay) {
-          line1.setText(episode.getTitle() + " " + episode.getEpisode());
-          if(episode.getSubtitle().isEmpty()) {
-            line2.setText(episode.getTitle() + (episode.getEpisode() < 2 ? "" : " " + RomanLiteral.toRomanLiteral(episode.getEpisode())));
-          }
-          else {
-            line2.setText(episode.getSubtitle());
-          }
-          line2.setFont(new Font("Sans Serif", Font.PLAIN, TITLE_HEIGHT - 4));
-          line1.setFont(new Font("Sans Serif", Font.PLAIN, SUBTITLE_HEIGHT - 4));
-        }
-        else {
-          line1.setText(episode.getTitle());
-          line2.setText(episode.getSubtitle());
-        }
+    Font line1Font = Constants.LIST_LARGE_FONT;
+    Font line2Font = Constants.LIST_SMALL_FONT;
+    int line1TextGap = 0;
+    int line2TextGap = 10;
+    collectionMarker = false;
+    rating = item.getRating() == null ? null : String.format("%3.1f", item.getRating());
+        
+    if(style == Style.MOVIE) {
+      line1.setText(item.getTitle());
+      line2.setText(item.getSubtitle());
+    }
+    else if(style == Style.COLLECTION_ITEM) {
+      line1.setText(item.getTitle() + " " + item.getEpisode());
+      if(item.getSubtitle().isEmpty()) {
+        line2.setText(item.getTitle() + (item.getEpisode() < 2 ? "" : " " + RomanLiteral.toRomanLiteral(item.getEpisode())));
       }
       else {
-        line1.setText(episode.getSeason() + "x" + episode.getEpisode() + " : " + episode.getSubtitle());
-        line2.setText("");
+        line2.setText(item.getSubtitle());
       }
+      line1TextGap = 25;
+      line2TextGap = 35;
+      line1Font = Constants.LIST_SMALL_FONT;
+      line2Font = Constants.LIST_LARGE_FONT;
     }
-    else if(item instanceof Season) {
+    else if(style == Style.EPISODE) {
+      line1TextGap = 25;
+      line2TextGap = 35;
+      line1.setText(item.getSeason() + "x" + item.getEpisode() + " : " + item.getSubtitle());
+      line2.setText("");
+    }
+    else if(style == Style.SEASON) {
       line1.setText("Season " + ((Season)item).getTitle());
       line2.setText("");
     }
-    else if(item instanceof NamedItem) {
-      line1.setText(((NamedItem)item).getTitle());
-      line2.setText("");
+    else if(style == Style.COLLECTION) {
+      line1.setText(item.getTitle());
+      line2.setText(item.getSubtitle());
+      collectionMarker = true;
     }
+    
+    line1.setFont(line1Font);
+    line2.setFont(line2Font);
+    line1.setIconTextGap(line1TextGap);
+    line2.setIconTextGap(line2TextGap);
     
     return panel;
   }
 
   @Override
   public int getPreferredHeight() {
-    return HEIGHT;
+    return Constants.HEIGHT;
   }
 }

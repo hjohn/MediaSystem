@@ -1,8 +1,8 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.Item;
-import hs.mediasystem.db.ItemProvider;
 import hs.mediasystem.framework.Decoder;
+import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Scanner;
 
 import java.io.IOException;
@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MovieScanner implements Scanner<Episode> {
+  private final MediaTree mediaTree;
   private final Decoder decoder;
-  private final ItemProvider itemProvider;
   
-  public MovieScanner(Decoder decoder, ItemProvider itemProvider) {
+  public MovieScanner(MediaTree mediaTree, Decoder decoder) {
+    this.mediaTree = mediaTree;
     this.decoder = decoder;
-    this.itemProvider = itemProvider;
   }
   
   @Override
@@ -31,7 +31,7 @@ public class MovieScanner implements Scanner<Episode> {
         Item item = decoder.decode(path);
         
         if(item != null) {
-          episodes.add(new Episode(item, itemProvider));
+          episodes.add(new Episode(mediaTree, item));
         }
         else {
           System.err.println("MovieScanner: Could not decode as movie: " + path);

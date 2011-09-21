@@ -2,24 +2,29 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.Constants;
 import hs.mediasystem.GlowBorder;
+import hs.mediasystem.db.CachedItemProvider;
+import hs.mediasystem.db.TvdbSerieProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Renderer;
+import hs.ui.controls.Label;
 import hs.ui.controls.Picture;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.nio.file.Path;
 import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.border.EmptyBorder;
 
-public class SeriesMediaTree implements MediaTree {
+public class SeriesMediaTree extends AbstractMediaTree {
   private final Path root;
 
   private List<? extends MediaItem> children;
   
   public SeriesMediaTree(Path root) {
+    super(new CachedItemProvider(new TvdbSerieProvider()));
     this.root = root;
   }
   
@@ -36,8 +41,7 @@ public class SeriesMediaTree implements MediaTree {
   @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      children = new SerieScanner().scan(root);
-      //children = new ArrayList<MediaItem>();
+      children = new SerieScanner(this).scan(root);
     }
     
     return children;
@@ -52,23 +56,42 @@ public class SeriesMediaTree implements MediaTree {
   public Renderer<MediaItem> getRenderer() {
     return new Renderer<MediaItem>() {
       private final Picture pic = new Picture();
+      private final Label label = new Label();
       
       @Override
       public JComponent render(MediaItem item, boolean hasFocus) {
         Serie serie = (Serie)item;
         
-        pic.image.set(serie.getBanner());
-        pic.bgColor().set(new Color(0, 0, 0, 0));
-        pic.maxHeight().set(78);
+        BufferedImage banner = serie.getBanner();
         
-        if(hasFocus) {
-          pic.border().set(new GlowBorder(Constants.MAIN_TEXT_COLOR.get(), 4));
+        if(banner != null) {
+          pic.image.set(banner);
+          pic.bgColor().set(new Color(0, 0, 0, 0));
+          pic.maxHeight().set(78);
+
+          if(hasFocus) {
+            pic.border().set(new GlowBorder(Constants.MAIN_TEXT_COLOR.get(), 4));
+          }
+          else {
+            pic.border().set(new EmptyBorder(4, 4, 4, 4));
+          }
+          
+          return pic.getComponent();
         }
         else {
-          pic.border().set(new EmptyBorder(4, 4, 4, 4));
+          label.text().set(serie.getTitle());
+          label.font().set(Constants.LIST_LARGE_FONT);
+          label.fgColor().link(Constants.MAIN_TEXT_COLOR);
+          
+          if(hasFocus) {
+            label.border().set(new GlowBorder(Constants.MAIN_TEXT_COLOR.get(), 4));
+          }
+          else {
+            label.border().set(new EmptyBorder(4, 4, 4, 4));
+          }
+          
+          return label.getComponent();
         }
-        
-        return pic.getComponent();
       }
 
       @Override

@@ -64,6 +64,7 @@ public abstract class AbstractBlock<C extends Config<?>> {
     };
   }
   
+  @SuppressWarnings("static-method")
   protected State currentState() {
     return new State() {
       @Override

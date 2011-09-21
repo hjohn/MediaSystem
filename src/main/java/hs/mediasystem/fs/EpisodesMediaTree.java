@@ -14,15 +14,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class EpisodesMediaTree implements MediaTree {
+public class EpisodesMediaTree extends AbstractMediaTree {
   private final Path root;
-  private final Serie serie;
   
   private List<? extends MediaItem> children;
 
   public EpisodesMediaTree(Path root, Serie serie) {
+    super(new CachedItemProvider(new TvdbEpisodeProvider(serie.getProviderId())));
     this.root = root;
-    this.serie = serie;
   }
 
   @Override
@@ -38,14 +37,14 @@ public class EpisodesMediaTree implements MediaTree {
   @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      List<Episode> episodes = new MovieScanner(new EpisodeDecoder(), new CachedItemProvider(new TvdbEpisodeProvider(serie.getProviderId()))).scan(root);
+      List<Episode> episodes = new MovieScanner(this, new EpisodeDecoder()).scan(root);
       List<NamedItem> items = new ArrayList<NamedItem>();
       
       Collection<List<NamedItem>> groupedItems = Groups.group(episodes, new SeasonGrouper());
       
       for(List<NamedItem> group : groupedItems) {
         if(group.size() > 1) {
-          Season s = new Season(group.get(0) instanceof Episode ? "" + ((Episode)group.get(0)).getSeason() : "Unknown");
+          Season s = new Season(this, group.get(0) instanceof Episode ? "" + ((Episode)group.get(0)).getSeason() : "Unknown");
           
           for(NamedItem item : group) {
             s.add(item);

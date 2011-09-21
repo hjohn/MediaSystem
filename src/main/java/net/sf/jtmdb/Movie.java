@@ -1628,7 +1628,7 @@ public class Movie implements Serializable {
 		}
 	}
 	
-	private String getString(JSONObject jsonObject, String fieldName) throws JSONException {
+	private static String getString(JSONObject jsonObject, String fieldName) throws JSONException {
 	  Object obj = jsonObject.get(fieldName);
 	  
 	  if(obj instanceof String) {

@@ -10,7 +10,7 @@ public class Item extends AbstractRecord {
   private byte[] poster;
   private byte[] background;
   private byte[] banner;
-  private float rating;
+  private Float rating;
   private Date releaseDate;
   private int runtime;
   private int season;
@@ -67,7 +67,7 @@ public class Item extends AbstractRecord {
     this.background = background;
   }
   
-  public float getRating() {
+  public Float getRating() {
     return rating;
   }
 

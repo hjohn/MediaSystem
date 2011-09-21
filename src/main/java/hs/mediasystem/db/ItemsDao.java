@@ -39,6 +39,7 @@ public class ItemsDao {
       
       statement.setString(1, fileName);
       
+      System.out.println("[FINE] Selecting item with localname = '" + fileName + "'");
       final ResultSet rs = statement.executeQuery();
       
       if(rs.next()) {
@@ -49,7 +50,7 @@ public class ItemsDao {
           setProvider(rs.getString("provider"));
           setProviderId(rs.getString("providerid"));
           setTitle(rs.getString("title"));
-          //setReleaseDate(rs.getDate("releasedate"));
+          setReleaseDate(rs.getDate("releasedate"));
           setRating(rs.getFloat("rating"));
           setPlot(rs.getString("plot"));
           setPoster(rs.getBytes("poster"));
@@ -135,7 +136,7 @@ public class ItemsDao {
     }
   }
 
-  private void setParameters(Map<String, Object> columns, PreparedStatement statement) throws SQLException {
+  private static void setParameters(Map<String, Object> columns, PreparedStatement statement) throws SQLException {
     int parameterIndex = 1;
     
     for(String key : columns.keySet()) {
@@ -150,7 +151,7 @@ public class ItemsDao {
     }
   }
 
-  private Map<String, Object> createFieldMap(Item item) {
+  private static Map<String, Object> createFieldMap(Item item) {
     Map<String, Object> columns = new LinkedHashMap<String, Object>();
     
     columns.put("localname", item.getLocalName());

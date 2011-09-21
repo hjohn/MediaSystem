@@ -2,6 +2,7 @@ package hs.mediasystem.screens.movie;
 
 import hs.mediasystem.Constants;
 import hs.mediasystem.Controller;
+import hs.mediasystem.Listener;
 import hs.mediasystem.MediaSystem;
 import hs.mediasystem.SizeFormatter;
 import hs.mediasystem.SwingWorker2;
@@ -28,13 +29,11 @@ import hs.ui.controls.Picture;
 import hs.ui.controls.VerticalGroup;
 import hs.ui.controls.listbox.SimpleList;
 import hs.ui.events.ItemsEvent;
-import hs.ui.events.KeyPressedEvent;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Rectangle;
-import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -44,13 +43,26 @@ import javax.swing.border.EmptyBorder;
 
 public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
   private final BasicListModel<MediaItem> menuModel = new BasicListModel<MediaItem>(new ArrayList<MediaItem>());
-  private final Model<String> plot = new ValueModel<String>();
   private final Model<BufferedImage> poster = new ValueModel<BufferedImage>();
-  private final Model<String> runtime = new ValueModel<String>();
   private final Model<Integer> listRowHeight = new ValueModel<Integer>(20);
   private final Model<ListCellRenderer<? super MediaItem>> listCellRenderer = new ValueModel<ListCellRenderer<? super MediaItem>>();
   private final Model<Integer> listFirstSelectedIndex = new ValueModel<Integer>(0);
   private final Model<Rectangle> listVisibleRectangle = new ValueModel<Rectangle>();
+
+  private final Model<String> genre = new ValueModel<>();
+  private final Model<String> director = new ValueModel<>();
+  private final Model<String> writer = new ValueModel<>();
+  private final Model<String> runtime = new ValueModel<>();
+  private final Model<String> rating = new ValueModel<>();
+  private final Model<String> plot = new ValueModel<>();
+
+  private final Listener<ItemUpdate> itemUpdateListener = new Listener<ItemUpdate>() {
+    @Override
+    public void onEvent(ItemUpdate event) {
+      int index = menuModel.indexOf(event.getItem());
+      menuModel.set(index, event.getItem());
+    }
+  };
   
   @Override
   public State currentState() {
@@ -74,6 +86,8 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
   public void applyConfig(MediaSelectionConfig config) {
     MediaTree mediaTree = config.getMediaTree();
     
+    itemUpdateListener.link(mediaTree.onItemUpdate());
+    
     Renderer<MediaItem> renderer = mediaTree.getRenderer();
     
     listCellRenderer.set(new MyCellRenderer(renderer));
@@ -82,17 +96,18 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
     menuModel.clear();
     menuModel.addAll(mediaTree.children());
     
-    plot.set("");
     poster.set(null);
+
+    genre.set(" ");
+    director.set(" ");
+    writer.set(" ");
     runtime.set(" ");
+    rating.set(" ");
+    plot.set("");
   }
     
   @Override
   protected AbstractGroup<?> create(final Controller controller) {
-//    new InternalContent(mediaTree).apply(); 
-//    menuModel.addAll(mediaTree.children());
-//    listCellRenderer.set(new MyCellRenderer(mediaTree.getRenderer()));
-    
     final SwingWorker2 movieUpdater = new SwingWorker2();
 
     return new VerticalGroup() {{
@@ -118,43 +133,48 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
               }});
               add(new Label());
               add(new Label() {{
+                Constants.styleInfoHeader(this);
                 text().set("GENRE");
-                Constants.styleInfoHeader(this);
               }});
               add(new DynamicLabel() {{
                 Constants.styleInfoText(this);
+                text().link(genre);
               }});
               add(new Label());
               add(new Label() {{
+                Constants.styleInfoHeader(this);
                 text().set("DIRECTOR");
-                Constants.styleInfoHeader(this);
               }});
               add(new DynamicLabel() {{
                 Constants.styleInfoText(this);
+                text().link(director);
               }});
               add(new Label());
               add(new Label() {{
+                Constants.styleInfoHeader(this);
                 text().set("WRITER");
-                Constants.styleInfoHeader(this);
               }});
               add(new DynamicLabel() {{
                 Constants.styleInfoText(this);
+                text().link(writer);
               }});
               add(new Label());
               add(new Label() {{
+                Constants.styleInfoHeader(this);
                 text().set("RUNTIME");
-                Constants.styleInfoHeader(this);
               }});
               add(new DynamicLabel() {{
-                text().link(runtime);
                 Constants.styleInfoText(this);
+                text().link(runtime);
               }});
               add(new Label());
               add(new Label() {{
-                text().set("RATING");
                 Constants.styleInfoHeader(this);
+                text().set("RATING");
               }});
               add(new DynamicLabel() {{
+                Constants.styleInfoText(this);
+                text().link(rating);
               }});
             }});
           }});
@@ -199,6 +219,10 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
                 config.setMediaTree(item.getRoot());
                 controller.forward(view);
               }
+              else if(item instanceof Group) {
+                Group group = (Group)item;
+                menuModel.addAll(menuModel.indexOf(item) + 1, group.children());
+              }
             }
           });
           onItemFocused().call(new EventListener<ItemsEvent<MediaItem>>() {
@@ -234,22 +258,22 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
               //getController().setContent(item.getScreen());
             }
           });
-          onKeyPressed().call(new EventListener<KeyPressedEvent>() {
-            @Override
-            public void onEvent(KeyPressedEvent event) {
-              if(event.getKeyCode() == KeyEvent.VK_RIGHT && event.isPressed()) {
-                System.out.println("Expand");
-
-                @SuppressWarnings("unchecked")
-                MediaItem activeRow = ((SimpleList<MediaItem>)event.getSource()).getActiveRow();
-                
-                if(activeRow instanceof Group) {
-                  Group group = (Group)activeRow;
-                  menuModel.addAll(menuModel.indexOf(activeRow) + 1, group.children());
-                }
-              }
-            }
-          });
+//          onKeyPressed().call(new EventListener<KeyPressedEvent>() {
+//            @Override
+//            public void onEvent(KeyPressedEvent event) {
+//              if(event.getKeyCode() == KeyEvent.VK_RIGHT && event.isPressed()) {
+//                System.out.println("Expand");
+//
+//                @SuppressWarnings("unchecked")
+//                MediaItem activeRow = ((SimpleList<MediaItem>)event.getSource()).getActiveRow();
+//                
+//                if(activeRow instanceof Group) {
+//                  Group group = (Group)activeRow;
+//                  menuModel.addAll(menuModel.indexOf(activeRow) + 1, group.children());
+//                }
+//              }
+//            }
+//          });
         }});
       }});
     }};

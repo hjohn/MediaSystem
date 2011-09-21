@@ -1,5 +1,9 @@
 package hs.mediasystem.framework;
 
+import hs.mediasystem.fs.NamedItem;
+import hs.mediasystem.screens.movie.ItemUpdate;
+import hs.models.events.ListenerList;
+
 import java.util.List;
 
 /**
@@ -16,4 +20,8 @@ public interface MediaTree {
   MediaTree parent();
   
   Renderer<MediaItem> getRenderer();
+
+  ListenerList<ItemUpdate> onItemUpdate();
+  
+  void triggerItemUpdate(NamedItem namedItem);
 }

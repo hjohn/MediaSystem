@@ -11,8 +11,8 @@ import java.util.List;
 public class EpisodeGroup extends NamedItem implements Group {
   private final List<NamedItem> children = new ArrayList<NamedItem>();
   
-  public EpisodeGroup(String title) {
-    super(title);
+  public EpisodeGroup(MediaTree mediaTree, String title) {
+    super(mediaTree, title);
   }
 
   public void add(NamedItem child) {

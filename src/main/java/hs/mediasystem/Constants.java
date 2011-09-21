@@ -14,6 +14,12 @@ public class Constants {
   public static final Model<Font> INFO_HEADER_FONT = new ValueModel<Font>(new Font("sans serif", Font.BOLD, 12));
   public static final Model<Font> INFO_TEXT_FONT = new ValueModel<Font>(new Font("sans serif", Font.PLAIN, 14));
   
+  public static final int HEIGHT = 48;
+  public static final int SUBTITLE_HEIGHT = 16;
+  public static final int TITLE_HEIGHT = HEIGHT - SUBTITLE_HEIGHT;
+  public static final Font LIST_LARGE_FONT = new Font("Sans Serif", Font.PLAIN, TITLE_HEIGHT - 4);
+  public static final Font LIST_SMALL_FONT = new Font("Sans Serif", Font.PLAIN, SUBTITLE_HEIGHT - 4);
+  
   public static void styleInfoHeader(Label label) {
     label.fgColor().set(MAIN_TEXT_COLOR.get());
     label.font().set(INFO_HEADER_FONT.get());

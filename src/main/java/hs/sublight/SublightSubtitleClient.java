@@ -230,7 +230,7 @@ public class SublightSubtitleClient {
 	}
 	
 
-	protected Map<String, SubtitleLanguage> getLanguageAliasMap() {
+	protected static Map<String, SubtitleLanguage> getLanguageAliasMap() {
 		Map<String, SubtitleLanguage> languages = new HashMap<String, SubtitleLanguage>(4);
 		
 		// insert special some additional special handling
@@ -242,7 +242,7 @@ public class SublightSubtitleClient {
 	}
 	
 
-	protected SubtitleLanguage getSubtitleLanguage(String languageName) {
+	protected static SubtitleLanguage getSubtitleLanguage(String languageName) {
 		// check subtitle language enum
 		for (SubtitleLanguage language : SubtitleLanguage.values()) {
 			if (language.value().equalsIgnoreCase(languageName))
@@ -260,7 +260,7 @@ public class SublightSubtitleClient {
 	}
 	
 
-	protected String getLanguageName(SubtitleLanguage language) {
+	protected static String getLanguageName(SubtitleLanguage language) {
 		// check alias list first
 		for (Entry<String, SubtitleLanguage> alias : getLanguageAliasMap().entrySet()) {
 			if (language == alias.getValue())
@@ -344,7 +344,7 @@ public class SublightSubtitleClient {
 	}
 	
 
-	protected void checkError(Holder<?> error) throws WebServiceException {
+	protected static void checkError(Holder<?> error) throws WebServiceException {
 		if (error.value != null) {
 			throw new WebServiceException("Response indicates error: " + error.value);
 		}

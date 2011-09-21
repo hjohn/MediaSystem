@@ -22,11 +22,11 @@ public class SublightSubtitleDescriptor implements SubtitleDescriptor {
 		this.source = source;
 		
 		this.name = getName(subtitle);
-		this.languageName = source.getLanguageName(subtitle.getLanguage());
+		this.languageName = SublightSubtitleClient.getLanguageName(subtitle.getLanguage());
 	}
 	
 
-	private String getName(Subtitle subtitle) {
+	private static String getName(Subtitle subtitle) {
 		String releaseName = subtitle.getRelease();
 		
 		// check if release name contains sufficient information to be used as display name

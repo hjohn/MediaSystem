@@ -1,13 +1,12 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.Item;
-import hs.mediasystem.db.ItemProvider;
 import hs.mediasystem.framework.MediaTree;
 
 public class Serie extends NamedItem {
   
-  public Serie(Item item, ItemProvider serieProvider) {
-    super(item, serieProvider);
+  public Serie(MediaTree mediaTree, Item item) {
+    super(mediaTree, item);
   }
   
   @Override

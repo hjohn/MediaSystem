@@ -1,9 +1,8 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.Item;
-import hs.mediasystem.db.ItemNotFoundException;
-import hs.mediasystem.db.ItemProvider;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaTree;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -14,23 +13,30 @@ import java.util.GregorianCalendar;
 
 import javax.imageio.ImageIO;
 
-
 public abstract class NamedItem implements MediaItem {
-  private final ItemProvider itemProvider;
+  private final MediaTree mediaTree;
   
   protected NamedItem parent;
 
   private Item item;
   
-  public NamedItem(Item item, ItemProvider itemProvider) {
+  public NamedItem(MediaTree mediaTree, Item item) {
+    this.mediaTree = mediaTree;
     this.item = item;
-    this.itemProvider = itemProvider;
   }
   
-  public NamedItem(final String title) {
-    this(new Item(null) {{
+  public NamedItem(MediaTree mediaTree, final String title) {
+    this(mediaTree, new Item(null) {{
       setTitle(title);
-    }}, null);
+    }});
+  }
+  
+  Item getItem() {
+    return item;
+  }
+  
+  void setItem(Item item) {
+    this.item = item;
   }
   
   public final String getTitle() {
@@ -46,6 +52,8 @@ public abstract class NamedItem implements MediaItem {
   }
   
   public String getSubtitle() {
+    ensureDataLoaded();
+    
     return item.getSubtitle() == null ? "" : item.getSubtitle();
   }
   
@@ -62,13 +70,7 @@ public abstract class NamedItem implements MediaItem {
   public int getEpisode() {
     return item.getEpisode();
   }
-  
-  public String getEpisodeName() {
-    ensureDataLoaded();
     
-    return item.getSubtitle();
-  }
-  
   public BufferedImage getBackground() {
     ensureDataLoaded();
 
@@ -126,19 +128,12 @@ public abstract class NamedItem implements MediaItem {
   
   private void ensureDataLoaded() {  // TODO should only enrich, not completely replace
     if(item.getId() == 0) {
-      try {
-        if(itemProvider != null) {
-          item = itemProvider.getItem(item);
-        }
-        else {
-          item = new Item(getPath()) {{
-            setTitle(NamedItem.this.getTitle());
-          }};
-        }
-      }
-      catch(ItemNotFoundException e) {
-        item = new Item(getPath());
-      }
+      item.setId(-1);
+      mediaTree.triggerItemUpdate(this);
     }
+  }
+
+  public Float getRating() {
+    return item.getRating();
   }
 }

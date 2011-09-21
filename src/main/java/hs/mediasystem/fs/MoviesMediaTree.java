@@ -15,12 +15,13 @@ import java.util.Comparator;
 import java.util.List;
 
 
-public class MoviesMediaTree implements MediaTree {
+public class MoviesMediaTree extends AbstractMediaTree {
   private final Path root;
 
   private List<? extends MediaItem> children;
   
   public MoviesMediaTree(Path root) {
+    super(new CachedItemProvider(new TmdbMovieProvider()));
     this.root = root;
   }
   
@@ -37,14 +38,14 @@ public class MoviesMediaTree implements MediaTree {
   @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      List<Episode> episodes = new MovieScanner(new MovieDecoder(), new CachedItemProvider(new TmdbMovieProvider())).scan(root);
+      List<Episode> episodes = new MovieScanner(this, new MovieDecoder()).scan(root);
       List<NamedItem> items = new ArrayList<NamedItem>();
       
       Collection<List<NamedItem>> groupedItems = Groups.group(episodes, new TitleGrouper());
       
       for(List<NamedItem> group : groupedItems) {
         if(group.size() > 1) {
-          EpisodeGroup g = new EpisodeGroup(group.get(0).getTitle());
+          EpisodeGroup g = new EpisodeGroup(this, group.get(0).getTitle());
           
           for(NamedItem item : group) {
             g.add(item);
