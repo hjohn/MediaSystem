@@ -1,6 +1,7 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.Item;
+import hs.mediasystem.db.LocalItem;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 
@@ -18,29 +19,25 @@ public abstract class NamedItem implements MediaItem {
   
   protected NamedItem parent;
 
-  private Item item;
+  private LocalItem item;
   
-  public NamedItem(MediaTree mediaTree, Item item) {
+  public NamedItem(MediaTree mediaTree, LocalItem item) {
     this.mediaTree = mediaTree;
     this.item = item;
   }
   
   public NamedItem(MediaTree mediaTree, final String title) {
-    this(mediaTree, new Item(null) {{
-      setTitle(title);
+    this(mediaTree, new LocalItem(null) {{
+      setLocalTitle(title);
     }});
   }
   
   Item getItem() {
     return item;
   }
-  
-  void setItem(Item item) {
-    this.item = item;
-  }
-  
+
   public final String getTitle() {
-    return item.getTitle();
+    return item.getLocalTitle();
   }
   
   public NamedItem getParent() {
@@ -52,9 +49,14 @@ public abstract class NamedItem implements MediaItem {
   }
   
   public String getSubtitle() {
-    ensureDataLoaded();
-    
-    return item.getSubtitle() == null ? "" : item.getSubtitle();
+    if(item.getLocalSubtitle() != null) {
+      return item.getLocalSubtitle();
+    }
+    else {
+      ensureDataLoaded();
+      
+      return item.getSubtitle() == null ? "" : item.getSubtitle();
+    }
   }
   
   public String getYear() {
@@ -127,13 +129,16 @@ public abstract class NamedItem implements MediaItem {
   }
   
   private void ensureDataLoaded() {  // TODO should only enrich, not completely replace
-    if(item.getId() == 0) {
+    if(item.getId() == 0 && mediaTree != null) {
+      System.out.println("Triggered for : " + getTitle());
       item.setId(-1);
       mediaTree.triggerItemUpdate(this);
     }
   }
 
   public Float getRating() {
+    ensureDataLoaded();
+    
     return item.getRating();
   }
 }

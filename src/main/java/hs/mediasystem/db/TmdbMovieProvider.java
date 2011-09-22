@@ -4,7 +4,6 @@ import hs.mediasystem.Levenshtein;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -17,12 +16,12 @@ import net.sf.jtmdb.MoviePoster;
 
 import org.json.JSONException;
 
-public class TmdbMovieProvider implements ItemProvider {
+public class TmdbMovieProvider implements ItemEnricher {
 
   @Override
-  public Item getItem(Item item) {
-    Path path = item.getPath();
+  public void enrichItem(Item item) {
     final String fileName = item.getPath().getFileName().toString();
+    
     String title = item.getTitle();
     String subtitle = item.getSubtitle();
     String year = extractYear(item.getReleaseDate());
@@ -83,7 +82,7 @@ public class TmdbMovieProvider implements ItemProvider {
         final Movie movie = Movie.imdbLookup(bestMatchingImdbNumber);
   
         System.out.println("Found movie:");
-        System.out.println("name: " + movie.getName());
+        System.out.println("name: " + movie.getName());  // TODO nullpointer here if IMDB is faulty (could be in filename)
         System.out.println("released date: " + movie.getReleasedDate());
         System.out.println("type: " + movie.getMovieType());
         System.out.println("overview: " + movie.getOverview());
@@ -100,18 +99,17 @@ public class TmdbMovieProvider implements ItemProvider {
         
         final byte[] poster = url != null ? Downloader.readURL(url) : null;
 
-        return new Item(path) {{
-          setImdbId(movie.getImdbID());
-          setProvider("TMDB");
-          setProviderId("" + movie.getID());
-          setTitle(movie.getName());
-          setLocalName(fileName);
-          setPoster(poster);
-          setPlot(movie.getOverview());
-          setRating((float)movie.getRating());
-          setReleaseDate(movie.getReleasedDate());
-          setRuntime(movie.getRuntime());
-          setType("movie");
+        item.setImdbId(movie.getImdbID());
+        item.setProvider("TMDB");
+        item.setProviderId("" + movie.getID());
+        item.setTitle(movie.getName());
+        item.setLocalName(fileName);
+        item.setPoster(poster);
+        item.setPlot(movie.getOverview());
+        item.setRating((float)movie.getRating());
+        item.setReleaseDate(movie.getReleasedDate());
+        item.setRuntime(movie.getRuntime());
+        item.setType("movie");
           
 //          for(CastInfo castInfo : movie.getCast()) {
 //            castInfo.getCharacterName();
@@ -121,7 +119,6 @@ public class TmdbMovieProvider implements ItemProvider {
 //            
 //            addCastMember(castInfo.getCastID(), castInfo.getName(), castInfo.getCharacterName());
 //          }
-        }};
       }
       else {
         throw new RuntimeException("cannot get movie details");

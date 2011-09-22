@@ -44,10 +44,10 @@ import javax.swing.border.EmptyBorder;
 public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
   private final BasicListModel<MediaItem> menuModel = new BasicListModel<MediaItem>(new ArrayList<MediaItem>());
   private final Model<BufferedImage> poster = new ValueModel<BufferedImage>();
-  private final Model<Integer> listRowHeight = new ValueModel<Integer>(20);
   private final Model<ListCellRenderer<? super MediaItem>> listCellRenderer = new ValueModel<ListCellRenderer<? super MediaItem>>();
   private final Model<Integer> listFirstSelectedIndex = new ValueModel<Integer>(0);
   private final Model<Rectangle> listVisibleRectangle = new ValueModel<Rectangle>();
+  private final Model<MediaItem> listPrototypeCellValue = new ValueModel<MediaItem>();
 
   private final Model<String> genre = new ValueModel<>();
   private final Model<String> director = new ValueModel<>();
@@ -89,11 +89,13 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
     itemUpdateListener.link(mediaTree.onItemUpdate());
     
     Renderer<MediaItem> renderer = mediaTree.getRenderer();
-    
-    listCellRenderer.set(new MyCellRenderer(renderer));
-    listRowHeight.set(renderer.getPreferredHeight());
-    
+
     menuModel.clear();
+
+    listCellRenderer.set(null);
+    listPrototypeCellValue.set(renderer.getPrototypeCellValue());
+    listCellRenderer.set(new MyCellRenderer(renderer));
+    
     menuModel.addAll(mediaTree.children());
     
     poster.set(null);
@@ -198,10 +200,10 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
           //maxHeight().set(30000);
           minWidth().set(50);
           maxWidth().set(30000);
-          rowHeight.link(listRowHeight);
+          prototypeCellValue.link(listPrototypeCellValue);
           cellRenderer.link(listCellRenderer);
-          visibleRectangle.proxy(listVisibleRectangle);
           firstSelectedIndex.link(listFirstSelectedIndex);
+          visibleRectangle.proxy(listVisibleRectangle);
           selectFirstItem();
           onItemDoubleClick().call(new EventListener<ItemsEvent<MediaItem>>() {
             @Override

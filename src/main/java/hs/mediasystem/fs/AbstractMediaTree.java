@@ -2,7 +2,7 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.LifoBlockingDeque;
 import hs.mediasystem.db.ItemNotFoundException;
-import hs.mediasystem.db.ItemProvider;
+import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.screens.movie.ItemUpdate;
 import hs.models.events.ListenerList;
@@ -17,10 +17,10 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractMediaTree implements MediaTree {
   private final Notifier<ItemUpdate> itemUpdateNotifier = new Notifier<>();
   private final ThreadPoolExecutor executor;
-  private final ItemProvider itemProvider;
+  private final ItemEnricher itemEnricher;
   
-  public AbstractMediaTree(ItemProvider itemProvider) {
-    this.itemProvider = itemProvider;
+  public AbstractMediaTree(ItemEnricher itemEnricher) {
+    this.itemEnricher = itemEnricher;
     
     executor = new ThreadPoolExecutor(2, 2, 30, TimeUnit.SECONDS, new LifoBlockingDeque<Runnable>(10)) {
       @Override
@@ -60,7 +60,7 @@ public abstract class AbstractMediaTree implements MediaTree {
         @Override
         public void run() {
           try {
-            namedItem.setItem(itemProvider.getItem(namedItem.getItem()));
+            itemEnricher.enrichItem(namedItem.getItem());
           }
           catch(ItemNotFoundException e) {
           }

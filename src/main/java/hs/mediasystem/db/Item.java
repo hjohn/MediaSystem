@@ -3,7 +3,15 @@ package hs.mediasystem.db;
 import java.nio.file.Path;
 import java.util.Date;
 
-public class Item extends AbstractRecord {
+public class Item {
+  private int id;
+   
+  private String title;
+  private String subtitle;
+  private String provider;
+  private String providerId;
+  private String type;
+  private int version; 
   private String localName;
   private String imdbId;
   private String plot;
@@ -15,12 +23,59 @@ public class Item extends AbstractRecord {
   private int runtime;
   private int season;
   private int episode;
-  private String subtitle;
   
   private final Path path;
   
   public Item(Path path) {
     this.path = path;
+  }
+  
+  public int getId() {
+    return id;
+  }
+  
+  public void setId(int id) {
+    this.id = id;
+  }
+  
+  public String getTitle() {
+    return title;
+  }
+  
+  public void setTitle(String title) {
+    this.title = title;
+  }
+  
+  public String getProvider() {
+    return provider;
+  }
+  
+  public void setProvider(String provider) {
+    this.provider = provider;
+  }
+  
+  public String getProviderId() {
+    return providerId;
+  }
+  
+  public void setProviderId(String providerId) {
+    this.providerId = providerId;
+  }
+  
+  public String getType() {
+    return type;
+  }
+  
+  public void setType(String type) {
+    this.type = type;
+  }
+  
+  public int getVersion() {
+    return version;
+  }
+  
+  public void setVersion(int version) {
+    this.version = version;
   }
   
   public Path getPath() {
@@ -71,7 +126,7 @@ public class Item extends AbstractRecord {
     return rating;
   }
 
-  public void setRating(float rating) {
+  public void setRating(Float rating) {
     this.rating = rating;
   }
   

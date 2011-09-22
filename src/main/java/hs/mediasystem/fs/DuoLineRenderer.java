@@ -4,12 +4,14 @@ import hs.mediasystem.Constants;
 import hs.mediasystem.RomanLiteral;
 import hs.mediasystem.framework.Group;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Renderer;
 import hs.smartlayout.SmartLayout;
 import hs.ui.swing.JPaintablePanel;
 import hs.ui.swing.Painter;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -85,7 +87,10 @@ public class DuoLineRenderer implements Renderer<MediaItem> {
     
     Style style;
     
-    if(item instanceof Group) {
+    if(item instanceof Season) {
+      style = Style.SEASON;
+    }
+    else if(item instanceof Group) {
       style = Style.COLLECTION;
     }
     else if(item instanceof Episode) {
@@ -100,9 +105,6 @@ public class DuoLineRenderer implements Renderer<MediaItem> {
       else {
         style = Style.EPISODE;
       }
-    }
-    else if(item instanceof Season) {
-      style = Style.SEASON;
     }
     else {
       style = Style.MOVIE;
@@ -152,6 +154,7 @@ public class DuoLineRenderer implements Renderer<MediaItem> {
     else if(style == Style.SEASON) {
       line1.setText("Season " + ((Season)item).getTitle());
       line2.setText("");
+      collectionMarker = true;
     }
     else if(style == Style.COLLECTION) {
       line1.setText(item.getTitle());
@@ -164,11 +167,23 @@ public class DuoLineRenderer implements Renderer<MediaItem> {
     line1.setIconTextGap(line1TextGap);
     line2.setIconTextGap(line2TextGap);
     
+    panel.setPreferredSize(new Dimension(1, Constants.HEIGHT));
+    
     return panel;
   }
-
+  
   @Override
-  public int getPreferredHeight() {
-    return Constants.HEIGHT;
+  public MediaItem getPrototypeCellValue() {
+    return new NamedItem(null, " ") {
+      @Override
+      public boolean isRoot() {
+        return false;
+      }
+
+      @Override
+      public MediaTree getRoot() {
+        throw new UnsupportedOperationException("Method not implemented");
+      }
+    };
   }
 }

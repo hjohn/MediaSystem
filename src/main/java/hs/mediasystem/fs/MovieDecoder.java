@@ -1,10 +1,9 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.Item;
+import hs.mediasystem.db.LocalItem;
 import hs.mediasystem.framework.Decoder;
 
 import java.nio.file.Path;
-import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,7 +21,7 @@ public class MovieDecoder implements Decoder {
   );
   
   @Override
-  public Item decode(Path path) {
+  public LocalItem decode(Path path) {
     Matcher matcher = PATTERN.matcher(path.getFileName().toString());
     
     if(!matcher.matches()) {
@@ -44,18 +43,15 @@ public class MovieDecoder implements Decoder {
       imdbNumber = null;
     }
     
-    Item item = new Item(path);
+    LocalItem item = new LocalItem(path);
     
-    item.setTitle(title);
+    item.setLocalTitle(title);
+    item.setLocalSubtitle(subtitle == null ? "" : subtitle);
+    item.setLocalReleaseYear(year);
+
     item.setImdbId(imdbNumber);
-    item.setSubtitle(subtitle == null ? "" : subtitle);
     item.setSeason(0);
     item.setEpisode(sequence == null ? 1 : Integer.parseInt(sequence));
-    
-    if(year != null) {
-      GregorianCalendar gc = new GregorianCalendar(Integer.parseInt(year), 0, 1);
-      item.setReleaseDate(gc.getTime());
-    }
     
     return item; 
   }

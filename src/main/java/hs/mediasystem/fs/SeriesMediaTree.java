@@ -3,6 +3,7 @@ package hs.mediasystem.fs;
 import hs.mediasystem.Constants;
 import hs.mediasystem.GlowBorder;
 import hs.mediasystem.db.CachedItemProvider;
+import hs.mediasystem.db.LocalItem;
 import hs.mediasystem.db.TvdbSerieProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
@@ -11,11 +12,13 @@ import hs.ui.controls.Label;
 import hs.ui.controls.Picture;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;
 import java.util.List;
 
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.border.EmptyBorder;
 
 public class SeriesMediaTree extends AbstractMediaTree {
@@ -67,6 +70,7 @@ public class SeriesMediaTree extends AbstractMediaTree {
         if(banner != null) {
           pic.image.set(banner);
           pic.bgColor().set(new Color(0, 0, 0, 0));
+          pic.minHeight().set(78);
           pic.maxHeight().set(78);
 
           if(hasFocus) {
@@ -90,13 +94,20 @@ public class SeriesMediaTree extends AbstractMediaTree {
             label.border().set(new EmptyBorder(4, 4, 4, 4));
           }
           
-          return label.getComponent();
+          JLabel label2 = label.getComponent();
+          
+          label2.setPreferredSize(new Dimension(1, 78));
+          
+          return label2;
         }
       }
 
       @Override
-      public int getPreferredHeight() {
-        return 70 + 8; // 758x140
+      public MediaItem getPrototypeCellValue() {
+        return new Serie(null, new LocalItem(null) {{
+          setTitle(" ");
+          setLocalTitle(" ");
+        }});
       }
     };
   }

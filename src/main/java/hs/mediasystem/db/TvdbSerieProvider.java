@@ -7,10 +7,10 @@ import java.util.List;
 import com.moviejukebox.thetvdb.TheTVDB;
 import com.moviejukebox.thetvdb.model.Series;
 
-public class TvdbSerieProvider implements ItemProvider {
+public class TvdbSerieProvider implements ItemEnricher {
 
   @Override
-  public Item getItem(final Item item) {
+  public void enrichItem(final Item item) {
     final String name = item.getTitle();
     
     TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
@@ -23,21 +23,19 @@ public class TvdbSerieProvider implements ItemProvider {
     final Series series = tvDB.getSeries(results.get(0).getId(), "en");
     
     try {
-      return new Item(item.getPath()) {{
-        byte[] banner = Downloader.readURL(new URL(series.getBanner()));
-        byte[] poster = Downloader.readURL(new URL(series.getPoster()));
-        byte[] background = Downloader.readURL(new URL(series.getFanart()));
+      byte[] banner = Downloader.readURL(new URL(series.getBanner()));
+      byte[] poster = Downloader.readURL(new URL(series.getPoster()));
+      byte[] background = Downloader.readURL(new URL(series.getFanart()));
 
-        setLocalName(item.getPath().getFileName().toString());
-        setTitle(name);
-        setPlot(series.getOverview());
-        setBanner(banner);
-        setPoster(poster);
-        setBackground(background);
-        setProvider("TVDB");
-        setProviderId(series.getId());
-        setType("serie");
-      }};
+      item.setLocalName(item.getPath().getFileName().toString());
+      item.setTitle(name);
+      item.setPlot(series.getOverview());
+      item.setBanner(banner);
+      item.setPoster(poster);
+      item.setBackground(background);
+      item.setProvider("TVDB");
+      item.setProviderId(series.getId());
+      item.setType("serie");
     }
     catch(MalformedURLException e) {
       throw new RuntimeException(e);

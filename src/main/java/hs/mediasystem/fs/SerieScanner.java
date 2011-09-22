@@ -1,6 +1,6 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.Item;
+import hs.mediasystem.db.LocalItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Scanner;
 
@@ -27,13 +27,12 @@ public class SerieScanner implements Scanner<Serie> {
   
       for(Path path : dirStream) {
         if(Files.isDirectory(path)) {
-          Item item = new Item(path);
+          LocalItem item = new LocalItem(path);
           
-          item.setTitle(path.getFileName().toString());
+          item.setLocalTitle(path.getFileName().toString());
+          item.setTitle(item.getLocalTitle());
           
-          Serie serie = new Serie(mediaTree, item);
-          
-          series.add(serie);
+          series.add(new Serie(mediaTree, item));
         }
       }
     }

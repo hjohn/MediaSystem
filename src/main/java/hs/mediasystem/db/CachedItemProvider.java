@@ -1,11 +1,11 @@
 package hs.mediasystem.db;
 
 
-public class CachedItemProvider implements ItemProvider {
+public class CachedItemProvider implements ItemEnricher {
   private final ItemsDao itemsDao;
-  private final ItemProvider providerToCache;
+  private final ItemEnricher providerToCache;
   
-  public CachedItemProvider(ItemProvider providerToCache) {
+  public CachedItemProvider(ItemEnricher providerToCache) {
     this.providerToCache = providerToCache;
     
     try {
@@ -17,43 +17,43 @@ public class CachedItemProvider implements ItemProvider {
   }
 
   @Override
-  public Item getItem(Item item) throws ItemNotFoundException {
+  public void enrichItem(Item item) throws ItemNotFoundException {
     String fileName = item.getPath().getFileName().toString();
     
     try {
       System.out.println("[FINE] Resolving from database cache: " + fileName);
       Item cachedItem = itemsDao.getItem(item.getPath());
+
+      item.setId(cachedItem.getId());
+      item.setVersion(cachedItem.getVersion());
+      item.setBackground(cachedItem.getBackground());
+      item.setPoster(cachedItem.getPoster());
+      item.setBanner(cachedItem.getBanner());
+      item.setImdbId(cachedItem.getImdbId());
+      item.setPlot(cachedItem.getPlot());
+      item.setTitle(cachedItem.getTitle());
+      item.setRating(cachedItem.getRating());
+      item.setReleaseDate(cachedItem.getReleaseDate());
+      item.setRuntime(cachedItem.getRuntime());
+      item.setSeason(cachedItem.getSeason());
+      item.setEpisode(cachedItem.getEpisode());
+      item.setType(cachedItem.getType());
+      item.setSubtitle(cachedItem.getSubtitle());
+      item.setProvider(cachedItem.getProvider());
+      item.setProviderId(cachedItem.getProviderId());
       
       if(cachedItem.getVersion() < ItemsDao.VERSION) {
         System.out.println("[FINE] Old version, updating from cached provider: " + fileName);
-        Item updatedItem = providerToCache.getItem(item);
         
-        cachedItem.setBackground(updatedItem.getBackground());
-        cachedItem.setPoster(updatedItem.getPoster());
-        cachedItem.setBanner(updatedItem.getBanner());
-        cachedItem.setImdbId(updatedItem.getImdbId());
-        cachedItem.setPlot(updatedItem.getPlot());
-        cachedItem.setTitle(updatedItem.getTitle());
-        cachedItem.setRating(updatedItem.getRating());
-        cachedItem.setReleaseDate(updatedItem.getReleaseDate());
-        cachedItem.setRuntime(updatedItem.getRuntime());
-        cachedItem.setSeason(updatedItem.getSeason());
-        cachedItem.setEpisode(updatedItem.getEpisode());
-        cachedItem.setType(updatedItem.getType());
-        cachedItem.setSubtitle(updatedItem.getSubtitle());
-        
+        providerToCache.enrichItem(item);
         itemsDao.updateItem(cachedItem);
       }
-      
-      return cachedItem;
     }
     catch(ItemNotFoundException e) {
       System.out.println("[FINE] Cache miss, falling back to cached provider: " + fileName);
-      Item cachedItem = providerToCache.getItem(item);
-      
-      itemsDao.storeItem(cachedItem);
-      
-      return cachedItem;
+
+      providerToCache.enrichItem(item);
+      itemsDao.storeItem(item);
     }
   }
 }
