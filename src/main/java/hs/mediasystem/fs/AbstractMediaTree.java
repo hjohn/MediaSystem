@@ -1,8 +1,8 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.LifoBlockingDeque;
-import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.db.ItemEnricher;
+import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.screens.movie.ItemUpdate;
 import hs.models.events.ListenerList;
@@ -15,17 +15,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractMediaTree implements MediaTree {
-  private final Notifier<ItemUpdate> itemUpdateNotifier = new Notifier<>();
-  private final ThreadPoolExecutor executor;
-  private final ItemEnricher itemEnricher;
+  private static final ThreadPoolExecutor EXECUTOR;
   
-  public AbstractMediaTree(ItemEnricher itemEnricher) {
-    this.itemEnricher = itemEnricher;
-    
-    executor = new ThreadPoolExecutor(2, 2, 30, TimeUnit.SECONDS, new LifoBlockingDeque<Runnable>(10)) {
+  private final Notifier<ItemUpdate> itemUpdateNotifier = new Notifier<>();
+  private final ItemEnricher itemEnricher;
+
+  static {
+    EXECUTOR = new ThreadPoolExecutor(2, 2, 30, TimeUnit.SECONDS, new LifoBlockingDeque<Runnable>(100)) {
       @Override
       protected void afterExecute(Runnable r, Throwable t) {
-        itemUpdateNotifier.notifyListeners(new ItemUpdate(((ItemUpdater)r).getNamedItem()));
+        ((ItemUpdater)r).notifyListeners();
       }
     };
     
@@ -40,7 +39,7 @@ public abstract class AbstractMediaTree implements MediaTree {
      * is needed, implemented below:
      */
     
-    executor.setRejectedExecutionHandler(new RejectedExecutionHandler() {
+    EXECUTOR.setRejectedExecutionHandler(new RejectedExecutionHandler() {
       @Override
       public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
         if(!e.isShutdown()) {
@@ -50,13 +49,17 @@ public abstract class AbstractMediaTree implements MediaTree {
       }
     });
     
-    executor.setThreadFactory(new DefaultThreadFactory("MediaTree", Thread.NORM_PRIORITY, true));
+    EXECUTOR.setThreadFactory(new DefaultThreadFactory("MediaTree", Thread.NORM_PRIORITY - 1, true));
+  }
+  
+  public AbstractMediaTree(ItemEnricher itemEnricher) {
+    this.itemEnricher = itemEnricher;
   }
   
   @Override
   public void triggerItemUpdate(final NamedItem namedItem) {
     if(namedItem.getPath() != null) {
-      executor.execute(new ItemUpdater(namedItem) {
+      EXECUTOR.execute(new ItemUpdater(itemUpdateNotifier, namedItem) {
         @Override
         public void run() {
           try {
@@ -75,14 +78,16 @@ public abstract class AbstractMediaTree implements MediaTree {
   }
   
   private static abstract class ItemUpdater implements Runnable {
+    private final Notifier<ItemUpdate> itemUpdateNotifier;
     private final NamedItem item;
 
-    public ItemUpdater(NamedItem item) {
+    public ItemUpdater(Notifier<ItemUpdate> itemUpdateNotifier, NamedItem item) {
+      this.itemUpdateNotifier = itemUpdateNotifier;
       this.item = item;
     }
     
-    public NamedItem getNamedItem() {
-      return item;
+    public void notifyListeners() {
+      itemUpdateNotifier.notifyListeners(new ItemUpdate(item));
     }
   }
 }
