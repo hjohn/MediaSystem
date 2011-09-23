@@ -16,9 +16,18 @@ import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 import hs.sublight.SublightSubtitleClient;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import javax.swing.JComponent;
+import javax.swing.Painter;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import net.sf.jtmdb.GeneralSettings;
 
@@ -113,9 +122,71 @@ public class MediaSystem {
     VIDEO_OPTIONS = new Screen(new VideoOptionsScreen());
   }
   
-  public static void main(String[] args) {
+  private static final Painter<Object> DUMMY_PAINTER = new Painter<Object>() {
+    @Override
+    public void paint(Graphics2D g, Object object, int width, int height) {
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      g.setColor(new Color(128, 0, 0, 32));
+      g.fillRect(0, 0, width, height);
+    }
+  };
+  
+  public static void main(String[] args) throws UnsupportedLookAndFeelException {
+//    UIManager.put("background", new Color(0, 0, 0, 0));
+    //UIManager.put("control", new Color(0, 0, 0, 0));
+//    UIManager.put("List.opaque", true);
+//    UIManager.put("List:\"List.cellRenderer\".opaque", false);
+//    UIManager.put("Panel.opaque", true);
+//    UIManager.put("Label.opaque", true);
+    UIManager.put("ScrollPane.opaque", true);
+    UIManager.put("ScrollPane[Enabled].backgroundPainter", new Painter<JComponent>() {
+      @Override
+      public void paint(Graphics2D g, JComponent object, int width, int height) {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setColor(new Color(0, 0, 0, 32));
+        g.fillRect(0, 0, width, height);
+      }
+    });
+    UIManager.put("ScrollPane[Enabled].borderPainter", DUMMY_PAINTER);
+    UIManager.put("ScrollPane[Enabled+Focused].borderPainter", DUMMY_PAINTER);
+    UIManager.put("List[Enabled].borderPainter", DUMMY_PAINTER);
+    UIManager.put("List[Enabled+Focused].borderPainter", DUMMY_PAINTER);
+//    UIManager.put("List.border", null);
+//    UIManager.put("List.background", new Color(0, 0, 0, 0));
+//    UIManager.put("Panel.background", new Color(0, 0, 0, 0));
+//    UIManager.put("ScrollPane.background", new Color(0, 255, 0));
+//    UIManager.put("TextArea.opaque", true);
+    UIManager.put("TextArea.background", new Color(0, 0, 0, 0));
+//    UIManager.put("TextArea[Enabled].backgroundPainter",null);
+//    UIManager.put("TextArea.disabled", new Color(255, 0, 0, 28));
+//    UIManager.put("TextPane.opaque", true);
+//    UIManager.put("TextPane.background", new Color(255, 0, 0, 28));
+//    UIManager.put("TextPane.disabled", new Color(255, 0, 0, 28));
+//    UIManager.put("TextField.background", new Color(0, 0, 0, 0));
+    
+    UIManager.setLookAndFeel(new NimbusLookAndFeel());
+    
+//    SynthLookAndFeel laf = new SynthLookAndFeel();
+//    UIManager.setLookAndFeel(laf);
+    //SynthLookAndFeel.setStyleFactory(new MyStyleFactory());
+    
+
     Controller controller = CONTROLLER_FACTORY.create();
     
     controller.forward(new View("Root", MAIN_MENU));
   }
+
+//  private static class MyStyleFactory extends SynthStyleFactory {
+//    @Override
+//    public SynthStyle getStyle(JComponent c, Region id) {
+//      if(id == Region.BUTTON) {
+//        return buttonStyle;
+//      }
+//      else if(id == Region.TREE) {
+//        return treeStyle;
+//      }
+//      return defaultStyle;
+//    }
+//  }
+  
 }

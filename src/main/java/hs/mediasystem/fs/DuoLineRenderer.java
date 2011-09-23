@@ -61,6 +61,8 @@ public class DuoLineRenderer implements Renderer<MediaItem> {
         if(rating != null) {
           Rectangle2D ratingBounds = Constants.LIST_LARGE_FONT.getStringBounds(rating, g.getFontRenderContext());
           
+          g.setFont(Constants.LIST_LARGE_FONT);
+          g.setColor(Constants.MAIN_TEXT_COLOR.get());
           g.drawString(rating, (int)(width - 40 - ratingBounds.getWidth()), (int)((height - ratingBounds.getHeight()) / 2 - ratingBounds.getY()));
         }
         
