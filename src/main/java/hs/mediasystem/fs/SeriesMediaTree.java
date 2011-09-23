@@ -2,9 +2,9 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.Constants;
 import hs.mediasystem.GlowBorder;
-import hs.mediasystem.db.CachedItemProvider;
+import hs.mediasystem.db.CachedItemEnricher;
 import hs.mediasystem.db.LocalItem;
-import hs.mediasystem.db.TvdbSerieProvider;
+import hs.mediasystem.db.TvdbSerieEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Renderer;
@@ -27,7 +27,7 @@ public class SeriesMediaTree extends AbstractMediaTree {
   private List<? extends MediaItem> children;
   
   public SeriesMediaTree(Path root) {
-    super(new CachedItemProvider(new TvdbSerieProvider()));
+    super(new CachedItemEnricher(new TvdbSerieEnricher()));
     this.root = root;
   }
   

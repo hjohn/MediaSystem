@@ -6,10 +6,10 @@ import java.net.URL;
 import com.moviejukebox.thetvdb.TheTVDB;
 import com.moviejukebox.thetvdb.model.Episode;
 
-public class TvdbEpisodeProvider implements ItemEnricher {
+public class TvdbEpisodeEnricher implements ItemEnricher {
   private final String serieId;
 
-  public TvdbEpisodeProvider(String serieId) {
+  public TvdbEpisodeEnricher(String serieId) {
     this.serieId = serieId;
   }
   

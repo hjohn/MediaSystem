@@ -1,7 +1,7 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.CachedItemProvider;
-import hs.mediasystem.db.TvdbEpisodeProvider;
+import hs.mediasystem.db.CachedItemEnricher;
+import hs.mediasystem.db.TvdbEpisodeEnricher;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
@@ -20,7 +20,7 @@ public class EpisodesMediaTree extends AbstractMediaTree {
   private List<? extends MediaItem> children;
 
   public EpisodesMediaTree(Path root, Serie serie) {
-    super(new CachedItemProvider(new TvdbEpisodeProvider(serie.getProviderId())));
+    super(new CachedItemEnricher(new TvdbEpisodeEnricher(serie.getProviderId())));
     this.root = root;
   }
 

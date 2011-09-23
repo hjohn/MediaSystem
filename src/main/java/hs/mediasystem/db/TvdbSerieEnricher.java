@@ -7,7 +7,7 @@ import java.util.List;
 import com.moviejukebox.thetvdb.TheTVDB;
 import com.moviejukebox.thetvdb.model.Series;
 
-public class TvdbSerieProvider implements ItemEnricher {
+public class TvdbSerieEnricher implements ItemEnricher {
 
   @Override
   public void enrichItem(final Item item) {

@@ -1,11 +1,11 @@
 package hs.mediasystem.db;
 
 
-public class CachedItemProvider implements ItemEnricher {
+public class CachedItemEnricher implements ItemEnricher {
   private final ItemsDao itemsDao;
   private final ItemEnricher providerToCache;
   
-  public CachedItemProvider(ItemEnricher providerToCache) {
+  public CachedItemEnricher(ItemEnricher providerToCache) {
     this.providerToCache = providerToCache;
     
     try {

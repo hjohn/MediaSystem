@@ -16,7 +16,7 @@ import net.sf.jtmdb.MoviePoster;
 
 import org.json.JSONException;
 
-public class TmdbMovieProvider implements ItemEnricher {
+public class TmdbMovieEnricher implements ItemEnricher {
 
   @Override
   public void enrichItem(Item item) {
