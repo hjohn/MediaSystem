@@ -20,25 +20,30 @@ public class TvdbSerieEnricher implements ItemEnricher {
     System.out.println("TVDB results:");
     System.out.println(results);
     
-    final Series series = tvDB.getSeries(results.get(0).getId(), "en");
-    
-    try {
-      byte[] banner = Downloader.readURL(new URL(series.getBanner()));
-      byte[] poster = Downloader.readURL(new URL(series.getPoster()));
-      byte[] background = Downloader.readURL(new URL(series.getFanart()));
-
-      item.setLocalName(item.getPath().getFileName().toString());
-      item.setTitle(name);
-      item.setPlot(series.getOverview());
-      item.setBanner(banner);
-      item.setPoster(poster);
-      item.setBackground(background);
-      item.setProvider("TVDB");
-      item.setProviderId(series.getId());
-      item.setType("serie");
+    if(!results.isEmpty()) {
+      final Series series = tvDB.getSeries(results.get(0).getId(), "en");
+      
+      try {
+        byte[] banner = Downloader.readURL(new URL(series.getBanner()));
+        byte[] poster = Downloader.readURL(new URL(series.getPoster()));
+        byte[] background = Downloader.readURL(new URL(series.getFanart()));
+  
+        item.setLocalName(item.getPath().getFileName().toString());
+        item.setTitle(name);
+        item.setPlot(series.getOverview());
+        item.setBanner(banner);
+        item.setPoster(poster);
+        item.setBackground(background);
+        item.setProvider("TVDB");
+        item.setProviderId(series.getId());
+        item.setType("serie");
+      }
+      catch(MalformedURLException e) {
+        throw new RuntimeException(e);
+      }
     }
-    catch(MalformedURLException e) {
-      throw new RuntimeException(e);
+    else {
+      System.out.println("[INFO] " + getClass().getSimpleName() + ": Could not find: " + name);
     }
   }
 }

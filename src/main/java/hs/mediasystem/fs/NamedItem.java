@@ -6,13 +6,9 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-
-import javax.imageio.ImageIO;
 
 public abstract class NamedItem implements MediaItem {
   private final MediaTree mediaTree;
@@ -76,34 +72,21 @@ public abstract class NamedItem implements MediaItem {
   public BufferedImage getBackground() {
     ensureDataLoaded();
 
-    return loadImage(item.getBackground());
+    return ImageCache.loadImage(getTitle() + "-background", item.getBackground());
   }
   
   public BufferedImage getBanner() {
     ensureDataLoaded();
 
-    return loadImage(item.getBanner());
+    return ImageCache.loadImage(getTitle() + "-banner", item.getBanner());
   }
   
   public BufferedImage getPoster() {
     ensureDataLoaded();
     
-    return loadImage(item.getPoster());
+    return ImageCache.loadImage(getTitle() + "-poster", item.getPoster());
   }
   
-  private static BufferedImage loadImage(byte[] stream) {
-    try {
-      if(stream != null) {
-        return ImageIO.read(new ByteArrayInputStream(stream));
-      }
-    }
-    catch(IOException e) {
-      // Ignore
-    }
-    
-    return null;
-  }
-
   public String getPlot() {
     ensureDataLoaded();
     
