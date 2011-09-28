@@ -13,31 +13,33 @@ import hs.ui.ControlListener;
 import hs.ui.controls.AbstractGroup;
 import hs.ui.controls.VerticalGroup;
 import hs.ui.frames.AbstractFrame;
+import hs.ui.image.ImageHandle;
 import hs.ui.swing.Painter;
 
 import java.awt.Color;
 import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.swing.ImageIcon;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 public class Controller {
   private final Player player;
   private final VerticalGroup mainGroup;
-  private final Image background;
+  private final ImageHandle backgroundHandle;
   private final NavigationHistory<View> navigationHistory = new NavigationHistory<View>();
   private final StateCache stateCache = new StateCache();
   
@@ -220,13 +222,20 @@ public class Controller {
 //      }
 //    });
 
-    background = new ImageIcon("images/Media Center background.jpg").getImage();
+    try {
+      byte[] background = Files.readAllBytes(Paths.get("images/Media Center background.jpg"));
+      backgroundHandle = new ImageHandle(background, ":background");
+    }
+    catch(IOException e) {
+      throw new RuntimeException(e);
+    }
+    
     mainGroup = new VerticalGroup() {{
       setPainter(new Painter() {
         @Override
         public void paint(Graphics2D g, int width, int height) {
           if(backgroundActive) {
-            g.drawImage(background, 0, 0, null);
+            g.drawImage(backgroundHandle.getImage(width, height, false), 0, 0, null);
           }
           else {
             g.setBackground(new Color(0, 0, 0, 1));
