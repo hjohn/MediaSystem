@@ -76,19 +76,23 @@ public abstract class NamedItem implements MediaItem {
   public ImageHandle getBackground() {
     ensureDataLoaded();
 
-    return item.getBackground() == null ? null : new ImageHandle(item.getBackground(), getTitle() + "-background");
+    return item.getBackground() == null ? null : new ImageHandle(item.getBackground(), createKey("background"));
   }
   
   public ImageHandle getBanner() {
     ensureDataLoaded();
 
-    return item.getBanner() == null ? null : new ImageHandle(item.getBanner(), getTitle() + "-banner");
+    return item.getBanner() == null ? null : new ImageHandle(item.getBanner(), createKey("banner"));
   }
   
   public ImageHandle getPoster() {
     ensureDataLoaded();
     
-    return item.getPoster() == null ? null : new ImageHandle(item.getPoster(), getTitle() + "-poster");
+    return item.getPoster() == null ? null : new ImageHandle(item.getPoster(), createKey("poster"));
+  }
+  
+  private String createKey(String suffix) {
+    return getTitle() + "-" + getSeason() + "x" + getEpisode() + "-" + getSubtitle() + "-" + suffix;
   }
   
   public String getPlot() {

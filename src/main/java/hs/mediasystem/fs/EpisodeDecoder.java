@@ -50,8 +50,11 @@ public class EpisodeDecoder implements Decoder {
     item.setLocalReleaseYear(year);
     
     item.setImdbId(imdbNumber);
-    item.setSeason(Integer.parseInt(sequence.split("x")[0]));
-    item.setEpisode(Integer.parseInt(sequence.split("x")[1]));
+    
+    if(sequence != null && sequence.matches("[0-9]+x[0-9]+")) {
+      item.setSeason(Integer.parseInt(sequence.split("x")[0]));
+      item.setEpisode(Integer.parseInt(sequence.split("x")[1]));
+    }
     item.setType("episode");
     item.setProvider("LOCAL");
     item.setProviderId("");

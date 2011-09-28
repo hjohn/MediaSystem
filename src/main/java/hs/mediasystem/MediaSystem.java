@@ -47,6 +47,7 @@ import net.sf.jtmdb.GeneralSettings;
 // TODO Hate the ugly Renderer class where still use Swing components setPreferredSize to make proper sized elements for a JList
 // TODO Tiling or upscaling support when screen is too large for background image
 // TODO Scanning is bad at handling junk in movie/serie folders
+// TODO Display alternative banner when there is no banner available
 
 // TODO Display list of video files with IMDB info
 
