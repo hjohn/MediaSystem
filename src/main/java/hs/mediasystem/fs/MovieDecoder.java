@@ -52,7 +52,10 @@ public class MovieDecoder implements Decoder {
     item.setImdbId(imdbNumber);
     item.setSeason(0);
     item.setEpisode(sequence == null ? 1 : Integer.parseInt(sequence));
-    
+    item.setType("movie");
+    item.setProvider("LOCAL");
+    item.setProviderId("");
+
     return item; 
   }
 }

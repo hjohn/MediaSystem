@@ -3,6 +3,7 @@ package hs.mediasystem.fs;
 import hs.mediasystem.LifoBlockingDeque;
 import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.db.ItemNotFoundException;
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.screens.movie.ItemUpdate;
 import hs.models.events.ListenerList;
@@ -79,9 +80,9 @@ public abstract class AbstractMediaTree implements MediaTree {
   
   private static abstract class ItemUpdater implements Runnable {
     private final Notifier<ItemUpdate> itemUpdateNotifier;
-    private final NamedItem item;
+    private final MediaItem item;
 
-    public ItemUpdater(Notifier<ItemUpdate> itemUpdateNotifier, NamedItem item) {
+    public ItemUpdater(Notifier<ItemUpdate> itemUpdateNotifier, MediaItem item) {
       this.itemUpdateNotifier = itemUpdateNotifier;
       this.item = item;
     }

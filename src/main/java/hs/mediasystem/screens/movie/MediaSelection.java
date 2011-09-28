@@ -29,12 +29,12 @@ import hs.ui.controls.Picture;
 import hs.ui.controls.VerticalGroup;
 import hs.ui.controls.listbox.SimpleList;
 import hs.ui.events.ItemsEvent;
+import hs.ui.image.ImageHandle;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.JList;
@@ -43,7 +43,7 @@ import javax.swing.border.EmptyBorder;
 
 public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
   private final BasicListModel<MediaItem> menuModel = new BasicListModel<MediaItem>(new ArrayList<MediaItem>());
-  private final Model<BufferedImage> poster = new ValueModel<BufferedImage>();
+  private final Model<ImageHandle> poster = new ValueModel<ImageHandle>();
   private final Model<ListCellRenderer<? super MediaItem>> listCellRenderer = new ValueModel<ListCellRenderer<? super MediaItem>>();
   private final Model<Integer> listFirstSelectedIndex = new ValueModel<Integer>(0);
   private final Model<Rectangle> listVisibleRectangle = new ValueModel<Rectangle>();
@@ -125,7 +125,7 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
           add(new HorizontalGroup() {{
             add(new Picture() {{
               weightX().set(2.0);
-              image.link(poster);
+              imageHandle.link(poster);
               opaque().set(false);
             }});
             add(new VerticalGroup() {{

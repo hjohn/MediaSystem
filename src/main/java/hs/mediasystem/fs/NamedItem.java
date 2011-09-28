@@ -4,8 +4,8 @@ import hs.mediasystem.db.Item;
 import hs.mediasystem.db.LocalItem;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
+import hs.ui.image.ImageHandle;
 
-import java.awt.image.BufferedImage;
 import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -13,7 +13,7 @@ import java.util.GregorianCalendar;
 public abstract class NamedItem implements MediaItem {
   private final MediaTree mediaTree;
   
-  protected NamedItem parent;
+  protected MediaItem parent;
 
   private LocalItem item;
   
@@ -32,11 +32,12 @@ public abstract class NamedItem implements MediaItem {
     return item;
   }
 
+  @Override
   public final String getTitle() {
     return item.getLocalTitle();
   }
   
-  public NamedItem getParent() {
+  public MediaItem getParent() {
     return parent;
   }
   
@@ -44,6 +45,7 @@ public abstract class NamedItem implements MediaItem {
     return item.getPath();
   }
   
+  @Override
   public String getSubtitle() {
     if(item.getLocalSubtitle() != null) {
       return item.getLocalSubtitle();
@@ -61,30 +63,32 @@ public abstract class NamedItem implements MediaItem {
     return "" + gc.get(Calendar.YEAR);
   }
   
+  @Override
   public int getSeason() {
     return item.getSeason();
   }
   
+  @Override
   public int getEpisode() {
     return item.getEpisode();
   }
     
-  public BufferedImage getBackground() {
+  public ImageHandle getBackground() {
     ensureDataLoaded();
 
-    return ImageCache.loadImage(getTitle() + "-background", item.getBackground());
+    return item.getBackground() == null ? null : new ImageHandle(item.getBackground(), getTitle() + "-background");
   }
   
-  public BufferedImage getBanner() {
+  public ImageHandle getBanner() {
     ensureDataLoaded();
 
-    return ImageCache.loadImage(getTitle() + "-banner", item.getBanner());
+    return item.getBanner() == null ? null : new ImageHandle(item.getBanner(), getTitle() + "-banner");
   }
   
-  public BufferedImage getPoster() {
+  public ImageHandle getPoster() {
     ensureDataLoaded();
     
-    return ImageCache.loadImage(getTitle() + "-poster", item.getPoster());
+    return item.getPoster() == null ? null : new ImageHandle(item.getPoster(), getTitle() + "-poster");
   }
   
   public String getPlot() {

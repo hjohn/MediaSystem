@@ -1,15 +1,15 @@
 package hs.mediasystem.screens.movie;
 
-import hs.mediasystem.fs.NamedItem;
+import hs.mediasystem.framework.MediaItem;
 
 public class ItemUpdate {
-  private final NamedItem namedItem;
+  private final MediaItem namedItem;
 
-  public ItemUpdate(NamedItem namedItem) {
+  public ItemUpdate(MediaItem namedItem) {
     this.namedItem = namedItem;
   }
 
-  public NamedItem getItem() {
+  public MediaItem getItem() {
     return namedItem;
   }
 }

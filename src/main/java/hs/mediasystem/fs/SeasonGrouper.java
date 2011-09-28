@@ -1,17 +1,12 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.framework.Grouper;
+import hs.mediasystem.framework.MediaItem;
 
-public class SeasonGrouper implements Grouper<NamedItem> {
+public class SeasonGrouper implements Grouper<MediaItem> {
 
   @Override
-  public Object getGroup(NamedItem item) {
-    if(item instanceof Episode) {
-      return ((Episode)item).getSeason();
-    }
-    else {
-      return "Unknown";
-    }
+  public Object getGroup(MediaItem item) {
+    return item.getSeason();
   }
-
 }

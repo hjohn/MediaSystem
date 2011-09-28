@@ -177,4 +177,9 @@ public class Item {
   public void setBanner(byte[] banner) {
     this.banner = banner;
   }
+  
+  @Override
+  public String toString() {
+    return "Item[id=" + id + ", localName=" + localName + ", title=" + title + ", subtitle=" + subtitle + ", path=" + path + "]";
+  }
 }

@@ -10,11 +10,12 @@ import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Renderer;
 import hs.ui.controls.Label;
 import hs.ui.controls.Picture;
+import hs.ui.image.ImageHandle;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.image.BufferedImage;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JComponent;
@@ -45,6 +46,7 @@ public class SeriesMediaTree extends AbstractMediaTree {
   public List<? extends MediaItem> children() {
     if(children == null) {
       children = new SerieScanner(this).scan(root);
+      Collections.sort(children, MediaItemComparator.INSTANCE);
     }
     
     return children;
@@ -65,10 +67,10 @@ public class SeriesMediaTree extends AbstractMediaTree {
       public JComponent render(MediaItem item, boolean hasFocus) {
         Serie serie = (Serie)item;
         
-        BufferedImage banner = serie.getBanner();
+        ImageHandle banner = serie.getBanner();
         
         if(banner != null) {
-          pic.image.set(banner);
+          pic.imageHandle.set(banner);
           pic.bgColor().set(new Color(0, 0, 0, 0));
           pic.minHeight().set(78);
           pic.maxHeight().set(78);

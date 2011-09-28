@@ -99,7 +99,7 @@ public class ItemsDao {
       statement.execute();
     }
     catch(SQLException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Exception while trying to store: " + item, e);
     }
   }
 

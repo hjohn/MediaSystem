@@ -1,6 +1,7 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.framework.Group;
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 
 import java.util.ArrayList;
@@ -9,15 +10,15 @@ import java.util.Collections;
 import java.util.List;
 
 public class Season extends NamedItem implements Group {
-  private final List<NamedItem> children = new ArrayList<NamedItem>();
+  private final List<MediaItem> children = new ArrayList<MediaItem>();
   
   public Season(MediaTree mediaTree, String title) {
     super(mediaTree, title);
   }
 
-  public void add(NamedItem child) {
+  public void add(MediaItem child) {
     children.add(child);
-    child.parent = this;
+    ((NamedItem)child).parent = this;
   }
 
   public int size() {
@@ -25,7 +26,7 @@ public class Season extends NamedItem implements Group {
   }
 
   @Override
-  public Collection<? extends NamedItem> children() {
+  public Collection<? extends MediaItem> children() {
     return Collections.unmodifiableCollection(children);
   }
   

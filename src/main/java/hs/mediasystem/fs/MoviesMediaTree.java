@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 
@@ -39,15 +38,15 @@ public class MoviesMediaTree extends AbstractMediaTree {
   public List<? extends MediaItem> children() {
     if(children == null) {
       List<Episode> episodes = new EpisodeScanner(this, new MovieDecoder()).scan(root);
-      List<NamedItem> items = new ArrayList<NamedItem>();
+      List<MediaItem> items = new ArrayList<MediaItem>();
       
-      Collection<List<NamedItem>> groupedItems = Groups.group(episodes, new TitleGrouper());
+      Collection<List<MediaItem>> groupedItems = Groups.group(episodes, new TitleGrouper());
       
-      for(List<NamedItem> group : groupedItems) {
+      for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
           EpisodeGroup g = new EpisodeGroup(this, group.get(0).getTitle());
           
-          for(NamedItem item : group) {
+          for(MediaItem item : group) {
             g.add(item);
           }
           
@@ -58,12 +57,7 @@ public class MoviesMediaTree extends AbstractMediaTree {
         }
       }
       
-      Collections.sort(items, new Comparator<NamedItem>() {
-        @Override
-        public int compare(NamedItem o1, NamedItem o2) {
-          return o1.getTitle().compareTo(o2.getTitle());
-        }
-      });
+      Collections.sort(items, MediaItemComparator.INSTANCE);
       
       children = items;
     }
