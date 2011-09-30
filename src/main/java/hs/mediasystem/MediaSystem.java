@@ -25,6 +25,8 @@ import java.nio.file.Paths;
 
 import javax.swing.JComponent;
 import javax.swing.Painter;
+import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
@@ -82,6 +84,20 @@ public class MediaSystem {
   private static final ControllerFactory CONTROLLER_FACTORY;
   
   static {
+    try {
+      UIManager.setLookAndFeel(new NimbusLookAndFeel());
+    }
+    catch(UnsupportedLookAndFeelException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        setUIDefaults();
+      }
+    });
     Ini ini = new Ini(new File("mediasystem.ini"));
     
     Section section = ini.getSection("general");
@@ -126,47 +142,14 @@ public class MediaSystem {
   private static final Painter<Object> DUMMY_PAINTER = new Painter<Object>() {
     @Override
     public void paint(Graphics2D g, Object object, int width, int height) {
-      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-      g.setColor(new Color(128, 0, 0, 32));
-      g.fillRect(0, 0, width, height);
+//      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//      g.setColor(new Color(128, 0, 0, 32));
+//      g.fillRect(0, 0, width, height);
     }
   };
   
-  public static void main(String[] args) throws UnsupportedLookAndFeelException {
-//    UIManager.put("background", new Color(0, 0, 0, 0));
-    //UIManager.put("control", new Color(0, 0, 0, 0));
-//    UIManager.put("List.opaque", true);
-//    UIManager.put("List:\"List.cellRenderer\".opaque", false);
-//    UIManager.put("Panel.opaque", true);
-//    UIManager.put("Label.opaque", true);
-    UIManager.put("ScrollPane.opaque", true);
-    UIManager.put("ScrollPane[Enabled].backgroundPainter", new Painter<JComponent>() {
-      @Override
-      public void paint(Graphics2D g, JComponent object, int width, int height) {
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setColor(new Color(0, 0, 0, 32));
-        g.fillRect(0, 0, width, height);
-      }
-    });
-    UIManager.put("ScrollPane[Enabled].borderPainter", DUMMY_PAINTER);
-    UIManager.put("ScrollPane[Enabled+Focused].borderPainter", DUMMY_PAINTER);
-    UIManager.put("List[Enabled].borderPainter", DUMMY_PAINTER);
-    UIManager.put("List[Enabled+Focused].borderPainter", DUMMY_PAINTER);
-//    UIManager.put("List.border", null);
-//    UIManager.put("List.background", new Color(0, 0, 0, 0));
-//    UIManager.put("Panel.background", new Color(0, 0, 0, 0));
-//    UIManager.put("ScrollPane.background", new Color(0, 255, 0));
-//    UIManager.put("TextArea.opaque", true);
-    UIManager.put("TextArea.background", new Color(0, 0, 0, 0));
-//    UIManager.put("TextArea[Enabled].backgroundPainter",null);
-//    UIManager.put("TextArea.disabled", new Color(255, 0, 0, 28));
-//    UIManager.put("TextPane.opaque", true);
-//    UIManager.put("TextPane.background", new Color(255, 0, 0, 28));
-//    UIManager.put("TextPane.disabled", new Color(255, 0, 0, 28));
-//    UIManager.put("TextField.background", new Color(0, 0, 0, 0));
-    
-    UIManager.setLookAndFeel(new NimbusLookAndFeel());
-    
+  public static void main(String[] args) {
+
 //    SynthLookAndFeel laf = new SynthLookAndFeel();
 //    UIManager.setLookAndFeel(laf);
     //SynthLookAndFeel.setStyleFactory(new MyStyleFactory());
@@ -189,5 +172,68 @@ public class MediaSystem {
 //      return defaultStyle;
 //    }
 //  }
+
   
+  private static void setUIDefaults() {
+    UIDefaults defaults = UIManager.getLookAndFeelDefaults();
+    
+  //  defaults.put("background", new Color(0, 0, 0, 0));
+    //defaults.put("control", new Color(0, 0, 0, 0));
+  //  defaults.put("List.opaque", true);
+  //  defaults.put("List:\"List.cellRenderer\".opaque", false);
+  //  defaults.put("Panel.opaque", true);
+  //  defaults.put("Label.opaque", true);
+    defaults.put("ScrollPane.opaque", true);
+    defaults.put("ScrollPane[Enabled].backgroundPainter", new Painter<JComponent>() {
+      @Override
+      public void paint(Graphics2D g, JComponent object, int width, int height) {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setColor(new Color(0, 0, 0, 32));
+        g.fillRect(0, 0, width, height);
+      }
+    });
+    defaults.put("ScrollPane[Enabled].borderPainter", DUMMY_PAINTER);
+    defaults.put("ScrollPane[Enabled+Focused].borderPainter", DUMMY_PAINTER);
+    defaults.put("List[Enabled].borderPainter", DUMMY_PAINTER);
+    defaults.put("List[Enabled+Focused].borderPainter", DUMMY_PAINTER);
+  //  defaults.put("List.border", null);
+  //  defaults.put("List.background", new Color(0, 0, 0, 0));
+  //  defaults.put("Panel.background", new Color(0, 0, 0, 0));
+  //  defaults.put("ScrollPane.background", new Color(0, 255, 0));
+  //  defaults.put("TextArea.opaque", true);
+    defaults.put("TextArea.background", new Color(0, 0, 0, 0));
+  //  defaults.put("TextArea[Enabled].backgroundPainter",null);
+  //  defaults.put("TextArea.disabled", new Color(255, 0, 0, 28));
+  //  defaults.put("TextPane.opaque", true);
+  //  defaults.put("TextPane.background", new Color(255, 0, 0, 28));
+  //  defaults.put("TextPane.disabled", new Color(255, 0, 0, 28));
+  //  defaults.put("TextField.background", new Color(0, 0, 0, 0));
+    
+    /*
+     * Remove scrollbar arrows 
+     */
+    
+    defaults.put("ScrollBar:\"ScrollBar.button\".size", 0);  // Removes the scrollbar arrows
+    defaults.put("ScrollBar.decrementButtonGap", 0); // No gap between scrollbar up arrow and thumb
+    defaults.put("ScrollBar.incrementButtonGap", 0); // No gap between scrollbar down arrow and thumb
+    
+    /*
+     * Change look of scrollbar thumb to something very simplistic 
+     */
+    
+    defaults.put("ScrollBar:ScrollBarThumb[Enabled].backgroundPainter", new Painter<JComponent>() {
+      @Override
+      public void paint(Graphics2D g, JComponent object, int width, int height) {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setColor(Constants.SCROLL_BAR_COLOR);
+//        g.setColor(new Color(0, 0, 0, 64));
+        g.fillRoundRect(2, 2, width - 4, height - 4, 12, 12);
+      }
+    });
+    
+    defaults.put("ScrollBar.opaque", true);
+    defaults.put("ScrollBar.background", new Color(0, 0, 0, 1));
+    
+    defaults.put("ScrollBar:ScrollBarTrack[Enabled].backgroundPainter", DUMMY_PAINTER);
+  }
 }

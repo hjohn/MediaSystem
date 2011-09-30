@@ -10,6 +10,7 @@ import java.awt.Font;
 
 public class Constants {
   public static final Model<Color> MAIN_TEXT_COLOR = new ValueModel<Color>(new Color(155, 190, 255, 200));
+  public static final Color SCROLL_BAR_COLOR = new Color(155, 190, 255, 128);
   public static final Model<Font> HEADER_FONT = new ValueModel<Font>(new Font("sans serif", Font.BOLD, 14));
   public static final Model<Font> INFO_HEADER_FONT = new ValueModel<Font>(new Font("sans serif", Font.BOLD, 12));
   public static final Model<Font> INFO_TEXT_FONT = new ValueModel<Font>(new Font("sans serif", Font.PLAIN, 14));
