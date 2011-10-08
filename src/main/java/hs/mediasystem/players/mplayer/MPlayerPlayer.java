@@ -2,11 +2,16 @@ package hs.mediasystem.players.mplayer;
 
 import hs.mediasystem.framework.Player;
 
+import java.awt.Color;
+import java.awt.Frame;
+import java.awt.Window;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.PrintStream;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
@@ -18,36 +23,55 @@ public class MPlayerPlayer implements Player {
   
   private final PrintStream commandStream;
   private final LineNumberReader resultStream;
+  private final boolean useFrame;
   
   private final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
-  
+
+  private Frame frame;
   private boolean isPlaying;
   
-  public MPlayerPlayer(Path mplayerPath) {
+  public MPlayerPlayer(Path mplayerPath, boolean useFrame) {
+    this.useFrame = useFrame;
+    
     try {
-      final String[] commands = new String[] {
-          mplayerPath.toString(),
+      List<String> commands = new ArrayList<String>();
+      
+      commands.add(mplayerPath.toString());
+      
+      if(useFrame) {
+        frame = new Frame();
+        frame.setUndecorated(true);
+        frame.setBackground(Color.BLACK);
+        frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+        frame.setVisible(true);
+        
+        commands.add("-wid");
+        commands.add("" + getWindowId(frame));
+      } 
+      else {
+        commands.add("-fixed-vo");
+      }
+      
+      commands.add("-fs");
+      commands.add("-vo");
+      commands.add("direct3d");
+      commands.add("-idle");
+      commands.add("-slave");
+      commands.add("-quiet");
+      commands.add("-noar");
+      commands.add("-noconsolecontrols");
+      commands.add("-nomouseinput");
+      commands.add("-nolirc");
+      commands.add("-nojoystick");
+      commands.add("-msglevel");
+      commands.add("statusline=6:global=6");
+      
   //        "-nokeepaspect",
   //        "-geometry", "0:0",
   //        "-colorkey", "0x101010",
-          "-fs",
-          "-vo", "direct3d",   // gl2 only does overlay correctly when spread over 2 monitors
-          "-idle",
-          "-slave",
-          "-quiet",
-          "-fixed-vo",
-          "-noar",
-          "-noconsolecontrols",
-          "-nomouseinput",
-          "-nolirc",
-          "-nojoystick",
-          "-msglevel", "statusline=6:global=6"
-          
        //   "-ontop"
-          
-      };
   
-      final Process process = Runtime.getRuntime().exec(commands);
+      final Process process = Runtime.getRuntime().exec(commands.toArray(new String[] {}));
             
       commandStream = new PrintStream(process.getOutputStream());
       resultStream = new LineNumberReader(new InputStreamReader(process.getInputStream()));
@@ -178,6 +202,10 @@ public class MPlayerPlayer implements Player {
   @Override
   public void dispose() {
     sendCommand("quit");
+    
+    if(useFrame) {
+      frame.dispose();
+    }
   }
 
   @Override
@@ -244,5 +272,14 @@ public class MPlayerPlayer implements Player {
     setProperty("subtitle_delay", ((float)delay) / 1000);
     sendCommand("osd_show_text \"subtitle delay: %4.1f s\"", ((float)delay) / 1000);
     subtitleDelay = delay;
+  }
+  
+  @SuppressWarnings({"restriction", "deprecation"})
+  private static long getWindowId(Window window) {
+    if(window.getPeer() instanceof sun.awt.windows.WComponentPeer) {
+      return ((sun.awt.windows.WComponentPeer)window.getPeer()).getHWnd();
+    }
+    
+    throw new RuntimeException("unable to get wid, window.getPeer().getClass(): " + window.getPeer().getClass());
   }
 }

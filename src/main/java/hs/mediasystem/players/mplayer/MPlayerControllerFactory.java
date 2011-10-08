@@ -34,6 +34,6 @@ public class MPlayerControllerFactory implements ControllerFactory {
     overlayFrame.maximized().set(true);
     overlayFrame.visible().set(true);
     
-    return new Controller(new MPlayerPlayer(mplayerPath), overlayFrame);
+    return new Controller(new MPlayerPlayer(mplayerPath, true), overlayFrame);
   }
 }
