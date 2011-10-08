@@ -74,10 +74,6 @@ public class Controller {
         }
         
         getMediaPlayer().setPosition(time);
-//        System.out.println("isFinished() : " + getMediaPlayer().isPlaying() + " : " + getMediaPlayer().getPosition() + " : " + getMediaPlayer().getTime());
-//        if(!getMediaPlayer().isPlaying()) {
-//          getMediaPlayer().play();
-//        }
       }
     });
     
@@ -97,10 +93,43 @@ public class Controller {
         }
         
         getMediaPlayer().setPosition(time);
-//        System.out.println("isFinished() : " + getMediaPlayer().isPlaying() + " : " + getMediaPlayer().getPosition() + " : " + getMediaPlayer().getTime());
+      }
+    });
+
+    put(KeyEvent.VK_NUMPAD2, new KeyHandler() {
+      @Override
+      public void keyPressed() {
+        long time = getMediaPlayer().getPosition();
+        
+        time -= 90 * 1000;
+        
+        if(time < 0) {
+          time = 0;
+        }
+        
+        getMediaPlayer().setPosition(time);
       }
     });
     
+    put(KeyEvent.VK_NUMPAD8, new KeyHandler() {
+      @Override
+      public void keyPressed() {
+        long time = getMediaPlayer().getPosition();
+        
+        time += 90 * 1000;
+        
+        if(time > getMediaPlayer().getLength() - 1000) {
+          time = getMediaPlayer().getLength() - 1000;
+          
+          if(time < 0) {
+            time = 0;
+          }
+        }
+        
+        getMediaPlayer().setPosition(time);
+      }
+    });
+
     put(KeyEvent.VK_S, new KeyHandler() {
       @Override
       public void keyPressed() {
