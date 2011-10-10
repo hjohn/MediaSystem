@@ -198,12 +198,6 @@ public class Controller {
     glassPane2.add(glassPane.getComponent(), BorderLayout.CENTER);
     glassPane2.setVisible(true);
 
-    SwingTimerTimingSource timingSource = new SwingTimerTimingSource();
-    
-    timingSource.init();
-    
-    Animator.setDefaultTimingSource(timingSource);
-
     DefaultKeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
       private long lastKeyProcessedTime;  // used to avoid flooding MPlayer...
       
@@ -455,6 +449,9 @@ public class Controller {
     return navigationHistory.current().copy(name);
   }
   
+  private final VideoPositionOverlay overlay = new VideoPositionOverlay();
+  private final VerticalGroup bar = new VerticalGroup();
+  
   public void skip(long millis) {
     long time = getMediaPlayer().getPosition();
     final long length = getMediaPlayer().getLength();
@@ -469,31 +466,13 @@ public class Controller {
       time = 0;
     }
     
-    final long adjustedTime = time;
-    
     getMediaPlayer().setPosition(time);
     
-    final VerticalGroup bar = new VerticalGroup();
-
-    
+    overlay.setPosition(time / length);
     bar.weightX().set(1.0);
     bar.weightY().set(1.0);
     
-    final VideoPositionOverlay overlay = new VideoPositionOverlay(time, length);
-    
-    TimingTarget target = new TimingTargetAdapter() {
-      @Override
-      public void timingEvent(Animator source, double fraction) {
-        overlay.setTransparency(fraction);
-        bar.repaint();
-      }
-    };
-    
-    bar.setPainter(overlay);
-    
-    Animator animator = new Animator.Builder().setDuration(5000, TimeUnit.MILLISECONDS).setRepeatCount(4).addTarget(target).build();
-        
-    animator.start();
+    bar.setPainter(overlay); 
     
     glassPane.removeAll();
     glassPane.add(bar);
@@ -501,24 +480,59 @@ public class Controller {
     glassPane.revalidate();
     glassPane.getComponent().validate();
     
+    overlay.reset();
+    
 //    System.err.println("glassPane = " + glassPane.getComponent().getSize());
 //    System.err.println("bar = " + bar.getComponent().getSize());
   }
   
-  private static class VideoPositionOverlay extends TimingTargetAdapter implements Painter {
+  private class VideoPositionOverlay extends TimingTargetAdapter implements Painter {
+    private final Animator fadeIn = new Animator.Builder().setDuration(500, TimeUnit.MILLISECONDS).addTarget(this).build();
+    private final Animator hold = new Animator.Builder().setInterpolator(new Interpolator() {
+      @Override
+      public double interpolate(double fraction) {
+        return 1.0;
+      }
+    }).setDuration(1000, TimeUnit.MILLISECONDS).addTarget(this).build();
+    private final Animator fadeOut = new Animator.Builder().setInterpolator(new Interpolator() {
+      @Override
+      public double interpolate(double fraction) {
+        return 1.0 - fraction;
+      }
+    }).setDuration(2500, TimeUnit.MILLISECONDS).addTarget(this).build();
     
-    private final long adjustedTime;
-    private final long length;
     private double transparency;
-
-    public VideoPositionOverlay(long adjustedTime, long length) {
-      this.adjustedTime = adjustedTime;
-      this.length = length;
+    private double position;
+    
+    public void setPosition(double position) {
+      this.position = position;
     }
     
-    public void setTransparency(double fraction) {
+    public synchronized void reset() {
+      if(hold.isRunning()) {
+        hold.cancel();
+        hold.start();
+      }
+      else if(fadeOut.isRunning() || !fadeIn.isRunning()) {
+        fadeOut.cancel();
+        fadeIn.start();
+      }
+    }
+    
+    @Override
+    public synchronized void end(Animator source) {
+      if(source == fadeIn) {
+        hold.start();
+      }
+      else if(source == hold) {
+        fadeOut.start();
+      }
+    }
+    
+    @Override
+    public synchronized void timingEvent(Animator source, double fraction) {
       this.transparency = fraction;
-      System.err.println("setTransparency called with : " + fraction);
+      bar.repaint();
     }
 
     @Override
@@ -529,15 +543,13 @@ public class Controller {
       int h = height * 5 / 100;
       int b = 10;
       
-      
-      
       g.setStroke(new BasicStroke(6.0f));
       Color c = Constants.MAIN_TEXT_COLOR.get();
       g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), (int)(255 * transparency)));
       
       g.drawRect(x, y, w, h);
       
-      g.fillRect(x + b, y + b, (int)((w - 2 * b) * adjustedTime / length), h - 2 * b);
+      g.fillRect(x + b, y + b, (int)((w - 2 * b) * position), h - 2 * b);
     }
   }
 }

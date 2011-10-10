@@ -52,9 +52,15 @@ public class MPlayerPlayer implements Player {
         commands.add("-fixed-vo");
       }
       
+      commands.add("-cache");
+      commands.add("8192");
+      commands.add("-autosync");
+      commands.add("30");
+      commands.add("-ao");
+      commands.add("win32");
       commands.add("-fs");
       commands.add("-vo");
-      commands.add("direct3d");
+      commands.add("gl2");
       commands.add("-idle");
       commands.add("-slave");
       commands.add("-quiet");
