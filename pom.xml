@@ -60,6 +60,16 @@
 			<scope>system</scope>
 			<systemPath>${basedir}/thetvdbapi-1.2-SNAPSHOT-r81.jar</systemPath>
 		</dependency>
+		<dependency>
+			<groupId>net.java.timingframework</groupId>
+			<artifactId>timingframework-core</artifactId>
+			<version>4.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>net.java.timingframework</groupId>
+			<artifactId>timingframework-swing</artifactId>
+			<version>4.1.0</version>
+		</dependency>
 	</dependencies>
     <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

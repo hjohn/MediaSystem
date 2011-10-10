@@ -16,11 +16,14 @@ import hs.ui.frames.AbstractFrame;
 import hs.ui.image.ImageHandle;
 import hs.ui.swing.Painter;
 
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Graphics2D;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.color.ColorSpace;
 import java.awt.event.KeyEvent;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,10 +34,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
+import javax.swing.plaf.nimbus.NimbusStyle;
+
+import org.jdesktop.core.animation.timing.Animator;
+import org.jdesktop.core.animation.timing.Interpolator;
+import org.jdesktop.core.animation.timing.TimingTarget;
+import org.jdesktop.core.animation.timing.TimingTargetAdapter;
+import org.jdesktop.core.animation.timing.interpolators.LinearInterpolator;
+import org.jdesktop.core.animation.timing.sources.ScheduledExecutorTimingSource;
+import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
 
 public class Controller {
   private final Player player;
@@ -65,68 +81,28 @@ public class Controller {
     put(KeyEvent.VK_NUMPAD4, new KeyHandler() {
       @Override
       public void keyPressed() {
-        long time = getMediaPlayer().getPosition();
-        
-        time -= 10 * 1000;
-        
-        if(time < 0) {
-          time = 0;
-        }
-        
-        getMediaPlayer().setPosition(time);
+        skip(-10 * 1000);
       }
     });
     
     put(KeyEvent.VK_NUMPAD6, new KeyHandler() {
       @Override
       public void keyPressed() {
-        long time = getMediaPlayer().getPosition();
-        
-        time += 10 * 1000;
-        
-        if(time > getMediaPlayer().getLength() - 1000) {
-          time = getMediaPlayer().getLength() - 1000;
-          
-          if(time < 0) {
-            time = 0;
-          }
-        }
-        
-        getMediaPlayer().setPosition(time);
+        skip(10 * 1000);
       }
     });
 
     put(KeyEvent.VK_NUMPAD2, new KeyHandler() {
       @Override
       public void keyPressed() {
-        long time = getMediaPlayer().getPosition();
-        
-        time -= 90 * 1000;
-        
-        if(time < 0) {
-          time = 0;
-        }
-        
-        getMediaPlayer().setPosition(time);
+        skip(-90 * 1000);
       }
     });
     
     put(KeyEvent.VK_NUMPAD8, new KeyHandler() {
       @Override
       public void keyPressed() {
-        long time = getMediaPlayer().getPosition();
-        
-        time += 90 * 1000;
-        
-        if(time > getMediaPlayer().getLength() - 1000) {
-          time = getMediaPlayer().getLength() - 1000;
-          
-          if(time < 0) {
-            time = 0;
-          }
-        }
-        
-        getMediaPlayer().setPosition(time);
+        skip(90 * 1000);
       }
     });
 
@@ -205,6 +181,8 @@ public class Controller {
   }};
   
   private final AbstractFrame<?> parentFrame;
+  private final JPanel glassPane2;
+  private final VerticalGroup glassPane = new VerticalGroup();
   private final Thread windowToFrontThread;
   
   private abstract class KeyHandler {
@@ -214,7 +192,18 @@ public class Controller {
   public Controller(final Player player, final AbstractFrame<?> parentFrame) {
     this.player = player;
     this.parentFrame = parentFrame;
+    glassPane2 = (JPanel)((JFrame)parentFrame.getContainer()).getGlassPane();
     
+    glassPane2.setLayout(new BorderLayout());
+    glassPane2.add(glassPane.getComponent(), BorderLayout.CENTER);
+    glassPane2.setVisible(true);
+
+    SwingTimerTimingSource timingSource = new SwingTimerTimingSource();
+    
+    timingSource.init();
+    
+    Animator.setDefaultTimingSource(timingSource);
+
     DefaultKeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
       private long lastKeyProcessedTime;  // used to avoid flooding MPlayer...
       
@@ -464,5 +453,92 @@ public class Controller {
 
   public View cloneCurrentView(String name) {
     return navigationHistory.current().copy(name);
-  } 
+  }
+  
+  public void skip(long millis) {
+    long time = getMediaPlayer().getPosition();
+    final long length = getMediaPlayer().getLength();
+    
+    time += millis;
+    
+    if(time > length - 1000) {
+      time = length - 1000;
+    }
+
+    if(time < 0) {
+      time = 0;
+    }
+    
+    final long adjustedTime = time;
+    
+    getMediaPlayer().setPosition(time);
+    
+    final VerticalGroup bar = new VerticalGroup();
+
+    
+    bar.weightX().set(1.0);
+    bar.weightY().set(1.0);
+    
+    final VideoPositionOverlay overlay = new VideoPositionOverlay(time, length);
+    
+    TimingTarget target = new TimingTargetAdapter() {
+      @Override
+      public void timingEvent(Animator source, double fraction) {
+        overlay.setTransparency(fraction);
+        bar.repaint();
+      }
+    };
+    
+    bar.setPainter(overlay);
+    
+    Animator animator = new Animator.Builder().setDuration(5000, TimeUnit.MILLISECONDS).setRepeatCount(4).addTarget(target).build();
+        
+    animator.start();
+    
+    glassPane.removeAll();
+    glassPane.add(bar);
+    
+    glassPane.revalidate();
+    glassPane.getComponent().validate();
+    
+//    System.err.println("glassPane = " + glassPane.getComponent().getSize());
+//    System.err.println("bar = " + bar.getComponent().getSize());
+  }
+  
+  private static class VideoPositionOverlay extends TimingTargetAdapter implements Painter {
+    
+    private final long adjustedTime;
+    private final long length;
+    private double transparency;
+
+    public VideoPositionOverlay(long adjustedTime, long length) {
+      this.adjustedTime = adjustedTime;
+      this.length = length;
+    }
+    
+    public void setTransparency(double fraction) {
+      this.transparency = fraction;
+      System.err.println("setTransparency called with : " + fraction);
+    }
+
+    @Override
+    public void paint(Graphics2D g, int width, int height) {
+      int x = width * 10 / 100;
+      int y = height * 80 / 100;
+      int w = width * 80 / 100;
+      int h = height * 5 / 100;
+      int b = 10;
+      
+      
+      
+      g.setStroke(new BasicStroke(6.0f));
+      Color c = Constants.MAIN_TEXT_COLOR.get();
+      g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), (int)(255 * transparency)));
+      
+      g.drawRect(x, y, w, h);
+      
+      g.fillRect(x + b, y + b, (int)((w - 2 * b) * adjustedTime / length), h - 2 * b);
+    }
+  }
 }
+
