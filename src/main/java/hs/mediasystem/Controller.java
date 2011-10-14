@@ -23,7 +23,6 @@ import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Graphics2D;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
-import java.awt.color.ColorSpace;
 import java.awt.event.KeyEvent;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,15 +40,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
-import javax.swing.plaf.nimbus.NimbusStyle;
 
 import org.jdesktop.core.animation.timing.Animator;
-import org.jdesktop.core.animation.timing.Interpolator;
 import org.jdesktop.core.animation.timing.TimingTarget;
 import org.jdesktop.core.animation.timing.TimingTargetAdapter;
-import org.jdesktop.core.animation.timing.interpolators.LinearInterpolator;
-import org.jdesktop.core.animation.timing.sources.ScheduledExecutorTimingSource;
 import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
 
 public class Controller {
