@@ -42,11 +42,13 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import org.jdesktop.core.animation.timing.Animator;
-import org.jdesktop.core.animation.timing.TimingTarget;
+import org.jdesktop.core.animation.timing.Interpolator;
 import org.jdesktop.core.animation.timing.TimingTargetAdapter;
 import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
 
 public class Controller {
+  private static final SwingTimerTimingSource TIMING_SOURCE = new SwingTimerTimingSource();
+  
   private final Player player;
   private final VerticalGroup mainGroup;
   private final ImageHandle backgroundHandle;
@@ -54,6 +56,12 @@ public class Controller {
   private final StateCache stateCache = new StateCache();
   
   private boolean backgroundActive = true;
+
+  static {
+    TIMING_SOURCE.init();
+
+    Animator.setDefaultTimingSource(TIMING_SOURCE);
+  }
   
   private final Map<Integer, KeyHandler> videoKeyHandlers = new HashMap<Integer, KeyHandler>() {{
 //    put(KeyEvent.VK_ESCAPE, new KeyHandler() {
@@ -269,6 +277,7 @@ public class Controller {
         System.out.println("CONTROLLER: Exiting, escape pressed");
         getMediaPlayer().dispose();
         parentFrame.dispose();
+        TIMING_SOURCE.dispose();
       }
     });
     

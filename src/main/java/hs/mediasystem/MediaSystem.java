@@ -31,9 +31,6 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
-import org.jdesktop.core.animation.timing.Animator;
-import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
-
 import net.sf.jtmdb.GeneralSettings;
 
 // Minimal working system:
@@ -153,13 +150,6 @@ public class MediaSystem {
   };
   
   public static void main(String[] args) {
-
-
-    SwingTimerTimingSource timingSource = new SwingTimerTimingSource();
-    
-    timingSource.init();
-    
-    Animator.setDefaultTimingSource(timingSource);
     
 //    SynthLookAndFeel laf = new SynthLookAndFeel();
 //    UIManager.setLookAndFeel(laf);
