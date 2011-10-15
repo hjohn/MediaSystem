@@ -4,7 +4,7 @@ import hs.mediasystem.framework.AbstractBlock;
 import hs.mediasystem.framework.Extensions;
 import hs.mediasystem.framework.Screen;
 import hs.mediasystem.framework.View;
-import hs.mediasystem.players.mplayer.MPlayerControllerFactory;
+import hs.mediasystem.players.vlc.VLCControllerFactory;
 import hs.mediasystem.screens.Clock;
 import hs.mediasystem.screens.Header;
 import hs.mediasystem.screens.MainMenu;
@@ -30,9 +30,6 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
-
-import org.jdesktop.core.animation.timing.Animator;
-import org.jdesktop.swing.animation.timing.sources.SwingTimerTimingSource;
 
 import net.sf.jtmdb.GeneralSettings;
 
@@ -115,7 +112,8 @@ public class MediaSystem {
     GeneralSettings.setLogEnabled(true);
     GeneralSettings.setLogStream(System.out);
     
-    CONTROLLER_FACTORY = new MPlayerControllerFactory(Paths.get(section.get("mplayer.path")));
+//    CONTROLLER_FACTORY = new MPlayerControllerFactory(Paths.get(section.get("mplayer.path")));
+    CONTROLLER_FACTORY = new VLCControllerFactory();
         
     final AbstractBlock<?> mediaSystemBorder = new MediaSystemBorder();
     final AbstractBlock<?> header = new Header();
@@ -152,13 +150,6 @@ public class MediaSystem {
   };
   
   public static void main(String[] args) {
-
-
-    SwingTimerTimingSource timingSource = new SwingTimerTimingSource();
-    
-    timingSource.init();
-    
-    Animator.setDefaultTimingSource(timingSource);
     
 //    SynthLookAndFeel laf = new SynthLookAndFeel();
 //    UIManager.setLookAndFeel(laf);
