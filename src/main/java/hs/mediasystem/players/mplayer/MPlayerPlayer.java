@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,13 +58,13 @@ public class MPlayerPlayer implements Player {
       commands.add("-autosync");
       commands.add("30");
       commands.add("-ao");
-      commands.add("win32");
+      commands.add("dsound");
       commands.add("-fs");
       commands.add("-vo");
       commands.add("gl2");
       commands.add("-idle");
       commands.add("-slave");
-      commands.add("-quiet");
+      //commands.add("-quiet");
       commands.add("-noar");
       commands.add("-noconsolecontrols");
       commands.add("-nomouseinput");
@@ -144,7 +145,15 @@ public class MPlayerPlayer implements Player {
     try {
       queue.clear();
       sendCommand(command, parameters);
-      String result = queue.take();
+      String result = queue.poll(100, TimeUnit.MILLISECONDS);
+      if(result == null) {
+        sendCommand(command, parameters);
+        result = queue.poll(200, TimeUnit.MILLISECONDS);
+        
+        if(result == null) {
+          throw new RuntimeException();  // TODO this apparently happens when sending commands to mplayer in quick succession...
+        }
+      }
       System.out.println("MPLAYER: --> " + result);
       return result;
     }
