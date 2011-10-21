@@ -1,6 +1,7 @@
 package hs.mediasystem.players.mplayer;
 
 import hs.mediasystem.framework.Player;
+import hs.models.events.ListenerList;
 
 import java.awt.Color;
 import java.awt.Frame;
@@ -287,5 +288,10 @@ public class MPlayerPlayer implements Player {
     }
     
     throw new RuntimeException("unable to get wid, window.getPeer().getClass(): " + window.getPeer().getClass());
+  }
+
+  @Override
+  public ListenerList<String> onFinished() {
+    throw new UnsupportedOperationException("Method not implemented");
   }
 }

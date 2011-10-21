@@ -7,6 +7,7 @@ import hs.mediasystem.framework.View;
 import hs.mediasystem.fs.Episode;
 import hs.models.BasicListModel;
 import hs.models.ListModel;
+import hs.models.events.Listener;
 import hs.sublight.SubtitleDescriptor;
 import hs.ui.AcceleratorScope;
 import hs.ui.ControlListener;
@@ -111,14 +112,7 @@ public class Controller {
     put(KeyEvent.VK_S, new KeyHandler() {
       @Override
       public void keyPressed() {
-        getMediaPlayer().stop();
-        setBackground(true);
-        if(activeScreen() == MediaSystem.VIDEO_PLAYING) {
-          back();
-        }
-        else {
-          mainGroup.repaint();
-        }
+        stop();
       }
     });
 
@@ -199,6 +193,13 @@ public class Controller {
     glassPane2.setLayout(new BorderLayout());
     glassPane2.add(glassPane.getComponent(), BorderLayout.CENTER);
     glassPane2.setVisible(true);
+    
+    player.onFinished().call(new Listener() {
+      @Override
+      public void onEvent() {
+        stop();
+      }
+    });
 
     DefaultKeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
       private long lastKeyProcessedTime;  // used to avoid flooding MPlayer...
@@ -419,6 +420,17 @@ public class Controller {
     windowToFrontThread.interrupt();
   }
   
+  public void stop() {
+    getMediaPlayer().stop();
+    setBackground(true);
+    if(activeScreen() == MediaSystem.VIDEO_PLAYING) {
+      back();
+    }
+    else {
+      mainGroup.repaint();
+    }
+  }
+  
   public Episode getCurrentItem() {
     return currentItem;
   }
@@ -471,7 +483,7 @@ public class Controller {
     
     getMediaPlayer().setPosition(time);
     
-    overlay.setPosition(time / length);
+    overlay.setPosition((double)time / length);
     bar.weightX().set(1.0);
     bar.weightY().set(1.0);
     
