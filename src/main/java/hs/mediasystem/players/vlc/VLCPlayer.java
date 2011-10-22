@@ -1,30 +1,57 @@
 package hs.mediasystem.players.vlc;
 
 import hs.mediasystem.framework.Player;
+import hs.models.events.ListenerList;
+import hs.models.events.Notifier;
 
+import java.awt.BorderLayout;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Frame;
 import java.nio.file.Path;
 
 import javax.swing.JFrame;
 
-import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
+import uk.co.caprica.vlcj.player.MediaPlayer;
+import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
+import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 public class VLCPlayer implements Player {
-  private final EmbeddedMediaPlayerComponent mediaPlayerComponent;
   private final EmbeddedMediaPlayer mediaPlayer;
-  private final JFrame frame;
+  private final Frame frame;
+  
+  private final Notifier<String> finishedNotifier = new Notifier<String>();
+
+  @Override
+  public ListenerList<String> onFinished() {
+    return finishedNotifier.getListenerList();
+  }
   
   public VLCPlayer() {
-    mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
+    String[] libvlcArgs = {"-V", "directx"};  // opengl direct3d
+    MediaPlayerFactory factory = new MediaPlayerFactory(libvlcArgs);
+
+    mediaPlayer = factory.newEmbeddedMediaPlayer();
     
-    frame = new JFrame();
+    Canvas canvas = new Canvas();
+    
+    frame = new Frame();
+    
+    frame.setLayout(new BorderLayout());
     frame.setUndecorated(true);
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-    frame.setContentPane(mediaPlayerComponent);
+    frame.add(canvas, BorderLayout.CENTER);
+    frame.setBackground(new Color(0, 0, 0));
     frame.setVisible(true);
-
-    mediaPlayer = mediaPlayerComponent.getMediaPlayer();
+    
+    mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
+    mediaPlayer.addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
+      @Override
+      public void finished(MediaPlayer mediaPlayer) {
+        finishedNotifier.notifyListeners("FINISH");
+      }
+    });
   }
   
   @Override

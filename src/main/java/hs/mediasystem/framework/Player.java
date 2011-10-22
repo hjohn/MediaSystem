@@ -1,5 +1,7 @@
 package hs.mediasystem.framework;
 
+import hs.models.events.ListenerList;
+
 import java.nio.file.Path;
 
 public interface Player {
@@ -40,4 +42,6 @@ public interface Player {
 
   int getSubtitleDelay();
   void setSubtitleDelay(int delay);
+  
+  ListenerList<String> onFinished();
 }
