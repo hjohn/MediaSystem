@@ -33,6 +33,8 @@ import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import net.sf.jtmdb.GeneralSettings;
 
+import com.sun.jna.NativeLibrary;
+
 // Minimal working system:
 // TODO Make clock in standard border
 // TODO Download + show subtitles, also multiple different ones should work without problem; store them with file I guess
@@ -155,7 +157,8 @@ public class MediaSystem {
 //    UIManager.setLookAndFeel(laf);
     //SynthLookAndFeel.setStyleFactory(new MyStyleFactory());
     
-
+    NativeLibrary.addSearchPath("libvlc", "c:/program files (x86)/VideoLAN/VLC");
+    
     Controller controller = CONTROLLER_FACTORY.create();
     
     controller.forward(new View("Root", MAIN_MENU));
