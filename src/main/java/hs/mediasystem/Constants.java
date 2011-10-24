@@ -15,6 +15,8 @@ public class Constants {
   public static final Model<Font> INFO_HEADER_FONT = new ValueModel<Font>(new Font("sans serif", Font.BOLD, 12));
   public static final Model<Font> INFO_TEXT_FONT = new ValueModel<Font>(new Font("sans serif", Font.PLAIN, 14));
   
+  public static final Color PANEL_BG_COLOR = new Color(0, 0, 0, 128);
+  
   public static final int HEIGHT = 48;
   public static final int SUBTITLE_HEIGHT = 16;
   public static final int TITLE_HEIGHT = HEIGHT - SUBTITLE_HEIGHT;

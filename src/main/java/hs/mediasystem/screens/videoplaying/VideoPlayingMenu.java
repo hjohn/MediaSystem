@@ -110,7 +110,10 @@ public class VideoPlayingMenu extends AbstractBlock<NoConfig> {
         }});
         add(new VerticalGroup() {{
           weightX().set(0.25);
-          add(new Button()); // TODO Here so something can get focus... HACK!  Need to figure out a better way
+          add(new Button() {{
+            bgColor().set(new Color(0, 0, 0, 0));
+            fgColor().set(new Color(0, 0, 0, 0));
+          }}); // TODO Here so something can get focus... HACK!  Need to figure out a better way
         }});
       }});
       add(new HorizontalGroup() {{

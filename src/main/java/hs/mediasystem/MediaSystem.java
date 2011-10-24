@@ -204,7 +204,7 @@ public class MediaSystem {
       @Override
       public void paint(Graphics2D g, JComponent object, int width, int height) {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setColor(new Color(0, 0, 0, 32));
+        g.setColor(Constants.PANEL_BG_COLOR);
         g.fillRect(0, 0, width, height);
       }
     });
