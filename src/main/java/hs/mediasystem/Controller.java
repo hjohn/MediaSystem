@@ -439,13 +439,17 @@ public class Controller {
 
   public void setSubtitle(SubtitleDescriptor item) {
     try {
+      System.out.println("Fetching subtitle...");
       ByteBuffer fetch = item.fetch();
       
+      System.out.println("Writing to disk...");
       FileOutputStream os = new FileOutputStream("tempsubtitle.srt");
       
       os.getChannel().write(fetch);
       os.close();
-      
+
+      System.out.println("Setting subtitle...");
+
       getMediaPlayer().showSubtitle("tempsubtitle.srt");
       
 //      System.out.println("sub track = " + getMediaPlayer().getSpu());

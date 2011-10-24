@@ -43,7 +43,10 @@ public class EpisodesMediaTree extends AbstractMediaTree {
       
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
-          Season s = new Season(this, group.get(0) instanceof Episode ? "" + ((Episode)group.get(0)).getSeason() : "Unknown");
+          int season = group.get(0) instanceof Episode ? ((Episode)group.get(0)).getSeason() : 0;
+          Season s = new Season(this, season == 0 ? "Unknown" : "" + season, season);
+          
+          Collections.sort(group, MediaItemComparator.INSTANCE);
           
           for(MediaItem item : group) {
             s.add(item);

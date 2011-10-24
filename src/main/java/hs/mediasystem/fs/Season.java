@@ -11,9 +11,11 @@ import java.util.List;
 
 public class Season extends NamedItem implements Group {
   private final List<MediaItem> children = new ArrayList<MediaItem>();
+  private final int season;
   
-  public Season(MediaTree mediaTree, String title) {
+  public Season(MediaTree mediaTree, String title, int season) {
     super(mediaTree, title);
+    this.season = season;
   }
 
   public void add(MediaItem child) {
@@ -38,6 +40,11 @@ public class Season extends NamedItem implements Group {
   @Override
   public boolean isLeaf() {
     return false;
+  }
+  
+  @Override
+  public int getSeason() {
+    return season;
   }
   
   @Override

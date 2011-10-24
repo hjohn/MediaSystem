@@ -63,6 +63,10 @@ public abstract class NamedItem implements MediaItem {
   }
   
   public String getYear() {
+    if(item.getReleaseDate() == null) {
+      return null;
+    }
+    
     GregorianCalendar gc = new GregorianCalendar(2000, 0, 1);
     gc.setTime(item.getReleaseDate());
     return "" + gc.get(Calendar.YEAR);

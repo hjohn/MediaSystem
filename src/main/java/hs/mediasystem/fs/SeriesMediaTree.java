@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
-
 public class SeriesMediaTree extends AbstractMediaTree {
   private final Path root;
 

@@ -39,7 +39,6 @@ public class VideoPlayingMenu extends AbstractBlock<NoConfig> {
         public void onEvent(VerticalGroup control) {
           if(controller.getCurrentItem() instanceof Episode) { // TODO only useful to get subtitles for non-streamed media
             System.out.println("Home was pressed");
-            System.out.println("Looking for subtitles!");
             
             Integer year = null;
             try {
@@ -47,9 +46,19 @@ public class VideoPlayingMenu extends AbstractBlock<NoConfig> {
             }
             catch(NumberFormatException e) {
             }
+
+            Short season = (short)controller.getCurrentItem().getSeason(); 
+            Integer episode = controller.getCurrentItem().getEpisode();
             
+            if(season == 0) {
+              season = null;
+              episode = null;
+            }
+
+            System.out.println("Looking for subtitles: " + controller.getCurrentItem().getTitle() + "; " +  year + "; " + season + "; " + episode + "; English");
+
             List<SubtitleDescriptor> subtitleList2 = 
-              client.getSubtitleList(controller.getCurrentItem().getTitle(), year, null, null, "English");
+              client.getSubtitleList(controller.getCurrentItem().getTitle(), year, season, episode, "English");
   //          client.getSubtitleList(controller.getCurrentItem().getTitle(), null, (short)1, 3, "English");
             System.out.println(subtitleList2);
             
