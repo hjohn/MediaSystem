@@ -14,7 +14,6 @@ import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Renderer;
 import hs.mediasystem.framework.State;
 import hs.mediasystem.framework.View;
-import hs.mediasystem.fs.Episode;
 import hs.mediasystem.fs.NamedItem;
 import hs.models.BasicListModel;
 import hs.models.Model;
@@ -210,9 +209,9 @@ public class MediaSelection extends AbstractBlock<MediaSelectionConfig> {
             public void onEvent(ItemsEvent<MediaItem> event) {
               final MediaItem item = event.getFirstItem();
 
-              if(item instanceof Episode) {
+              if(item.isLeaf()) {
                 controller.setBackground(false);
-                controller.playMedia((Episode)item);
+                controller.playMedia(item);
                 controller.forward(new View("Play", MediaSystem.VIDEO_PLAYING));
               }
               else if(item.isRoot()) {

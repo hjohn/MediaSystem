@@ -36,6 +36,11 @@ public class Season extends NamedItem implements Group {
   }
   
   @Override
+  public boolean isLeaf() {
+    return false;
+  }
+  
+  @Override
   public MediaTree getRoot() {
     return null;
   }

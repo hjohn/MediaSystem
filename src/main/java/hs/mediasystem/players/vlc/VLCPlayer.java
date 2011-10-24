@@ -8,10 +8,11 @@ import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Frame;
-import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.JFrame;
 
+import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.MediaPlayerFactory;
@@ -47,16 +48,29 @@ public class VLCPlayer implements Player {
     
     mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
     mediaPlayer.addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
+      private AtomicInteger ignoreFinish = new AtomicInteger();
+      
+      @Override
+      public void mediaSubItemAdded(MediaPlayer mediaPlayer, libvlc_media_t subItem) {
+        ignoreFinish.incrementAndGet();
+      }
+      
       @Override
       public void finished(MediaPlayer mediaPlayer) {
-        finishedNotifier.notifyListeners("FINISH");
+        if(ignoreFinish.get() == 0) {
+          finishedNotifier.notifyListeners("FINISH");
+        }
+        else {
+          ignoreFinish.decrementAndGet();
+        }
       }
     });
   }
   
   @Override
-  public void play(Path path) {
-    mediaPlayer.playMedia(path.toString());
+  public void play(String uri) {
+    mediaPlayer.setPlaySubItems(true);
+    mediaPlayer.playMedia(uri);
   }
 
   @Override

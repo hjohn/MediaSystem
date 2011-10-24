@@ -2,11 +2,9 @@ package hs.mediasystem.framework;
 
 import hs.models.events.ListenerList;
 
-import java.nio.file.Path;
-
 public interface Player {
 
-  void play(Path path);
+  void play(String uri);
 
   void pause();
 

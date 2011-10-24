@@ -5,6 +5,7 @@ import hs.mediasystem.MediaSystem;
 import hs.mediasystem.framework.AbstractBlock;
 import hs.mediasystem.framework.NoConfig;
 import hs.mediasystem.framework.View;
+import hs.mediasystem.fs.Episode;
 import hs.smartlayout.Anchor;
 import hs.sublight.SublightSubtitleClient;
 import hs.sublight.SubtitleDescriptor;
@@ -36,25 +37,27 @@ public class VideoPlayingMenu extends AbstractBlock<NoConfig> {
       setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), AcceleratorScope.ANCESTOR_WINDOW, new ControlListener<VerticalGroup>() {
         @Override
         public void onEvent(VerticalGroup control) {
-          System.out.println("Home was pressed");
-          System.out.println("Looking for subtitles!");
-          
-          Integer year = null;
-          try {
-            year = Integer.parseInt(controller.getCurrentItem().getYear());
+          if(controller.getCurrentItem() instanceof Episode) { // TODO only useful to get subtitles for non-streamed media
+            System.out.println("Home was pressed");
+            System.out.println("Looking for subtitles!");
+            
+            Integer year = null;
+            try {
+              year = Integer.parseInt(((Episode)controller.getCurrentItem()).getYear());
+            }
+            catch(NumberFormatException e) {
+            }
+            
+            List<SubtitleDescriptor> subtitleList2 = 
+              client.getSubtitleList(controller.getCurrentItem().getTitle(), year, null, null, "English");
+  //          client.getSubtitleList(controller.getCurrentItem().getTitle(), null, (short)1, 3, "English");
+            System.out.println(subtitleList2);
+            
+            controller.subtitles.clear();
+            controller.subtitles.addAll(subtitleList2);
+            
+            controller.forward(new View("Playback Options", MediaSystem.VIDEO_OPTIONS));
           }
-          catch(NumberFormatException e) {
-          }
-          
-          List<SubtitleDescriptor> subtitleList2 = 
-            client.getSubtitleList(controller.getCurrentItem().getTitle(), year, null, null, "English");
-//          client.getSubtitleList(controller.getCurrentItem().getTitle(), null, (short)1, 3, "English");
-          System.out.println(subtitleList2);
-          
-          controller.subtitles.clear();
-          controller.subtitles.addAll(subtitleList2);
-          
-          controller.forward(new View("Playback Options", MediaSystem.VIDEO_OPTIONS));
         }
       });
    // '9'               = video: volume down         --> Volume Down

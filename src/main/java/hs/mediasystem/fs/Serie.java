@@ -15,6 +15,11 @@ public class Serie extends NamedItem {
   }
   
   @Override
+  public boolean isLeaf() {
+    return false;
+  }
+  
+  @Override
   public MediaTree getRoot() {
     return new EpisodesMediaTree(getPath(), this);
   }
