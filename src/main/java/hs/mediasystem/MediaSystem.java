@@ -18,6 +18,9 @@ import hs.sublight.SublightSubtitleClient;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.io.File;
 import java.nio.file.Path;
@@ -84,7 +87,8 @@ public class MediaSystem {
   public static final Screen VIDEO_OPTIONS;
   
   private static final ControllerFactory CONTROLLER_FACTORY;
-  
+  private static final Ini INI = new Ini(new File("mediasystem.ini"));
+
   static {
     try {
       UIManager.setLookAndFeel(new NimbusLookAndFeel());
@@ -100,9 +104,8 @@ public class MediaSystem {
         setUIDefaults();
       }
     });
-    Ini ini = new Ini(new File("mediasystem.ini"));
     
-    Section section = ini.getSection("general");
+    Section section = INI.getSection("general");
     
     Path moviesPath = Paths.get(section.get("movies.path"));
     Path seriesPath = Paths.get(section.get("series.path"));
@@ -159,7 +162,16 @@ public class MediaSystem {
     
     NativeLibrary.addSearchPath("libvlc", "c:/program files (x86)/VideoLAN/VLC");
     
-    Controller controller = CONTROLLER_FACTORY.create();
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice[] gs = ge.getScreenDevices();
+    
+    int screen = Integer.parseInt(INI.getSection("general").getDefault("screen", "0"));
+    
+    GraphicsDevice graphicsDevice = (screen >= 0 && screen < gs.length) ? gs[screen] : gs[0];
+    
+    System.out.println("Using display: " + graphicsDevice + "; " + graphicsDevice.getDisplayMode().getWidth() + "x" + graphicsDevice.getDisplayMode().getHeight() + "x" + graphicsDevice.getDisplayMode().getBitDepth() + " @ " + graphicsDevice.getDisplayMode().getRefreshRate() + " Hz");
+    
+    Controller controller = CONTROLLER_FACTORY.create(graphicsDevice);
     
     controller.forward(new View("Root", MAIN_MENU));
   }
