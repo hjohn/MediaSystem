@@ -29,7 +29,7 @@ public class VLCPlayer implements Player {
   }
   
   public VLCPlayer() {
-    String[] libvlcArgs = {"-V", "directx"};  // opengl direct3d
+    String[] libvlcArgs = {"-V", "direct3d"};  // opengl direct3d
     MediaPlayerFactory factory = new MediaPlayerFactory(libvlcArgs);
 
     mediaPlayer = factory.newEmbeddedMediaPlayer();
