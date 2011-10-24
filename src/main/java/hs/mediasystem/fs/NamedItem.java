@@ -46,6 +46,11 @@ public abstract class NamedItem implements MediaItem {
   }
   
   @Override
+  public String getUri() {
+    return item.getPath().toString();
+  }
+  
+  @Override
   public String getSubtitle() {
     if(item.getLocalSubtitle() != null) {
       return item.getLocalSubtitle();
@@ -79,6 +84,7 @@ public abstract class NamedItem implements MediaItem {
     return item.getBackground() == null ? null : new ImageHandle(item.getBackground(), createKey("background"));
   }
   
+  @Override
   public ImageHandle getBanner() {
     ensureDataLoaded();
 

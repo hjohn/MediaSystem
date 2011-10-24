@@ -181,6 +181,11 @@ public class DuoLineRenderer implements Renderer<MediaItem> {
       public boolean isRoot() {
         return false;
       }
+      
+      @Override
+      public boolean isLeaf() {
+        return false;
+      }
 
       @Override
       public MediaTree getRoot() {

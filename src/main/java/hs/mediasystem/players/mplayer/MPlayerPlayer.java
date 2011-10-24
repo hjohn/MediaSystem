@@ -171,8 +171,8 @@ public class MPlayerPlayer implements Player {
   }
   
   @Override
-  public void play(Path path) {
-    sendCommand("loadfile \"" + path.toString().replaceAll("\\\\", "\\\\\\\\") + "\"");
+  public void play(String uri) {
+    sendCommand("loadfile \"" + uri.replaceAll("\\\\", "\\\\\\\\") + "\"");
   }
 
   @Override

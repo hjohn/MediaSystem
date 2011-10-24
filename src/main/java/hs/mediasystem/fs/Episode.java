@@ -15,6 +15,11 @@ public class Episode extends NamedItem {
   }
   
   @Override
+  public boolean isLeaf() {
+    return true;
+  }
+  
+  @Override
   public MediaTree getRoot() {
     return null;
   }

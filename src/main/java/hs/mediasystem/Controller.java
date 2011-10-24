@@ -1,10 +1,10 @@
 package hs.mediasystem;
 
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.Player;
 import hs.mediasystem.framework.Screen;
 import hs.mediasystem.framework.State;
 import hs.mediasystem.framework.View;
-import hs.mediasystem.fs.Episode;
 import hs.models.BasicListModel;
 import hs.models.ListModel;
 import hs.models.events.Listener;
@@ -410,11 +410,11 @@ public class Controller {
     return navigationHistory.current().getScreen(); 
   }
 
-  private Episode currentItem;
+  private MediaItem currentItem;
   
-  public void playMedia(Episode episode) {
-    currentItem = episode;
-    player.play(episode.getPath());
+  public void playMedia(MediaItem item) {
+    currentItem = item;
+    player.play(item.getUri());
     
     windowToFrontDelay.set(8);
     windowToFrontThread.interrupt();
@@ -431,7 +431,7 @@ public class Controller {
     }
   }
   
-  public Episode getCurrentItem() {
+  public MediaItem getCurrentItem() {
     return currentItem;
   }
   

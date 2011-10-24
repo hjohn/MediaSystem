@@ -3,6 +3,7 @@ package hs.mediasystem.screens;
 import hs.mediasystem.Controller;
 import hs.mediasystem.IconHelper;
 import hs.mediasystem.MediaSystem;
+import hs.mediasystem.Nederland24MediaTree;
 import hs.mediasystem.framework.AbstractBlock;
 import hs.mediasystem.framework.NoConfig;
 import hs.mediasystem.framework.View;
@@ -37,10 +38,11 @@ public class MainMenu extends AbstractBlock<NoConfig> {
   protected AbstractGroup<?> create(final Controller controller) {
     View moviesView = new View("Movies", MediaSystem.MEDIA_SELECTION, new MediaSelectionConfig(new MoviesMediaTree(moviesPath)));
     View seriesView = new View("Series", MediaSystem.MEDIA_SELECTION, new MediaSelectionConfig(new SeriesMediaTree(seriesPath)));
+    View nederland24View = new View("Nederland 24", MediaSystem.MEDIA_SELECTION, new MediaSelectionConfig(new Nederland24MediaTree()));
     
     menuModel.add(new MenuElement("Movies", IconHelper.readIcon("images/aktion.png", 32, 32), moviesView));
     menuModel.add(new MenuElement("Series", IconHelper.readIcon("images/aktion.png", 32, 32), seriesView));
-    menuModel.add(new MenuElement("YouTube", IconHelper.readIcon("images/password.png", 32, 32), moviesView));
+    menuModel.add(new MenuElement("Nederland 24", IconHelper.readIcon("images/password.png", 32, 32), nederland24View));
     menuModel.add(new MenuElement("TV", IconHelper.readIcon("images/tv.png", 32, 32), moviesView));
     menuModel.add(new MenuElement("Web", IconHelper.readIcon("images/browser.png", 32, 32), moviesView));
     menuModel.add(new MenuElement("Exit", IconHelper.readIcon("images/logout.png", 32, 32), moviesView));
