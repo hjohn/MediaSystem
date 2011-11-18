@@ -5,6 +5,7 @@ import hs.mediasystem.ControllerFactory;
 import hs.ui.frames.Frame;
 
 import java.awt.Color;
+import java.awt.GraphicsDevice;
 import java.awt.Window;
 import java.nio.file.Path;
 
@@ -21,8 +22,10 @@ public class MPlayerControllerFactory implements ControllerFactory {
   }
   
   @Override
-  public Controller create() {
+  public Controller create(GraphicsDevice device) {
     Frame overlayFrame = new Frame();
+    
+    device.setFullScreenWindow((JFrame)overlayFrame.getContainer());
     
 //    ((JFrame)overlayFrame.getContainer()).setLocationByPlatform(true);
     ((JFrame)overlayFrame.getContainer()).setAlwaysOnTop(true);
@@ -31,7 +34,7 @@ public class MPlayerControllerFactory implements ControllerFactory {
     
 //    overlayFrame.visible().set(true);
 
-    overlayFrame.maximized().set(true);
+//    overlayFrame.maximized().set(true);
     overlayFrame.visible().set(true);
     
     return new Controller(new MPlayerPlayer(mplayerPath, true), overlayFrame);

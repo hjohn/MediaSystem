@@ -1,5 +1,6 @@
 package hs.mediasystem.screens.videoplaying;
 
+import hs.mediasystem.Constants;
 import hs.mediasystem.Controller;
 import hs.mediasystem.framework.AbstractBlock;
 import hs.mediasystem.framework.NoConfig;
@@ -65,7 +66,7 @@ public class VideoOptionsScreen extends AbstractBlock<NoConfig> {
           weightX().set(0.25);
         }});
         add(new VerticalGroup() {{
-          border().set(BorderFactory.createLineBorder(new Color(0, 0, 255, 120), 5, true));
+          border().set(BorderFactory.createLineBorder(Constants.PANEL_BG_COLOR, 40, true));  // TODO does not do proper transparency; interferes with bgcolor (they get added so a 2nd rounded corner appears)
           weightX().set(1.0);
           weightY().set(1.0);
           add(new ListBox2<SubtitleDescriptor>() {{
@@ -81,16 +82,17 @@ public class VideoOptionsScreen extends AbstractBlock<NoConfig> {
                 }
               });
               alignment().set(HorizontalAlignment.LEFT);
-              width().set(500);
+              width().set(750);
               renderer().set(new MySubtitleCellRenderer());
               anchor().set(Anchor.CENTER);
             }});
             items().link(controller.subtitles);
             font().set(new Font("Sans Serif", Font.PLAIN, 32));
             weightX().set(1.0);
+            weightY().set(1.0);
             
-            minHeight().set(400);
-            maxHeight().set(400);
+//            minHeight().set(400);
+//            maxHeight().set(400);
 //            minWidth().set(1);
 //            maxWidth().set(1300);
             rowHeight().set(40);

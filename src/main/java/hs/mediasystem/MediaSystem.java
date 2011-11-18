@@ -3,6 +3,8 @@ package hs.mediasystem;
 import hs.mediasystem.framework.AbstractBlock;
 import hs.mediasystem.framework.Extensions;
 import hs.mediasystem.framework.Screen;
+import hs.mediasystem.players.vlc.VLCControllerFactory;
+import hs.mediasystem.players.vlc.VLCPlayer;
 import hs.mediasystem.screens.Clock;
 import hs.mediasystem.screens.Header;
 import hs.mediasystem.screens.MainMenu;
@@ -16,6 +18,8 @@ import hs.sublight.SublightSubtitleClient;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.io.File;
 import java.nio.file.Path;
@@ -32,6 +36,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import net.sf.jtmdb.GeneralSettings;
+
+import com.sun.jna.NativeLibrary;
 
 // Minimal working system:
 // TODO Make clock in standard border
@@ -81,8 +87,9 @@ public class MediaSystem {
   public static final Screen VIDEO_PLAYING;
   public static final Screen VIDEO_OPTIONS;
   
-//  private static final ControllerFactory CONTROLLER_FACTORY;
-  
+  private static final ControllerFactory CONTROLLER_FACTORY;
+  private static final Ini INI = new Ini(new File("mediasystem.ini"));
+
   static {
     try {
       UIManager.setLookAndFeel(new NimbusLookAndFeel());
@@ -98,9 +105,8 @@ public class MediaSystem {
         setUIDefaults();
       }
     });
-    Ini ini = new Ini(new File("mediasystem.ini"));
     
-    Section section = ini.getSection("general");
+    Section section = INI.getSection("general");
     
     Path moviesPath = Paths.get(section.get("movies.path"));
     Path seriesPath = Paths.get(section.get("series.path"));
@@ -113,7 +119,7 @@ public class MediaSystem {
     GeneralSettings.setLogStream(System.out);
     
 //    CONTROLLER_FACTORY = new MPlayerControllerFactory(Paths.get(section.get("mplayer.path")));
-//    CONTROLLER_FACTORY = new VLCControllerFactory();
+    CONTROLLER_FACTORY = new VLCControllerFactory();
 //    CONTROLLER_FACTORY = new VLCJavaFXControllerFactory();
         
     final AbstractBlock<?> mediaSystemBorder = new MediaSystemBorder();
@@ -157,9 +163,27 @@ public class MediaSystem {
 //    UIManager.setLookAndFeel(laf);
     //SynthLookAndFeel.setStyleFactory(new MyStyleFactory());
     
-    Application.launch(FrontEnd.class, args);
+
 
    // Controller controller = CONTROLLER_FACTORY.create();
+
+    NativeLibrary.addSearchPath("libvlc", "c:/program files (x86)/VideoLAN/VLC");
+    
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice[] gs = ge.getScreenDevices();
+    
+    int screen = Integer.parseInt(INI.getSection("general").getDefault("screen", "0"));
+    
+    GraphicsDevice graphicsDevice = (screen >= 0 && screen < gs.length) ? gs[screen] : gs[0];
+    
+    System.out.println("Using display: " + graphicsDevice + "; " + graphicsDevice.getDisplayMode().getWidth() + "x" + graphicsDevice.getDisplayMode().getHeight() + "x" + graphicsDevice.getDisplayMode().getBitDepth() + " @ " + graphicsDevice.getDisplayMode().getRefreshRate() + " Hz");
+
+    
+    new VLCPlayer(graphicsDevice);  // TODO make configurable
+
+    Application.launch(FrontEnd.class, args);
+
+//    Controller controller = CONTROLLER_FACTORY.create(graphicsDevice);
     
    //  controller.forward(new View("Root", MAIN_MENU));
   }
@@ -192,7 +216,7 @@ public class MediaSystem {
       @Override
       public void paint(Graphics2D g, JComponent object, int width, int height) {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setColor(new Color(0, 0, 0, 32));
+        g.setColor(Constants.PANEL_BG_COLOR);
         g.fillRect(0, 0, width, height);
       }
     });

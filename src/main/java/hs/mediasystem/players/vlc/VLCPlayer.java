@@ -8,6 +8,7 @@ import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Frame;
+import java.awt.GraphicsDevice;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.JFrame;
@@ -29,19 +30,22 @@ public class VLCPlayer implements Player {
     return finishedNotifier.getListenerList();
   }
   
-  public VLCPlayer() {
-    String[] libvlcArgs = {"-V", "directx"};  // opengl direct3d
+  public VLCPlayer(GraphicsDevice device) {
+    String[] libvlcArgs = {"-V", "direct3d"};  // opengl direct3d
     MediaPlayerFactory factory = new MediaPlayerFactory(libvlcArgs);
 
     mediaPlayer = factory.newEmbeddedMediaPlayer();
     
     Canvas canvas = new Canvas();
     
-    frame = new Frame();
+    frame = new Frame(device.getDefaultConfiguration());
+    
     
     frame.setLayout(new BorderLayout());
     frame.setUndecorated(true);
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+//    device.setFullScreenWindow(frame);
+    
     frame.add(canvas, BorderLayout.CENTER);
     frame.setBackground(new Color(0, 0, 0));
     frame.setVisible(true);

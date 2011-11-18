@@ -1,8 +1,6 @@
 package hs.mediasystem;
 
-import hs.mediasystem.framework.Player;
 import hs.mediasystem.fs.MoviesMediaTree;
-import hs.mediasystem.players.vlc.VLCPlayer;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -37,12 +35,10 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 public class FrontEnd extends Application {
-  private Player player;
   
   @Override
   public void start(Stage primaryStage) throws Exception {
-    player = new VLCPlayer();  // TODO make configurable
-    
+   
     final BorderPane root = new BorderPane();
     Scene scene = new Scene(root, new Color(0, 0, 0, 0.01));
     

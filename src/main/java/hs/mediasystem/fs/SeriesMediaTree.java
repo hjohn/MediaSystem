@@ -12,7 +12,6 @@ import java.util.List;
 
 import javafx.scene.control.ListCell;
 
-
 public class SeriesMediaTree extends AbstractMediaTree {
   private final Path root;
 
