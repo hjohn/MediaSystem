@@ -11,6 +11,7 @@ import java.util.GregorianCalendar;
 import java.util.TreeSet;
 
 import net.sf.jtmdb.Movie;
+import net.sf.jtmdb.MovieBackdrop;
 import net.sf.jtmdb.MovieImages;
 import net.sf.jtmdb.MoviePoster;
 
@@ -90,6 +91,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
         final MovieImages images = movie.getImages();
         URL url = null;
+        URL backgroundURL = null;
 
         if(images.posters.size() > 0) {
           MoviePoster poster = images.posters.iterator().next();
@@ -97,7 +99,14 @@ public class TmdbMovieEnricher implements ItemEnricher {
           url = poster.getLargestImage();
         }
         
+        if(images.backdrops.size() > 0) {
+          MovieBackdrop background = images.backdrops.iterator().next();
+          
+          backgroundURL = background.getLargestImage();
+        }
+        
         final byte[] poster = url != null ? Downloader.readURL(url) : null;
+        final byte[] background = backgroundURL != null ? Downloader.readURL(backgroundURL) : null;
 
         item.setImdbId(movie.getImdbID());
         item.setProvider("TMDB");
@@ -105,6 +114,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
         item.setTitle(movie.getName());
         item.setLocalName(fileName);
         item.setPoster(poster);
+        item.setBackground(background);
         item.setPlot(movie.getOverview());
         item.setRating((float)movie.getRating());
         item.setReleaseDate(movie.getReleasedDate());

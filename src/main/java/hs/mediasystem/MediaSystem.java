@@ -3,8 +3,6 @@ package hs.mediasystem;
 import hs.mediasystem.framework.AbstractBlock;
 import hs.mediasystem.framework.Extensions;
 import hs.mediasystem.framework.Screen;
-import hs.mediasystem.framework.View;
-import hs.mediasystem.players.vlc.VLCControllerFactory;
 import hs.mediasystem.screens.Clock;
 import hs.mediasystem.screens.Header;
 import hs.mediasystem.screens.MainMenu;
@@ -22,6 +20,8 @@ import java.awt.RenderingHints;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import javafx.application.Application;
 
 import javax.swing.JComponent;
 import javax.swing.Painter;
@@ -81,7 +81,7 @@ public class MediaSystem {
   public static final Screen VIDEO_PLAYING;
   public static final Screen VIDEO_OPTIONS;
   
-  private static final ControllerFactory CONTROLLER_FACTORY;
+//  private static final ControllerFactory CONTROLLER_FACTORY;
   
   static {
     try {
@@ -113,7 +113,8 @@ public class MediaSystem {
     GeneralSettings.setLogStream(System.out);
     
 //    CONTROLLER_FACTORY = new MPlayerControllerFactory(Paths.get(section.get("mplayer.path")));
-    CONTROLLER_FACTORY = new VLCControllerFactory();
+//    CONTROLLER_FACTORY = new VLCControllerFactory();
+//    CONTROLLER_FACTORY = new VLCJavaFXControllerFactory();
         
     final AbstractBlock<?> mediaSystemBorder = new MediaSystemBorder();
     final AbstractBlock<?> header = new Header();
@@ -150,15 +151,17 @@ public class MediaSystem {
   };
   
   public static void main(String[] args) {
+   //  URL.setURLStreamHandlerFactory(new MyURLStreamHandlerFactory());
     
 //    SynthLookAndFeel laf = new SynthLookAndFeel();
 //    UIManager.setLookAndFeel(laf);
     //SynthLookAndFeel.setStyleFactory(new MyStyleFactory());
     
+    Application.launch(FrontEnd.class, args);
 
-    Controller controller = CONTROLLER_FACTORY.create();
+   // Controller controller = CONTROLLER_FACTORY.create();
     
-    controller.forward(new View("Root", MAIN_MENU));
+   //  controller.forward(new View("Root", MAIN_MENU));
   }
 
 //  private static class MyStyleFactory extends SynthStyleFactory {

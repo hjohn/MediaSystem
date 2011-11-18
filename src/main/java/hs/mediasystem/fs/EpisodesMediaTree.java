@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javafx.scene.control.ListCell;
+
 public class EpisodesMediaTree extends AbstractMediaTree {
   private final Path root;
   
@@ -72,5 +74,10 @@ public class EpisodesMediaTree extends AbstractMediaTree {
   @Override
   public Renderer<MediaItem> getRenderer() {
     return new DuoLineRenderer();
+  }
+
+  @Override
+  public ListCell<MediaItem> createListCell() {
+    throw new UnsupportedOperationException("Method not implemented");
   }
 }

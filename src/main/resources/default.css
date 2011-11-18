@@ -1,0 +1,48 @@
+
+#selectItem-listView *.label {
+  -fx-text-fill: rgb(173, 216, 230);
+}
+
+#selectItem-listView {
+  -fx-font: bold 18pt "Arial";
+  -fx-background-color: null;
+}
+
+#selectItem-listCell-subtitle {
+  -fx-font: 12pt "Arial";
+}
+
+.list-cell:even {
+  -fx-background-color: null;
+}
+.list-cell:odd {
+  -fx-background-color: null;
+}
+.list-cell:focused {
+  -fx-background-color: rgba(173, 216, 230, 0.3);
+}
+
+#top-bar *.label {
+  -fx-font: bold 18pt "Tahoma";
+  -fx-text-fill: rgb(173, 216, 230);
+}
+
+#top-bar {
+  -fx-background-color: rgba(255, 255, 0, 0.3);
+  -fx-border-color: white;
+  -fx-border-width: 0 0 2 0;
+}
+
+.content-box {
+//  -fx-text-fill: rgba(#006464;
+  -fx-background-color: rgba(255, 255, 0, 0.3);
+  -fx-border-radius: 20;
+  -fx-background-radius: 20;
+  -fx-padding: 10;
+}
+
+.content-box-grid {
+  -fx-padding: 10;
+  -fx-hgap: 10;
+  -fx-vgap: 10;
+}

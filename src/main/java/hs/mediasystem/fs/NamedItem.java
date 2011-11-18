@@ -91,6 +91,7 @@ public abstract class NamedItem implements MediaItem {
     return item.getBanner() == null ? null : new ImageHandle(item.getBanner(), createKey("banner"));
   }
   
+  @Override
   public ImageHandle getPoster() {
     ensureDataLoaded();
     

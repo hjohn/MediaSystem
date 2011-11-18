@@ -16,4 +16,6 @@ public interface MediaItem {
   int getEpisode();
   
   ImageHandle getBanner();
+  ImageHandle getPoster();
+  ImageHandle getBackground();
 }

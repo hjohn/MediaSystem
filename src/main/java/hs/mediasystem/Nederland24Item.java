@@ -59,4 +59,14 @@ public class Nederland24Item implements MediaItem {
   public String getUri() {
     return uri;
   }
+
+  @Override
+  public ImageHandle getPoster() {
+    return null;
+  }
+
+  @Override
+  public ImageHandle getBackground() {
+    return null;
+  }
 }

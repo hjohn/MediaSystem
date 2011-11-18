@@ -82,6 +82,13 @@
 		  <artifactId>jna</artifactId>
 		  <version>3.0.9</version>
 		</dependency>
+        <dependency>
+          <groupId>javafx</groupId>
+          <artifactId>javafx</artifactId>
+          <scope>system</scope>
+          <systemPath>C:\Program Files\Oracle\JavaFX 2.0 SDK\rt\lib\jfxrt.jar</systemPath>
+          <version>2.0</version>
+        </dependency>
 	</dependencies>
     <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

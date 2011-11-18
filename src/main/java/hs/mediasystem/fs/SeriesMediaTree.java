@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
+import javafx.scene.control.ListCell;
+
 
 public class SeriesMediaTree extends AbstractMediaTree {
   private final Path root;
@@ -49,5 +51,10 @@ public class SeriesMediaTree extends AbstractMediaTree {
   @Override
   public Renderer<MediaItem> getRenderer() {
     return new MediaItemRenderer();
+  }
+
+  @Override
+  public ListCell<MediaItem> createListCell() {
+    throw new UnsupportedOperationException("Method not implemented");
   }
 }
