@@ -42,7 +42,7 @@ public class VideoPlayingMenu extends AbstractBlock<NoConfig> {
             
             Integer year = null;
             try {
-              year = Integer.parseInt(((Episode)controller.getCurrentItem()).getYear());
+              year = Integer.parseInt(((Episode)controller.getCurrentItem()).getReleaseYear());
             }
             catch(NumberFormatException e) {
             }

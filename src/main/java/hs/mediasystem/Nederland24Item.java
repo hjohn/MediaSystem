@@ -69,4 +69,14 @@ public class Nederland24Item implements MediaItem {
   public ImageHandle getBackground() {
     return null;
   }
+
+  @Override
+  public String getReleaseYear() {
+    return null;
+  }
+
+  @Override
+  public String getPlot() {
+    return null;
+  }
 }

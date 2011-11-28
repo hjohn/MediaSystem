@@ -40,9 +40,10 @@ public class FrontEnd extends Application {
   public void start(Stage primaryStage) throws Exception {
    
     final BorderPane root = new BorderPane();
-    Scene scene = new Scene(root, new Color(0, 0, 0, 0.01));
+    Scene scene = new Scene(root, new Color(0, 0, 0, 1.0));
     
-    final Stage stage = new Stage(StageStyle.TRANSPARENT);
+//    final Stage stage = new Stage(StageStyle.TRANSPARENT);
+    final Stage stage = new Stage(StageStyle.UNDECORATED);
     
     stage.setScene(scene);
     //stage.setFullScreen(true);
@@ -54,7 +55,7 @@ public class FrontEnd extends Application {
     stage.setY(bounds.getMinY());
     stage.setWidth(bounds.getWidth());
     stage.setHeight(bounds.getHeight());
-    
+
     scene.getStylesheets().add("default.css");
 
     final List<Button> buttons = new ArrayList<Button>() {{
@@ -114,7 +115,7 @@ public class FrontEnd extends Application {
       public void handle(ActionEvent event) {
         SelectItemScene scene = new SelectItemScene();
         
-        Node node = scene.show(stage, new MoviesMediaTree(Paths.get("d:/Dev/Library/movies")));
+        Node node = scene.show(stage, new MoviesMediaTree(Paths.get("L:/Movies/HD")));
 
         root.setCenter(node);
         

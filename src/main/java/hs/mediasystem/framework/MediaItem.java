@@ -11,6 +11,8 @@ public interface MediaItem {
   
   String getTitle();
   String getSubtitle();
+  String getReleaseYear();
+  String getPlot();
 
   int getSeason();
   int getEpisode();

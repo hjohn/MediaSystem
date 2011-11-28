@@ -15,6 +15,7 @@ import hs.ui.controls.AbstractGroup;
 import hs.ui.controls.VerticalGroup;
 import hs.ui.frames.AbstractFrame;
 import hs.ui.image.ImageHandle;
+import hs.ui.image.ImageCache;
 import hs.ui.swing.Painter;
 
 import java.awt.BasicStroke;
@@ -250,7 +251,7 @@ public class Controller {
         @Override
         public void paint(Graphics2D g, int width, int height) {
           if(backgroundActive) {
-            g.drawImage(backgroundHandle.getImage(width, height, false), 0, 0, null);
+            g.drawImage(ImageCache.loadImage(backgroundHandle, width, height, false), 0, 0, null);
           }
           else {
             g.setBackground(new Color(0, 0, 0, 1));
@@ -307,7 +308,7 @@ public class Controller {
         for(;;) {
           try {
             Thread.sleep(2L << windowToFrontDelay.getAndIncrement());
-            parentFrame.toFront();
+            // parentFrame.toFront();
           }
           catch(InterruptedException e) {
             // occurs when windowToFrontDelay changed

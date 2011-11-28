@@ -9,6 +9,7 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.JFrame;
@@ -17,6 +18,7 @@ import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.MediaPlayerFactory;
+import uk.co.caprica.vlcj.player.TrackDescription;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 public class VLCPlayer implements Player {
@@ -57,15 +59,33 @@ public class VLCPlayer implements Player {
       @Override
       public void mediaSubItemAdded(MediaPlayer mediaPlayer, libvlc_media_t subItem) {
         ignoreFinish.incrementAndGet();
+        int i = 1;
+        
+        System.out.println("VLCPlayer: mediaSubItemAdded: " + subItem.toString());
+        
+        for(TrackDescription desc : mediaPlayer.getTitleDescriptions()) {
+          System.out.println(i++ + " : " + desc.description());
+        }
       }
       
       @Override
       public void finished(MediaPlayer mediaPlayer) {
+        int index = mediaPlayer.subItemIndex();
+        System.out.println(index);
+        
+        List<String> subItems = mediaPlayer.subItems();
+        
+        if(index < subItems.size()) {
+          System.out.println("Finished: " + subItems.get(index));
+        }
+        
         if(ignoreFinish.get() == 0) {
-          finishedNotifier.notifyListeners("FINISH");
+          // finishedNotifier.notifyListeners("FINISH");
         }
         else {
           ignoreFinish.decrementAndGet();
+          System.out.println("VLCPlayer: Adding more media");
+//          mediaPlayer.playMedia(uri);
         }
       }
     });
@@ -73,6 +93,7 @@ public class VLCPlayer implements Player {
   
   @Override
   public void play(String uri) {
+    mediaPlayer.setRepeat(true);
     mediaPlayer.setPlaySubItems(true);
     mediaPlayer.playMedia(uri);
   }

@@ -62,7 +62,8 @@ public abstract class NamedItem implements MediaItem {
     }
   }
   
-  public String getYear() {
+  @Override
+  public String getReleaseYear() {
     if(item.getReleaseDate() == null) {
       return null;
     }
@@ -106,6 +107,7 @@ public abstract class NamedItem implements MediaItem {
     return getTitle() + "-" + getSeason() + "x" + getEpisode() + "-" + getSubtitle() + "-" + suffix;
   }
   
+  @Override
   public String getPlot() {
     ensureDataLoaded();
     
