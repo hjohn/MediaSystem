@@ -80,7 +80,7 @@ public class EpisodesMediaTree extends AbstractMediaTree {
   }
 
   @Override
-  public ListCell<MediaItem> createListCell() {
+  public CellProvider<MediaItem> createListCell() {
     throw new UnsupportedOperationException("Method not implemented");
   }
 }

@@ -26,7 +26,7 @@ public class SerieScanner implements Scanner<Serie> {
       DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath);
   
       for(Path path : dirStream) {
-        if(Files.isDirectory(path)) {
+        if(Files.isDirectory(path) && !path.getFileName().toString().startsWith(".")) {
           LocalItem item = new LocalItem(path);
           
           item.setLocalName(path.getFileName().toString());

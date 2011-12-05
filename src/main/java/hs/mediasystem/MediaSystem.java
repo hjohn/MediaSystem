@@ -169,19 +169,20 @@ public class MediaSystem {
 
     NativeLibrary.addSearchPath("libvlc", "c:/program files (x86)/VideoLAN/VLC");
     
-    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    GraphicsDevice[] gs = ge.getScreenDevices();
-    
-    int screen = Integer.parseInt(INI.getSection("general").getDefault("screen", "0"));
-    
-    GraphicsDevice graphicsDevice = (screen >= 0 && screen < gs.length) ? gs[screen] : gs[0];
-    
-    System.out.println("Using display: " + graphicsDevice + "; " + graphicsDevice.getDisplayMode().getWidth() + "x" + graphicsDevice.getDisplayMode().getHeight() + "x" + graphicsDevice.getDisplayMode().getBitDepth() + " @ " + graphicsDevice.getDisplayMode().getRefreshRate() + " Hz");
-
-    
-    new VLCPlayer(graphicsDevice);  // TODO make configurable
+//    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+//    GraphicsDevice[] gs = ge.getScreenDevices();
+//    
+//    int screen = Integer.parseInt(INI.getSection("general").getDefault("screen", "0"));
+//    
+//    GraphicsDevice graphicsDevice = (screen >= 0 && screen < gs.length) ? gs[screen] : gs[0];
+//    
+//    System.out.println("Using display: " + graphicsDevice + "; " + graphicsDevice.getDisplayMode().getWidth() + "x" + graphicsDevice.getDisplayMode().getHeight() + "x" + graphicsDevice.getDisplayMode().getBitDepth() + " @ " + graphicsDevice.getDisplayMode().getRefreshRate() + " Hz");
+//
+//    
+//    new VLCPlayer(graphicsDevice);  // TODO make configurable
 
     Application.launch(FrontEnd.class, args);
+    
 
 //    Controller controller = CONTROLLER_FACTORY.create(graphicsDevice);
     

@@ -2,6 +2,7 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.framework.MediaItem;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.HBox;
@@ -11,7 +12,7 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
-public class DuoLineRenderer2 extends ListCell<MediaItem> {
+public class DuoLineRenderer2 implements CellProvider<MediaItem> {
   
   private final HBox group = new HBox();
   
@@ -41,18 +42,15 @@ public class DuoLineRenderer2 extends ListCell<MediaItem> {
       HBox.setHgrow(this, Priority.ALWAYS);
     }});
     group.getChildren().add(collectionMarker);
-    
-    setGraphic(group);
   }
   
-  @Override
-  protected void updateItem(MediaItem item, boolean empty) {
-    super.updateItem(item, empty);
-
+  public Node configureCell(MediaItem item) {
     if(item != null) {
       title.setText(item.getTitle());
       subtitle.setText(item.getSubtitle());
       collectionMarker.setVisible(item instanceof hs.mediasystem.framework.Group);
     }
+    
+    return group;
   }
 }

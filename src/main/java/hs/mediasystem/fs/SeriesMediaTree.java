@@ -53,7 +53,7 @@ public class SeriesMediaTree extends AbstractMediaTree {
   }
 
   @Override
-  public ListCell<MediaItem> createListCell() {
-    throw new UnsupportedOperationException("Method not implemented");
+  public CellProvider<MediaItem> createListCell() {
+    return new BannerRenderer();
   }
 }

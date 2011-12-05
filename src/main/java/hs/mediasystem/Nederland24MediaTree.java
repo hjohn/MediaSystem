@@ -3,6 +3,7 @@ package hs.mediasystem;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Renderer;
+import hs.mediasystem.fs.CellProvider;
 import hs.mediasystem.fs.MediaItemRenderer;
 import hs.mediasystem.fs.NamedItem;
 import hs.mediasystem.screens.movie.ItemUpdate;
@@ -53,7 +54,7 @@ public class Nederland24MediaTree implements MediaTree {
   }
 
   @Override
-  public ListCell<MediaItem> createListCell() {
+  public CellProvider<MediaItem> createListCell() {
     throw new UnsupportedOperationException("Method not implemented");
   }
 }

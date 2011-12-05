@@ -1,5 +1,6 @@
 package hs.mediasystem.framework;
 
+import hs.mediasystem.fs.CellProvider;
 import hs.mediasystem.fs.NamedItem;
 import hs.mediasystem.screens.movie.ItemUpdate;
 import hs.models.events.ListenerList;
@@ -22,7 +23,7 @@ public interface MediaTree {
   MediaTree parent();
   
   Renderer<MediaItem> getRenderer();
-  ListCell<MediaItem> createListCell();
+  CellProvider<MediaItem> createListCell();
 
   ListenerList<ItemUpdate> onItemUpdate();
   

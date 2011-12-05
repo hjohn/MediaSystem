@@ -1,6 +1,7 @@
 
 .root {
   color-blue: rgb(173, 216, 230);
+  color-blue-50: rgba(173, 216, 230, 0.5);
   -fx-font: 14pt "Arial";
 }
 
@@ -37,13 +38,13 @@
   -fx-font: 12pt "Arial";
 }
 
-.list-cell:even {
+.list-cell:even, .tree-cell:even {
   -fx-background-color: null;
 }
-.list-cell:odd {
+.list-cell:odd, .tree-cell:odd {
   -fx-background-color: null;
 }
-.list-cell:focused {
+.list-cell:focused, .tree-cell:focused {
   -fx-background-color: rgba(173, 216, 230, 0.3);
 }
 
@@ -59,8 +60,8 @@
 }
 
 .content-box {
-//  -fx-text-fill: rgba(#006464;
-  -fx-background-color: rgba(0, 0, 0, 0.5);
+/*  -fx-text-fill: rgba(#006464; */
+  -fx-background-color: derive(color-blue-50, -50%);
   -fx-border-radius: 20;
   -fx-background-radius: 20;
   -fx-padding: 30;

@@ -2,6 +2,7 @@ package hs.mediasystem;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
+import hs.mediasystem.fs.CellProvider;
 import hs.mediasystem.screens.movie.ItemUpdate;
 import hs.models.events.EventListener;
 import hs.ui.image.ImageHandle;
@@ -14,6 +15,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -22,11 +25,16 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -36,11 +44,12 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
 
 public class SelectItemScene {
+  private final ProgramController controller;
+  
   private final ObjectProperty<String> title = new SimpleObjectProperty<String>();
   private final ObjectProperty<String> subtitle = new SimpleObjectProperty<String>();
   private final ObjectProperty<String> releaseYear = new SimpleObjectProperty<String>();
@@ -73,8 +82,9 @@ public class SelectItemScene {
       new KeyValue(backgroundImageView.opacityProperty(), 0.0)
     )
   );
-  
-  public SelectItemScene() {
+    
+  public SelectItemScene(ProgramController controller) {
+    this.controller = controller;
     timeline.setOnFinished(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
@@ -89,43 +99,122 @@ public class SelectItemScene {
       }
     });
   }
-    
-  public Node show(final Stage stage, final MediaTree mediaTree) {
+  
+  private ObservableList<MediaItem> mediaItems = FXCollections.observableArrayList(); 
+  
+  private TreeItem<MediaItem> treeRoot = new TreeItem<MediaItem>();
+  
+  public Node create(final MediaTree mediaTree) {
+    mediaItems.addAll(mediaTree.children());
+
+    for(MediaItem item : mediaTree.children()) {
+      treeRoot.getChildren().add(new TreeItem<MediaItem>(item));
+    }
+
     final GridPane root = new GridPane();
             
     root.getStyleClass().addAll("select-item-pane", "content-box-grid");
     
-    final ListView<MediaItem> listView = new ListView<MediaItem>() {{
+    final TreeView<MediaItem> treeView = new TreeView<MediaItem>(treeRoot) {{
       setId("selectItem-listView");
-      getItems().addAll(mediaTree.children());
-      
-      setCellFactory(new Callback<ListView<MediaItem>, ListCell<MediaItem>>() {
+
+      setEditable(false);
+      setShowRoot(false);
+      setCellFactory(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
         @Override
-        public ListCell<MediaItem> call(ListView<MediaItem> param) {
-          return mediaTree.createListCell();
+        public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
+          final CellProvider<MediaItem> provider = mediaTree.createListCell();
+          
+          return new TreeCell<MediaItem>() {
+            @Override
+            protected void updateItem(MediaItem item, boolean empty) {
+              super.updateItem(item, empty);
+              
+              setGraphic(provider.configureCell(item));
+            }
+          };
         }
       });
       
-      getFocusModel().focusedItemProperty().addListener(new ChangeListener<MediaItem>() {
+      getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<MediaItem>>() {
         @Override
-        public void changed(ObservableValue<? extends MediaItem> observable, MediaItem oldValue, MediaItem newValue) {
-          System.out.println("Selection changed to mediaItem: " + newValue.getTitle());
+        public void changed(ObservableValue<? extends TreeItem<MediaItem>> observable, TreeItem<MediaItem> oldValue, final TreeItem<MediaItem> newValue) {
+          System.err.println("changed called on Thread: " + Thread.currentThread().getName());
+//          update(newValue.getValue());
           
-          update(newValue);
+          Platform.runLater(new Runnable() {
+            public void run() {
+              update(newValue.getValue());
+            }
+          });
+        }
+      });
+      
+      addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+        @Override
+        public void handle(MouseEvent event) {
+          if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+            System.out.println("Selected " + getSelectionModel().getSelectedItem().getValue().getTitle());
+            itemSelected(getSelectionModel().getSelectedItem().getValue());
+          }
+        }
+      });
+      
+      addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+        @Override
+        public void handle(KeyEvent event) {
+          if(event.getCode() == KeyCode.ENTER) {
+            System.out.println("Selected (with key) " + getSelectionModel().getSelectedItem().getValue().getTitle());
+            itemSelected(getSelectionModel().getSelectedItem().getValue());
+          }
         }
       });
     }};
-    
+
     mediaTree.onItemUpdate().call(new EventListener<ItemUpdate>() {
       @Override
       public void onEvent(final ItemUpdate event) {
-        if(event.getItem().equals(listView.getSelectionModel().getSelectedItem())) {
+        TreeItem<MediaItem> foundItem = findMediaItem(treeRoot, event.getItem());
+        
+        if(foundItem != null) {
+          int index = foundItem.getParent().getChildren().indexOf(foundItem);
+          
+          TreeItem<MediaItem> focusedItem = treeView.getFocusModel().getFocusedItem();
+          int focusedIndex = treeView.getFocusModel().getFocusedIndex();
+          TreeItem<MediaItem> oldItem = foundItem.getParent().getChildren().set(index, new TreeItem<MediaItem>(event.getItem()));
+          
+          if(focusedItem.equals(oldItem)) {
+            treeView.getFocusModel().focus(focusedIndex);  // HACK: Because of the call to "set" above, the focused index can change as the item is replaced.  This code restores it.
+          }
+        }
+        
+        TreeItem<MediaItem> selectedItem = treeView.getSelectionModel().getSelectedItem();
+
+        if(selectedItem != null && event.getItem().equals(selectedItem.getValue())) {
           Platform.runLater(new Runnable() {
             public void run() {
               update(event.getItem());
             }
           });
         }
+      }
+      
+      private TreeItem<MediaItem> findMediaItem(TreeItem<MediaItem> treeRoot, MediaItem mediaItem) {
+        for(TreeItem<MediaItem> treeItem : treeRoot.getChildren()) {
+          if(treeItem.getValue().equals(mediaItem)) {
+            return treeItem;
+          }
+          
+          if(!treeItem.isLeaf()) {
+            TreeItem<MediaItem> foundItem = findMediaItem(treeItem, mediaItem);
+            
+            if(foundItem != null) {
+              return foundItem;
+            }
+          }
+        }
+        
+        return null;
       }
     });
 
@@ -175,9 +264,9 @@ public class SelectItemScene {
           setEffect(new DropShadow());
           //setEffect(new Reflection());
           
-          // Following three lines is a dirty hack to get the ImageView to respect the size of its parent
+          // HACK: Following three lines is a dirty hack to get the ImageView to respect the size of its parent
           setManaged(false);
-          fitWidthProperty().bind(widthProperty().subtract(hgapProperty()));
+          fitWidthProperty().bind(widthProperty().subtract(hgapProperty()));  // TODO seems to bug when redisplaying this scene after being hidden?
           fitHeightProperty().bind(heightProperty());
         }});
       }}, 0, 0);
@@ -208,9 +297,9 @@ public class SelectItemScene {
     
     root.add(new HBox() {{
       getStyleClass().add("content-box");
-      getChildren().add(listView);
+      getChildren().add(treeView);
       
-      HBox.setHgrow(listView, Priority.ALWAYS);
+      HBox.setHgrow(treeView, Priority.ALWAYS);
     }}, 1, 1);
         
     return new StackPane() {{
@@ -225,6 +314,7 @@ public class SelectItemScene {
   
   private class MediaItemUpdateService extends Service<Void> {
     private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<MediaItem>();
+    
     public void setMediaItem(MediaItem value) {mediaItem.set(value);}
     
     @Override
@@ -303,6 +393,7 @@ public class SelectItemScene {
     return false;
   }
   
+  @SuppressWarnings("unused")
   private static void debugScene(Node node) {
     if(node == null) {
       return;
@@ -321,6 +412,13 @@ public class SelectItemScene {
     }
     
     debugScene(node.getParent());
+  }
+  
+
+  private void itemSelected(MediaItem selectedItem) {
+    if(selectedItem.isLeaf()) {
+      controller.play(selectedItem);
+    }
   }
 }
 
