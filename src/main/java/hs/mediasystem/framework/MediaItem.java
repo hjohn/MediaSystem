@@ -20,4 +20,7 @@ public interface MediaItem {
   ImageHandle getBanner();
   ImageHandle getPoster();
   ImageHandle getBackground();
+  
+  void loadData();
+  boolean isDataLoaded();
 }

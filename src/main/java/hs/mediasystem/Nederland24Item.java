@@ -79,4 +79,13 @@ public class Nederland24Item implements MediaItem {
   public String getPlot() {
     return null;
   }
+
+  @Override
+  public void loadData() {
+  }
+
+  @Override
+  public boolean isDataLoaded() {
+    return true;
+  }
 }

@@ -54,6 +54,10 @@ public class Nederland24MediaTree implements MediaTree {
   }
 
   @Override
+  public void enrichItem(NamedItem namedItem) {
+  }
+  
+  @Override
   public CellProvider<MediaItem> createListCell() {
     throw new UnsupportedOperationException("Method not implemented");
   }

@@ -133,11 +133,24 @@ public abstract class NamedItem implements MediaItem {
   }
   
   private void ensureDataLoaded() {  // TODO should only enrich, not completely replace
+//    if(item.getId() == 0 && mediaTree != null) {
+//      System.out.println("Triggered for : " + getTitle());
+//      item.setId(-1);
+//      mediaTree.triggerItemUpdate(this);
+//    }
+  }
+  
+  public void loadData() {
     if(item.getId() == 0 && mediaTree != null) {
-      System.out.println("Triggered for : " + getTitle());
+      System.out.println("Loading data synchronously for : " + getTitle());
       item.setId(-1);
-      mediaTree.triggerItemUpdate(this);
+      mediaTree.enrichItem(this);
     }
+  }
+  
+  public boolean isDataLoaded() {
+    System.err.println("isDataLoaded() : " + item.getTitle() + " ; " + item.getId());
+    return item.getId() != 0 || mediaTree == null;
   }
 
   public Float getRating() {

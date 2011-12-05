@@ -7,8 +7,6 @@ import hs.models.events.ListenerList;
 
 import java.util.List;
 
-import javafx.scene.control.ListCell;
-
 /**
  * A representation of a group of (related) media with navigation and display information.
  */
@@ -28,4 +26,5 @@ public interface MediaTree {
   ListenerList<ItemUpdate> onItemUpdate();
   
   void triggerItemUpdate(NamedItem namedItem);
+  void enrichItem(final NamedItem namedItem);
 }

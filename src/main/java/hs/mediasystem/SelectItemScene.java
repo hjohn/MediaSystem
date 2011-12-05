@@ -6,6 +6,7 @@ import hs.mediasystem.fs.CellProvider;
 import hs.mediasystem.screens.movie.ItemUpdate;
 import hs.models.events.EventListener;
 import hs.ui.image.ImageHandle;
+import javafx.concurrent.Worker;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -123,16 +124,7 @@ public class SelectItemScene {
       setCellFactory(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
         @Override
         public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
-          final CellProvider<MediaItem> provider = mediaTree.createListCell();
-          
-          return new TreeCell<MediaItem>() {
-            @Override
-            protected void updateItem(MediaItem item, boolean empty) {
-              super.updateItem(item, empty);
-              
-              setGraphic(provider.configureCell(item));
-            }
-          };
+          return new MediaItemTreeCell(mediaTree.createListCell());
         }
       });
       
@@ -174,19 +166,19 @@ public class SelectItemScene {
     mediaTree.onItemUpdate().call(new EventListener<ItemUpdate>() {
       @Override
       public void onEvent(final ItemUpdate event) {
-        TreeItem<MediaItem> foundItem = findMediaItem(treeRoot, event.getItem());
-        
-        if(foundItem != null) {
-          int index = foundItem.getParent().getChildren().indexOf(foundItem);
-          
-          TreeItem<MediaItem> focusedItem = treeView.getFocusModel().getFocusedItem();
-          int focusedIndex = treeView.getFocusModel().getFocusedIndex();
-          TreeItem<MediaItem> oldItem = foundItem.getParent().getChildren().set(index, new TreeItem<MediaItem>(event.getItem()));
-          
-          if(focusedItem.equals(oldItem)) {
-            treeView.getFocusModel().focus(focusedIndex);  // HACK: Because of the call to "set" above, the focused index can change as the item is replaced.  This code restores it.
-          }
-        }
+//        TreeItem<MediaItem> foundItem = findMediaItem(treeRoot, event.getItem());
+//        
+//        if(foundItem != null) {
+//          int index = foundItem.getParent().getChildren().indexOf(foundItem);
+//          
+//          TreeItem<MediaItem> focusedItem = treeView.getFocusModel().getFocusedItem();
+//          int focusedIndex = treeView.getFocusModel().getFocusedIndex();
+//          TreeItem<MediaItem> oldItem = foundItem.getParent().getChildren().set(index, new TreeItem<MediaItem>(event.getItem()));
+//          
+//          if(focusedItem.equals(oldItem)) {
+//            treeView.getFocusModel().focus(focusedIndex);  // HACK: Because of the call to "set" above, the focused index can change as the item is replaced.  This code restores it.
+//          }
+//        }
         
         TreeItem<MediaItem> selectedItem = treeView.getSelectionModel().getSelectedItem();
 
@@ -199,23 +191,23 @@ public class SelectItemScene {
         }
       }
       
-      private TreeItem<MediaItem> findMediaItem(TreeItem<MediaItem> treeRoot, MediaItem mediaItem) {
-        for(TreeItem<MediaItem> treeItem : treeRoot.getChildren()) {
-          if(treeItem.getValue().equals(mediaItem)) {
-            return treeItem;
-          }
-          
-          if(!treeItem.isLeaf()) {
-            TreeItem<MediaItem> foundItem = findMediaItem(treeItem, mediaItem);
-            
-            if(foundItem != null) {
-              return foundItem;
-            }
-          }
-        }
-        
-        return null;
-      }
+//      private TreeItem<MediaItem> findMediaItem(TreeItem<MediaItem> treeRoot, MediaItem mediaItem) {
+//        for(TreeItem<MediaItem> treeItem : treeRoot.getChildren()) {
+//          if(treeItem.getValue().equals(mediaItem)) {
+//            return treeItem;
+//          }
+//          
+//          if(!treeItem.isLeaf()) {
+//            TreeItem<MediaItem> foundItem = findMediaItem(treeItem, mediaItem);
+//            
+//            if(foundItem != null) {
+//              return foundItem;
+//            }
+//          }
+//        }
+//        
+//        return null;
+//      }
     });
 
     root.getColumnConstraints().addAll(
@@ -312,6 +304,50 @@ public class SelectItemScene {
     }};
   }
   
+  private final class MediaItemTreeCell extends TreeCell<MediaItem> {
+    private final CellProvider<MediaItem> provider;
+    private Task<Void> loadTask;
+    
+    private MediaItemTreeCell(CellProvider<MediaItem> provider) {
+      this.provider = provider;
+    }
+
+    @Override
+    protected void updateItem(final MediaItem item, boolean empty) {
+      super.updateItem(item, empty);
+      
+      if(item != null) {
+        setGraphic(provider.configureCell(item));
+        
+        if(!item.isDataLoaded()) {  // TODO apparently, updateItem is also called for an invisible cell... this causes the time it is really displayed to assume data is loaded already while we really should wait for it
+          if(loadTask != null) {
+            loadTask.cancel();
+          }
+          
+          loadTask = new Task<Void>() {  // TODO service?
+            public Void call() {
+              System.err.println("Loading data for : " + item.getTitle());
+              item.loadData();
+              return null;
+            }
+          };
+          
+          loadTask.stateProperty().addListener(new ChangeListener<Worker.State>() {
+            public void changed(ObservableValue<? extends Worker.State> source, Worker.State oldState, Worker.State newState) {
+              if(newState.equals(Worker.State.SUCCEEDED)) {
+                System.err.println("Setting new graphic for : " + item.getTitle());
+                setGraphic(provider.configureCell(item));
+              }
+            }
+          });
+          
+          new Thread(loadTask).start();
+        }
+      }
+    }
+  }
+
+
   private class MediaItemUpdateService extends Service<Void> {
     private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<MediaItem>();
     

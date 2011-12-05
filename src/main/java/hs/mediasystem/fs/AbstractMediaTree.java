@@ -63,14 +63,19 @@ public abstract class AbstractMediaTree implements MediaTree {
       EXECUTOR.execute(new ItemUpdater(itemUpdateNotifier, namedItem) {
         @Override
         public void run() {
-          try {
-            itemEnricher.enrichItem(namedItem.getItem());
-          }
-          catch(ItemNotFoundException e) {
-            System.out.println("Item Enrichment failed: " + e);
-          }
+          enrichItem(namedItem);
         }
       });
+    }
+  }
+  
+  @Override
+  public void enrichItem(final NamedItem namedItem) {
+    try {
+      itemEnricher.enrichItem(namedItem.getItem());
+    }
+    catch(ItemNotFoundException e) {
+      System.out.println("Item Enrichment failed: " + e);
     }
   }
 
