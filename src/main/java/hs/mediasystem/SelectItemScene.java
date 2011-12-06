@@ -1,12 +1,12 @@
 package hs.mediasystem;
 
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaItem.State;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.CellProvider;
 import hs.mediasystem.screens.movie.ItemUpdate;
 import hs.models.events.EventListener;
 import hs.ui.image.ImageHandle;
-import javafx.concurrent.Worker;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -135,6 +135,7 @@ public class SelectItemScene {
 //          update(newValue.getValue());
           
           Platform.runLater(new Runnable() {
+            @Override
             public void run() {
               update(newValue.getValue());
             }
@@ -184,6 +185,7 @@ public class SelectItemScene {
 
         if(selectedItem != null && event.getItem().equals(selectedItem.getValue())) {
           Platform.runLater(new Runnable() {
+            @Override
             public void run() {
               update(event.getItem());
             }
@@ -319,24 +321,31 @@ public class SelectItemScene {
       if(item != null) {
         setGraphic(provider.configureCell(item));
         
-        if(!item.isDataLoaded()) {  // TODO apparently, updateItem is also called for an invisible cell... this causes the time it is really displayed to assume data is loaded already while we really should wait for it
+        if(item.stateProperty().get() != State.ENRICHED) {
           if(loadTask != null) {
             loadTask.cancel();
           }
           
           loadTask = new Task<Void>() {  // TODO service?
+            @Override
             public Void call() {
               System.err.println("Loading data for : " + item.getTitle());
               item.loadData();
               return null;
             }
           };
-          
-          loadTask.stateProperty().addListener(new ChangeListener<Worker.State>() {
-            public void changed(ObservableValue<? extends Worker.State> source, Worker.State oldState, Worker.State newState) {
-              if(newState.equals(Worker.State.SUCCEEDED)) {
+
+          item.stateProperty().addListener(new ChangeListener<State>() {
+            @Override
+            public void changed(ObservableValue<? extends State> source, State oldState, State newState) {
+              if(newState.equals(State.ENRICHED)) {
                 System.err.println("Setting new graphic for : " + item.getTitle());
-                setGraphic(provider.configureCell(item));
+                Platform.runLater(new Runnable() {
+                  @Override
+                  public void run() {
+                    setGraphic(provider.configureCell(item));
+                  }
+                });
               }
             }
           });
@@ -374,10 +383,10 @@ public class SelectItemScene {
           }
           
           return null;
-        };
+        }
       };
     }
-  };
+  }
   
   private MediaItemUpdateService mediaItemUpdateService = new MediaItemUpdateService();
   

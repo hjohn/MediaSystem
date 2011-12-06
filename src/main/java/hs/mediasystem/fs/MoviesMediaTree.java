@@ -13,9 +13,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javafx.scene.control.ListCell;
-
-
 public class MoviesMediaTree extends AbstractMediaTree {
   private final Path root;
 

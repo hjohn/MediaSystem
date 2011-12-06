@@ -5,6 +5,7 @@ import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Player;
 import hs.mediasystem.screens.MainScreen;
 import hs.mediasystem.screens.TransparentPlayingScreen;
+import hs.mediasystem.util.ini.Ini;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -15,14 +16,15 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class ProgramController {
-
   private final Player player;
   private final Stage mainStage;  // TODO two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing
   private final Stage overlayStage;
   private final BorderPane mainGroup;
   private final BorderPane overlayGroup;
+  private final Ini ini;
   
-  public ProgramController(Player player) {
+  public ProgramController(Ini ini, Player player) {
+    this.ini = ini;
     this.player = player;
     
     mainGroup = new BorderPane();
@@ -35,7 +37,11 @@ public class ProgramController {
     setupStage(overlayStage, overlayGroup, 0.05);
   }
   
-  private void setupStage(Stage stage, BorderPane borderPane, double transparency) {
+  public Ini getIni() {
+    return ini;
+  }
+  
+  private static void setupStage(Stage stage, BorderPane borderPane, double transparency) {
     Scene scene = new Scene(borderPane, new Color(0, 0, 0, transparency));
 
     stage.setScene(scene);

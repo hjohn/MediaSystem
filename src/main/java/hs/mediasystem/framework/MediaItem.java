@@ -1,8 +1,11 @@
 package hs.mediasystem.framework;
 
 import hs.ui.image.ImageHandle;
+import javafx.beans.property.ReadOnlyObjectProperty;
 
 public interface MediaItem {
+  public enum State {BASIC, ENRICHING, ENRICHED}
+  
   MediaTree getRoot();
   boolean isRoot();
   boolean isLeaf();
@@ -21,6 +24,6 @@ public interface MediaItem {
   ImageHandle getPoster();
   ImageHandle getBackground();
   
+  ReadOnlyObjectProperty<State> stateProperty();
   void loadData();
-  boolean isDataLoaded();
 }

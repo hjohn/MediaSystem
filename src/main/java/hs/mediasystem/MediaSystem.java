@@ -3,8 +3,6 @@ package hs.mediasystem;
 import hs.mediasystem.framework.AbstractBlock;
 import hs.mediasystem.framework.Extensions;
 import hs.mediasystem.framework.Screen;
-import hs.mediasystem.players.vlc.VLCControllerFactory;
-import hs.mediasystem.players.vlc.VLCPlayer;
 import hs.mediasystem.screens.Clock;
 import hs.mediasystem.screens.Header;
 import hs.mediasystem.screens.MainMenu;
@@ -18,8 +16,6 @@ import hs.sublight.SublightSubtitleClient;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.io.File;
 import java.nio.file.Path;
@@ -87,7 +83,6 @@ public class MediaSystem {
   public static final Screen VIDEO_PLAYING;
   public static final Screen VIDEO_OPTIONS;
   
-  private static final ControllerFactory CONTROLLER_FACTORY;
   private static final Ini INI = new Ini(new File("mediasystem.ini"));
 
   static {
@@ -119,7 +114,7 @@ public class MediaSystem {
     GeneralSettings.setLogStream(System.out);
     
 //    CONTROLLER_FACTORY = new MPlayerControllerFactory(Paths.get(section.get("mplayer.path")));
-    CONTROLLER_FACTORY = new VLCControllerFactory();
+  //  CONTROLLER_FACTORY = new VLCControllerFactory();
 //    CONTROLLER_FACTORY = new VLCJavaFXControllerFactory();
         
     final AbstractBlock<?> mediaSystemBorder = new MediaSystemBorder();

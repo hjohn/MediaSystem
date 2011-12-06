@@ -33,7 +33,7 @@ public class FrontEnd extends Application {
   
   @Override
   public void start(Stage primaryStage) throws Exception {
-    ProgramController controller = new ProgramController(player);
+    ProgramController controller = new ProgramController(INI, player);
     
     controller.showMainScreen();
   }

@@ -10,6 +10,9 @@ import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+
 public abstract class NamedItem implements MediaItem {
   private final MediaTree mediaTree;
   
@@ -83,6 +86,7 @@ public abstract class NamedItem implements MediaItem {
     return item.getEpisode();
   }
     
+  @Override
   public ImageHandle getBackground() {
     ensureDataLoaded();
 
@@ -139,18 +143,35 @@ public abstract class NamedItem implements MediaItem {
 //      mediaTree.triggerItemUpdate(this);
 //    }
   }
+
+  private ReadOnlyObjectWrapper<State> state = new ReadOnlyObjectWrapper<State>(State.BASIC);
   
+  public State getState() {
+    return state.get();
+  }
+  
+  @Override
+  public ReadOnlyObjectProperty<State> stateProperty() {
+    return state.getReadOnlyProperty();
+  }
+  
+  @Override
   public void loadData() {
+    synchronized(state) {
+      if(getState() != State.BASIC) {
+        return;
+      }
+      
+      state.set(State.ENRICHING);
+    }
+
     if(item.getId() == 0 && mediaTree != null) {
       System.out.println("Loading data synchronously for : " + getTitle());
       item.setId(-1);
       mediaTree.enrichItem(this);
     }
-  }
-  
-  public boolean isDataLoaded() {
-    System.err.println("isDataLoaded() : " + item.getTitle() + " ; " + item.getId());
-    return item.getId() != 0 || mediaTree == null;
+    
+    state.set(State.ENRICHED);
   }
 
   public Float getRating() {

@@ -24,6 +24,7 @@ public class BannerRenderer implements CellProvider<MediaItem> {
     }});
   }
   
+  @Override
   public Node configureCell(MediaItem item) {
     if(item != null) {
       ImageHandle banner = item.getBanner();

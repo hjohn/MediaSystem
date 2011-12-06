@@ -13,8 +13,6 @@ import hs.models.events.Notifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.scene.control.ListCell;
-
 public class Nederland24MediaTree implements MediaTree {
   private final Notifier<ItemUpdate> itemUpdateNotifier = new Notifier<>();
 

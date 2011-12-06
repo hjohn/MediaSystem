@@ -3,6 +3,7 @@ package hs.mediasystem;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.ui.image.ImageHandle;
+import javafx.beans.property.ReadOnlyObjectProperty;
 
 public class Nederland24Item implements MediaItem {
   private final MediaTree root;
@@ -85,7 +86,7 @@ public class Nederland24Item implements MediaItem {
   }
 
   @Override
-  public boolean isDataLoaded() {
-    return true;
+  public ReadOnlyObjectProperty<State> stateProperty() {
+    throw new UnsupportedOperationException("Method not implemented");
   }
 }

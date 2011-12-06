@@ -4,7 +4,6 @@ import hs.mediasystem.framework.MediaItem;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -44,6 +43,7 @@ public class DuoLineRenderer2 implements CellProvider<MediaItem> {
     group.getChildren().add(collectionMarker);
   }
   
+  @Override
   public Node configureCell(MediaItem item) {
     if(item != null) {
       title.setText(item.getTitle());

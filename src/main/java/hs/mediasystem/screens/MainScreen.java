@@ -1,7 +1,6 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.ProgramController;
-import hs.mediasystem.SelectItemScene;
 import hs.mediasystem.fs.MoviesMediaTree;
 import hs.mediasystem.fs.SeriesMediaTree;
 
@@ -95,14 +94,14 @@ public class MainScreen {
     buttons.get(0).setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
-        controller.showSelectItemScreen(new MoviesMediaTree(Paths.get("L:/Movies/HD")));
+        controller.showSelectItemScreen(new MoviesMediaTree(Paths.get(controller.getIni().getValue("general", "movies.path"))));
       }
     });
     
     buttons.get(1).setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
-        controller.showSelectItemScreen(new SeriesMediaTree(Paths.get("L:/Series")));
+        controller.showSelectItemScreen(new SeriesMediaTree(Paths.get(controller.getIni().getValue("general", "series.path"))));
       }
     });
     

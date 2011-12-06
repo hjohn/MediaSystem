@@ -34,6 +34,7 @@ public class NetworkKeyListener {
     final ServerSocket socket = new ServerSocket(1111);
     
     Thread thread = new Thread() {
+      @Override
       public void run() {
         try {
           for(;;) {
