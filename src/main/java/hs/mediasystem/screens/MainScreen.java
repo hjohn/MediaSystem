@@ -15,10 +15,7 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
-import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -65,12 +62,6 @@ public class MainScreen {
         Timeline timeline = new Timeline();
         Button b = (Button)(((ReadOnlyProperty<? extends Boolean>)observable).getBean());
         
-        System.out.println("focus changed");
-        
-        Point2D point = b.localToParent(0, b.getLayoutY());
-        
-        System.out.println("point = " + point + " ; " + b.getLayoutY());
-        
         double d = b.getParent().getLayoutBounds().getHeight();
         timeline.getKeyFrames().addAll(
           new KeyFrame(Duration.ZERO, new KeyValue(menuBox.translateYProperty(), menuBox.getTranslateY())),
@@ -83,12 +74,12 @@ public class MainScreen {
     
     for(final Button button : buttons) {
       button.focusedProperty().addListener(changeListener);
-      button.addEventHandler(EventType.ROOT, new EventHandler<Event>() {
-        @Override
-        public void handle(Event event) {
-          System.out.println("Button " + button.getText() + " received " + event);
-        }
-      });
+//      button.addEventHandler(EventType.ROOT, new EventHandler<Event>() {
+//        @Override
+//        public void handle(Event event) {
+//          System.out.println("Button " + button.getText() + " received " + event);
+//        }
+//      });
     }
     
     buttons.get(0).setOnAction(new EventHandler<ActionEvent>() {

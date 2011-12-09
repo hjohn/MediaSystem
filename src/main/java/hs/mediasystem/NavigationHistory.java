@@ -3,6 +3,12 @@ package hs.mediasystem;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+
 public class NavigationHistory<T> {
   private final List<T> stack = new ArrayList<T>();
 
@@ -14,7 +20,9 @@ public class NavigationHistory<T> {
     }
     
     currentStackIndex--;
-    
+
+    onAction.get().handle(new ActionEvent(this, Event.NULL_SOURCE_TARGET));
+
     return stack.get(currentStackIndex);
   }
   
@@ -25,6 +33,8 @@ public class NavigationHistory<T> {
     
     stack.add(destination);
     currentStackIndex++;
+    
+    onAction.get().handle(new ActionEvent(this, Event.NULL_SOURCE_TARGET));
   }
   
   public List<T> getPath() {
@@ -44,4 +54,20 @@ public class NavigationHistory<T> {
   public boolean isEmpty() {
     return stack.isEmpty();
   }
+  
+  private final ObjectProperty<EventHandler<ActionEvent>> onAction = new SimpleObjectProperty<EventHandler<ActionEvent>>();
+  
+  public EventHandler<ActionEvent> getOnAction() {
+    return onAction.get();
+  }
+  
+  public void setOnAction(EventHandler<ActionEvent> value) {
+    onAction.set(value);
+  }
+  
+  public ObjectProperty<EventHandler<ActionEvent>> onActionProperty() {
+    return onAction;
+  }
+  
+  //onChangeProperty();
 }

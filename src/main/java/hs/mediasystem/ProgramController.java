@@ -6,9 +6,13 @@ import hs.mediasystem.framework.Player;
 import hs.mediasystem.screens.MainScreen;
 import hs.mediasystem.screens.TransparentPlayingScreen;
 import hs.mediasystem.util.ini.Ini;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
@@ -23,6 +27,8 @@ public class ProgramController {
   private final BorderPane overlayGroup;
   private final Ini ini;
   
+  private final NavigationHistory<NavigationItem> history = new NavigationHistory<NavigationItem>();
+  
   public ProgramController(Ini ini, Player player) {
     this.ini = ini;
     this.player = player;
@@ -35,6 +41,30 @@ public class ProgramController {
 
     setupStage(mainStage, mainGroup, 1.0);
     setupStage(overlayStage, overlayGroup, 0.05);
+    
+//    mainGroup.addEventHandler(KeyEvent.KEY_TYPED, new EventHandler<KeyEvent>() {
+//      @Override
+//      public void handle(KeyEvent event) {
+//        System.out.println(event);
+//        
+//      }
+//    });
+    
+    mainGroup.setOnKeyPressed(new EventHandler<KeyEvent>() {
+      @Override
+      public void handle(KeyEvent event) {
+        if(event.getCode().equals(KeyCode.BACK_SPACE)) {
+          history.back();
+        }
+      }
+    });
+    
+    history.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        updateScreen();
+      }
+    });
   }
   
   public Ini getIni() {
@@ -72,25 +102,48 @@ public class ProgramController {
   public void showMainScreen() {
     MainScreen mainScreen = new MainScreen(this);
     
-    displayOnMainStage(mainScreen.create());
+    history.forward(new NavigationItem(mainScreen.create(), "MAIN"));
   }
   
   public void showSelectItemScreen(MediaTree mediaTree) {
     SelectItemScene selectItemScreen = new SelectItemScene(this);
     
-    displayOnMainStage(selectItemScreen.create(mediaTree));
+    history.forward(new NavigationItem(selectItemScreen.create(mediaTree), "MAIN"));
+  }
+  
+  private void updateScreen() {
+    if(history.current().getStage().equals("MAIN")) {
+      displayOnMainStage(history.current().getNode());
+    }
+    else {
+      displayOnOverlayStage(history.current().getNode());
+    }
   }
   
   public void play(MediaItem mediaItem) {
     player.play(mediaItem.getUri());
-    
+   
     TransparentPlayingScreen screen = new TransparentPlayingScreen(this);
-    displayOnOverlayStage(screen.create(mediaItem));
+    history.forward(new NavigationItem(screen.create(mediaItem), "OVERLAY"));
   }
   
   public void stop() {
-    mainStage.show();
-    overlayStage.hide();
     player.stop();
+    history.back();
   }
+  
+  // SelectItemScene...
+  // NavigationInterface
+  //  - back();
+  //  - play();
+  //  - editItem();
+  //  - castInfo();
+  //
+  // MainNavInterface
+  //  - selectItem();
+  //  - exitProgram();
+  //
+  // TransparentPlayingNavInterface
+  //  - back();
+  //  - selectSubtitle();
 }

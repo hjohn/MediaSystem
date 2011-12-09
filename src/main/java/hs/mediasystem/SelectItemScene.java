@@ -4,8 +4,6 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItem.State;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.CellProvider;
-import hs.mediasystem.screens.movie.ItemUpdate;
-import hs.models.events.EventListener;
 import hs.ui.image.ImageHandle;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -164,54 +162,6 @@ public class SelectItemScene {
       });
     }};
 
-    mediaTree.onItemUpdate().call(new EventListener<ItemUpdate>() {
-      @Override
-      public void onEvent(final ItemUpdate event) {
-//        TreeItem<MediaItem> foundItem = findMediaItem(treeRoot, event.getItem());
-//        
-//        if(foundItem != null) {
-//          int index = foundItem.getParent().getChildren().indexOf(foundItem);
-//          
-//          TreeItem<MediaItem> focusedItem = treeView.getFocusModel().getFocusedItem();
-//          int focusedIndex = treeView.getFocusModel().getFocusedIndex();
-//          TreeItem<MediaItem> oldItem = foundItem.getParent().getChildren().set(index, new TreeItem<MediaItem>(event.getItem()));
-//          
-//          if(focusedItem.equals(oldItem)) {
-//            treeView.getFocusModel().focus(focusedIndex);  // HACK: Because of the call to "set" above, the focused index can change as the item is replaced.  This code restores it.
-//          }
-//        }
-        
-        TreeItem<MediaItem> selectedItem = treeView.getSelectionModel().getSelectedItem();
-
-        if(selectedItem != null && event.getItem().equals(selectedItem.getValue())) {
-          Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-              update(event.getItem());
-            }
-          });
-        }
-      }
-      
-//      private TreeItem<MediaItem> findMediaItem(TreeItem<MediaItem> treeRoot, MediaItem mediaItem) {
-//        for(TreeItem<MediaItem> treeItem : treeRoot.getChildren()) {
-//          if(treeItem.getValue().equals(mediaItem)) {
-//            return treeItem;
-//          }
-//          
-//          if(!treeItem.isLeaf()) {
-//            TreeItem<MediaItem> foundItem = findMediaItem(treeItem, mediaItem);
-//            
-//            if(foundItem != null) {
-//              return foundItem;
-//            }
-//          }
-//        }
-//        
-//        return null;
-//      }
-    });
-
     root.getColumnConstraints().addAll(
       new ColumnConstraints() {{
         setPercentWidth(50);
@@ -299,6 +249,8 @@ public class SelectItemScene {
     return new StackPane() {{
       getChildren().add(new BorderPane() {{
         setCenter(new Group() {{
+          //this.getStyleClass().add("debug-border");
+          setMinSize(1, 1);
           getChildren().addAll(backgroundImageView, newBackgroundImageView);
         }});
       }});

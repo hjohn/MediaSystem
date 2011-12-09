@@ -163,6 +163,7 @@ public class MediaSystem {
    // Controller controller = CONTROLLER_FACTORY.create();
 
     NativeLibrary.addSearchPath("libvlc", "c:/program files (x86)/VideoLAN/VLC");
+    NativeLibrary.addSearchPath("libvlc", "c:/program files/VideoLAN/VLC");
     
 //    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 //    GraphicsDevice[] gs = ge.getScreenDevices();
