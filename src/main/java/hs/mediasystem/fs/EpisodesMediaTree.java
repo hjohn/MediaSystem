@@ -79,6 +79,6 @@ public class EpisodesMediaTree extends AbstractMediaTree {
 
   @Override
   public CellProvider<MediaItem> createListCell() {
-    throw new UnsupportedOperationException("Method not implemented");
+    return new DuoLineRenderer2();
   }
 }

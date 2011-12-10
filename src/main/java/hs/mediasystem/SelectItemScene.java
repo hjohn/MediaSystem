@@ -4,6 +4,7 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItem.State;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.CellProvider;
+import hs.mediasystem.fs.EpisodeGroup;
 import hs.ui.image.ImageHandle;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -14,7 +15,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -49,15 +49,17 @@ import javafx.util.Duration;
 public class SelectItemScene {
   private final ProgramController controller;
   
-  private final ObjectProperty<String> title = new SimpleObjectProperty<String>();
-  private final ObjectProperty<String> subtitle = new SimpleObjectProperty<String>();
-  private final ObjectProperty<String> releaseYear = new SimpleObjectProperty<String>();
-  private final ObjectProperty<String> plot = new SimpleObjectProperty<String>();
+  private final ObjectProperty<String> title = new SimpleObjectProperty<>();
+  private final ObjectProperty<String> subtitle = new SimpleObjectProperty<>();
+  private final ObjectProperty<String> releaseYear = new SimpleObjectProperty<>();
+  private final ObjectProperty<String> plot = new SimpleObjectProperty<>();
 
-  private final ObjectProperty<Image> poster = new SimpleObjectProperty<Image>();
-  private final ObjectProperty<Image> background = new SimpleObjectProperty<Image>();
-  private final ObjectProperty<Image> newBackground = new SimpleObjectProperty<Image>();
-  private final ObjectProperty<Image> wantedBackground = new SimpleObjectProperty<Image>();
+  private final ObjectProperty<Image> poster = new SimpleObjectProperty<>();
+  private final ObjectProperty<Image> background = new SimpleObjectProperty<>();
+  private final ObjectProperty<Image> newBackground = new SimpleObjectProperty<>();
+  private final ObjectProperty<Image> wantedBackground = new SimpleObjectProperty<>();
+  
+  private final ObjectProperty<Callback<TreeView<MediaItem>, TreeCell<MediaItem>>> cellFactory = new SimpleObjectProperty<>();
   
   private final ImageView backgroundImageView = new ImageView() {{
     imageProperty().bind(background);
@@ -99,17 +101,26 @@ public class SelectItemScene {
     });
   }
   
-  private ObservableList<MediaItem> mediaItems = FXCollections.observableArrayList(); 
-  
   private TreeItem<MediaItem> treeRoot = new TreeItem<MediaItem>();
+    
+  private void setMediaTree(final MediaTree mediaTree) {
+    treeRoot.getChildren().clear();
+    
+    for(MediaItem item : mediaTree.children()) {
+      treeRoot.getChildren().add(new MediaTreeItem(item));
+    }
+    
+    cellFactory.set(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
+      @Override
+      public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
+        return new MediaItemTreeCell(mediaTree.createListCell());
+      }
+    });
+  }
   
   public Node create(final MediaTree mediaTree) {
-    mediaItems.addAll(mediaTree.children());
-
-    for(MediaItem item : mediaTree.children()) {
-      treeRoot.getChildren().add(new TreeItem<MediaItem>(item));
-    }
-
+    setMediaTree(mediaTree);
+    
     final GridPane root = new GridPane();
             
     root.getStyleClass().addAll("select-item-pane", "content-box-grid");
@@ -119,12 +130,7 @@ public class SelectItemScene {
 
       setEditable(false);
       setShowRoot(false);
-      setCellFactory(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
-        @Override
-        public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
-          return new MediaItemTreeCell(mediaTree.createListCell());
-        }
-      });
+      cellFactoryProperty().bind(cellFactory);
       
       getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<MediaItem>>() {
         @Override
@@ -146,7 +152,7 @@ public class SelectItemScene {
         public void handle(MouseEvent event) {
           if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
             System.out.println("Selected " + getSelectionModel().getSelectedItem().getValue().getTitle());
-            itemSelected(getSelectionModel().getSelectedItem().getValue());
+            itemSelected(getSelectionModel().getSelectedItem());
           }
         }
       });
@@ -156,7 +162,7 @@ public class SelectItemScene {
         public void handle(KeyEvent event) {
           if(event.getCode() == KeyCode.ENTER) {
             System.out.println("Selected (with key) " + getSelectionModel().getSelectedItem().getValue().getTitle());
-            itemSelected(getSelectionModel().getSelectedItem().getValue());
+            itemSelected(getSelectionModel().getSelectedItem());
           }
         }
       });
@@ -258,20 +264,58 @@ public class SelectItemScene {
     }};
   }
   
+  private final class MediaTreeItem extends TreeItem<MediaItem> {
+    private boolean childrenPopulated;
+    
+    private MediaTreeItem(MediaItem value) {
+      super(value);
+    }
+
+    @Override
+    public boolean isLeaf() {
+      return !(getValue() instanceof hs.mediasystem.framework.Group);
+    }
+
+    @Override
+    public ObservableList<TreeItem<MediaItem>> getChildren() {
+      if(!childrenPopulated) {
+        childrenPopulated = true;
+  
+        if(getValue() instanceof hs.mediasystem.framework.Group) {
+          hs.mediasystem.framework.Group group = (hs.mediasystem.framework.Group)getValue();
+          
+          for(MediaItem child : group.children()) {
+            super.getChildren().add(new MediaTreeItem(child));
+          }
+        }
+      }
+      
+      return super.getChildren();
+    }
+  }
+
+
   private final class MediaItemTreeCell extends TreeCell<MediaItem> {
     private final CellProvider<MediaItem> provider;
+    
     private Task<Void> loadTask;
     
     private MediaItemTreeCell(CellProvider<MediaItem> provider) {
       this.provider = provider;
+      
+      setDisclosureNode(new Group());
     }
 
+    private Node createNodeGraphic(MediaItem item) {
+      return provider.configureCell(item);
+    }
+    
     @Override
     protected void updateItem(final MediaItem item, boolean empty) {
       super.updateItem(item, empty);
-      
+
       if(item != null) {
-        setGraphic(provider.configureCell(item));
+        setGraphic(createNodeGraphic(item));
         
         if(item.stateProperty().get() != State.ENRICHED) {
           if(loadTask != null) {
@@ -295,7 +339,7 @@ public class SelectItemScene {
                 Platform.runLater(new Runnable() {
                   @Override
                   public void run() {
-                    setGraphic(provider.configureCell(item));
+                    setGraphic(createNodeGraphic(item));
                   }
                 });
               }
@@ -412,9 +456,18 @@ public class SelectItemScene {
   }
   
 
-  private void itemSelected(MediaItem selectedItem) {
-    if(selectedItem.isLeaf()) {
-      controller.play(selectedItem);
+  private void itemSelected(TreeItem<MediaItem> treeItem) {
+    MediaItem mediaItem = treeItem.getValue();
+    
+    if(mediaItem.isLeaf()) {
+      controller.play(mediaItem);
+    }
+    else if(mediaItem.isRoot()) {
+      setMediaTree(mediaItem.getRoot());
+    }
+    else if(mediaItem instanceof hs.mediasystem.framework.Group) {
+      System.out.println("Expanding " + mediaItem.getTitle());
+      treeItem.setExpanded(true);
     }
   }
 }
