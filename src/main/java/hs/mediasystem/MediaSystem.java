@@ -35,6 +35,12 @@ import net.sf.jtmdb.GeneralSettings;
 
 import com.sun.jna.NativeLibrary;
 
+// Top 10 stuff:
+// TODO Minimal movie control; ffwd, rewind, pause, mute, vol+-, subtitle delay+-, subtitle select, brightness+-
+// TODO Subtitle selection / Auto download
+// TODO Some form of remote control support
+// TODO Running time overlay (info button)
+
 // Minimal working system:
 // TODO Make clock in standard border
 // TODO Download + show subtitles, also multiple different ones should work without problem; store them with file I guess
