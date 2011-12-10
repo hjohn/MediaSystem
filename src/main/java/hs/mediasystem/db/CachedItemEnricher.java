@@ -55,5 +55,9 @@ public class CachedItemEnricher implements ItemEnricher {
       providerToCache.enrichItem(item);
       itemsDao.storeItem(item);
     }
+    catch(Exception e) {
+      System.out.println("[WARN] Enrichment failed: " + e);
+      throw new RuntimeException(e);
+    }
   }
 }
