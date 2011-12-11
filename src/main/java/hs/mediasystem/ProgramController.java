@@ -40,7 +40,7 @@ public class ProgramController {
     overlayStage = new Stage(StageStyle.TRANSPARENT);
 
     setupStage(mainStage, mainGroup, 1.0);
-    setupStage(overlayStage, overlayGroup, 0.05);
+    setupStage(overlayStage, overlayGroup, 0.0);
     
 //    mainGroup.addEventHandler(KeyEvent.KEY_TYPED, new EventHandler<KeyEvent>() {
 //      @Override
@@ -124,7 +124,7 @@ public class ProgramController {
     player.play(mediaItem.getUri());
    
     TransparentPlayingScreen screen = new TransparentPlayingScreen(this);
-    history.forward(new NavigationItem(screen.create(mediaItem), "OVERLAY"));
+    history.forward(new NavigationItem(screen.create(mediaItem, overlayStage.getWidth(), overlayStage.getHeight()), "OVERLAY"));
   }
   
   public void stop() {
@@ -189,6 +189,18 @@ public class ProgramController {
     int delay = player.getSubtitleDelay() + msDelayDiff;
     
     player.setSubtitleDelay(delay);
+  }
+
+  public int getVolume() {
+    return player.getVolume();
+  }
+
+  public long getPosition() {
+    return player.getPosition();
+  }
+
+  public long getLength() {
+    return player.getLength();
   }
   
   // SelectItemScene...

@@ -2,6 +2,7 @@
 .root {
   color-blue: rgb(173, 216, 230);
   color-blue-50: rgba(173, 216, 230, 0.5);
+  color-orange: rgb(220, 130, 50);
   -fx-font: 14pt "Arial";
 }
 
@@ -72,4 +73,45 @@
   -fx-padding: 10;
   -fx-hgap: 20;
   -fx-vgap: 20;
+}
+
+
+
+
+/* Video Overlay */
+
+#video-overlay {
+  -fx-padding: 40;
+  -fx-background-color: linear-gradient(from 0% 50% to 0% 100%, rgba(0, 0, 0, 0), black 50%); /* linear-gradient(to top, -fx-base, derive(-fx-base,30%)); */
+}
+
+#video-overlay_info {
+  -fx-padding: 40;
+}
+
+#video-overlay .video-title {
+  -fx-font: bold 64pt "Arial";
+  -fx-text-fill: white;
+}
+
+#video-overlay .video-subtitle {
+  -fx-font: bold 24pt "Arial";
+  -fx-text-fill: white;
+  -fx-padding: 0 0 20 0;
+}
+
+#video-overlay {
+  -fx-font: 24pt "Arial";
+  -fx-text-fill: color-blue;
+}
+
+#video-overlay .progress-bar {
+	-fx-padding: 0 0 0 0;
+}
+
+#video-overlay_info_bar {
+/*	-fx-node-vpos: center;
+  -fx-vpos: center;
+  -fx-hpos: center; dunno why this doesn't work...*/
+  -fx-spacing: 20;
 }

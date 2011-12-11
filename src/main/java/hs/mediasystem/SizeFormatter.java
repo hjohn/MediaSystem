@@ -22,7 +22,12 @@ public class SizeFormatter {
     new Format("%s hours and %s minutes", 24 * 60 * 60, new Format("%.0f", 60 * 60), new Format("%.0f", 60)),
     new Format("%s days and %s hours", -1, new Format("%.0f", 24 * 60 * 60), new Format("%.0f", 60 * 60))
   });
-  
+
+  public static final FormatSet SECONDS_AS_POSITION = new FormatSet(new Format[] {
+    new Format("%s:%s", 60 * 60, new Format("%.0f", 60), new Format("%02.0f", 1)),  // m:ss 
+    new Format("%s:%s:%s", -1, new Format("%.0f", 60 * 60), new Format("%02.0f", 60), new Format("%02.0f", 1))  // h:mm:ss  
+  });
+
   public static String formatBytes(long bytes) {
     long b = bytes + 1023;
 
