@@ -303,4 +303,14 @@ public class MPlayerPlayer implements Player {
   public ListenerList<String> onFinished() {
     throw new UnsupportedOperationException("Method not implemented");
   }
+
+  @Override
+  public float getBrightness() {
+    throw new UnsupportedOperationException("Method not implemented");
+  }
+
+  @Override
+  public void setBrightness(float brightness) {
+    throw new UnsupportedOperationException("Method not implemented");
+  }
 }

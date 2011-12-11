@@ -131,6 +131,65 @@ public class ProgramController {
     player.stop();
     history.back();
   }
+
+  public void pause() {
+    player.pause();
+  }
+
+  public void move(int ms) {
+    long position = player.getPosition();
+    long length = player.getLength();
+    long newPosition = position + ms;
+
+    System.out.println("Position = " + position + "; length = " + length + "; np = " + newPosition);
+    
+    if(newPosition > length - 5000) {
+      newPosition = length - 5000;
+    }
+    if(newPosition < 0) {
+      newPosition = 0;
+    }
+
+    if(Math.abs(newPosition - position) > 5000) {
+      player.setPosition(newPosition);
+    }
+  }
+
+  public void mute() {
+    player.setMute(!player.isMute());
+  }
+
+  public void changeVolume(int volumeDiff) {
+    int volume = player.getVolume() + volumeDiff;
+    
+    if(volume > 100) {
+      volume = 100;
+    }
+    if(volume < 0) {
+      volume = 0;
+    }
+    
+    player.setVolume(volume);
+  }
+
+  public void changeBrightness(float brightnessDiff) {
+    float brightness = player.getBrightness() + brightnessDiff;
+    
+    if(brightness > 2.0) {
+      brightness = 2.0f;
+    }
+    else if(brightness < 0.0) {
+      brightness = 0.0f;
+    }
+    
+    player.setBrightness(brightness);
+  }
+
+  public void changeSubtitleDelay(int msDelayDiff) {
+    int delay = player.getSubtitleDelay() + msDelayDiff;
+    
+    player.setSubtitleDelay(delay);
+  }
   
   // SelectItemScene...
   // NavigationInterface

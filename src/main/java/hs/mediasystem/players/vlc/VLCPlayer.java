@@ -168,4 +168,14 @@ public class VLCPlayer implements Player {
   public void setSubtitleDelay(int delay) {
     throw new UnsupportedOperationException("Method not implemented");
   }
+
+  @Override
+  public float getBrightness() {
+    return mediaPlayer.getBrightness();
+  }
+
+  @Override
+  public void setBrightness(float brightness) {
+    mediaPlayer.setBrightness(brightness);
+  }
 }
