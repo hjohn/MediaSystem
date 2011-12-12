@@ -110,8 +110,6 @@
 }
 
 #video-overlay_info_bar {
-/*	-fx-node-vpos: center;
-  -fx-vpos: center;
-  -fx-hpos: center; dunno why this doesn't work...*/
   -fx-spacing: 20;
+  -fx-alignment: CENTER;
 }

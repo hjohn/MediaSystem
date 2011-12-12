@@ -9,9 +9,10 @@ import java.util.regex.Pattern;
 
 public class EpisodeDecoder implements Decoder {
   private static String VALID_EXTENSIONS = "(avi|flv|mkv|mov|mp4|mpg|mpeg)";
-  private static String ALL_BUT_SEPARATOR = "(?:[^ ]++| (?!(?:- |\\[)))++";
+  private static String SPLIT_CHARS = " \\.";
+  private static String ALL_BUT_SEPARATOR = "(?:[^" + SPLIT_CHARS +"]++| (?!(?:- |\\[)))++";
   private static String SEPARATOR_PLUS_SEQUENCE_NUMBER = "(?: - ([0-9x]++))?";
-  private static String SEPARATOR_PLUS_SUBTITLE = "(?: - )?((?:[^ ]*+| (?!\\[))*+)";
+  private static String SEPARATOR_PLUS_SUBTITLE = "(?: - )?((?:[^" + SPLIT_CHARS + "]++| (?!\\[))*+)";
   private static String RELEASE_YEAR = "[0-9]{4}";
   private static String EXTENSION = "\\." + VALID_EXTENSIONS;
   private static String IMDB = "\\(([0-9]++)\\)";

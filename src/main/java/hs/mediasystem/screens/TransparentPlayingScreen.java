@@ -16,7 +16,6 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -169,7 +168,6 @@ public class TransparentPlayingScreen {
           }});
           getChildren().add(new HBox() {{
             setId("video-overlay_info_bar");
-            setAlignment(Pos.CENTER);
             getChildren().add(new Label() {{
               textProperty().bind(new StringBinding() {
                 {
@@ -216,7 +214,7 @@ public class TransparentPlayingScreen {
     }
   }
   
-  private Effect createEffect(final double size) { // font point size
+  private static Effect createEffect(final double size) { // font point size
     return new Blend() {{
       setMode(BlendMode.MULTIPLY);
       setBottomInput(new DropShadow() {{
