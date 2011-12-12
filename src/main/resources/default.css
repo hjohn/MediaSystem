@@ -105,10 +105,6 @@
   -fx-text-fill: color-blue;
 }
 
-#video-overlay .progress-bar {
-	-fx-padding: 0 0 0 0;
-}
-
 #video-overlay_info_bar {
   -fx-spacing: 20;
   -fx-alignment: CENTER;
