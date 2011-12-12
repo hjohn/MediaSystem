@@ -38,6 +38,7 @@ public class ProgramController {
     
     mainStage = new Stage(StageStyle.UNDECORATED);
     overlayStage = new Stage(StageStyle.TRANSPARENT);
+    overlayStage.setFullScreen(true);
 
     setupStage(mainStage, mainGroup, 1.0);
     setupStage(overlayStage, overlayGroup, 0.0);
@@ -73,7 +74,7 @@ public class ProgramController {
   
   private static void setupStage(Stage stage, BorderPane borderPane, double transparency) {
     Scene scene = new Scene(borderPane, new Color(0, 0, 0, transparency));
-
+    
     stage.setScene(scene);
     
     Screen screen = Screen.getPrimary();

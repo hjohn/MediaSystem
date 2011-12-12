@@ -2,7 +2,10 @@
 .root {
   color-blue: rgb(173, 216, 230);
   color-blue-50: rgba(173, 216, 230, 0.5);
-  color-orange: rgb(220, 130, 50);
+  color-orange: rgb(255, 180, 50);
+  color-green: rgb(0, 255, 0);
+  color-yellow: rgb(255, 255, 0);
+  color-red: rgb(255, 0, 0);
   -fx-font: 14pt "Arial";
 }
 
@@ -82,11 +85,11 @@
 
 #video-overlay {
   -fx-padding: 40;
-  -fx-background-color: linear-gradient(from 0% 50% to 0% 100%, rgba(0, 0, 0, 0), black 50%); /* linear-gradient(to top, -fx-base, derive(-fx-base,30%)); */
+  -fx-background-color: linear-gradient(from 0% 50% to 0% 100%, rgba(0, 0, 0, 0), black 50%);
 }
 
 #video-overlay_info {
-  -fx-padding: 40;
+  -fx-padding: 40 0 0 40;
 }
 
 #video-overlay .video-title {
@@ -109,3 +112,32 @@
   -fx-spacing: 20;
   -fx-alignment: CENTER;
 }
+
+#video-overlay .progress-bar {
+  -fx-background-color: black;
+}
+
+.progress-bar .track {
+  -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-blue, -50%), derive(color-blue, 0%)), 
+                        linear-gradient(from 0% 0% to 0% 100%, derive(color-blue, -25%), derive(color-blue, -50%)),
+                        linear-gradient(from 0% 0% to 0% 100%, derive(color-blue, -50%), derive(color-blue, -100%)); 
+  -fx-background-radius: 8, 8, 8;
+  -fx-background-insets: 0, 1, 2;
+}
+
+.position .progress-bar .bar {
+  -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, -75%) 0%, derive(color-orange, 0%) 36%, derive(color-orange, -75%) 100%),
+  											linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, -50%) 0%, derive(color-orange, 25%) 36%, derive(color-orange, -50%) 100%), 
+                        linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, 0%) 0%, derive(color-orange, 100%) 36%, derive(color-orange, 0%) 100%); 
+  -fx-background-radius: 8, 8, 8;
+  -fx-background-insets: 2, 3, 4;
+}
+
+.volume .progress-bar .bar {
+  -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-red, -75%) 0%, derive(color-red, 0%) 36%, derive(color-red, -75%) 100%),
+  											linear-gradient(from 0% 0% to 0% 100%, derive(color-red, -50%) 0%, derive(color-red, 25%) 36%, derive(color-red, -50%) 100%), 
+                        linear-gradient(from 0% 0% to 0% 100%, derive(color-red, 0%) 0%, derive(color-red, 100%) 36%, derive(color-red, 0%) 100%); 
+  -fx-background-radius: 8, 8, 8;
+  -fx-background-insets: 2, 3, 4;
+}
+
