@@ -1,6 +1,7 @@
 package hs.mediasystem.players.mplayer;
 
 import hs.mediasystem.framework.Player;
+import hs.mediasystem.framework.Subtitle;
 import hs.models.events.ListenerList;
 
 import java.awt.Color;
@@ -312,5 +313,23 @@ public class MPlayerPlayer implements Player {
   @Override
   public void setBrightness(float brightness) {
     throw new UnsupportedOperationException("Method not implemented");
+  }
+
+  @Override
+  public void setSubtitle(Subtitle subtitle) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public Subtitle getSubtitle() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public List<Subtitle> getSubtitles() {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

@@ -3,9 +3,13 @@ package hs.mediasystem;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Player;
+import hs.mediasystem.framework.Subtitle;
 import hs.mediasystem.screens.MainScreen;
 import hs.mediasystem.screens.TransparentPlayingScreen;
 import hs.mediasystem.util.ini.Ini;
+
+import java.util.List;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
@@ -202,6 +206,25 @@ public class ProgramController {
 
   public long getLength() {
     return player.getLength();
+  }
+
+  public Subtitle nextSubtitle() {
+    List<Subtitle> subtitles = player.getSubtitles();
+    
+    if(subtitles.isEmpty()) {
+      return null;
+    }
+    
+    Subtitle currentSubtitle = player.getSubtitle();
+    int index = currentSubtitle == null ? 1 : subtitles.indexOf(currentSubtitle) + 1;
+    
+    if(index >= subtitles.size()) {
+      index = 0;
+    }
+
+    player.setSubtitle(subtitles.get(index));
+    
+    return subtitles.get(index);
   }
   
   // SelectItemScene...

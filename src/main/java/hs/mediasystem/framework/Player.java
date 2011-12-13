@@ -2,6 +2,8 @@ package hs.mediasystem.framework;
 
 import hs.models.events.ListenerList;
 
+import java.util.List;
+
 public interface Player {
 
   void play(String uri);
@@ -60,4 +62,8 @@ public interface Player {
   void setBrightness(float brightness);
   
   ListenerList<String> onFinished();
+  
+  void setSubtitle(Subtitle subtitle);
+  Subtitle getSubtitle();
+  List<Subtitle> getSubtitles();
 }

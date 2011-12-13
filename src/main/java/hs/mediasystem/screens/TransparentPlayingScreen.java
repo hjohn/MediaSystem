@@ -4,6 +4,7 @@ import hs.mediasystem.ImageCache;
 import hs.mediasystem.ProgramController;
 import hs.mediasystem.SizeFormatter;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.Subtitle;
 import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -16,6 +17,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -43,20 +46,30 @@ import javafx.util.Duration;
 public class TransparentPlayingScreen {
   private final ProgramController controller;
   private final BorderPane borderPane = new BorderPane();
+  private final BorderPane bottomPane = new BorderPane();
+  private final Label topLabel = new Label();
+  
   private final ObjectProperty<String> volumeText = new SimpleObjectProperty<>();
   private final DoubleProperty volume = new SimpleDoubleProperty(0.0);
   private final LongProperty position = new SimpleLongProperty();
   private final LongProperty length = new SimpleLongProperty(1);
+  private final StringProperty osdLine = new SimpleStringProperty("");
 
+  private final Timeline osdFade = new Timeline(
+    new KeyFrame(Duration.seconds(1), new KeyValue(topLabel.opacityProperty(), 1.0)),
+    new KeyFrame(Duration.seconds(6), new KeyValue(topLabel.opacityProperty(), 1.0)),
+    new KeyFrame(Duration.seconds(9), new KeyValue(topLabel.opacityProperty(), 0.0))
+  );
+  
   private final Timeline fadeIn = new Timeline(
     //new KeyFrame(Duration.seconds(0), new KeyValue(borderPane.opacityProperty(), 0.0)),
-    new KeyFrame(Duration.seconds(1), new KeyValue(borderPane.opacityProperty(), 1.0))
+    new KeyFrame(Duration.seconds(1), new KeyValue(bottomPane.opacityProperty(), 1.0))
   );
   
   private final Timeline sustainAndFadeOut = new Timeline(
-    new KeyFrame(Duration.seconds(0), new KeyValue(borderPane.opacityProperty(), 1.0)),
-    new KeyFrame(Duration.seconds(5), new KeyValue(borderPane.opacityProperty(), 1.0)),
-    new KeyFrame(Duration.seconds(8), new KeyValue(borderPane.opacityProperty(), 0.0))
+    new KeyFrame(Duration.seconds(0), new KeyValue(bottomPane.opacityProperty(), 1.0)),
+    new KeyFrame(Duration.seconds(5), new KeyValue(bottomPane.opacityProperty(), 1.0)),
+    new KeyFrame(Duration.seconds(8), new KeyValue(bottomPane.opacityProperty(), 0.0))
   );
 
   private final Timeline positionUpdater = new Timeline(
@@ -93,6 +106,7 @@ public class TransparentPlayingScreen {
   
   public Node create(final MediaItem mediaItem, final double w, final double h) {
     volumeText.set("Volume " + controller.getVolume() + "%");
+    controller.changeVolume(-100);
     
     borderPane.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
@@ -102,31 +116,44 @@ public class TransparentPlayingScreen {
         if(code == KeyCode.S) {
           controller.stop();
         }
+        else if(code == KeyCode.J) {
+          Subtitle subtitle = controller.nextSubtitle();
+          osdLine.set("Subtitle: " + subtitle.getDescription());
+          osdFade.playFromStart();
+        }
         else if(code == KeyCode.SPACE) {
           controller.pause();
+          showOSD();
         }
         else if(code == KeyCode.NUMPAD4) {
           controller.move(-10 * 1000);
+          showOSD();
         }
         else if(code == KeyCode.NUMPAD6) {
           controller.move(10 * 1000);
+          showOSD();
         }
         else if(code == KeyCode.NUMPAD2) {
           controller.move(-60 * 1000);
+          showOSD();
         }
         else if(code == KeyCode.NUMPAD8) {
           controller.move(60 * 1000);
+          showOSD();
         }
         else if(code == KeyCode.M) {
           controller.mute();
+          showOSD();
         }
         else if(code == KeyCode.DIGIT9) {
           controller.changeVolume(-1);
           volumeText.set("Volume " + controller.getVolume() + "%");
+          showOSD();
         }
         else if(code == KeyCode.DIGIT0) {
           controller.changeVolume(1);
           volumeText.set("Volume " + controller.getVolume() + "%");
+          showOSD();
         }
         else if(code == KeyCode.DIGIT1) {
           controller.changeBrightness(-0.05f);
@@ -139,104 +166,103 @@ public class TransparentPlayingScreen {
         }
         else if(code == KeyCode.X) {
           controller.changeSubtitleDelay(100);
-        }
-        
-        showOSD();
+        }       
       }
     });
     
     borderPane.setFocusTraversable(true);
-    borderPane.setTop(new Label() {{
-      textProperty().bind(volumeText);
-    }});
+    borderPane.setTop(topLabel);
     
-    borderPane.setBottom(new BorderPane() {{
-      setId("video-overlay");
-      setLeft(new ImageView(ImageCache.loadImage(mediaItem.getPoster())) {{
-        getStyleClass().add("poster");
-        setFitWidth(w * 0.2);
-        setFitHeight(h * 0.4);
-        setPreserveRatio(true);
-        setEffect(new Blend() {{
-          setBottomInput(new DropShadow());
-          setTopInput(new Reflection() {{
-            this.setFraction(0.10);
-          }});
+    topLabel.setId("video-osd-line");
+    topLabel.textProperty().bind(osdLine);
+    
+    borderPane.setBottom(bottomPane);
+    
+    bottomPane.setId("video-overlay");
+    bottomPane.setLeft(new ImageView(ImageCache.loadImage(mediaItem.getPoster())) {{
+      getStyleClass().add("poster");
+      setFitWidth(w * 0.2);
+      setFitHeight(h * 0.4);
+      setPreserveRatio(true);
+      setEffect(new Blend() {{
+        setBottomInput(new DropShadow());
+        setTopInput(new Reflection() {{
+          this.setFraction(0.10);
         }});
       }});
-      setCenter(new BorderPane() {{
-        setId("video-overlay_info");
-        setBottom(new HBox() {{
-          getChildren().add(new VBox() {{
-            HBox.setHgrow(this, Priority.ALWAYS);
-            getChildren().add(new Label(mediaItem.getTitle()) {{
-              getStyleClass().add("video-title");
-              setEffect(createEffect(64));
-            }});
-            getChildren().add(new Label(mediaItem.getSubtitle()) {{
-              getStyleClass().add("video-subtitle");
-            }});
-            getChildren().add(new GridPane() {{
-//              setSpacing(20);
-              setHgap(20);
-              getColumnConstraints().addAll(
-                new ColumnConstraints() {{
-                }},
-                new ColumnConstraints() {{
-                  setPercentWidth(60.0);   // this is not working as I want it.
-                  setHalignment(HPos.RIGHT);
-                }},
-                new ColumnConstraints() {{
-                  setPercentWidth(20.0);
-                }},
-                new ColumnConstraints() {{
-                }}
-              );
-              setId("video-overlay_info_bar");
-              add(new Label() {{
-                textProperty().bind(new StringBinding() {
-                  {
-                    bind(position);
-                  }
-                  
-                  @Override
-                  protected String computeValue() {
-                    return SizeFormatter.SECONDS_AS_POSITION.format(position.get() / 1000);
-                  }
-                });
-              }}, 0, 0);
-              add(new ProgressBar(0) {{
-                getStyleClass().add("position");
-                progressProperty().bind(Bindings.divide(Bindings.add(position, 0.0), length));
-                setMaxWidth(100000);
-                HBox.setHgrow(this, Priority.ALWAYS);
-              }}, 1, 0, 2, 1);
-              add(new Label() {{
-                textProperty().bind(new StringBinding() {
-                  {
-                    bind(length);
-                  }
-                  
-                  @Override
-                  protected String computeValue() {
-                    return SizeFormatter.SECONDS_AS_POSITION.format(length.get() / 1000);
-                  }
-                });
-              }}, 3, 0);
-              add(new Label("-"), 1, 1);
-              add(new ProgressBar(0) {{
-                getStyleClass().add("volume");
-                progressProperty().bind(volume);
-                setMaxWidth(100000);
-                HBox.setHgrow(this, Priority.ALWAYS);
-              }}, 2, 1);
-              add(new Label("+"), 3, 1);
-            }});            
+    }});
+    bottomPane.setCenter(new BorderPane() {{
+      setId("video-overlay_info");
+      setBottom(new HBox() {{
+        getChildren().add(new VBox() {{
+          HBox.setHgrow(this, Priority.ALWAYS);
+          getChildren().add(new Label(mediaItem.getTitle()) {{
+            getStyleClass().add("video-title");
+            setEffect(createEffect(64));
           }});
+          getChildren().add(new Label(mediaItem.getSubtitle()) {{
+            getStyleClass().add("video-subtitle");
+          }});
+          getChildren().add(new GridPane() {{
+//              setSpacing(20);
+            setHgap(20);
+            getColumnConstraints().addAll(
+              new ColumnConstraints() {{
+              }},
+              new ColumnConstraints() {{
+                setPercentWidth(60.0);   // this is not working as I want it.
+                setHalignment(HPos.RIGHT);
+              }},
+              new ColumnConstraints() {{
+                setPercentWidth(20.0);
+              }},
+              new ColumnConstraints() {{
+              }}
+            );
+            setId("video-overlay_info_bar");
+            add(new Label() {{
+              textProperty().bind(new StringBinding() {
+                {
+                  bind(position);
+                }
+                
+                @Override
+                protected String computeValue() {
+                  return SizeFormatter.SECONDS_AS_POSITION.format(position.get() / 1000);
+                }
+              });
+            }}, 0, 0);
+            add(new ProgressBar(0) {{
+              getStyleClass().add("position");
+              progressProperty().bind(Bindings.divide(Bindings.add(position, 0.0), length));
+              setMaxWidth(100000);
+              HBox.setHgrow(this, Priority.ALWAYS);
+            }}, 1, 0, 2, 1);
+            add(new Label() {{
+              textProperty().bind(new StringBinding() {
+                {
+                  bind(length);
+                }
+                
+                @Override
+                protected String computeValue() {
+                  return SizeFormatter.SECONDS_AS_POSITION.format(length.get() / 1000);
+                }
+              });
+            }}, 3, 0);
+            add(new Label("-"), 1, 1);
+            add(new ProgressBar(0) {{
+              getStyleClass().add("volume");
+              progressProperty().bind(volume);
+              setMaxWidth(100000);
+              HBox.setHgrow(this, Priority.ALWAYS);
+            }}, 2, 1);
+            add(new Label("+"), 3, 1);
+          }});            
+        }});
 //          getChildren().add(new Slider() {{
 //            setOrientation(Orientation.VERTICAL);
 //          }});
-        }});
       }});
     }});
     

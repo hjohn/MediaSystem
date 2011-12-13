@@ -36,26 +36,23 @@ import net.sf.jtmdb.GeneralSettings;
 import com.sun.jna.NativeLibrary;
 
 // Top 10 stuff:
+// TODO 'j' next subtitle
+// TODO OSD subtitle description
 // TODO Minimal movie control; subtitle select
 // TODO Subtitle selection / Auto download
 // TODO Some form of remote control support
-// TODO Running time overlay (info button)
 // TODO VLCPlayer: Make brightness controls work
 
 // Minimal working system:
 // TODO Make clock in standard border
 // TODO Download + show subtitles, also multiple different ones should work without problem; store them with file I guess
 // TODO Lirc support
-// TODO Something to show length of movie/time left
-// TODO Brightness adjustment
 // TODO Include year in duoline
-// TODO Groups (Seasons, Collections) should be openable once -> solve by going to tree?
 // TODO Add breadcrumb
 // TODO Auto-scroll plot/overview
 // TODO Possibly with Series/Season, information about episode count
 // TODO Display Genre, Rating, First Aired, etc.. for all types
 // TODO BUG: When there's an outstanding query for a provider (which is taking long), it is possible for a 2nd query to be triggered on the same item.  When both return finally, they are inserted one after the other.  The second one causes a duplicate key violation.
-// TODO Hate the ugly Renderer class where still use Swing components setPreferredSize to make proper sized elements for a JList
 // TODO Display alternative banner when there is no banner available
 
 // TODO Display list of video files with IMDB info

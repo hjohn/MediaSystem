@@ -80,6 +80,12 @@
 
 
 
+#video-osd-line {
+  -fx-padding: 40;
+  -fx-font: bold 48pt "Arial";
+  -fx-text-fill: white;
+}
+
 
 /* Video Overlay */
 

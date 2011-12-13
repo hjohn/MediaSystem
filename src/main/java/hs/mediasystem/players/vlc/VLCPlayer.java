@@ -1,6 +1,7 @@
 package hs.mediasystem.players.vlc;
 
 import hs.mediasystem.framework.Player;
+import hs.mediasystem.framework.Subtitle;
 import hs.models.events.ListenerList;
 import hs.models.events.Notifier;
 
@@ -9,6 +10,7 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -91,11 +93,60 @@ public class VLCPlayer implements Player {
     });
   }
   
+  public void setSubtitle(Subtitle subtitle) {
+    mediaPlayer.setSpu(subtitle.getId());
+  }
+
+  public Subtitle getSubtitle() {
+    int id = mediaPlayer.getSpu();
+    
+    for(Subtitle subtitle : getSubtitles()) {
+      if(subtitle.getId() == id) {
+        System.out.println("getSubtitle(): returning " + id + "; " + subtitle.getDescription());
+        return subtitle;
+      }
+    }
+    
+    System.out.println("getSubtitle(): returning null; id = " + id);
+    return null;
+  }
+
+  private final List<Subtitle> subtitles = new ArrayList<>();
+
+  public List<Subtitle> getSubtitles() {
+    if(subtitles.isEmpty()) {
+      for(TrackDescription spuDescription : mediaPlayer.getSpuDescriptions()) {
+        subtitles.add(new Subtitle(spuDescription.id(), spuDescription.description()));
+      }
+    }
+    
+    return subtitles;
+  }
+  
+  
   @Override
   public void play(String uri) {
+    subtitles.clear();
     mediaPlayer.setRepeat(true);
     mediaPlayer.setPlaySubItems(true);
     mediaPlayer.playMedia(uri);
+    
+    System.out.println("[FINE] Playing: " + uri);
+    
+    new Thread() {
+      public void run() {
+        try {
+          Thread.sleep(10 * 1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+
+        System.out.println("[FINE] Found " + mediaPlayer.getSpuCount() + " subtitle(s)");
+        for(TrackDescription spuDescription : mediaPlayer.getSpuDescriptions()) {
+          System.out.println("[FINE] Subtitle " + spuDescription.id() + ": " + spuDescription.description());
+        }
+      }
+    }.start();
   }
 
   @Override
