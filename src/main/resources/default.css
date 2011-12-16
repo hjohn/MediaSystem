@@ -133,7 +133,7 @@
 
 .position .progress-bar .bar {
   -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, -75%) 0%, derive(color-orange, 0%) 36%, derive(color-orange, -75%) 100%),
-  											linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, -50%) 0%, derive(color-orange, 25%) 36%, derive(color-orange, -50%) 100%), 
+                        linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, -50%) 0%, derive(color-orange, 25%) 36%, derive(color-orange, -50%) 100%), 
                         linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, 0%) 0%, derive(color-orange, 100%) 36%, derive(color-orange, 0%) 100%); 
   -fx-background-radius: 8, 8, 8;
   -fx-background-insets: 2, 3, 4;
@@ -141,9 +141,23 @@
 
 .volume .progress-bar .bar {
   -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-red, -75%) 0%, derive(color-red, 0%) 36%, derive(color-red, -75%) 100%),
-  											linear-gradient(from 0% 0% to 0% 100%, derive(color-red, -50%) 0%, derive(color-red, 25%) 36%, derive(color-red, -50%) 100%), 
+                        linear-gradient(from 0% 0% to 0% 100%, derive(color-red, -50%) 0%, derive(color-red, 25%) 36%, derive(color-red, -50%) 100%), 
                         linear-gradient(from 0% 0% to 0% 100%, derive(color-red, 0%) 0%, derive(color-red, 100%) 36%, derive(color-red, 0%) 100%); 
   -fx-background-radius: 8, 8, 8;
   -fx-background-insets: 2, 3, 4;
 }
 
+.myborderpane {
+  -fx-border-color: white;
+  -fx-border-width: 2 2 2 2;
+}
+
+.myborderpane:focus {
+  -fx-border-color: green;
+  -fx-border-width: 2 2 2 2;
+}
+
+.myborderpane:focused {
+  -fx-border-color: red;
+  -fx-border-width: 2 2 2 2;
+}
