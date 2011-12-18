@@ -2,10 +2,13 @@
 .root {
   color-blue: rgb(173, 216, 230);
   color-blue-50: rgba(173, 216, 230, 0.5);
+  color-blue-20: rgba(173, 216, 230, 0.2);
+  color-blue-10: rgba(173, 216, 230, 0.1);
   color-orange: rgb(255, 180, 50);
   color-green: rgb(0, 255, 0);
   color-yellow: rgb(255, 255, 0);
   color-red: rgb(255, 0, 0);
+  color-white: rgb(255, 255, 255);
   -fx-font: 14pt "Arial";
 }
 
@@ -147,17 +150,45 @@
   -fx-background-insets: 2, 3, 4;
 }
 
-.myborderpane {
-  -fx-border-color: white;
-  -fx-border-width: 2 2 2 2;
+#dialog .cell {
+  -fx-border-color: linear-gradient(to right, black, color-blue-20 15%, color-blue-20 85%, black);
+  -fx-border-width: 1;
 }
 
-.myborderpane:focus {
-  -fx-border-color: green;
-  -fx-border-width: 2 2 2 2;
+#dialog {
+  -fx-spacing: 5;
+  -fx-font: bold 18pt "Arial";
 }
 
-.myborderpane:focused {
+#dialog-screen {
+  -fx-background-color: rgba(0, 0, 0, 0.5);
+}
+
+#dialog {
+  -fx-background-color: rgba(0, 0, 0, 0.75);
+  -fx-border-radius: 10;
   -fx-border-color: red;
-  -fx-border-width: 2 2 2 2;
+  -fx-border-width: 2;
+  -fx-padding: 10;
+}
+
+#dialog .label {
+  -fx-padding: 5;
+}
+
+#dialog .cell:focused {
+  -fx-background-insets: 1, 1, 1;
+  -fx-background-color: radial-gradient(center 25% 0%, radius 25%, color-blue 0%, transparent),
+                        radial-gradient(center 75% 100%, radius 25%, color-blue 0%, transparent),
+                        linear-gradient(to right, black, color-blue-20 15%, color-blue-20 85%, black);
+  
+  -fx-border-width: 1, 1, 1;
+  -fx-border-color: radial-gradient(center 25% 0%, radius 25%, color-blue 0%, transparent),
+                    radial-gradient(center 75% 100%, radius 25%, color-blue 0%, transparent),
+                    linear-gradient(to right, black, color-blue-50 15%, color-blue-50 85%, black);
+                    
+}
+
+#dialog .cell:focused .label {
+  -fx-text-fill: color-white;
 }

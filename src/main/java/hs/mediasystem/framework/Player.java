@@ -4,6 +4,9 @@ import hs.models.events.ListenerList;
 
 import java.util.List;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+
 public interface Player {
 
   void play(String uri);
@@ -41,6 +44,7 @@ public interface Player {
    */
   int getVolume();
   void setVolume(int volume);
+  IntegerProperty volumeProperty();
   
   boolean isMute();
   void setMute(boolean mute);
@@ -64,6 +68,22 @@ public interface Player {
   ListenerList<String> onFinished();
   
   void setSubtitle(Subtitle subtitle);
+  
+  /**
+   * Returns the current subtitle.  Will return a Subtitle.DISABLED when not showing any
+   * subtitle.
+   * 
+   * @return the current subtitle
+   */
   Subtitle getSubtitle();
+  
+  /**
+   * Returns a list of Subtitles.  This list always includes as the first element 
+   * Subtitle.DISABLED.  This list is therefore never empty.
+   * 
+   * @return a list of Subtitles
+   */
   List<Subtitle> getSubtitles();
+
+  ObjectProperty<Subtitle> subtitleProperty();
 }

@@ -14,6 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
+
 import javax.swing.JFrame;
 
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
@@ -93,36 +98,77 @@ public class VLCPlayer implements Player {
     });
   }
   
-  public void setSubtitle(Subtitle subtitle) {
-    mediaPlayer.setSpu(subtitle.getId());
-  }
-
-  public Subtitle getSubtitle() {
-    int id = mediaPlayer.getSpu();
+  public Subtitle getSubtitleInternal() {
+    int index = mediaPlayer.getSpu();
     
-    for(Subtitle subtitle : getSubtitles()) {
-      if(subtitle.getId() == id) {
-        System.out.println("getSubtitle(): returning " + id + "; " + subtitle.getDescription());
-        return subtitle;
-      }
-    }
-    
-    System.out.println("getSubtitle(): returning null; id = " + id);
-    return null;
+    return index == -1 ? Subtitle.DISABLED : getSubtitles().get(index);
+//    
+//    for(Subtitle subtitle : getSubtitles()) {
+//      if(subtitle.getId() == id) {
+//        System.out.println("getSubtitle(): returning " + id + "; " + subtitle.getDescription());
+//        return subtitle;
+//      }
+//    }
+//    
+//    return Subtitle.DISABLED;
   }
 
   private final List<Subtitle> subtitles = new ArrayList<>();
 
+  @Override
   public List<Subtitle> getSubtitles() {
     if(subtitles.isEmpty()) {
       for(TrackDescription spuDescription : mediaPlayer.getSpuDescriptions()) {
         subtitles.add(new Subtitle(spuDescription.id(), spuDescription.description()));
       }
+      
+      if(!subtitles.isEmpty()) {
+        subtitles.remove(0);
+        subtitles.add(0, Subtitle.DISABLED);
+      }
     }
     
-    return subtitles;
+    return subtitles.isEmpty() ? NO_SUBTITLES : subtitles;
+  }
+
+  private static final List<Subtitle> NO_SUBTITLES = new ArrayList<Subtitle>() {{
+    add(Subtitle.DISABLED);
+  }};
+  
+  private final ObjectProperty<Subtitle> subtitle = new SimpleObjectProperty<Subtitle>() {
+    private boolean initialized;
+    
+    @Override
+    public Subtitle get() {
+      if(!initialized) {
+        initialized = true;
+        set(getSubtitleInternal());
+      }
+      
+      return super.get();
+    }
+    
+    @Override
+    public void set(Subtitle value) {
+      super.set(value);
+      mediaPlayer.setSpu(getSubtitles().indexOf(value));
+    }
+  };
+  
+  @Override
+  public Subtitle getSubtitle() {
+    return subtitle.get();
   }
   
+  @Override
+  public void setSubtitle(Subtitle subtitle) {
+    this.subtitle.set(subtitle);
+  }
+  
+  @Override
+  public ObjectProperty<Subtitle> subtitleProperty() {
+    return subtitle;
+  }
   
   @Override
   public void play(String uri) {
@@ -134,6 +180,7 @@ public class VLCPlayer implements Player {
     System.out.println("[FINE] Playing: " + uri);
     
     new Thread() {
+      @Override
       public void run() {
         try {
           Thread.sleep(10 * 1000);
@@ -190,14 +237,27 @@ public class VLCPlayer implements Player {
     mediaPlayer.setSubTitleFile(fileName);
   }
 
+  private final IntegerProperty volume = new SimpleIntegerProperty(100) {
+    @Override
+    public void set(int value) {
+      super.set(value);
+      mediaPlayer.setVolume(value);
+    }
+  };
+  
   @Override
   public int getVolume() {
-    return mediaPlayer.getVolume();
+    return volume.get();
   }
 
   @Override
   public void setVolume(int volume) {
-    mediaPlayer.setVolume(volume);
+    this.volume.set(volume);
+  }
+  
+  @Override
+  public IntegerProperty volumeProperty() {
+    return volume;
   }
 
   @Override

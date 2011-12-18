@@ -3,8 +3,12 @@ package hs.mediasystem.screens;
 import hs.mediasystem.ImageCache;
 import hs.mediasystem.ProgramController;
 import hs.mediasystem.SizeFormatter;
+import hs.mediasystem.StringConverter;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.Subtitle;
+import hs.mediasystem.screens.DialogScreen.ListOption;
+import hs.mediasystem.screens.DialogScreen.NumericOption;
+import hs.mediasystem.screens.DialogScreen.Option;
 import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -19,6 +23,8 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -39,12 +45,14 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 public class TransparentPlayingScreen {
   private final ProgramController controller;
+  private final StackPane stackPane = new StackPane();
   private final BorderPane borderPane = new BorderPane();
   private final BorderPane bottomPane = new BorderPane();
   private final Label topLabel = new Label();
@@ -106,7 +114,6 @@ public class TransparentPlayingScreen {
   
   public Node create(final MediaItem mediaItem, final double w, final double h) {
     volumeText.set("Volume " + controller.getVolume() + "%");
-    controller.changeVolume(-100);
     
     borderPane.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
@@ -118,8 +125,27 @@ public class TransparentPlayingScreen {
         }
         else if(code == KeyCode.J) {
           Subtitle subtitle = controller.nextSubtitle();
-          osdLine.set("Subtitle: " + subtitle.getDescription());
+          if(subtitle != null) {
+            osdLine.set("Subtitle: " + subtitle.getDescription());
+          }
           osdFade.playFromStart();
+        }
+        else if(code == KeyCode.O) {
+          ObservableList<Option> options = FXCollections.observableArrayList(
+            new NumericOption(controller.getPlayer().volumeProperty(), "Volume", "%3.0f%%", 1, 0, 100),
+            new ListOption<Subtitle>("Subtitle", controller.getPlayer().subtitleProperty(), controller.getPlayer().getSubtitles(), new StringConverter<Subtitle>() {
+              @Override
+              public String toString(Subtitle object) {
+                return object.getDescription();
+              }
+            }),
+            new Option("Audio Stream"),
+            new NumericOption("Audio Delay", "%4.1fs", 0.1) 
+          );
+          
+          DialogScreen screen = new DialogScreen(controller, options); 
+          stackPane.getChildren().add(screen.create());
+          stackPane.getChildren().get(0).setDisable(true);
         }
         else if(code == KeyCode.SPACE) {
           controller.pause();
@@ -266,7 +292,9 @@ public class TransparentPlayingScreen {
       }});
     }});
     
-    return borderPane;
+    stackPane.getChildren().add(borderPane);
+    
+    return stackPane;
   }
 
   private void showOSD() {

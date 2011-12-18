@@ -1,12 +1,17 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.ProgramController;
+import hs.mediasystem.StringConverter;
+
+import java.util.List;
+
 import javafx.application.Application;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.WritableNumberValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
@@ -20,12 +25,20 @@ import javafx.stage.Stage;
 
 public class DialogScreen extends Application {
   private final ProgramController controller;
+  private final ObservableList<Option> options;
   
   @Override
   public void start(Stage stage) throws Exception {
+    ObservableList<Option> options = FXCollections.observableArrayList(
+      new NumericOption("Volume", "%3.0f%%", 1, 0, 100), 
+      new Option("Audio Stream"),
+      new NumericOption("Audio Delay", "%4.1fs", 0.1) 
+    );
+    DialogScreen dialogScreen = new DialogScreen(null, options);
+    
     BorderPane borderPane = new BorderPane();
     
-    borderPane.setCenter(create());
+    borderPane.setCenter(dialogScreen.create());
         
     setupStage(stage, borderPane, 1.0);
     
@@ -54,10 +67,12 @@ public class DialogScreen extends Application {
   
   public DialogScreen() {
     this.controller = null;
+    this.options = null;
   }
   
-  public DialogScreen(ProgramController controller) {
+  public DialogScreen(ProgramController controller, ObservableList<Option> options) {
     this.controller = controller;
+    this.options = options;
   }
   
   /*
@@ -74,15 +89,17 @@ public class DialogScreen extends Application {
   
   
   public Node create() {
-    ObservableList<Option> list = FXCollections.observableArrayList(
-      new NumericOption("Volume", "%3.0f%%", 1, 0, 100), 
-      new Option("Audio Stream"),
-      new NumericOption("Audio Delay", "%4.1fs", 0.1) 
-    );
-    
+
+    BorderPane borderPane = new BorderPane();
+    borderPane.setId("dialog-screen");
+
     VBox box = new VBox();
     
-    for(Option option : list) {
+    box.setMaxSize(800, 600);
+    
+    box.setId("dialog");
+    
+    for(Option option : options) {
       box.getChildren().add(option.getControl());
     }
     
@@ -90,11 +107,11 @@ public class DialogScreen extends Application {
 //      this.setCellFactory(new MyCellFactoryCallBack());
 //    }};
     
-    
-    return box;
+    borderPane.setCenter(box);
+    return borderPane;
   }
   
-  public class Option {
+  public static class Option {
     private final String description;
     private BorderPane borderPane;
 
@@ -110,7 +127,7 @@ public class DialogScreen extends Application {
       if(borderPane == null) {
         borderPane = new BorderPane() {{
           setFocusTraversable(true);
-          getStyleClass().add("myborderpane");
+          getStyleClass().add("cell");
           
           
 //          addEventHandler(EventType.ROOT, new EventHandler<Event>() {
@@ -123,6 +140,8 @@ public class DialogScreen extends Application {
           addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
             final KeyCombination tab = new KeyCodeCombination(KeyCode.TAB);
             final KeyCombination shiftTab = new KeyCodeCombination(KeyCode.TAB, KeyCombination.SHIFT_DOWN);
+            final KeyCombination down = new KeyCodeCombination(KeyCode.DOWN);
+            final KeyCombination up = new KeyCodeCombination(KeyCode.UP);
 
             @Override
             public void handle(KeyEvent event) {
@@ -136,11 +155,11 @@ public class DialogScreen extends Application {
                 right();
                 event.consume();
               }
-              else if(tab.match(event)) {
+              else if(tab.match(event) || down.match(event)) {
                 moveFocusNext(borderPane);
-                
               }
-              else if(shiftTab.match(event)) {
+              else if(shiftTab.match(event) || up.match(event)) {
+                moveFocusPrevious(borderPane);
               }
             }
           });
@@ -163,8 +182,66 @@ public class DialogScreen extends Application {
     }
   }
   
-  public class NumericOption extends Option {
-    private final Label control = new Label("--Val--");
+  public static class ListOption<T> extends Option {
+    private final Label control = new Label();
+    private final ObjectProperty<T> property;
+    private final List<T> items;
+    private final StringConverter<T> stringConverter;
+
+    private T value;
+    
+    public ListOption(String description, ObjectProperty<T> property, List<T> items, StringConverter<T> stringConverter) {
+      super(description);
+      this.property = property;
+      this.items = items;
+      this.stringConverter = stringConverter;
+      this.value = property.get();
+      
+      updateControl();
+    }
+    
+    @Override
+    public void left() {
+      int index = items.indexOf(value) - 1;
+      
+      if(index < 0) {
+        index = items.size() - 1;
+      }
+      
+      value = items.get(index);
+      
+      updateControl();
+    }
+    
+    @Override
+    public void right() {
+      int index = items.indexOf(value) + 1;
+      
+      if(index >= items.size()) {
+        index = 0;
+      }
+      
+      value = items.get(index);
+      
+      updateControl();
+    }
+    
+    private void updateControl() {
+      if(property != null) {
+        property.set(value);
+      }
+      control.setText(stringConverter.toString(value));
+    }
+    
+    @Override
+    public Node getRightControl() {
+      return control;
+    }
+  }
+  
+  public static class NumericOption extends Option {
+    private final WritableNumberValue property;
+    private final Label control = new Label();
     private final String format;
     private final double stepSize;
     private final double min;
@@ -172,12 +249,23 @@ public class DialogScreen extends Application {
     
     private double value;
 
-    public NumericOption(String description, String format, double stepSize, double min, double max) {
+    public NumericOption(WritableNumberValue property, String description, String format, double stepSize, double min, double max) {
       super(description);
+      this.property = property;
       this.format = format;
       this.stepSize = stepSize;
       this.min = min;
       this.max = max;
+      
+      if(property != null) {
+        value = property.getValue().doubleValue();
+      }
+      
+      updateControl();
+    }
+    
+    public NumericOption(String description, String format, double stepSize, double min, double max) {
+      this(null, description, format, stepSize, min, max);
     }
     
     public NumericOption(String description, String format, double stepSize) {
@@ -207,6 +295,9 @@ public class DialogScreen extends Application {
     }
     
     private void updateControl() {
+      if(property != null) {
+        property.setValue(value);
+      }
       control.setText(String.format(format, value));
     }
     
@@ -227,4 +318,17 @@ public class DialogScreen extends Application {
       parentChildren.get(indexInParent + 1).requestFocus();
     }
   }
+  
+  private static void moveFocusPrevious(BorderPane borderPane) {
+    ObservableList<Node> parentChildren = borderPane.getParent().getChildrenUnmodifiable();
+    int indexInParent = parentChildren.indexOf(borderPane);
+    
+    if(indexInParent == 0) {
+      parentChildren.get(parentChildren.size() - 1).requestFocus();
+    }
+    else {
+      parentChildren.get(indexInParent - 1).requestFocus();
+    }
+  }
+
 }

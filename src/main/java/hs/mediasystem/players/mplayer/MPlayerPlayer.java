@@ -20,6 +20,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+
 public class MPlayerPlayer implements Player {
   private static final Pattern GET_PROPERTY_PATTERN = Pattern.compile("ANS_[a-zA-Z_]+=(.*)");
   private static final Pattern SUB_LOAD_RESPONSE = Pattern.compile("SUB: Added subtitle file \\(([0-9]+)\\):.*");
@@ -329,6 +332,18 @@ public class MPlayerPlayer implements Player {
 
   @Override
   public List<Subtitle> getSubtitles() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public IntegerProperty volumeProperty() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ObjectProperty<Subtitle> subtitleProperty() {
     // TODO Auto-generated method stub
     return null;
   }

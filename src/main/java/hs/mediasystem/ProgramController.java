@@ -208,15 +208,17 @@ public class ProgramController {
     return player.getLength();
   }
 
+  /**
+   * Returns the current subtitle.  Never returns <code>null</code> but will return a special Subtitle
+   * instance for when subtitles are unavailable or disabled.
+   * 
+   * @return the current subtitle
+   */
   public Subtitle nextSubtitle() {
     List<Subtitle> subtitles = player.getSubtitles();
     
-    if(subtitles.isEmpty()) {
-      return null;
-    }
-    
     Subtitle currentSubtitle = player.getSubtitle();
-    int index = currentSubtitle == null ? 1 : subtitles.indexOf(currentSubtitle) + 1;
+    int index = subtitles.indexOf(currentSubtitle) + 1;
     
     if(index >= subtitles.size()) {
       index = 0;
@@ -225,6 +227,10 @@ public class ProgramController {
     player.setSubtitle(subtitles.get(index));
     
     return subtitles.get(index);
+  }
+
+  public Player getPlayer() {
+    return player;
   }
   
   // SelectItemScene...
