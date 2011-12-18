@@ -20,7 +20,6 @@ public interface MediaTree {
   List<? extends MediaItem> children();
   MediaTree parent();
   
-  Renderer<MediaItem> getRenderer();
   CellProvider<MediaItem> createListCell();
 
   ListenerList<ItemUpdate> onItemUpdate();

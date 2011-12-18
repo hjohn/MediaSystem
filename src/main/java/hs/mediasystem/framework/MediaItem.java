@@ -1,6 +1,6 @@
 package hs.mediasystem.framework;
 
-import hs.ui.image.ImageHandle;
+import hs.mediasystem.ImageHandle;
 import javafx.beans.property.ReadOnlyObjectProperty;
 
 public interface MediaItem {

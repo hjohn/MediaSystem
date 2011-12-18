@@ -4,11 +4,9 @@ import hs.mediasystem.ImageCache;
 import hs.mediasystem.ProgramController;
 import hs.mediasystem.SizeFormatter;
 import hs.mediasystem.StringConverter;
+import hs.mediasystem.framework.AudioTrack;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.Subtitle;
-import hs.mediasystem.screens.DialogScreen.ListOption;
-import hs.mediasystem.screens.DialogScreen.NumericOption;
-import hs.mediasystem.screens.DialogScreen.Option;
 import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -139,11 +137,18 @@ public class TransparentPlayingScreen {
                 return object.getDescription();
               }
             }),
-            new Option("Audio Stream"),
-            new NumericOption("Audio Delay", "%4.1fs", 0.1) 
+            new ListOption<AudioTrack>("Audio Track", controller.getPlayer().audioTrackProperty(), controller.getPlayer().getAudioTracks(), new StringConverter<AudioTrack>() {
+              @Override
+              public String toString(AudioTrack object) {
+                return object.getDescription();
+              }
+            }),
+            new NumericOption(controller.getPlayer().rateProperty(), "Playback Speed", "%4.1f", 0.1, 0.1, 4.0),
+            //new NumericOption(controller.getPlayer().audioDelayProperty(), "Audio Delay", "%4.1fs", 0.1, -30, 30), 
+            new NumericOption(controller.getPlayer().brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2) 
           );
           
-          DialogScreen screen = new DialogScreen(controller, options); 
+          DialogScreen screen = new DialogScreen(options); 
           stackPane.getChildren().add(screen.create());
           stackPane.getChildren().get(0).setDisable(true);
         }

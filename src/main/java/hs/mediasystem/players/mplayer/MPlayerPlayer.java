@@ -1,5 +1,6 @@
 package hs.mediasystem.players.mplayer;
 
+import hs.mediasystem.framework.AudioTrack;
 import hs.mediasystem.framework.Player;
 import hs.mediasystem.framework.Subtitle;
 import hs.models.events.ListenerList;
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 
@@ -344,6 +346,72 @@ public class MPlayerPlayer implements Player {
 
   @Override
   public ObjectProperty<Subtitle> subtitleProperty() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public float getRate() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public void setRate(float rate) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public FloatProperty rateProperty() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public int getAudioDelay() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public void setAudioDelay(int rate) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public IntegerProperty audioDelayProperty() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public AudioTrack getAudioTrack() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void setAudioTrack(AudioTrack audioTrack) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public ObjectProperty<AudioTrack> audioTrackProperty() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public FloatProperty brightnessProperty() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public List<AudioTrack> getAudioTracks() {
     // TODO Auto-generated method stub
     return null;
   }

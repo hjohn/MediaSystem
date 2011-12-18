@@ -2,7 +2,6 @@ package hs.mediasystem;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
-import hs.ui.image.ImageHandle;
 import javafx.beans.property.ReadOnlyObjectProperty;
 
 public class Nederland24Item implements MediaItem {

@@ -3,15 +3,17 @@ package hs.mediasystem.framework;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.scene.Node;
+
 /**
  * Represents a specific screen and its content, a page visit.
  */
 public class View {
-  private final Screen screen;
+  private final Node screen;
   private final Map<Class<?>, Config<?>> configs = new HashMap<Class<?>, Config<?>>();
   private final String name;
 
-  public View(String name, Screen screen, Config<?>... configs) {
+  public View(String name, Node screen, Config<?>... configs) {
     this.name = name;
     this.screen = screen;
     
@@ -24,7 +26,7 @@ public class View {
     return name;
   }
   
-  public Screen getScreen() {
+  public Node getScreen() {
     return screen;
   }
 
@@ -33,9 +35,9 @@ public class View {
   }
 
   public void applyConfig() {
-    for(Config<?> config : configs.values()) {
-      screen.applyConfig(config);
-    }
+//    for(Config<?> config : configs.values()) {
+//      screen.applyConfig(config);
+//    }
   }
   
   public <T extends Config<T>> T replaceConfig(Class<T> cls) {

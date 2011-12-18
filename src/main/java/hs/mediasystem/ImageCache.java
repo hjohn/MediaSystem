@@ -1,7 +1,5 @@
 package hs.mediasystem;
 
-import hs.ui.image.ImageHandle;
-
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;

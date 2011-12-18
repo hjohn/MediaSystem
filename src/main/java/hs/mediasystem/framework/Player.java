@@ -4,6 +4,7 @@ import hs.models.events.ListenerList;
 
 import java.util.List;
 
+import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 
@@ -57,25 +58,7 @@ public interface Player {
   int getSubtitleDelay();
   void setSubtitleDelay(int delay);
   
-  /**
-   * Returns the current brightness in a range of 0.0 to 2.0.
-   * 
-   * @return the current brightness
-   */
-  float getBrightness();
-  void setBrightness(float brightness);
-  
   ListenerList<String> onFinished();
-  
-  void setSubtitle(Subtitle subtitle);
-  
-  /**
-   * Returns the current subtitle.  Will return a Subtitle.DISABLED when not showing any
-   * subtitle.
-   * 
-   * @return the current subtitle
-   */
-  Subtitle getSubtitle();
   
   /**
    * Returns a list of Subtitles.  This list always includes as the first element 
@@ -84,6 +67,47 @@ public interface Player {
    * @return a list of Subtitles
    */
   List<Subtitle> getSubtitles();
-
+  
+  /**
+   * Returns the current subtitle.  Will return a Subtitle.DISABLED when not showing any
+   * subtitle.
+   * 
+   * @return the current subtitle
+   */
+  Subtitle getSubtitle();
+  void setSubtitle(Subtitle subtitle);
   ObjectProperty<Subtitle> subtitleProperty();
+  
+  /**
+   * Returns the current rate of playback.  
+   * 
+   * @return the current rate of playback
+   */
+  float getRate();
+  void setRate(float rate);
+  FloatProperty rateProperty();
+
+  /**
+   * Returns the audio delay, in milliseconds.
+   * 
+   * @return the audio delay, in milliseconds
+   */
+  int getAudioDelay();
+  void setAudioDelay(int rate);
+  IntegerProperty audioDelayProperty();
+  
+  AudioTrack getAudioTrack();
+  void setAudioTrack(AudioTrack audioTrack);
+  ObjectProperty<AudioTrack> audioTrackProperty();
+  
+  /**
+   * Returns the brightness.  
+   * 
+   * @return the brightness
+   */
+  float getBrightness();
+  void setBrightness(float brightness);
+  FloatProperty brightnessProperty();
+
+  List<AudioTrack> getAudioTracks();
 }

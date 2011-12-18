@@ -1,7 +1,9 @@
 package hs.mediasystem;
 
+import hs.mediasystem.util.ini.Ini;
+
 import java.awt.GraphicsDevice;
 
 public interface ControllerFactory {
-  public Controller create(GraphicsDevice device);
+  ProgramController create(Ini ini, GraphicsDevice device);
 }

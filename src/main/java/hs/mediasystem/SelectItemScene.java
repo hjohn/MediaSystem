@@ -4,7 +4,6 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItem.State;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.CellProvider;
-import hs.ui.image.ImageHandle;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;

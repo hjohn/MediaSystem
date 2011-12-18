@@ -2,9 +2,7 @@ package hs.mediasystem;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.framework.Renderer;
 import hs.mediasystem.fs.CellProvider;
-import hs.mediasystem.fs.MediaItemRenderer;
 import hs.mediasystem.fs.NamedItem;
 import hs.mediasystem.screens.movie.ItemUpdate;
 import hs.models.events.ListenerList;
@@ -35,11 +33,6 @@ public class Nederland24MediaTree implements MediaTree {
   @Override
   public MediaTree parent() {
     return null;
-  }
-
-  @Override
-  public Renderer<MediaItem> getRenderer() {
-    return new MediaItemRenderer();
   }
 
   @Override

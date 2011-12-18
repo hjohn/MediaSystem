@@ -1,5 +1,9 @@
 package hs.mediasystem.players.vlc;
 
+import hs.mediasystem.BeanFloatProperty;
+import hs.mediasystem.BeanIntegerProperty;
+import hs.mediasystem.BeanObjectProperty;
+import hs.mediasystem.framework.AudioTrack;
 import hs.mediasystem.framework.Player;
 import hs.mediasystem.framework.Subtitle;
 import hs.models.events.ListenerList;
@@ -14,10 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 import javax.swing.JFrame;
 
@@ -96,21 +99,31 @@ public class VLCPlayer implements Player {
         }
       }
     });
+    
+    volume = new BeanIntegerProperty(mediaPlayer, "volume");
+    audioDelay = new BeanIntegerProperty(mediaPlayer, "audioDelay");
+    rate = new BeanFloatProperty(mediaPlayer, "rate");
+    brightness = new BeanFloatProperty(mediaPlayer, "brightness");
+  }
+  
+  public AudioTrack getAudioTrackInternal() {
+    int index = mediaPlayer.getAudioTrack();
+    
+    return getAudioTracks().get(index);
+  }
+  
+  public void setAudioTrackInternal(AudioTrack audioTrack) {
+    mediaPlayer.setAudioTrack(getAudioTracks().indexOf(audioTrack));
   }
   
   public Subtitle getSubtitleInternal() {
     int index = mediaPlayer.getSpu();
     
     return index == -1 ? Subtitle.DISABLED : getSubtitles().get(index);
-//    
-//    for(Subtitle subtitle : getSubtitles()) {
-//      if(subtitle.getId() == id) {
-//        System.out.println("getSubtitle(): returning " + id + "; " + subtitle.getDescription());
-//        return subtitle;
-//      }
-//    }
-//    
-//    return Subtitle.DISABLED;
+  }
+  
+  public void setSubtitleInternal(Subtitle subtitle) {
+    mediaPlayer.setSpu(getSubtitles().indexOf(subtitle));
   }
 
   private final List<Subtitle> subtitles = new ArrayList<>();
@@ -130,45 +143,25 @@ public class VLCPlayer implements Player {
     
     return subtitles.isEmpty() ? NO_SUBTITLES : subtitles;
   }
+  
+  private final List<AudioTrack> audioTracks = new ArrayList<>();
+
+  @Override
+  public List<AudioTrack> getAudioTracks() {
+    if(audioTracks.isEmpty()) {
+      for(TrackDescription description : mediaPlayer.getAudioDescriptions()) {
+        audioTracks.add(new AudioTrack(description.id(), description.description()));
+      }
+    }
+    
+    return audioTracks.isEmpty() ? NO_AUDIO_TRACKS : audioTracks;
+  }
 
   private static final List<Subtitle> NO_SUBTITLES = new ArrayList<Subtitle>() {{
     add(Subtitle.DISABLED);
   }};
   
-  private final ObjectProperty<Subtitle> subtitle = new SimpleObjectProperty<Subtitle>() {
-    private boolean initialized;
-    
-    @Override
-    public Subtitle get() {
-      if(!initialized) {
-        initialized = true;
-        set(getSubtitleInternal());
-      }
-      
-      return super.get();
-    }
-    
-    @Override
-    public void set(Subtitle value) {
-      super.set(value);
-      mediaPlayer.setSpu(getSubtitles().indexOf(value));
-    }
-  };
-  
-  @Override
-  public Subtitle getSubtitle() {
-    return subtitle.get();
-  }
-  
-  @Override
-  public void setSubtitle(Subtitle subtitle) {
-    this.subtitle.set(subtitle);
-  }
-  
-  @Override
-  public ObjectProperty<Subtitle> subtitleProperty() {
-    return subtitle;
-  }
+  private static final List<AudioTrack> NO_AUDIO_TRACKS = new ArrayList<AudioTrack>();
   
   @Override
   public void play(String uri) {
@@ -236,30 +229,37 @@ public class VLCPlayer implements Player {
   public void showSubtitle(String fileName) {
     mediaPlayer.setSubTitleFile(fileName);
   }
-
-  private final IntegerProperty volume = new SimpleIntegerProperty(100) {
-    @Override
-    public void set(int value) {
-      super.set(value);
-      mediaPlayer.setVolume(value);
-    }
-  };
   
-  @Override
-  public int getVolume() {
-    return volume.get();
-  }
+  private final IntegerProperty volume;
+  @Override public int getVolume() { return volume.get(); }
+  @Override public void setVolume(int volume) { this.volume.set(volume); }
+  @Override public IntegerProperty volumeProperty() { return volume; }
 
-  @Override
-  public void setVolume(int volume) {
-    this.volume.set(volume);
-  }
+  private final IntegerProperty audioDelay;
+  @Override public int getAudioDelay() { return audioDelay.get(); }
+  @Override public void setAudioDelay(int audioDelay) { this.audioDelay.set(audioDelay); }
+  @Override public IntegerProperty audioDelayProperty() { return audioDelay; }
+
+  private final FloatProperty rate;
+  @Override public float getRate() { return rate.get(); }
+  @Override public void setRate(float rate) { this.rate.set(rate); }
+  @Override public FloatProperty rateProperty() { return rate; }
   
-  @Override
-  public IntegerProperty volumeProperty() {
-    return volume;
-  }
-
+  private final FloatProperty brightness;
+  @Override public float getBrightness() { return brightness.get(); }
+  @Override public void setBrightness(float brightness) { this.brightness.set(brightness); }
+  @Override public FloatProperty brightnessProperty() { return brightness; }
+  
+  private final ObjectProperty<Subtitle> subtitle = new BeanObjectProperty<Subtitle>(this, "subtitleInternal"); 
+  @Override public Subtitle getSubtitle() { return subtitle.get(); }
+  @Override public void setSubtitle(Subtitle subtitle) { this.subtitle.set(subtitle); }
+  @Override public ObjectProperty<Subtitle> subtitleProperty() { return subtitle; }
+  
+  private final ObjectProperty<AudioTrack> audioTrack = new BeanObjectProperty<AudioTrack>(this, "audioTrackInternal"); 
+  @Override public AudioTrack getAudioTrack() { return audioTrack.get(); }
+  @Override public void setAudioTrack(AudioTrack audioTrack) { this.audioTrack.set(audioTrack); }
+  @Override public ObjectProperty<AudioTrack> audioTrackProperty() { return audioTrack; }
+  
   @Override
   public boolean isMute() {
     return mediaPlayer.isMute();
@@ -278,15 +278,5 @@ public class VLCPlayer implements Player {
   @Override
   public void setSubtitleDelay(int delay) {
     throw new UnsupportedOperationException("Method not implemented");
-  }
-
-  @Override
-  public float getBrightness() {
-    return mediaPlayer.getBrightness();
-  }
-
-  @Override
-  public void setBrightness(float brightness) {
-    mediaPlayer.setBrightness(brightness);
   }
 }

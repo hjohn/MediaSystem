@@ -4,7 +4,6 @@ import hs.mediasystem.db.CachedItemEnricher;
 import hs.mediasystem.db.TvdbSerieEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.framework.Renderer;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -43,11 +42,6 @@ public class SeriesMediaTree extends AbstractMediaTree {
   @Override
   public MediaTree parent() {
     return null;
-  }
-
-  @Override
-  public Renderer<MediaItem> getRenderer() {
-    return new MediaItemRenderer();
   }
 
   @Override

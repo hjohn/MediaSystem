@@ -5,7 +5,6 @@ import hs.mediasystem.db.TvdbEpisodeEnricher;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.framework.Renderer;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -70,11 +69,6 @@ public class EpisodesMediaTree extends AbstractMediaTree {
   @Override
   public MediaTree parent() {
     throw new UnsupportedOperationException("Method not implemented");
-  }
-
-  @Override
-  public Renderer<MediaItem> getRenderer() {
-    return new DuoLineRenderer();
   }
 
   @Override

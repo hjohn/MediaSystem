@@ -3,6 +3,7 @@ package hs.mediasystem;
 import hs.mediasystem.framework.Player;
 import hs.mediasystem.players.vlc.VLCPlayer;
 import hs.mediasystem.util.ini.Ini;
+import hs.mediasystem.util.ini.Section;
 
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -10,6 +11,7 @@ import java.io.File;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import net.sf.jtmdb.GeneralSettings;
 
 public class FrontEnd extends Application {
   private static final Ini INI = new Ini(new File("mediasystem.ini"));
@@ -18,6 +20,17 @@ public class FrontEnd extends Application {
   
   @Override
   public void init() throws Exception {
+    Section section = INI.getSection("general");
+    
+//    Path moviesPath = Paths.get(section.get("movies.path"));
+//    Path seriesPath = Paths.get(section.get("series.path"));
+//    String sublightKey = section.get("sublight.key");
+//    String sublightClientName = section.get("sublight.client");
+    
+    GeneralSettings.setApiKey(section.get("jtmdb.key"));
+    GeneralSettings.setLogEnabled(true);
+    GeneralSettings.setLogStream(System.out);
+    
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gs = ge.getScreenDevices();
     

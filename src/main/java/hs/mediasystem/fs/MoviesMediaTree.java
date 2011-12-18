@@ -5,7 +5,6 @@ import hs.mediasystem.db.TmdbMovieEnricher;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.framework.Renderer;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -69,11 +68,6 @@ public class MoviesMediaTree extends AbstractMediaTree {
     return null;
   }
   
-  @Override
-  public Renderer<MediaItem> getRenderer() {
-    return new DuoLineRenderer();
-  }
-
   @Override
   public CellProvider<MediaItem> createListCell() {
     return new DuoLineRenderer2();

@@ -1,10 +1,10 @@
 package hs.mediasystem.fs;
 
+import hs.mediasystem.ImageHandle;
 import hs.mediasystem.db.Item;
 import hs.mediasystem.db.LocalItem;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
-import hs.ui.image.ImageHandle;
 
 import java.nio.file.Path;
 import java.util.Calendar;
