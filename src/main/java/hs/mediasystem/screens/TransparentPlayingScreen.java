@@ -11,6 +11,7 @@ import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.DoubleProperty;
@@ -37,6 +38,8 @@ import javafx.scene.effect.InnerShadow;
 import javafx.scene.effect.Reflection;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
@@ -110,10 +113,12 @@ public class TransparentPlayingScreen {
     positionUpdater.play();
   }
   
+  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
+  
   public Node create(final MediaItem mediaItem, final double w, final double h) {
     volumeText.set("Volume " + controller.getVolume() + "%");
     
-    borderPane.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+    stackPane.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
         KeyCode code = event.getCode();
@@ -127,6 +132,11 @@ public class TransparentPlayingScreen {
             osdLine.set("Subtitle: " + subtitle.getDescription());
           }
           osdFade.playFromStart();
+        }
+        else if(BACK_SPACE.match(event)) {
+          if(stackPane.getChildren().size() > 1) {
+            stackPane.getChildren().remove(1);
+          }
         }
         else if(code == KeyCode.O) {
           ObservableList<Option> options = FXCollections.observableArrayList(
@@ -150,7 +160,15 @@ public class TransparentPlayingScreen {
           
           DialogScreen screen = new DialogScreen(options); 
           stackPane.getChildren().add(screen.create());
-          stackPane.getChildren().get(0).setDisable(true);
+          
+          // HACK Using setDisable to shift the focus to the Options Dialog
+          borderPane.setDisable(true);
+          Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+              borderPane.setDisable(false);
+            }
+          });
         }
         else if(code == KeyCode.SPACE) {
           controller.pause();

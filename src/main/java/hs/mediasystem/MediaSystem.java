@@ -8,7 +8,6 @@ import com.sun.jna.NativeLibrary;
 // TODO Subtitle selection / Auto download
 // TODO Some form of remote control support
 // TODO VLCPlayer: Make brightness controls work
-// TODO Close Options screen with backspace
 // TODO Style Options screen
 // TODO Movie Overlay should disappear initially
 // TODO When changing Options, show this in OSD
