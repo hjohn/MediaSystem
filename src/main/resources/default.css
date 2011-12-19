@@ -126,7 +126,21 @@
   -fx-background-color: black;
 }
 
-.progress-bar .track {
+.progress-bar {  
+/*   -fx-border-width: 1, 1, 1; */
+/*   -fx-border-color: radial-gradient(center 25% 0%, radius 25%, color-blue 0%, transparent), */
+/*                     radial-gradient(center 75% 100%, radius 25%, color-blue 0%, transparent), */
+/*                     linear-gradient(to right, black, color-blue-50 15%, color-blue-50 85%, black); */
+
+  -fx-border-insets: 0, 2;
+  -fx-border-width: 4, 2;
+  -fx-border-radius: 12, 12;
+  -fx-border-color: radial-gradient(center 50% 5%, radius 100%, rgb(255, 255, 255) 0%, rgb(64, 64, 64)),
+                    radial-gradient(center 50% 5%, radius 100%, rgb(32, 32, 32) 0%, rgb(255, 255, 255));
+
+}
+
+.progress-bar2 .track {
   -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-blue, -50%), derive(color-blue, 0%)), 
                         linear-gradient(from 0% 0% to 0% 100%, derive(color-blue, -25%), derive(color-blue, -50%)),
                         linear-gradient(from 0% 0% to 0% 100%, derive(color-blue, -50%), derive(color-blue, -100%)); 
@@ -134,12 +148,27 @@
   -fx-background-insets: 0, 1, 2;
 }
 
+.progress-bar3 .track {
+  -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, color-blue-10, derive(color-blue, 0%)),
+                        black,   
+                        linear-gradient(from 0% 0% to 0% 100%, color-blue-10, derive(color-blue, -50%)),
+                        linear-gradient(from 0% 0% to 0% 100%, color-blue-10, derive(color-blue, -25%));
+  -fx-background-radius: 8, 8, 8, 8;
+  -fx-background-insets: 0, 1, 2, 3;
+}
+
+.progress-bar .track {
+  -fx-background-color: radial-gradient(focus-angle 90deg, focus-distance 0%, center 50% 0%, radius 75%, black 0%, grey);
+  -fx-background-radius: 10;
+  -fx-background-insets: 0;
+  -fx-effect: innershadow(gaussian, black, 5, 0.0, 0, 0);
+}
+
 .position .progress-bar .bar {
-  -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, -75%) 0%, derive(color-orange, 0%) 36%, derive(color-orange, -75%) 100%),
-                        linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, -50%) 0%, derive(color-orange, 25%) 36%, derive(color-orange, -50%) 100%), 
-                        linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, 0%) 0%, derive(color-orange, 100%) 36%, derive(color-orange, 0%) 100%); 
-  -fx-background-radius: 8, 8, 8;
-  -fx-background-insets: 2, 3, 4;
+  -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, 0%) 0%, derive(color-orange, 100%) 30%, white 36%, derive(color-orange, 100%) 42%, derive(color-orange, 0%) 72%, derive(color-orange, -50%)); 
+  -fx-background-radius: 8;
+  -fx-background-insets: 2;
+  -fx-effect: innershadow(gaussian, black, 3, 0.0, 0, 0);
 }
 
 .volume .progress-bar .bar {
@@ -192,3 +221,29 @@
 #dialog .cell:focused .label {
   -fx-text-fill: color-white;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

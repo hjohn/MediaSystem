@@ -136,39 +136,42 @@ public class TransparentPlayingScreen {
         else if(BACK_SPACE.match(event)) {
           if(stackPane.getChildren().size() > 1) {
             stackPane.getChildren().remove(1);
+            borderPane.requestFocus();
           }
         }
         else if(code == KeyCode.O) {
-          ObservableList<Option> options = FXCollections.observableArrayList(
-            new NumericOption(controller.getPlayer().volumeProperty(), "Volume", "%3.0f%%", 1, 0, 100),
-            new ListOption<Subtitle>("Subtitle", controller.getPlayer().subtitleProperty(), controller.getPlayer().getSubtitles(), new StringConverter<Subtitle>() {
+          if(stackPane.getChildren().size() == 1) {
+            ObservableList<Option> options = FXCollections.observableArrayList(
+              new NumericOption(controller.getPlayer().volumeProperty(), "Volume", "%3.0f%%", 1, 0, 100),
+              new ListOption<Subtitle>("Subtitle", controller.getPlayer().subtitleProperty(), controller.getPlayer().getSubtitles(), new StringConverter<Subtitle>() {
+                @Override
+                public String toString(Subtitle object) {
+                  return object.getDescription();
+                }
+              }),
+              new ListOption<AudioTrack>("Audio Track", controller.getPlayer().audioTrackProperty(), controller.getPlayer().getAudioTracks(), new StringConverter<AudioTrack>() {
+                @Override
+                public String toString(AudioTrack object) {
+                  return object.getDescription();
+                }
+              }),
+              new NumericOption(controller.getPlayer().rateProperty(), "Playback Speed", "%4.1f", 0.1, 0.1, 4.0),
+              //new NumericOption(controller.getPlayer().audioDelayProperty(), "Audio Delay", "%4.1fs", 0.1, -30, 30), 
+              new NumericOption(controller.getPlayer().brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2) 
+            );
+            
+            DialogScreen screen = new DialogScreen(options); 
+            stackPane.getChildren().add(screen.create());
+            
+            // HACK Using setDisable to shift the focus to the Options Dialog TODO this doesn't even always work...
+            borderPane.setDisable(true);
+            Platform.runLater(new Runnable() {
               @Override
-              public String toString(Subtitle object) {
-                return object.getDescription();
+              public void run() {
+                borderPane.setDisable(false);
               }
-            }),
-            new ListOption<AudioTrack>("Audio Track", controller.getPlayer().audioTrackProperty(), controller.getPlayer().getAudioTracks(), new StringConverter<AudioTrack>() {
-              @Override
-              public String toString(AudioTrack object) {
-                return object.getDescription();
-              }
-            }),
-            new NumericOption(controller.getPlayer().rateProperty(), "Playback Speed", "%4.1f", 0.1, 0.1, 4.0),
-            //new NumericOption(controller.getPlayer().audioDelayProperty(), "Audio Delay", "%4.1fs", 0.1, -30, 30), 
-            new NumericOption(controller.getPlayer().brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2) 
-          );
-          
-          DialogScreen screen = new DialogScreen(options); 
-          stackPane.getChildren().add(screen.create());
-          
-          // HACK Using setDisable to shift the focus to the Options Dialog
-          borderPane.setDisable(true);
-          Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-              borderPane.setDisable(false);
-            }
-          });
+            });
+          }
         }
         else if(code == KeyCode.SPACE) {
           controller.pause();

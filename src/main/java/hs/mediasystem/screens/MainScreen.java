@@ -19,6 +19,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -51,11 +52,22 @@ public class MainScreen {
       }});
     }};
     
-    
+
     final VBox menuBox = new VBox() {{
       getChildren().addAll(buttons);
     }};
-    
+
+    HBox box = new HBox() {{
+      getChildren().add(menuBox);
+      getChildren().add(new ProgressBar() {{
+        setProgress(0.25);
+        setMinSize(300, 30);
+        setStyle("-fx-background-color: black;");
+        getStyleClass().add("position");
+        setTranslateY(10);
+      }});
+    }};
+
     ChangeListener<Boolean> changeListener = new ChangeListener<Boolean>() {
       @Override
       public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -96,7 +108,7 @@ public class MainScreen {
       }
     });
     
-    root.setCenter(menuBox);
+    root.setCenter(box);
     
     root.setTop(new HBox() {{
       setId("top-bar");
