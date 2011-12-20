@@ -180,6 +180,8 @@
 }
 
 #dialog .cell {
+  -fx-background-color: transparent;
+  
   -fx-border-color: linear-gradient(to right, black, color-blue-20 15%, color-blue-20 85%, black);
   -fx-border-width: 1;
 }
@@ -195,9 +197,8 @@
 
 #dialog {
   -fx-background-color: rgba(0, 0, 0, 0.75);
-  -fx-border-radius: 10;
-  -fx-border-color: red;
-  -fx-border-width: 2;
+  -fx-background-radius: 20;
+  
   -fx-padding: 10;
 }
 
@@ -220,6 +221,10 @@
 
 #dialog .cell:focused .label {
   -fx-text-fill: color-white;
+}
+
+#dialog .title {
+  -fx-alignment: center;
 }
 
 

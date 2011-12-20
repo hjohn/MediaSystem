@@ -22,12 +22,15 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.effect.Blend;
@@ -156,11 +159,11 @@ public class TransparentPlayingScreen {
                 }
               }),
               new NumericOption(controller.getPlayer().rateProperty(), "Playback Speed", "%4.1f", 0.1, 0.1, 4.0),
-              //new NumericOption(controller.getPlayer().audioDelayProperty(), "Audio Delay", "%4.1fs", 0.1, -30, 30), 
+              new NumericOption(controller.getPlayer().audioDelayProperty(), "Audio Delay", "%5.0fms", 100, -30000, 30000), 
               new NumericOption(controller.getPlayer().brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2) 
             );
             
-            DialogScreen screen = new DialogScreen(options); 
+            DialogScreen screen = new DialogScreen("Video - Options", options); 
             stackPane.getChildren().add(screen.create());
             
             // HACK Using setDisable to shift the focus to the Options Dialog TODO this doesn't even always work...
@@ -319,6 +322,15 @@ public class TransparentPlayingScreen {
     }});
     
     stackPane.getChildren().add(borderPane);
+    
+    stackPane.sceneProperty().addListener(new ChangeListener<Scene>() {
+      @Override
+      public void changed(ObservableValue<? extends Scene> observable, Scene oldValue, Scene newValue) {
+        if(newValue != null) {
+          sustainAndFadeOut.playFromStart();
+        }
+      }
+    });
     
     return stackPane;
   }

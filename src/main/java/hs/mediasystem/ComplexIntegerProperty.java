@@ -1,15 +1,15 @@
 package hs.mediasystem;
 
-import hs.models.BeanAccessor;
+import hs.models.Accessor;
 import javafx.beans.property.SimpleIntegerProperty;
 
-public final class BeanIntegerProperty extends SimpleIntegerProperty {
-  private final BeanAccessor<Integer> accessor;
+public final class ComplexIntegerProperty extends SimpleIntegerProperty {
+  private final Accessor<Integer> accessor;
 
   private boolean initialized;
 
-  public BeanIntegerProperty(Object bean, String propertyName) {
-    accessor = new BeanAccessor<Integer>(bean, propertyName);
+  public ComplexIntegerProperty(Accessor<Integer> accessor) {
+    this.accessor = accessor;
   }
 
   @Override

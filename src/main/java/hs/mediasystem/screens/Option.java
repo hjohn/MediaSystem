@@ -45,20 +45,20 @@ public class Option {
           @Override
           public void handle(KeyEvent event) {
             if(event.getCode() == KeyCode.LEFT) {
-              System.out.println("left");
               left();
               event.consume();
             }
             else if(event.getCode() == KeyCode.RIGHT) {
-              System.out.println("right");
               right();
               event.consume();
             }
             else if(tab.match(event) || down.match(event)) {
               moveFocusNext(borderPane);
+              event.consume();
             }
             else if(shiftTab.match(event) || up.match(event)) {
               moveFocusPrevious(borderPane);
+              event.consume();
             }
           }
         });

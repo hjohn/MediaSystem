@@ -8,9 +8,10 @@ import com.sun.jna.NativeLibrary;
 // TODO Subtitle selection / Auto download
 // TODO Some form of remote control support
 // TODO VLCPlayer: Make brightness controls work
-// TODO Style Options screen
-// TODO Movie Overlay should disappear initially
 // TODO When changing Options, show this in OSD
+// TODO Tree selection bug (expand node, double click first newly shown item, plays wrong item).  Looks like BUG RT-16565.
+// TODO Background picture is centered, not stretched
+// TODO When returning to select screen, if bg pic is big, the scene will be larged than the stage
 
 // Minimal working system:
 // TODO Make clock in standard border

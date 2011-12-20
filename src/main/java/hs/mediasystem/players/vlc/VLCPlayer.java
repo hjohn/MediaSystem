@@ -1,11 +1,13 @@
 package hs.mediasystem.players.vlc;
 
 import hs.mediasystem.BeanFloatProperty;
-import hs.mediasystem.BeanIntegerProperty;
 import hs.mediasystem.BeanObjectProperty;
+import hs.mediasystem.ComplexIntegerProperty;
 import hs.mediasystem.framework.AudioTrack;
 import hs.mediasystem.framework.Player;
 import hs.mediasystem.framework.Subtitle;
+import hs.models.Accessor;
+import hs.models.BeanAccessor;
 import hs.models.events.ListenerList;
 import hs.models.events.Notifier;
 
@@ -100,8 +102,18 @@ public class VLCPlayer implements Player {
       }
     });
     
-    volume = new BeanIntegerProperty(mediaPlayer, "volume");
-    audioDelay = new BeanIntegerProperty(mediaPlayer, "audioDelay");
+    volume = new ComplexIntegerProperty(new BeanAccessor<Integer>(mediaPlayer, "volume"));
+    audioDelay = new ComplexIntegerProperty(new Accessor<Integer>() {
+      @Override
+      public void write(Integer value) {
+        mediaPlayer.setAudioDelay(value * 1000L);
+      }
+      
+      @Override
+      public Integer read() {
+        return (int)(mediaPlayer.getAudioDelay() / 1000);
+      }
+    });
     rate = new BeanFloatProperty(mediaPlayer, "rate");
     brightness = new BeanFloatProperty(mediaPlayer, "brightness");
   }
@@ -109,6 +121,9 @@ public class VLCPlayer implements Player {
   public AudioTrack getAudioTrackInternal() {
     int index = mediaPlayer.getAudioTrack();
     
+    if(index == -1) {
+      return AudioTrack.NO_AUDIO_TRACK;
+    }
     return getAudioTracks().get(index);
   }
   

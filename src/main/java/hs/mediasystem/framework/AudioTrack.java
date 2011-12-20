@@ -1,6 +1,8 @@
 package hs.mediasystem.framework;
 
 public class AudioTrack {
+  public static final AudioTrack NO_AUDIO_TRACK = new AudioTrack(-1, "Unavailable");
+  
   private final int id;
   private final String description;
   
