@@ -1,6 +1,4 @@
-package hs.mediasystem.framework;
-
-import hs.models.events.ListenerList;
+package hs.mediasystem.framework.player;
 
 import java.util.List;
 
@@ -57,8 +55,6 @@ public interface Player {
    */
   int getSubtitleDelay();
   void setSubtitleDelay(int delay);
-  
-  ListenerList<String> onFinished();
   
   /**
    * Returns a list of Subtitles.  This list always includes as the first element 

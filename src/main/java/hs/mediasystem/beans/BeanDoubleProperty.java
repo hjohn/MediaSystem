@@ -1,6 +1,5 @@
-package hs.mediasystem;
+package hs.mediasystem.beans;
 
-import hs.models.BeanAccessor;
 import javafx.beans.property.SimpleDoubleProperty;
 
 public final class BeanDoubleProperty extends SimpleDoubleProperty {

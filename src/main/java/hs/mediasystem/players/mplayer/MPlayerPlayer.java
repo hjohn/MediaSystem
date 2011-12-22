@@ -1,9 +1,8 @@
 package hs.mediasystem.players.mplayer;
 
-import hs.mediasystem.framework.AudioTrack;
-import hs.mediasystem.framework.Player;
-import hs.mediasystem.framework.Subtitle;
-import hs.models.events.ListenerList;
+import hs.mediasystem.framework.player.AudioTrack;
+import hs.mediasystem.framework.player.Player;
+import hs.mediasystem.framework.player.Subtitle;
 
 import java.awt.Color;
 import java.awt.Frame;
@@ -303,11 +302,6 @@ public class MPlayerPlayer implements Player {
     }
     
     throw new RuntimeException("unable to get wid, window.getPeer().getClass(): " + window.getPeer().getClass());
-  }
-
-  @Override
-  public ListenerList<String> onFinished() {
-    throw new UnsupportedOperationException("Method not implemented");
   }
 
   @Override

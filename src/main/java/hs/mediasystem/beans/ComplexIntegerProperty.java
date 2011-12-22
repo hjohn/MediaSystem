@@ -1,6 +1,5 @@
-package hs.mediasystem;
+package hs.mediasystem.beans;
 
-import hs.models.Accessor;
 import javafx.beans.property.SimpleIntegerProperty;
 
 public final class ComplexIntegerProperty extends SimpleIntegerProperty {

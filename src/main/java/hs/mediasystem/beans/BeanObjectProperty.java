@@ -1,6 +1,5 @@
-package hs.mediasystem;
+package hs.mediasystem.beans;
 
-import hs.models.BeanAccessor;
 import javafx.beans.property.SimpleObjectProperty;
 
 public final class BeanObjectProperty<T> extends SimpleObjectProperty<T> {

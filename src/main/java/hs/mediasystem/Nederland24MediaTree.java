@@ -4,15 +4,11 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.CellProvider;
 import hs.mediasystem.fs.NamedItem;
-import hs.mediasystem.screens.movie.ItemUpdate;
-import hs.models.events.ListenerList;
-import hs.models.events.Notifier;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Nederland24MediaTree implements MediaTree {
-  private final Notifier<ItemUpdate> itemUpdateNotifier = new Notifier<>();
 
   @Override
   public void refresh() {
@@ -33,15 +29,6 @@ public class Nederland24MediaTree implements MediaTree {
   @Override
   public MediaTree parent() {
     return null;
-  }
-
-  @Override
-  public ListenerList<ItemUpdate> onItemUpdate() {
-    return itemUpdateNotifier.getListenerList();
-  }
-
-  @Override
-  public void triggerItemUpdate(NamedItem namedItem) {
   }
 
   @Override

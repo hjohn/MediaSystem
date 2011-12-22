@@ -2,8 +2,8 @@ package hs.mediasystem;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.framework.Player;
-import hs.mediasystem.framework.Subtitle;
+import hs.mediasystem.framework.player.Player;
+import hs.mediasystem.framework.player.Subtitle;
 import hs.mediasystem.screens.MainScreen;
 import hs.mediasystem.screens.TransparentPlayingScreen;
 import hs.mediasystem.util.ini.Ini;

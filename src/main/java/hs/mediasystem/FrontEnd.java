@@ -1,6 +1,6 @@
 package hs.mediasystem;
 
-import hs.mediasystem.framework.Player;
+import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.players.vlc.VLCPlayer;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;

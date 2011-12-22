@@ -1,15 +1,13 @@
 package hs.mediasystem.players.vlc;
 
-import hs.mediasystem.BeanFloatProperty;
-import hs.mediasystem.BeanObjectProperty;
-import hs.mediasystem.ComplexIntegerProperty;
-import hs.mediasystem.framework.AudioTrack;
-import hs.mediasystem.framework.Player;
-import hs.mediasystem.framework.Subtitle;
-import hs.models.Accessor;
-import hs.models.BeanAccessor;
-import hs.models.events.ListenerList;
-import hs.models.events.Notifier;
+import hs.mediasystem.beans.Accessor;
+import hs.mediasystem.beans.BeanAccessor;
+import hs.mediasystem.beans.BeanFloatProperty;
+import hs.mediasystem.beans.BeanObjectProperty;
+import hs.mediasystem.beans.ComplexIntegerProperty;
+import hs.mediasystem.framework.player.AudioTrack;
+import hs.mediasystem.framework.player.Player;
+import hs.mediasystem.framework.player.Subtitle;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
@@ -37,13 +35,6 @@ public class VLCPlayer implements Player {
   private final EmbeddedMediaPlayer mediaPlayer;
   private final Frame frame;
   
-  private final Notifier<String> finishedNotifier = new Notifier<String>();
-
-  @Override
-  public ListenerList<String> onFinished() {
-    return finishedNotifier.getListenerList();
-  }
-  
   public VLCPlayer(GraphicsDevice device) {
     String[] libvlcArgs = {"-V", "direct3d"};  // opengl direct3d
     MediaPlayerFactory factory = new MediaPlayerFactory(libvlcArgs);
@@ -52,8 +43,7 @@ public class VLCPlayer implements Player {
     
     Canvas canvas = new Canvas();
     
-    frame = new Frame(device.getDefaultConfiguration());
-    
+    frame = new Frame(device.getDefaultConfiguration());    
     
     frame.setLayout(new BorderLayout());
     frame.setUndecorated(true);
