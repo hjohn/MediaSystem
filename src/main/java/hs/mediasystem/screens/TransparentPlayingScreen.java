@@ -163,8 +163,7 @@ public class TransparentPlayingScreen {
               new NumericOption(controller.getPlayer().brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2) 
             );
             
-            DialogScreen screen = new DialogScreen("Video - Options", options); 
-            stackPane.getChildren().add(screen.create());
+            stackPane.getChildren().add(new DialogScreen("Video - Options", options));
             
             // HACK Using setDisable to shift the focus to the Options Dialog TODO this doesn't even always work...
             borderPane.setDisable(true);

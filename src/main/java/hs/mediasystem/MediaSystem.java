@@ -11,7 +11,8 @@ import com.sun.jna.NativeLibrary;
 // TODO When changing Options, show this in OSD
 // TODO Tree selection bug (expand node, double click first newly shown item, plays wrong item).  Looks like BUG RT-16565.
 // TODO Background picture is centered, not stretched
-// TODO When returning to select screen, if bg pic is big, the scene will be larged than the stage
+// TODO When returning to select screen, if bg pic is big, the scene will be larger than the stage
+// TODO Style main page
 
 // Minimal working system:
 // TODO Make clock in standard border
