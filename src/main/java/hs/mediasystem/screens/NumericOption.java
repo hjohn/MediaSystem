@@ -1,12 +1,9 @@
 package hs.mediasystem.screens;
 
 import javafx.beans.value.WritableNumberValue;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
 
 public class NumericOption extends Option {
   private final WritableNumberValue property;
-  private final Label control = new Label();
   private final String format;
   private final double stepSize;
   private final double min;
@@ -63,11 +60,6 @@ public class NumericOption extends Option {
     if(property != null) {
       property.setValue(value);
     }
-    control.setText(String.format(format, value));
-  }
-  
-  @Override
-  public Node getRightControl() {
-    return control;
+    label.setText(String.format(format, value));
   }
 }

@@ -1,33 +1,25 @@
 package hs.mediasystem.screens;
 
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 
-public class Option {
+public class Option extends BorderPane {
   private final String description;
-  private BorderPane borderPane;
+  
+  protected final Label label = new Label();
 
   public Option(String description) {
     this.description = description;
+    
+    setFocusTraversable(true);
+    getStyleClass().add("cell");
+    
+    setLeft(new Label(getDescription()));
+    setRight(label);
   }
   
   public String getDescription() {
     return description;
-  }
-
-  public Node getControl() {
-    if(borderPane == null) {
-      borderPane = new BorderPane() {{
-        setFocusTraversable(true);
-        getStyleClass().add("cell");
-        
-        setLeft(new Label(getDescription()));
-        setRight(getRightControl());
-      }};
-    }
-    
-    return borderPane;
   }
   
   public void left() {
@@ -37,9 +29,5 @@ public class Option {
   }
   
   public void select() {
-  }
-  
-  public Node getRightControl() {
-    return new Label("<Value>");
   }
 }

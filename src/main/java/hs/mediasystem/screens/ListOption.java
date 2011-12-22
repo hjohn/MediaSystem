@@ -5,11 +5,8 @@ import hs.mediasystem.StringConverter;
 import java.util.List;
 
 import javafx.beans.property.ObjectProperty;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
 
 public class ListOption<T> extends Option {
-  private final Label control = new Label();
   private final ObjectProperty<T> property;
   private final List<T> items;
   private final StringConverter<T> stringConverter;
@@ -56,11 +53,6 @@ public class ListOption<T> extends Option {
     if(property != null) {
       property.set(value);
     }
-    control.setText(stringConverter.toString(value));
-  }
-  
-  @Override
-  public Node getRightControl() {
-    return control;
+    label.setText(stringConverter.toString(value));
   }
 }

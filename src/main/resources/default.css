@@ -186,7 +186,7 @@
   -fx-border-width: 1;
 }
 
-#dialog {
+#dialog-main {
   -fx-spacing: 5;
   -fx-font: bold 18pt "Arial";
 }
@@ -195,7 +195,11 @@
   -fx-background-color: rgba(0, 0, 0, 0.5);
 }
 
-#dialog {
+#dialog-list {
+  -fx-spacing: 5;
+}
+
+#dialog-main {
   -fx-background-color: rgba(0, 0, 0, 0.75);
   -fx-background-radius: 20;
   
@@ -204,6 +208,7 @@
 
 #dialog .label {
   -fx-padding: 5;
+  -fx-text-fill: color-blue;
 }
 
 #dialog .cell:focused {
@@ -223,32 +228,19 @@
   -fx-text-fill: color-white;
 }
 
+#dialog .list-cell {
+  -fx-text-fill: color-blue;
+}
+
+#dialog .list-cell:focused {
+  -fx-text-fill: color-white;
+}
+
 #dialog .title {
   -fx-alignment: center;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#dialog .list-view {
+  -fx-background-color: transparent;
+}
 

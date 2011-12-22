@@ -13,6 +13,7 @@ import com.sun.jna.NativeLibrary;
 // TODO Background picture is centered, not stretched
 // TODO When returning to select screen, if bg pic is big, the scene will be larger than the stage
 // TODO Style main page
+// TODO Separators for Dialog Screen
 
 // Minimal working system:
 // TODO Make clock in standard border

@@ -1,7 +1,11 @@
 package hs.mediasystem.screens;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -12,6 +16,7 @@ import javafx.scene.layout.VBox;
 
 public class DialogScreen extends BorderPane {
   private final ObservableList<Option> options;
+  private final List<List<Node>> optionStack  = new ArrayList<>();
   
   private int selectedIndex = 0;
   
@@ -19,7 +24,7 @@ public class DialogScreen extends BorderPane {
     this.options = options;
 
     VBox box = new VBox() {{
-      setId("dialog");
+      setId("dialog-main");
       setMaxSize(800, 600);
       
       getChildren().add(new Label(title) {{
@@ -28,8 +33,9 @@ public class DialogScreen extends BorderPane {
       }});
       
       getChildren().add(new VBox() {{
+        setId("dialog-list");
         for(Option option : options) {
-          getChildren().add(option.getControl());
+          getChildren().add(option);
         }
         
         addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
@@ -38,13 +44,22 @@ public class DialogScreen extends BorderPane {
           final KeyCombination down = new KeyCodeCombination(KeyCode.DOWN);
           final KeyCombination up = new KeyCodeCombination(KeyCode.UP);
           final KeyCombination enter = new KeyCodeCombination(KeyCode.ENTER);
+          final KeyCombination backspace = new KeyCodeCombination(KeyCode.BACK_SPACE);
 
           @Override
           public void handle(KeyEvent event) {
             Option selectedOption = options.get(selectedIndex);
             
             if(enter.match(event)) {
-              selectedOption.select();
+              if(selectedOption instanceof SubOption) {
+                SubOption option = (SubOption)selectedOption;
+                
+                optionStack.add(new ArrayList<Node>(getChildren()));
+                
+                getChildren().clear();
+                getChildren().addAll(option.getOptions());
+                getChildren().get(0).requestFocus();
+              }
               event.consume();
             }
             else if(event.getCode() == KeyCode.LEFT) {
@@ -63,13 +78,21 @@ public class DialogScreen extends BorderPane {
               moveFocusPrevious();
               event.consume();
             }
+            else if(backspace.match(event)) {
+              if(!optionStack.isEmpty()) {
+                getChildren().clear();
+                getChildren().addAll(optionStack.remove(optionStack.size() - 1));
+                getChildren().get(0).requestFocus();
+                event.consume();
+              }
+            }
           }
         });
 
       }});  
     }};
     
-    setId("dialog-screen");
+    setId("dialog");
     setCenter(box);
   }
   
@@ -80,7 +103,7 @@ public class DialogScreen extends BorderPane {
       index = 0;
     }
 
-    options.get(index).getControl().requestFocus();
+    options.get(index).requestFocus();
     selectedIndex = index;
   }
   
@@ -91,7 +114,7 @@ public class DialogScreen extends BorderPane {
       index = options.size() - 1;
     }
 
-    options.get(index).getControl().requestFocus();
+    options.get(index).requestFocus();
     selectedIndex = index;
   }
 }

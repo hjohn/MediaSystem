@@ -160,7 +160,13 @@ public class TransparentPlayingScreen {
               }),
               new NumericOption(controller.getPlayer().rateProperty(), "Playback Speed", "%4.1f", 0.1, 0.1, 4.0),
               new NumericOption(controller.getPlayer().audioDelayProperty(), "Audio Delay", "%5.0fms", 100, -30000, 30000), 
-              new NumericOption(controller.getPlayer().brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2) 
+              new NumericOption(controller.getPlayer().brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2),
+              new SubOption("Download subtitle...", new ListViewOption<Subtitle>("Subtitles for Download", controller.getPlayer().subtitleProperty(), FXCollections.observableArrayList(controller.getPlayer().getSubtitles()), new StringConverter<Subtitle>() {
+                @Override
+                public String toString(Subtitle object) {
+                  return object.getDescription();
+                }
+              }))
             );
             
             stackPane.getChildren().add(new DialogScreen("Video - Options", options));
