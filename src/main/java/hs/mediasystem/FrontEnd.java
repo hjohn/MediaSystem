@@ -1,7 +1,5 @@
 package hs.mediasystem;
 
-import hs.mediasystem.framework.player.Player;
-import hs.mediasystem.players.vlc.VLCPlayer;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
@@ -16,7 +14,7 @@ import net.sf.jtmdb.GeneralSettings;
 public class FrontEnd extends Application {
   private static final Ini INI = new Ini(new File("mediasystem.ini"));
 
-  private Player player;
+  private ControllerFactory controllerFactory;
   
   @Override
   public void init() throws Exception {
@@ -31,22 +29,22 @@ public class FrontEnd extends Application {
     GeneralSettings.setLogEnabled(true);
     GeneralSettings.setLogStream(System.out);
     
-    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    GraphicsDevice[] gs = ge.getScreenDevices();
+    String factoryClassName = section.getDefault("player.factoryClass", "hs.mediasystem.players.vlc.VLCControllerFactory");
     
-    int screen = Integer.parseInt(INI.getSection("general").getDefault("screen", "0"));
-    
-    GraphicsDevice graphicsDevice = (screen >= 0 && screen < gs.length) ? gs[screen] : gs[0];
-    
-    System.out.println("Using display: " + graphicsDevice + "; " + graphicsDevice.getDisplayMode().getWidth() + "x" + graphicsDevice.getDisplayMode().getHeight() + "x" + graphicsDevice.getDisplayMode().getBitDepth() + " @ " + graphicsDevice.getDisplayMode().getRefreshRate() + " Hz");
-
-    player = new VLCPlayer(graphicsDevice);  // TODO make configurable
-    System.out.println("1");
+    controllerFactory = (ControllerFactory) Class.forName(factoryClassName).newInstance();
   }
   
   @Override
   public void start(Stage primaryStage) throws Exception {
-    ProgramController controller = new ProgramController(INI, player);
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice[] gs = ge.getScreenDevices();
+    
+    int screen = Integer.parseInt(INI.getSection("general").getDefault("screen", "0"));
+    GraphicsDevice graphicsDevice = (screen >= 0 && screen < gs.length) ? gs[screen] : gs[0];
+    
+    System.out.println("Using display: " + graphicsDevice + "; " + graphicsDevice.getDisplayMode().getWidth() + "x" + graphicsDevice.getDisplayMode().getHeight() + "x" + graphicsDevice.getDisplayMode().getBitDepth() + " @ " + graphicsDevice.getDisplayMode().getRefreshRate() + " Hz");
+    
+    ProgramController controller = controllerFactory.create(INI, graphicsDevice);
     
     controller.showMainScreen();
   }

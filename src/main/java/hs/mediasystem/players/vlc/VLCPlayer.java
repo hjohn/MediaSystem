@@ -35,9 +35,8 @@ public class VLCPlayer implements Player {
   private final EmbeddedMediaPlayer mediaPlayer;
   private final Frame frame;
   
-  public VLCPlayer(GraphicsDevice device) {
-    String[] libvlcArgs = {"-V", "direct3d"};  // opengl direct3d
-    MediaPlayerFactory factory = new MediaPlayerFactory(libvlcArgs);
+  public VLCPlayer(GraphicsDevice device, String... args) {
+    MediaPlayerFactory factory = new MediaPlayerFactory(args);
 
     mediaPlayer = factory.newEmbeddedMediaPlayer();
     

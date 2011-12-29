@@ -59,9 +59,6 @@ import com.sun.jna.NativeLibrary;
 public class MediaSystem {
   
   public static void main(String[] args) {
-    NativeLibrary.addSearchPath("libvlc", "c:/program files (x86)/VideoLAN/VLC");
-    NativeLibrary.addSearchPath("libvlc", "c:/program files/VideoLAN/VLC");
-
     Application.launch(FrontEnd.class, args);
   }
 }
