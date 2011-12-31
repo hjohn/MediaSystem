@@ -352,13 +352,15 @@ public class SelectItemScene {
 
 
   private class MediaItemUpdateService extends Service<Void> {
-    private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<MediaItem>();
+    private MediaItem mediaItem;
     
-    public void setMediaItem(MediaItem value) {mediaItem.set(value);}
+    public void setMediaItem(MediaItem value) { 
+      mediaItem = value; 
+    }
     
     @Override
     protected Task<Void> createTask() {
-      final MediaItem item = mediaItem.get();
+      final MediaItem item = mediaItem;
       
       return new Task<Void>() {
         @Override
@@ -387,31 +389,6 @@ public class SelectItemScene {
   protected void update(final MediaItem item) {
     mediaItemUpdateService.setMediaItem(item);
     mediaItemUpdateService.restart();
-    
-    
-//    Task<Void> task = new Task<Void>() {
-//      @Override
-//      protected Void call() throws Exception {
-//        title.set(item.getTitle());
-//        subtitle.set(item.getSubtitle());
-//        releaseYear.set(item.getReleaseYear());
-//        plot.set(item.getPlot());
-//        trySetImage(item.getPoster(), poster);
-//        
-//        if(trySetImage(item.getBackground(), wantedBackground, backgroundImageView.getFitWidth(), backgroundImageView.getFitHeight())) {
-//          if(timeline.getStatus() == Animation.Status.STOPPED) {
-//            newBackground.set(wantedBackground.get());
-//            timeline.play();
-//          }
-//        }
-//        
-//        return null;
-//      }
-//    };
-//    
-//    new Thread(task).run();
-    
-
   }
   
   public static boolean trySetImage(ImageHandle handle, ObjectProperty<Image> image) {

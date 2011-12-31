@@ -1,15 +1,19 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.Callable;
+
+import java.util.List;
+
 public class SubOption extends Option {
-  private final Option[] options;
+  private final Callable<List<Option>> optionCreator;
   
-  public SubOption(String description, Option... options) {
+  public SubOption(String description, Callable<List<Option>> optionCreator) {
     super(description);
 
-    this.options = options;
+    this.optionCreator = optionCreator;
   }
 
-  public Option[] getOptions() {
-    return options;
+  public List<Option> getOptions() {
+    return optionCreator.call();
   } 
 }

@@ -1,12 +1,19 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.Callable;
 import hs.mediasystem.ImageCache;
 import hs.mediasystem.ProgramController;
 import hs.mediasystem.SizeFormatter;
 import hs.mediasystem.StringConverter;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Subtitle;
+import hs.sublight.SubtitleDescriptor;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -24,7 +31,6 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -130,7 +136,7 @@ public class TransparentPlayingScreen extends StackPane {
         }
         else if(code == KeyCode.O) {
           if(getChildren().size() == 1) {
-            ObservableList<Option> options = FXCollections.observableArrayList(
+            List<Option> options = FXCollections.observableArrayList(
               new NumericOption(controller.getPlayer().volumeProperty(), "Volume", "%3.0f%%", 1, 0, 100),
               new ListOption<Subtitle>("Subtitle", controller.getPlayer().subtitleProperty(), controller.getPlayer().getSubtitles(), new StringConverter<Subtitle>() {
                 @Override
@@ -147,12 +153,36 @@ public class TransparentPlayingScreen extends StackPane {
               new NumericOption(controller.getPlayer().rateProperty(), "Playback Speed", "%4.1f", 0.1, 0.1, 4.0),
               new NumericOption(controller.getPlayer().audioDelayProperty(), "Audio Delay", "%5.0fms", 100, -30000, 30000), 
               new NumericOption(controller.getPlayer().brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2),
-              new SubOption("Download subtitle...", new ListViewOption<Subtitle>("Subtitles for Download", controller.getPlayer().subtitleProperty(), FXCollections.observableArrayList(controller.getPlayer().getSubtitles()), new StringConverter<Subtitle>() {
+              new SubOption("Download subtitle...", new Callable<List<Option>>() {
                 @Override
-                public String toString(Subtitle object) {
-                  return object.getDescription();
+                public List<Option> call() {
+                  return new ArrayList<Option>() {{
+                    final SubtitleSelector subtitleSelector = new SubtitleSelector(controller.getSubtitleProviders());
+                    
+                    subtitleSelector.query(mediaItem);
+                    
+                    subtitleSelector.subtitleProviderProperty().addListener(new ChangeListener<SubtitleProvider>() {
+                      @Override
+                      public void changed(ObservableValue<? extends SubtitleProvider> observableValue, SubtitleProvider oldValue, SubtitleProvider newValue) {
+                        subtitleSelector.query(mediaItem);
+                      }
+                    });
+                    
+                    add(new ListOption<SubtitleProvider>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), subtitleSelector.getSubtitleProviders(), new StringConverter<SubtitleProvider>() {
+                      @Override
+                      public String toString(SubtitleProvider object) {
+                        return object.getName();
+                      }
+                    }));
+                    add(new ListViewOption<SubtitleDescriptor>("Subtitles for Download", null, subtitleSelector.getSubtitles(), new StringConverter<SubtitleDescriptor>() {
+                      @Override
+                      public String toString(SubtitleDescriptor object) {
+                        return object.getName() + " (" + object.getLanguageName() + ") [" + object.getType() + "]";
+                      }
+                    }));
+                  }};
                 }
-              }))
+              })
             );
             
             getChildren().add(new DialogScreen("Video - Options", options));

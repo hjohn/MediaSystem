@@ -12,6 +12,8 @@ import javafx.application.Application;
 // TODO When returning to select screen, if bg pic is big, the scene will be larger than the stage
 // TODO Style main page
 // TODO Separators for Dialog Screen
+// TODO Subtitle selection list must be left with backspace, or exit at top/bottom item
+// TODO Style ListViewOption's "header" option
 
 // Minimal working system:
 // TODO Make clock in standard border

@@ -2,12 +2,16 @@ package hs.mediasystem;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
+import hs.mediasystem.framework.SublightSubtitleProvider;
+import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
 import hs.mediasystem.screens.MainScreen;
 import hs.mediasystem.screens.TransparentPlayingScreen;
 import hs.mediasystem.util.ini.Ini;
+import hs.mediasystem.util.ini.Section;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javafx.event.ActionEvent;
@@ -69,7 +73,7 @@ public class ProgramController {
       public void handle(ActionEvent event) {
         updateScreen();
       }
-    });
+    });    
   }
   
   public Ini getIni() {
@@ -231,6 +235,14 @@ public class ProgramController {
 
   public Player getPlayer() {
     return player;
+  }
+  
+  public List<SubtitleProvider> getSubtitleProviders() {
+    final Section general = ini.getSection("general");
+    
+    return new ArrayList<SubtitleProvider>() {{
+      add(new SublightSubtitleProvider(general.get("sublight.client"), general.get("sublight.key")));
+    }};
   }
   
   // SelectItemScene...
