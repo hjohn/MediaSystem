@@ -1,7 +1,7 @@
 package hs.mediasystem.players.vlc;
 
-import hs.mediasystem.ControllerFactory;
-import hs.mediasystem.ProgramController;
+import hs.mediasystem.PlayerFactory;
+import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
@@ -11,10 +11,10 @@ import java.util.List;
 
 import com.sun.jna.NativeLibrary;
 
-public class VLCControllerFactory implements ControllerFactory {
+public class VLCPlayerFactory implements PlayerFactory {
 
   @Override
-  public ProgramController create(Ini ini, GraphicsDevice device) {
+  public Player create(Ini ini, GraphicsDevice device) {
     Section main = ini.getSection("vlc");
     
     NativeLibrary.addSearchPath("libvlc", main.getDefault("libvlcSearchPath", "c:/program files/VideoLAN/VLC"));
@@ -27,6 +27,6 @@ public class VLCControllerFactory implements ControllerFactory {
       args.add(section.get(key));
     }
     
-    return new ProgramController(ini, new VLCPlayer(device, args.toArray(new String[args.size()]))); 
+    return new VLCPlayer(device, args.toArray(new String[args.size()])); 
   }
 }

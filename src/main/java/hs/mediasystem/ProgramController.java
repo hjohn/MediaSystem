@@ -128,8 +128,8 @@ public class ProgramController {
   public void play(MediaItem mediaItem) {
     player.play(mediaItem.getUri());
    
-    TransparentPlayingScreen screen = new TransparentPlayingScreen(this);
-    history.forward(new NavigationItem(screen.create(mediaItem, overlayStage.getWidth(), overlayStage.getHeight()), "OVERLAY"));
+    TransparentPlayingScreen screen = new TransparentPlayingScreen(this, mediaItem, overlayStage.getWidth(), overlayStage.getHeight());
+    history.forward(new NavigationItem(screen, "OVERLAY"));
   }
   
   public void stop() {

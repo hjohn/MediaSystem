@@ -1,5 +1,6 @@
 package hs.mediasystem;
 
+import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
@@ -14,7 +15,7 @@ import net.sf.jtmdb.GeneralSettings;
 public class FrontEnd extends Application {
   private static final Ini INI = new Ini(new File("mediasystem.ini"));
 
-  private ControllerFactory controllerFactory;
+  private Player player;
   
   @Override
   public void init() throws Exception {
@@ -29,13 +30,8 @@ public class FrontEnd extends Application {
     GeneralSettings.setLogEnabled(true);
     GeneralSettings.setLogStream(System.out);
     
-    String factoryClassName = section.getDefault("player.factoryClass", "hs.mediasystem.players.vlc.VLCControllerFactory");
+    String factoryClassName = section.getDefault("player.factoryClass", "hs.mediasystem.players.vlc.VLCPlayerFactory");
     
-    controllerFactory = (ControllerFactory) Class.forName(factoryClassName).newInstance();
-  }
-  
-  @Override
-  public void start(Stage primaryStage) throws Exception {
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gs = ge.getScreenDevices();
     
@@ -44,7 +40,14 @@ public class FrontEnd extends Application {
     
     System.out.println("Using display: " + graphicsDevice + "; " + graphicsDevice.getDisplayMode().getWidth() + "x" + graphicsDevice.getDisplayMode().getHeight() + "x" + graphicsDevice.getDisplayMode().getBitDepth() + " @ " + graphicsDevice.getDisplayMode().getRefreshRate() + " Hz");
     
-    ProgramController controller = controllerFactory.create(INI, graphicsDevice);
+    PlayerFactory playerFactory = (PlayerFactory)Class.forName(factoryClassName).newInstance();
+    player = playerFactory.create(INI, graphicsDevice);
+  }
+  
+  @Override
+  public void start(Stage primaryStage) throws Exception {
+
+    ProgramController controller = new ProgramController(INI, player);
     
     controller.showMainScreen();
   }

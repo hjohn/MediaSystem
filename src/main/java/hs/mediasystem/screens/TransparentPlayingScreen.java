@@ -7,7 +7,6 @@ import hs.mediasystem.StringConverter;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Subtitle;
-import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -29,7 +28,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -54,34 +52,30 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
-public class TransparentPlayingScreen {
+public class TransparentPlayingScreen extends StackPane {
   private final ProgramController controller;
-  private final StackPane stackPane = new StackPane();
-  private final BorderPane borderPane = new BorderPane();
-  private final BorderPane bottomPane = new BorderPane();
-  private final Label topLabel = new Label();
   
   private final ObjectProperty<String> volumeText = new SimpleObjectProperty<>();
   private final DoubleProperty volume = new SimpleDoubleProperty(0.0);
   private final LongProperty position = new SimpleLongProperty();
   private final LongProperty length = new SimpleLongProperty(1);
   private final StringProperty osdLine = new SimpleStringProperty("");
-
+  
+  private final BorderPane borderPane = new BorderPane();
+  private final BorderPane bottomPane = new BorderPane();
+  private final Label topLabel = new Label();
+  
   private final Timeline osdFade = new Timeline(
     new KeyFrame(Duration.seconds(1), new KeyValue(topLabel.opacityProperty(), 1.0)),
     new KeyFrame(Duration.seconds(6), new KeyValue(topLabel.opacityProperty(), 1.0)),
     new KeyFrame(Duration.seconds(9), new KeyValue(topLabel.opacityProperty(), 0.0))
   );
   
-  private final Timeline fadeIn = new Timeline(
-    //new KeyFrame(Duration.seconds(0), new KeyValue(borderPane.opacityProperty(), 0.0)),
-    new KeyFrame(Duration.seconds(1), new KeyValue(bottomPane.opacityProperty(), 1.0))
-  );
-  
-  private final Timeline sustainAndFadeOut = new Timeline(
-    new KeyFrame(Duration.seconds(0), new KeyValue(bottomPane.opacityProperty(), 1.0)),
-    new KeyFrame(Duration.seconds(5), new KeyValue(bottomPane.opacityProperty(), 1.0)),
-    new KeyFrame(Duration.seconds(8), new KeyValue(bottomPane.opacityProperty(), 0.0))
+  private final Timeline fadeInSustainAndFadeOut = new Timeline(
+    new KeyFrame(Duration.seconds(0)),
+    new KeyFrame(Duration.seconds(1), new KeyValue(bottomPane.opacityProperty(), 1.0)),
+    new KeyFrame(Duration.seconds(6), new KeyValue(bottomPane.opacityProperty(), 1.0)),
+    new KeyFrame(Duration.seconds(9), new KeyValue(bottomPane.opacityProperty(), 0.0))
   );
 
   private final Timeline positionUpdater = new Timeline(
@@ -92,6 +86,7 @@ public class TransparentPlayingScreen {
 //        length.set(SizeFormatter.SECONDS_AS_POSITION.format(controller.getLength() / 1000));
         volume.set(controller.getVolume() / 100.0);
         position.set(controller.getPosition());
+        
         long len = controller.getLength();
         
         if(len == 0) {
@@ -101,27 +96,18 @@ public class TransparentPlayingScreen {
       }
     })
   );
-  
-  public TransparentPlayingScreen(ProgramController controller) {
+
+  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
+
+  public TransparentPlayingScreen(final ProgramController controller, final MediaItem mediaItem, final double w, final double h) {
     this.controller = controller;
-    
-    fadeIn.setOnFinished(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-        sustainAndFadeOut.play();
-      }
-    });
     
     positionUpdater.setCycleCount(Timeline.INDEFINITE);
     positionUpdater.play();
-  }
   
-  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
-  
-  public Node create(final MediaItem mediaItem, final double w, final double h) {
     volumeText.set("Volume " + controller.getVolume() + "%");
     
-    stackPane.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+    addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
         KeyCode code = event.getCode();
@@ -137,13 +123,13 @@ public class TransparentPlayingScreen {
           osdFade.playFromStart();
         }
         else if(BACK_SPACE.match(event)) {
-          if(stackPane.getChildren().size() > 1) {
-            stackPane.getChildren().remove(1);
+          if(getChildren().size() > 1) {
+            getChildren().remove(1);
             borderPane.requestFocus();
           }
         }
         else if(code == KeyCode.O) {
-          if(stackPane.getChildren().size() == 1) {
+          if(getChildren().size() == 1) {
             ObservableList<Option> options = FXCollections.observableArrayList(
               new NumericOption(controller.getPlayer().volumeProperty(), "Volume", "%3.0f%%", 1, 0, 100),
               new ListOption<Subtitle>("Subtitle", controller.getPlayer().subtitleProperty(), controller.getPlayer().getSubtitles(), new StringConverter<Subtitle>() {
@@ -169,7 +155,7 @@ public class TransparentPlayingScreen {
               }))
             );
             
-            stackPane.getChildren().add(new DialogScreen("Video - Options", options));
+            getChildren().add(new DialogScreen("Video - Options", options));
             
             // HACK Using setDisable to shift the focus to the Options Dialog TODO this doesn't even always work...
             borderPane.setDisable(true);
@@ -231,7 +217,9 @@ public class TransparentPlayingScreen {
     });
     
     borderPane.setFocusTraversable(true);
-    borderPane.setTop(topLabel);
+    borderPane.setTop(new VBox() {{
+      getChildren().add(topLabel);
+    }});
     
     topLabel.setId("video-osd-line");
     topLabel.textProperty().bind(osdLine);
@@ -258,7 +246,7 @@ public class TransparentPlayingScreen {
           HBox.setHgrow(this, Priority.ALWAYS);
           getChildren().add(new Label(mediaItem.getTitle()) {{
             getStyleClass().add("video-title");
-            setEffect(createEffect(64));
+            setEffect(createNeonEffect(64));
           }});
           getChildren().add(new Label(mediaItem.getSubtitle()) {{
             getStyleClass().add("video-subtitle");
@@ -326,30 +314,23 @@ public class TransparentPlayingScreen {
       }});
     }});
     
-    stackPane.getChildren().add(borderPane);
+    getChildren().add(borderPane);
     
-    stackPane.sceneProperty().addListener(new ChangeListener<Scene>() {
+    sceneProperty().addListener(new ChangeListener<Scene>() {
       @Override
       public void changed(ObservableValue<? extends Scene> observable, Scene oldValue, Scene newValue) {
         if(newValue != null) {
-          sustainAndFadeOut.playFromStart();
+          fadeInSustainAndFadeOut.playFromStart();
         }
       }
     });
-    
-    return stackPane;
-  }
-
-  private void showOSD() {
-    if(fadeIn.getStatus() == Status.STOPPED && sustainAndFadeOut.getStatus() == Status.STOPPED) {
-      fadeIn.play();
-    }
-    else if(fadeIn.getStatus() == Status.STOPPED && sustainAndFadeOut.getStatus() == Status.RUNNING) {
-      sustainAndFadeOut.playFromStart();
-    }
   }
   
-  private static Effect createEffect(final double size) { // font point size
+  private void showOSD() {
+    fadeInSustainAndFadeOut.playFromStart();
+  }
+  
+  private static Effect createNeonEffect(final double size) { // font point size
     return new Blend() {{
       setMode(BlendMode.MULTIPLY);
       setBottomInput(new DropShadow() {{

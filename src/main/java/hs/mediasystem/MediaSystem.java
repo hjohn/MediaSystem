@@ -2,8 +2,6 @@ package hs.mediasystem;
 
 import javafx.application.Application;
 
-import com.sun.jna.NativeLibrary;
-
 // Top 10 stuff:
 // TODO Subtitle selection / Auto download
 // TODO Some form of remote control support

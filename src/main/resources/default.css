@@ -179,13 +179,6 @@
   -fx-background-insets: 2, 3, 4;
 }
 
-#dialog .cell {
-  -fx-background-color: transparent;
-  
-  -fx-border-color: linear-gradient(to right, black, color-blue-20 15%, color-blue-20 85%, black);
-  -fx-border-width: 1;
-}
-
 #dialog-main {
   -fx-spacing: 5;
   -fx-font: bold 18pt "Arial";
@@ -211,20 +204,27 @@
   -fx-text-fill: color-blue;
 }
 
-#dialog .cell:focused {
+.cell {
+  -fx-background-color: transparent;
+  
+  -fx-border-color: linear-gradient(to right, transparent, color-blue-20 15%, color-blue-20 85%, transparent);
+  -fx-border-width: 1;
+}
+
+.cell:focused {
   -fx-background-insets: 1, 1, 1;
   -fx-background-color: radial-gradient(center 25% 0%, radius 25%, color-blue 0%, transparent),
                         radial-gradient(center 75% 100%, radius 25%, color-blue 0%, transparent),
-                        linear-gradient(to right, black, color-blue-20 15%, color-blue-20 85%, black);
+                        linear-gradient(to right, transparent, color-blue-20 15%, color-blue-20 85%, transparent);
   
   -fx-border-width: 1, 1, 1;
   -fx-border-color: radial-gradient(center 25% 0%, radius 25%, color-blue 0%, transparent),
                     radial-gradient(center 75% 100%, radius 25%, color-blue 0%, transparent),
-                    linear-gradient(to right, black, color-blue-50 15%, color-blue-50 85%, black);
+                    linear-gradient(to right, transparent, color-blue-50 15%, color-blue-50 85%, transparent);
                     
 }
 
-#dialog .cell:focused .label {
+.cell:focused .label {
   -fx-text-fill: color-white;
 }
 
