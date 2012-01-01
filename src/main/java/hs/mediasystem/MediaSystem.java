@@ -3,7 +3,6 @@ package hs.mediasystem;
 import javafx.application.Application;
 
 // Top 10 stuff:
-// TODO Subtitle selection / Auto download
 // TODO Some form of remote control support
 // TODO VLCPlayer: Make brightness controls work
 // TODO When changing Options, show this in OSD
@@ -14,6 +13,8 @@ import javafx.application.Application;
 // TODO Separators for Dialog Screen
 // TODO Subtitle selection list must be left with backspace, or exit at top/bottom item
 // TODO Style ListViewOption's "header" option
+// TODO After downloading a subtitle, going back to Video Options resets subtitle to disabled
+// TODO Subtitle list in Video Options should be updated more frequently, especially after downloading a sub (may require Player to notify of changes)
 
 // Minimal working system:
 // TODO Make clock in standard border
@@ -54,10 +55,10 @@ import javafx.application.Application;
 // Backspace         = back to previous page/menu --> Back
 // Enter             = select                     --> OK (nav.center)
 // Home              = menu                       --> Home (windows)
-// 't'               = video: sub title menu      --> Teletext 
+// 't'               = video: sub title menu      --> Teletext
 
 public class MediaSystem {
-  
+
   public static void main(String[] args) {
     Application.launch(FrontEnd.class, args);
   }

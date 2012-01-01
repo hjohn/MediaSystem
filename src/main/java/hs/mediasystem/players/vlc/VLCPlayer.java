@@ -14,6 +14,7 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,52 +35,52 @@ import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 public class VLCPlayer implements Player {
   private final EmbeddedMediaPlayer mediaPlayer;
   private final Frame frame;
-  
+
   public VLCPlayer(GraphicsDevice device, String... args) {
     MediaPlayerFactory factory = new MediaPlayerFactory(args);
 
     mediaPlayer = factory.newEmbeddedMediaPlayer();
-    
+
     Canvas canvas = new Canvas();
-    
-    frame = new Frame(device.getDefaultConfiguration());    
-    
+
+    frame = new Frame(device.getDefaultConfiguration());
+
     frame.setLayout(new BorderLayout());
     frame.setUndecorated(true);
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 //    device.setFullScreenWindow(frame);
-    
+
     frame.add(canvas, BorderLayout.CENTER);
     frame.setBackground(new Color(0, 0, 0));
     frame.setVisible(true);
-    
+
     mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
     mediaPlayer.addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
       private AtomicInteger ignoreFinish = new AtomicInteger();
-      
+
       @Override
       public void mediaSubItemAdded(MediaPlayer mediaPlayer, libvlc_media_t subItem) {
         ignoreFinish.incrementAndGet();
         int i = 1;
-        
+
         System.out.println("VLCPlayer: mediaSubItemAdded: " + subItem.toString());
-        
+
         for(TrackDescription desc : mediaPlayer.getTitleDescriptions()) {
           System.out.println(i++ + " : " + desc.description());
         }
       }
-      
+
       @Override
       public void finished(MediaPlayer mediaPlayer) {
         int index = mediaPlayer.subItemIndex();
         System.out.println(index);
-        
+
         List<String> subItems = mediaPlayer.subItems();
-        
+
         if(index < subItems.size()) {
           System.out.println("Finished: " + subItems.get(index));
         }
-        
+
         if(ignoreFinish.get() == 0) {
           // finishedNotifier.notifyListeners("FINISH");
         }
@@ -90,14 +91,14 @@ public class VLCPlayer implements Player {
         }
       }
     });
-    
+
     volume = new ComplexIntegerProperty(new BeanAccessor<Integer>(mediaPlayer, "volume"));
     audioDelay = new ComplexIntegerProperty(new Accessor<Integer>() {
       @Override
       public void write(Integer value) {
         mediaPlayer.setAudioDelay(value * 1000L);
       }
-      
+
       @Override
       public Integer read() {
         return (int)(mediaPlayer.getAudioDelay() / 1000);
@@ -106,26 +107,26 @@ public class VLCPlayer implements Player {
     rate = new BeanFloatProperty(mediaPlayer, "rate");
     brightness = new BeanFloatProperty(mediaPlayer, "brightness");
   }
-  
+
   public AudioTrack getAudioTrackInternal() {
     int index = mediaPlayer.getAudioTrack();
-    
+
     if(index == -1) {
       return AudioTrack.NO_AUDIO_TRACK;
     }
     return getAudioTracks().get(index);
   }
-  
+
   public void setAudioTrackInternal(AudioTrack audioTrack) {
     mediaPlayer.setAudioTrack(getAudioTracks().indexOf(audioTrack));
   }
-  
+
   public Subtitle getSubtitleInternal() {
     int index = mediaPlayer.getSpu();
-    
+
     return index == -1 ? Subtitle.DISABLED : getSubtitles().get(index);
   }
-  
+
   public void setSubtitleInternal(Subtitle subtitle) {
     mediaPlayer.setSpu(getSubtitles().indexOf(subtitle));
   }
@@ -138,16 +139,16 @@ public class VLCPlayer implements Player {
       for(TrackDescription spuDescription : mediaPlayer.getSpuDescriptions()) {
         subtitles.add(new Subtitle(spuDescription.id(), spuDescription.description()));
       }
-      
+
       if(!subtitles.isEmpty()) {
         subtitles.remove(0);
         subtitles.add(0, Subtitle.DISABLED);
       }
     }
-    
+
     return subtitles.isEmpty() ? NO_SUBTITLES : subtitles;
   }
-  
+
   private final List<AudioTrack> audioTracks = new ArrayList<>();
 
   @Override
@@ -157,25 +158,25 @@ public class VLCPlayer implements Player {
         audioTracks.add(new AudioTrack(description.id(), description.description()));
       }
     }
-    
+
     return audioTracks.isEmpty() ? NO_AUDIO_TRACKS : audioTracks;
   }
 
   private static final List<Subtitle> NO_SUBTITLES = new ArrayList<Subtitle>() {{
     add(Subtitle.DISABLED);
   }};
-  
+
   private static final List<AudioTrack> NO_AUDIO_TRACKS = new ArrayList<AudioTrack>();
-  
+
   @Override
   public void play(String uri) {
     subtitles.clear();
     mediaPlayer.setRepeat(true);
     mediaPlayer.setPlaySubItems(true);
     mediaPlayer.playMedia(uri);
-    
+
     System.out.println("[FINE] Playing: " + uri);
-    
+
     new Thread() {
       @Override
       public void run() {
@@ -230,10 +231,13 @@ public class VLCPlayer implements Player {
   }
 
   @Override
-  public void showSubtitle(String fileName) {
-    mediaPlayer.setSubTitleFile(fileName);
+  public void showSubtitle(Path path) {
+    System.out.println("[INFO] VLCPlayer.showSubtitle: path = " + path.toString());
+    mediaPlayer.setSubTitleFile(path.toString());
+    subtitles.clear();
+    getSubtitles();
   }
-  
+
   private final IntegerProperty volume;
   @Override public int getVolume() { return volume.get(); }
   @Override public void setVolume(int volume) { this.volume.set(volume); }
@@ -248,22 +252,22 @@ public class VLCPlayer implements Player {
   @Override public float getRate() { return rate.get(); }
   @Override public void setRate(float rate) { this.rate.set(rate); }
   @Override public FloatProperty rateProperty() { return rate; }
-  
+
   private final FloatProperty brightness;
   @Override public float getBrightness() { return brightness.get(); }
   @Override public void setBrightness(float brightness) { this.brightness.set(brightness); }
   @Override public FloatProperty brightnessProperty() { return brightness; }
-  
-  private final ObjectProperty<Subtitle> subtitle = new BeanObjectProperty<Subtitle>(this, "subtitleInternal"); 
+
+  private final ObjectProperty<Subtitle> subtitle = new BeanObjectProperty<Subtitle>(this, "subtitleInternal");
   @Override public Subtitle getSubtitle() { return subtitle.get(); }
   @Override public void setSubtitle(Subtitle subtitle) { this.subtitle.set(subtitle); }
   @Override public ObjectProperty<Subtitle> subtitleProperty() { return subtitle; }
-  
-  private final ObjectProperty<AudioTrack> audioTrack = new BeanObjectProperty<AudioTrack>(this, "audioTrackInternal"); 
+
+  private final ObjectProperty<AudioTrack> audioTrack = new BeanObjectProperty<AudioTrack>(this, "audioTrackInternal");
   @Override public AudioTrack getAudioTrack() { return audioTrack.get(); }
   @Override public void setAudioTrack(AudioTrack audioTrack) { this.audioTrack.set(audioTrack); }
   @Override public ObjectProperty<AudioTrack> audioTrackProperty() { return audioTrack; }
-  
+
   @Override
   public boolean isMute() {
     return mediaPlayer.isMute();

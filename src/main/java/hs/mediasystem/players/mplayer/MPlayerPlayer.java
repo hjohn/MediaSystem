@@ -27,38 +27,38 @@ import javafx.beans.property.ObjectProperty;
 public class MPlayerPlayer implements Player {
   private static final Pattern GET_PROPERTY_PATTERN = Pattern.compile("ANS_[a-zA-Z_]+=(.*)");
   private static final Pattern SUB_LOAD_RESPONSE = Pattern.compile("SUB: Added subtitle file \\(([0-9]+)\\):.*");
-  
+
   private final PrintStream commandStream;
   private final LineNumberReader resultStream;
   private final boolean useFrame;
-  
+
   private final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 
   private Frame frame;
   private boolean isPlaying;
-  
+
   public MPlayerPlayer(Path mplayerPath, boolean useFrame) {
     this.useFrame = useFrame;
-    
+
     try {
       List<String> commands = new ArrayList<String>();
-      
+
       commands.add(mplayerPath.toString());
-      
+
       if(useFrame) {
         frame = new Frame();
         frame.setUndecorated(true);
         frame.setBackground(Color.BLACK);
         frame.setExtendedState(Frame.MAXIMIZED_BOTH);
         frame.setVisible(true);
-        
+
         commands.add("-wid");
         commands.add("" + getWindowId(frame));
-      } 
+      }
       else {
         commands.add("-fixed-vo");
       }
-      
+
       commands.add("-cache");
       commands.add("8192");
       commands.add("-autosync");
@@ -78,30 +78,30 @@ public class MPlayerPlayer implements Player {
       commands.add("-nojoystick");
       commands.add("-msglevel");
       commands.add("statusline=6:global=6");
-      
+
   //        "-nokeepaspect",
   //        "-geometry", "0:0",
   //        "-colorkey", "0x101010",
        //   "-ontop"
-  
+
       final Process process = Runtime.getRuntime().exec(commands.toArray(new String[] {}));
-            
+
       commandStream = new PrintStream(process.getOutputStream());
       resultStream = new LineNumberReader(new InputStreamReader(process.getInputStream()));
-      
+
       Thread thread = new Thread() {
         @Override
         public void run() {
           try {
             for(;;) {
               String line = resultStream.readLine();
-              
+
               if(line == null) {
                 break;
               }
 
               System.out.println("MPLAYER: [INPUT] " + line);
-              
+
               if(line.matches("EOF code:.*")) {
                 isPlaying = false;
               }
@@ -113,11 +113,11 @@ public class MPlayerPlayer implements Player {
           catch(IOException e) {
             throw new RuntimeException(e);
           }
-          
+
           System.out.println("Thread '" + this.getName() + "' exiting.");
         }
       };
-      
+
       thread.setDaemon(true);
       thread.setName("MPlayer Input Handler");
       thread.start();
@@ -125,29 +125,29 @@ public class MPlayerPlayer implements Player {
     catch(IOException e) {
       throw new RuntimeException(e);
     }
-    
+
 //    sendCommand("loadfile \"d:/empty-gifanim2.gif\"");
 //    sendCommand("pause");
   }
-  
+
   private String getProperty(String propertyName) throws MPlayerIllegalStateException {
     String result = sendCommandAndGetResult("pausing_keep_force get_property " + propertyName);
-    
+
     if(!result.startsWith("ANS_ERROR=")) {
       Matcher matcher = GET_PROPERTY_PATTERN.matcher(result);
       if(matcher.matches()) {
         return matcher.group(1);
       }
     }
-    
+
     throw new MPlayerIllegalStateException();
   }
-  
+
   private void setProperty(String propertyName, Object value) {
     sendCommand("pausing_keep_force set_property " + propertyName + " " + value);
   }
-  
-  private String sendCommandAndGetResult(String command, Object... parameters) { 
+
+  private String sendCommandAndGetResult(String command, Object... parameters) {
     try {
       queue.clear();
       sendCommand(command, parameters);
@@ -155,7 +155,7 @@ public class MPlayerPlayer implements Player {
       if(result == null) {
         sendCommand(command, parameters);
         result = queue.poll(200, TimeUnit.MILLISECONDS);
-        
+
         if(result == null) {
           throw new RuntimeException();  // TODO this apparently happens when sending commands to mplayer in quick succession...
         }
@@ -167,14 +167,14 @@ public class MPlayerPlayer implements Player {
       throw new RuntimeException(e);
     }
   }
-  
+
   private void sendCommand(String command, Object... parameters) {
     String formattedCommand = String.format(command, parameters);
     System.out.println("MPLAYER: " + formattedCommand);
     commandStream.println(formattedCommand);
     commandStream.flush();
   }
-  
+
   @Override
   public void play(String uri) {
     sendCommand("loadfile \"" + uri.replaceAll("\\\\", "\\\\\\\\") + "\"");
@@ -223,18 +223,18 @@ public class MPlayerPlayer implements Player {
   @Override
   public void dispose() {
     sendCommand("quit");
-    
+
     if(useFrame) {
       frame.dispose();
     }
   }
 
   @Override
-  public void showSubtitle(String fileName) {
-    String result = sendCommandAndGetResult("sub_load " + fileName);
-    
+  public void showSubtitle(Path path) {
+    String result = sendCommandAndGetResult("sub_load " + path.toString());
+
     Matcher matcher = SUB_LOAD_RESPONSE.matcher(result);
-    
+
     if(matcher.matches()) {
       sendCommand("sub_select " + matcher.group(1));
     }
@@ -242,7 +242,7 @@ public class MPlayerPlayer implements Player {
 
   private int cachedVolume = -1;
   private int subtitleDelay = 0;
-  
+
   @Override
   public int getVolume() {
     if(cachedVolume == -1) {
@@ -253,7 +253,7 @@ public class MPlayerPlayer implements Player {
         cachedVolume = 0;
       }
     }
-    
+
     return cachedVolume;
   }
 
@@ -262,7 +262,7 @@ public class MPlayerPlayer implements Player {
     if(volume < 0 || volume > 100) {
       throw new IllegalArgumentException("parameter 'volume' must be in the range 0...100");
     }
-    
+
     setProperty("volume", volume);
     sendCommand("osd_show_text \"volume: %d%%\"", volume);
     cachedVolume = volume;
@@ -294,13 +294,13 @@ public class MPlayerPlayer implements Player {
     sendCommand("osd_show_text \"subtitle delay: %4.1f s\"", ((float)delay) / 1000);
     subtitleDelay = delay;
   }
-  
+
   @SuppressWarnings({"restriction", "deprecation"})
   private static long getWindowId(Window window) {
     if(window.getPeer() instanceof sun.awt.windows.WComponentPeer) {
       return ((sun.awt.windows.WComponentPeer)window.getPeer()).getHWnd();
     }
-    
+
     throw new RuntimeException("unable to get wid, window.getPeer().getClass(): " + window.getPeer().getClass());
   }
 
@@ -317,7 +317,7 @@ public class MPlayerPlayer implements Player {
   @Override
   public void setSubtitle(Subtitle subtitle) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -353,7 +353,7 @@ public class MPlayerPlayer implements Player {
   @Override
   public void setRate(float rate) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -371,7 +371,7 @@ public class MPlayerPlayer implements Player {
   @Override
   public void setAudioDelay(int rate) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -389,7 +389,7 @@ public class MPlayerPlayer implements Player {
   @Override
   public void setAudioTrack(AudioTrack audioTrack) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override

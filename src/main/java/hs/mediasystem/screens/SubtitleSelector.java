@@ -17,14 +17,13 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
-import javafx.concurrent.Task;
 
 public class SubtitleSelector {
   private final ObjectProperty<SubtitleProvider> subtitleProvider = new SimpleObjectProperty<>();
   public SubtitleProvider getSubtitleProvider() { return subtitleProvider.get(); }
   public void setSubtitleProvider(SubtitleProvider provider) { subtitleProvider.set(provider); }
   public ObjectProperty<SubtitleProvider> subtitleProviderProperty() { return subtitleProvider; }
-  
+
   private final List<SubtitleProvider> subtitleProviders = new ArrayList<SubtitleProvider>();
   public List<SubtitleProvider> getSubtitleProviders() { return Collections.unmodifiableList(subtitleProviders); }
 
@@ -34,66 +33,32 @@ public class SubtitleSelector {
   private final ReadOnlyBooleanWrapper loaded = new ReadOnlyBooleanWrapper(false);
   public boolean isLoaded() { return loaded.get(); }
   public ReadOnlyBooleanProperty loadedProperty() { return loaded.getReadOnlyProperty(); }
-  
+
   private final SubtitleQueryService subtitleQueryService = new SubtitleQueryService();
-  
+
   public SubtitleSelector(List<SubtitleProvider> providers) {
     subtitleProviders.addAll(providers);
     subtitleProvider.set(providers.get(0));
-    
+
     subtitleQueryService.stateProperty().addListener(new ChangeListener<Service.State>() {
       @Override
       public void changed(ObservableValue<? extends Service.State> observableValue, Service.State oldValue, Service.State newValue) {
         if(newValue == Service.State.SUCCEEDED) {
           subtitles.clear();
           subtitles.addAll(subtitleQueryService.getValue());
-          
+
           loaded.set(true);
         }
       }
     });
   }
-  
+
   public void query(MediaItem mediaItem) {
     loaded.set(false);
     subtitles.clear();
-    
+
     subtitleQueryService.setMediaItem(mediaItem);
+    subtitleQueryService.setSubtitleProvider(subtitleProvider.get());
     subtitleQueryService.restart();
   }
-  
-  private class SubtitleQueryService extends Service<List<SubtitleDescriptor>> {
-    private MediaItem mediaItem;
-    
-    public void setMediaItem(MediaItem mediaItem) {
-      this.mediaItem = mediaItem;
-    }
-    
-    @Override
-    protected Task<List<SubtitleDescriptor>> createTask() {
-      final MediaItem mediaItem = this.mediaItem;
-      final SubtitleProvider subtitleProvider = getSubtitleProvider();
-      
-      return new Task<List<SubtitleDescriptor>>() {
-        @Override
-        protected List<SubtitleDescriptor> call() throws Exception {
-          return subtitleProvider.query(mediaItem);
-        }
-      };
-    }
-  }
-  
-  
-//  System.out.println("Fetching subtitle...");
-//  ByteBuffer fetch = item.fetch();
-//  
-//  System.out.println("Writing to disk...");
-//  FileOutputStream os = new FileOutputStream("tempsubtitle.srt");
-//  
-//  os.getChannel().write(fetch);
-//  os.close();
-//
-//  System.out.println("Setting subtitle...");
-//
-//  getMediaPlayer().showSubtitle("tempsubtitle.srt");
 }
