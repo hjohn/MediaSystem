@@ -16,12 +16,12 @@ public class MoviesMediaTree extends AbstractMediaTree {
   private final Path root;
 
   private List<? extends MediaItem> children;
-  
+
   public MoviesMediaTree(Path root) {
     super(new CachedItemEnricher(new TmdbMovieEnricher()));
     this.root = root;
   }
-  
+
   @Override
   public void refresh() {
     children = null;
@@ -37,29 +37,29 @@ public class MoviesMediaTree extends AbstractMediaTree {
     if(children == null) {
       List<Episode> episodes = new EpisodeScanner(this, new MovieDecoder()).scan(root);
       List<MediaItem> items = new ArrayList<MediaItem>();
-      
+
       Collection<List<MediaItem>> groupedItems = Groups.group(episodes, new TitleGrouper());
-      
+
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
           EpisodeGroup g = new EpisodeGroup(this, group.get(0).getTitle());
-          
+
           for(MediaItem item : group) {
             g.add(item);
           }
-          
+
           items.add(g);
         }
         else {
           items.add(group.get(0));
         }
       }
-      
+
       Collections.sort(items, MediaItemComparator.INSTANCE);
-      
+
       children = items;
     }
-    
+
     return children;
   }
 
@@ -67,7 +67,7 @@ public class MoviesMediaTree extends AbstractMediaTree {
   public MediaTree parent() {
     return null;
   }
-  
+
   @Override
   public CellProvider<MediaItem> createListCell() {
     return new DuoLineRenderer2();

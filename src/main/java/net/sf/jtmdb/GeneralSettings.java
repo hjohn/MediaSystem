@@ -15,7 +15,7 @@ import java.util.Locale;
 /**
  * This class contains general settings for the library (the API key for
  * instance)
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class GeneralSettings {
@@ -36,7 +36,7 @@ public class GeneralSettings {
 	 * The url of the API method for getting Movie info.
 	 */
 	protected static final String MOVIE_GETINFO_URL = "Movie.getInfo/";
-	
+
 	 protected static final String MOVIE_IMDB_LOOKUP_URL = "Movie.imdbLookup/";
 
 	/**
@@ -131,7 +131,7 @@ public class GeneralSettings {
 	/**
 	 * Returns the stored API key for the library. Used by search methods
 	 * internally.
-	 * 
+	 *
 	 * @return The stored API key for the library.
 	 */
 	public static String getApiKey() {
@@ -140,7 +140,7 @@ public class GeneralSettings {
 
 	/**
 	 * Sets the API key for the library. Used by search methods internally.
-	 * 
+	 *
 	 * @param apiKey
 	 *            The API key for the library.
 	 */
@@ -150,7 +150,7 @@ public class GeneralSettings {
 
 	/**
 	 * Sets the output stream to use for the log.
-	 * 
+	 *
 	 * @param logStream
 	 *            The output stream to use for the log.
 	 */
@@ -165,7 +165,7 @@ public class GeneralSettings {
 	 * <strong>WARNING</strong>: This method opens a PrintStream to a file. It's
 	 * up to the user to close the stream when he no longer needs it (by calling
 	 * {@link #getLogStream()} and calling close() on it).
-	 * 
+	 *
 	 * @param fileLog
 	 *            The file to use as a log.
 	 * @throws FileNotFoundException
@@ -177,7 +177,7 @@ public class GeneralSettings {
 
 	/**
 	 * Returns the output stream used for the log. Default is System.out.
-	 * 
+	 *
 	 * @return The output stream used for the log. Default is System.out.
 	 */
 	public static PrintStream getLogStream() {
@@ -186,7 +186,7 @@ public class GeneralSettings {
 
 	/**
 	 * Sets whether to print to the log.
-	 * 
+	 *
 	 * @param logEnabled
 	 *            If true, text will be output to the log.
 	 */
@@ -196,7 +196,7 @@ public class GeneralSettings {
 
 	/**
 	 * If true, text will be output to the log. Default is false;
-	 * 
+	 *
 	 * @return If true, text will be output to the log. Default is false;
 	 */
 	public static boolean isLogEnabled() {
@@ -205,7 +205,7 @@ public class GeneralSettings {
 
 	/**
 	 * Sets the verbosity level of the log.
-	 * 
+	 *
 	 * @param logVerbosity
 	 *            The verbosity level of the log.
 	 */
@@ -215,7 +215,7 @@ public class GeneralSettings {
 
 	/**
 	 * The verbosity level of the log. Default is VERBOSE.
-	 * 
+	 *
 	 * @return The verbosity level of the log. Default is VERBOSE.
 	 */
 	public static Log.Verbosity getLogVerbosity() {
@@ -224,7 +224,7 @@ public class GeneralSettings {
 
 	/**
 	 * Sets the locale of the API.
-	 * 
+	 *
 	 * @param APILocale
 	 *            The locale of the API.
 	 */
@@ -234,7 +234,7 @@ public class GeneralSettings {
 
 	/**
 	 * The locale of the API. Default is en-US.
-	 * 
+	 *
 	 * @return The locale of the API. Default is en-US.
 	 */
 	public static Locale getAPILocale() {
@@ -243,7 +243,7 @@ public class GeneralSettings {
 
 	/**
 	 * The locale string of the API. Default is "en-US".
-	 * 
+	 *
 	 * @return The locale string of the API. Default is "en-US".
 	 */
 	public static String getAPILocaleFormatted() {
@@ -262,7 +262,7 @@ public class GeneralSettings {
 	/**
 	 * This method will store the state of the GeneralSettings to the provided
 	 * state object.
-	 * 
+	 *
 	 * @param state
 	 *            The state object to use in order to store the GeneralSettings
 	 *            state.
@@ -278,7 +278,7 @@ public class GeneralSettings {
 	/**
 	 * This method will restore the state of the GeneralSettings from the
 	 * provided state object.
-	 * 
+	 *
 	 * @param state
 	 *            The state object to use in order to restore the
 	 *            GeneralSettings state.
@@ -293,7 +293,7 @@ public class GeneralSettings {
 
 	/**
 	 * This class provides useful utilities.
-	 * 
+	 *
 	 * @author Savvas Dalkitsis
 	 */
 	public static class Utilities {
@@ -305,7 +305,7 @@ public class GeneralSettings {
 		/**
 		 * This method will open a connection to the provided url and return its
 		 * response.
-		 * 
+		 *
 		 * @param url
 		 *            The url to open a connection to.
 		 * @return The respone.
@@ -326,7 +326,7 @@ public class GeneralSettings {
 
 		/**
 		 * This method posts data to a URL and returns the response.
-		 * 
+		 *
 		 * @param url
 		 *            The url to post the data to.
 		 * @param post

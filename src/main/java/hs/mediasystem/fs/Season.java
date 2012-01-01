@@ -12,7 +12,7 @@ import java.util.List;
 public class Season extends NamedItem implements Group {
   private final List<MediaItem> children = new ArrayList<MediaItem>();
   private final int season;
-  
+
   public Season(MediaTree mediaTree, String title, int season) {
     super(mediaTree, title);
     this.season = season;
@@ -31,22 +31,22 @@ public class Season extends NamedItem implements Group {
   public Collection<? extends MediaItem> children() {
     return Collections.unmodifiableCollection(children);
   }
-  
+
   @Override
   public boolean isRoot() {
     return false;
   }
-  
+
   @Override
   public boolean isLeaf() {
     return false;
   }
-  
+
   @Override
   public int getSeason() {
     return season;
   }
-  
+
   @Override
   public MediaTree getRoot() {
     return null;

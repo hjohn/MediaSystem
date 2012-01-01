@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 public class BeanAccessor<T> implements Accessor<T> {
   private final Object instance;
   private final String propertyName;
-  
+
   private Method readMethod;
   private Method writeMethod;
 
@@ -14,7 +14,7 @@ public class BeanAccessor<T> implements Accessor<T> {
     this.instance = instance;
     this.propertyName = propertyName;
   }
-  
+
   private Method getReadMethod() {
     if(readMethod == null) {
       readMethod = BeanUtils.getReadMethod(instance.getClass(), propertyName);
@@ -26,7 +26,7 @@ public class BeanAccessor<T> implements Accessor<T> {
   private Class<?> getType() {
     return getReadMethod().getReturnType();
   }
-  
+
   @SuppressWarnings("unchecked")
   @Override
   public T read() {
@@ -46,7 +46,7 @@ public class BeanAccessor<T> implements Accessor<T> {
     if(writeMethod == null) {
       writeMethod = BeanUtils.getWriteMethod(instance.getClass(), propertyName, getType());
     }
-    
+
     try {
       writeMethod.invoke(instance, value);
     }

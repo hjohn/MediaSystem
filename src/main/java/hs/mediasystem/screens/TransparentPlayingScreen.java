@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -173,7 +174,7 @@ public class TransparentPlayingScreen extends StackPane {
   public TransparentPlayingScreen(final ProgramController controller, final MediaItem mediaItem, final double w, final double h) {
     this.controller = controller;
 
-    positionUpdater.setCycleCount(Timeline.INDEFINITE);
+    positionUpdater.setCycleCount(Animation.INDEFINITE);
     positionUpdater.play();
 
     volumeText.set("Volume " + controller.getVolume() + "%");

@@ -14,12 +14,12 @@ public class Nederland24Item implements MediaItem {
     this.title = title;
     this.uri = uri;
   }
-  
+
   @Override
   public boolean isRoot() {
     return false;
   }
-  
+
   @Override
   public boolean isLeaf() {
     return true;

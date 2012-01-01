@@ -9,7 +9,7 @@ import net.sf.jtmdb.Log.Verbosity;
 
 /**
  * This class represents a Movie Backdrop.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class MovieBackdrop implements Serializable {
@@ -18,7 +18,7 @@ public class MovieBackdrop implements Serializable {
 
 	/**
 	 * This enumeration provides different sizes for the backdrops.
-	 * 
+	 *
 	 * @author Savvas Dalkitsis
 	 */
 	public enum Size {
@@ -37,7 +37,7 @@ public class MovieBackdrop implements Serializable {
 
 	/**
 	 * Constructs a new MovieBackdrop.
-	 * 
+	 *
 	 * @param ID
 	 *            The ID of the backdrop.
 	 */
@@ -49,7 +49,7 @@ public class MovieBackdrop implements Serializable {
 
 	/**
 	 * Constructs a new MovieBackdrop.
-	 * 
+	 *
 	 * @param info
 	 *            The urls and dimensions of the different sizes of the
 	 *            backdrop.
@@ -66,7 +66,7 @@ public class MovieBackdrop implements Serializable {
 	/**
 	 * Returns the Url of the backdrop for the specified size if it exists,
 	 * otherwise null.
-	 * 
+	 *
 	 * @param size
 	 *            The size of the backdrop.
 	 * @return The Url of the backdrop for the specified size if it exists,
@@ -79,7 +79,7 @@ public class MovieBackdrop implements Serializable {
 	/**
 	 * Returns the dimensions of the backdrop for the specified size if it
 	 * exists, otherwise null.
-	 * 
+	 *
 	 * @param size
 	 *            The size of the backdrop.
 	 * @return The dimensions of the backdrop for the specified size if it
@@ -91,7 +91,7 @@ public class MovieBackdrop implements Serializable {
 
 	/**
 	 * Sets the image Url and dimension for the provided size.
-	 * 
+	 *
 	 * @param size
 	 *            The size of the backdrop.
 	 * @param info
@@ -103,7 +103,7 @@ public class MovieBackdrop implements Serializable {
 
 	/**
 	 * The backdrop ID.
-	 * 
+	 *
 	 * @return The backdrop ID.
 	 */
 	public String getID() {
@@ -112,7 +112,7 @@ public class MovieBackdrop implements Serializable {
 
 	/**
 	 * Returns the Url of the smallest available size.
-	 * 
+	 *
 	 * @return The Url of the smallest available size.
 	 */
 	public URL getSmallestImage() {
@@ -128,7 +128,7 @@ public class MovieBackdrop implements Serializable {
 
 	/**
 	 * Returns the Url of the largest available size.
-	 * 
+	 *
 	 * @return The Url of the largest available size.
 	 */
 	public URL getLargestImage() {
@@ -144,7 +144,7 @@ public class MovieBackdrop implements Serializable {
 
 	/**
 	 * Returns the dimensions of the smallest available size.
-	 * 
+	 *
 	 * @return The dimensions of the smallest available size.
 	 */
 	public Dimension getSmallestImageDimension() {
@@ -160,7 +160,7 @@ public class MovieBackdrop implements Serializable {
 
 	/**
 	 * Returns the dimensions of the largest available size.
-	 * 
+	 *
 	 * @return The dimensions of the largest available size.
 	 */
 	public Dimension getLargestImageDimension() {

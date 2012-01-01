@@ -46,7 +46,7 @@ import javafx.util.Duration;
 
 public class SelectItemScene {
   private final ProgramController controller;
-  
+
   private final ObjectProperty<String> title = new SimpleObjectProperty<>();
   private final ObjectProperty<String> subtitle = new SimpleObjectProperty<>();
   private final ObjectProperty<String> releaseYear = new SimpleObjectProperty<>();
@@ -56,32 +56,32 @@ public class SelectItemScene {
   private final ObjectProperty<Image> background = new SimpleObjectProperty<>();
   private final ObjectProperty<Image> newBackground = new SimpleObjectProperty<>();
   private final ObjectProperty<Image> wantedBackground = new SimpleObjectProperty<>();
-  
+
   private final ObjectProperty<Callback<TreeView<MediaItem>, TreeCell<MediaItem>>> cellFactory = new SimpleObjectProperty<>();
-  
+
   private final ImageView backgroundImageView = new ImageView() {{
     imageProperty().bind(background);
     setPreserveRatio(true);
     setSmooth(true);
   }};
-  
+
   private final ImageView newBackgroundImageView = new ImageView() {{
     imageProperty().bind(newBackground);
     setPreserveRatio(true);
     setSmooth(true);
   }};
-  
+
   private final Timeline timeline = new Timeline(
-    new KeyFrame(Duration.ZERO, 
+    new KeyFrame(Duration.ZERO,
       new KeyValue(newBackgroundImageView.opacityProperty(), 0.0),
       new KeyValue(backgroundImageView.opacityProperty(), 1.0)
     ),
-    new KeyFrame(new Duration(4000), 
+    new KeyFrame(new Duration(4000),
       new KeyValue(newBackgroundImageView.opacityProperty(), 1.0),
       new KeyValue(backgroundImageView.opacityProperty(), 0.0)
     )
   );
-    
+
   public SelectItemScene(ProgramController controller) {
     this.controller = controller;
     timeline.setOnFinished(new EventHandler<ActionEvent>() {
@@ -90,7 +90,7 @@ public class SelectItemScene {
         background.set(newBackground.get());
         backgroundImageView.setOpacity(1.0);
         newBackgroundImageView.setOpacity(0.0);
-        
+
         if(!wantedBackground.get().equals(background.get())) {
           newBackground.set(wantedBackground.get());
           timeline.play();
@@ -98,16 +98,16 @@ public class SelectItemScene {
       }
     });
   }
-  
+
   private TreeItem<MediaItem> treeRoot = new TreeItem<MediaItem>();
-    
+
   private void setMediaTree(final MediaTree mediaTree) {
     treeRoot.getChildren().clear();
-    
+
     for(MediaItem item : mediaTree.children()) {
       treeRoot.getChildren().add(new MediaTreeItem(item));
     }
-    
+
     cellFactory.set(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
       @Override
       public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
@@ -115,27 +115,27 @@ public class SelectItemScene {
       }
     });
   }
-  
+
   public Node create(final MediaTree mediaTree) {
     setMediaTree(mediaTree);
-    
+
     final GridPane root = new GridPane();
-            
+
     root.getStyleClass().addAll("select-item-pane", "content-box-grid");
-    
+
     final TreeView<MediaItem> treeView = new TreeView<MediaItem>(treeRoot) {{
       setId("selectItem-listView");
 
       setEditable(false);
       setShowRoot(false);
       cellFactoryProperty().bind(cellFactory);
-      
+
       getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<MediaItem>>() {
         @Override
         public void changed(ObservableValue<? extends TreeItem<MediaItem>> observable, TreeItem<MediaItem> oldValue, final TreeItem<MediaItem> newValue) {
           System.err.println("changed called on Thread: " + Thread.currentThread().getName());
 //          update(newValue.getValue());
-          
+
           Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -144,7 +144,7 @@ public class SelectItemScene {
           });
         }
       });
-      
+
       addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent event) {
@@ -154,7 +154,7 @@ public class SelectItemScene {
           }
         }
       });
-      
+
       addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
         @Override
         public void handle(KeyEvent event) {
@@ -174,7 +174,7 @@ public class SelectItemScene {
         setPercentWidth(50);
       }}
     );
-    
+
     root.getRowConstraints().addAll(
       new RowConstraints() {{
         setPercentHeight(25);
@@ -183,10 +183,10 @@ public class SelectItemScene {
         setPercentHeight(75);
       }}
     );
-  
+
     root.add(new GridPane() {{
       setHgap(10);
-      
+
       getColumnConstraints().addAll(
         new ColumnConstraints() {{
           setPercentWidth(50);
@@ -195,14 +195,14 @@ public class SelectItemScene {
           setPercentWidth(50);
         }}
       );
-      
+
       getRowConstraints().addAll(
         new RowConstraints() {{
           // setVgrow(Priority.NEVER);
           setPercentHeight(100);
         }}
       );
-      
+
       getStyleClass().add("content-box");
       add(new BorderPane() {{
         setTop(new ImageView() {{
@@ -211,7 +211,7 @@ public class SelectItemScene {
           setSmooth(true);
           setEffect(new DropShadow());
           //setEffect(new Reflection());
-          
+
           // HACK: Following three lines is a dirty hack to get the ImageView to respect the size of its parent
           setManaged(false);
           fitWidthProperty().bind(widthProperty().subtract(hgapProperty()));  // TODO seems to bug when redisplaying this scene after being hidden?
@@ -242,14 +242,14 @@ public class SelectItemScene {
         }});
       }}, 1, 0);
     }}, 0, 1);
-    
+
     root.add(new HBox() {{
       getStyleClass().add("content-box");
       getChildren().add(treeView);
-      
+
       HBox.setHgrow(treeView, Priority.ALWAYS);
     }}, 1, 1);
-        
+
     return new StackPane() {{
       getChildren().add(new BorderPane() {{
         setCenter(new Group() {{
@@ -261,10 +261,10 @@ public class SelectItemScene {
       getChildren().add(root);
     }};
   }
-  
+
   private final class MediaTreeItem extends TreeItem<MediaItem> {
     private boolean childrenPopulated;
-    
+
     private MediaTreeItem(MediaItem value) {
       super(value);
     }
@@ -278,16 +278,16 @@ public class SelectItemScene {
     public ObservableList<TreeItem<MediaItem>> getChildren() {
       if(!childrenPopulated) {
         childrenPopulated = true;
-  
+
         if(getValue() instanceof hs.mediasystem.framework.Group) {
           hs.mediasystem.framework.Group group = (hs.mediasystem.framework.Group)getValue();
-          
+
           for(MediaItem child : group.children()) {
             super.getChildren().add(new MediaTreeItem(child));
           }
         }
       }
-      
+
       return super.getChildren();
     }
   }
@@ -295,31 +295,31 @@ public class SelectItemScene {
 
   private final class MediaItemTreeCell extends TreeCell<MediaItem> {
     private final CellProvider<MediaItem> provider;
-    
+
     private Task<Void> loadTask;
-    
+
     private MediaItemTreeCell(CellProvider<MediaItem> provider) {
       this.provider = provider;
-      
+
       setDisclosureNode(new Group());
     }
 
     private Node createNodeGraphic(MediaItem item) {
       return provider.configureCell(item);
     }
-    
+
     @Override
     protected void updateItem(final MediaItem item, boolean empty) {
       super.updateItem(item, empty);
 
       if(item != null) {
         setGraphic(createNodeGraphic(item));
-        
+
         if(item.stateProperty().get() != State.ENRICHED) {
           if(loadTask != null) {
             loadTask.cancel();
           }
-          
+
           loadTask = new Task<Void>() {  // TODO service?
             @Override
             public Void call() {
@@ -343,7 +343,7 @@ public class SelectItemScene {
               }
             }
           });
-          
+
           new Thread(loadTask).start();
         }
       }
@@ -353,15 +353,15 @@ public class SelectItemScene {
 
   private class MediaItemUpdateService extends Service<Void> {
     private MediaItem mediaItem;
-    
-    public void setMediaItem(MediaItem value) { 
-      mediaItem = value; 
+
+    public void setMediaItem(MediaItem value) {
+      mediaItem = value;
     }
-    
+
     @Override
     protected Task<Void> createTask() {
       final MediaItem item = mediaItem;
-      
+
       return new Task<Void>() {
         @Override
         protected Void call() throws Exception {
@@ -370,33 +370,33 @@ public class SelectItemScene {
           releaseYear.set(item.getReleaseYear());
           plot.set(item.getPlot());
           trySetImage(item.getPoster(), poster);
-          
+
           if(trySetImage(item.getBackground(), wantedBackground, backgroundImageView.getFitWidth(), backgroundImageView.getFitHeight())) {
             if(timeline.getStatus() == Animation.Status.STOPPED) {
               newBackground.set(wantedBackground.get());
               timeline.play();
             }
           }
-          
+
           return null;
         }
       };
     }
   }
-  
+
   private MediaItemUpdateService mediaItemUpdateService = new MediaItemUpdateService();
-  
+
   protected void update(final MediaItem item) {
     mediaItemUpdateService.setMediaItem(item);
     mediaItemUpdateService.restart();
   }
-  
+
   public static boolean trySetImage(ImageHandle handle, ObjectProperty<Image> image) {
     if(handle != null) {
       image.set(ImageCache.loadImage(handle));
       return true;
     }
-    
+
     return false;
   }
 
@@ -405,16 +405,16 @@ public class SelectItemScene {
       image.set(ImageCache.loadImage(handle, w, h, true));
       return true;
     }
-    
+
     return false;
   }
-  
+
   @SuppressWarnings("unused")
   private static void debugScene(Node node) {
     if(node == null) {
       return;
     }
-    
+
     if(node instanceof Control) {
       Control c = (Control)node;
       System.out.println(">>> " + c.getClass() + " size = " + c.getWidth() + " x " + c.getHeight() + " upto " + c.getMaxWidth() + " x " + c.getMaxHeight() + " pref " + c.getPrefWidth() + " x " + c.getPrefHeight() + " min " + c.getMinWidth() + " x " + c.getMinHeight());
@@ -426,14 +426,14 @@ public class SelectItemScene {
     else {
       System.out.println(">>> " + node.getClass());
     }
-    
+
     debugScene(node.getParent());
   }
-  
+
 
   private void itemSelected(TreeItem<MediaItem> treeItem) {
     MediaItem mediaItem = treeItem.getValue();
-    
+
     if(mediaItem.isLeaf()) {
       controller.play(mediaItem);
     }

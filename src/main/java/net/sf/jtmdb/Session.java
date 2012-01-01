@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * This class represents a session with Tmdb used in POST methods.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class Session implements Serializable {
@@ -22,7 +22,7 @@ public class Session implements Serializable {
 
 	/**
 	 * Gets the user name.
-	 * 
+	 *
 	 * @return The user name.
 	 */
 	public String getUserName() {
@@ -31,7 +31,7 @@ public class Session implements Serializable {
 
 	/**
 	 * Gets the session key.
-	 * 
+	 *
 	 * @return The session key.
 	 */
 	public String getSession() {
@@ -40,7 +40,7 @@ public class Session implements Serializable {
 
 	/**
 	 * Creates a session with the provided user name and key.
-	 * 
+	 *
 	 * @param userName
 	 *            The user name.
 	 * @param session

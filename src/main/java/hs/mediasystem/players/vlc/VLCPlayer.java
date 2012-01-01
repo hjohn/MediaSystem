@@ -22,9 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
-
-import javax.swing.JFrame;
-
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
@@ -47,7 +44,7 @@ public class VLCPlayer implements Player {
 
     frame.setLayout(new BorderLayout());
     frame.setUndecorated(true);
-    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+    frame.setExtendedState(Frame.MAXIMIZED_BOTH);
 //    device.setFullScreenWindow(frame);
 
     frame.add(canvas, BorderLayout.CENTER);

@@ -9,7 +9,7 @@ import net.sf.jtmdb.Log.Verbosity;
 
 /**
  * This class represents a Person profile picture.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class PersonProfile implements Serializable {
@@ -18,7 +18,7 @@ public class PersonProfile implements Serializable {
 
 	/**
 	 * This enumeration provides different sizes for the profile image.
-	 * 
+	 *
 	 * @author Savvas Dalkitsis
 	 */
 	public enum Size {
@@ -37,7 +37,7 @@ public class PersonProfile implements Serializable {
 
 	/**
 	 * Constructs a new PersonProfile.
-	 * 
+	 *
 	 * @param ID
 	 *            The ID of the profile image.
 	 */
@@ -49,7 +49,7 @@ public class PersonProfile implements Serializable {
 
 	/**
 	 * Constructs a new PersonProfile.
-	 * 
+	 *
 	 * @param info
 	 *            The urls and dimensions of the different sizes of the profile
 	 *            image.
@@ -66,7 +66,7 @@ public class PersonProfile implements Serializable {
 	/**
 	 * Returns the Url of the profile image for the specified size if it exists,
 	 * otherwise null.
-	 * 
+	 *
 	 * @param size
 	 *            The size of the profile image.
 	 * @return The Url of the profile image for the specified size if it exists,
@@ -79,7 +79,7 @@ public class PersonProfile implements Serializable {
 	/**
 	 * Returns the dimensions of the profile image for the specified size if it
 	 * exists, otherwise null.
-	 * 
+	 *
 	 * @param size
 	 *            The size of the profile image.
 	 * @return The dimensions of the profile image for the specified size if it
@@ -91,7 +91,7 @@ public class PersonProfile implements Serializable {
 
 	/**
 	 * Sets the image Url and dimension for the provided size.
-	 * 
+	 *
 	 * @param size
 	 *            The size of the profile image.
 	 * @param info
@@ -104,7 +104,7 @@ public class PersonProfile implements Serializable {
 
 	/**
 	 * The profile image ID.
-	 * 
+	 *
 	 * @return The profile image ID.
 	 */
 	public String getID() {
@@ -113,7 +113,7 @@ public class PersonProfile implements Serializable {
 
 	/**
 	 * Returns the Url of the smallest available size.
-	 * 
+	 *
 	 * @return The Url of the smallest available size.
 	 */
 	public URL getSmallestImage() {
@@ -129,7 +129,7 @@ public class PersonProfile implements Serializable {
 
 	/**
 	 * Returns the Url of the largest available size.
-	 * 
+	 *
 	 * @return The Url of the largest available size.
 	 */
 	public URL getLargestImage() {
@@ -145,7 +145,7 @@ public class PersonProfile implements Serializable {
 
 	/**
 	 * Returns the dimensions of the smallest available size.
-	 * 
+	 *
 	 * @return The dimensions of the smallest available size.
 	 */
 	public Dimension getSmallestImageDimension() {
@@ -161,7 +161,7 @@ public class PersonProfile implements Serializable {
 
 	/**
 	 * Returns the dimensions of the largest available size.
-	 * 
+	 *
 	 * @return The dimensions of the largest available size.
 	 */
 	public Dimension getLargestImageDimension() {

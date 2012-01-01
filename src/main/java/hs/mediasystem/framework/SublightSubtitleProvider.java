@@ -11,20 +11,20 @@ public class SublightSubtitleProvider implements SubtitleProvider {
   public SublightSubtitleProvider(String clientIdentity, String apiKey) {
     client = new SublightSubtitleClient(clientIdentity, apiKey);
   }
-  
+
   @Override
   public List<SubtitleDescriptor> query(MediaItem mediaItem) {
     Integer year = null;
-    
+
     try {
       year = Integer.parseInt(mediaItem.getReleaseYear());
     }
     catch(NumberFormatException e) {
     }
 
-    Short season = (short)mediaItem.getSeason(); 
+    Short season = (short)mediaItem.getSeason();
     Integer episode = mediaItem.getEpisode();
-    
+
     if(season == 0) {
       season = null;
       episode = null;

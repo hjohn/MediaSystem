@@ -13,15 +13,15 @@ import javafx.util.Callback;
 
 public class ListViewOption<T> extends Option {
   private final ListView<T> listView = new ListView<>();
-  
+
   public ListViewOption(String description, final ObjectProperty<T> property, ObservableList<T> items, final StringConverter<T> stringConverter) {
     super(description);
-    
+
     setLeft(null);
     setRight(null);
     setTop(new Label(description));
     setCenter(listView);
-    
+
     listView.setItems(items);
     listView.setCellFactory(new Callback<ListView<T>, ListCell<T>>() {
       @Override
@@ -30,7 +30,7 @@ public class ListViewOption<T> extends Option {
           @Override
           protected void updateItem(T item, boolean empty) {
             super.updateItem(item, empty);
-            
+
             if(item != null) {
               setText(stringConverter.toString(item));
             }
@@ -38,7 +38,7 @@ public class ListViewOption<T> extends Option {
         };
       }
     });
-    
+
     listView.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
@@ -50,7 +50,7 @@ public class ListViewOption<T> extends Option {
       }
     });
   }
-  
+
   @Override
   public void requestFocus() {
     listView.requestFocus();

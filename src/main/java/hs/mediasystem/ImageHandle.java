@@ -8,11 +8,11 @@ public class ImageHandle {
     this.imageData = imageData;
     this.key = key;
   }
- 
+
   public byte[] getImageData() {
     return imageData;
   }
-  
+
   public String getKey() {
     return key;
   }

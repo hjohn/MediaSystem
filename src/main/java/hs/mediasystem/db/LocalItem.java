@@ -6,7 +6,7 @@ public class LocalItem extends Item {
   private String localTitle;
   private String localSubtitle;
   private String localReleaseYear;
-  
+
   public LocalItem(Path path) {
     super(path);
   }

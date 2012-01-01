@@ -4,7 +4,7 @@ import java.util.Date;
 
 /**
  * This class represents version information for a Person.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class PersonVersionInfo extends VersionInfo {

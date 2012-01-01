@@ -18,9 +18,9 @@ public class DialogScreen extends BorderPane {
 //  private final List<Option> options;
   private final ObservableList<Node> options;
   private final List<List<Node>> optionStack  = new ArrayList<>();
-  
+
   private int selectedIndex = 0;
-  
+
   public DialogScreen(final String title, final List<Option> options) {
     final VBox optionList = new VBox() {{
       setId("dialog-list");
@@ -28,7 +28,7 @@ public class DialogScreen extends BorderPane {
       for(Option option : options) {
         getChildren().add(option);
       }
-      
+
       addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
         final KeyCombination tab = new KeyCodeCombination(KeyCode.TAB);
         final KeyCombination shiftTab = new KeyCodeCombination(KeyCode.TAB, KeyCombination.SHIFT_DOWN);
@@ -40,13 +40,13 @@ public class DialogScreen extends BorderPane {
         @Override
         public void handle(KeyEvent event) {
           Option selectedOption = options.get(selectedIndex);
-          
+
           if(enter.match(event)) {
             if(selectedOption instanceof SubOption) {
               SubOption option = (SubOption)selectedOption;
-              
+
               optionStack.add(new ArrayList<Node>(getChildren()));
-              
+
               getChildren().clear();
               getChildren().addAll(option.getOptions());
               getChildren().get(0).requestFocus();
@@ -82,28 +82,28 @@ public class DialogScreen extends BorderPane {
         }
       });
     }};
-    
+
     this.options = optionList.getChildren();
-    
+
     VBox box = new VBox() {{
       setId("dialog-main");
       setMaxSize(800, 600);
-      
+
       getChildren().add(new Label(title) {{
         getStyleClass().add("title");
         setMaxWidth(Integer.MAX_VALUE);
       }});
-      
+
       getChildren().add(optionList);
     }};
-    
+
     setId("dialog");
     setCenter(box);
   }
-  
+
   private void moveFocusNext() {
     int index = selectedIndex + 1;
-    
+
     if(index >= options.size()) {
       index = 0;
     }
@@ -111,10 +111,10 @@ public class DialogScreen extends BorderPane {
     options.get(index).requestFocus();
     selectedIndex = index;
   }
-  
+
   private void moveFocusPrevious() {
     int index = selectedIndex - 1;
-    
+
     if(index < 0) {
       index = options.size() - 1;
     }

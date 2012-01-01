@@ -7,7 +7,7 @@ import net.sf.jtmdb.Log.Verbosity;
 
 /**
  * This class represents a Country.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class Country implements Serializable {
@@ -29,7 +29,7 @@ public class Country implements Serializable {
 
 	/**
 	 * Constructs a Country with the given URL, name and code.
-	 * 
+	 *
 	 * @param url
 	 *            The URL of the Country.
 	 * @param name
@@ -64,7 +64,7 @@ public class Country implements Serializable {
 
 	/**
 	 * The URL of the Country.
-	 * 
+	 *
 	 * @return The URL of the Country.
 	 */
 	public URL getUrl() {
@@ -73,7 +73,7 @@ public class Country implements Serializable {
 
 	/**
 	 * Sets the URL of the Country.
-	 * 
+	 *
 	 * @param url
 	 *            The URL of the Country.
 	 */
@@ -83,7 +83,7 @@ public class Country implements Serializable {
 
 	/**
 	 * The name of the Country.
-	 * 
+	 *
 	 * @return The name of the Country.
 	 */
 	public String getName() {
@@ -92,7 +92,7 @@ public class Country implements Serializable {
 
 	/**
 	 * Sets the name of the Country.
-	 * 
+	 *
 	 * @param name
 	 *            The name of the Country.
 	 */
@@ -102,7 +102,7 @@ public class Country implements Serializable {
 
 	/**
 	 * The code of the Country.
-	 * 
+	 *
 	 * @return The code of the Country.
 	 */
 	public String getCode() {
@@ -111,7 +111,7 @@ public class Country implements Serializable {
 
 	/**
 	 * Sets the code of the Country.
-	 * 
+	 *
 	 * @param code
 	 *            The code of the Country.
 	 */

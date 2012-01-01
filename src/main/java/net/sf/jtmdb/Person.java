@@ -27,7 +27,7 @@ import org.json.JSONObject;
  * "flavors". The normal one and a reduced one. The reduced is returned when
  * searching for people and is missing some fields that are present when getting
  * the info for a specific person.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class Person implements Serializable {
@@ -101,7 +101,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Construct a person object from a JSON object.
-	 * 
+	 *
 	 * @param jsonObject
 	 *            The JSON object describing the Person.
 	 */
@@ -111,10 +111,10 @@ public class Person implements Serializable {
 	}
 
 	/**
-	 * 
+	 *
 	 * Construct a person object from a JSON array containing the JSON object
 	 * describing the Person.
-	 * 
+	 *
 	 * @param jsonObjectInArray
 	 *            A JSON array containing the JSON object describing the Person.
 	 */
@@ -125,7 +125,7 @@ public class Person implements Serializable {
 
 	/**
 	 * The json string that created this Person object.
-	 * 
+	 *
 	 * @return The json string that created this Person object.
 	 */
 	public String getJsonOrigin() {
@@ -134,7 +134,7 @@ public class Person implements Serializable {
 
 	/**
 	 * The prettyprinted json string that created this Person object.
-	 * 
+	 *
 	 * @param indentFactor
 	 *            The number of spaces to add to each level of indentation.
 	 * @return The json string that created this Person object.
@@ -150,7 +150,7 @@ public class Person implements Serializable {
 
 	/**
 	 * The name of the person.
-	 * 
+	 *
 	 * @return The name of the person.
 	 */
 	public String getName() {
@@ -159,7 +159,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the name of the person.
-	 * 
+	 *
 	 * @param name
 	 *            The name of the person.
 	 */
@@ -170,7 +170,7 @@ public class Person implements Serializable {
 	/**
 	 * The birthplace of the person. Not present in reduced form (see class
 	 * description {@link Person} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The birthplace of the person.
 	 */
 	public String getBirthPlace() {
@@ -179,7 +179,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the birthplace of the person.
-	 * 
+	 *
 	 * @param birthPlace
 	 *            The birthplace of the person.
 	 */
@@ -189,7 +189,7 @@ public class Person implements Serializable {
 
 	/**
 	 * The profile image of the person.
-	 * 
+	 *
 	 * @return The profile image of the person.
 	 */
 	public PersonProfile getProfile() {
@@ -198,7 +198,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the profile image of the person.
-	 * 
+	 *
 	 * @param profile
 	 *            The profile image of the person.
 	 */
@@ -209,7 +209,7 @@ public class Person implements Serializable {
 	/**
 	 * The number of known movies of the person. Not present in reduced form
 	 * (see class description {@link Person} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The number of known movies of the person.
 	 */
 	public int getKnownMovies() {
@@ -218,7 +218,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the number of known movies of the person.
-	 * 
+	 *
 	 * @param knownMovies
 	 *            The number of known movies of the person.
 	 */
@@ -229,7 +229,7 @@ public class Person implements Serializable {
 	/**
 	 * The filmography of the person. Not present in reduced form (see class
 	 * description {@link Person} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The filmography of the person.
 	 */
 	public Set<FilmographyInfo> getFilmography() {
@@ -238,7 +238,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the filmography of the person.
-	 * 
+	 *
 	 * @param filmography
 	 *            The filmography of the person.
 	 */
@@ -248,7 +248,7 @@ public class Person implements Serializable {
 
 	/**
 	 * The url of the person.
-	 * 
+	 *
 	 * @return The url of the person.
 	 */
 	public URL getUrl() {
@@ -257,7 +257,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the url of the person.
-	 * 
+	 *
 	 * @param url
 	 *            The url of the person.
 	 */
@@ -267,7 +267,7 @@ public class Person implements Serializable {
 
 	/**
 	 * The ID of the person.
-	 * 
+	 *
 	 * @return The ID of the person.
 	 */
 	public int getID() {
@@ -276,7 +276,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the popularity of the person.
-	 * 
+	 *
 	 * @param popularity
 	 *            The popularity of the person.
 	 */
@@ -286,7 +286,7 @@ public class Person implements Serializable {
 
 	/**
 	 * The popularity of the person.
-	 * 
+	 *
 	 * @return The popularity of the person.
 	 */
 	public int getPopularity() {
@@ -295,7 +295,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the ID of the person.
-	 * 
+	 *
 	 * @param iD
 	 *            The ID of the person.
 	 */
@@ -306,7 +306,7 @@ public class Person implements Serializable {
 	/**
 	 * The birthday of the person. Not present in reduced form (see class
 	 * description {@link Person} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The birthday of the person.
 	 */
 	public Date getBirthday() {
@@ -315,7 +315,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the birthday of the person.
-	 * 
+	 *
 	 * @param birthday
 	 *            The birthday of the person.
 	 */
@@ -326,7 +326,7 @@ public class Person implements Serializable {
 	/**
 	 * The aliases of the person. Not present in reduced form (see class
 	 * description {@link Person} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The aliases of the person.
 	 */
 	public Set<String> getAka() {
@@ -335,7 +335,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the aliases of the person.
-	 * 
+	 *
 	 * @param aka
 	 *            The aliases of the person.
 	 */
@@ -346,7 +346,7 @@ public class Person implements Serializable {
 	/**
 	 * Sets whether the Person contains reduced information (see class
 	 * description {@link Person}).
-	 * 
+	 *
 	 * @param isReduced
 	 *            True if the Person has reduced fields set.
 	 */
@@ -357,7 +357,7 @@ public class Person implements Serializable {
 	/**
 	 * If true, the Person object has reduced fields set (see class description
 	 * {@link Person}).
-	 * 
+	 *
 	 * @return True if the Person has reduced fields set.
 	 */
 	public boolean isReduced() {
@@ -366,7 +366,7 @@ public class Person implements Serializable {
 
 	/**
 	 * The biography of the person.
-	 * 
+	 *
 	 * @return The biography of the person.
 	 */
 	public String getBiography() {
@@ -375,7 +375,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the biography of the person.
-	 * 
+	 *
 	 * @param biography
 	 *            The biography of the person.
 	 */
@@ -385,7 +385,7 @@ public class Person implements Serializable {
 
 	/**
 	 * The Date of the last modification.
-	 * 
+	 *
 	 * @return The Date of the last modification.
 	 */
 	public Date getLastModifiedAtDate() {
@@ -394,7 +394,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the date of the last modification.
-	 * 
+	 *
 	 * @param lastModifiedAt
 	 *            The date of the last modification.
 	 */
@@ -404,7 +404,7 @@ public class Person implements Serializable {
 
 	/**
 	 * The version of the Person.
-	 * 
+	 *
 	 * @return The version of the Person.
 	 */
 	public int getVersion() {
@@ -413,7 +413,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Sets the version of the Person.
-	 * 
+	 *
 	 * @param version
 	 *            The version of the Person.
 	 */
@@ -423,7 +423,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Parses a JSON object wrapped in a JSON array and sets the Person fields.
-	 * 
+	 *
 	 * @param jsonArray
 	 *            The JSON array containing the JSON object that describes the
 	 *            Person.
@@ -439,7 +439,7 @@ public class Person implements Serializable {
 
 	/**
 	 * Parses a JSON object and sets the Person fields.
-	 * 
+	 *
 	 * @param jsonObject
 	 *            The JSON object that describes the Person.
 	 */
@@ -577,7 +577,7 @@ public class Person implements Serializable {
 	 * class description {@link Person} and method {@link #isReduced()}). Will
 	 * return null if a valid API key was not supplied to the
 	 * {@link GeneralSettings}
-	 * 
+	 *
 	 * @param name
 	 *            The name of the person to search for.
 	 * @return A list of Person objects with the full form (see class
@@ -643,7 +643,7 @@ public class Person implements Serializable {
 	 * list of Person objects with the reduced form (see class description
 	 * {@link Person} and method {@link #isReduced()}). Will return null if a
 	 * valid API key was not supplied to the {@link GeneralSettings}
-	 * 
+	 *
 	 * @param name
 	 *            The name of the person to search for.
 	 * @return A list of Person objects with the reduced form (see class
@@ -709,7 +709,7 @@ public class Person implements Serializable {
 	 * {@link #isReduced()}). Will return null if a valid API key was not
 	 * supplied to the {@link GeneralSettings} or if the supplied ID did not
 	 * correspond to a Person.
-	 * 
+	 *
 	 * @param ID
 	 *            The ID of the Person.
 	 * @return A Person object with the normal form (see class description
@@ -756,7 +756,7 @@ public class Person implements Serializable {
 	 * Gets the version information for a Person by ID. Will return null if a
 	 * valid API key was not supplied to the {@link GeneralSettings} or if the
 	 * supplied ID did not correspond to a Person.
-	 * 
+	 *
 	 * @param ID
 	 *            The ID of the Person to get the version for.
 	 * @return Version information of a Person by ID.
@@ -813,7 +813,7 @@ public class Person implements Serializable {
 	 * Gets the version information for a list of Persons by ID. Will return
 	 * null if a valid API key was not supplied to the {@link GeneralSettings}
 	 * and will skip any IDs that did not correspond to a Person.
-	 * 
+	 *
 	 * @param IDs
 	 *            The list of Person IDs to get version information for.
 	 * @return Version information of a list of Persons by ID.
@@ -887,7 +887,7 @@ public class Person implements Serializable {
 	 * return null if a valid API key was not supplied to the
 	 * {@link GeneralSettings} or if the supplied ID did not correspond to a
 	 * Person.
-	 * 
+	 *
 	 * @return Version information for the last Person in the database.
 	 * @throws IOException
 	 * @throws JSONException

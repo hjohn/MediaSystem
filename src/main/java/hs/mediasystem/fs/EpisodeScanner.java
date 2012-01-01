@@ -16,37 +16,37 @@ import java.util.List;
 public class EpisodeScanner implements Scanner<Episode> {
   private final MediaTree mediaTree;
   private final Decoder decoder;
-  
+
   public EpisodeScanner(MediaTree mediaTree, Decoder decoder) {
     this.mediaTree = mediaTree;
     this.decoder = decoder;
   }
-  
+
   @Override
   public List<Episode> scan(Path scanPath) {
     try {
       List<Episode> episodes = new ArrayList<Episode>();
       DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath);
-  
+
       for(Path path : dirStream) {
         LocalItem item = decoder.decode(path);
-        
+
         if(item != null) {
           item.setTitle(item.getLocalTitle());
           item.setSubtitle(item.getLocalSubtitle());
-          
+
           if(item.getLocalReleaseYear() != null) {
             GregorianCalendar gc = new GregorianCalendar(Integer.parseInt(item.getLocalReleaseYear()), 0, 1);
             item.setReleaseDate(gc.getTime());
           }
-          
+
           episodes.add(new Episode(mediaTree, item));
         }
         else {
           System.err.println("MovieScanner: Could not decode as movie: " + path);
         }
       }
-      
+
       return episodes;
     }
     catch(IOException e) {

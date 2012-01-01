@@ -20,7 +20,7 @@ public class Ini implements Iterable<Section> {
 
   public Ini(File iniFile) {
     this.iniFile = iniFile;
-    
+
     if(iniFile.exists()) {
       try {
         sections = readIniFile(iniFile);
@@ -41,7 +41,7 @@ public class Ini implements Iterable<Section> {
     sections = new HashMap<String, Section>();
     iniFile = null;
   }
-  
+
   public boolean isEmpty() {
     return sections.isEmpty();
   }
@@ -74,7 +74,7 @@ public class Ini implements Iterable<Section> {
       try {
         PrintWriter writer = new PrintWriter(new FileWriter(iniFile));
         boolean first = true;
-  
+
         try {
           for(Section section : sections.values()) {
             if(!first) {
@@ -82,7 +82,7 @@ public class Ini implements Iterable<Section> {
             }
             writer.println("[" + section.getName() + "]");
             first = false;
-  
+
             for(String key : section) {
               for(String value : section.getAll(key)) {
                 writer.println(key + "=" + value);
@@ -96,7 +96,7 @@ public class Ini implements Iterable<Section> {
       }
       catch(IOException e) {
         throw new RuntimeException(e);
-      } 
+      }
     }
   }
 

@@ -12,7 +12,7 @@ import org.json.JSONObject;
  * This class represents an entry in the cast list of a Movie. It contains info
  * about a member of cast and its ID is the same ID with that of the Person in
  * the cast.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class CastInfo implements Serializable {
@@ -58,7 +58,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * Constructs a new CastInfo object.
-	 * 
+	 *
 	 * @param url
 	 *            The Url of the cast.
 	 * @param name
@@ -125,7 +125,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * The json string that created this CastInfo object.
-	 * 
+	 *
 	 * @return The json string that created this CastInfo object.
 	 */
 	public String getJsonOrigin() {
@@ -134,7 +134,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * The prettyprinted json string that created this CastInfo object.
-	 * 
+	 *
 	 * @param indentFactor
 	 *            The number of spaces to add to each level of indentation.
 	 * @return The json string that created this CastInfo object.
@@ -150,7 +150,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * The Url of the cast.
-	 * 
+	 *
 	 * @return The Url of the cast.
 	 */
 	public URL getUrl() {
@@ -159,7 +159,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * Sets the Url of the cast.
-	 * 
+	 *
 	 * @param url
 	 *            The Url of the cast.
 	 */
@@ -169,7 +169,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * The name of the cast.
-	 * 
+	 *
 	 * @return The name of the cast.
 	 */
 	public String getName() {
@@ -178,7 +178,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * Sets the name of the cast.
-	 * 
+	 *
 	 * @param name
 	 *            The name of the cast.
 	 */
@@ -188,7 +188,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * The name of the character of the cast.
-	 * 
+	 *
 	 * @return The name of the character of the cast.
 	 */
 	public String getCharacterName() {
@@ -197,7 +197,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * Sets the name of the character of the cast.
-	 * 
+	 *
 	 * @param characterName
 	 *            The name of the character of the cast.
 	 */
@@ -207,7 +207,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * The job description of the cast.
-	 * 
+	 *
 	 * @return The job description of the cast.
 	 */
 	public String getJob() {
@@ -216,7 +216,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * Sets the job description of the cast.
-	 * 
+	 *
 	 * @param job
 	 *            The job description of the cast.
 	 */
@@ -226,7 +226,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * The ID of the person.
-	 * 
+	 *
 	 * @return The ID of the person.
 	 */
 	public int getID() {
@@ -235,7 +235,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * Sets the ID of the person.
-	 * 
+	 *
 	 * @param iD
 	 *            The ID of the person.
 	 */
@@ -245,7 +245,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * The ID of the cast.
-	 * 
+	 *
 	 * @return The ID of the cast.
 	 */
 	public int getCastID() {
@@ -254,7 +254,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * Sets the ID of the cast.
-	 * 
+	 *
 	 * @param castID
 	 *            The ID of the cast.
 	 */
@@ -264,7 +264,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * The thumbnail Url of the cast.
-	 * 
+	 *
 	 * @return The thumbnail Url of the cast.
 	 */
 	public URL getThumb() {
@@ -273,7 +273,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * Sets the thumbnail Url of the cast.
-	 * 
+	 *
 	 * @param thumb
 	 *            The thumbnail Url of the cast.
 	 */
@@ -283,7 +283,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * Sets the department of the job of the cast.
-	 * 
+	 *
 	 * @param department
 	 *            The department of the job of the cast.
 	 */
@@ -293,7 +293,7 @@ public class CastInfo implements Serializable {
 
 	/**
 	 * The department of the job of the cast.
-	 * 
+	 *
 	 * @return The department of the job of the cast.
 	 */
 	public String getDepartment() {

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * This class represents a pair of objects.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class Pair<K, V> implements Serializable {
@@ -22,7 +22,7 @@ public class Pair<K, V> implements Serializable {
 
 	/**
 	 * Constructs a Pair with the provided parameters.
-	 * 
+	 *
 	 * @param first
 	 *            The first object of the pair.
 	 * @param second
@@ -41,7 +41,7 @@ public class Pair<K, V> implements Serializable {
 
 	/**
 	 * Gets the first object of the Pair.
-	 * 
+	 *
 	 * @return The first object of the Pair.
 	 */
 	public K getFirst() {
@@ -50,7 +50,7 @@ public class Pair<K, V> implements Serializable {
 
 	/**
 	 * Sets the first object of the Pair.
-	 * 
+	 *
 	 * @param first
 	 *            The first object of the Pair.
 	 */
@@ -60,7 +60,7 @@ public class Pair<K, V> implements Serializable {
 
 	/**
 	 * Gets the second object of the Pair.
-	 * 
+	 *
 	 * @return The second object of the Pair.
 	 */
 	public V getSecond() {
@@ -69,7 +69,7 @@ public class Pair<K, V> implements Serializable {
 
 	/**
 	 * Set the second object of the pair.
-	 * 
+	 *
 	 * @param second
 	 *            The second object of the pair.
 	 */

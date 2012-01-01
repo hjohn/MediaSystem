@@ -13,12 +13,12 @@ public class SeriesMediaTree extends AbstractMediaTree {
   private final Path root;
 
   private List<? extends MediaItem> children;
-  
+
   public SeriesMediaTree(Path root) {
     super(new CachedItemEnricher(new TvdbSerieEnricher()));
     this.root = root;
   }
-  
+
   @Override
   public void refresh() {
     children = null;
@@ -35,7 +35,7 @@ public class SeriesMediaTree extends AbstractMediaTree {
       children = new SerieScanner(this).scan(root);
       Collections.sort(children, MediaItemComparator.INSTANCE);
     }
-    
+
     return children;
   }
 

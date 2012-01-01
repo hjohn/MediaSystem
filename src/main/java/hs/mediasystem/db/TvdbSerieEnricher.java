@@ -12,22 +12,22 @@ public class TvdbSerieEnricher implements ItemEnricher {
   @Override
   public void enrichItem(final Item item) {
     final String name = item.getTitle();
-    
+
     TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
-    
+
     List<Series> results = tvDB.searchSeries(name, "en");
-    
+
     System.out.println("TVDB results:");
     System.out.println(results);
-    
+
     if(!results.isEmpty()) {
       final Series series = tvDB.getSeries(results.get(0).getId(), "en");
-      
+
       try {
         byte[] banner = Downloader.readURL(new URL(series.getBanner()));
         byte[] poster = Downloader.readURL(new URL(series.getPoster()));
         byte[] background = Downloader.readURL(new URL(series.getFanart()));
-  
+
         item.setLocalName(item.getPath().getFileName().toString());
         item.setTitle(name);
         item.setPlot(series.getOverview());

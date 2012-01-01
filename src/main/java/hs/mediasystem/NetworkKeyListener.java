@@ -23,23 +23,23 @@ public class NetworkKeyListener {
     @Override
     public Thread newThread(Runnable r) {
       Thread thread = new Thread(r);
-      
+
       thread.setDaemon(true);
-      
+
       return thread;
     }
   });
-  
+
   public NetworkKeyListener(int port) throws IOException {
     final ServerSocket socket = new ServerSocket(1111);
-    
+
     Thread thread = new Thread() {
       @Override
       public void run() {
         try {
           for(;;) {
             final Socket client = socket.accept();
-            
+
             threadPool.execute(new Runnable() {
               @Override
               public void run() {
@@ -48,14 +48,14 @@ public class NetworkKeyListener {
 
                   PrintWriter writer = new PrintWriter(new OutputStreamWriter(client.getOutputStream()));
                   LineNumberReader reader = new LineNumberReader(new InputStreamReader(client.getInputStream()));
-                  
+
                   for(;;) {
                     String line = reader.readLine();
-                    
+
                     if(line == null) {
                       break;
                     }
-                    
+
                     if(line.equals("quintessence")) {
                       writer.print("cookie");
                       writer.flush();
@@ -66,10 +66,10 @@ public class NetworkKeyListener {
                     }
                     else if(line.startsWith("EVENT ")) {
                       System.out.println(">>> " + line);
-                      
+
                       KeyStroke stroke = KeyStroke.getKeyStroke(line.substring(6));
                       KeyEvent event = new KeyEvent(component, stroke.getKeyEventType(), System.currentTimeMillis(), stroke.getModifiers(), stroke.getKeyCode(), stroke.getKeyChar());
-  
+
                       Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(event);
                       break;
                     }
@@ -95,7 +95,7 @@ public class NetworkKeyListener {
         }
       }
     };
-    
+
     thread.setDaemon(true);
     thread.start();
   }

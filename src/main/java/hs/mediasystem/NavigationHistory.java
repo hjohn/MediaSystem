@@ -13,37 +13,37 @@ public class NavigationHistory<T> {
   private final List<T> stack = new ArrayList<T>();
 
   private int currentStackIndex = -1;
-  
+
   public T back() {
     if(currentStackIndex == 0) {
       return null;
     }
-    
+
     currentStackIndex--;
 
     onAction.get().handle(new ActionEvent(this, Event.NULL_SOURCE_TARGET));
 
     return stack.get(currentStackIndex);
   }
-  
-  public void forward(T destination) { 
+
+  public void forward(T destination) {
     while(stack.size() - 1 > currentStackIndex) {
       stack.remove(stack.size() - 1);
     }
-    
+
     stack.add(destination);
     currentStackIndex++;
-    
+
     onAction.get().handle(new ActionEvent(this, Event.NULL_SOURCE_TARGET));
   }
-  
+
   public List<T> getPath() {
     List<T> list = new ArrayList<T>();
-    
+
     for(int index = 0; index <= currentStackIndex; index++) {
       list.add(stack.get(index));
     }
-    
+
     return list;
   }
 
@@ -54,20 +54,20 @@ public class NavigationHistory<T> {
   public boolean isEmpty() {
     return stack.isEmpty();
   }
-  
+
   private final ObjectProperty<EventHandler<ActionEvent>> onAction = new SimpleObjectProperty<EventHandler<ActionEvent>>();
-  
+
   public EventHandler<ActionEvent> getOnAction() {
     return onAction.get();
   }
-  
+
   public void setOnAction(EventHandler<ActionEvent> value) {
     onAction.set(value);
   }
-  
+
   public ObjectProperty<EventHandler<ActionEvent>> onActionProperty() {
     return onAction;
   }
-  
+
   //onChangeProperty();
 }

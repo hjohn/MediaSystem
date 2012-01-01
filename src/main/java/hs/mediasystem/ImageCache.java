@@ -8,7 +8,7 @@ import javafx.scene.image.Image;
 
 public class ImageCache {
   private static Map<String, Image> cache = new HashMap<String, Image>();
-  
+
   public static Image loadImage(ImageHandle handle) {
     Image image = cache.get(handle.getKey());
 
@@ -19,7 +19,7 @@ public class ImageCache {
 
     return image;
   }
-  
+
   private static String createKey(String key, double w, double h, boolean keepAspect) {
     return key + "-" + w + "x" + h + "-" + (keepAspect ? "T" : "F");
   }
@@ -30,13 +30,13 @@ public class ImageCache {
 
     if(image == null && handle.getImageData() != null) {
       image = new Image(new ByteArrayInputStream(handle.getImageData()), w, h, keepAspect, true);
-      
+
       cache.put(key, image);
 //        if(image.getWidth() == w && image.getHeight() == h) {
 //          cache.put(handle.getKey(), image);
 //        }
     }
-    
+
     return image;
   }
 }

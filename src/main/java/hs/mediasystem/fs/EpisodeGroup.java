@@ -11,7 +11,7 @@ import java.util.List;
 
 public class EpisodeGroup extends NamedItem implements Group {
   private final List<MediaItem> children = new ArrayList<MediaItem>();
-  
+
   public EpisodeGroup(MediaTree mediaTree, String title) {
     super(mediaTree, title);
   }
@@ -29,17 +29,17 @@ public class EpisodeGroup extends NamedItem implements Group {
   public Collection<? extends MediaItem> children() {
     return Collections.unmodifiableCollection(children);
   }
-  
+
   @Override
   public boolean isRoot() {
     return false;
   }
-  
+
   @Override
   public boolean isLeaf() {
     return false;
   }
-  
+
   @Override
   public MediaTree getRoot() {
     return null;

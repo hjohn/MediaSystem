@@ -17,7 +17,7 @@ public final class BeanFloatProperty extends SimpleFloatProperty {
       initialized = true;
       set(accessor.read());
     }
-    
+
     return super.get();
   }
 

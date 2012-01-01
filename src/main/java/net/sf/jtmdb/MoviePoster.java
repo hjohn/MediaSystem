@@ -9,7 +9,7 @@ import net.sf.jtmdb.Log.Verbosity;
 
 /**
  * This class represents a Movie Poster.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class MoviePoster implements Serializable {
@@ -18,7 +18,7 @@ public class MoviePoster implements Serializable {
 
 	/**
 	 * This enumeration provides different sizes for the posters.
-	 * 
+	 *
 	 * @author Savvas Dalkitsis
 	 */
 	public enum Size {
@@ -37,7 +37,7 @@ public class MoviePoster implements Serializable {
 
 	/**
 	 * Constructs a new MoviePoster.
-	 * 
+	 *
 	 * @param ID
 	 *            The ID of the poster.
 	 */
@@ -50,7 +50,7 @@ public class MoviePoster implements Serializable {
 
 	/**
 	 * Constructs a new MoviePoster.
-	 * 
+	 *
 	 * @param info
 	 *            The url and dimension infos of the different sizes of the
 	 *            poster.
@@ -67,7 +67,7 @@ public class MoviePoster implements Serializable {
 	/**
 	 * Returns the Url of the poster for the specified size if it exists,
 	 * otherwise null.
-	 * 
+	 *
 	 * @param size
 	 *            The size of the poster.
 	 * @return The Url of the poster for the specified size if it exists,
@@ -80,7 +80,7 @@ public class MoviePoster implements Serializable {
 	/**
 	 * Returns the dimensions of the poster for the specified size if it exists,
 	 * otherwise null.
-	 * 
+	 *
 	 * @param size
 	 *            The size of the poster.
 	 * @return The dimension of the poster for the specified size if it exists,
@@ -92,7 +92,7 @@ public class MoviePoster implements Serializable {
 
 	/**
 	 * Sets the image Url and dimension for the provided size.
-	 * 
+	 *
 	 * @param size
 	 *            The size of the poster.
 	 * @param info
@@ -105,7 +105,7 @@ public class MoviePoster implements Serializable {
 
 	/**
 	 * The poster ID.
-	 * 
+	 *
 	 * @return The poster ID.
 	 */
 	public String getID() {
@@ -114,7 +114,7 @@ public class MoviePoster implements Serializable {
 
 	/**
 	 * Returns the Url of the smallest available size.
-	 * 
+	 *
 	 * @return The Url of the smallest available size.
 	 */
 	public URL getSmallestImage() {
@@ -134,7 +134,7 @@ public class MoviePoster implements Serializable {
 
 	/**
 	 * Returns the Url of the largest available size.
-	 * 
+	 *
 	 * @return The Url of the largest available size.
 	 */
 	public URL getLargestImage() {
@@ -154,7 +154,7 @@ public class MoviePoster implements Serializable {
 
 	/**
 	 * Returns the dimensions of the smallest available size.
-	 * 
+	 *
 	 * @return The dimensions of the smallest available size.
 	 */
 	public Dimension getSmallestImageDimension() {
@@ -174,7 +174,7 @@ public class MoviePoster implements Serializable {
 
 	/**
 	 * Returns the dimensions of the largest available size.
-	 * 
+	 *
 	 * @return The dimensions of the largest available size.
 	 */
 	public Dimension getLargestImageDimension() {

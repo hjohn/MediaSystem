@@ -14,7 +14,7 @@ import java.util.List;
 
 public class EpisodesMediaTree extends AbstractMediaTree {
   private final Path root;
-  
+
   private List<? extends MediaItem> children;
 
   public EpisodesMediaTree(Path root, Serie serie) {
@@ -37,34 +37,34 @@ public class EpisodesMediaTree extends AbstractMediaTree {
     if(children == null) {
       List<Episode> episodes = new EpisodeScanner(this, new EpisodeDecoder()).scan(root);
       List<MediaItem> items = new ArrayList<MediaItem>();
-      
+
       Collection<List<MediaItem>> groupedItems = Groups.group(episodes, new SeasonGrouper());
-      
+
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
           int season = group.get(0) instanceof Episode ? ((Episode)group.get(0)).getSeason() : 0;
           Season s = new Season(this, season == 0 ? "Unknown" : "" + season, season);
-          
+
           Collections.sort(group, MediaItemComparator.INSTANCE);
-          
+
           for(MediaItem item : group) {
             s.add(item);
           }
-          
+
           items.add(s);
         }
         else {
           items.add(group.get(0));
         }
       }
-      
+
       Collections.sort(items, MediaItemComparator.INSTANCE);
-      
+
       children = items;
     }
-    
+
     return children;
-  } 
+  }
 
   @Override
   public MediaTree parent() {

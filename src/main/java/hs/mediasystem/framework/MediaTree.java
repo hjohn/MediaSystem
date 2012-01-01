@@ -10,14 +10,14 @@ import java.util.List;
  */
 public interface MediaTree {
   public enum Style {BANNER, LIST}
-  
+
   void refresh();
 
   Style getStyle();
 
   List<? extends MediaItem> children();
   MediaTree parent();
-  
+
   CellProvider<MediaItem> createListCell();
 
   void enrichItem(final NamedItem namedItem);

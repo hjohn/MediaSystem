@@ -17,7 +17,7 @@ public final class ComplexIntegerProperty extends SimpleIntegerProperty {
       initialized = true;
       set(accessor.read());
     }
-    
+
     return super.get();
   }
 

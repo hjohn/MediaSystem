@@ -17,7 +17,7 @@ public final class BeanObjectProperty<T> extends SimpleObjectProperty<T> {
       initialized = true;
       set(accessor.read());
     }
-    
+
     return super.get();
   }
 

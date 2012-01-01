@@ -6,7 +6,7 @@ import java.util.List;
 
 public class SubOption extends Option {
   private final Callable<List<Option>> optionCreator;
-  
+
   public SubOption(String description, Callable<List<Option>> optionCreator) {
     super(description);
 
@@ -15,5 +15,5 @@ public class SubOption extends Option {
 
   public List<Option> getOptions() {
     return optionCreator.call();
-  } 
+  }
 }

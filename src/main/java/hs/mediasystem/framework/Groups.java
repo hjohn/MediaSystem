@@ -10,12 +10,12 @@ import java.util.Map;
 public class Groups {
   public static <T> Collection<List<T>> group(List<? extends T> list, Grouper<T> grouper) {
     Map<Object, List<T>> groups = new HashMap<Object, List<T>>();
-    
+
     for(T item : list) {
       Object key = grouper.getGroup(item);
-      
+
       List<T> group = groups.get(key);
-      
+
       if(group == null) {
         group = new ArrayList<T>();
         groups.put(key, group);

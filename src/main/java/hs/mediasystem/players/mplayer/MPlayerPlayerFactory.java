@@ -16,7 +16,7 @@ public class MPlayerPlayerFactory implements PlayerFactory {
   public MPlayerPlayerFactory(Path mplayerPath) {
     this.mplayerPath = mplayerPath;
   }
-  
+
   @Override
   public Player create(Ini ini, GraphicsDevice device) {
     return new MPlayerPlayer(mplayerPath, true);
