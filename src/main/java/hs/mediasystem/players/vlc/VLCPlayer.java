@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
@@ -54,6 +56,35 @@ public class VLCPlayer implements Player {
     mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
     mediaPlayer.addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
       private AtomicInteger ignoreFinish = new AtomicInteger();
+
+      @Override
+      public void newMedia(MediaPlayer mediaPlayer) {
+        System.out.println("[FINE] VLCPlayer: Event[newMedia]");
+        updateSubtitles();
+      }
+
+      @Override
+      public void mediaChanged(MediaPlayer mediaPlayer) {
+        System.out.println("[FINE] VLCPlayer: Event[mediaChanged]");
+      }
+
+      @Override
+      public void mediaMetaChanged(MediaPlayer mediaPlayer, int metaType) {
+        System.out.println("[FINE] VLCPlayer: Event[mediaMetaChanged]: " + metaType);
+      }
+
+      @Override
+      public void mediaStateChanged(MediaPlayer mediaPlayer, int newState) {
+        System.out.println("[FINE] VLCPlayer: Event[mediaStateChanged]: " + newState);
+      }
+
+      @Override
+      public void mediaParsedChanged(MediaPlayer mediaPlayer, int parsed) {
+        System.out.println("[FINE] VLCPlayer: Event[mediaParsedChanged]: " + parsed);
+        if(parsed == 1) {
+          updateSubtitles();
+        }
+      }
 
       @Override
       public void mediaSubItemAdded(MediaPlayer mediaPlayer, libvlc_media_t subItem) {
@@ -128,46 +159,31 @@ public class VLCPlayer implements Player {
     mediaPlayer.setSpu(getSubtitles().indexOf(subtitle));
   }
 
-  private final List<Subtitle> subtitles = new ArrayList<>();
+  private final ObservableList<Subtitle> subtitles = FXCollections.observableArrayList(Subtitle.DISABLED);
 
   @Override
-  public List<Subtitle> getSubtitles() {
-    if(subtitles.isEmpty()) {
-      for(TrackDescription spuDescription : mediaPlayer.getSpuDescriptions()) {
-        subtitles.add(new Subtitle(spuDescription.id(), spuDescription.description()));
-      }
-
-      if(!subtitles.isEmpty()) {
-        subtitles.remove(0);
-        subtitles.add(0, Subtitle.DISABLED);
-      }
-    }
-
-    return subtitles.isEmpty() ? NO_SUBTITLES : subtitles;
+  public ObservableList<Subtitle> getSubtitles() {
+    updateSubtitles();
+    return FXCollections.unmodifiableObservableList(subtitles);
   }
 
   private final List<AudioTrack> audioTracks = new ArrayList<>();
 
   @Override
-  public List<AudioTrack> getAudioTracks() {
+  public ObservableList<AudioTrack> getAudioTracks() {
     if(audioTracks.isEmpty()) {
       for(TrackDescription description : mediaPlayer.getAudioDescriptions()) {
         audioTracks.add(new AudioTrack(description.id(), description.description()));
       }
     }
 
-    return audioTracks.isEmpty() ? NO_AUDIO_TRACKS : audioTracks;
+    return FXCollections.observableArrayList(audioTracks.isEmpty() ? NO_AUDIO_TRACKS : audioTracks);
   }
-
-  private static final List<Subtitle> NO_SUBTITLES = new ArrayList<Subtitle>() {{
-    add(Subtitle.DISABLED);
-  }};
 
   private static final List<AudioTrack> NO_AUDIO_TRACKS = new ArrayList<AudioTrack>();
 
   @Override
   public void play(String uri) {
-    subtitles.clear();
     mediaPlayer.setRepeat(true);
     mediaPlayer.setPlaySubItems(true);
     mediaPlayer.playMedia(uri);
@@ -231,8 +247,18 @@ public class VLCPlayer implements Player {
   public void showSubtitle(Path path) {
     System.out.println("[INFO] VLCPlayer.showSubtitle: path = " + path.toString());
     mediaPlayer.setSubTitleFile(path.toString());
-    subtitles.clear();
-    getSubtitles();
+  }
+
+  private void updateSubtitles() {
+    if(subtitles.size() > 1) {
+      subtitles.subList(1, subtitles.size()).clear();
+    }
+
+    for(TrackDescription spuDescription : mediaPlayer.getSpuDescriptions()) {
+      if(spuDescription.id() > 0) {
+        subtitles.add(new Subtitle(spuDescription.id(), spuDescription.description()));
+      }
+    }
   }
 
   private final IntegerProperty volume;
@@ -255,7 +281,7 @@ public class VLCPlayer implements Player {
   @Override public void setBrightness(float brightness) { this.brightness.set(brightness); }
   @Override public FloatProperty brightnessProperty() { return brightness; }
 
-  private final ObjectProperty<Subtitle> subtitle = new BeanObjectProperty<Subtitle>(this, "subtitleInternal");
+  private final BeanObjectProperty<Subtitle> subtitle = new BeanObjectProperty<Subtitle>(this, "subtitleInternal");
   @Override public Subtitle getSubtitle() { return subtitle.get(); }
   @Override public void setSubtitle(Subtitle subtitle) { this.subtitle.set(subtitle); }
   @Override public ObjectProperty<Subtitle> subtitleProperty() { return subtitle; }

@@ -1,11 +1,11 @@
 package hs.mediasystem.framework.player;
 
 import java.nio.file.Path;
-import java.util.List;
 
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.ObservableList;
 
 public interface Player {
 
@@ -63,7 +63,7 @@ public interface Player {
    *
    * @return a list of Subtitles
    */
-  List<Subtitle> getSubtitles();
+  ObservableList<Subtitle> getSubtitles();
 
   /**
    * Returns the current subtitle.  Will return a Subtitle.DISABLED when not showing any
@@ -106,5 +106,5 @@ public interface Player {
   void setBrightness(float brightness);
   FloatProperty brightnessProperty();
 
-  List<AudioTrack> getAudioTracks();
+  ObservableList<AudioTrack> getAudioTracks();
 }

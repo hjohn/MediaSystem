@@ -273,7 +273,7 @@ public class TransparentPlayingScreen extends StackPane {
                       }
                     });
 
-                    add(new ListOption<SubtitleProvider>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), subtitleSelector.getSubtitleProviders(), new StringConverter<SubtitleProvider>() {
+                    add(new ListOption<SubtitleProvider>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringConverter<SubtitleProvider>() {
                       @Override
                       public String toString(SubtitleProvider object) {
                         return object.getName();

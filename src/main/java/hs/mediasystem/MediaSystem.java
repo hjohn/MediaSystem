@@ -13,8 +13,6 @@ import javafx.application.Application;
 // TODO Separators for Dialog Screen
 // TODO Subtitle selection list must be left with backspace, or exit at top/bottom item
 // TODO Style ListViewOption's "header" option
-// TODO After downloading a subtitle, going back to Video Options resets subtitle to disabled
-// TODO Subtitle list in Video Options should be updated more frequently, especially after downloading a sub (may require Player to notify of changes)
 
 // Minimal working system:
 // TODO Make clock in standard border
@@ -29,6 +27,9 @@ import javafx.application.Application;
 // TODO Display alternative banner when there is no banner available
 
 // TODO Display list of video files with IMDB info
+
+// Unable to Fix:
+// - Subtitle list in Video Options should be updated more frequently, especially after downloading a sub (may require Player to notify of changes) --> No indication from VLC when a subtitle actually was fully loaded, so this is not possible
 
 // Keyboard            Action                         On Remote Control
 // ====================================================================

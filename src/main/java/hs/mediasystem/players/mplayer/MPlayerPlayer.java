@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.ObservableList;
 
 public class MPlayerPlayer implements Player {
   private static final Pattern GET_PROPERTY_PATTERN = Pattern.compile("ANS_[a-zA-Z_]+=(.*)");
@@ -327,7 +328,7 @@ public class MPlayerPlayer implements Player {
   }
 
   @Override
-  public List<Subtitle> getSubtitles() {
+  public ObservableList<Subtitle> getSubtitles() {
     // TODO Auto-generated method stub
     return null;
   }
@@ -405,7 +406,7 @@ public class MPlayerPlayer implements Player {
   }
 
   @Override
-  public List<AudioTrack> getAudioTracks() {
+  public ObservableList<AudioTrack> getAudioTracks() {
     // TODO Auto-generated method stub
     return null;
   }
