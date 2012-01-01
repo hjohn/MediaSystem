@@ -364,7 +364,7 @@ public class TransparentPlayingScreen extends StackPane {
     borderPane.setBottom(bottomPane);
 
     bottomPane.setId("video-overlay");
-    bottomPane.setLeft(new ImageView(ImageCache.loadImage(mediaItem.getPoster())) {{
+    bottomPane.setLeft(new ImageView(ImageCache.loadImage(mediaItem.getPoster())) {{  // TODO it's possible with fast clicks that this is still null here, and might be loaded at a later time!
       getStyleClass().add("poster");
       setFitWidth(w * 0.2);
       setFitHeight(h * 0.4);
