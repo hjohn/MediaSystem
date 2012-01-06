@@ -189,7 +189,9 @@
 
 .cell {
   -fx-background-color: transparent;
-  
+}
+
+.cell:filled {  
   -fx-border-color: linear-gradient(to right, transparent, color-blue-20 15%, color-blue-20 85%, transparent);
   -fx-border-width: 1;
 }
@@ -250,4 +252,34 @@
 #messagePane .description {
   -fx-padding: 0 10 10 10;
 }
-} 
+
+.list .list-view {
+  -fx-border-width: 2;
+  -fx-border-color: color-blue-20;
+  -fx-border-radius: 10;
+
+  -fx-font: bold 14pt "Arial";
+}
+
+.list .title {
+  -fx-alignment: center;
+}
+
+.list .title .label {
+  -fx-font: bold 18pt "Arial";
+  -fx-background-color: color-blue-20;
+  -fx-background-radius: 8 8 0 0;
+  -fx-label-padding: 0 20 0 20;
+}
+
+
+
+
+
+
+
+
+
+
+ 
+

@@ -12,7 +12,7 @@ import javafx.application.Application;
 // TODO Style main page
 // TODO Separators for Dialog Screen
 // TODO Subtitle selection list must be left with backspace, or exit at top/bottom item
-// TODO Style ListViewOption's "header" option
+// TODO Fix focus issue on option screen
 
 // Minimal working system:
 // TODO Make clock in standard border
