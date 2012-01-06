@@ -4,10 +4,10 @@ package hs.mediasystem.db;
 public class CachedItemEnricher implements ItemEnricher {
   private final ItemsDao itemsDao;
   private final ItemEnricher providerToCache;
-  
+
   public CachedItemEnricher(ItemEnricher providerToCache) {
     this.providerToCache = providerToCache;
-    
+
     try {
       itemsDao = new ItemsDao();
     }
@@ -19,7 +19,7 @@ public class CachedItemEnricher implements ItemEnricher {
   @Override
   public void enrichItem(Item item) throws ItemNotFoundException {
     String fileName = item.getPath().getFileName().toString();
-    
+
     try {
       System.out.println("[FINE] Resolving from database cache: " + fileName);
       Item cachedItem = itemsDao.getItem(item.getPath());
@@ -41,10 +41,10 @@ public class CachedItemEnricher implements ItemEnricher {
       item.setSubtitle(cachedItem.getSubtitle());
       item.setProvider(cachedItem.getProvider());
       item.setProviderId(cachedItem.getProviderId());
-      
+
       if(cachedItem.getVersion() < ItemsDao.VERSION) {
         System.out.println("[FINE] Old version, updating from cached provider: " + fileName);
-        
+
         providerToCache.enrichItem(item);
         itemsDao.updateItem(cachedItem);
       }

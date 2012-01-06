@@ -17,7 +17,7 @@ import org.json.JSONObject;
  * the user must browse to the returned URL and authenticate the token. Once the
  * token is authenticated, the user can create an authenticated session using
  * the method {@link #getSession(String)}
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class Auth {
@@ -30,7 +30,7 @@ public class Auth {
 	 * Gets the session for the authenticated token. Will return a pair of
 	 * Session and the ServerResponse or null if there was an error with the API
 	 * or an IOException occurred.
-	 * 
+	 *
 	 * @param token
 	 *            The authenticated token.
 	 * @return A pair of Session and the ServerResponse or null if there was an
@@ -74,7 +74,7 @@ public class Auth {
 	/**
 	 * Will return the URL that the user must browse to, in order to
 	 * authenticate the provided token.
-	 * 
+	 *
 	 * @param token
 	 *            The token to authenticate.
 	 * @return The URL that the user must browse to, in order to authenticate
@@ -92,7 +92,7 @@ public class Auth {
 	/**
 	 * Requests a token from the server that can be used to create an
 	 * authenticated session. Will be null if an error occurred.
-	 * 
+	 *
 	 * @return A token from the server that can be used to create an
 	 *         authenticated session. Will be null if an error occurred.
 	 * @throws IOException

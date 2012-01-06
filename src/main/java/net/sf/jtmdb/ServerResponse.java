@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * This enumeration provides the responses from the server when using a POST
  * method.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public enum ServerResponse {
@@ -95,7 +95,7 @@ public enum ServerResponse {
 
 	/**
 	 * The code of the response.
-	 * 
+	 *
 	 * @return The response of the response.
 	 */
 	public int getCode() {
@@ -104,7 +104,7 @@ public enum ServerResponse {
 
 	/**
 	 * Sets the code of the response.
-	 * 
+	 *
 	 * @param code
 	 *            The code of the response.
 	 */
@@ -118,7 +118,7 @@ public enum ServerResponse {
 
 	/**
 	 * The message of the response.
-	 * 
+	 *
 	 * @return The message of the response.
 	 */
 	public String getMessage() {
@@ -127,7 +127,7 @@ public enum ServerResponse {
 
 	/**
 	 * Set the message of the response.
-	 * 
+	 *
 	 * @param message
 	 *            The message of the response.
 	 */
@@ -142,7 +142,7 @@ public enum ServerResponse {
 
 	/**
 	 * Returns the appropriate response for the specified ID.
-	 * 
+	 *
 	 * @param id
 	 *            The ID of the response.
 	 * @return The appropriate response for the specified ID.

@@ -2,10 +2,7 @@ package hs.mediasystem;
 
 import javafx.application.Application;
 
-import com.sun.jna.NativeLibrary;
-
 // Top 10 stuff:
-// TODO Subtitle selection / Auto download
 // TODO Some form of remote control support
 // TODO VLCPlayer: Make brightness controls work
 // TODO When changing Options, show this in OSD
@@ -14,6 +11,8 @@ import com.sun.jna.NativeLibrary;
 // TODO When returning to select screen, if bg pic is big, the scene will be larger than the stage
 // TODO Style main page
 // TODO Separators for Dialog Screen
+// TODO Subtitle selection list must be left with backspace, or exit at top/bottom item
+// TODO Style ListViewOption's "header" option
 
 // Minimal working system:
 // TODO Make clock in standard border
@@ -28,6 +27,9 @@ import com.sun.jna.NativeLibrary;
 // TODO Display alternative banner when there is no banner available
 
 // TODO Display list of video files with IMDB info
+
+// Unable to Fix:
+// - Subtitle list in Video Options should be updated more frequently, especially after downloading a sub (may require Player to notify of changes) --> No indication from VLC when a subtitle actually was fully loaded, so this is not possible
 
 // Keyboard            Action                         On Remote Control
 // ====================================================================
@@ -54,10 +56,10 @@ import com.sun.jna.NativeLibrary;
 // Backspace         = back to previous page/menu --> Back
 // Enter             = select                     --> OK (nav.center)
 // Home              = menu                       --> Home (windows)
-// 't'               = video: sub title menu      --> Teletext 
+// 't'               = video: sub title menu      --> Teletext
 
 public class MediaSystem {
-  
+
   public static void main(String[] args) {
     Application.launch(FrontEnd.class, args);
   }

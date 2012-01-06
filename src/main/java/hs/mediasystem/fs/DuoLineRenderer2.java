@@ -12,13 +12,13 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
 public class DuoLineRenderer2 implements CellProvider<MediaItem> {
-  
+
   private final HBox group = new HBox();
-  
+
   private final Label title = new Label() {{
     setId("selectItem-listCell-title");
   }};
-  
+
   private final Label subtitle = new Label() {{
     setId("selectItem-listCell-subtitle");
   }};
@@ -42,7 +42,7 @@ public class DuoLineRenderer2 implements CellProvider<MediaItem> {
     }});
     group.getChildren().add(collectionMarker);
   }
-  
+
   @Override
   public Node configureCell(MediaItem item) {
     if(item != null) {
@@ -50,7 +50,7 @@ public class DuoLineRenderer2 implements CellProvider<MediaItem> {
       subtitle.setText(item.getSubtitle());
       collectionMarker.setVisible(item instanceof hs.mediasystem.framework.Group);
     }
-    
+
     return group;
   }
 }

@@ -11,7 +11,7 @@ import org.json.JSONObject;
 
 /**
  * This class represents an entry in the filmography list of a Person.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class FilmographyInfo implements Serializable {
@@ -65,7 +65,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * Creates a new FilmographyInfo object.
-	 * 
+	 *
 	 * @param name
 	 *            The name of the Movie.
 	 * @param characterName
@@ -139,7 +139,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * The json string that created this FilmographyInfo object.
-	 * 
+	 *
 	 * @return The json string that created this FilmographyInfo object.
 	 */
 	public String getJsonOrigin() {
@@ -148,7 +148,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * The prettyprinted json string that created this FilmographyInfo object.
-	 * 
+	 *
 	 * @param indentFactor
 	 *            The number of spaces to add to each level of indentation.
 	 * @return The json string that created this FilmographyInfo object.
@@ -164,7 +164,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * The name of the Movie.
-	 * 
+	 *
 	 * @return The name of the Movie.
 	 */
 	public String getName() {
@@ -173,7 +173,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * Sets the name of the Movie.
-	 * 
+	 *
 	 * @param name
 	 *            The name of the Movie.
 	 */
@@ -183,7 +183,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * The name of the character in the Movie.
-	 * 
+	 *
 	 * @return The name of the character in the Movie.
 	 */
 	public String getCharacterName() {
@@ -192,7 +192,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * Sets the name of the character in the Movie.
-	 * 
+	 *
 	 * @param characterName
 	 *            The name of the character in the Movie.
 	 */
@@ -202,7 +202,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * The url of the Movie.
-	 * 
+	 *
 	 * @return The url of the Movie.
 	 */
 	public URL getUrl() {
@@ -211,7 +211,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * Sets the url of the Movie.
-	 * 
+	 *
 	 * @param url
 	 *            The url of the Movie.
 	 */
@@ -221,7 +221,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * The url of the Movie poster.
-	 * 
+	 *
 	 * @return The url of the Movie poster.
 	 */
 	public URL getMoviePoster() {
@@ -230,7 +230,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * Sets the url of the Movie poster.
-	 * 
+	 *
 	 * @param moviePoster
 	 *            The url of the Movie poster.
 	 */
@@ -240,7 +240,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * The ID of the Movie.
-	 * 
+	 *
 	 * @return The ID of the Movie.
 	 */
 	public int getID() {
@@ -249,7 +249,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * Sets the ID of the Movie.
-	 * 
+	 *
 	 * @param iD
 	 *            The ID of the Movie.
 	 */
@@ -259,7 +259,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * The ID of the cast.
-	 * 
+	 *
 	 * @return The ID of the cast.
 	 */
 	public int getCastID() {
@@ -268,7 +268,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * Sets the ID of the cast.
-	 * 
+	 *
 	 * @param castID
 	 *            The ID of the cast.
 	 */
@@ -278,7 +278,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * The job description in the Movie.
-	 * 
+	 *
 	 * @return The job description in the Movie.
 	 */
 	public String getJob() {
@@ -287,7 +287,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * Sets the job description in the Movie.
-	 * 
+	 *
 	 * @param job
 	 *            The job description in the Movie.
 	 */
@@ -297,7 +297,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * Returns true if the Movie is adult only.
-	 * 
+	 *
 	 * @return True if the Movie is adult only.
 	 */
 	public boolean isAdult() {
@@ -306,7 +306,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * Sets whether the Movie is adult only.
-	 * 
+	 *
 	 * @param adult
 	 *            The adult flag of the Movie.
 	 */
@@ -316,7 +316,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * Sets the department of the job for the Movie.
-	 * 
+	 *
 	 * @param department
 	 *            The department of the job for the Movie.
 	 */
@@ -333,7 +333,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * The Movie release Date.
-	 * 
+	 *
 	 * @return The Movie release Date.
 	 */
 	public Date getReleasedDate() {
@@ -342,7 +342,7 @@ public class FilmographyInfo implements Serializable {
 
 	/**
 	 * Sets the release date of the Movie.
-	 * 
+	 *
 	 * @param releasedDate
 	 *            The release date of the Movie.
 	 */

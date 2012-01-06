@@ -11,7 +11,7 @@ import net.sf.jtmdb.Log.Verbosity;
 
 /**
  * This class contains the options used in the Movie.browse method.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class BrowseOptions implements Serializable {
@@ -20,7 +20,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Enumeration of the types of order for the results.
-	 * 
+	 *
 	 * @author Savvas Dalkitsis
 	 */
 	public static enum ORDER_BY {
@@ -50,7 +50,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Enumeration of the order of the results.
-	 * 
+	 *
 	 * @author Savvas Dalkitsis
 	 */
 	public static enum ORDER {
@@ -76,7 +76,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Enumeration providing AND, OR operators.
-	 * 
+	 *
 	 * @author Savvas Dalkitsis
 	 */
 	public static enum BOOLEAN {
@@ -168,7 +168,7 @@ public class BrowseOptions implements Serializable {
 	/**
 	 * Gets the type of the ordering of the results. Default is
 	 * ORDER_BY.RELEASE.
-	 * 
+	 *
 	 * @return The type of the ordering of the results. Default is
 	 *         ORDER_BY.RELEASE.
 	 */
@@ -178,7 +178,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Sets the type of the ordering of the results.
-	 * 
+	 *
 	 * @param orderBy
 	 *            The type of the ordering of the results.
 	 */
@@ -188,7 +188,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Gets the order of the results. Default is ORDER.ASC.
-	 * 
+	 *
 	 * @return The order of the results. Default is ORDER.ASC.
 	 */
 	public ORDER getOrder() {
@@ -197,7 +197,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Sets the order of the results.
-	 * 
+	 *
 	 * @param order
 	 *            The order of the results.
 	 */
@@ -216,7 +216,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Gets the current page of the results.
-	 * 
+	 *
 	 * @return The current page of the results. Will be null if the page is not
 	 *         set or has been cleared.
 	 */
@@ -226,7 +226,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Sets the page of the results. Must be greater than 0.
-	 * 
+	 *
 	 * @param page
 	 *            The page of the results. Must be greater than 0.
 	 */
@@ -247,7 +247,7 @@ public class BrowseOptions implements Serializable {
 	/**
 	 * Gets the amount of results displayed in each page of the results. Will be
 	 * null if the per page is not set or has been cleared.
-	 * 
+	 *
 	 * @return The amount of results displayed in each page of the results. Will
 	 *         be null if the per page is not set or has been cleared.
 	 */
@@ -257,7 +257,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Sets the amount of results to display per page. Must be greater than 0.
-	 * 
+	 *
 	 * @param perPage
 	 *            The amount of results to display per page. Must be greater
 	 *            than 0.
@@ -278,7 +278,7 @@ public class BrowseOptions implements Serializable {
 	/**
 	 * Gets the query for the search. Will be null if it has not been set or has
 	 * been cleared.
-	 * 
+	 *
 	 * @return The query for the search. Will be null if it has not been set or
 	 *         has been cleared.
 	 */
@@ -289,7 +289,7 @@ public class BrowseOptions implements Serializable {
 	/**
 	 * Sets the query for the search. If you pass null it acts like
 	 * {@link #clearQuery()}.
-	 * 
+	 *
 	 * @param query
 	 *            The query for the search. If you pass null it acts like
 	 *            {@link #clearQuery()}.
@@ -308,7 +308,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Gets the minimum rating a movie must have to appear in the results.
-	 * 
+	 *
 	 * @return The minimum rating a movie must have to appear in the results.
 	 */
 	public Float getRatingMin() {
@@ -317,7 +317,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Gets the maximum rating a movie must have to appear in the results.
-	 * 
+	 *
 	 * @return The maximum rating a movie must have to appear in the results.
 	 */
 	public Float getRatingMax() {
@@ -329,7 +329,7 @@ public class BrowseOptions implements Serializable {
 	 * be greater or equal to 0 and smaller than or equal to 10. If the maximum
 	 * rating has not been set or if it has been set but is smaller than this
 	 * value, this will set it to 10.
-	 * 
+	 *
 	 * @param ratingMin
 	 *            The minimum rating a movie must have to appear in the results.
 	 *            Must be greater or equal to 0 and smaller than or equal to 10.
@@ -351,7 +351,7 @@ public class BrowseOptions implements Serializable {
 	 * be greater or equal to 0 and smaller than or equal to 10. If the minimum
 	 * rating has not been set or if it has been set but is greater than this
 	 * value, this will set it to 0.
-	 * 
+	 *
 	 * @param ratingMax
 	 *            The maximum rating a movie must have to appear in the results.
 	 *            Must be greater or equal to 0 and smaller than or equal to 10.
@@ -377,7 +377,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Gets the set of genres for the search.
-	 * 
+	 *
 	 * @return The set of genres for the search.
 	 */
 	public Set<Integer> getGenres() {
@@ -386,7 +386,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Adds the genres to the list for the search.
-	 * 
+	 *
 	 * @param genreIDs
 	 *            The IDs of the genres to add.
 	 */
@@ -401,7 +401,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Adds the genres to the list for the search.
-	 * 
+	 *
 	 * @param genres
 	 *            The genres to add.
 	 */
@@ -424,7 +424,7 @@ public class BrowseOptions implements Serializable {
 	 * be translated to another language and therefore there may be mismatches
 	 * between the names you specified and the returned names, in which case the
 	 * genres will not be added.
-	 * 
+	 *
 	 * @param genreNames
 	 *            The names of genres to add.
 	 */
@@ -449,7 +449,7 @@ public class BrowseOptions implements Serializable {
 	 * As with the method {@link #addGenres(String...)}, the list returned by
 	 * the method Genre.getList() may be translated and thus, the names may not
 	 * match.
-	 * 
+	 *
 	 * @param genreList
 	 *            The set of genres in which to look for the genre by name.
 	 * @param genreNames
@@ -467,7 +467,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Removes the genres from the search.
-	 * 
+	 *
 	 * @param genreIDs
 	 *            The IDs of the genres to remove.
 	 */
@@ -481,7 +481,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Removes the genres from the search.
-	 * 
+	 *
 	 * @param genres
 	 *            The genres to remove.
 	 */
@@ -503,7 +503,7 @@ public class BrowseOptions implements Serializable {
 	 * be translated to another language and therefore there may be mismatches
 	 * between the names you specified and the returned names, in which case the
 	 * genres will not be removed.
-	 * 
+	 *
 	 * @param genreNames
 	 *            The names of genres to remove.
 	 */
@@ -529,7 +529,7 @@ public class BrowseOptions implements Serializable {
 	 * As with the method {@link #removeGenres(String...)}, the list returned by
 	 * the method Genre.getList() may be translated and thus, the names may not
 	 * match.
-	 * 
+	 *
 	 * @param genreList
 	 *            The set of genres in which to look for the genre by name.
 	 * @param genreNames
@@ -547,7 +547,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Gets the genre selector for the search. Default is BOOLEAN.AND.
-	 * 
+	 *
 	 * @return The genre selector for the search. Default is BOOLEAN.AND.
 	 */
 	public BOOLEAN getGenreSelector() {
@@ -556,7 +556,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Sets the genre selector for the search.
-	 * 
+	 *
 	 * @param genreSelector
 	 *            The genre selector for the search.
 	 */
@@ -574,7 +574,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Gets the minimum release date a movie must have to appear in the results.
-	 * 
+	 *
 	 * @return The minimum release date a movie must have to appear in the
 	 *         results.
 	 */
@@ -584,7 +584,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Gets the maximum release date a movie must have to appear in the results.
-	 * 
+	 *
 	 * @return The maximum release date a movie must have to appear in the
 	 *         results.
 	 */
@@ -599,7 +599,7 @@ public class BrowseOptions implements Serializable {
 	 * represented. If null is passed, it acts like calling
 	 * {@link #clearReleases()}. If not, this method calls {@link #clearYear()}
 	 * since they cannot be used side by side.
-	 * 
+	 *
 	 * @param ratingMin
 	 *            The minimum release date a movie must have to appear in the
 	 *            results. If the maximum release date has not been set or if it
@@ -628,7 +628,7 @@ public class BrowseOptions implements Serializable {
 	 * (epoch). If null is passed, it acts like calling {@link #clearReleases()}
 	 * . If not, this method calls {@link #clearYear()} since they cannot be
 	 * used side by side.
-	 * 
+	 *
 	 * @param ratingMin
 	 *            The maximum release date a movie must have to appear in the
 	 *            results. If the minimum release date has not been set or if it
@@ -659,7 +659,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Gets the year setting for the search.
-	 * 
+	 *
 	 * @return The year setting for the search.
 	 */
 	public Integer getYear() {
@@ -670,7 +670,7 @@ public class BrowseOptions implements Serializable {
 	 * Sets the year setting for the search. Must be greater or equal to 0. This
 	 * will call {@link #clearReleases()} since these settings cannot exist side
 	 * by side.
-	 * 
+	 *
 	 * @param year
 	 *            The year setting for the search. Must be greater or equal to
 	 *            0. This will call {@link #clearReleases()} since these
@@ -693,7 +693,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Gets the certifications for the search.
-	 * 
+	 *
 	 * @return The certifications for the search.
 	 */
 	public Set<String> getCertifications() {
@@ -702,7 +702,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Add certifications to the search.
-	 * 
+	 *
 	 * @param certifications
 	 *            The certifications to add to the search.
 	 */
@@ -717,7 +717,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Removes certifications from the search.
-	 * 
+	 *
 	 * @param certifications
 	 *            The certifications to remove from the search.
 	 */
@@ -738,7 +738,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Gets the companies for the search.
-	 * 
+	 *
 	 * @return The companies for the search.
 	 */
 	public Set<String> getCompanies() {
@@ -747,7 +747,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Adds companies to the search.
-	 * 
+	 *
 	 * @param companies
 	 *            The companies to add to the search.
 	 */
@@ -762,7 +762,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Removes companies from the search.
-	 * 
+	 *
 	 * @param companies
 	 *            The companies to remove from the search.
 	 */
@@ -783,7 +783,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Gets the countries for the search.
-	 * 
+	 *
 	 * @return The countries for the search.
 	 */
 	public Set<String> getCountries() {
@@ -792,7 +792,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Adds countries to the search.
-	 * 
+	 *
 	 * @param countries
 	 *            The countries to add to the search.
 	 */
@@ -807,7 +807,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Removes countries from the search.
-	 * 
+	 *
 	 * @param countries
 	 *            The countries to remove from the search.
 	 */
@@ -829,7 +829,7 @@ public class BrowseOptions implements Serializable {
 	/**
 	 * Gets the minimum amount of votes a Movie must have to appear in the
 	 * results.
-	 * 
+	 *
 	 * @return The minimum amount of votes a Movie must have to appear in the
 	 *         results.
 	 */
@@ -840,7 +840,7 @@ public class BrowseOptions implements Serializable {
 	/**
 	 * Sets the minimum amount of votes a Movie must have in order to appear in
 	 * the results. Must be greater or equal to 0.
-	 * 
+	 *
 	 * @param minVotes
 	 *            The minimum amount of votes a Movie must have in order to
 	 *            appear in the results. Must be greater or equal to 0.
@@ -854,7 +854,7 @@ public class BrowseOptions implements Serializable {
 
 	/**
 	 * Builds the query to be appended to the call to the server.
-	 * 
+	 *
 	 * @return The query to be appended to the call to the server.
 	 */
 	protected String buildQuery() {

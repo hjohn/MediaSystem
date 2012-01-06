@@ -18,7 +18,7 @@ public class Downloader {
       while((n = is.read(byteChunk)) > 0) {
         bais.write(byteChunk, 0, n);
       }
-      
+
       return bais.toByteArray();
     }
     catch(IOException e) {
@@ -26,13 +26,13 @@ public class Downloader {
       return null;
     }
     finally {
-      if (is != null) { 
+      if (is != null) {
         try {
           is.close();
         }
         catch(IOException e) {
           // don't care
-        } 
+        }
       }
     }
   }

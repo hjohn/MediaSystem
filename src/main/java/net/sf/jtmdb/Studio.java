@@ -7,7 +7,7 @@ import net.sf.jtmdb.Log.Verbosity;
 
 /**
  * This class represents a movie Studio.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class Studio implements Serializable {
@@ -25,7 +25,7 @@ public class Studio implements Serializable {
 
 	/**
 	 * Constructs a Studio with the given URL and name.
-	 * 
+	 *
 	 * @param url
 	 *            The URL of the Studio.
 	 * @param name
@@ -57,7 +57,7 @@ public class Studio implements Serializable {
 
 	/**
 	 * The URL of the Studio.
-	 * 
+	 *
 	 * @return The URL of the Studio.
 	 */
 	public URL getUrl() {
@@ -66,7 +66,7 @@ public class Studio implements Serializable {
 
 	/**
 	 * Sets the URL of the Studio.
-	 * 
+	 *
 	 * @param url
 	 *            The URL of the Studio.
 	 */
@@ -76,7 +76,7 @@ public class Studio implements Serializable {
 
 	/**
 	 * The name of the Studio.
-	 * 
+	 *
 	 * @return The name of the Studio.
 	 */
 	public String getName() {
@@ -85,7 +85,7 @@ public class Studio implements Serializable {
 
 	/**
 	 * Sets the name of the Studio.
-	 * 
+	 *
 	 * @param name
 	 *            The name of the Studio.
 	 */

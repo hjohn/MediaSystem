@@ -16,7 +16,7 @@ import org.json.JSONObject;
 
 /**
  * This class represents a movie Genre.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class Genre implements Serializable {
@@ -38,7 +38,7 @@ public class Genre implements Serializable {
 
 	/**
 	 * Constructs a Genre with the given URL, name and ID.
-	 * 
+	 *
 	 * @param url
 	 *            The URL of the Genre.
 	 * @param name
@@ -73,7 +73,7 @@ public class Genre implements Serializable {
 
 	/**
 	 * The URL of the Genre.
-	 * 
+	 *
 	 * @return The URL of the Genre.
 	 */
 	public URL getUrl() {
@@ -82,7 +82,7 @@ public class Genre implements Serializable {
 
 	/**
 	 * Sets the URL of the Genre.
-	 * 
+	 *
 	 * @param url
 	 *            The URL of the Genre.
 	 */
@@ -92,7 +92,7 @@ public class Genre implements Serializable {
 
 	/**
 	 * The name of the Genre.
-	 * 
+	 *
 	 * @return The name of the Genre.
 	 */
 	public String getName() {
@@ -101,7 +101,7 @@ public class Genre implements Serializable {
 
 	/**
 	 * Sets the name of the Genre.
-	 * 
+	 *
 	 * @param name
 	 *            The name of the Genre.
 	 */
@@ -111,7 +111,7 @@ public class Genre implements Serializable {
 
 	/**
 	 * The ID of the Genre.
-	 * 
+	 *
 	 * @return The ID of the Genre.
 	 */
 	public int getID() {
@@ -120,7 +120,7 @@ public class Genre implements Serializable {
 
 	/**
 	 * Sets the ID of the Genre.
-	 * 
+	 *
 	 * @param ID
 	 *            The ID of the Genre.
 	 */
@@ -134,7 +134,7 @@ public class Genre implements Serializable {
 	 * Returns a Pair of objects. The first object is a boolean that denotes if
 	 * the list is translated. The second is the list of Genres. Will return
 	 * null if a valid API key was not supplied to the {@link GeneralSettings}.
-	 * 
+	 *
 	 * @return Returns a Pair of objects. The first object is a boolean that
 	 *         denotes if the list is translated. The second is the list of
 	 *         Genres. Will return null if a valid API key was not supplied to

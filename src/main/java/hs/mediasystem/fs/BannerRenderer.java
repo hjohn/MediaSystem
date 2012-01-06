@@ -12,7 +12,7 @@ import javafx.scene.layout.VBox;
 
 public class BannerRenderer implements CellProvider<MediaItem> {
   private final HBox group = new HBox();
-  
+
   private final Label title = new Label() {{
     setId("selectItem-listCell-title");
   }};
@@ -23,12 +23,12 @@ public class BannerRenderer implements CellProvider<MediaItem> {
       HBox.setHgrow(this, Priority.ALWAYS);
     }});
   }
-  
+
   @Override
   public Node configureCell(MediaItem item) {
     if(item != null) {
       ImageHandle banner = item.getBanner();
-      
+
       if(banner != null) {
         title.setGraphic(new ImageView(ImageCache.loadImage(banner)) {{
           setPreserveRatio(true);

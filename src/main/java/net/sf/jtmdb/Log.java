@@ -5,14 +5,14 @@ import java.util.Date;
 
 /**
  * This class provides static methods to print to the log.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class Log {
 
 	/**
 	 * This enumeration provides different verbosity levels of log output.
-	 * 
+	 *
 	 * @author Savvas Dalkitsis
 	 */
 	public static enum Verbosity {
@@ -32,7 +32,7 @@ public class Log {
 		/**
 		 * This method will test if this verbosity level is greater than the one
 		 * provided.
-		 * 
+		 *
 		 * @param verbosity
 		 *            The level against which to test.
 		 * @return True if this level of verbosity is greater than the one
@@ -64,7 +64,7 @@ public class Log {
 
 	/**
 	 * This is the header of each line in the log.
-	 * 
+	 *
 	 * @return The header of each line in the log.
 	 */
 	private static String header(Verbosity verbosity) {
@@ -81,7 +81,7 @@ public class Log {
 	/**
 	 * This method will print the provided string that ends with a newline
 	 * character to the log if it is enabled.
-	 * 
+	 *
 	 * @param text
 	 *            The text to print to the log.
 	 */
@@ -93,7 +93,7 @@ public class Log {
 	 * This method will print the provided string that ends with a newline
 	 * character to the log if it is enabled and the Log verbosity level is
 	 * equal to or greater than the one provided.
-	 * 
+	 *
 	 * @param text
 	 *            The text to print to the log.
 	 * @param verbosity
@@ -109,7 +109,7 @@ public class Log {
 	/**
 	 * This method will print the stack trace of a throwable to the log if it is
 	 * enabled.
-	 * 
+	 *
 	 * @param throwable
 	 *            The throwable whose stack to print to the log.
 	 */
@@ -121,7 +121,7 @@ public class Log {
 	 * This method will print the stack trace of a throwable to the log if it is
 	 * enabled and the Log verbosity level is equal to or greater than the one
 	 * provided.
-	 * 
+	 *
 	 * @param throwable
 	 *            The throwable whose stack to print to the log.
 	 * @param verbosity

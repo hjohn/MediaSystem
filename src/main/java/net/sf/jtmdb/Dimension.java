@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * This class holds a width and a height (integer values).
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class Dimension implements Serializable {
@@ -16,7 +16,7 @@ public class Dimension implements Serializable {
 
 	/**
 	 * Constructs a Dimension object with the specified dimensions.
-	 * 
+	 *
 	 * @param width
 	 *            The width.
 	 * @param height
@@ -36,7 +36,7 @@ public class Dimension implements Serializable {
 
 	/**
 	 * Sets the height of the dimension.
-	 * 
+	 *
 	 * @param height
 	 *            The height to set
 	 */
@@ -46,7 +46,7 @@ public class Dimension implements Serializable {
 
 	/**
 	 * Returns the height of the dimension.
-	 * 
+	 *
 	 * @return The height
 	 */
 	public int getHeight() {
@@ -55,7 +55,7 @@ public class Dimension implements Serializable {
 
 	/**
 	 * Sets the width of the dimension.
-	 * 
+	 *
 	 * @param width
 	 *            The width to set
 	 */
@@ -65,7 +65,7 @@ public class Dimension implements Serializable {
 
 	/**
 	 * Returns the width of the dimension.
-	 * 
+	 *
 	 * @return The width
 	 */
 	public int getWidth() {

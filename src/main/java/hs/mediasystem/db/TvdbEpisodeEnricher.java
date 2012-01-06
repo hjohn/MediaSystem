@@ -12,15 +12,15 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
   public TvdbEpisodeEnricher(String serieId) {
     this.serieId = serieId;
   }
-  
+
   @Override
   public void enrichItem(final Item item) throws ItemNotFoundException {
     TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 
     final Episode episode = tvDB.getEpisode(serieId, item.getSeason(), item.getEpisode(), "en");
-    
+
     System.out.println("TvdbEpisodeProvider: episode = " + episode + "; serieId = " + serieId);
-    
+
     try {
       byte[] poster = Downloader.readURL(new URL("http://thetvdb.com/banners/episodes/" + serieId + "/" + episode.getId() + ".jpg"));
 

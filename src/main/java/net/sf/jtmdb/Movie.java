@@ -29,7 +29,7 @@ import org.json.JSONObject;
  * "flavors". The normal one and a reduced one. The reduced is returned when
  * searching for movies and is missing some fields that are present when getting
  * the info for a specific movie.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class Movie implements Serializable {
@@ -162,7 +162,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Construct a movie object from a JSON object.
-	 * 
+	 *
 	 * @param jsonObject
 	 *            The JSON object describing the Movie.
 	 */
@@ -174,7 +174,7 @@ public class Movie implements Serializable {
 	/**
 	 * Construct a movie object from a JSON array containing the JSON object
 	 * describing the Movie.
-	 * 
+	 *
 	 * @param jsonObjectInArray
 	 *            A JSON array containing the JSON object describing the Movie.
 	 */
@@ -185,7 +185,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Returns the language of the Movie.
-	 * 
+	 *
 	 * @return The language of the Movie.
 	 */
 	public String getLanguage() {
@@ -194,7 +194,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the language of the Movie.
-	 * 
+	 *
 	 * @param language
 	 *            The language of the Movie.
 	 */
@@ -204,7 +204,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Returns the type of the Movie.
-	 * 
+	 *
 	 * @return The type of the Movie.
 	 */
 	public String getMovieType() {
@@ -213,7 +213,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the type of the Movie.
-	 * 
+	 *
 	 * @param movieType
 	 *            The type of the Movie.
 	 */
@@ -223,7 +223,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Returns true if the Movie is translated.
-	 * 
+	 *
 	 * @return True if the Movie is translated.
 	 */
 	public boolean isTranslated() {
@@ -232,7 +232,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets whether the Movie is translated.
-	 * 
+	 *
 	 * @param translated
 	 *            The translated flag of the Movie.
 	 */
@@ -242,7 +242,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Returns true if the Movie is adult only.
-	 * 
+	 *
 	 * @return True if the Movie is adult only.
 	 */
 	public boolean isAdult() {
@@ -251,7 +251,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets whether the Movie is adult only.
-	 * 
+	 *
 	 * @param adult
 	 *            The adult flag of the Movie.
 	 */
@@ -262,7 +262,7 @@ public class Movie implements Serializable {
 	/**
 	 * If true, the Movie object has reduced fields set (see class description
 	 * {@link Movie}).
-	 * 
+	 *
 	 * @return True if the Movie has reduced fields set.
 	 */
 	public boolean isReduced() {
@@ -272,7 +272,7 @@ public class Movie implements Serializable {
 	/**
 	 * Sets whether the Movie contains reduced information (see class
 	 * description {@link Movie}).
-	 * 
+	 *
 	 * @param isReduced
 	 *            True if the Movie has reduced fields set.
 	 */
@@ -282,7 +282,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The json string that created this Movie object.
-	 * 
+	 *
 	 * @return The json string that created this Movie object.
 	 */
 	public String getJsonOrigin() {
@@ -291,7 +291,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The prettyprinted json string that created this Movie object.
-	 * 
+	 *
 	 * @param indentFactor
 	 *            The number of spaces to add to each level of indentation.
 	 * @return The json string that created this Movie object.
@@ -307,7 +307,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The name of the Movie.
-	 * 
+	 *
 	 * @return The name of the Movie.
 	 */
 	public String getName() {
@@ -316,7 +316,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The Movie alternative name.
-	 * 
+	 *
 	 * @return The Movie alternative name.
 	 */
 	public String getAlternativeName() {
@@ -325,7 +325,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The Movie original name.
-	 * 
+	 *
 	 * @return The Movie original name.
 	 */
 	public String getOriginalName() {
@@ -335,7 +335,7 @@ public class Movie implements Serializable {
 	/**
 	 * The Movie tagline. Not present in reduced form (see class description
 	 * {@link Movie} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The Movie tagline. Not present in reduced form (see class
 	 *         description {@link Movie} and method {@link #isReduced()}).
 	 */
@@ -345,7 +345,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The Movie certification.
-	 * 
+	 *
 	 * @return The Movie certification.
 	 */
 	public String getCertification() {
@@ -355,7 +355,7 @@ public class Movie implements Serializable {
 	/**
 	 * The Movie Genres. Not present in reduced form (see class description
 	 * {@link Movie} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The Movie Genres. Not present in reduced form (see class
 	 *         description {@link Movie} and method {@link #isReduced()}).
 	 */
@@ -366,7 +366,7 @@ public class Movie implements Serializable {
 	/**
 	 * The Movie Studio. Not present in reduced form (see class description
 	 * {@link Movie} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The Movie Studio. Not present in reduced form (see class
 	 *         description {@link Movie} and method {@link #isReduced()}).
 	 */
@@ -377,7 +377,7 @@ public class Movie implements Serializable {
 	/**
 	 * The Movie Countries. Not present in reduced form (see class description
 	 * {@link Movie} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The Movie Countries. Not present in reduced form (see class
 	 *         description {@link Movie} and method {@link #isReduced()}).
 	 */
@@ -387,7 +387,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The Movie ID.
-	 * 
+	 *
 	 * @return The Movie ID.
 	 */
 	public int getID() {
@@ -396,7 +396,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The Movie Imdb ID.
-	 * 
+	 *
 	 * @return The Movie Imdb ID.
 	 */
 	public String getImdbID() {
@@ -405,7 +405,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The Movie Url.
-	 * 
+	 *
 	 * @return The Movie Url.
 	 */
 	public URL getUrl() {
@@ -414,7 +414,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The overview of the Movie.
-	 * 
+	 *
 	 * @return The overview of the Movie.
 	 */
 	public String getOverview() {
@@ -423,7 +423,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The Movie rating.
-	 * 
+	 *
 	 * @return The Movie rating.
 	 */
 	public double getRating() {
@@ -432,7 +432,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The Movie release Date.
-	 * 
+	 *
 	 * @return The Movie release Date.
 	 */
 	public Date getReleasedDate() {
@@ -441,7 +441,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The Date of the last modification.
-	 * 
+	 *
 	 * @return The Date of the last modification.
 	 */
 	public Date getLastModifiedAtDate() {
@@ -450,7 +450,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The version of the Movie.
-	 * 
+	 *
 	 * @return The version of the Movie.
 	 */
 	public int getVersion() {
@@ -459,7 +459,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The votes of the Movie.
-	 * 
+	 *
 	 * @return The votes of the Movie.
 	 */
 	public int getVotes() {
@@ -469,7 +469,7 @@ public class Movie implements Serializable {
 	/**
 	 * The Movie runtime. Not present in reduced form (see class description
 	 * {@link Movie} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The Movie runtime. Not present in reduced form (see class
 	 *         description {@link Movie} and method {@link #isReduced()}).
 	 */
@@ -480,7 +480,7 @@ public class Movie implements Serializable {
 	/**
 	 * The Movie budget. Not present in reduced form (see class description
 	 * {@link Movie} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The Movie budget. Not present in reduced form (see class
 	 *         description {@link Movie} and method {@link #isReduced()}).
 	 */
@@ -491,7 +491,7 @@ public class Movie implements Serializable {
 	/**
 	 * The Movie revenue. Not present in reduced form (see class description
 	 * {@link Movie} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The Movie revenue. Not present in reduced form (see class
 	 *         description {@link Movie} and method {@link #isReduced()}).
 	 */
@@ -502,7 +502,7 @@ public class Movie implements Serializable {
 	/**
 	 * The Movie home page. Not present in reduced form (see class description
 	 * {@link Movie} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The Movie home page. Not present in reduced form (see class
 	 *         description {@link Movie} and method {@link #isReduced()}).
 	 */
@@ -513,7 +513,7 @@ public class Movie implements Serializable {
 	/**
 	 * The Movie trailer. Not present in reduced form (see class description
 	 * {@link Movie} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The Movie trailer. Not present in reduced form (see class
 	 *         description {@link Movie} and method {@link #isReduced()}).
 	 */
@@ -524,7 +524,7 @@ public class Movie implements Serializable {
 	/**
 	 * The Movie cast. Not present in reduced form (see class description
 	 * {@link Movie} and method {@link #isReduced()}).
-	 * 
+	 *
 	 * @return The Movie cast. Not present in reduced form (see class
 	 *         description {@link Movie} and method {@link #isReduced()}).
 	 */
@@ -534,7 +534,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * The Movie images.
-	 * 
+	 *
 	 * @return The Movie images.
 	 */
 	public MovieImages getImages() {
@@ -543,7 +543,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the name of the Movie.
-	 * 
+	 *
 	 * @param name
 	 *            The name of the Movie.
 	 */
@@ -553,7 +553,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the alternative name of the Movie.
-	 * 
+	 *
 	 * @param alternativeName
 	 *            The alternative name of the Movie.
 	 */
@@ -563,7 +563,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the original name of the Movie.
-	 * 
+	 *
 	 * @param originalName
 	 *            The original name of the Movie.
 	 */
@@ -573,7 +573,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the tagline of the Movie.
-	 * 
+	 *
 	 * @param tagline
 	 *            The tagline of the Movie.
 	 */
@@ -583,7 +583,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the certification of the Movie.
-	 * 
+	 *
 	 * @param certification
 	 *            The certification of the Movie.
 	 */
@@ -593,7 +593,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the ID of the Movie.
-	 * 
+	 *
 	 * @param iD
 	 *            The ID of the Movie.
 	 */
@@ -603,7 +603,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the Imdb ID of the Movie.
-	 * 
+	 *
 	 * @param imdbID
 	 *            The Imdb ID of the Movie.
 	 */
@@ -613,7 +613,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the Url of the Movie.
-	 * 
+	 *
 	 * @param url
 	 *            The Url of the Movie.
 	 */
@@ -623,7 +623,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the overview of the Movie.
-	 * 
+	 *
 	 * @param overview
 	 *            The overview of the Movie.
 	 */
@@ -633,7 +633,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the rating of the Movie.
-	 * 
+	 *
 	 * @param rating
 	 *            The rating of the Movie.
 	 */
@@ -643,7 +643,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the release date of the Movie.
-	 * 
+	 *
 	 * @param releasedDate
 	 *            The release date of the Movie.
 	 */
@@ -653,7 +653,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the date of the last modification.
-	 * 
+	 *
 	 * @param lastModifiedAt
 	 *            The date of the last modification.
 	 */
@@ -663,7 +663,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the runtime of the Movie.
-	 * 
+	 *
 	 * @param runtime
 	 *            The runtime of the Movie.
 	 */
@@ -673,7 +673,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the budget of the Movie.
-	 * 
+	 *
 	 * @param budget
 	 *            The budget of the Movie.
 	 */
@@ -683,7 +683,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the revenue of the Movie.
-	 * 
+	 *
 	 * @param revenue
 	 *            The revenue of the Movie.
 	 */
@@ -693,7 +693,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the home page of the Movie.
-	 * 
+	 *
 	 * @param homepage
 	 *            The home page of the Movie.
 	 */
@@ -703,7 +703,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the trailer of the Movie.
-	 * 
+	 *
 	 * @param trailer
 	 *            The trailer of the Movie.
 	 */
@@ -713,7 +713,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the cast of the Movie.
-	 * 
+	 *
 	 * @param cast
 	 *            The cast of the Movie.
 	 */
@@ -724,7 +724,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the version of the Movie.
-	 * 
+	 *
 	 * @param version
 	 *            The version of the Movie.
 	 */
@@ -734,7 +734,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the votes of the Movie.
-	 * 
+	 *
 	 * @param votes
 	 *            The votes of the Movie.
 	 */
@@ -744,7 +744,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Adds the cast to the Movie.
-	 * 
+	 *
 	 * @param cast
 	 *            The cast of the Movie to add.
 	 */
@@ -754,7 +754,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Set the genres of the Movie.
-	 * 
+	 *
 	 * @param genres
 	 *            The genres of the Movie.
 	 */
@@ -765,7 +765,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Adds the studios to the Movie.
-	 * 
+	 *
 	 * @param studios
 	 *            The studios of the Movie to add.
 	 */
@@ -775,7 +775,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Set the studios of the Movie.
-	 * 
+	 *
 	 * @param studios
 	 *            The studios of the Movie.
 	 */
@@ -786,7 +786,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Adds the countries to the Movie.
-	 * 
+	 *
 	 * @param countries
 	 *            The countries of the Movie to add.
 	 */
@@ -796,7 +796,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Set the countries of the Movie.
-	 * 
+	 *
 	 * @param countries
 	 *            The countries of the Movie.
 	 */
@@ -807,7 +807,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Adds the genres to the Movie.
-	 * 
+	 *
 	 * @param genres
 	 *            The genres of the Movie to add.
 	 */
@@ -817,7 +817,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Sets the images of the Movie.
-	 * 
+	 *
 	 * @param images
 	 *            The images of the Movie.
 	 */
@@ -834,7 +834,7 @@ public class Movie implements Serializable {
 	 * <strong>This method relies on parsing the home page HTML of
 	 * themoviedb.org. So it is not 100% stable as the syntax of the web page
 	 * may change.</strong>
-	 * 
+	 *
 	 * @return A list of Movie objects in the box office with the full form (see
 	 *         class description {@link Movie} and method {@link #isReduced()}
 	 *         ).Will return null if a valid API key was not supplied to the
@@ -862,7 +862,7 @@ public class Movie implements Serializable {
 	 * <strong>This method relies on parsing the home page HTML of
 	 * themoviedb.org. So it is not 100% stable as the syntax of the web page
 	 * may change.</strong>
-	 * 
+	 *
 	 * @return A set of the IDs of the movies in the box office. Will return
 	 *         null if a valid API key was not supplied to the
 	 *         {@link GeneralSettings}
@@ -884,7 +884,7 @@ public class Movie implements Serializable {
 	 * <strong>This method relies on parsing the home page HTML of
 	 * themoviedb.org. So it is not 100% stable as the syntax of the web page
 	 * may change.</strong>
-	 * 
+	 *
 	 * @return A list of the most popular Movie objects with the full form (see
 	 *         class description {@link Movie} and method {@link #isReduced()}
 	 *         ).Will return null if a valid API key was not supplied to the
@@ -913,7 +913,7 @@ public class Movie implements Serializable {
 	 * <strong>This method relies on parsing the home page HTML of
 	 * themoviedb.org. So it is not 100% stable as the syntax of the web page
 	 * may change.</strong>
-	 * 
+	 *
 	 * @return A set of the IDs of the most popular movies. Will return null if
 	 *         a valid API key was not supplied to the {@link GeneralSettings}
 	 * @throws IOException
@@ -929,7 +929,7 @@ public class Movie implements Serializable {
 	 * This method gets the HTML of the home page of themoviedatabase.org and
 	 * parses it for a list of movies in the box office or in the most popular
 	 * list.
-	 * 
+	 *
 	 * @param part
 	 *            The part of the HTML to parse. 0 is for the box office and 1
 	 *            is for the most popular.
@@ -970,7 +970,7 @@ public class Movie implements Serializable {
 	 * class description {@link Movie} and method {@link #isReduced()}). Will
 	 * return null if a valid API key was not supplied to the
 	 * {@link GeneralSettings}
-	 * 
+	 *
 	 * @param name
 	 *            The name of the movie to search for.
 	 * @return A list of Movie objects with the full form (see class description
@@ -1036,7 +1036,7 @@ public class Movie implements Serializable {
 	 * list of Movie objects with the reduced form (see class description
 	 * {@link Movie} and method {@link #isReduced()}). Will return null if a
 	 * valid API key was not supplied to the {@link GeneralSettings}
-	 * 
+	 *
 	 * @param name
 	 *            The name of the movie to search for.
 	 * @return A list of Movie objects with the reduced form (see class
@@ -1102,7 +1102,7 @@ public class Movie implements Serializable {
 	 * {@link #isReduced()}). Will return null if a valid API key was not
 	 * supplied to the {@link GeneralSettings} or if the supplied ID did not
 	 * correspond to a Movie.
-	 * 
+	 *
 	 * @param ID
 	 *            The ID of the Movie.
 	 * @return A Movie object with the normal form (see class description
@@ -1144,7 +1144,7 @@ public class Movie implements Serializable {
 		}
 		return null;
 	}
-	
+
 	 public static Movie imdbLookup(String ID) throws IOException, JSONException {
 	    Log.log("Getting info for Movie with IMDB id " + ID, Verbosity.NORMAL);
 	    if (GeneralSettings.getApiKey() != null
@@ -1181,7 +1181,7 @@ public class Movie implements Serializable {
 	 * Gets the images for a specific Movie (by ID). Will return null if a valid
 	 * API key was not supplied to the {@link GeneralSettings} or if the
 	 * supplied ID did not correspond to a Movie.
-	 * 
+	 *
 	 * @param ID
 	 *            The ID of the Movie.
 	 * @return The images for a specific Movie (by ID). Will return null if a
@@ -1327,7 +1327,7 @@ public class Movie implements Serializable {
 	 * Gets the version information for a Movie by ID. Will return null if a
 	 * valid API key was not supplied to the {@link GeneralSettings} or if the
 	 * supplied ID did not correspond to a Movie.
-	 * 
+	 *
 	 * @param ID
 	 *            The ID of the Movie to get the version for.
 	 * @return Version information of a Movie by ID.
@@ -1385,7 +1385,7 @@ public class Movie implements Serializable {
 	 * Gets the version information for a list of Movies by ID. Will return null
 	 * if a valid API key was not supplied to the {@link GeneralSettings} and
 	 * will skip any IDs that did not correspond to a Movie.
-	 * 
+	 *
 	 * @param IDs
 	 *            The list of Movie IDs to get version information for.
 	 * @return Version information of a list of Movies by ID.
@@ -1459,7 +1459,7 @@ public class Movie implements Serializable {
 	 * Gets the version information for the last Movie in the database. Will
 	 * return null if a valid API key was not supplied to the
 	 * {@link GeneralSettings}.
-	 * 
+	 *
 	 * @return Version information for the last Movie in the database.
 	 * @throws IOException
 	 * @throws JSONException
@@ -1517,7 +1517,7 @@ public class Movie implements Serializable {
 	 * second is a list of Translation objects. Will return null if a valid API
 	 * key was not supplied to the {@link GeneralSettings} or if the supplied ID
 	 * did not correspond to a Movie.
-	 * 
+	 *
 	 * @param ID
 	 *            The ID of the Movie.
 	 * @return A Pair of objects. The first object is the MovieVersionInfo of
@@ -1539,7 +1539,7 @@ public class Movie implements Serializable {
 	 * second is a list of Translation objects. Will return null if a valid API
 	 * key was not supplied to the {@link GeneralSettings} or if the supplied ID
 	 * did not correspond to a Movie.
-	 * 
+	 *
 	 * @param imdbID
 	 *            The Imdb ID of the Movie.
 	 * @return A Pair of objects. The first object is the MovieVersionInfo of
@@ -1615,7 +1615,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Parses a JSON object wrapped in a JSON array and sets the Movie fields.
-	 * 
+	 *
 	 * @param jsonArray
 	 *            The JSON array containing the JSON object that describes the
 	 *            Movie.
@@ -1627,10 +1627,10 @@ public class Movie implements Serializable {
 			Log.log(e, Verbosity.ERROR);
 		}
 	}
-	
+
 	private static String getString(JSONObject jsonObject, String fieldName) throws JSONException {
 	  Object obj = jsonObject.get(fieldName);
-	  
+
 	  if(obj instanceof String) {
 	    return (String)obj;
 	  }
@@ -1639,7 +1639,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Parses a JSON object and sets the Movie fields.
-	 * 
+	 *
 	 * @param jsonObject
 	 *            The JSON object that describes the Movie.
 	 */
@@ -1785,7 +1785,7 @@ public class Movie implements Serializable {
 			if (lastModified != null) {
 				setLastModifiedAtDate(lastModified);
 			}
-			
+
 			setCertification(getString(jsonObject, "certification"));
 
 			setVersion(jsonObject.getInt("version"));
@@ -1919,7 +1919,7 @@ public class Movie implements Serializable {
 	 * with the reduced form (see class description {@link Movie} and method
 	 * {@link #isReduced()}). Will return null if a valid API key was not
 	 * supplied to the {@link GeneralSettings}
-	 * 
+	 *
 	 * @param options
 	 *            The settings that govern which Movies get returned.
 	 * @return A list of Movie objects with the reduced form (see class
@@ -1969,7 +1969,7 @@ public class Movie implements Serializable {
 
 	/**
 	 * Adds rating for a Movie. Requires an authenticated session.
-	 * 
+	 *
 	 * @param movieID
 	 *            The ID of the movie to rate.
 	 * @param rating

@@ -4,7 +4,7 @@ import java.util.Date;
 
 /**
  * This class represents version information.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public abstract class VersionInfo {
@@ -28,7 +28,7 @@ public abstract class VersionInfo {
 
 	/**
 	 * Contructs a VersionInfo object.
-	 * 
+	 *
 	 * @param name
 	 *            The name of the object.
 	 * @param ID
@@ -47,7 +47,7 @@ public abstract class VersionInfo {
 
 	/**
 	 * The ID of the object.
-	 * 
+	 *
 	 * @return The ID of the object.
 	 */
 	public int getID() {
@@ -56,7 +56,7 @@ public abstract class VersionInfo {
 
 	/**
 	 * The name of the object.
-	 * 
+	 *
 	 * @return The name of the object.
 	 */
 	public String getName() {
@@ -65,7 +65,7 @@ public abstract class VersionInfo {
 
 	/**
 	 * The version of the object.
-	 * 
+	 *
 	 * @return The version of the object.
 	 */
 	public int getVersion() {
@@ -74,7 +74,7 @@ public abstract class VersionInfo {
 
 	/**
 	 * The date of the last modification of the object.
-	 * 
+	 *
 	 * @return The date of the last modification of the object.
 	 */
 	public Date getLastModified() {

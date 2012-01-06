@@ -12,12 +12,12 @@ public class StateCache {
       return size() > 100;
     }
   };
-  
+
   public void putState(Object key, State state) {
     System.out.println("[FINE] StateCache: adding state with key: " + key);
     states.put(key, state);
   }
-  
+
   public State getState(Object key) {
     return states.get(key);
   }

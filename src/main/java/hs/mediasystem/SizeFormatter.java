@@ -15,7 +15,7 @@ public class SizeFormatter {
     new Format("%.1f TB", 1024L * 1024 * 1024 * 1024, 100),
     new Format("%.0f TB", 1024L * 1024 * 1024 * 1024)
   });
-  
+
   public static final FormatSet DURATION = new FormatSet(new Format[] {
     new Format("%.0f seconds", 1, 60),
     new Format("%s minutes and %s seconds", 60 * 60, new Format("%.0f", 60), new Format("%.0f", 1)),
@@ -24,8 +24,8 @@ public class SizeFormatter {
   });
 
   public static final FormatSet SECONDS_AS_POSITION = new FormatSet(new Format[] {
-    new Format("%s:%s", 60 * 60, new Format("%.0f", 60), new Format("%02.0f", 1)),  // m:ss 
-    new Format("%s:%s:%s", -1, new Format("%.0f", 60 * 60), new Format("%02.0f", 60), new Format("%02.0f", 1))  // h:mm:ss  
+    new Format("%s:%s", 60 * 60, new Format("%.0f", 60), new Format("%02.0f", 1)),  // m:ss
+    new Format("%s:%s:%s", -1, new Format("%.0f", 60 * 60), new Format("%02.0f", 60), new Format("%02.0f", 1))  // h:mm:ss
   });
 
   public static String formatBytes(long bytes) {
@@ -33,30 +33,30 @@ public class SizeFormatter {
 
     return b / 1024 + " kB";
   }
-  
+
   public static class FormatSet implements Iterable<Format> {
     private final Format[] formats;
 
     public FormatSet(Format... formats) {
       this.formats = formats;
     }
-    
+
     @Override
     public Iterator<Format> iterator() {
-      return Arrays.asList(formats).iterator(); 
+      return Arrays.asList(formats).iterator();
     }
-    
+
     public String format(long number) {
       for(Format format : formats) {
         if(format.isApplicable(number)) {
           return format.format(number);
         }
       }
-      
+
       return null;  // Code should never get here
     }
   }
-  
+
   private static class Format {
     private final String formatString;
     private final long cutOff;
@@ -69,11 +69,11 @@ public class SizeFormatter {
       this.divisor = divisor;
       this.formats = null;
     }
-    
+
     public Format(String formatString, long divisor) {
       this(formatString, divisor, -1);
     }
-    
+
     public Format(String formatString, long cutOff, Format... formats) {
       this.formatString = formatString;
       this.cutOff = cutOff;
@@ -84,7 +84,7 @@ public class SizeFormatter {
     public boolean isApplicable(long number) {
       return cutOff < 0 || number < cutOff * divisor - divisor / 2;
     }
-    
+
     public String format(long number) {
       if(formats == null) {
         return String.format(formatString, ((double)number) / divisor);
@@ -92,13 +92,13 @@ public class SizeFormatter {
       else {
         String[] args = new String[formats.length];
         long n = number;
-        
+
         for(int i = 0; i < formats.length; i++) {
           long mod = i == formats.length - 1 ? 0 : n % formats[i].divisor;
-          args[i] = formats[i].format(n - mod); 
+          args[i] = formats[i].format(n - mod);
           n = mod;
         }
-        
+
         return String.format(formatString, (Object[])args);
       }
     }

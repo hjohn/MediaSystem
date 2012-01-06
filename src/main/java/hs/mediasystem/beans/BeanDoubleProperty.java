@@ -17,7 +17,7 @@ public final class BeanDoubleProperty extends SimpleDoubleProperty {
       initialized = true;
       set(accessor.read());
     }
-    
+
     return super.get();
   }
 

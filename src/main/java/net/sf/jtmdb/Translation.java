@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * This class describes a translation of a Movie.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class Translation implements Serializable {
@@ -32,7 +32,7 @@ public class Translation implements Serializable {
 
 	/**
 	 * Gets the English name of the translation.
-	 * 
+	 *
 	 * @return The English name of the translation.
 	 */
 	public String getEnglishName() {
@@ -41,7 +41,7 @@ public class Translation implements Serializable {
 
 	/**
 	 * Gets the native name of the translation.
-	 * 
+	 *
 	 * @return The native name of the translation.
 	 */
 	public String getNativeName() {
@@ -50,7 +50,7 @@ public class Translation implements Serializable {
 
 	/**
 	 * Gets the ISO_639_1 code of the translation.
-	 * 
+	 *
 	 * @return The ISO_639_1 code of the translation.
 	 */
 	public String getIso639_1() {

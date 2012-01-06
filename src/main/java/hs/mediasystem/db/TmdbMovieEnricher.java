@@ -22,19 +22,19 @@ public class TmdbMovieEnricher implements ItemEnricher {
   @Override
   public void enrichItem(Item item) {
     final String fileName = item.getPath().getFileName().toString();
-    
+
     String title = item.getTitle();
     String subtitle = item.getSubtitle();
     String year = extractYear(item.getReleaseDate());
     int seq = item.getSeason();
-    
+
     try {
       String bestMatchingImdbNumber = null;
-      
+
       if(item.getImdbId() != null) {
         bestMatchingImdbNumber = item.getImdbId();
       }
-      
+
       if(bestMatchingImdbNumber == null) {
         TreeSet<Score> scores = new TreeSet<Score>(new Comparator<Score>() {
           @Override
@@ -42,7 +42,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
             return Double.compare(o2.score, o1.score);
           }
         });
-        
+
         for(Movie movie : Movie.search(title)) {
           String movieYear = extractYear(movie.getReleasedDate());
           double score = 0;
@@ -55,33 +55,33 @@ public class TmdbMovieEnricher implements ItemEnricher {
           }
 
           String searchString = title;
-          
+
           if(seq > 1) {
             searchString += " " + seq;
           }
           if(subtitle.length() > 0) {
             searchString += " " + subtitle;
           }
-          
+
           System.out.println(movie.getName() + " -vs- " + searchString);
           double matchScore = Levenshtein.compare(movie.getName().toLowerCase(), searchString.toLowerCase());
-          
+
           score += matchScore * 90;
 
           scores.add(new Score(movie, score));
           System.out.println(new Score(movie, score));
         }
-        
+
         if(!scores.isEmpty()) {
           bestMatchingImdbNumber = scores.first().movie.getImdbID();
           System.out.println("Best was: " + scores.first());
         }
       }
-      
+
       if(bestMatchingImdbNumber != null) {
         System.out.println("best mathcing imdb number: " + bestMatchingImdbNumber);
         final Movie movie = Movie.imdbLookup(bestMatchingImdbNumber);
-  
+
         System.out.println("Found movie:");
         System.out.println("name: " + movie.getName());  // TODO nullpointer here if IMDB is faulty (could be in filename)
         System.out.println("released date: " + movie.getReleasedDate());
@@ -95,16 +95,16 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
         if(images.posters.size() > 0) {
           MoviePoster poster = images.posters.iterator().next();
-          
+
           url = poster.getLargestImage();
         }
-        
+
         if(images.backdrops.size() > 0) {
           MovieBackdrop background = images.backdrops.iterator().next();
-          
+
           backgroundURL = background.getLargestImage();
         }
-        
+
         final byte[] poster = url != null ? Downloader.readURL(url) : null;
         final byte[] background = backgroundURL != null ? Downloader.readURL(backgroundURL) : null;
 
@@ -120,13 +120,13 @@ public class TmdbMovieEnricher implements ItemEnricher {
         item.setReleaseDate(movie.getReleasedDate());
         item.setRuntime(movie.getRuntime());
         item.setType("movie");
-          
+
 //          for(CastInfo castInfo : movie.getCast()) {
 //            castInfo.getCharacterName();
 //            castInfo.getID();
 //            castInfo.getName();
 //            castInfo.getThumb();
-//            
+//
 //            addCastMember(castInfo.getCastID(), castInfo.getName(), castInfo.getCharacterName());
 //          }
       }
@@ -141,7 +141,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
       throw new RuntimeException(e);
     }
   }
-  
+
   private static class Score {
     private final Movie movie;
     private final double score;
@@ -150,18 +150,18 @@ public class TmdbMovieEnricher implements ItemEnricher {
       this.movie = movie;
       this.score = score;
     }
-    
+
     @Override
     public String toString() {
-      return String.format("Score[%10.2f, " + movie.getImdbID() + " : " + movie.getName() + " : " + movie.getReleasedDate() + "]", score); 
+      return String.format("Score[%10.2f, " + movie.getImdbID() + " : " + movie.getName() + " : " + movie.getReleasedDate() + "]", score);
     }
   }
-  
+
   private static String extractYear(Date date) {
     if(date == null) {
       return "";
     }
-    
+
     GregorianCalendar gc = new GregorianCalendar();
     gc.setTime(date);
     return "" + gc.get(Calendar.YEAR);

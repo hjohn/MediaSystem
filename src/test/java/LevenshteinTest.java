@@ -17,10 +17,10 @@ public class LevenshteinTest {
     this.text = text;
     this.matchText = matchText;
   }
-  
+
   @Parameters
   public static Collection<Object[]> data() {
-    return Arrays.asList(new Object[][] 
+    return Arrays.asList(new Object[][]
       {
         {"Star Wars", "Star Warz"},
         {"Star Wars", "Staar Wars"},
@@ -38,7 +38,7 @@ public class LevenshteinTest {
       }
     );
   }
-  
+
   @Test
   public void test() {
     double compare = Levenshtein.compare(text.toLowerCase(), matchText.toLowerCase());

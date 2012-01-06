@@ -18,7 +18,7 @@ import org.json.JSONObject;
 /**
  * This class provides methods that links movie information with media formats
  * such as DVDs.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class Media {
@@ -34,7 +34,7 @@ public class Media {
 	/**
 	 * This enumeration provides the type of Media available for tagging Movies
 	 * with.
-	 * 
+	 *
 	 * @author Savvas Dalkitsis
 	 */
 	public static enum MediaType {
@@ -63,7 +63,7 @@ public class Media {
 	 * id's can be useful for identifying movies without having to worry about
 	 * their file name.</br></br>The method will calculate the hash of the
 	 * supplied file for you.</br</br>Requires an authenticated session.
-	 * 
+	 *
 	 * @param movieID
 	 *            The ID of the TMDb movie you are tagging with the hash.
 	 * @param mediaFile
@@ -87,7 +87,7 @@ public class Media {
 	 * id's can be useful for identifying movies without having to worry about
 	 * their file name.</br></br>The method will calculate the hash of the
 	 * supplied file for you.</br</br>Requires an authenticated session.
-	 * 
+	 *
 	 * @param movieID
 	 *            The ID of the TMDb movie you are tagging with the hash.
 	 * @param mediaFile
@@ -115,7 +115,7 @@ public class Media {
 	 * are supported. More about these id's and hashes can be found <a
 	 * href="http://api.themoviedb.org/2.1/ids-hashes">here</a>.</br> </br>
 	 * Requires an authenticated session.
-	 * 
+	 *
 	 * @param movieID
 	 *            The ID of the TMDb movie you are tagging with the hash.
 	 * @param mediaHash
@@ -145,7 +145,7 @@ public class Media {
 	 * are supported. More about these id's and hashes can be found <a
 	 * href="http://api.themoviedb.org/2.1/ids-hashes">here</a>.</br> </br>
 	 * Requires an authenticated session.
-	 * 
+	 *
 	 * @param movieID
 	 *            The ID of the TMDb movie you are tagging with the hash.
 	 * @param mediaHash
@@ -232,7 +232,7 @@ public class Media {
 	 * {@link Movie} and method {@link #isReduced()}). Will return null if a
 	 * valid API key was not supplied to the {@link GeneralSettings} or if the
 	 * supplied media file was not correspond to a movie in the database.
-	 * 
+	 *
 	 * @param mediaFile
 	 *            The file to get the Movie info for.
 	 * @return A list of Movie objects with the normal form (see class
@@ -254,7 +254,7 @@ public class Media {
 	 * and method {@link #isReduced()}). Will return null if a valid API key was
 	 * not supplied to the {@link GeneralSettings} or if the supplied DVD ID did
 	 * not correspond to a movie.
-	 * 
+	 *
 	 * @param dvdID
 	 *            The ID of the DVD.
 	 * @return A Movie object with the normal form (see class description
@@ -306,7 +306,7 @@ public class Media {
 	 * Will return null if a valid API key was not supplied to the
 	 * {@link GeneralSettings} or if the supplied hash and byte size did not
 	 * correspond to a movie.
-	 * 
+	 *
 	 * @param hash
 	 *            The hash of the file.
 	 * @param byteSize
@@ -362,7 +362,7 @@ public class Media {
 	/**
 	 * This method calculates the hash of the file based on the size + 64bit
 	 * checksum of the first and last 64k.
-	 * 
+	 *
 	 * @param f
 	 *            The file to calculate the checksum for.
 	 * @return The hex value of the checksum.

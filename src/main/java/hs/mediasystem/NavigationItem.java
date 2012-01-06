@@ -11,11 +11,11 @@ public class NavigationItem {
     this.node = node;
     this.stage = stage;
   }
-  
+
   public Node getNode() {
     return node;
   }
-  
+
   public String getStage() {
     return stage;
   }

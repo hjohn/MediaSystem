@@ -4,7 +4,7 @@ import java.util.Date;
 
 /**
  * This class represents version information for a Movie.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class MovieVersionInfo extends VersionInfo {
@@ -32,7 +32,7 @@ public class MovieVersionInfo extends VersionInfo {
 
 	/**
 	 * The imdb ID of the Movie.
-	 * 
+	 *
 	 * @return The imdb ID of the Movie.
 	 */
 	public String getImdbID() {

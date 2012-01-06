@@ -15,7 +15,7 @@ public class ItemsDao {
   public static final int VERSION = 2;
 
   private Connection connection;
-  
+
   public ItemsDao() throws ClassNotFoundException {
     Class.forName("org.postgresql.Driver");
   }
@@ -25,23 +25,23 @@ public class ItemsDao {
       connection = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/mediasystem", "postgres", "W2rdpass");
       connection.prepareStatement("SET search_path = public").execute();
     }
-    
+
     return connection;
   }
-  
+
   public Item getItem(Path path) throws ItemNotFoundException {
     String fileName = path.getFileName().toString();
-    
+
     try {
       Connection connection = getConnection();
-      
+
       PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE localname = ?");
-      
+
       statement.setString(1, fileName);
-      
+
       System.out.println("[FINE] Selecting item with localname = '" + fileName + "'");
       final ResultSet rs = statement.executeQuery();
-      
+
       if(rs.next()) {
         return new Item(path) {{
           setId(rs.getInt("id"));
@@ -64,23 +64,23 @@ public class ItemsDao {
           setSubtitle(rs.getString("subtitle"));
         }};
       }
-      
+
       throw new ItemNotFoundException();
     }
     catch(SQLException e) {
       throw new RuntimeException(e);
     }
   }
-  
+
   public void storeItem(Item item) {
     try {
       Connection connection = getConnection();
 
       Map<String, Object> parameters = createFieldMap(item);
-      
+
       StringBuilder fields = new StringBuilder();
       StringBuilder values = new StringBuilder();
-            
+
       for(String key : parameters.keySet()) {
         if(fields.length() > 0) {
           fields.append(",");
@@ -90,7 +90,7 @@ public class ItemsDao {
         fields.append(key);
         values.append("?");
       }
-      
+
       PreparedStatement statement = connection.prepareStatement(
         "INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")"
       );
@@ -108,9 +108,9 @@ public class ItemsDao {
       Connection connection = getConnection();
 
       Map<String, Object> parameters = createFieldMap(item);
-      
+
       StringBuilder set = new StringBuilder();
-            
+
       for(String key : parameters.keySet()) {
         if(set.length() > 0) {
           set.append(",");
@@ -119,15 +119,15 @@ public class ItemsDao {
         set.append(key);
         set.append("=?");
       }
-      
+
       PreparedStatement statement = connection.prepareStatement(
         "UPDATE items SET " + set.toString() + " WHERE id = ?"
       );
-      
+
       parameters.put("1", item.getId());
 
       System.out.println("Updating item with id: " + item.getId());
-      
+
       setParameters(parameters, statement);
       statement.execute();
     }
@@ -138,10 +138,10 @@ public class ItemsDao {
 
   private static void setParameters(Map<String, Object> columns, PreparedStatement statement) throws SQLException {
     int parameterIndex = 1;
-    
+
     for(String key : columns.keySet()) {
       Object value = columns.get(key);
-    
+
       if(value instanceof Date) {
         statement.setTimestamp(parameterIndex++, new Timestamp(((Date)value).getTime()));
       }
@@ -153,7 +153,7 @@ public class ItemsDao {
 
   private static Map<String, Object> createFieldMap(Item item) {
     Map<String, Object> columns = new LinkedHashMap<String, Object>();
-    
+
     columns.put("localname", item.getLocalName());
     columns.put("imdbid", item.getImdbId());
     columns.put("provider", item.getProvider());
@@ -174,7 +174,7 @@ public class ItemsDao {
     columns.put("episode", item.getEpisode());
     columns.put("type", item.getType());
     columns.put("subtitle", item.getSubtitle());
-    
+
     return columns;
   }
 }

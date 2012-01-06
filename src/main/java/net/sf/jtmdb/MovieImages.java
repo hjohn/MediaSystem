@@ -6,7 +6,7 @@ import java.util.Set;
 
 /**
  * This class represents the images of a Movie. Contains posters and backdrops.
- * 
+ *
  * @author Savvas Dalkitsis
  */
 public class MovieImages implements Serializable {

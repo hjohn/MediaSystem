@@ -33,10 +33,10 @@ public class MainScreen {
   public MainScreen(ProgramController controller) {
     this.controller = controller;
   }
-  
+
   public Node create() {
     final BorderPane root = new BorderPane();
-    
+
     final List<Button> buttons = new ArrayList<Button>() {{
       add(new Button("Movies") {{
         setGraphic(new ImageView(new Image("images/package_multimedia.png")));
@@ -51,7 +51,7 @@ public class MainScreen {
         setGraphic(new ImageView(new Image("images/tv.png")));
       }});
     }};
-    
+
 
     final VBox menuBox = new VBox() {{
       getChildren().addAll(buttons);
@@ -73,17 +73,17 @@ public class MainScreen {
       public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
         Timeline timeline = new Timeline();
         Button b = (Button)(((ReadOnlyProperty<? extends Boolean>)observable).getBean());
-        
+
         double d = b.getParent().getLayoutBounds().getHeight();
         timeline.getKeyFrames().addAll(
           new KeyFrame(Duration.ZERO, new KeyValue(menuBox.translateYProperty(), menuBox.getTranslateY())),
           new KeyFrame(new Duration(500), new KeyValue(menuBox.translateYProperty(), -b.getLayoutY() + d / 2))
         );
-        
+
         timeline.play();
       }
     };
-    
+
     for(final Button button : buttons) {
       button.focusedProperty().addListener(changeListener);
 //      button.addEventHandler(EventType.ROOT, new EventHandler<Event>() {
@@ -93,28 +93,28 @@ public class MainScreen {
 //        }
 //      });
     }
-    
+
     buttons.get(0).setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
         controller.showSelectItemScreen(new MoviesMediaTree(Paths.get(controller.getIni().getValue("general", "movies.path"))));
       }
     });
-    
+
     buttons.get(1).setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
         controller.showSelectItemScreen(new SeriesMediaTree(Paths.get(controller.getIni().getValue("general", "series.path"))));
       }
     });
-    
+
     root.setCenter(box);
-    
+
     root.setTop(new HBox() {{
       setId("top-bar");
       getChildren().add(new Label("MediaSystem"));
     }});
-    
+
     return root;
   }
 }
