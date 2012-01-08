@@ -73,7 +73,7 @@
           <groupId>javafx</groupId>
           <artifactId>javafx</artifactId>
           <scope>system</scope>
-          <systemPath>C:\Program Files (x86)\Oracle\JavaFX 2.0 SDK\rt\lib\jfxrt.jar</systemPath>
+          <systemPath>C:\Program Files\Oracle\JavaFX 2.0 SDK\rt\lib\jfxrt.jar</systemPath>
           <version>2.0</version>
         </dependency>
 	</dependencies>
