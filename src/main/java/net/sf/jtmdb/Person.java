@@ -89,7 +89,7 @@ public class Person implements Serializable {
 	/**
 	 * The filmography of the person. Not present in reduced form.
 	 */
-	private Set<FilmographyInfo> filmography = new LinkedHashSet<FilmographyInfo>();
+	private Set<FilmographyInfo> filmography = new LinkedHashSet<>();
 	/**
 	 * The birthday of the person. Not present in reduced form.
 	 */
@@ -97,7 +97,7 @@ public class Person implements Serializable {
 	/**
 	 * The aliases of the person. Not present in reduced form.
 	 */
-	private Set<String> aka = new LinkedHashSet<String>();
+	private Set<String> aka = new LinkedHashSet<>();
 
 	/**
 	 * Construct a person object from a JSON object.
@@ -493,7 +493,7 @@ public class Person implements Serializable {
 				if (prof == null) {
 					prof = new PersonProfile(id);
 				}
-				prof.setImage(ps, new Pair<Dimension, URL>(profileD, url));
+				prof.setImage(ps, new Pair<>(profileD, url));
 				setProfile(prof);
 			}
 			Date lastModified = null;
@@ -606,7 +606,7 @@ public class Person implements Serializable {
 							+ GeneralSettings.API_MODE_URL + "/"
 							+ GeneralSettings.getApiKey() + "/" + name);
 					String jsonString = Utilities.readUrlResponse(call).trim();
-					List<Person> results = new LinkedList<Person>();
+					List<Person> results = new LinkedList<>();
 					if ((jsonString.startsWith("[") || jsonString
 							.startsWith("{"))
 							&& !jsonString.equals("[\"Nothing found.\"]")) {
@@ -672,7 +672,7 @@ public class Person implements Serializable {
 							+ GeneralSettings.API_MODE_URL + "/"
 							+ GeneralSettings.getApiKey() + "/" + name);
 					String jsonString = Utilities.readUrlResponse(call).trim();
-					List<Person> results = new LinkedList<Person>();
+					List<Person> results = new LinkedList<>();
 					if ((jsonString.startsWith("[") || jsonString
 							.startsWith("{"))
 							&& !jsonString.equals("[\"Nothing found.\"]")) {
@@ -846,7 +846,7 @@ public class Person implements Serializable {
 				if ((jsonString.startsWith("[") || jsonString.startsWith("{"))
 						&& !jsonString.equals("[\"Nothing found.\"]")) {
 					JSONArray jsonArray = new JSONArray(jsonString.toString());
-					List<PersonVersionInfo> versionInfo = new LinkedList<PersonVersionInfo>();
+					List<PersonVersionInfo> versionInfo = new LinkedList<>();
 					for (int i = 0; i < jsonArray.length(); i++) {
 						JSONObject jsonObject = jsonArray.getJSONObject(i);
 						String name = jsonObject.getString("name");

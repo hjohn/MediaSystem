@@ -111,7 +111,7 @@ public enum ServerResponse {
 	public void setCode(int code) {
 		this.code = code;
 		if (pool == null) {
-			pool = new HashMap<Integer, ServerResponse>();
+			pool = new HashMap<>();
 		}
 		pool.put(code, this);
 	}

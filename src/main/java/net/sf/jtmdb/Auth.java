@@ -50,16 +50,16 @@ public class Auth {
 					JSONObject jsonObject = new JSONObject(jsonString
 							.toString());
 					if (jsonObject.has("code")) {
-						return new Pair<Session, ServerResponse>(null,
+						return new Pair<>(null,
 								ServerResponse.forID(jsonObject.getInt("code")));
 					}
 					String userName = jsonObject.getString("username");
 					String session = jsonObject.getString("session");
-					return new Pair<Session, ServerResponse>(new Session(
+					return new Pair<>(new Session(
 							userName, session), ServerResponse.SUCCESS);
 				} catch (JSONException e) {
 					Log.log(e, Verbosity.NORMAL);
-					return new Pair<Session, ServerResponse>(null,
+					return new Pair<>(null,
 							ServerResponse.UNKNOWN_ERROR);
 				}
 			} catch (IOException e) {

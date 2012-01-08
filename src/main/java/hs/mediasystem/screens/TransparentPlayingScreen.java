@@ -243,13 +243,13 @@ public class TransparentPlayingScreen extends StackPane {
           if(getChildren().size() == 1) {
             List<Option> options = FXCollections.observableArrayList(
               new NumericOption(controller.getPlayer().volumeProperty(), "Volume", "%3.0f%%", 1, 0, 100),
-              new ListOption<Subtitle>("Subtitle", controller.getPlayer().subtitleProperty(), controller.getPlayer().getSubtitles(), new StringConverter<Subtitle>() {
+              new ListOption<>("Subtitle", controller.getPlayer().subtitleProperty(), controller.getPlayer().getSubtitles(), new StringConverter<Subtitle>() {
                 @Override
                 public String toString(Subtitle object) {
                   return object.getDescription();
                 }
               }),
-              new ListOption<AudioTrack>("Audio Track", controller.getPlayer().audioTrackProperty(), controller.getPlayer().getAudioTracks(), new StringConverter<AudioTrack>() {
+              new ListOption<>("Audio Track", controller.getPlayer().audioTrackProperty(), controller.getPlayer().getAudioTracks(), new StringConverter<AudioTrack>() {
                 @Override
                 public String toString(AudioTrack object) {
                   return object.getDescription();
@@ -273,13 +273,13 @@ public class TransparentPlayingScreen extends StackPane {
                       }
                     });
 
-                    add(new ListOption<SubtitleProvider>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringConverter<SubtitleProvider>() {
+                    add(new ListOption<>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringConverter<SubtitleProvider>() {
                       @Override
                       public String toString(SubtitleProvider object) {
                         return object.getName();
                       }
                     }));
-                    add(new ListViewOption<SubtitleDescriptor>("Subtitles for Download", selectedSubtitleForDownload, subtitleSelector.getSubtitles(), new StringConverter<SubtitleDescriptor>() {
+                    add(new ListViewOption<>("Subtitles for Download", selectedSubtitleForDownload, subtitleSelector.getSubtitles(), new StringConverter<SubtitleDescriptor>() {
                       @Override
                       public String toString(SubtitleDescriptor object) {
                         return object.getName() + " (" + object.getLanguageName() + ") [" + object.getType() + "]";

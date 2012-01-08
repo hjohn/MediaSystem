@@ -10,7 +10,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 
 public class NavigationHistory<T> {
-  private final List<T> stack = new ArrayList<T>();
+  private final List<T> stack = new ArrayList<>();
 
   private int currentStackIndex = -1;
 
@@ -38,7 +38,7 @@ public class NavigationHistory<T> {
   }
 
   public List<T> getPath() {
-    List<T> list = new ArrayList<T>();
+    List<T> list = new ArrayList<>();
 
     for(int index = 0; index <= currentStackIndex; index++) {
       list.add(stack.get(index));
@@ -55,7 +55,7 @@ public class NavigationHistory<T> {
     return stack.isEmpty();
   }
 
-  private final ObjectProperty<EventHandler<ActionEvent>> onAction = new SimpleObjectProperty<EventHandler<ActionEvent>>();
+  private final ObjectProperty<EventHandler<ActionEvent>> onAction = new SimpleObjectProperty<>();
 
   public EventHandler<ActionEvent> getOnAction() {
     return onAction.get();

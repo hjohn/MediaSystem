@@ -24,7 +24,7 @@ public class SubtitleSelector {
   public void setSubtitleProvider(SubtitleProvider provider) { subtitleProvider.set(provider); }
   public ObjectProperty<SubtitleProvider> subtitleProviderProperty() { return subtitleProvider; }
 
-  private final List<SubtitleProvider> subtitleProviders = new ArrayList<SubtitleProvider>();
+  private final List<SubtitleProvider> subtitleProviders = new ArrayList<>();
   public List<SubtitleProvider> getSubtitleProviders() { return Collections.unmodifiableList(subtitleProviders); }
 
   private final ObservableList<SubtitleDescriptor> subtitles = FXCollections.observableArrayList();

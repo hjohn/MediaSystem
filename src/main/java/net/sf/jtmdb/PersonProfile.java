@@ -28,7 +28,7 @@ public class PersonProfile implements Serializable {
 	/**
 	 * The urls and dimensions for the different sizes of the profile image.
 	 */
-	private Map<Size, Pair<Dimension, URL>> info = new HashMap<Size, Pair<Dimension, URL>>();
+	private Map<Size, Pair<Dimension, URL>> info = new HashMap<>();
 
 	/**
 	 * The ID of the profile image.

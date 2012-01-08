@@ -20,7 +20,7 @@ public class VLCPlayerFactory implements PlayerFactory {
     NativeLibrary.addSearchPath("libvlc", main.getDefault("libvlcSearchPath", "c:/program files/VideoLAN/VLC"));
 
     Section section = ini.getSection("vlc.args");
-    List<String> args = new ArrayList<String>();
+    List<String> args = new ArrayList<>();
 
     for(String key : section) {
       args.add(key);

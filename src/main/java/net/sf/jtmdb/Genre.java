@@ -159,7 +159,7 @@ public class Genre implements Serializable {
 					JSONArray jsonArray = new JSONArray(jsonString.toString());
 					JSONObject jsonObject = jsonArray.getJSONObject(0);
 					boolean translated = jsonObject.getBoolean("translated");
-					Set<Genre> genres = new LinkedHashSet<Genre>();
+					Set<Genre> genres = new LinkedHashSet<>();
 					for (int i = 1; i < jsonArray.length(); i++) {
 						jsonObject = jsonArray.getJSONObject(i);
 						String genreName = jsonObject.getString("name");
@@ -172,7 +172,7 @@ public class Genre implements Serializable {
 						int ID = jsonObject.getInt("id");
 						genres.add(new Genre(genreUrl, genreName, ID));
 					}
-					return new Pair<Boolean, Set<Genre>>(translated, genres);
+					return new Pair<>(translated, genres);
 				} else {
 					Log.log("Getting list of Genres returned no results",
 							Verbosity.NORMAL);

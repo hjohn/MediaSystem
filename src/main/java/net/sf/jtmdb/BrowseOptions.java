@@ -392,7 +392,7 @@ public class BrowseOptions implements Serializable {
 	 */
 	public void addGenres(int... genreIDs) {
 		if (genres == null) {
-			genres = new LinkedHashSet<Integer>();
+			genres = new LinkedHashSet<>();
 		}
 		for (int ID : genreIDs) {
 			genres.add(ID);
@@ -407,7 +407,7 @@ public class BrowseOptions implements Serializable {
 	 */
 	public void addGenres(Genre... genres) {
 		if (this.genres == null) {
-			this.genres = new LinkedHashSet<Integer>();
+			this.genres = new LinkedHashSet<>();
 		}
 		for (Genre g : genres) {
 			this.genres.add(g.getID());
@@ -708,7 +708,7 @@ public class BrowseOptions implements Serializable {
 	 */
 	public void addCertifications(String... certifications) {
 		if (this.certifications == null) {
-			this.certifications = new LinkedHashSet<String>();
+			this.certifications = new LinkedHashSet<>();
 		}
 		for (String certification : certifications) {
 			this.certifications.add(certification);
@@ -753,7 +753,7 @@ public class BrowseOptions implements Serializable {
 	 */
 	public void addCompanies(String... companies) {
 		if (this.companies == null) {
-			this.companies = new LinkedHashSet<String>();
+			this.companies = new LinkedHashSet<>();
 		}
 		for (String company : companies) {
 			this.companies.add(company);
@@ -798,7 +798,7 @@ public class BrowseOptions implements Serializable {
 	 */
 	public void addCountries(String... countries) {
 		if (this.countries == null) {
-			this.countries = new LinkedHashSet<String>();
+			this.countries = new LinkedHashSet<>();
 		}
 		for (String country : countries) {
 			this.countries.add(country);

@@ -336,7 +336,7 @@ public class Media {
 				if ((jsonString.startsWith("[") || jsonString.startsWith("{"))
 						&& !jsonString.equals("[\"Nothing found.\"]")) {
 					JSONArray jsonArray = new JSONArray(jsonString.toString());
-					List<Movie> movies = new LinkedList<Movie>();
+					List<Movie> movies = new LinkedList<>();
 					for (int i = 0; i < jsonArray.length(); i++) {
 						movies.add(new Movie(jsonArray.getJSONObject(i)));
 					}
@@ -370,46 +370,47 @@ public class Media {
 	 */
 	public static String generateFileHash(File f) throws IOException {
 		long byteSize = f.length();
-
-		long index = Math.min(byteSize, 1024 * 64);
-		BufferedInputStream in = new BufferedInputStream(new FileInputStream(f));
 		long head = 0;
 		long tail = 0;
-		long read = 0;
 		byte[] longBuffer = new byte[8];
-		int b = 0;
-		while ((b = in.read(longBuffer)) != -1 && read < index) {
-			long l = 0;
-			for (int i = 7; i >= 8 - b; i--) {
-				l = l << 8;
-				long newL = longBuffer[i];
-				l = l | (newL & 255);
-			}
-			for (int i = 1; i <= 8 - b; i++) {
-				l = l << 8;
-			}
-			read += b;
-			head += l;
+		
+		try(BufferedInputStream in = new BufferedInputStream(new FileInputStream(f))) {
+		  long index = Math.min(byteSize, 1024 * 64);
+  		long read = 0;
+  		int b = 0;
+  		while ((b = in.read(longBuffer)) != -1 && read < index) {
+  			long l = 0;
+  			for (int i = 7; i >= 8 - b; i--) {
+  				l = l << 8;
+  				long newL = longBuffer[i];
+  				l = l | (newL & 255);
+  			}
+  			for (int i = 1; i <= 8 - b; i++) {
+  				l = l << 8;
+  			}
+  			read += b;
+  			head += l;
+  		}
 		}
-		in.close();
-		in = new BufferedInputStream(new FileInputStream(f));
-		in.skip(byteSize - 1024 * 64);
-		b = 0;
-		while ((b = in.read(longBuffer)) != -1) {
-			long l = 0;
-			for (int i = 7; i >= 8 - b; i--) {
-				l = l << 8;
-				long newL = longBuffer[i];
-				l = l | (newL & 255);
-			}
-			for (int i = 1; i <= 8 - b; i++) {
-				l = l << 8;
-			}
-			tail += l;
+		
+		try(BufferedInputStream in = new BufferedInputStream(new FileInputStream(f))) {
+  		in.skip(byteSize - 1024 * 64);
+  		int b = 0;
+  		while ((b = in.read(longBuffer)) != -1) {
+  			long l = 0;
+  			for (int i = 7; i >= 8 - b; i--) {
+  				l = l << 8;
+  				long newL = longBuffer[i];
+  				l = l | (newL & 255);
+  			}
+  			for (int i = 1; i <= 8 - b; i++) {
+  				l = l << 8;
+  			}
+  			tail += l;
+  		}
 		}
-		in.close();
+		
 		return Long.toHexString(byteSize + head + tail);
-
 	}
 
 }

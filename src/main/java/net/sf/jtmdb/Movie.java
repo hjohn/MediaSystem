@@ -146,19 +146,19 @@ public class Movie implements Serializable {
 	/**
 	 * The movie cast. Not present in reduced form.
 	 */
-	private Set<CastInfo> cast = new LinkedHashSet<CastInfo>();
+	private Set<CastInfo> cast = new LinkedHashSet<>();
 	/**
 	 * The movie Genres. Not present in reduced form.
 	 */
-	private Set<Genre> genres = new LinkedHashSet<Genre>();
+	private Set<Genre> genres = new LinkedHashSet<>();
 	/**
 	 * The movie Studios. Not present in reduced form.
 	 */
-	private Set<Studio> studios = new LinkedHashSet<Studio>();
+	private Set<Studio> studios = new LinkedHashSet<>();
 	/**
 	 * The movie Countries. Not present in reduced form.
 	 */
-	private Set<Country> countries = new LinkedHashSet<Country>();
+	private Set<Country> countries = new LinkedHashSet<>();
 
 	/**
 	 * Construct a movie object from a JSON object.
@@ -846,7 +846,7 @@ public class Movie implements Serializable {
 		Log.log("Requesting the box office from the site.", Verbosity.NORMAL);
 		Set<Integer> ids = parseHTML(0);
 
-		List<Movie> movies = new LinkedList<Movie>();
+		List<Movie> movies = new LinkedList<>();
 		if (!ids.isEmpty()) {
 			for (int id : ids.toArray(new Integer[0])) {
 				movies.add(getInfo(id));
@@ -897,7 +897,7 @@ public class Movie implements Serializable {
 				Verbosity.NORMAL);
 		Set<Integer> ids = parseHTML(1);
 
-		List<Movie> movies = new LinkedList<Movie>();
+		List<Movie> movies = new LinkedList<>();
 		if (!ids.isEmpty()) {
 			for (int id : ids.toArray(new Integer[0])) {
 				movies.add(getInfo(id));
@@ -938,7 +938,7 @@ public class Movie implements Serializable {
 	 */
 	private static Set<Integer> parseHTML(int part) throws IOException {
 		Log.log("Parsing the site homepage.", Verbosity.NORMAL);
-		Set<Integer> ids = new LinkedHashSet<Integer>();
+		Set<Integer> ids = new LinkedHashSet<>();
 		try {
 			URL call = new URL(GeneralSettings.HOMEPAGE_URL);
 			String xmlString = Utilities.readUrlResponse(call);
@@ -999,7 +999,7 @@ public class Movie implements Serializable {
 							+ GeneralSettings.API_MODE_URL + "/"
 							+ GeneralSettings.getApiKey() + "/" + name);
 					String jsonString = Utilities.readUrlResponse(call).trim();
-					List<Movie> results = new LinkedList<Movie>();
+					List<Movie> results = new LinkedList<>();
 					if ((jsonString.startsWith("[") || jsonString
 							.startsWith("{"))
 							&& !jsonString.equals("[\"Nothing found.\"]")) {
@@ -1065,7 +1065,7 @@ public class Movie implements Serializable {
 							+ GeneralSettings.API_MODE_URL + "/"
 							+ GeneralSettings.getApiKey() + "/" + name);
 					String jsonString = Utilities.readUrlResponse(call).trim();
-					List<Movie> results = new LinkedList<Movie>();
+					List<Movie> results = new LinkedList<>();
 					if ((jsonString.startsWith("[") || jsonString
 							.startsWith("{"))
 							&& !jsonString.equals("[\"Nothing found.\"]")) {
@@ -1256,7 +1256,7 @@ public class Movie implements Serializable {
 							images.posters.add(poster);
 						}
 						poster.setImage(posterSizeEnum,
-								new Pair<Dimension, URL>(posterD, posterURL));
+								new Pair<>(posterD, posterURL));
 					}
 					postersArray = json.getJSONArray("backdrops");
 					for (int i = 0; i < postersArray.length(); i++) {
@@ -1303,7 +1303,7 @@ public class Movie implements Serializable {
 							images.backdrops.add(backdrop);
 						}
 						backdrop.setImage(posterSizeEnum,
-								new Pair<Dimension, URL>(posterD, posterURL));
+								new Pair<>(posterD, posterURL));
 					}
 					return images;
 				} else {
@@ -1415,7 +1415,7 @@ public class Movie implements Serializable {
 						+ GeneralSettings.API_MODE_URL + "/"
 						+ GeneralSettings.getApiKey() + "/" + listIDs);
 				String jsonString = Utilities.readUrlResponse(call).trim();
-				List<MovieVersionInfo> versionInfo = new LinkedList<MovieVersionInfo>();
+				List<MovieVersionInfo> versionInfo = new LinkedList<>();
 				if ((jsonString.startsWith("[") || jsonString.startsWith("{"))
 						&& !jsonString.equals("[\"Nothing found.\"]")) {
 					JSONArray jsonArray = new JSONArray(jsonString.toString());
@@ -1583,7 +1583,7 @@ public class Movie implements Serializable {
 							movieID, version, lastModified, imdbIDTmp);
 					JSONArray translations = jsonObject
 							.getJSONArray("translations");
-					List<Translation> translationsList = new LinkedList<Translation>();
+					List<Translation> translationsList = new LinkedList<>();
 					for (int i = 0; i < translations.length(); i++) {
 						JSONObject translation = translations.getJSONObject(i);
 						String englishName = translation
@@ -1594,7 +1594,7 @@ public class Movie implements Serializable {
 						translationsList.add(new Translation(englishName,
 								nativeName, iso639_1));
 					}
-					return new Pair<MovieVersionInfo, List<Translation>>(
+					return new Pair<>(
 							versionInfo, translationsList);
 				} else {
 					Log.log("Getting translations for Movie with id " + imdbID
@@ -1713,7 +1713,7 @@ public class Movie implements Serializable {
 					poster = new MoviePoster(posterID);
 					getImages().posters.add(poster);
 				}
-				poster.setImage(posterSizeEnum, new Pair<Dimension, URL>(
+				poster.setImage(posterSizeEnum, new Pair<>(
 						posterD, posterURL));
 			}
 			postersArray = jsonObject.getJSONArray("backdrops");
@@ -1762,7 +1762,7 @@ public class Movie implements Serializable {
 					backdrop = new MovieBackdrop(posterID);
 					getImages().backdrops.add(backdrop);
 				}
-				backdrop.setImage(posterSizeEnum, new Pair<Dimension, URL>(
+				backdrop.setImage(posterSizeEnum, new Pair<>(
 						posterD, posterURL));
 			}
 			setImdbID(jsonObject.getString("imdb_id"));
@@ -1942,7 +1942,7 @@ public class Movie implements Serializable {
 						+ GeneralSettings.getApiKey() + "?"
 						+ options.buildQuery());
 				String jsonString = Utilities.readUrlResponse(call).trim();
-				List<Movie> results = new LinkedList<Movie>();
+				List<Movie> results = new LinkedList<>();
 				if ((jsonString.startsWith("[") || jsonString.startsWith("{"))
 						&& !jsonString.equals("[\"Nothing found.\"]")) {
 					JSONArray jsonArray = new JSONArray(jsonString.toString());
