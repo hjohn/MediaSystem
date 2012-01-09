@@ -144,7 +144,7 @@ public abstract class NamedItem implements MediaItem {
 //    }
   }
 
-  private ReadOnlyObjectWrapper<State> state = new ReadOnlyObjectWrapper<State>(State.BASIC);
+  private ReadOnlyObjectWrapper<State> state = new ReadOnlyObjectWrapper<>(State.BASIC);
 
   public State getState() {
     return state.get();

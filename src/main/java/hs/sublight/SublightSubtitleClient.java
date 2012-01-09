@@ -62,15 +62,15 @@ public class SublightSubtitleClient {
 		// require login
 		login();
 
-		Holder<ArrayOfIMDB> response = new Holder<ArrayOfIMDB>();
-		Holder<String> error = new Holder<String>();
+		Holder<ArrayOfIMDB> response = new Holder<>();
+		Holder<String> error = new Holder<>();
 
 		webservice.findIMDB(query, null, null, response, error);
 
 		// abort if something went wrong
 		checkError(error);
 
-		List<SearchResult> results = new ArrayList<SearchResult>();
+		List<SearchResult> results = new ArrayList<>();
 
 		if (response.value != null) {
 			for (IMDB imdb : response.value.getIMDB()) {
@@ -87,7 +87,7 @@ public class SublightSubtitleClient {
 	public List<SubtitleDescriptor> getSubtitleList(SearchResult searchResult, String languageName) throws WebServiceException {
 		MovieDescriptor movie = (MovieDescriptor) searchResult;
 
-		List<SubtitleDescriptor> subtitles = new ArrayList<SubtitleDescriptor>();
+		List<SubtitleDescriptor> subtitles = new ArrayList<>();
 
 		// retrieve subtitles by name and year
 		for (Subtitle subtitle : getSubtitleList(null, movie.getName(), movie.getYear(), null, null, languageName)) {
@@ -98,7 +98,7 @@ public class SublightSubtitleClient {
 	}
 
   public List<SubtitleDescriptor> getSubtitleList(String name, Integer year, Short season, Integer episode, String languageName) throws WebServiceException {
-    List<SubtitleDescriptor> subtitles = new ArrayList<SubtitleDescriptor>();
+    List<SubtitleDescriptor> subtitles = new ArrayList<>();
 
     // retrieve subtitles by name and year
     for(Subtitle subtitle : getSubtitleList(null, name, year, season, episode, languageName)) {
@@ -163,9 +163,9 @@ public class SublightSubtitleClient {
 		Collections.addAll(genres.getGenre(), Genre.values());
 
 		// response holders
-		Holder<ArrayOfSubtitle> subtitles = new Holder<ArrayOfSubtitle>();
-		Holder<ArrayOfRelease> releases = new Holder<ArrayOfRelease>();
-		Holder<String> error = new Holder<String>();
+		Holder<ArrayOfSubtitle> subtitles = new Holder<>();
+		Holder<ArrayOfRelease> releases = new Holder<>();
+		Holder<String> error = new Holder<>();
 
 		webservice.searchSubtitles4(session, videoHashes, name, year, season, episode, languages, genres, null, null, null, subtitles, releases, null, error);
 
@@ -179,7 +179,7 @@ public class SublightSubtitleClient {
 
 		// map all release names by subtitle id
 		if (releases.value != null) {
-			Map<String, String> releaseNameBySubtitleID = new HashMap<String, String>();
+			Map<String, String> releaseNameBySubtitleID = new HashMap<>();
 
 			// map release names by subtitle id
 			for (Release release : releases.value.getRelease()) {
@@ -212,9 +212,9 @@ public class SublightSubtitleClient {
 		subtitle.setLanguage(getSubtitleLanguage(languageName));
 		subtitle.setRelease(releaseName);
 
-		Holder<Boolean> result = new Holder<Boolean>();
-		Holder<String> subid = new Holder<String>();
-		Holder<String> error = new Holder<String>();
+		Holder<Boolean> result = new Holder<>();
+		Holder<String> subid = new Holder<>();
+		Holder<String> error = new Holder<>();
 
 		// upload subtitle
 		webservice.publishSubtitle2(session, subtitle, data, result, subid, null, error);
@@ -231,7 +231,7 @@ public class SublightSubtitleClient {
 
 
 	protected static Map<String, SubtitleLanguage> getLanguageAliasMap() {
-		Map<String, SubtitleLanguage> languages = new HashMap<String, SubtitleLanguage>(4);
+		Map<String, SubtitleLanguage> languages = new HashMap<>(4);
 
 		// insert special some additional special handling
 		languages.put("Brazilian", SubtitleLanguage.PORTUGUESE_BRAZIL);
@@ -276,10 +276,10 @@ public class SublightSubtitleClient {
 		// require login
 		login();
 
-		Holder<String> ticket = new Holder<String>();
-		Holder<Short> que = new Holder<Short>();
-		Holder<byte[]> data = new Holder<byte[]>();
-		Holder<String> error = new Holder<String>();
+		Holder<String> ticket = new Holder<>();
+		Holder<Short> que = new Holder<>();
+		Holder<byte[]> data = new Holder<>();
+		Holder<String> error = new Holder<>();
 
 		webservice.getDownloadTicket2(session, null, subtitle.getSubtitleID(), null, ticket, que, null, error);
 
@@ -309,8 +309,8 @@ public class SublightSubtitleClient {
 			ArrayOfString args = new ArrayOfString();
 			args.getString().add(iid);
 
-			Holder<String> session = new Holder<String>();
-			Holder<String> error = new Holder<String>();
+			Holder<String> session = new Holder<>();
+			Holder<String> error = new Holder<>();
 
 			webservice.logInAnonymous4(clientInfo, args, session, null, error);
 
@@ -328,7 +328,7 @@ public class SublightSubtitleClient {
 
 	protected synchronized void logout() throws WebServiceException {
 		if (session != null) {
-			Holder<String> error = new Holder<String>();
+			Holder<String> error = new Holder<>();
 
 			webservice.logOut(session, null, error);
 

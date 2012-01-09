@@ -7,7 +7,7 @@ import java.util.Map;
 import javafx.scene.image.Image;
 
 public class ImageCache {
-  private static final Map<String, Image> CACHE = new HashMap<String, Image>();
+  private static final Map<String, Image> CACHE = new HashMap<>();
 
   public static Image loadImage(ImageHandle handle) {
     Image image = CACHE.get(handle.getKey());

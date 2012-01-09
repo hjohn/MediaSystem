@@ -33,36 +33,36 @@ public class ItemsDao {
     String fileName = path.getFileName().toString();
 
     try {
-      Connection connection = getConnection();
-
-      PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE localname = ?");
-
-      statement.setString(1, fileName);
-
-      System.out.println("[FINE] Selecting item with localname = '" + fileName + "'");
-      final ResultSet rs = statement.executeQuery();
-
-      if(rs.next()) {
-        return new Item(path) {{
-          setId(rs.getInt("id"));
-          setLocalName(rs.getString("localname"));
-          setImdbId(rs.getString("imdbid"));
-          setProvider(rs.getString("provider"));
-          setProviderId(rs.getString("providerid"));
-          setTitle(rs.getString("title"));
-          setReleaseDate(rs.getDate("releasedate"));
-          setRating(rs.getFloat("rating"));
-          setPlot(rs.getString("plot"));
-          setPoster(rs.getBytes("poster"));
-          setBanner(rs.getBytes("banner"));
-          setBackground(rs.getBytes("background"));
-          setRuntime(rs.getInt("runtime"));
-          setVersion(rs.getInt("version"));
-          setSeason(rs.getInt("season"));
-          setEpisode(rs.getInt("episode"));
-          setType(rs.getString("type"));
-          setSubtitle(rs.getString("subtitle"));
-        }};
+      try(Connection connection = getConnection()) {
+        try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE localname = ?")) {
+          statement.setString(1, fileName);
+    
+          System.out.println("[FINE] Selecting item with localname = '" + fileName + "'");
+          try(final ResultSet rs = statement.executeQuery()) {
+            if(rs.next()) {
+              return new Item(path) {{
+                setId(rs.getInt("id"));
+                setLocalName(rs.getString("localname"));
+                setImdbId(rs.getString("imdbid"));
+                setProvider(rs.getString("provider"));
+                setProviderId(rs.getString("providerid"));
+                setTitle(rs.getString("title"));
+                setReleaseDate(rs.getDate("releasedate"));
+                setRating(rs.getFloat("rating"));
+                setPlot(rs.getString("plot"));
+                setPoster(rs.getBytes("poster"));
+                setBanner(rs.getBytes("banner"));
+                setBackground(rs.getBytes("background"));
+                setRuntime(rs.getInt("runtime"));
+                setVersion(rs.getInt("version"));
+                setSeason(rs.getInt("season"));
+                setEpisode(rs.getInt("episode"));
+                setType(rs.getString("type"));
+                setSubtitle(rs.getString("subtitle"));
+              }};
+            }
+          }
+        }
       }
 
       throw new ItemNotFoundException();
@@ -74,29 +74,27 @@ public class ItemsDao {
 
   public void storeItem(Item item) {
     try {
-      Connection connection = getConnection();
-
-      Map<String, Object> parameters = createFieldMap(item);
-
-      StringBuilder fields = new StringBuilder();
-      StringBuilder values = new StringBuilder();
-
-      for(String key : parameters.keySet()) {
-        if(fields.length() > 0) {
-          fields.append(",");
-          values.append(",");
+      try(Connection connection = getConnection()) {
+        Map<String, Object> parameters = createFieldMap(item);
+  
+        StringBuilder fields = new StringBuilder();
+        StringBuilder values = new StringBuilder();
+  
+        for(String key : parameters.keySet()) {
+          if(fields.length() > 0) {
+            fields.append(",");
+            values.append(",");
+          }
+  
+          fields.append(key);
+          values.append("?");
         }
-
-        fields.append(key);
-        values.append("?");
+  
+        try(PreparedStatement statement = connection.prepareStatement("INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")")) {
+          setParameters(parameters, statement);
+          statement.execute();
+        }
       }
-
-      PreparedStatement statement = connection.prepareStatement(
-        "INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")"
-      );
-
-      setParameters(parameters, statement);
-      statement.execute();
     }
     catch(SQLException e) {
       throw new RuntimeException("Exception while trying to store: " + item, e);
@@ -105,31 +103,29 @@ public class ItemsDao {
 
   public void updateItem(Item item) {
     try {
-      Connection connection = getConnection();
-
-      Map<String, Object> parameters = createFieldMap(item);
-
-      StringBuilder set = new StringBuilder();
-
-      for(String key : parameters.keySet()) {
-        if(set.length() > 0) {
-          set.append(",");
+      try(Connection connection = getConnection()) {
+        Map<String, Object> parameters = createFieldMap(item);
+  
+        StringBuilder set = new StringBuilder();
+  
+        for(String key : parameters.keySet()) {
+          if(set.length() > 0) {
+            set.append(",");
+          }
+  
+          set.append(key);
+          set.append("=?");
         }
-
-        set.append(key);
-        set.append("=?");
+  
+        try(PreparedStatement statement = connection.prepareStatement("UPDATE items SET " + set.toString() + " WHERE id = ?")) {
+          parameters.put("1", item.getId());
+    
+          System.out.println("Updating item with id: " + item.getId());
+    
+          setParameters(parameters, statement);
+          statement.execute();
+        }
       }
-
-      PreparedStatement statement = connection.prepareStatement(
-        "UPDATE items SET " + set.toString() + " WHERE id = ?"
-      );
-
-      parameters.put("1", item.getId());
-
-      System.out.println("Updating item with id: " + item.getId());
-
-      setParameters(parameters, statement);
-      statement.execute();
     }
     catch(SQLException e) {
       throw new RuntimeException(e);
@@ -152,7 +148,7 @@ public class ItemsDao {
   }
 
   private static Map<String, Object> createFieldMap(Item item) {
-    Map<String, Object> columns = new LinkedHashMap<String, Object>();
+    Map<String, Object> columns = new LinkedHashMap<>();
 
     columns.put("localname", item.getLocalName());
     columns.put("imdbid", item.getImdbId());

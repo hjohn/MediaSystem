@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class EpisodeGroup extends NamedItem implements Group {
-  private final List<MediaItem> children = new ArrayList<MediaItem>();
+  private final List<MediaItem> children = new ArrayList<>();
 
   public EpisodeGroup(MediaTree mediaTree, String title) {
     super(mediaTree, title);

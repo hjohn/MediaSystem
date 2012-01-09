@@ -33,7 +33,7 @@ public class MPlayerPlayer implements Player {
   private final LineNumberReader resultStream;
   private final boolean useFrame;
 
-  private final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+  private final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
 
   private Frame frame;
   private boolean isPlaying;
@@ -42,7 +42,7 @@ public class MPlayerPlayer implements Player {
     this.useFrame = useFrame;
 
     try {
-      List<String> commands = new ArrayList<String>();
+      List<String> commands = new ArrayList<>();
 
       commands.add(mplayerPath.toString());
 

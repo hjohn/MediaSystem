@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Season extends NamedItem implements Group {
-  private final List<MediaItem> children = new ArrayList<MediaItem>();
+  private final List<MediaItem> children = new ArrayList<>();
   private final int season;
 
   public Season(MediaTree mediaTree, String title, int season) {

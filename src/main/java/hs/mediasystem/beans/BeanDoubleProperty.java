@@ -8,7 +8,7 @@ public final class BeanDoubleProperty extends SimpleDoubleProperty {
   private boolean initialized;
 
   public BeanDoubleProperty(Object bean, String propertyName) {
-    accessor = new BeanAccessor<Double>(bean, propertyName);
+    accessor = new BeanAccessor<>(bean, propertyName);
   }
 
   @Override

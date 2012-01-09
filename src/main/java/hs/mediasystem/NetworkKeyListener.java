@@ -46,32 +46,32 @@ public class NetworkKeyListener {
                 try {
                   client.setSoTimeout(500);
 
-                  PrintWriter writer = new PrintWriter(new OutputStreamWriter(client.getOutputStream()));
-                  LineNumberReader reader = new LineNumberReader(new InputStreamReader(client.getInputStream()));
-
-                  for(;;) {
-                    String line = reader.readLine();
-
-                    if(line == null) {
-                      break;
-                    }
-
-                    if(line.equals("quintessence")) {
-                      writer.print("cookie");
-                      writer.flush();
-                    }
-                    else if(line.equals("f882a23cc28ace6fd543abc94322344e")) {
-                      writer.print("accept");
-                      writer.flush();
-                    }
-                    else if(line.startsWith("EVENT ")) {
-                      System.out.println(">>> " + line);
-
-                      KeyStroke stroke = KeyStroke.getKeyStroke(line.substring(6));
-                      KeyEvent event = new KeyEvent(component, stroke.getKeyEventType(), System.currentTimeMillis(), stroke.getModifiers(), stroke.getKeyCode(), stroke.getKeyChar());
-
-                      Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(event);
-                      break;
+                  try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(client.getOutputStream()));
+                      LineNumberReader reader = new LineNumberReader(new InputStreamReader(client.getInputStream()))) {
+                    for(;;) {
+                      String line = reader.readLine();
+  
+                      if(line == null) {
+                        break;
+                      }
+  
+                      if(line.equals("quintessence")) {
+                        writer.print("cookie");
+                        writer.flush();
+                      }
+                      else if(line.equals("f882a23cc28ace6fd543abc94322344e")) {
+                        writer.print("accept");
+                        writer.flush();
+                      }
+                      else if(line.startsWith("EVENT ")) {
+                        System.out.println(">>> " + line);
+  
+                        KeyStroke stroke = KeyStroke.getKeyStroke(line.substring(6));
+                        KeyEvent event = new KeyEvent(component, stroke.getKeyEventType(), System.currentTimeMillis(), stroke.getModifiers(), stroke.getKeyCode(), stroke.getKeyChar());
+  
+                        Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(event);
+                        break;
+                      }
                     }
                   }
                 }

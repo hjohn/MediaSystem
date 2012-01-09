@@ -8,7 +8,7 @@ public final class BeanFloatProperty extends SimpleFloatProperty {
   private boolean initialized;
 
   public BeanFloatProperty(Object bean, String propertyName) {
-    accessor = new BeanAccessor<Float>(bean, propertyName);
+    accessor = new BeanAccessor<>(bean, propertyName);
   }
 
   @Override

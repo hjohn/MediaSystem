@@ -36,7 +36,7 @@ public class MoviesMediaTree extends AbstractMediaTree {
   public List<? extends MediaItem> children() {
     if(children == null) {
       List<Episode> episodes = new EpisodeScanner(this, new MovieDecoder()).scan(root);
-      List<MediaItem> items = new ArrayList<MediaItem>();
+      List<MediaItem> items = new ArrayList<>();
 
       Collection<List<MediaItem>> groupedItems = Groups.group(episodes, new TitleGrouper());
 

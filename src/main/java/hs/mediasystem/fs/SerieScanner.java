@@ -20,23 +20,23 @@ public class SerieScanner implements Scanner<Serie> {
 
   @Override
   public List<Serie> scan(Path scanPath) {
-    List<Serie> series = new ArrayList<Serie>();
+    List<Serie> series = new ArrayList<>();
 
     try {
-      DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath);
-
-      for(Path path : dirStream) {
-        if(Files.isDirectory(path) && !path.getFileName().toString().startsWith(".")) {
-          LocalItem item = new LocalItem(path);
-
-          item.setLocalName(path.getFileName().toString());
-          item.setLocalTitle(item.getLocalName());
-          item.setTitle(item.getLocalName());
-          item.setType("serie");
-          item.setProvider("LOCAL");
-          item.setProviderId("");
-
-          series.add(new Serie(mediaTree, item));
+      try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
+        for(Path path : dirStream) {
+          if(Files.isDirectory(path) && !path.getFileName().toString().startsWith(".")) {
+            LocalItem item = new LocalItem(path);
+  
+            item.setLocalName(path.getFileName().toString());
+            item.setLocalTitle(item.getLocalName());
+            item.setTitle(item.getLocalName());
+            item.setType("serie");
+            item.setProvider("LOCAL");
+            item.setProviderId("");
+  
+            series.add(new Serie(mediaTree, item));
+          }
         }
       }
     }

@@ -36,7 +36,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
       }
 
       if(bestMatchingImdbNumber == null) {
-        TreeSet<Score> scores = new TreeSet<Score>(new Comparator<Score>() {
+        TreeSet<Score> scores = new TreeSet<>(new Comparator<Score>() {
           @Override
           public int compare(Score o1, Score o2) {
             return Double.compare(o2.score, o1.score);

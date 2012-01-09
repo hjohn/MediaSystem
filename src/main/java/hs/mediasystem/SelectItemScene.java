@@ -99,7 +99,7 @@ public class SelectItemScene {
     });
   }
 
-  private TreeItem<MediaItem> treeRoot = new TreeItem<MediaItem>();
+  private TreeItem<MediaItem> treeRoot = new TreeItem<>();
 
   private void setMediaTree(final MediaTree mediaTree) {
     treeRoot.getChildren().clear();

@@ -35,7 +35,7 @@ public class ProgramController {
   private final BorderPane overlayGroup;
   private final Ini ini;
 
-  private final NavigationHistory<NavigationItem> history = new NavigationHistory<NavigationItem>();
+  private final NavigationHistory<NavigationItem> history = new NavigationHistory<>();
 
   public ProgramController(Ini ini, Player player) {
     this.ini = ini;

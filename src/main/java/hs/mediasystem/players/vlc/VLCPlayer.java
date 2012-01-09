@@ -180,7 +180,7 @@ public class VLCPlayer implements Player {
     return FXCollections.observableArrayList(audioTracks.isEmpty() ? NO_AUDIO_TRACKS : audioTracks);
   }
 
-  private static final List<AudioTrack> NO_AUDIO_TRACKS = new ArrayList<AudioTrack>();
+  private static final List<AudioTrack> NO_AUDIO_TRACKS = new ArrayList<>();
 
   @Override
   public void play(String uri) {
@@ -281,12 +281,12 @@ public class VLCPlayer implements Player {
   @Override public void setBrightness(float brightness) { this.brightness.set(brightness); }
   @Override public FloatProperty brightnessProperty() { return brightness; }
 
-  private final BeanObjectProperty<Subtitle> subtitle = new BeanObjectProperty<Subtitle>(this, "subtitleInternal");
+  private final BeanObjectProperty<Subtitle> subtitle = new BeanObjectProperty<>(this, "subtitleInternal");
   @Override public Subtitle getSubtitle() { return subtitle.get(); }
   @Override public void setSubtitle(Subtitle subtitle) { this.subtitle.set(subtitle); }
   @Override public ObjectProperty<Subtitle> subtitleProperty() { return subtitle; }
 
-  private final ObjectProperty<AudioTrack> audioTrack = new BeanObjectProperty<AudioTrack>(this, "audioTrackInternal");
+  private final ObjectProperty<AudioTrack> audioTrack = new BeanObjectProperty<>(this, "audioTrackInternal");
   @Override public AudioTrack getAudioTrack() { return audioTrack.get(); }
   @Override public void setAudioTrack(AudioTrack audioTrack) { this.audioTrack.set(audioTrack); }
   @Override public ObjectProperty<AudioTrack> audioTrackProperty() { return audioTrack; }

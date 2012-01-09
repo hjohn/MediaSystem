@@ -90,13 +90,13 @@ public class SublightSubtitleDescriptor implements SubtitleDescriptor {
 			// move to subtitle entry
 			ZipEntry entry = stream.getNextEntry();
 
-			ByteBufferOutputStream buffer = new ByteBufferOutputStream((int) entry.getSize());
-
-			// read subtitle data
-			buffer.transferFully(stream);
-
-			// return plain subtitle data
-			return buffer.getByteBuffer();
+			try(ByteBufferOutputStream buffer = new ByteBufferOutputStream((int) entry.getSize())) {
+  			// read subtitle data
+  			buffer.transferFully(stream);
+  
+  			// return plain subtitle data
+  			return buffer.getByteBuffer();
+			}
 		} finally {
 			stream.close();
 		}

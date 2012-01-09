@@ -33,12 +33,12 @@ public class Ini implements Iterable<Section> {
       }
     }
     else {
-      sections = new HashMap<String, Section>();
+      sections = new HashMap<>();
     }
   }
 
   public Ini() {
-    sections = new HashMap<String, Section>();
+    sections = new HashMap<>();
     iniFile = null;
   }
 
@@ -72,10 +72,9 @@ public class Ini implements Iterable<Section> {
   public void save() {
     if(iniFile != null) {
       try {
-        PrintWriter writer = new PrintWriter(new FileWriter(iniFile));
-        boolean first = true;
-
-        try {
+        try(PrintWriter writer = new PrintWriter(new FileWriter(iniFile))) {
+          boolean first = true;
+  
           for(Section section : sections.values()) {
             if(!first) {
               writer.println();
@@ -90,9 +89,6 @@ public class Ini implements Iterable<Section> {
             }
           }
         }
-        finally {
-          writer.close();
-        }
       }
       catch(IOException e) {
         throw new RuntimeException(e);
@@ -103,47 +99,48 @@ public class Ini implements Iterable<Section> {
   private static final Pattern SECTION_PATTERN = Pattern.compile("\\[([-A-Za-z0-9\\.]+)\\](\\s*:\\s*\\[([-A-Za-z0-9\\.]+)\\])?");
 
   private static Map<String, Section> readIniFile(File iniFile) throws IOException {
-    BufferedReader reader = new BufferedReader(new FileReader(iniFile));
-    Map<String, Section> sections = new LinkedHashMap<String, Section>();
-    Section currentSection = null;
-
-    for(;;) {
-      String line = reader.readLine();
-
-      if(line == null) {
-        break;
-      }
-
-      line = line.trim();
-      Matcher matcher = SECTION_PATTERN.matcher(line);
-
-      if(matcher.matches()) {
-        String sectionName = matcher.group(1);
-        currentSection = sections.get(sectionName);
-
-        Section parentSection = null;
-
-        if(matcher.group(3) != null) {
-          parentSection = sections.get(matcher.group(3));
-          if(parentSection == null) {
-            throw new RuntimeException("Parse Error, Parent '" + matcher.group(3) + "' not found for section '" + sectionName + "'");
+    try(BufferedReader reader = new BufferedReader(new FileReader(iniFile))) {
+      Map<String, Section> sections = new LinkedHashMap<>();
+      Section currentSection = null;
+  
+      for(;;) {
+        String line = reader.readLine();
+  
+        if(line == null) {
+          break;
+        }
+  
+        line = line.trim();
+        Matcher matcher = SECTION_PATTERN.matcher(line);
+  
+        if(matcher.matches()) {
+          String sectionName = matcher.group(1);
+          currentSection = sections.get(sectionName);
+  
+          Section parentSection = null;
+  
+          if(matcher.group(3) != null) {
+            parentSection = sections.get(matcher.group(3));
+            if(parentSection == null) {
+              throw new RuntimeException("Parse Error, Parent '" + matcher.group(3) + "' not found for section '" + sectionName + "'");
+            }
+          }
+  
+          if(currentSection == null) {
+            currentSection = new Section(sectionName, parentSection);
+            sections.put(currentSection.getName(), currentSection);
           }
         }
-
-        if(currentSection == null) {
-          currentSection = new Section(sectionName, parentSection);
-          sections.put(currentSection.getName(), currentSection);
+        else if(currentSection != null) {
+          int eq = line.indexOf('=');
+  
+          if(eq > 1) {
+            currentSection.put(line.substring(0, eq).trim(), line.substring(eq + 1).trim());
+          }
         }
       }
-      else if(currentSection != null) {
-        int eq = line.indexOf('=');
-
-        if(eq > 1) {
-          currentSection.put(line.substring(0, eq).trim(), line.substring(eq + 1).trim());
-        }
-      }
+      
+      return sections;
     }
-
-    return sections;
   }
 }

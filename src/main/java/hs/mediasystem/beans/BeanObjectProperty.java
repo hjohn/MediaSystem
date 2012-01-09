@@ -6,7 +6,7 @@ public final class BeanObjectProperty<T> extends SimpleObjectProperty<T> {
   private final BeanAccessor<T> accessor;
 
   public BeanObjectProperty(Object bean, String propertyName) {
-    accessor = new BeanAccessor<T>(bean, propertyName);
+    accessor = new BeanAccessor<>(bean, propertyName);
   }
 
   public void update() {

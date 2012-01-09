@@ -28,7 +28,7 @@ public class MovieBackdrop implements Serializable {
 	/**
 	 * The urls and dimensions for the different sizes of the backdrop.
 	 */
-	private Map<Size, Pair<Dimension, URL>> info = new HashMap<Size, Pair<Dimension, URL>>();
+	private Map<Size, Pair<Dimension, URL>> info = new HashMap<>();
 
 	/**
 	 * The ID of the backdrop.

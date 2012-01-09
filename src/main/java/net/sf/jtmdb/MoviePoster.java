@@ -28,7 +28,7 @@ public class MoviePoster implements Serializable {
 	/**
 	 * The urls and dimensions info for the different sizes of the poster.
 	 */
-	private Map<Size, Pair<Dimension, URL>> info = new HashMap<Size, Pair<Dimension, URL>>();
+	private Map<Size, Pair<Dimension, URL>> info = new HashMap<>();
 
 	/**
 	 * The ID of the backdrop.
