@@ -39,7 +39,7 @@ public class MoviesMediaTree extends AbstractMediaTree {
 
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
-          EpisodeGroup g = new EpisodeGroup(this, group.get(0).getTitle(), "MOVIE");
+          EpisodeGroup g = new EpisodeGroup(this, group.get(0).getTitle());
 
           for(MediaItem item : group) {
             g.add(item);

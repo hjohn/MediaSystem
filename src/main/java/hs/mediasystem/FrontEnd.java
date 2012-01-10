@@ -1,9 +1,15 @@
 package hs.mediasystem;
 
+import hs.mediasystem.db.Cachable;
+import hs.mediasystem.db.CachedItemEnricher;
+import hs.mediasystem.db.CachedItemIdentifier;
 import hs.mediasystem.db.ItemEnricher;
+import hs.mediasystem.db.ItemIdentifier;
 import hs.mediasystem.db.TmdbMovieEnricher;
 import hs.mediasystem.db.TvdbEpisodeEnricher;
 import hs.mediasystem.db.TvdbSerieEnricher;
+import hs.mediasystem.db.TvdbSerieIdentifier;
+import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MoviesMainMenuExtension;
@@ -42,7 +48,7 @@ public class FrontEnd extends Application {
 //    String sublightClientName = section.get("sublight.client");
 
     GeneralSettings.setApiKey(section.get("jtmdb.key"));
-    GeneralSettings.setLogEnabled(true);
+    GeneralSettings.setLogEnabled(false);
     GeneralSettings.setLogStream(System.out);
 
     String factoryClassName = section.getDefault("player.factoryClass", "hs.mediasystem.players.vlc.VLCPlayerFactory");
@@ -61,42 +67,21 @@ public class FrontEnd extends Application {
 
   @Override
   public void start(Stage primaryStage) throws Exception {
-//    Module module2 = new AbstractModule() {
-//
-//      @Override
-//      protected void configure() {
-//        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(MoviesMainMenuExtension.class);
-//
-//        bind(ItemEnricher.class).toInstance(new CachedItemEnricher(new ItemsDao(), new TmdbMovieEnricher()));
-//      }
-//    };
-//
-//    Module module3 = new AbstractModule() {
-//
-//      @Override
-//      protected void configure() {
-//        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(SeriesMainMenuExtension.class);
-//
-//        bind(ItemEnricher.class).toInstance(new CachedItemEnricher(new ItemsDao(), new TvdbSerieEnricher()));
-//      }
-//    };
-
     Module module = new AbstractModule() {
       @Override
       protected void configure() {
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(MoviesMainMenuExtension.class);
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(SeriesMainMenuExtension.class);
+
         MapBinder.newMapBinder(binder(), String.class, ItemEnricher.class).addBinding("SERIE").to(TvdbSerieEnricher.class);
         MapBinder.newMapBinder(binder(), String.class, ItemEnricher.class).addBinding("MOVIE").to(TmdbMovieEnricher.class);
         MapBinder.newMapBinder(binder(), String.class, ItemEnricher.class).addBinding("EPISODE").to(TvdbEpisodeEnricher.class);
 
-//        MapBinder.newSetBinder(binder(), TmdbMovieEnricher.class);
+        bind(ItemIdentifier.class).to(CachedItemIdentifier.class);
+        bind(ItemIdentifier.class).annotatedWith(Cachable.class).to(TvdbSerieIdentifier.class);
 
-//        bind(new TypeLiteral<List<MainMenuExtension>>() {}).toProvider();
-//        Instance(new ArrayList<MainMenuExtension>() {{
-//          add(new MoviesMainMenuExtension());
-//          add(new SeriesMainMenuExtension());
-//        }});
+        bind(ItemEnricher.class).to(CachedItemEnricher.class);
+        bind(ItemEnricher.class).annotatedWith(Cachable.class).to(TypeBasedItemEnricher.class);
       }
 
       @Provides
@@ -113,8 +98,6 @@ public class FrontEnd extends Application {
     Injector injector = Guice.createInjector(module);
 
     ProgramController controller = injector.getInstance(ProgramController.class);
-
-    //ProgramController controller = new ProgramController(INI, player);
 
     controller.showMainScreen();
   }

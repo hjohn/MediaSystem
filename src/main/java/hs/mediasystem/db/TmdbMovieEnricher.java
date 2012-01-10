@@ -21,8 +21,6 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
   @Override
   public void enrichItem(Item item) {
-    final String fileName = item.getPath().getFileName().toString();
-
     String title = item.getTitle();
     String subtitle = item.getSubtitle();
     String year = extractYear(item.getReleaseDate());
@@ -112,14 +110,13 @@ public class TmdbMovieEnricher implements ItemEnricher {
         item.setProvider("TMDB");
         item.setProviderId("" + movie.getID());
         item.setTitle(movie.getName());
-        item.setLocalName(fileName);
         item.setPoster(poster);
         item.setBackground(background);
         item.setPlot(movie.getOverview());
         item.setRating((float)movie.getRating());
         item.setReleaseDate(movie.getReleasedDate());
         item.setRuntime(movie.getRuntime());
-        item.setType("movie");
+        item.setType("MOVIE");
 
 //          for(CastInfo castInfo : movie.getCast()) {
 //            castInfo.getCharacterName();

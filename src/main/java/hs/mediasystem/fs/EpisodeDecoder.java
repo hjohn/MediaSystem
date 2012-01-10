@@ -57,9 +57,11 @@ public class EpisodeDecoder implements Decoder {
       item.setSeason(Integer.parseInt(sequence.split("x")[0]));
       item.setEpisode(Integer.parseInt(sequence.split("x")[1]));
     }
-    item.setType("episode");
+    item.setType("EPISODE");
     item.setProvider("LOCAL");
     item.setProviderId("");
+
+    item.calculateSurrogateName();
 
     return item;
   }

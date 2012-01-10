@@ -5,9 +5,6 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItem.State;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.CellProvider;
-
-import java.util.Map;
-
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -88,12 +85,13 @@ public class SelectItemScene {
     )
   );
 
-  private final Map<String, ItemEnricher> itemEnrichers;
+  private final ItemEnricher itemEnricher;
 
   @Inject
-  public SelectItemScene(ProgramController controller, Map<String, ItemEnricher> itemEnrichers) {
+  public SelectItemScene(ProgramController controller, ItemEnricher itemEnricher) {
     this.controller = controller;
-    this.itemEnrichers = itemEnrichers;
+    this.itemEnricher = itemEnricher;
+
     timeline.setOnFinished(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
@@ -143,15 +141,16 @@ public class SelectItemScene {
       getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<MediaItem>>() {
         @Override
         public void changed(ObservableValue<? extends TreeItem<MediaItem>> observable, TreeItem<MediaItem> oldValue, final TreeItem<MediaItem> newValue) {
-          System.err.println("changed called on Thread: " + Thread.currentThread().getName());
-//          update(newValue.getValue());
+          if(newValue != null) {
+            final MediaItem item = newValue.getValue();
 
-          Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-              update(newValue.getValue());
-            }
-          });
+            Platform.runLater(new Runnable() {
+              @Override
+              public void run() {
+                update(item);
+              }
+            });
+          }
         }
       });
 
@@ -231,7 +230,7 @@ public class SelectItemScene {
       add(new BorderPane() {{
         setTop(new VBox() {{
           getStyleClass().addAll("item-details");
-          getChildren().add(new Label() {{
+          getChildren().add(new Label("title") {{
             textProperty().bind(title);
             getStyleClass().addAll("movie-name", "title");
           }});
@@ -302,7 +301,6 @@ public class SelectItemScene {
     }
   }
 
-
   private final class MediaItemTreeCell extends TreeCell<MediaItem> {
     private final CellProvider<MediaItem> provider;
 
@@ -334,7 +332,8 @@ public class SelectItemScene {
             @Override
             public Void call() {
               System.err.println("Loading data for : " + item.getTitle());
-              //item.loadData(itemEnrichers.get(item.getType()));
+              item.loadData(itemEnricher);
+
               return null;
             }
           };
@@ -343,7 +342,6 @@ public class SelectItemScene {
             @Override
             public void changed(ObservableValue<? extends State> source, State oldState, State newState) {
               if(newState.equals(State.ENRICHED)) {
-                System.err.println("Setting new graphic for : " + item.getTitle());
                 Platform.runLater(new Runnable() {
                   @Override
                   public void run() {
@@ -361,7 +359,7 @@ public class SelectItemScene {
   }
 
 
-  private class MediaItemUpdateService extends Service<Void> {
+  private class MediaItemUpdateService extends Service<Void> {  // TODO also needs to be used when MediaItem changed to ENRICHED state
     private MediaItem mediaItem;
 
     public void setMediaItem(MediaItem value) {
@@ -375,18 +373,23 @@ public class SelectItemScene {
       return new Task<Void>() {
         @Override
         protected Void call() throws Exception {
-          title.set(item.getTitle());
-          subtitle.set(item.getSubtitle());
-          releaseYear.set(item.getReleaseYear());
-          plot.set(item.getPlot());
-          trySetImage(item.getPoster(), poster);
+          Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+              title.set(item.getTitle());
+              subtitle.set(item.getSubtitle());
+              releaseYear.set(item.getReleaseYear());
+              plot.set(item.getPlot());
+              trySetImage(item.getPoster(), poster);
 
-          if(trySetImage(item.getBackground(), wantedBackground, backgroundImageView.getFitWidth(), backgroundImageView.getFitHeight())) {
-            if(timeline.getStatus() == Animation.Status.STOPPED) {
-              newBackground.set(wantedBackground.get());
-              timeline.play();
+              if(trySetImage(item.getBackground(), wantedBackground, backgroundImageView.getFitWidth(), backgroundImageView.getFitHeight())) {
+                if(timeline.getStatus() == Animation.Status.STOPPED) {
+                  newBackground.set(wantedBackground.get());
+                  timeline.play();
+                }
+              }
             }
-          }
+          });
 
           return null;
         }

@@ -1,6 +1,5 @@
 package hs.mediasystem.db;
 
-import java.nio.file.Path;
 import java.util.Date;
 
 public class Item {
@@ -10,10 +9,8 @@ public class Item {
   private String subtitle;
   private String provider;
   private String providerId;
-  private String providerParentId;
   private String type;
   private int version;
-  private String localName;
   private String imdbId;
   private String plot;
   private byte[] poster;
@@ -25,10 +22,10 @@ public class Item {
   private int season;
   private int episode;
 
-  private final Path path;
+  protected transient String surrogateName;
 
-  public Item(Path path) {
-    this.path = path;
+  public String getSurrogateName() {
+    return surrogateName;
   }
 
   public int getId() {
@@ -77,18 +74,6 @@ public class Item {
 
   public void setVersion(int version) {
     this.version = version;
-  }
-
-  public Path getPath() {
-    return path;
-  }
-
-  public String getLocalName() {
-    return localName;
-  }
-
-  public void setLocalName(String localName) {
-    this.localName = localName;
   }
 
   public String getImdbId() {
@@ -179,16 +164,8 @@ public class Item {
     this.banner = banner;
   }
 
-  public String getProviderParentId() {
-    return providerParentId;
-  }
-
-  public void setProviderParentId(String providerParentId) {
-    this.providerParentId = providerParentId;
-  }
-
   @Override
   public String toString() {
-    return "Item[id=" + id + ", localName=" + localName + ", title=" + title + ", subtitle=" + subtitle + ", path=" + path + "]";
+    return "Item[id=" + id + ", title=" + title + ", subtitle=" + subtitle + ", type=" + type + "]";
   }
 }

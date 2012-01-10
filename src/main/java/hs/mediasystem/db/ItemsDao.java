@@ -1,11 +1,11 @@
 package hs.mediasystem.db;
 
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -27,46 +27,62 @@ public class ItemsDao {
 
   private Connection getConnection() throws SQLException {
     if(connection == null) {
-      connection = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/mediasystem", "postgres", "W2rdpass");
+      connection = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/mediasystem", "postgres", "8192");
       connection.prepareStatement("SET search_path = public").execute();
     }
 
     return connection;
   }
 
-  public Item getItem(Path path) throws ItemNotFoundException {
-    String fileName = path.getFileName().toString();
-
+  public Item getItem(Item item) throws ItemNotFoundException {
     try {
-      try(Connection connection = getConnection()) {
-        try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE localname = ?")) {
-          statement.setString(1, fileName);
+      Connection connection = getConnection();
+      try(PreparedStatement statement = connection.prepareStatement("SELECT items_id FROM localvariants WHERE surrogatename = ?")) {
+        statement.setString(1, item.getSurrogateName());
 
-          System.out.println("[FINE] Selecting item with localname = '" + fileName + "'");
-          try(final ResultSet rs = statement.executeQuery()) {
-            if(rs.next()) {
-              return new Item(path) {{
-                setId(rs.getInt("id"));
-                setLocalName(rs.getString("localname"));
-                setImdbId(rs.getString("imdbid"));
-                setProvider(rs.getString("provider"));
-                setProviderId(rs.getString("providerid"));
-                setProviderParentId(rs.getString("providerparentid"));
-                setTitle(rs.getString("title"));
-                setReleaseDate(rs.getDate("releasedate"));
-                setRating(rs.getFloat("rating"));
-                setPlot(rs.getString("plot"));
-                setPoster(rs.getBytes("poster"));
-                setBanner(rs.getBytes("banner"));
-                setBackground(rs.getBytes("background"));
-                setRuntime(rs.getInt("runtime"));
-                setVersion(rs.getInt("version"));
-                setSeason(rs.getInt("season"));
-                setEpisode(rs.getInt("episode"));
-                setType(rs.getString("type"));
-                setSubtitle(rs.getString("subtitle"));
-              }};
-            }
+        System.out.println("[FINE] Selecting localvariant with surrogatename = '" + item.getSurrogateName() + "'");
+        try(final ResultSet rs = statement.executeQuery()) {
+          if(rs.next()) {
+            return getItem(rs.getInt("items_id"));
+          }
+        }
+      }
+
+      throw new ItemNotFoundException();
+    }
+    catch(SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public Item getItem(int id) throws ItemNotFoundException {
+    try {
+      Connection connection = getConnection();
+      try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE id = ?")) {
+        statement.setInt(1, id);
+
+        System.out.println("[FINE] Selecting item with id = '" + id + "'");
+        try(final ResultSet rs = statement.executeQuery()) {
+          if(rs.next()) {
+            return new Item() {{
+              setId(rs.getInt("id"));
+              setImdbId(rs.getString("imdbid"));
+              setProvider(rs.getString("provider"));
+              setProviderId(rs.getString("providerid"));
+              setTitle(rs.getString("title"));
+              setReleaseDate(rs.getDate("releasedate"));
+              setRating(rs.getFloat("rating"));
+              setPlot(rs.getString("plot"));
+              setPoster(rs.getBytes("poster"));
+              setBanner(rs.getBytes("banner"));
+              setBackground(rs.getBytes("background"));
+              setRuntime(rs.getInt("runtime"));
+              setVersion(rs.getInt("version"));
+              setSeason(rs.getInt("season"));
+              setEpisode(rs.getInt("episode"));
+              setType(rs.getString("type"));
+              setSubtitle(rs.getString("subtitle"));
+            }};
           }
         }
       }
@@ -80,26 +96,40 @@ public class ItemsDao {
 
   public void storeItem(Item item) {
     try {
-      try(Connection connection = getConnection()) {
-        Map<String, Object> parameters = createFieldMap(item);
+      Connection connection = getConnection();
 
-        StringBuilder fields = new StringBuilder();
-        StringBuilder values = new StringBuilder();
+      Map<String, Object> parameters = createFieldMap(item);
 
-        for(String key : parameters.keySet()) {
-          if(fields.length() > 0) {
-            fields.append(",");
-            values.append(",");
+      StringBuilder fields = new StringBuilder();
+      StringBuilder values = new StringBuilder();
+
+      for(String key : parameters.keySet()) {
+        if(fields.length() > 0) {
+          fields.append(",");
+          values.append(",");
+        }
+
+        fields.append(key);
+        values.append("?");
+      }
+
+      int generatedKey = -1;
+
+      try(PreparedStatement statement = connection.prepareStatement("INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")" , Statement.RETURN_GENERATED_KEYS)) {
+        setParameters(parameters, statement);
+        statement.execute();
+
+        try(ResultSet generatedKeys = statement.getGeneratedKeys()) {
+          if(generatedKeys.next()) {
+            generatedKey = generatedKeys.getInt(1);
           }
-
-          fields.append(key);
-          values.append("?");
         }
+      }
 
-        try(PreparedStatement statement = connection.prepareStatement("INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")")) {
-          setParameters(parameters, statement);
-          statement.execute();
-        }
+      try(PreparedStatement statement = connection.prepareStatement("INSERT INTO localvariants (surrogatename, items_id) VALUES (?, ?)")) {
+        statement.setString(1, item.getSurrogateName());
+        statement.setInt(2, generatedKey);
+        statement.execute();
       }
     }
     catch(SQLException e) {
@@ -109,28 +139,27 @@ public class ItemsDao {
 
   public void updateItem(Item item) {
     try {
-      try(Connection connection = getConnection()) {
-        Map<String, Object> parameters = createFieldMap(item);
+      Connection connection = getConnection();
+      Map<String, Object> parameters = createFieldMap(item);
 
-        StringBuilder set = new StringBuilder();
+      StringBuilder set = new StringBuilder();
 
-        for(String key : parameters.keySet()) {
-          if(set.length() > 0) {
-            set.append(",");
-          }
-
-          set.append(key);
-          set.append("=?");
+      for(String key : parameters.keySet()) {
+        if(set.length() > 0) {
+          set.append(",");
         }
 
-        try(PreparedStatement statement = connection.prepareStatement("UPDATE items SET " + set.toString() + " WHERE id = ?")) {
-          parameters.put("1", item.getId());
+        set.append(key);
+        set.append("=?");
+      }
 
-          System.out.println("Updating item with id: " + item.getId());
+      try(PreparedStatement statement = connection.prepareStatement("UPDATE items SET " + set.toString() + " WHERE id = ?")) {
+        parameters.put("1", item.getId());
 
-          setParameters(parameters, statement);
-          statement.execute();
-        }
+        System.out.println("Updating item with id: " + item.getId());
+
+        setParameters(parameters, statement);
+        statement.execute();
       }
     }
     catch(SQLException e) {
@@ -156,11 +185,9 @@ public class ItemsDao {
   private static Map<String, Object> createFieldMap(Item item) {
     Map<String, Object> columns = new LinkedHashMap<>();
 
-    columns.put("localname", item.getLocalName());
     columns.put("imdbid", item.getImdbId());
     columns.put("provider", item.getProvider());
     columns.put("providerid", item.getProviderId());
-    columns.put("providerparentid", item.getProviderParentId());
     columns.put("rating", item.getRating());
     columns.put("title", item.getTitle());
     columns.put("plot", item.getPlot());

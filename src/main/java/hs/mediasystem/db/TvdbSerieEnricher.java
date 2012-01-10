@@ -28,7 +28,6 @@ public class TvdbSerieEnricher implements ItemEnricher {
         byte[] poster = Downloader.readURL(new URL(series.getPoster()));
         byte[] background = Downloader.readURL(new URL(series.getFanart()));
 
-        item.setLocalName(item.getPath().getFileName().toString());
         item.setTitle(name);
         item.setPlot(series.getOverview());
         item.setBanner(banner);
@@ -36,7 +35,7 @@ public class TvdbSerieEnricher implements ItemEnricher {
         item.setBackground(background);
         item.setProvider("TVDB");
         item.setProviderId(series.getId());
-        item.setType("serie");
+        item.setType("SERIE");
       }
       catch(MalformedURLException e) {
         throw new RuntimeException(e);

@@ -16,22 +16,23 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 
 public abstract class NamedItem implements MediaItem {
   private final MediaTree mediaTree;
-  private final String type;
 
   protected MediaItem parent;
 
   private LocalItem item;
 
-  public NamedItem(MediaTree mediaTree, LocalItem item, String type) {
+  public NamedItem(MediaTree mediaTree, LocalItem item) {
     this.mediaTree = mediaTree;
     this.item = item;
-    this.type = type;
   }
 
-  public NamedItem(MediaTree mediaTree, final String title, String type) {
+  public NamedItem(MediaTree mediaTree, final String title) {
     this(mediaTree, new LocalItem(null) {{
+      setId(-1);
+      setTitle(title);
       setLocalTitle(title);
-    }}, type);
+      calculateSurrogateName();
+    }});
   }
 
   Item getItem() {
@@ -62,8 +63,6 @@ public abstract class NamedItem implements MediaItem {
       return item.getLocalSubtitle();
     }
     else {
-      ensureDataLoaded();
-
       return item.getSubtitle() == null ? "" : item.getSubtitle();
     }
   }
@@ -91,22 +90,16 @@ public abstract class NamedItem implements MediaItem {
 
   @Override
   public ImageHandle getBackground() {
-    ensureDataLoaded();
-
     return item.getBackground() == null ? null : new ImageHandle(item.getBackground(), createKey("background"));
   }
 
   @Override
   public ImageHandle getBanner() {
-    ensureDataLoaded();
-
     return item.getBanner() == null ? null : new ImageHandle(item.getBanner(), createKey("banner"));
   }
 
   @Override
   public ImageHandle getPoster() {
-    ensureDataLoaded();
-
     return item.getPoster() == null ? null : new ImageHandle(item.getPoster(), createKey("poster"));
   }
 
@@ -116,35 +109,19 @@ public abstract class NamedItem implements MediaItem {
 
   @Override
   public String getPlot() {
-    ensureDataLoaded();
-
     return item.getPlot();
   }
 
   public int getRuntime() {
-    ensureDataLoaded();
-
     return item.getRuntime();
   }
 
   public String getProvider() {
-    ensureDataLoaded();
-
     return item.getProvider();
   }
 
   public String getProviderId() {
-    ensureDataLoaded();
-
     return item.getProviderId();
-  }
-
-  private void ensureDataLoaded() {  // TODO should only enrich, not completely replace
-//    if(item.getId() == 0 && mediaTree != null) {
-//      System.out.println("Triggered for : " + getTitle());
-//      item.setId(-1);
-//      mediaTree.triggerItemUpdate(this);
-//    }
   }
 
   private ReadOnlyObjectWrapper<State> state = new ReadOnlyObjectWrapper<>(State.BASIC);
@@ -168,23 +145,17 @@ public abstract class NamedItem implements MediaItem {
       state.set(State.ENRICHING);
     }
 
-    if(item.getId() == 0 && mediaTree != null) {
-      System.out.println("Loading data synchronously for : " + getTitle());
-      item.setId(-1);
-      mediaTree.enrichItem(itemEnricher, this);
+    synchronized(NamedItem.class) {
+      if(item.getId() == 0 && mediaTree != null) {
+        item.setId(-1);
+        mediaTree.enrichItem(itemEnricher, this);
+      }
     }
 
     state.set(State.ENRICHED);
   }
 
   public Float getRating() {
-    ensureDataLoaded();
-
     return item.getRating();
-  }
-
-  @Override
-  public String getType() {
-    return type;
   }
 }

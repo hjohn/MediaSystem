@@ -14,7 +14,7 @@ public class Season extends NamedItem implements Group {
   private final int season;
 
   public Season(MediaTree mediaTree, String title, int season) {
-    super(mediaTree, title, "EPISODE");
+    super(mediaTree, title);
     this.season = season;
   }
 

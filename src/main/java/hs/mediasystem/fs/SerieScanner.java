@@ -27,14 +27,15 @@ public class SerieScanner implements Scanner<Serie> {
         for(Path path : dirStream) {
           if(Files.isDirectory(path) && !path.getFileName().toString().startsWith(".")) {
             LocalItem item = new LocalItem(path);
-  
-            item.setLocalName(path.getFileName().toString());
-            item.setLocalTitle(item.getLocalName());
-            item.setTitle(item.getLocalName());
-            item.setType("serie");
+
+            item.setLocalTitle(path.getFileName().toString());
+            item.setTitle(item.getLocalTitle());
+            item.setType("SERIE");
             item.setProvider("LOCAL");
             item.setProviderId("");
-  
+
+            item.calculateSurrogateName();
+
             series.add(new Serie(mediaTree, item));
           }
         }

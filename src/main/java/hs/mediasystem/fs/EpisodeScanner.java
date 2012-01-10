@@ -31,21 +31,25 @@ public class EpisodeScanner implements Scanner<Episode> {
 
       try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
         for(Path path : dirStream) {
-          LocalItem item = decoder.decode(path);
+          if(path.getFileName().toString().matches(MovieDecoder.EXTENSION_PATTERN.pattern())) {
+            LocalItem item = decoder.decode(path);
 
-          if(item != null) {
-            item.setTitle(item.getLocalTitle());
-            item.setSubtitle(item.getLocalSubtitle());
+            if(item != null) {
+              item.setTitle(item.getLocalTitle());
+              item.setSubtitle(item.getLocalSubtitle());
 
-            if(item.getLocalReleaseYear() != null) {
-              GregorianCalendar gc = new GregorianCalendar(Integer.parseInt(item.getLocalReleaseYear()), 0, 1);
-              item.setReleaseDate(gc.getTime());
+              if(item.getLocalReleaseYear() != null) {
+                GregorianCalendar gc = new GregorianCalendar(Integer.parseInt(item.getLocalReleaseYear()), 0, 1);
+                item.setReleaseDate(gc.getTime());
+              }
+
+              item.setType(type);
+
+              episodes.add(new Episode(mediaTree, item));
             }
-
-            episodes.add(new Episode(mediaTree, item, type));
-          }
-          else {
-            System.err.println("MovieScanner: Could not decode as movie: " + path);
+            else {
+              System.err.println("EpisodeScanner: Could not decode as movie: " + path);
+            }
           }
         }
       }

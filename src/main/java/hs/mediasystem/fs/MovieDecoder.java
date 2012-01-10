@@ -8,23 +8,42 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MovieDecoder implements Decoder {
-  private static String VALID_EXTENSIONS = "(avi|flv|mkv|mov|mp4|mpg|mpeg)";
-  private static String SPLIT_CHARS = " \\.";
+  public static Pattern EXTENSION_PATTERN = Pattern.compile("(?i).+\\.(avi|flv|mkv|mov|mp4|mpg|mpeg)");
+
+  private static String SPLIT_CHARS = " ";
   private static String ALL_BUT_SEPARATOR = "(?:[^" + SPLIT_CHARS + "]++| (?!(?:- |\\[)))++";      // matches the title
   private static String SEPARATOR_PLUS_SEQUENCE_NUMBER = "(?: - ([0-9]++))?";   // matches the sequence number
   private static String SEPARATOR_PLUS_SUBTITLE = "(?: - )?((?:[^" + SPLIT_CHARS + "]++| (?!\\[))*+)";  // matches the subtitle
   private static String RELEASE_YEAR = "[0-9]{4}";
-  private static String EXTENSION = "\\." + VALID_EXTENSIONS;
   private static String IMDB = "\\(([0-9]++)\\)";
 
   private static final Pattern PATTERN = Pattern.compile(
       "(?i)(" + ALL_BUT_SEPARATOR + ")" + SEPARATOR_PLUS_SEQUENCE_NUMBER + SEPARATOR_PLUS_SUBTITLE +
-      "(?: \\[(" + RELEASE_YEAR + ")?(?: ?(?:" + IMDB + ")?)?.*\\])?" + EXTENSION
+      "(?: \\[(" + RELEASE_YEAR + ")?(?: ?(?:" + IMDB + ")?)?.*\\])?"
   );
+
+  private static String getValidExtension(String fileName) {
+    Matcher matcher = EXTENSION_PATTERN.matcher(fileName);
+
+    if(matcher.matches()) {
+      return matcher.group(1);
+    }
+
+    return null;
+  }
 
   @Override
   public LocalItem decode(Path path) {
-    Matcher matcher = PATTERN.matcher(path.getFileName().toString());
+    String fileName = path.getFileName().toString();
+    String extension = getValidExtension(fileName);
+
+    if(extension == null) {
+      return null;
+    }
+
+    fileName = fileName.substring(0, fileName.length() - extension.length() - 1);
+
+    Matcher matcher = PATTERN.matcher(fileName);
 
     if(!matcher.matches()) {
       return null;
@@ -54,9 +73,11 @@ public class MovieDecoder implements Decoder {
     item.setImdbId(imdbNumber);
     item.setSeason(0);
     item.setEpisode(sequence == null ? 1 : Integer.parseInt(sequence));
-    item.setType("movie");
+    item.setType("MOVIE");
     item.setProvider("LOCAL");
     item.setProviderId("");
+
+    item.calculateSurrogateName();
 
     return item;
   }

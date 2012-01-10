@@ -1,14 +1,13 @@
-CREATE TABLE items IF NOT EXISTS
+CREATE TABLE IF NOT EXISTS items
 (
   id serial4,
   provider character varying(20) NOT NULL,
   providerid character varying(20) NOT NULL,
   "type" character varying(10) NOT NULL,
-  localname character varying(1000) NOT NULL,
   title character varying(100) NOT NULL,
+  subtitle character varying(100),
   season integer,
   episode integer,
-  subtitle character varying(100),
   releasedate date,
   plot character varying(2000),
   imdbid character varying(20),
@@ -21,8 +20,15 @@ CREATE TABLE items IF NOT EXISTS
   poster bytea,
   background bytea,
   banner bytea,
-  CONSTRAINT id PRIMARY KEY (id),
-  CONSTRAINT localname UNIQUE (localname)
+  CONSTRAINT items_id PRIMARY KEY (id),
+  CONSTRAINT items_providerkey UNIQUE ("type", provider, providerid)
 );
 
-CREATE UNIQUE INDEX localname_idx ON items (localname); 
+CREATE TABLE IF NOT EXISTS localvariants
+(
+  id serial4,
+  surrogatename character varying(250) NOT NULL,
+  items_id int4 REFERENCES items (id),
+  CONSTRAINT localvariants_id PRIMARY KEY (id),
+  CONSTRAINT localvariants_surrogatename UNIQUE (surrogatename)
+);
