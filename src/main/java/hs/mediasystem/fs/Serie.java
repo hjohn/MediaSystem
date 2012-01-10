@@ -6,7 +6,7 @@ import hs.mediasystem.framework.MediaTree;
 public class Serie extends NamedItem {
 
   public Serie(MediaTree mediaTree, LocalItem item) {
-    super(mediaTree, item);
+    super(mediaTree, item, "SERIE");
   }
 
   @Override
@@ -21,6 +21,6 @@ public class Serie extends NamedItem {
 
   @Override
   public MediaTree getRoot() {
-    return new EpisodesMediaTree(getPath(), this);
+    return new EpisodesMediaTree(getPath());
   }
 }

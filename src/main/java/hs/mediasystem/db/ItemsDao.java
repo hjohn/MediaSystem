@@ -16,8 +16,13 @@ public class ItemsDao {
 
   private Connection connection;
 
-  public ItemsDao() throws ClassNotFoundException {
-    Class.forName("org.postgresql.Driver");
+  public ItemsDao() {
+    try {
+      Class.forName("org.postgresql.Driver");
+    }
+    catch(ClassNotFoundException e) {
+      throw new RuntimeException();
+    }
   }
 
   private Connection getConnection() throws SQLException {
@@ -36,7 +41,7 @@ public class ItemsDao {
       try(Connection connection = getConnection()) {
         try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE localname = ?")) {
           statement.setString(1, fileName);
-    
+
           System.out.println("[FINE] Selecting item with localname = '" + fileName + "'");
           try(final ResultSet rs = statement.executeQuery()) {
             if(rs.next()) {
@@ -46,6 +51,7 @@ public class ItemsDao {
                 setImdbId(rs.getString("imdbid"));
                 setProvider(rs.getString("provider"));
                 setProviderId(rs.getString("providerid"));
+                setProviderParentId(rs.getString("providerparentid"));
                 setTitle(rs.getString("title"));
                 setReleaseDate(rs.getDate("releasedate"));
                 setRating(rs.getFloat("rating"));
@@ -76,20 +82,20 @@ public class ItemsDao {
     try {
       try(Connection connection = getConnection()) {
         Map<String, Object> parameters = createFieldMap(item);
-  
+
         StringBuilder fields = new StringBuilder();
         StringBuilder values = new StringBuilder();
-  
+
         for(String key : parameters.keySet()) {
           if(fields.length() > 0) {
             fields.append(",");
             values.append(",");
           }
-  
+
           fields.append(key);
           values.append("?");
         }
-  
+
         try(PreparedStatement statement = connection.prepareStatement("INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")")) {
           setParameters(parameters, statement);
           statement.execute();
@@ -105,23 +111,23 @@ public class ItemsDao {
     try {
       try(Connection connection = getConnection()) {
         Map<String, Object> parameters = createFieldMap(item);
-  
+
         StringBuilder set = new StringBuilder();
-  
+
         for(String key : parameters.keySet()) {
           if(set.length() > 0) {
             set.append(",");
           }
-  
+
           set.append(key);
           set.append("=?");
         }
-  
+
         try(PreparedStatement statement = connection.prepareStatement("UPDATE items SET " + set.toString() + " WHERE id = ?")) {
           parameters.put("1", item.getId());
-    
+
           System.out.println("Updating item with id: " + item.getId());
-    
+
           setParameters(parameters, statement);
           statement.execute();
         }
@@ -154,6 +160,7 @@ public class ItemsDao {
     columns.put("imdbid", item.getImdbId());
     columns.put("provider", item.getProvider());
     columns.put("providerid", item.getProviderId());
+    columns.put("providerparentid", item.getProviderParentId());
     columns.put("rating", item.getRating());
     columns.put("title", item.getTitle());
     columns.put("plot", item.getPlot());

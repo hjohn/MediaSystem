@@ -1,5 +1,6 @@
 package hs.mediasystem;
 
+import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -81,11 +82,16 @@ public class Nederland24Item implements MediaItem {
   }
 
   @Override
-  public void loadData() {
+  public void loadData(ItemEnricher itemEnricher) {
   }
 
   @Override
   public ReadOnlyObjectProperty<State> stateProperty() {
     throw new UnsupportedOperationException("Method not implemented");
+  }
+
+  @Override
+  public String getType() {
+    return null;
   }
 }

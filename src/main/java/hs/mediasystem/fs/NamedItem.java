@@ -2,6 +2,7 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.ImageHandle;
 import hs.mediasystem.db.Item;
+import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.db.LocalItem;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
@@ -15,20 +16,22 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 
 public abstract class NamedItem implements MediaItem {
   private final MediaTree mediaTree;
+  private final String type;
 
   protected MediaItem parent;
 
   private LocalItem item;
 
-  public NamedItem(MediaTree mediaTree, LocalItem item) {
+  public NamedItem(MediaTree mediaTree, LocalItem item, String type) {
     this.mediaTree = mediaTree;
     this.item = item;
+    this.type = type;
   }
 
-  public NamedItem(MediaTree mediaTree, final String title) {
+  public NamedItem(MediaTree mediaTree, final String title, String type) {
     this(mediaTree, new LocalItem(null) {{
       setLocalTitle(title);
-    }});
+    }}, type);
   }
 
   Item getItem() {
@@ -156,7 +159,7 @@ public abstract class NamedItem implements MediaItem {
   }
 
   @Override
-  public void loadData() {
+  public void loadData(ItemEnricher itemEnricher) {
     synchronized(state) {
       if(getState() != State.BASIC) {
         return;
@@ -168,7 +171,7 @@ public abstract class NamedItem implements MediaItem {
     if(item.getId() == 0 && mediaTree != null) {
       System.out.println("Loading data synchronously for : " + getTitle());
       item.setId(-1);
-      mediaTree.enrichItem(this);
+      mediaTree.enrichItem(itemEnricher, this);
     }
 
     state.set(State.ENRICHED);
@@ -178,5 +181,10 @@ public abstract class NamedItem implements MediaItem {
     ensureDataLoaded();
 
     return item.getRating();
+  }
+
+  @Override
+  public String getType() {
+    return type;
   }
 }

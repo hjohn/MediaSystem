@@ -7,15 +7,17 @@ import com.moviejukebox.thetvdb.TheTVDB;
 import com.moviejukebox.thetvdb.model.Episode;
 
 public class TvdbEpisodeEnricher implements ItemEnricher {
-  private final String serieId;
-
-  public TvdbEpisodeEnricher(String serieId) {
-    this.serieId = serieId;
-  }
+//  private final String serieId;
+//
+//  public TvdbEpisodeEnricher(String serieId) {
+//    this.serieId = serieId;
+//  }
 
   @Override
   public void enrichItem(final Item item) throws ItemNotFoundException {
     TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
+
+    String serieId = "";
 
     final Episode episode = tvDB.getEpisode(serieId, item.getSeason(), item.getEpisode(), "en");
 

@@ -55,16 +55,6 @@
 			<systemPath>${basedir}/thetvdbapi-1.2-SNAPSHOT-r81.jar</systemPath>
 		</dependency>
 		<dependency>
-			<groupId>net.java.timingframework</groupId>
-			<artifactId>timingframework-core</artifactId>
-			<version>4.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>net.java.timingframework</groupId>
-			<artifactId>timingframework-swing</artifactId>
-			<version>4.1.0</version>
-		</dependency>
-		<dependency>
 		  <groupId>com.sun.jna</groupId>
 		  <artifactId>jna</artifactId>
 		  <version>3.0.9</version>
@@ -73,8 +63,18 @@
           <groupId>javafx</groupId>
           <artifactId>javafx</artifactId>
           <scope>system</scope>
-          <systemPath>C:\Program Files\Oracle\JavaFX 2.0 SDK\rt\lib\jfxrt.jar</systemPath>
+          <systemPath>C:\Program Files (x86)\Oracle\JavaFX 2.0 SDK\rt\lib\jfxrt.jar</systemPath>
           <version>2.0</version>
+        </dependency>
+        <dependency>
+        	<groupId>com.google.inject</groupId>
+        	<artifactId>guice</artifactId>
+        	<version>3.0</version>
+        </dependency>
+        <dependency>
+        	<groupId>com.google.inject.extensions</groupId>
+        	<artifactId>guice-multibindings</artifactId>
+        	<version>3.0</version>
         </dependency>
 	</dependencies>
     <properties>

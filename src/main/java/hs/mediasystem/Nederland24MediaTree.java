@@ -1,5 +1,6 @@
 package hs.mediasystem;
 
+import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.CellProvider;
@@ -32,7 +33,7 @@ public class Nederland24MediaTree implements MediaTree {
   }
 
   @Override
-  public void enrichItem(NamedItem namedItem) {
+  public void enrichItem(ItemEnricher itemEnricher, NamedItem namedItem) {
   }
 
   @Override

@@ -1,5 +1,6 @@
 package hs.mediasystem.framework;
 
+import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.fs.CellProvider;
 import hs.mediasystem.fs.NamedItem;
 
@@ -20,5 +21,5 @@ public interface MediaTree {
 
   CellProvider<MediaItem> createListCell();
 
-  void enrichItem(final NamedItem namedItem);
+  void enrichItem(final ItemEnricher enricher, final NamedItem namedItem);
 }

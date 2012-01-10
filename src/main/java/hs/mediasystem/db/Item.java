@@ -10,6 +10,7 @@ public class Item {
   private String subtitle;
   private String provider;
   private String providerId;
+  private String providerParentId;
   private String type;
   private int version;
   private String localName;
@@ -176,6 +177,14 @@ public class Item {
 
   public void setBanner(byte[] banner) {
     this.banner = banner;
+  }
+
+  public String getProviderParentId() {
+    return providerParentId;
+  }
+
+  public void setProviderParentId(String providerParentId) {
+    this.providerParentId = providerParentId;
   }
 
   @Override

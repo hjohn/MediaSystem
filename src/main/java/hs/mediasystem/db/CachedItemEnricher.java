@@ -1,19 +1,16 @@
 package hs.mediasystem.db;
 
+import javax.inject.Inject;
+
 
 public class CachedItemEnricher implements ItemEnricher {
   private final ItemsDao itemsDao;
   private final ItemEnricher providerToCache;
 
-  public CachedItemEnricher(ItemEnricher providerToCache) {
+  @Inject
+  public CachedItemEnricher(ItemsDao itemsDao, ItemEnricher providerToCache) {
+    this.itemsDao = itemsDao;
     this.providerToCache = providerToCache;
-
-    try {
-      itemsDao = new ItemsDao();
-    }
-    catch(ClassNotFoundException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   @Override
@@ -41,6 +38,7 @@ public class CachedItemEnricher implements ItemEnricher {
       item.setSubtitle(cachedItem.getSubtitle());
       item.setProvider(cachedItem.getProvider());
       item.setProviderId(cachedItem.getProviderId());
+      item.setProviderParentId(cachedItem.getProviderParentId());
 
       if(cachedItem.getVersion() < ItemsDao.VERSION) {
         System.out.println("[FINE] Old version, updating from cached provider: " + fileName);

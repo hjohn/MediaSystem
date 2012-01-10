@@ -1,7 +1,6 @@
 package hs.mediasystem;
 
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.SublightSubtitleProvider;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.Player;
@@ -27,6 +26,11 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+@Singleton
 public class ProgramController {
   private final Player player;
   private final Stage mainStage;  // TODO two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing
@@ -34,12 +38,15 @@ public class ProgramController {
   private final BorderPane mainGroup;
   private final BorderPane overlayGroup;
   private final Ini ini;
+  private final Provider<MainScreen> mainScreenProvider;
 
   private final NavigationHistory<NavigationItem> history = new NavigationHistory<>();
 
-  public ProgramController(Ini ini, Player player) {
+  @Inject
+  public ProgramController(Ini ini, Player player, Provider<MainScreen> mainScreenProvider) {
     this.ini = ini;
     this.player = player;
+    this.mainScreenProvider = mainScreenProvider;
 
     mainGroup = new BorderPane();
     overlayGroup = new BorderPane();
@@ -109,15 +116,14 @@ public class ProgramController {
   }
 
   public void showMainScreen() {
-    MainScreen mainScreen = new MainScreen(this);
+//    MainScreen mainScreen = new MainScreen(this);
+    MainScreen mainScreen = mainScreenProvider.get();
 
     history.forward(new NavigationItem(mainScreen.create(), "MAIN"));
   }
 
-  public void showSelectItemScreen(MediaTree mediaTree) {
-    SelectItemScene selectItemScreen = new SelectItemScene(this);
-
-    history.forward(new NavigationItem(selectItemScreen.create(mediaTree), "MAIN"));
+  public void showScreen(Node node) {
+    history.forward(new NavigationItem(node, "MAIN"));
   }
 
   private void updateScreen() {

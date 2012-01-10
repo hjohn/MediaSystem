@@ -1,4 +1,4 @@
-CREATE TABLE items
+CREATE TABLE items IF NOT EXISTS
 (
   id serial4,
   provider character varying(20) NOT NULL,
@@ -23,4 +23,6 @@ CREATE TABLE items
   banner bytea,
   CONSTRAINT id PRIMARY KEY (id),
   CONSTRAINT localname UNIQUE (localname)
-)
+);
+
+CREATE UNIQUE INDEX localname_idx ON items (localname); 

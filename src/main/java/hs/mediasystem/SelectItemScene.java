@@ -1,9 +1,13 @@
 package hs.mediasystem;
 
+import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItem.State;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.CellProvider;
+
+import java.util.Map;
+
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -44,6 +48,8 @@ import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.Duration;
 
+import javax.inject.Inject;
+
 public class SelectItemScene {
   private final ProgramController controller;
 
@@ -82,8 +88,12 @@ public class SelectItemScene {
     )
   );
 
-  public SelectItemScene(ProgramController controller) {
+  private final Map<String, ItemEnricher> itemEnrichers;
+
+  @Inject
+  public SelectItemScene(ProgramController controller, Map<String, ItemEnricher> itemEnrichers) {
     this.controller = controller;
+    this.itemEnrichers = itemEnrichers;
     timeline.setOnFinished(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
@@ -324,7 +334,7 @@ public class SelectItemScene {
             @Override
             public Void call() {
               System.err.println("Loading data for : " + item.getTitle());
-              item.loadData();
+              //item.loadData(itemEnrichers.get(item.getType()));
               return null;
             }
           };

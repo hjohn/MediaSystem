@@ -1,7 +1,5 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.CachedItemEnricher;
-import hs.mediasystem.db.TmdbMovieEnricher;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
@@ -18,7 +16,6 @@ public class MoviesMediaTree extends AbstractMediaTree {
   private List<? extends MediaItem> children;
 
   public MoviesMediaTree(Path root) {
-    super(new CachedItemEnricher(new TmdbMovieEnricher()));
     this.root = root;
   }
 
@@ -35,14 +32,14 @@ public class MoviesMediaTree extends AbstractMediaTree {
   @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      List<Episode> episodes = new EpisodeScanner(this, new MovieDecoder()).scan(root);
+      List<Episode> episodes = new EpisodeScanner(this, new MovieDecoder(), "MOVIE").scan(root);
       List<MediaItem> items = new ArrayList<>();
 
       Collection<List<MediaItem>> groupedItems = Groups.group(episodes, new TitleGrouper());
 
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
-          EpisodeGroup g = new EpisodeGroup(this, group.get(0).getTitle());
+          EpisodeGroup g = new EpisodeGroup(this, group.get(0).getTitle(), "MOVIE");
 
           for(MediaItem item : group) {
             g.add(item);

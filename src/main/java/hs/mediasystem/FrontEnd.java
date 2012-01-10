@@ -1,6 +1,13 @@
 package hs.mediasystem;
 
+import hs.mediasystem.db.ItemEnricher;
+import hs.mediasystem.db.TmdbMovieEnricher;
+import hs.mediasystem.db.TvdbEpisodeEnricher;
+import hs.mediasystem.db.TvdbSerieEnricher;
 import hs.mediasystem.framework.player.Player;
+import hs.mediasystem.screens.MainMenuExtension;
+import hs.mediasystem.screens.MoviesMainMenuExtension;
+import hs.mediasystem.screens.SeriesMainMenuExtension;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
@@ -11,6 +18,14 @@ import java.io.File;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import net.sf.jtmdb.GeneralSettings;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.Provides;
+import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
 
 public class FrontEnd extends Application {
   private static final Ini INI = new Ini(new File("mediasystem.ini"));
@@ -46,8 +61,60 @@ public class FrontEnd extends Application {
 
   @Override
   public void start(Stage primaryStage) throws Exception {
+//    Module module2 = new AbstractModule() {
+//
+//      @Override
+//      protected void configure() {
+//        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(MoviesMainMenuExtension.class);
+//
+//        bind(ItemEnricher.class).toInstance(new CachedItemEnricher(new ItemsDao(), new TmdbMovieEnricher()));
+//      }
+//    };
+//
+//    Module module3 = new AbstractModule() {
+//
+//      @Override
+//      protected void configure() {
+//        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(SeriesMainMenuExtension.class);
+//
+//        bind(ItemEnricher.class).toInstance(new CachedItemEnricher(new ItemsDao(), new TvdbSerieEnricher()));
+//      }
+//    };
 
-    ProgramController controller = new ProgramController(INI, player);
+    Module module = new AbstractModule() {
+      @Override
+      protected void configure() {
+        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(MoviesMainMenuExtension.class);
+        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(SeriesMainMenuExtension.class);
+        MapBinder.newMapBinder(binder(), String.class, ItemEnricher.class).addBinding("SERIE").to(TvdbSerieEnricher.class);
+        MapBinder.newMapBinder(binder(), String.class, ItemEnricher.class).addBinding("MOVIE").to(TmdbMovieEnricher.class);
+        MapBinder.newMapBinder(binder(), String.class, ItemEnricher.class).addBinding("EPISODE").to(TvdbEpisodeEnricher.class);
+
+//        MapBinder.newSetBinder(binder(), TmdbMovieEnricher.class);
+
+//        bind(new TypeLiteral<List<MainMenuExtension>>() {}).toProvider();
+//        Instance(new ArrayList<MainMenuExtension>() {{
+//          add(new MoviesMainMenuExtension());
+//          add(new SeriesMainMenuExtension());
+//        }});
+      }
+
+      @Provides
+      public Player providesPlayer() {
+        return player;
+      }
+
+      @Provides
+      public Ini providesIni() {
+        return INI;
+      }
+    };
+
+    Injector injector = Guice.createInjector(module);
+
+    ProgramController controller = injector.getInstance(ProgramController.class);
+
+    //ProgramController controller = new ProgramController(INI, player);
 
     controller.showMainScreen();
   }

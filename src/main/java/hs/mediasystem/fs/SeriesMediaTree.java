@@ -1,7 +1,5 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.CachedItemEnricher;
-import hs.mediasystem.db.TvdbSerieEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 
@@ -15,7 +13,6 @@ public class SeriesMediaTree extends AbstractMediaTree {
   private List<? extends MediaItem> children;
 
   public SeriesMediaTree(Path root) {
-    super(new CachedItemEnricher(new TvdbSerieEnricher()));
     this.root = root;
   }
 

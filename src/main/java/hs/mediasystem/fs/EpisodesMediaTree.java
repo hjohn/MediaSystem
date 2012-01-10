@@ -1,7 +1,5 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.CachedItemEnricher;
-import hs.mediasystem.db.TvdbEpisodeEnricher;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
@@ -17,8 +15,7 @@ public class EpisodesMediaTree extends AbstractMediaTree {
 
   private List<? extends MediaItem> children;
 
-  public EpisodesMediaTree(Path root, Serie serie) {
-    super(new CachedItemEnricher(new TvdbEpisodeEnricher(serie.getProviderId())));
+  public EpisodesMediaTree(Path root) {
     this.root = root;
   }
 
@@ -35,7 +32,7 @@ public class EpisodesMediaTree extends AbstractMediaTree {
   @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      List<Episode> episodes = new EpisodeScanner(this, new EpisodeDecoder()).scan(root);
+      List<Episode> episodes = new EpisodeScanner(this, new EpisodeDecoder(), "EPISODE").scan(root);
       List<MediaItem> items = new ArrayList<>();
 
       Collection<List<MediaItem>> groupedItems = Groups.group(episodes, new SeasonGrouper());

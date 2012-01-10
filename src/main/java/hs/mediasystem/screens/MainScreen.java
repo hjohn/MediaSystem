@@ -1,12 +1,10 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.ProgramController;
-import hs.mediasystem.fs.MoviesMediaTree;
-import hs.mediasystem.fs.SeriesMediaTree;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -20,37 +18,56 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import javax.inject.Inject;
+
 public class MainScreen {
   private final ProgramController controller;
+  private final Set<MainMenuExtension> mainMenuExtensions;
 
-  public MainScreen(ProgramController controller) {
+  @Inject
+  public MainScreen(ProgramController controller, Set<MainMenuExtension> mainMenuExtensions) {
     this.controller = controller;
+    this.mainMenuExtensions = mainMenuExtensions;
   }
 
   public Node create() {
     final BorderPane root = new BorderPane();
 
-    final List<Button> buttons = new ArrayList<Button>() {{
-      add(new Button("Movies") {{
-        setGraphic(new ImageView(new Image("images/package_multimedia.png")));
+    final List<Button> buttons = new ArrayList<>();
+//    {{
+//      add(new Button("Movies") {{
+//        setGraphic(new ImageView(new Image("images/package_multimedia.png")));
+//      }});
+//      add(new Button("Series") {{
+//        setGraphic(new ImageView(new Image("images/aktion.png")));
+//      }});
+//      add(new Button("Nederland 24") {{
+//        setGraphic(new ImageView(new Image("images/browser.png")));
+//      }});
+//      add(new Button("Youtube") {{
+//        setGraphic(new ImageView(new Image("images/tv.png")));
+//      }});
+//    }};
+
+    for(final MainMenuExtension mainMenuExtension : mainMenuExtensions) {
+      buttons.add(new Button(mainMenuExtension.getTitle()) {{
+        setGraphic(new ImageView(mainMenuExtension.getImage()));
+        setOnAction(new EventHandler<ActionEvent>() {
+          @Override
+          public void handle(ActionEvent event) {
+            mainMenuExtension.select(controller);
+//            ItemEnricher itemEnricher = new CachedItemEnricher(new ItemsDao(), new TmdbMovieEnricher());
+//            controller.showSelectItemScreen(new MoviesMediaTree(itemEnricher, Paths.get(controller.getIni().getValue("general", "movies.path"))));
+          }
+        });
       }});
-      add(new Button("Series") {{
-        setGraphic(new ImageView(new Image("images/aktion.png")));
-      }});
-      add(new Button("Nederland 24") {{
-        setGraphic(new ImageView(new Image("images/browser.png")));
-      }});
-      add(new Button("Youtube") {{
-        setGraphic(new ImageView(new Image("images/tv.png")));
-      }});
-    }};
+    }
 
 
     final VBox menuBox = new VBox() {{
@@ -94,19 +111,20 @@ public class MainScreen {
 //      });
     }
 
-    buttons.get(0).setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-        controller.showSelectItemScreen(new MoviesMediaTree(Paths.get(controller.getIni().getValue("general", "movies.path"))));
-      }
-    });
-
-    buttons.get(1).setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-        controller.showSelectItemScreen(new SeriesMediaTree(Paths.get(controller.getIni().getValue("general", "series.path"))));
-      }
-    });
+//    buttons.get(0).setOnAction(new EventHandler<ActionEvent>() {
+//      @Override
+//      public void handle(ActionEvent event) {
+//        ItemEnricher itemEnricher = new CachedItemEnricher(new ItemsDao(), new TmdbMovieEnricher());
+//        controller.showSelectItemScreen(new MoviesMediaTree(itemEnricher, Paths.get(controller.getIni().getValue("general", "movies.path"))));
+//      }
+//    });
+//
+//    buttons.get(1).setOnAction(new EventHandler<ActionEvent>() {
+//      @Override
+//      public void handle(ActionEvent event) {
+//        controller.showSelectItemScreen(new SeriesMediaTree(Paths.get(controller.getIni().getValue("general", "series.path"))));
+//      }
+//    });
 
     root.setCenter(box);
 

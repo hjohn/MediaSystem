@@ -1,6 +1,7 @@
 package hs.mediasystem.framework;
 
 import hs.mediasystem.ImageHandle;
+import hs.mediasystem.db.ItemEnricher;
 import javafx.beans.property.ReadOnlyObjectProperty;
 
 public interface MediaItem {
@@ -9,6 +10,7 @@ public interface MediaItem {
   MediaTree getRoot();
   boolean isRoot();
   boolean isLeaf();
+  String getType();
 
   String getUri();
 
@@ -25,5 +27,5 @@ public interface MediaItem {
   ImageHandle getBackground();
 
   ReadOnlyObjectProperty<State> stateProperty();
-  void loadData();
+  void loadData(ItemEnricher itemEnricher);
 }
