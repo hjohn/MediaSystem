@@ -9,18 +9,28 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 public class ListViewOption<T> extends Option {
   private final ListView<T> listView = new ListView<>();
 
-  public ListViewOption(String description, final ObjectProperty<T> property, ObservableList<T> items, final StringConverter<T> stringConverter) {
+  public ListViewOption(final String description, final ObjectProperty<T> property, ObservableList<T> items, final StringConverter<T> stringConverter) {
     super(description);
 
+    getStyleClass().clear();
+    getStyleClass().add("list");
+    
     setLeft(null);
     setRight(null);
-    setTop(new Label(description));
-    setCenter(listView);
+    setTop(null);
+    setCenter(new VBox() {{
+      getChildren().add(new VBox() {{
+        getStyleClass().add("title");
+        getChildren().add(new Label(description));
+      }});
+      getChildren().add(listView);
+    }});
 
     listView.setItems(items);
     listView.setCellFactory(new Callback<ListView<T>, ListCell<T>>() {

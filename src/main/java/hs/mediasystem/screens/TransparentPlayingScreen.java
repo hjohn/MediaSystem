@@ -19,7 +19,6 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.DoubleProperty;
@@ -290,16 +289,11 @@ public class TransparentPlayingScreen extends StackPane {
               })
             );
 
-            getChildren().add(new DialogScreen("Video - Options", options));
+            DialogScreen dialogScreen = new DialogScreen("Video - Options", options);
+            
+            getChildren().add(dialogScreen);
 
-            // HACK Using setDisable to shift the focus to the Options Dialog TODO this doesn't even always work...
-            borderPane.setDisable(true);
-            Platform.runLater(new Runnable() {
-              @Override
-              public void run() {
-                borderPane.setDisable(false);
-              }
-            });
+            dialogScreen.requestFocus();
           }
         }
         else if(code == KeyCode.SPACE) {

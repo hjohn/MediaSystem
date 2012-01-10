@@ -12,6 +12,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 public class DialogScreen extends BorderPane {
@@ -121,5 +122,10 @@ public class DialogScreen extends BorderPane {
 
     options.get(index).requestFocus();
     selectedIndex = index;
+  }
+  
+  @Override
+  public void requestFocus() {
+    ((Pane)lookup("#dialog-list")).getChildren().get(0).requestFocus();
   }
 }
