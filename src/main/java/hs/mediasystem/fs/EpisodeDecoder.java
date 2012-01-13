@@ -1,6 +1,7 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.LocalItem;
+import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.db.LocalInfo.Type;
 import hs.mediasystem.framework.Decoder;
 
 import java.nio.file.Path;
@@ -23,7 +24,7 @@ public class EpisodeDecoder implements Decoder {
   );
 
   @Override
-  public LocalItem decode(Path path) {
+  public LocalInfo decode(Path path, Type type) {
     Matcher matcher = PATTERN.matcher(path.getFileName().toString());
 
     if(!matcher.matches()) {
@@ -33,7 +34,7 @@ public class EpisodeDecoder implements Decoder {
     String title = matcher.group(1);
     String sequence = matcher.group(2);
     String subtitle = matcher.group(3);
-    String year = matcher.group(4);
+    String yearString = matcher.group(4);
 
     String imdb = matcher.group(5);
     String imdbNumber;
@@ -45,24 +46,15 @@ public class EpisodeDecoder implements Decoder {
       imdbNumber = null;
     }
 
-    LocalItem item = new LocalItem(path);
-
-    item.setLocalTitle(title);
-    item.setLocalSubtitle(subtitle.isEmpty() ? null : subtitle);
-    item.setLocalReleaseYear(year);
-
-    item.setImdbId(imdbNumber);
+    Integer year = yearString.isEmpty() ? null : Integer.parseInt(yearString);
+    Integer season = null;
+    Integer episode = null;
 
     if(sequence != null && sequence.matches("[0-9]+x[0-9]+")) {
-      item.setSeason(Integer.parseInt(sequence.split("x")[0]));
-      item.setEpisode(Integer.parseInt(sequence.split("x")[1]));
+      season = Integer.parseInt(sequence.split("x")[0]);
+      episode = Integer.parseInt(sequence.split("x")[1]);
     }
-    item.setType("EPISODE");
-    item.setProvider("LOCAL");
-    item.setProviderId("");
 
-    item.calculateSurrogateName();
-
-    return item;
+    return new LocalInfo(path, type, title, subtitle.isEmpty() ? null : subtitle, imdbNumber, year, season, episode);
   }
 }

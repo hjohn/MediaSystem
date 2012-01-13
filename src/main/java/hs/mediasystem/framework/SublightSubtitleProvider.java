@@ -14,21 +14,10 @@ public class SublightSubtitleProvider implements SubtitleProvider {
 
   @Override
   public List<SubtitleDescriptor> query(MediaItem mediaItem) {
-    Integer year = null;
+    Integer year = mediaItem.getReleaseYear();
 
-    try {
-      year = Integer.parseInt(mediaItem.getReleaseYear());
-    }
-    catch(NumberFormatException e) {
-    }
-
-    Short season = (short)mediaItem.getSeason();
+    Short season = mediaItem.getSeason() == null ? null : mediaItem.getSeason().shortValue();
     Integer episode = mediaItem.getEpisode();
-
-    if(season == 0) {
-      season = null;
-      episode = null;
-    }
 
     System.out.println("Looking for subtitles: " + mediaItem.getTitle() + "; " +  year + "; " + season + "; " + episode + "; English");
 

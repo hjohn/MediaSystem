@@ -1,14 +1,15 @@
 CREATE TABLE IF NOT EXISTS items
 (
   id serial4,
+  "type" character varying(10) NOT NULL,
   provider character varying(20) NOT NULL,
   providerid character varying(20) NOT NULL,
-  "type" character varying(10) NOT NULL,
   title character varying(100) NOT NULL,
   subtitle character varying(100),
   season integer,
   episode integer,
   releasedate date,
+  releaseyear integer,
   plot character varying(2000),
   imdbid character varying(20),
   rating numeric(4,1),
@@ -24,11 +25,13 @@ CREATE TABLE IF NOT EXISTS items
   CONSTRAINT items_providerkey UNIQUE ("type", provider, providerid)
 );
 
-CREATE TABLE IF NOT EXISTS localvariants
+CREATE TABLE IF NOT EXISTS identifiers
 (
   id serial4,
   surrogatename character varying(250) NOT NULL,
-  items_id int4 REFERENCES items (id),
-  CONSTRAINT localvariants_id PRIMARY KEY (id),
-  CONSTRAINT localvariants_surrogatename UNIQUE (surrogatename)
-);
+  "type" character varying(10) NOT NULL,
+  provider character varying(20) NOT NULL,
+  providerid character varying(20) NOT NULL,
+  CONSTRAINT queries_id PRIMARY KEY (id),
+  CONSTRAINT queries_surrogatename UNIQUE (surrogatename)
+)

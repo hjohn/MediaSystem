@@ -1,12 +1,12 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.LocalItem;
+import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaTree;
 
 public class Episode extends NamedItem {
 
-  public Episode(MediaTree mediaTree, LocalItem item) {
-    super(mediaTree, item);
+  public Episode(MediaTree mediaTree, LocalInfo localInfo) {
+    super(mediaTree, localInfo);
   }
 
   @Override

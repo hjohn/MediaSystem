@@ -1,5 +1,7 @@
 package hs.mediasystem.fs;
 
+import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.db.LocalInfo.Type;
 import hs.mediasystem.framework.Group;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
@@ -11,11 +13,9 @@ import java.util.List;
 
 public class Season extends NamedItem implements Group {
   private final List<MediaItem> children = new ArrayList<>();
-  private final int season;
 
   public Season(MediaTree mediaTree, String title, int season) {
-    super(mediaTree, title);
-    this.season = season;
+    super(mediaTree, new LocalInfo(null, Type.EPISODE, title, null, null, null, season, null));
   }
 
   public void add(MediaItem child) {
@@ -40,11 +40,6 @@ public class Season extends NamedItem implements Group {
   @Override
   public boolean isLeaf() {
     return false;
-  }
-
-  @Override
-  public int getSeason() {
-    return season;
   }
 
   @Override

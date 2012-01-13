@@ -1,6 +1,7 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.LocalItem;
+import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.db.LocalInfo.Type;
 import hs.mediasystem.framework.Decoder;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Scanner;
@@ -10,15 +11,14 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 public class EpisodeScanner implements Scanner<Episode> {
   private final MediaTree mediaTree;
   private final Decoder decoder;
-  private final String type;
+  private final Type type;
 
-  public EpisodeScanner(MediaTree mediaTree, Decoder decoder, String type) {
+  public EpisodeScanner(MediaTree mediaTree, Decoder decoder, Type type) {
     this.mediaTree = mediaTree;
     this.decoder = decoder;
     this.type = type;
@@ -32,20 +32,10 @@ public class EpisodeScanner implements Scanner<Episode> {
       try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
         for(Path path : dirStream) {
           if(path.getFileName().toString().matches(MovieDecoder.EXTENSION_PATTERN.pattern())) {
-            LocalItem item = decoder.decode(path);
+            LocalInfo localInfo = decoder.decode(path, type);
 
-            if(item != null) {
-              item.setTitle(item.getLocalTitle());
-              item.setSubtitle(item.getLocalSubtitle());
-
-              if(item.getLocalReleaseYear() != null) {
-                GregorianCalendar gc = new GregorianCalendar(Integer.parseInt(item.getLocalReleaseYear()), 0, 1);
-                item.setReleaseDate(gc.getTime());
-              }
-
-              item.setType(type);
-
-              episodes.add(new Episode(mediaTree, item));
+            if(localInfo != null) {
+              episodes.add(new Episode(mediaTree, localInfo));
             }
             else {
               System.err.println("EpisodeScanner: Could not decode as movie: " + path);

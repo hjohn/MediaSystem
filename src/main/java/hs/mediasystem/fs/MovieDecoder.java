@@ -1,6 +1,7 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.LocalItem;
+import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.db.LocalInfo.Type;
 import hs.mediasystem.framework.Decoder;
 
 import java.nio.file.Path;
@@ -33,7 +34,7 @@ public class MovieDecoder implements Decoder {
   }
 
   @Override
-  public LocalItem decode(Path path) {
+  public LocalInfo decode(Path path, Type type) {
     String fileName = path.getFileName().toString();
     String extension = getValidExtension(fileName);
 
@@ -52,7 +53,7 @@ public class MovieDecoder implements Decoder {
     String title = matcher.group(1);
     String sequence = matcher.group(2);
     String subtitle = matcher.group(3);
-    String year = matcher.group(4);
+    String yearString = matcher.group(4);
 
     String imdb = matcher.group(5);
     String imdbNumber;
@@ -64,21 +65,9 @@ public class MovieDecoder implements Decoder {
       imdbNumber = null;
     }
 
-    LocalItem item = new LocalItem(path);
+    Integer year = yearString == null || yearString.isEmpty() ? null : Integer.parseInt(yearString);
+    Integer episode = sequence == null ? 1 : Integer.parseInt(sequence);
 
-    item.setLocalTitle(title);
-    item.setLocalSubtitle(subtitle == null ? "" : subtitle);
-    item.setLocalReleaseYear(year);
-
-    item.setImdbId(imdbNumber);
-    item.setSeason(0);
-    item.setEpisode(sequence == null ? 1 : Integer.parseInt(sequence));
-    item.setType("MOVIE");
-    item.setProvider("LOCAL");
-    item.setProviderId("");
-
-    item.calculateSurrogateName();
-
-    return item;
+    return new LocalInfo(path, type, title, subtitle == null ? "" : subtitle, imdbNumber, year, null, episode);
   }
 }

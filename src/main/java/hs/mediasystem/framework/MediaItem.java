@@ -15,11 +15,11 @@ public interface MediaItem {
 
   String getTitle();
   String getSubtitle();
-  String getReleaseYear();
+  Integer getReleaseYear();
   String getPlot();
 
-  int getSeason();
-  int getEpisode();
+  Integer getSeason();
+  Integer getEpisode();
 
   ImageHandle getBanner();
   ImageHandle getPoster();

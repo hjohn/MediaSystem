@@ -12,6 +12,27 @@ public class CachedItemEnricher implements ItemEnricher {
     this.providerToCache = providerToCache;
   }
 
+
+  @Override
+  public void identifyItem(Item item) throws ItemNotFoundException {
+    System.out.println("[FINE] CachedItemEnricher.identifyItem() - with surrogatename: " + item.getSurrogateName());
+
+    try {
+      Item identifier = itemsDao.getQuery(item.getSurrogateName());
+
+      System.out.println("[FINE] CachedItemEnricher.identifyItem() - Cache Hit");
+
+      item.setType(identifier.getType());
+      item.setProvider(identifier.getProvider());
+      item.setProviderId(identifier.getProviderId());
+    }
+    catch(ItemNotFoundException e) {
+      System.out.println("[FINE] CachedItemEnricher.identifyItem() - Cache Miss");
+      providerToCache.identifyItem(item);
+      itemsDao.storeAsQuery(item);
+    }
+  }
+
   @Override
   public void enrichItem(Item item) throws ItemNotFoundException {
     try {

@@ -1,6 +1,7 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.LocalItem;
+import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.db.LocalInfo.Type;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Scanner;
 
@@ -26,17 +27,9 @@ public class SerieScanner implements Scanner<Serie> {
       try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
         for(Path path : dirStream) {
           if(Files.isDirectory(path) && !path.getFileName().toString().startsWith(".")) {
-            LocalItem item = new LocalItem(path);
+            LocalInfo localInfo = new LocalInfo(path, Type.SERIE, path.getFileName().toString(), null, null, null, null, null);
 
-            item.setLocalTitle(path.getFileName().toString());
-            item.setTitle(item.getLocalTitle());
-            item.setType("SERIE");
-            item.setProvider("LOCAL");
-            item.setProviderId("");
-
-            item.calculateSurrogateName();
-
-            series.add(new Serie(mediaTree, item));
+            series.add(new Serie(mediaTree, localInfo));
           }
         }
       }
