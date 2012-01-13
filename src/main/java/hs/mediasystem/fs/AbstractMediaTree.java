@@ -46,7 +46,7 @@ public abstract class AbstractMediaTree implements MediaTree {
       itemEnricher.enrichItem(namedItem.getItem());
     }
     catch(ItemNotFoundException e) {
-      System.out.println("Item Enrichment failed: " + e);
+      System.out.println("[FINE] AbstractMediaTree.enrichItem() - Enrichment failed: " + e + ": " + namedItem);
     }
   }
 }

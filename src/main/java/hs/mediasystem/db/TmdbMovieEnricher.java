@@ -57,7 +57,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
           if(seq > 1) {
             searchString += " " + seq;
           }
-          if(subtitle.length() > 0) {
+          if(subtitle != null && subtitle.length() > 0) {
             searchString += " " + subtitle;
           }
 

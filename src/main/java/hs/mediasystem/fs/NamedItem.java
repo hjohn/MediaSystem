@@ -152,4 +152,9 @@ public abstract class NamedItem implements MediaItem {
 
     state.set(State.ENRICHED);
   }
+
+  @Override
+  public String toString() {
+    return "('" + localInfo.getTitle() + "', NamedItem[subtitle=" + localInfo.getSubtitle() + ", type=" + localInfo.getType() + "])";
+  }
 }

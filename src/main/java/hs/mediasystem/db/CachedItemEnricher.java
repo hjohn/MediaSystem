@@ -37,7 +37,7 @@ public class CachedItemEnricher implements ItemEnricher {
   public void enrichItem(Item item) throws ItemNotFoundException {
     try {
       try {
-        System.out.println("[FINE] Resolving from database cache: " + item);
+        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Loading from Cache: " + item);
         Item cachedItem = itemsDao.getItem(item);
 
         item.setId(cachedItem.getId());
@@ -59,25 +59,23 @@ public class CachedItemEnricher implements ItemEnricher {
         item.setProviderId(cachedItem.getProviderId());
 
         if(cachedItem.getVersion() < ItemsDao.VERSION) {
-          System.out.println("[FINE] Old version, updating from cached provider: " + item);
+          System.out.println("[FINE] CachedItemEnricher.enrichItem() - Old version, updating from cached provider: " + item);
 
           providerToCache.enrichItem(item);
           itemsDao.updateItem(cachedItem);
         }
 
-        System.out.println("[FINE] Succesfully enriched: " + item);
+        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Succesfully enriched: " + item);
       }
       catch(ItemNotFoundException e) {
-        System.out.println("[FINE] Cache miss, falling back to cached provider: " + item);
+        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Cache miss, falling back to cached provider: " + item);
 
         providerToCache.enrichItem(item);
-
-        System.out.println("[FINE] Storing newly enriched item: " + item);
         itemsDao.storeItem(item);
       }
     }
     catch(Exception e) {
-      System.out.println("[WARN] Enrichment failed: " + e);
+      System.out.println("[FINE] CachedItemEnricher.enrichItem() - Enrichment failed: " + e);
       throw new RuntimeException(e);
     }
   }

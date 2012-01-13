@@ -14,7 +14,6 @@ public class TypeBasedItemEnricher implements ItemEnricher {
 
   @Override
   public void identifyItem(Item item) throws ItemNotFoundException {
-    System.out.println("[FINE] TypeBasedItemEnricher.identifyItem() - here we are");
     ItemEnricher itemEnricher = itemEnrichers.get(item.getType());
 
     if(itemEnricher != null) {

@@ -329,7 +329,7 @@ public class SelectItemScene {
           loadTask = new Task<Void>() {  // TODO service?
             @Override
             public Void call() {
-              System.err.println("Loading data for : " + item.getTitle());
+              System.out.println("[FINE] SelectItemScene.MediaItemTreeCell.updateItem(...).new Task() {...}.call() - Loading data for: " + item);
               try {
                 item.loadData(itemEnricher);
               }

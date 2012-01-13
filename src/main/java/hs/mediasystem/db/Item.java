@@ -173,6 +173,6 @@ public class Item {
 
   @Override
   public String toString() {
-    return "Item[id=" + id + ", title=" + title + ", subtitle=" + subtitle + ", type=" + type + "]";
+    return "('" + title + "', Item[id=" + id + ", subtitle=" + subtitle + ", type=" + type + "])";
   }
 }

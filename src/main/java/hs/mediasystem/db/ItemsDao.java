@@ -36,12 +36,13 @@ public class ItemsDao {
   public Item getItem(Item item) throws ItemNotFoundException {
     try {
       Connection connection = getConnection();
+
       try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
         statement.setString(1, item.getType());
         statement.setString(2, item.getProvider());
         statement.setString(3, item.getProviderId());
 
-        System.out.println("[FINE] Selecting Item with type/provider/providerid = " + item.getType() + "/" + item.getProvider() + "/" + item.getProviderId());
+        System.out.println("[FINE] ItemsDao.getItem() - Selecting Item with type/provider/providerid = " + item.getType() + "/" + item.getProvider() + "/" + item.getProviderId());
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
             return new Item() {{
@@ -74,45 +75,6 @@ public class ItemsDao {
     }
   }
 
-  public Item getItem(int id) throws ItemNotFoundException {
-    try {
-      Connection connection = getConnection();
-      try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE id = ?")) {
-        statement.setInt(1, id);
-
-        System.out.println("[FINE] Selecting item with id = '" + id + "'");
-        try(final ResultSet rs = statement.executeQuery()) {
-          if(rs.next()) {
-            return new Item() {{
-              setId(rs.getInt("id"));
-              setImdbId(rs.getString("imdbid"));
-              setProvider(rs.getString("provider"));
-              setProviderId(rs.getString("providerid"));
-              setTitle(rs.getString("title"));
-              setReleaseDate(rs.getDate("releasedate"));
-              setRating(rs.getFloat("rating"));
-              setPlot(rs.getString("plot"));
-              setPoster(rs.getBytes("poster"));
-              setBanner(rs.getBytes("banner"));
-              setBackground(rs.getBytes("background"));
-              setRuntime(rs.getInt("runtime"));
-              setVersion(rs.getInt("version"));
-              setSeason(rs.getInt("season"));
-              setEpisode(rs.getInt("episode"));
-              setType(rs.getString("type"));
-              setSubtitle(rs.getString("subtitle"));
-            }};
-          }
-        }
-      }
-
-      throw new ItemNotFoundException("id = " + id);
-    }
-    catch(SQLException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   public void storeItem(Item item) {
     try {
       Connection connection = getConnection();
@@ -132,24 +94,10 @@ public class ItemsDao {
         values.append("?");
       }
 
-//      int generatedKey = -1;
-
       try(PreparedStatement statement = connection.prepareStatement("INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")")) {
         setParameters(parameters, statement);
         statement.execute();
-
-//        try(ResultSet generatedKeys = statement.getGeneratedKeys()) {
-//          if(generatedKeys.next()) {
-//            generatedKey = generatedKeys.getInt(1);
-//          }
-//        }
       }
-//
-//      try(PreparedStatement statement = connection.prepareStatement("INSERT INTO localvariants (surrogatename, items_id) VALUES (?, ?)")) {
-//        statement.setString(1, item.getSurrogateName());
-//        statement.setInt(2, generatedKey);
-//        statement.execute();
-//      }
     }
     catch(SQLException e) {
       throw new RuntimeException("Exception while trying to store: " + item, e);
@@ -175,7 +123,7 @@ public class ItemsDao {
       try(PreparedStatement statement = connection.prepareStatement("UPDATE items SET " + set.toString() + " WHERE id = ?")) {
         parameters.put("1", item.getId());
 
-        System.out.println("Updating item with id: " + item.getId());
+        System.out.println("[FINE] ItemsDao.updateItem() - Updating item with id: " + item.getId());
 
         setParameters(parameters, statement);
         statement.execute();
@@ -193,7 +141,7 @@ public class ItemsDao {
       try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM identifiers WHERE surrogatename = ?")) {
         statement.setString(1, surrogateName);
 
-        System.out.println("[FINE] Looking for query with name: " + surrogateName);
+        System.out.println("[FINE] ItemsDao.getQuery() - Looking for Identifier with name: " + surrogateName);
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
             return new Item() {{
