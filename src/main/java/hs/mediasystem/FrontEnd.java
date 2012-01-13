@@ -78,12 +78,12 @@ public class FrontEnd extends Application {
         bind(ItemEnricher.class).annotatedWith(Cachable.class).to(TypeBasedItemEnricher.class);
       }
 
-      @Provides
+      @Provides @SuppressWarnings("unused")
       public Player providesPlayer() {
         return player;
       }
 
-      @Provides
+      @Provides @SuppressWarnings("unused")
       public Ini providesIni() {
         return INI;
       }

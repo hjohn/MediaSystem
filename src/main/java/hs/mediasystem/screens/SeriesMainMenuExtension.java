@@ -1,23 +1,22 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.ProgramController;
-import hs.mediasystem.SelectItemScene;
+import hs.mediasystem.SelectMediaPresentation;
 import hs.mediasystem.fs.SeriesMediaTree;
 
 import java.nio.file.Paths;
 
-import javafx.scene.Node;
 import javafx.scene.image.Image;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
 public class SeriesMainMenuExtension implements MainMenuExtension {
-  private final Provider<SelectItemScene> selectItemSceneProvider;
+  private final Provider<SelectMediaPresentation> selectMediaPresentationProvider;
 
   @Inject
-  public SeriesMainMenuExtension(Provider<SelectItemScene> selectItemSceneProvider) {
-    this.selectItemSceneProvider = selectItemSceneProvider;
+  public SeriesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider) {
+    this.selectMediaPresentationProvider = selectMediaPresentationProvider;
   }
 
   @Override
@@ -32,10 +31,10 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
 
   @Override
   public void select(ProgramController controller) {
-//    ItemEnricher itemEnricher = new CachedItemEnricher(new ItemsDao(), new TvdbSerieEnricher());
+    SelectMediaPresentation presentation = selectMediaPresentationProvider.get();
 
-    Node scene = selectItemSceneProvider.get().create(new SeriesMediaTree(Paths.get(controller.getIni().getValue("general", "series.path"))));
+    presentation.setMediaTree(new SeriesMediaTree(Paths.get(controller.getIni().getValue("general", "series.path"))));
 
-    controller.showScreen(scene);
+    controller.showScreen(presentation.getView());
   }
 }

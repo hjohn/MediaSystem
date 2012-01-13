@@ -171,8 +171,7 @@ public class GeneralSettings {
 	 * @throws FileNotFoundException
 	 */
 	public static void setLogStream(File fileLog) throws FileNotFoundException {
-		PrintStream fileStream = new PrintStream(fileLog);
-		setLogStream(fileStream);
+		setLogStream(new PrintStream(fileLog));
 	}
 
 	/**
@@ -313,15 +312,15 @@ public class GeneralSettings {
 		 */
 		public static String readUrlResponse(URL url) throws IOException {
 			URLConnection yc = url.openConnection();
-			BufferedReader in = new BufferedReader(new InputStreamReader(yc
-					.getInputStream()));
-			String inputLine;
-			StringBuffer responce = new StringBuffer();
-			while ((inputLine = in.readLine()) != null) {
-				responce.append(inputLine);
+			try(BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()))) {
+  			String inputLine;
+  			StringBuffer response = new StringBuffer();
+  			while ((inputLine = in.readLine()) != null) {
+  				response.append(inputLine);
+  			}
+
+  			return response.toString();
 			}
-			in.close();
-			return responce.toString();
 		}
 
 		/**
@@ -367,15 +366,15 @@ public class GeneralSettings {
 			out.flush();
 			out.close();
 
-			BufferedReader in = new BufferedReader(new InputStreamReader(conn
-					.getInputStream()));
-			String inputLine;
-			StringBuffer response = new StringBuffer();
-			while ((inputLine = in.readLine()) != null) {
-				response.append(inputLine);
+			try(BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+  			String inputLine;
+  			StringBuffer response = new StringBuffer();
+  			while ((inputLine = in.readLine()) != null) {
+  				response.append(inputLine);
+  			}
+
+  			return response.toString();
 			}
-			in.close();
-			return response.toString();
 		}
 	}
 

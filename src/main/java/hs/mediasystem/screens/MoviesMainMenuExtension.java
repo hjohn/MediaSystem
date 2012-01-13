@@ -1,23 +1,22 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.ProgramController;
-import hs.mediasystem.SelectItemScene;
+import hs.mediasystem.SelectMediaPresentation;
 import hs.mediasystem.fs.MoviesMediaTree;
 
 import java.nio.file.Paths;
 
-import javafx.scene.Node;
 import javafx.scene.image.Image;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
 public class MoviesMainMenuExtension implements MainMenuExtension {
-  private final Provider<SelectItemScene> selectItemSceneProvider;
+  private final Provider<SelectMediaPresentation> selectMediaPresentationProvider;
 
   @Inject
-  public MoviesMainMenuExtension(Provider<SelectItemScene> selectItemSceneProvider) {
-    this.selectItemSceneProvider = selectItemSceneProvider;
+  public MoviesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider) {
+    this.selectMediaPresentationProvider = selectMediaPresentationProvider;
   }
 
   @Override
@@ -32,8 +31,10 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
 
   @Override
   public void select(ProgramController controller) {
-    Node scene = selectItemSceneProvider.get().create(new MoviesMediaTree(Paths.get(controller.getIni().getValue("general", "movies.path"))));
+    SelectMediaPresentation presentation = selectMediaPresentationProvider.get();
 
-    controller.showScreen(scene);
+    presentation.setMediaTree(new MoviesMediaTree(Paths.get(controller.getIni().getValue("general", "movies.path"))));
+
+    controller.showScreen(presentation.getView());
   }
 }

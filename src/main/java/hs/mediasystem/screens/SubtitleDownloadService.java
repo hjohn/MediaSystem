@@ -31,11 +31,10 @@ public class SubtitleDownloadService extends Service<Path> {
         ByteBuffer buffer = descriptor.fetch();
         updateProgress(60, 100);
 
-        FileOutputStream os = new FileOutputStream("tempsubtitle.srt");
-        os.getChannel().write(buffer);
-        updateProgress(90, 100);
-
-        os.close();
+        try(FileOutputStream os = new FileOutputStream("tempsubtitle.srt")) {
+          os.getChannel().write(buffer);
+          updateProgress(90, 100);
+        }
 
         updateProgress(100, 100);
 

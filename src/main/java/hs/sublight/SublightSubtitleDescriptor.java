@@ -2,7 +2,6 @@ package hs.sublight;
 
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
-import java.util.Formatter;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -47,17 +46,17 @@ public class SublightSubtitleDescriptor implements SubtitleDescriptor {
 		}
 
 		// format proper display name
-		Formatter builder = new Formatter(new StringBuilder(subtitle.getTitle()));
+		StringBuilder builder = new StringBuilder(subtitle.getTitle());
 
 		if (subtitle.getSeason() != null || subtitle.getEpisode() != null) {
-			builder.format(" - S%02dE%02d", subtitle.getSeason(), subtitle.getEpisode());
+		  builder.append(String.format(" - S%02dE%02d", subtitle.getSeason(), subtitle.getEpisode()));
 		}
 
 		if (subtitle.getRelease() != null && !subtitle.getRelease().isEmpty()) {
-			builder.format(" (%s)", subtitle.getRelease());
+			builder.append(String.format(" (%s)", subtitle.getRelease()));
 		}
 
-		return builder.out().toString();
+		return builder.toString();
 	}
 
 
@@ -93,7 +92,7 @@ public class SublightSubtitleDescriptor implements SubtitleDescriptor {
 			try(ByteBufferOutputStream buffer = new ByteBufferOutputStream((int) entry.getSize())) {
   			// read subtitle data
   			buffer.transferFully(stream);
-  
+
   			// return plain subtitle data
   			return buffer.getByteBuffer();
 			}
