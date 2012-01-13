@@ -20,11 +20,11 @@ import org.json.JSONException;
 public class TmdbMovieEnricher implements ItemEnricher {
 
   @Override
-  public void enrichItem(Item item) {
+  public void identifyItem(Item item) throws ItemNotFoundException {
     String title = item.getTitle();
     String subtitle = item.getSubtitle();
     String year = extractYear(item.getReleaseDate());
-    int seq = item.getSeason();
+    int seq = item.getSeason() == null ? 1 : item.getSeason();
 
     try {
       String bestMatchingImdbNumber = null;
@@ -77,6 +77,25 @@ public class TmdbMovieEnricher implements ItemEnricher {
       }
 
       if(bestMatchingImdbNumber != null) {
+        item.setType("MOVIE");
+        item.setProvider("TMDB");
+        item.setProviderId(bestMatchingImdbNumber);
+      }
+      else {
+        throw new ItemNotFoundException(item);
+      }
+    }
+    catch(IOException | JSONException e) {
+      throw new ItemNotFoundException(item, e);
+    }
+  }
+
+  @Override
+  public void enrichItem(Item item) throws ItemNotFoundException {
+    if(item.getProvider().equals("TMDB") && item.getType().equals("MOVIE")) {
+      String bestMatchingImdbNumber = item.getProviderId();
+
+      try {
         System.out.println("best mathcing imdb number: " + bestMatchingImdbNumber);
         final Movie movie = Movie.imdbLookup(bestMatchingImdbNumber);
 
@@ -103,12 +122,10 @@ public class TmdbMovieEnricher implements ItemEnricher {
           backgroundURL = background.getLargestImage();
         }
 
-        final byte[] poster = url != null ? Downloader.readURL(url) : null;
-        final byte[] background = backgroundURL != null ? Downloader.readURL(backgroundURL) : null;
+        final byte[] poster = url != null ? Downloader.tryReadURL(url.toExternalForm()) : null;
+        final byte[] background = backgroundURL != null ? Downloader.tryReadURL(backgroundURL.toExternalForm()) : null;
 
         item.setImdbId(movie.getImdbID());
-        item.setProvider("TMDB");
-        item.setProviderId("" + movie.getID());
         item.setTitle(movie.getName());
         item.setPoster(poster);
         item.setBackground(background);
@@ -116,26 +133,22 @@ public class TmdbMovieEnricher implements ItemEnricher {
         item.setRating((float)movie.getRating());
         item.setReleaseDate(movie.getReleasedDate());
         item.setRuntime(movie.getRuntime());
-        item.setType("MOVIE");
 
-//          for(CastInfo castInfo : movie.getCast()) {
-//            castInfo.getCharacterName();
-//            castInfo.getID();
-//            castInfo.getName();
-//            castInfo.getThumb();
-//
-//            addCastMember(castInfo.getCastID(), castInfo.getName(), castInfo.getCharacterName());
-//          }
+  //          for(CastInfo castInfo : movie.getCast()) {
+  //            castInfo.getCharacterName();
+  //            castInfo.getID();
+  //            castInfo.getName();
+  //            castInfo.getThumb();
+  //
+  //            addCastMember(castInfo.getCastID(), castInfo.getName(), castInfo.getCharacterName());
+  //          }
       }
-      else {
-        throw new RuntimeException("cannot get movie details");
+      catch(IOException | JSONException e) {
+        throw new ItemNotFoundException(item, e);
       }
     }
-    catch(IOException e) {
-      throw new RuntimeException(e);
-    }
-    catch(JSONException e) {
-      throw new RuntimeException(e);
+    else {
+      System.out.println("[FINE] TmdbMovieEnricher.enrichItem() - Unable to enrich, wrong provider or type: " + item);
     }
   }
 

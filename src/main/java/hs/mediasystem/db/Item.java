@@ -17,15 +17,14 @@ public class Item {
   private byte[] background;
   private byte[] banner;
   private Float rating;
+  private Integer releaseYear;
   private Date releaseDate;
   private int runtime;
-  private int season;
-  private int episode;
-
-  protected transient String surrogateName;
+  private Integer season;
+  private Integer episode;
 
   public String getSurrogateName() {
-    return surrogateName;
+    return type + "/" + title.toLowerCase() + "/" + (subtitle != null ? subtitle.toLowerCase() : "") + "/" + season + "/" + episode + "/" + releaseYear;
   }
 
   public int getId() {
@@ -132,19 +131,19 @@ public class Item {
     this.runtime = runtime;
   }
 
-  public int getSeason() {
+  public Integer getSeason() {
     return season;
   }
 
-  public void setSeason(int season) {
+  public void setSeason(Integer season) {
     this.season = season;
   }
 
-  public int getEpisode() {
+  public Integer getEpisode() {
     return episode;
   }
 
-  public void setEpisode(int episode) {
+  public void setEpisode(Integer episode) {
     this.episode = episode;
   }
 
@@ -162,6 +161,14 @@ public class Item {
 
   public void setBanner(byte[] banner) {
     this.banner = banner;
+  }
+
+  public Integer getReleaseYear() {
+    return releaseYear;
+  }
+
+  public void setReleaseYear(Integer releaseYear) {
+    this.releaseYear = releaseYear;
   }
 
   @Override

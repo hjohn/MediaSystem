@@ -42,6 +42,7 @@ public abstract class AbstractMediaTree implements MediaTree {
   @Override
   public void enrichItem(ItemEnricher itemEnricher, final NamedItem namedItem) {
     try {
+      itemEnricher.identifyItem(namedItem.getItem());
       itemEnricher.enrichItem(namedItem.getItem());
     }
     catch(ItemNotFoundException e) {

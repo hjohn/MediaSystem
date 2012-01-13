@@ -3,36 +3,34 @@ package hs.mediasystem.fs;
 import hs.mediasystem.ImageHandle;
 import hs.mediasystem.db.Item;
 import hs.mediasystem.db.ItemEnricher;
-import hs.mediasystem.db.LocalItem;
+import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 
 import java.nio.file.Path;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 
 public abstract class NamedItem implements MediaItem {
   private final MediaTree mediaTree;
+  private final LocalInfo localInfo;
 
   protected MediaItem parent;
 
-  private LocalItem item;
+  private Item item = new Item();
 
-  public NamedItem(MediaTree mediaTree, LocalItem item) {
+  public NamedItem(MediaTree mediaTree, LocalInfo localInfo) {
     this.mediaTree = mediaTree;
-    this.item = item;
-  }
+    this.localInfo = localInfo;
 
-  public NamedItem(MediaTree mediaTree, final String title) {
-    this(mediaTree, new LocalItem(null) {{
-      setId(-1);
-      setTitle(title);
-      setLocalTitle(title);
-      calculateSurrogateName();
-    }});
+    item.setType(localInfo.getType().name());
+    item.setTitle(localInfo.getTitle());
+    item.setSubtitle(localInfo.getSubtitle());
+    item.setReleaseYear(localInfo.getReleaseYear());
+    item.setImdbId(localInfo.getCode());
+    item.setSeason(localInfo.getSeason());
+    item.setEpisode(localInfo.getEpisode());
   }
 
   Item getItem() {
@@ -41,7 +39,7 @@ public abstract class NamedItem implements MediaItem {
 
   @Override
   public final String getTitle() {
-    return item.getLocalTitle();
+    return localInfo.getTitle();
   }
 
   public MediaItem getParent() {
@@ -49,43 +47,39 @@ public abstract class NamedItem implements MediaItem {
   }
 
   public Path getPath() {
-    return item.getPath();
+    return localInfo.getPath();
   }
 
   @Override
   public String getUri() {
-    return item.getPath().toString();
+    return localInfo.getPath().toString();
   }
 
   @Override
   public String getSubtitle() {
-    if(item.getLocalSubtitle() != null) {
-      return item.getLocalSubtitle();
-    }
-    else {
-      return item.getSubtitle() == null ? "" : item.getSubtitle();
-    }
+    return localInfo.getSubtitle() == null ? "" : localInfo.getSubtitle();
   }
 
   @Override
-  public String getReleaseYear() {
-    if(item.getReleaseDate() == null) {
-      return null;
-    }
-
-    GregorianCalendar gc = new GregorianCalendar(2000, 0, 1);
-    gc.setTime(item.getReleaseDate());
-    return "" + gc.get(Calendar.YEAR);
+  public Integer getReleaseYear() {
+    return localInfo.getReleaseYear();
+//    if(localInfo.getReleaseDate() == null) {
+//      return null;
+//    }
+//
+//    GregorianCalendar gc = new GregorianCalendar(2000, 0, 1);
+//    gc.setTime(localInfo.getReleaseDate());
+//    return "" + gc.get(Calendar.YEAR);
   }
 
   @Override
-  public int getSeason() {
-    return item.getSeason();
+  public Integer getSeason() {
+    return localInfo.getSeason();
   }
 
   @Override
-  public int getEpisode() {
-    return item.getEpisode();
+  public Integer getEpisode() {
+    return localInfo.getEpisode();
   }
 
   @Override
@@ -114,6 +108,10 @@ public abstract class NamedItem implements MediaItem {
 
   public int getRuntime() {
     return item.getRuntime();
+  }
+
+  public Float getRating() {
+    return item.getRating();
   }
 
   public String getProvider() {
@@ -153,9 +151,5 @@ public abstract class NamedItem implements MediaItem {
     }
 
     state.set(State.ENRICHED);
-  }
-
-  public Float getRating() {
-    return item.getRating();
   }
 }

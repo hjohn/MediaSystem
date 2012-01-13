@@ -1,5 +1,6 @@
 package hs.mediasystem.fs;
 
+import hs.mediasystem.db.LocalInfo.Type;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
@@ -32,7 +33,7 @@ public class EpisodesMediaTree extends AbstractMediaTree {
   @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      List<Episode> episodes = new EpisodeScanner(this, new EpisodeDecoder(), "EPISODE").scan(root);
+      List<Episode> episodes = new EpisodeScanner(this, new EpisodeDecoder(), Type.EPISODE).scan(root);
       List<MediaItem> items = new ArrayList<>();
 
       Collection<List<MediaItem>> groupedItems = Groups.group(episodes, new SeasonGrouper());

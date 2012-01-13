@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -37,18 +36,38 @@ public class ItemsDao {
   public Item getItem(Item item) throws ItemNotFoundException {
     try {
       Connection connection = getConnection();
-      try(PreparedStatement statement = connection.prepareStatement("SELECT items_id FROM localvariants WHERE surrogatename = ?")) {
-        statement.setString(1, item.getSurrogateName());
+      try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
+        statement.setString(1, item.getType());
+        statement.setString(2, item.getProvider());
+        statement.setString(3, item.getProviderId());
 
-        System.out.println("[FINE] Selecting localvariant with surrogatename = '" + item.getSurrogateName() + "'");
+        System.out.println("[FINE] Selecting Item with type/provider/providerid = " + item.getType() + "/" + item.getProvider() + "/" + item.getProviderId());
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
-            return getItem(rs.getInt("items_id"));
+            return new Item() {{
+              setId(rs.getInt("id"));
+              setImdbId(rs.getString("imdbid"));
+              setProvider(rs.getString("provider"));
+              setProviderId(rs.getString("providerid"));
+              setTitle(rs.getString("title"));
+              setReleaseDate(rs.getDate("releasedate"));
+              setRating(rs.getFloat("rating"));
+              setPlot(rs.getString("plot"));
+              setPoster(rs.getBytes("poster"));
+              setBanner(rs.getBytes("banner"));
+              setBackground(rs.getBytes("background"));
+              setRuntime(rs.getInt("runtime"));
+              setVersion(rs.getInt("version"));
+              setSeason(rs.getInt("season"));
+              setEpisode(rs.getInt("episode"));
+              setType(rs.getString("type"));
+              setSubtitle(rs.getString("subtitle"));
+            }};
           }
         }
       }
 
-      throw new ItemNotFoundException();
+      throw new ItemNotFoundException(item);
     }
     catch(SQLException e) {
       throw new RuntimeException(e);
@@ -87,7 +106,7 @@ public class ItemsDao {
         }
       }
 
-      throw new ItemNotFoundException();
+      throw new ItemNotFoundException("id = " + id);
     }
     catch(SQLException e) {
       throw new RuntimeException(e);
@@ -113,24 +132,24 @@ public class ItemsDao {
         values.append("?");
       }
 
-      int generatedKey = -1;
+//      int generatedKey = -1;
 
-      try(PreparedStatement statement = connection.prepareStatement("INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")" , Statement.RETURN_GENERATED_KEYS)) {
+      try(PreparedStatement statement = connection.prepareStatement("INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")")) {
         setParameters(parameters, statement);
         statement.execute();
 
-        try(ResultSet generatedKeys = statement.getGeneratedKeys()) {
-          if(generatedKeys.next()) {
-            generatedKey = generatedKeys.getInt(1);
-          }
-        }
+//        try(ResultSet generatedKeys = statement.getGeneratedKeys()) {
+//          if(generatedKeys.next()) {
+//            generatedKey = generatedKeys.getInt(1);
+//          }
+//        }
       }
-
-      try(PreparedStatement statement = connection.prepareStatement("INSERT INTO localvariants (surrogatename, items_id) VALUES (?, ?)")) {
-        statement.setString(1, item.getSurrogateName());
-        statement.setInt(2, generatedKey);
-        statement.execute();
-      }
+//
+//      try(PreparedStatement statement = connection.prepareStatement("INSERT INTO localvariants (surrogatename, items_id) VALUES (?, ?)")) {
+//        statement.setString(1, item.getSurrogateName());
+//        statement.setInt(2, generatedKey);
+//        statement.execute();
+//      }
     }
     catch(SQLException e) {
       throw new RuntimeException("Exception while trying to store: " + item, e);
@@ -164,6 +183,49 @@ public class ItemsDao {
     }
     catch(SQLException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  public Item getQuery(String surrogateName) throws ItemNotFoundException {
+    try {
+      Connection connection = getConnection();
+
+      try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM identifiers WHERE surrogatename = ?")) {
+        statement.setString(1, surrogateName);
+
+        System.out.println("[FINE] Looking for query with name: " + surrogateName);
+        try(final ResultSet rs = statement.executeQuery()) {
+          if(rs.next()) {
+            return new Item() {{
+              setType(rs.getString("type"));
+              setProvider(rs.getString("provider"));
+              setProviderId(rs.getString("providerid"));
+            }};
+          }
+        }
+      }
+
+      throw new ItemNotFoundException(surrogateName);
+    }
+    catch(SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void storeAsQuery(Item item) {
+    try {
+      Connection connection = getConnection();
+
+      try(PreparedStatement statement = connection.prepareStatement("INSERT INTO identifiers (surrogatename, type, provider, providerid) VALUES (?, ?, ?, ?)")) {
+        statement.setString(1, item.getSurrogateName());
+        statement.setString(2, item.getType());
+        statement.setString(3, item.getProvider());
+        statement.setString(4, item.getProviderId());
+        statement.execute();
+      }
+    }
+    catch(SQLException e) {
+      throw new RuntimeException("Exception while trying to store: " + item, e);
     }
   }
 

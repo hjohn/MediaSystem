@@ -2,13 +2,10 @@ package hs.mediasystem;
 
 import hs.mediasystem.db.Cachable;
 import hs.mediasystem.db.CachedItemEnricher;
-import hs.mediasystem.db.CachedItemIdentifier;
 import hs.mediasystem.db.ItemEnricher;
-import hs.mediasystem.db.ItemIdentifier;
 import hs.mediasystem.db.TmdbMovieEnricher;
 import hs.mediasystem.db.TvdbEpisodeEnricher;
 import hs.mediasystem.db.TvdbSerieEnricher;
-import hs.mediasystem.db.TvdbSerieIdentifier;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -76,9 +73,6 @@ public class FrontEnd extends Application {
         MapBinder.newMapBinder(binder(), String.class, ItemEnricher.class).addBinding("SERIE").to(TvdbSerieEnricher.class);
         MapBinder.newMapBinder(binder(), String.class, ItemEnricher.class).addBinding("MOVIE").to(TmdbMovieEnricher.class);
         MapBinder.newMapBinder(binder(), String.class, ItemEnricher.class).addBinding("EPISODE").to(TvdbEpisodeEnricher.class);
-
-        bind(ItemIdentifier.class).to(CachedItemIdentifier.class);
-        bind(ItemIdentifier.class).annotatedWith(Cachable.class).to(TvdbSerieIdentifier.class);
 
         bind(ItemEnricher.class).to(CachedItemEnricher.class);
         bind(ItemEnricher.class).annotatedWith(Cachable.class).to(TypeBasedItemEnricher.class);

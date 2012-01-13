@@ -332,7 +332,12 @@ public class SelectItemScene {
             @Override
             public Void call() {
               System.err.println("Loading data for : " + item.getTitle());
-              item.loadData(itemEnricher);
+              try {
+                item.loadData(itemEnricher);
+              }
+              catch(Exception e) {
+                e.printStackTrace();
+              }
 
               return null;
             }
@@ -378,7 +383,7 @@ public class SelectItemScene {
             public void run() {
               title.set(item.getTitle());
               subtitle.set(item.getSubtitle());
-              releaseYear.set(item.getReleaseYear());
+              releaseYear.set(item.getReleaseYear() == null ? "" : "" + item.getReleaseYear());
               plot.set(item.getPlot());
               trySetImage(item.getPoster(), poster);
 
