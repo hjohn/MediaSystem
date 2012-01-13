@@ -24,7 +24,7 @@ public class Item {
   private Integer episode;
 
   public String getSurrogateName() {
-    return type + "/" + title.toLowerCase() + "/" + (subtitle != null ? subtitle.toLowerCase() : "") + "/" + season + "/" + episode + "/" + releaseYear;
+    return type + "/" + title.toLowerCase() + "/" + (subtitle != null ? subtitle.toLowerCase() : "") + "/" + (season == null ? "" : season) + "/" + (episode == null ? "" : episode) + "/" + (releaseYear == null ? "" : releaseYear);
   }
 
   public int getId() {

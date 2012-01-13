@@ -11,7 +11,7 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
-public class DuoLineRenderer2 implements CellProvider<MediaItem> {
+public class DuoLineRenderer implements CellProvider<MediaItem> {
 
   private final HBox group = new HBox();
 
@@ -34,7 +34,7 @@ public class DuoLineRenderer2 implements CellProvider<MediaItem> {
     }});
   }};
 
-  public DuoLineRenderer2() {
+  public DuoLineRenderer() {
     group.getChildren().add(new VBox() {{
       getChildren().add(title);
       getChildren().add(subtitle);

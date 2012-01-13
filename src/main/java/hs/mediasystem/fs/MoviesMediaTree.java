@@ -68,6 +68,6 @@ public class MoviesMediaTree extends AbstractMediaTree {
 
   @Override
   public CellProvider<MediaItem> createListCell() {
-    return new DuoLineRenderer2();
+    return new DuoLineRenderer();
   }
 }
