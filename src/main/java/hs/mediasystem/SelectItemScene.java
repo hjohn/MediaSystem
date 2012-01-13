@@ -109,7 +109,7 @@ public class SelectItemScene {
 
   private TreeItem<MediaItem> treeRoot = new TreeItem<>();
 
-  private void setMediaTree(final MediaTree mediaTree) {
+  public void setMediaTree(final MediaTree mediaTree) {
     treeRoot.getChildren().clear();
 
     for(MediaItem item : mediaTree.children()) {
@@ -125,6 +125,7 @@ public class SelectItemScene {
   }
 
   public Node create(final MediaTree mediaTree) {
+    final SelectMediaPresentation presentation = new SelectMediaPresentation(controller, this);
     setMediaTree(mediaTree);
 
     final GridPane root = new GridPane();
@@ -141,16 +142,11 @@ public class SelectItemScene {
       getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<MediaItem>>() {
         @Override
         public void changed(ObservableValue<? extends TreeItem<MediaItem>> observable, TreeItem<MediaItem> oldValue, final TreeItem<MediaItem> newValue) {
-          if(newValue != null) {
-            final MediaItem item = newValue.getValue();
-
-            Platform.runLater(new Runnable() {
-              @Override
-              public void run() {
-                update(item);
-              }
-            });
-          }
+          presentation.itemFocused(newValue);
+//          if(newValue != null) {
+//            final MediaItem item = newValue.getValue();
+//            update(item);
+//          }
         }
       });
 
@@ -159,7 +155,8 @@ public class SelectItemScene {
         public void handle(MouseEvent event) {
           if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
             System.out.println("Selected " + getSelectionModel().getSelectedItem().getValue().getTitle());
-            itemSelected(getSelectionModel().getSelectedItem());
+//            itemSelected(getSelectionModel().getSelectedItem());
+            presentation.itemSelected(getSelectionModel().getSelectedItem());
           }
         }
       });
@@ -169,7 +166,8 @@ public class SelectItemScene {
         public void handle(KeyEvent event) {
           if(event.getCode() == KeyCode.ENTER) {
             System.out.println("Selected (with key) " + getSelectionModel().getSelectedItem().getValue().getTitle());
-            itemSelected(getSelectionModel().getSelectedItem());
+//            itemSelected(getSelectionModel().getSelectedItem());
+            presentation.itemSelected(getSelectionModel().getSelectedItem());
           }
         }
       });
@@ -400,8 +398,13 @@ public class SelectItemScene {
   private MediaItemUpdateService mediaItemUpdateService = new MediaItemUpdateService();
 
   protected void update(final MediaItem item) {
-    mediaItemUpdateService.setMediaItem(item);
-    mediaItemUpdateService.restart();
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+        mediaItemUpdateService.setMediaItem(item);
+        mediaItemUpdateService.restart();
+      }
+    });
   }
 
   public static boolean trySetImage(ImageHandle handle, ObjectProperty<Image> image) {
