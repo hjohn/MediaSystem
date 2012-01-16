@@ -14,9 +14,7 @@ import javafx.application.Application;
 // TODO Subtitle selection list must be left with backspace, or exit at top/bottom item
 
 // TODO Solve hack in nameditem to only load one item at the time in the background
-// TODO Dislike how surrogate name is generated in LocalItem
-// TODO Database structure still not feeling right
-// TODO Local names not shown everywhere
+// TODO Local names not shown everywhere(?)
 // TODO database credentials to config
 
 // Minimal working system:
