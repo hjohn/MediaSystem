@@ -9,9 +9,6 @@ import hs.mediasystem.framework.MediaTree;
 
 import java.nio.file.Path;
 
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-
 public abstract class NamedItem implements MediaItem {
   private final MediaTree mediaTree;
   private final LocalInfo localInfo;
@@ -19,6 +16,7 @@ public abstract class NamedItem implements MediaItem {
   protected MediaItem parent;
 
   private Item item = new Item();
+  private boolean enriched;
 
   public NamedItem(MediaTree mediaTree, LocalInfo localInfo) {
     this.mediaTree = mediaTree;
@@ -122,35 +120,20 @@ public abstract class NamedItem implements MediaItem {
     return item.getProviderId();
   }
 
-  private ReadOnlyObjectWrapper<State> state = new ReadOnlyObjectWrapper<>(State.BASIC);
-
-  public State getState() {
-    return state.get();
-  }
-
   @Override
-  public ReadOnlyObjectProperty<State> stateProperty() {
-    return state.getReadOnlyProperty();
+  public boolean isEnriched() {
+    return enriched;
   }
 
   @Override
   public void loadData(ItemEnricher itemEnricher) {
-    synchronized(state) {
-      if(getState() != State.BASIC) {
-        return;
-      }
-
-      state.set(State.ENRICHING);
-    }
-
-    synchronized(NamedItem.class) {
+    synchronized(NamedItem.class) {  // TODO so only one gets updated at the time globally...
       if(item.getId() == 0 && mediaTree != null) {
         item.setId(-1);
         mediaTree.enrichItem(itemEnricher, this);
+        enriched = true;
       }
     }
-
-    state.set(State.ENRICHED);
   }
 
   @Override
