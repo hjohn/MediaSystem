@@ -1,11 +1,9 @@
 package hs.mediasystem.framework;
 
 import hs.mediasystem.ImageHandle;
-import hs.mediasystem.db.ItemEnricher;
+import hs.mediasystem.db.Item;
 
 public interface MediaItem {
-  public enum State {BASIC, ENRICHING, ENRICHED}
-
   MediaTree getRoot();
   boolean isRoot();
   boolean isLeaf();
@@ -24,6 +22,7 @@ public interface MediaItem {
   ImageHandle getPoster();
   ImageHandle getBackground();
 
+  Item getItem();  // TODO don't want this exposed here
+  void setEnriched(boolean enriched);
   boolean isEnriched();
-  void loadData(ItemEnricher itemEnricher);
 }

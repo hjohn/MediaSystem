@@ -2,7 +2,6 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.db.LocalInfo.Type;
-import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Scanner;
 
 import java.io.IOException;
@@ -13,11 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SerieScanner implements Scanner<Serie> {
-  private final MediaTree mediaTree;
-
-  public SerieScanner(MediaTree mediaTree) {
-    this.mediaTree = mediaTree;
-  }
 
   @Override
   public List<Serie> scan(Path scanPath) {
@@ -29,7 +23,7 @@ public class SerieScanner implements Scanner<Serie> {
           if(Files.isDirectory(path) && !path.getFileName().toString().startsWith(".")) {
             LocalInfo localInfo = new LocalInfo(path, Type.SERIE, path.getFileName().toString(), null, null, null, null, null);
 
-            series.add(new Serie(mediaTree, localInfo));
+            series.add(new Serie(localInfo));
           }
         }
       }

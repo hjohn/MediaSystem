@@ -30,7 +30,7 @@ public class NetworkKeyListener {
     }
   });
 
-  public NetworkKeyListener(int port) throws IOException {
+  public NetworkKeyListener() throws IOException {
     final ServerSocket socket = new ServerSocket(1111);
 
     Thread thread = new Thread() {
@@ -38,56 +38,56 @@ public class NetworkKeyListener {
       public void run() {
         try {
           for(;;) {
-            final Socket client = socket.accept();
+            try(final Socket client = socket.accept()) {
+              threadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                  try {
+                    client.setSoTimeout(500);
 
-            threadPool.execute(new Runnable() {
-              @Override
-              public void run() {
-                try {
-                  client.setSoTimeout(500);
+                    try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(client.getOutputStream()));
+                        LineNumberReader reader = new LineNumberReader(new InputStreamReader(client.getInputStream()))) {
+                      for(;;) {
+                        String line = reader.readLine();
 
-                  try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(client.getOutputStream()));
-                      LineNumberReader reader = new LineNumberReader(new InputStreamReader(client.getInputStream()))) {
-                    for(;;) {
-                      String line = reader.readLine();
-  
-                      if(line == null) {
-                        break;
-                      }
-  
-                      if(line.equals("quintessence")) {
-                        writer.print("cookie");
-                        writer.flush();
-                      }
-                      else if(line.equals("f882a23cc28ace6fd543abc94322344e")) {
-                        writer.print("accept");
-                        writer.flush();
-                      }
-                      else if(line.startsWith("EVENT ")) {
-                        System.out.println(">>> " + line);
-  
-                        KeyStroke stroke = KeyStroke.getKeyStroke(line.substring(6));
-                        KeyEvent event = new KeyEvent(component, stroke.getKeyEventType(), System.currentTimeMillis(), stroke.getModifiers(), stroke.getKeyCode(), stroke.getKeyChar());
-  
-                        Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(event);
-                        break;
+                        if(line == null) {
+                          break;
+                        }
+
+                        if(line.equals("quintessence")) {
+                          writer.print("cookie");
+                          writer.flush();
+                        }
+                        else if(line.equals("f882a23cc28ace6fd543abc94322344e")) {
+                          writer.print("accept");
+                          writer.flush();
+                        }
+                        else if(line.startsWith("EVENT ")) {
+                          System.out.println(">>> " + line);
+
+                          KeyStroke stroke = KeyStroke.getKeyStroke(line.substring(6));
+                          KeyEvent event = new KeyEvent(component, stroke.getKeyEventType(), System.currentTimeMillis(), stroke.getModifiers(), stroke.getKeyCode(), stroke.getKeyChar());
+
+                          Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(event);
+                          break;
+                        }
                       }
                     }
                   }
-                }
-                catch (IOException e) {
-                  e.printStackTrace();
-                }
-                finally {
-                  try {
-                    client.close();
-                  }
                   catch (IOException e) {
-                    // Not interested
+                    e.printStackTrace();
+                  }
+                  finally {
+                    try {
+                      client.close();
+                    }
+                    catch (IOException e) {
+                      // Not interested
+                    }
                   }
                 }
-              }
-            });
+              });
+            }
           }
         }
         catch(Exception e) {

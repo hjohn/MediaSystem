@@ -2,6 +2,7 @@ package hs.mediasystem;
 
 import hs.mediasystem.SelectMediaPane.ItemEvent;
 import hs.mediasystem.db.ItemEnricher;
+import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.CellProvider;
@@ -156,7 +157,21 @@ public class SelectMediaPresentation {
             public Void call() {
               System.out.println("[FINE] SelectMediaPresentation.MediaItemTreeCell.updateItem(...).new Task() {...}.call() - Loading data for: " + item);
 
-              item.loadData(itemEnricher);
+              synchronized(SelectMediaPresentation.class) {  // TODO so only one gets updated at the time globally...
+                if(item.getItem().getId() == 0) {
+                  item.getItem().setId(-1);
+
+                  try {
+                    itemEnricher.identifyItem(item.getItem());
+                    itemEnricher.enrichItem(item.getItem());
+                  }
+                  catch(ItemNotFoundException e) {
+                    System.out.println("[FINE] AbstractMediaTree.enrichItem() - Enrichment failed: " + e + ": " + item);
+                  }
+
+                  item.setEnriched(true);  // set to true, even if something failed as otherwise we keep trying to enrich
+                }
+              }
 
               return null;
             }

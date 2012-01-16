@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class MoviesMediaTree extends AbstractMediaTree {
+public class MoviesMediaTree implements MediaTree {
   private final Path root;
 
   private List<? extends MediaItem> children;
@@ -21,26 +21,16 @@ public class MoviesMediaTree extends AbstractMediaTree {
   }
 
   @Override
-  public void refresh() {
-    children = null;
-  }
-
-  @Override
-  public Style getStyle() {
-    return Style.LIST;
-  }
-
-  @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      List<Episode> episodes = new EpisodeScanner(this, new MovieDecoder(), Type.MOVIE).scan(root);
+      List<Episode> episodes = new EpisodeScanner(new MovieDecoder(), Type.MOVIE).scan(root);
       List<MediaItem> items = new ArrayList<>();
 
       Collection<List<MediaItem>> groupedItems = Groups.group(episodes, new TitleGrouper());
 
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
-          EpisodeGroup g = new EpisodeGroup(this, group.get(0).getTitle());
+          EpisodeGroup g = new EpisodeGroup(group.get(0).getTitle());
 
           for(MediaItem item : group) {
             g.add(item);

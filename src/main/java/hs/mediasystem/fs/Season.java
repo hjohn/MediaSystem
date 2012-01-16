@@ -14,8 +14,8 @@ import java.util.List;
 public class Season extends NamedItem implements Group {
   private final List<MediaItem> children = new ArrayList<>();
 
-  public Season(MediaTree mediaTree, String title, int season) {
-    super(mediaTree, new LocalInfo(null, Type.EPISODE, title, null, null, null, season, null));
+  public Season(String title, int season) {
+    super(new LocalInfo(null, Type.EPISODE, title, null, null, null, season, null));
   }
 
   public void add(MediaItem child) {

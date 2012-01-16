@@ -2,15 +2,12 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.ImageHandle;
 import hs.mediasystem.db.Item;
-import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.MediaTree;
 
 import java.nio.file.Path;
 
 public abstract class NamedItem implements MediaItem {
-  private final MediaTree mediaTree;
   private final LocalInfo localInfo;
 
   protected MediaItem parent;
@@ -18,8 +15,7 @@ public abstract class NamedItem implements MediaItem {
   private Item item = new Item();
   private boolean enriched;
 
-  public NamedItem(MediaTree mediaTree, LocalInfo localInfo) {
-    this.mediaTree = mediaTree;
+  public NamedItem(LocalInfo localInfo) {
     this.localInfo = localInfo;
 
     item.setType(localInfo.getType().name());
@@ -31,7 +27,8 @@ public abstract class NamedItem implements MediaItem {
     item.setEpisode(localInfo.getEpisode());
   }
 
-  Item getItem() {
+  @Override
+  public Item getItem() {
     return item;
   }
 
@@ -126,14 +123,8 @@ public abstract class NamedItem implements MediaItem {
   }
 
   @Override
-  public void loadData(ItemEnricher itemEnricher) {
-    synchronized(NamedItem.class) {  // TODO so only one gets updated at the time globally...
-      if(item.getId() == 0 && mediaTree != null) {
-        item.setId(-1);
-        mediaTree.enrichItem(itemEnricher, this);
-        enriched = true;
-      }
-    }
+  public void setEnriched(boolean enriched) {
+    this.enriched = enriched;
   }
 
   @Override

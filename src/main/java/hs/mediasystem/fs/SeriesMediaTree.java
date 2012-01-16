@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
-public class SeriesMediaTree extends AbstractMediaTree {
+public class SeriesMediaTree implements MediaTree {
   private final Path root;
 
   private List<? extends MediaItem> children;
@@ -17,19 +17,9 @@ public class SeriesMediaTree extends AbstractMediaTree {
   }
 
   @Override
-  public void refresh() {
-    children = null;
-  }
-
-  @Override
-  public Style getStyle() {
-    return Style.BANNER;
-  }
-
-  @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      children = new SerieScanner(this).scan(root);
+      children = new SerieScanner().scan(root);
       Collections.sort(children, MediaItemComparator.INSTANCE);
     }
 

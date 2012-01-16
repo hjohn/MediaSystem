@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class EpisodesMediaTree extends AbstractMediaTree {
+public class EpisodesMediaTree implements MediaTree {
   private final Path root;
 
   private List<? extends MediaItem> children;
@@ -21,19 +21,9 @@ public class EpisodesMediaTree extends AbstractMediaTree {
   }
 
   @Override
-  public void refresh() {
-    throw new UnsupportedOperationException("Method not implemented");
-  }
-
-  @Override
-  public Style getStyle() {
-    return Style.LIST;
-  }
-
-  @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      List<Episode> episodes = new EpisodeScanner(this, new EpisodeDecoder(), Type.EPISODE).scan(root);
+      List<Episode> episodes = new EpisodeScanner(new EpisodeDecoder(), Type.EPISODE).scan(root);
       List<MediaItem> items = new ArrayList<>();
 
       Collection<List<MediaItem>> groupedItems = Groups.group(episodes, new SeasonGrouper());
@@ -41,7 +31,7 @@ public class EpisodesMediaTree extends AbstractMediaTree {
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
           int season = group.get(0) instanceof Episode ? ((Episode)group.get(0)).getSeason() : 0;
-          Season s = new Season(this, season == 0 ? "Unknown" : "" + season, season);
+          Season s = new Season(season == 0 ? "Unknown" : "" + season, season);
 
           Collections.sort(group, MediaItemComparator.INSTANCE);
 

@@ -13,7 +13,7 @@ import javafx.application.Application;
 // TODO Separators for Dialog Screen
 // TODO Subtitle selection list must be left with backspace, or exit at top/bottom item
 
-// TODO Solve hack in nameditem to only load one item at the time in the background
+// TODO Solve hack in SelectMediaPresentation to only load one item at the time in the background
 // TODO Local names not shown everywhere(?)
 // TODO database credentials to config
 
