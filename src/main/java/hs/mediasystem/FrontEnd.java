@@ -2,6 +2,7 @@ package hs.mediasystem;
 
 import hs.mediasystem.db.Cachable;
 import hs.mediasystem.db.CachedItemEnricher;
+import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.db.TmdbMovieEnricher;
 import hs.mediasystem.db.TvdbEpisodeEnricher;
@@ -17,10 +18,14 @@ import hs.mediasystem.util.ini.Section;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
 import net.sf.jtmdb.GeneralSettings;
+
+import org.postgresql.ds.PGConnectionPoolDataSource;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -34,6 +39,7 @@ public class FrontEnd extends Application {
   private static final Ini INI = new Ini(new File("mediasystem.ini"));
 
   private Player player;
+  private ConnectionPool pool;
 
   @Override
   public void init() throws Exception {
@@ -64,6 +70,18 @@ public class FrontEnd extends Application {
 
   @Override
   public void start(Stage primaryStage) throws Exception {
+    PGConnectionPoolDataSource dataSource = new PGConnectionPoolDataSource();
+
+    Section db = INI.getSection("database");
+
+    dataSource.setServerName(db.getDefault("host", "127.0.0.1"));
+    dataSource.setPortNumber(Integer.parseInt(db.getDefault("port", "5432")));
+    dataSource.setDatabaseName(db.getDefault("name", "mediasystem"));
+    dataSource.setPassword(db.get("password"));
+    dataSource.setUser(db.get("user"));
+
+    pool = new ConnectionPool(dataSource, 5);
+
     Module module = new AbstractModule() {
       @Override
       protected void configure() {
@@ -87,6 +105,20 @@ public class FrontEnd extends Application {
       public Ini providesIni() {
         return INI;
       }
+
+      @Provides @SuppressWarnings("unused")
+      public Connection providesConnection() {
+        Connection connection = pool.getConnection();
+
+        try {
+          connection.prepareStatement("SET search_path = public").execute();
+        }
+        catch(SQLException e) {
+          throw new RuntimeException(e);
+        }
+
+        return connection;
+      }
     };
 
     Injector injector = Guice.createInjector(module);
@@ -94,5 +126,12 @@ public class FrontEnd extends Application {
     ProgramController controller = injector.getInstance(ProgramController.class);
 
     controller.showMainScreen();
+  }
+
+  @Override
+  public void stop() throws Exception {
+    if(pool != null) {
+      pool.close();
+    }
   }
 }

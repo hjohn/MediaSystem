@@ -1,7 +1,6 @@
 package hs.mediasystem.db;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,34 +9,27 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 public class ItemsDao {
   public static final int VERSION = 2;
 
-  private Connection connection;
+  private final Provider<Connection> connectionProvider;
 
-  public ItemsDao() {
-    try {
-      Class.forName("org.postgresql.Driver");
-    }
-    catch(ClassNotFoundException e) {
-      throw new RuntimeException();
-    }
+  @Inject
+  public ItemsDao(Provider<Connection> connectionProvider) {
+    this.connectionProvider = connectionProvider;
   }
 
-  private Connection getConnection() throws SQLException {
-    if(connection == null) {
-      connection = DriverManager.getConnection("jdbc:postgresql://127.0.0.1:5432/mediasystem", "postgres", "8192");
-      connection.prepareStatement("SET search_path = public").execute();
-    }
-
-    return connection;
+  private Connection getConnection() {
+    return connectionProvider.get();
   }
 
   public Item getItem(Item item) throws ItemNotFoundException {
     try {
-      Connection connection = getConnection();
-
-      try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
+      try(Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
         statement.setString(1, item.getType());
         statement.setString(2, item.getProvider());
         statement.setString(3, item.getProviderId());
@@ -77,8 +69,6 @@ public class ItemsDao {
 
   public void storeItem(Item item) {
     try {
-      Connection connection = getConnection();
-
       Map<String, Object> parameters = createFieldMap(item);
 
       StringBuilder fields = new StringBuilder();
@@ -94,7 +84,8 @@ public class ItemsDao {
         values.append("?");
       }
 
-      try(PreparedStatement statement = connection.prepareStatement("INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")")) {
+      try(Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement("INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")")) {
         setParameters(parameters, statement);
         statement.execute();
       }
@@ -106,7 +97,6 @@ public class ItemsDao {
 
   public void updateItem(Item item) {
     try {
-      Connection connection = getConnection();
       Map<String, Object> parameters = createFieldMap(item);
 
       StringBuilder set = new StringBuilder();
@@ -120,7 +110,8 @@ public class ItemsDao {
         set.append("=?");
       }
 
-      try(PreparedStatement statement = connection.prepareStatement("UPDATE items SET " + set.toString() + " WHERE id = ?")) {
+      try(Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement("UPDATE items SET " + set.toString() + " WHERE id = ?")) {
         parameters.put("1", item.getId());
 
         System.out.println("[FINE] ItemsDao.updateItem() - Updating item with id: " + item.getId());
@@ -136,9 +127,8 @@ public class ItemsDao {
 
   public Item getQuery(String surrogateName) throws ItemNotFoundException {
     try {
-      Connection connection = getConnection();
-
-      try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM identifiers WHERE surrogatename = ?")) {
+      try(Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement("SELECT * FROM identifiers WHERE surrogatename = ?")) {
         statement.setString(1, surrogateName);
 
         System.out.println("[FINE] ItemsDao.getQuery() - Looking for Identifier with name: " + surrogateName);
@@ -162,9 +152,8 @@ public class ItemsDao {
 
   public void storeAsQuery(Item item) {
     try {
-      Connection connection = getConnection();
-
-      try(PreparedStatement statement = connection.prepareStatement("INSERT INTO identifiers (surrogatename, type, provider, providerid) VALUES (?, ?, ?, ?)")) {
+      try(Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement("INSERT INTO identifiers (surrogatename, type, provider, providerid) VALUES (?, ?, ?, ?)")) {
         statement.setString(1, item.getSurrogateName());
         statement.setString(2, item.getType());
         statement.setString(3, item.getProvider());

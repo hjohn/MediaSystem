@@ -61,6 +61,7 @@ public class CachedItemEnricher implements ItemEnricher {
         if(cachedItem.getVersion() < ItemsDao.VERSION) {
           System.out.println("[FINE] CachedItemEnricher.enrichItem() - Old version, updating from cached provider: " + item);
 
+          providerToCache.identifyItem(item);
           providerToCache.enrichItem(item);
           itemsDao.updateItem(cachedItem);
         }
@@ -70,6 +71,7 @@ public class CachedItemEnricher implements ItemEnricher {
       catch(ItemNotFoundException e) {
         System.out.println("[FINE] CachedItemEnricher.enrichItem() - Cache miss, falling back to cached provider: " + item);
 
+        providerToCache.identifyItem(item);
         providerToCache.enrichItem(item);
         itemsDao.storeItem(item);
       }

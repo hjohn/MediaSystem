@@ -37,8 +37,10 @@ public class SelectMediaPresentation {
     view.onItemFocused().set(new EventHandler<ItemEvent<MediaItem>>() {
       @Override
       public void handle(ItemEvent<MediaItem> event) {
-        currentItem = event.getTreeItem().getValue();
-        updateCurrentItem();  // TODO Expensive image loading being done on JavaFX thread
+        if(event.getTreeItem() != null) {
+          currentItem = event.getTreeItem().getValue();
+          updateCurrentItem();  // TODO Expensive image loading being done on JavaFX thread
+        }
       }
     });
     view.onItemSelected().set(new EventHandler<ItemEvent<MediaItem>>() {

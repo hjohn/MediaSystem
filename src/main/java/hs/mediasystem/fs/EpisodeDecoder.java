@@ -46,7 +46,7 @@ public class EpisodeDecoder implements Decoder {
       imdbNumber = null;
     }
 
-    Integer year = yearString.isEmpty() ? null : Integer.parseInt(yearString);
+    Integer year = yearString == null || yearString.isEmpty() ? null : Integer.parseInt(yearString);
     Integer season = null;
     Integer episode = null;
 
