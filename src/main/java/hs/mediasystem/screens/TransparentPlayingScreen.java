@@ -1,14 +1,13 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.Callable;
-import hs.mediasystem.ImageCache;
-import hs.mediasystem.ProgramController;
-import hs.mediasystem.SizeFormatter;
-import hs.mediasystem.StringConverter;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Subtitle;
+import hs.mediasystem.util.Callable;
+import hs.mediasystem.util.ImageCache;
+import hs.mediasystem.util.SizeFormatter;
+import hs.mediasystem.util.StringConverter;
 import hs.sublight.SubtitleDescriptor;
 
 import java.nio.file.Path;

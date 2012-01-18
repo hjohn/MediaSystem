@@ -1,4 +1,4 @@
-package hs.mediasystem;
+package hs.mediasystem.util;
 
 public interface Callable<T> {
   T call();

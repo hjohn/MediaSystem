@@ -1,5 +1,7 @@
-package hs.mediasystem;
+package hs.mediasystem.screens;
 
+import hs.mediasystem.util.ImageCache;
+import hs.mediasystem.util.ImageHandle;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;

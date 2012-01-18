@@ -1,4 +1,4 @@
-package hs.mediasystem;
+package hs.mediasystem.screens;
 
 import java.util.ArrayList;
 import java.util.List;

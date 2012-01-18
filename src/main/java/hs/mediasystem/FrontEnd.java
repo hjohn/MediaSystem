@@ -11,6 +11,7 @@ import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MoviesMainMenuExtension;
+import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SeriesMainMenuExtension;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;

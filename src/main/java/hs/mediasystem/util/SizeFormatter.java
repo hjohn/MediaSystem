@@ -1,4 +1,4 @@
-package hs.mediasystem;
+package hs.mediasystem.util;
 
 import java.util.Arrays;
 import java.util.Iterator;

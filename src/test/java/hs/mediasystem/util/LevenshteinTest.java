@@ -1,4 +1,5 @@
-import hs.mediasystem.Levenshtein;
+package hs.mediasystem.util;
+import hs.mediasystem.util.Levenshtein;
 
 import java.util.Arrays;
 import java.util.Collection;

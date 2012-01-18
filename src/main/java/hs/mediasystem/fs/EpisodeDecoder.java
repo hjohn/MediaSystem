@@ -9,14 +9,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class EpisodeDecoder implements Decoder {
-  private static String VALID_EXTENSIONS = "(avi|flv|mkv|mov|mp4|mpg|mpeg)";
-  private static String SPLIT_CHARS = " \\.";
-  private static String ALL_BUT_SEPARATOR = "(?:[^" + SPLIT_CHARS +"]++| (?!(?:- |\\[)))++";
-  private static String SEPARATOR_PLUS_SEQUENCE_NUMBER = "(?: - ([0-9x]++))?";
-  private static String SEPARATOR_PLUS_SUBTITLE = "(?: - )?((?:[^" + SPLIT_CHARS + "]++| (?!\\[))*+)";
-  private static String RELEASE_YEAR = "[0-9]{4}";
-  private static String EXTENSION = "\\." + VALID_EXTENSIONS;
-  private static String IMDB = "\\(([0-9]++)\\)";
+  private static final String VALID_EXTENSIONS = "(avi|flv|mkv|mov|mp4|mpg|mpeg)";
+  private static final String SPLIT_CHARS = " \\.";
+  private static final String ALL_BUT_SEPARATOR = "(?:[^" + SPLIT_CHARS +"]++| (?!(?:- |\\[)))++";
+  private static final String SEPARATOR_PLUS_SEQUENCE_NUMBER = "(?: - ([0-9x]++))?";
+  private static final String SEPARATOR_PLUS_SUBTITLE = "(?: - )?((?:[^" + SPLIT_CHARS + "]++| (?!\\[))*+)";
+  private static final String RELEASE_YEAR = "[0-9]{4}";
+  private static final String EXTENSION = "\\." + VALID_EXTENSIONS;
+  private static final String IMDB = "\\(([0-9]++)\\)";
 
   private static final Pattern PATTERN = Pattern.compile(
       "(?i)(" + ALL_BUT_SEPARATOR + ")" + SEPARATOR_PLUS_SEQUENCE_NUMBER + SEPARATOR_PLUS_SUBTITLE +

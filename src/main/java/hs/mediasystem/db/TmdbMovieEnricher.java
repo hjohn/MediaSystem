@@ -1,6 +1,6 @@
 package hs.mediasystem.db;
 
-import hs.mediasystem.Levenshtein;
+import hs.mediasystem.util.Levenshtein;
 
 import java.io.IOException;
 import java.net.URL;

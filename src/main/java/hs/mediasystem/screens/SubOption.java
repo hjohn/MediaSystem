@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.Callable;
+import hs.mediasystem.util.Callable;
 
 import java.util.List;
 

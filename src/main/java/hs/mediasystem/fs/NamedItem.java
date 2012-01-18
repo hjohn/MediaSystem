@@ -1,9 +1,9 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.ImageHandle;
 import hs.mediasystem.db.Item;
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.util.ImageHandle;
 
 import java.nio.file.Path;
 

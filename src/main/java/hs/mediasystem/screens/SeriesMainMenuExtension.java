@@ -1,7 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.ProgramController;
-import hs.mediasystem.SelectMediaPresentation;
 import hs.mediasystem.fs.SeriesMediaTree;
 
 import java.nio.file.Paths;

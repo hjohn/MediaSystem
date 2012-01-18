@@ -1,6 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.ProgramController;
 
 import java.util.ArrayList;
 import java.util.List;

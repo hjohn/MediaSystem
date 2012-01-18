@@ -1,5 +1,6 @@
 package hs.mediasystem.fs;
 
+import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import javafx.scene.Group;
 import javafx.scene.Node;

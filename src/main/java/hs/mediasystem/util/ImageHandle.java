@@ -1,4 +1,4 @@
-package hs.mediasystem;
+package hs.mediasystem.util;
 
 public class ImageHandle {
   private final byte[] imageData;

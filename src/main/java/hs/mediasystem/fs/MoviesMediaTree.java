@@ -1,6 +1,7 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo.Type;
+import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;

@@ -14,7 +14,7 @@ public class Option extends BorderPane {
     setFocusTraversable(true);
     getStyleClass().add("cell");
 
-    setLeft(new Label(getDescription()));
+    setLeft(new Label(description));
     setRight(label);
   }
 

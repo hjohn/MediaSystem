@@ -15,7 +15,6 @@ import javafx.application.Application;
 
 // TODO Solve hack in SelectMediaPresentation to only load one item at the time in the background
 // TODO Local names not shown everywhere(?)
-// TODO database credentials to config
 
 // Minimal working system:
 // TODO Make clock in standard border

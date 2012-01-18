@@ -1,7 +1,7 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.ImageHandle;
 import hs.mediasystem.db.Item;
+import hs.mediasystem.util.ImageHandle;
 
 public interface MediaItem {
   MediaTree getRoot();

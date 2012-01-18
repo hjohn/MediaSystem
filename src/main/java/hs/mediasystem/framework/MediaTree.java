@@ -1,7 +1,5 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.fs.CellProvider;
-
 import java.util.List;
 
 /**

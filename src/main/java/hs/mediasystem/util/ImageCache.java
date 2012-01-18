@@ -1,4 +1,4 @@
-package hs.mediasystem;
+package hs.mediasystem.util;
 
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;

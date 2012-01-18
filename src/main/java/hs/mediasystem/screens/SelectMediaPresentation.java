@@ -1,11 +1,11 @@
-package hs.mediasystem;
+package hs.mediasystem.screens;
 
-import hs.mediasystem.SelectMediaPane.ItemEvent;
 import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.db.ItemNotFoundException;
+import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.fs.CellProvider;
+import hs.mediasystem.screens.SelectMediaPane.ItemEvent;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;

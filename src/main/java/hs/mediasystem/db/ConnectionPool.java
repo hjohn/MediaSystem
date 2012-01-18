@@ -150,7 +150,7 @@ public class ConnectionPool implements AutoCloseable {
     try {
       return getValidConnection();
     }
-    catch(Throwable t) {
+    catch(Exception t) {
       semaphore.release();
       throw new IllegalStateException("Unable to acquire connection", t);
     }

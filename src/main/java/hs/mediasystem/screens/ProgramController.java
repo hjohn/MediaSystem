@@ -1,12 +1,10 @@
-package hs.mediasystem;
+package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SublightSubtitleProvider;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
-import hs.mediasystem.screens.MainScreen;
-import hs.mediasystem.screens.TransparentPlayingScreen;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 

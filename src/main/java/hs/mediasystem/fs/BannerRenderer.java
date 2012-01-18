@@ -1,8 +1,9 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.ImageCache;
-import hs.mediasystem.ImageHandle;
+import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.util.ImageCache;
+import hs.mediasystem.util.ImageHandle;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
