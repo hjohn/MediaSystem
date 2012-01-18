@@ -3,6 +3,7 @@ package hs.mediasystem.screens;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.AudioTrack;
+import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
@@ -61,7 +62,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
-public class TransparentPlayingScreen extends StackPane {
+public class PlaybackOverlayPane extends StackPane {
   private final ProgramController controller;
 
   private final ObjectProperty<String> volumeText = new SimpleObjectProperty<>();
@@ -169,7 +170,7 @@ public class TransparentPlayingScreen extends StackPane {
 
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
 
-  public TransparentPlayingScreen(final ProgramController controller, final MediaItem mediaItem, final double w, final double h) {
+  public PlaybackOverlayPane(final ProgramController controller, final MediaItem mediaItem, final double w, final double h) {
     this.controller = controller;
 
     positionUpdater.setCycleCount(Animation.INDEFINITE);
@@ -187,24 +188,21 @@ public class TransparentPlayingScreen extends StackPane {
       }
     });
 
-    subtitleDownloadService.runningProperty().addListener(new ChangeListener<Boolean>() {
-      @Override
-      public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-        messagePane.getChildren().remove(subtitleDownloadMessage);
-
-        if(newValue) {
-          messagePane.getChildren().add(subtitleDownloadMessage);
-        }
-      }
-    });
+    final Player player = controller.getPlayer();
 
     subtitleDownloadService.stateProperty().addListener(new ChangeListener<State>() {
       @Override
       public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
-        if(newValue == State.SUCCEEDED) {
+        if(newValue == State.SCHEDULED) {
+          messagePane.getChildren().add(subtitleDownloadMessage);
+        }
+        else if(newValue == State.SUCCEEDED) {
           Path subtitlePath = subtitleDownloadService.getValue();
 
-          controller.getPlayer().showSubtitle(subtitlePath);
+          player.showSubtitle(subtitlePath);
+        }
+        else if(newValue == State.SUCCEEDED || newValue == State.FAILED) {
+          messagePane.getChildren().remove(subtitleDownloadMessage);
         }
       }
     });
@@ -240,22 +238,22 @@ public class TransparentPlayingScreen extends StackPane {
         else if(code == KeyCode.O) {
           if(getChildren().size() == 1) {
             List<Option> options = FXCollections.observableArrayList(
-              new NumericOption(controller.getPlayer().volumeProperty(), "Volume", "%3.0f%%", 1, 0, 100),
-              new ListOption<>("Subtitle", controller.getPlayer().subtitleProperty(), controller.getPlayer().getSubtitles(), new StringConverter<Subtitle>() {
+              new NumericOption(player.volumeProperty(), "Volume", "%3.0f%%", 1, 0, 100),
+              new ListOption<>("Subtitle", player.subtitleProperty(), player.getSubtitles(), new StringConverter<Subtitle>() {
                 @Override
                 public String toString(Subtitle object) {
                   return object.getDescription();
                 }
               }),
-              new ListOption<>("Audio Track", controller.getPlayer().audioTrackProperty(), controller.getPlayer().getAudioTracks(), new StringConverter<AudioTrack>() {
+              new ListOption<>("Audio Track", player.audioTrackProperty(), player.getAudioTracks(), new StringConverter<AudioTrack>() {
                 @Override
                 public String toString(AudioTrack object) {
                   return object.getDescription();
                 }
               }),
-              new NumericOption(controller.getPlayer().rateProperty(), "Playback Speed", "%4.1f", 0.1, 0.1, 4.0),
-              new NumericOption(controller.getPlayer().audioDelayProperty(), "Audio Delay", "%5.0fms", 100, -30000, 30000),
-              new NumericOption(controller.getPlayer().brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2),
+              new NumericOption(player.rateProperty(), "Playback Speed", "%4.1f", 0.1, 0.1, 4.0),
+              new NumericOption(player.audioDelayProperty(), "Audio Delay", "%5.0fms", 100, -30000, 30000),
+              new NumericOption(player.brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2),
               new SubOption("Download subtitle...", new Callable<List<Option>>() {
                 @Override
                 public List<Option> call() {
@@ -289,7 +287,7 @@ public class TransparentPlayingScreen extends StackPane {
             );
 
             DialogScreen dialogScreen = new DialogScreen("Video - Options", options);
-            
+
             getChildren().add(dialogScreen);
 
             dialogScreen.requestFocus();
