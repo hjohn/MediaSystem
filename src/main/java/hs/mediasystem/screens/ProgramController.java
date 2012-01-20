@@ -37,14 +37,16 @@ public class ProgramController {
   private final BorderPane overlayGroup;
   private final Ini ini;
   private final Provider<MainScreen> mainScreenProvider;
+  private final Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider;
 
   private final NavigationHistory<NavigationItem> history = new NavigationHistory<>();
 
   @Inject
-  public ProgramController(Ini ini, Player player, Provider<MainScreen> mainScreenProvider) {
+  public ProgramController(Ini ini, Player player, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider) {
     this.ini = ini;
     this.player = player;
     this.mainScreenProvider = mainScreenProvider;
+    this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
 
     mainGroup = new BorderPane();
     overlayGroup = new BorderPane();
@@ -133,11 +135,19 @@ public class ProgramController {
     }
   }
 
+  private MediaItem currentMediaItem;
+
+  public MediaItem getCurrentMediaItem() {
+    return currentMediaItem;
+  }
+
   public void play(MediaItem mediaItem) {
     player.play(mediaItem.getUri());
 
-    PlaybackOverlayPane screen = new PlaybackOverlayPane(this, mediaItem, overlayStage.getWidth(), overlayStage.getHeight());
-    history.forward(new NavigationItem(screen, "OVERLAY"));
+    currentMediaItem = mediaItem;
+
+    PlaybackOverlayPresentation playbackOverlayPresentation = playbackOverlayPresentationProvider.get();
+    history.forward(new NavigationItem(playbackOverlayPresentation.getView(), "OVERLAY"));
   }
 
   public void stop() {

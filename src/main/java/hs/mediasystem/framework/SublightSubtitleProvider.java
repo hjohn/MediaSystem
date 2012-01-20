@@ -19,7 +19,10 @@ public class SublightSubtitleProvider implements SubtitleProvider {
     Short season = mediaItem.getSeason() == null ? null : mediaItem.getSeason().shortValue();
     Integer episode = mediaItem.getEpisode();
 
-    System.out.println("Looking for subtitles: " + mediaItem.getTitle() + "; " +  year + "; " + season + "; " + episode + "; English");
+    if(season == null) {
+      episode = null;
+    }
+    System.out.println("[FINE] SublightSubtitleProvider.query() - Looking for subtitles: " + mediaItem.getTitle() + "; " +  year + "; " + season + "; " + episode + "; English");
 
     return client.getSubtitleList(mediaItem.getTitle(), year, season, episode, "English");
   }

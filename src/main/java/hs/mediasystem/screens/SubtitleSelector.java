@@ -47,7 +47,12 @@ public class SubtitleSelector {
           subtitles.clear();
           subtitles.addAll(subtitleQueryService.getValue());
 
+          System.out.println("[FINE] SubtitleSelector.SubtitleSelector(...).new ChangeListener() {...}.changed() - Succesfully loaded " + subtitleQueryService.getValue().size() + " subtitles");
+
           loaded.set(true);
+        }
+        else if(newValue == Service.State.FAILED) {
+          System.out.println("[FINE] SubtitleSelector.SubtitleSelector(...).new ChangeListener() {...}.changed() - Exception search for subtitles: " + subtitleQueryService.getException());
         }
       }
     });

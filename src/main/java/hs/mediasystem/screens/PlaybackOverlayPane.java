@@ -1,21 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.SubtitleProvider;
-import hs.mediasystem.framework.player.AudioTrack;
-import hs.mediasystem.framework.player.Player;
-import hs.mediasystem.framework.player.Subtitle;
-import hs.mediasystem.util.Callable;
-import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.SizeFormatter;
-import hs.mediasystem.util.StringConverter;
-import hs.sublight.SubtitleDescriptor;
-
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
-import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -31,11 +16,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.concurrent.Service;
 import javafx.concurrent.Worker.State;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -47,11 +30,8 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Effect;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.effect.Reflection;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -63,38 +43,7 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 public class PlaybackOverlayPane extends StackPane {
-  private final ProgramController controller;
-
-  private final ObjectProperty<String> volumeText = new SimpleObjectProperty<>();
-  private final DoubleProperty volume = new SimpleDoubleProperty(0.0);
-  private final LongProperty position = new SimpleLongProperty();
-  private final LongProperty length = new SimpleLongProperty(1);
   private final StringProperty osdLine = new SimpleStringProperty("");
-  private final ObjectProperty<SubtitleDescriptor> selectedSubtitleForDownload = new SimpleObjectProperty<>();
-
-  private final SubtitleDownloadService subtitleDownloadService = new SubtitleDownloadService();
-
-  private final VBox subtitleDownloadMessage = new VBox() {{
-    getChildren().add(new VBox() {{
-      getStyleClass().add("item");
-      getChildren().add(new Label("Title") {{
-        getStyleClass().add("title");
-        textProperty().bind(subtitleDownloadService.titleProperty());
-      }});
-      getChildren().add(new Label() {{
-        setWrapText(true);
-        setMaxWidth(300);
-        getStyleClass().add("description");
-        textProperty().bind(subtitleDownloadService.messageProperty());
-      }});
-      getChildren().add(new ProgressBar() {{
-        getStyleClass().add("blue-bar");
-        setMaxWidth(300);
-//        visibleProperty().bind(subtitleDownloadService.runningProperty());
-        progressProperty().bind(subtitleDownloadService.progressProperty());
-      }});
-    }});
-  }};
 
   private final BorderPane borderPane = new BorderPane();
   private final BorderPane bottomPane = new BorderPane();
@@ -102,39 +51,7 @@ public class PlaybackOverlayPane extends StackPane {
   private final VBox messagePane = new VBox() {{
     setId("messagePane");
     setVisible(false);
-//    getChildren().add(subtitleDownloadProgressBar);
-//    getChildren().add(new VBox() {{
-//      getStyleClass().add("item");
-//      getChildren().add(new Label("Title") {{
-//        getStyleClass().add("title");
-//      }});
-//      getChildren().add(new Label("Currently busy doing some stuff, which may take a long time.  Since this is a long text, it better wrap.") {{
-//        this.setWrapText(true);
-//        this.setMaxWidth(300);
-//        getStyleClass().add("description");
-//      }});
-//      getChildren().add(new ProgressBar() {{
-//        this.getStyleClass().add("blue-bar");
-//        this.setMaxWidth(300);
-//      }});
-//    }});
-//    getChildren().add(new VBox() {{
-//      getStyleClass().add("item");
-//      getChildren().add(new Label("Title 2") {{
-//        getStyleClass().add("title");
-//      }});
-//      getChildren().add(new Label("Currently busy doing some stuff, which may take a long time.  Since this is a long text, it better wrap.") {{
-//        this.setMaxWidth(300);
-//        this.setWrapText(true);
-//        getStyleClass().add("description");
-//      }});
-//      getChildren().add(new ProgressBar(0.25) {{
-//        this.getStyleClass().add("blue-bar");
-//        this.setMaxWidth(300);
-//      }});
-//    }});
   }};
-
 
   private final Timeline osdFade = new Timeline(
     new KeyFrame(Duration.seconds(1), new KeyValue(topLabel.opacityProperty(), 1.0)),
@@ -149,196 +66,14 @@ public class PlaybackOverlayPane extends StackPane {
     new KeyFrame(Duration.seconds(9), new KeyValue(bottomPane.opacityProperty(), 0.0))
   );
 
-  private final Timeline positionUpdater = new Timeline(
-    new KeyFrame(Duration.seconds(0.10), new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-//        position.set(SizeFormatter.SECONDS_AS_POSITION.format(controller.getPosition() / 1000));
-//        length.set(SizeFormatter.SECONDS_AS_POSITION.format(controller.getLength() / 1000));
-        volume.set(controller.getVolume() / 100.0);
-        position.set(controller.getPosition());
-
-        long len = controller.getLength();
-
-        if(len == 0) {
-          len = 1;
-        }
-        length.set(len);
-      }
-    })
-  );
-
-  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
-
-  public PlaybackOverlayPane(final ProgramController controller, final MediaItem mediaItem, final double w, final double h) {
-    this.controller = controller;
-
-    positionUpdater.setCycleCount(Animation.INDEFINITE);
-    positionUpdater.play();
-
-    volumeText.set("Volume " + controller.getVolume() + "%");
-
-    selectedSubtitleForDownload.addListener(new ChangeListener<SubtitleDescriptor>() {
-      @Override
-      public void changed(ObservableValue<? extends SubtitleDescriptor> observable, SubtitleDescriptor oldValue, SubtitleDescriptor newValue) {
-        if(newValue != null) {
-          subtitleDownloadService.setSubtitleDescriptor(newValue);
-          subtitleDownloadService.restart();
-        }
-      }
-    });
-
-    final Player player = controller.getPlayer();
-
-    subtitleDownloadService.stateProperty().addListener(new ChangeListener<State>() {
-      @Override
-      public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
-        if(newValue == State.SCHEDULED) {
-          messagePane.getChildren().add(subtitleDownloadMessage);
-        }
-        else if(newValue == State.SUCCEEDED) {
-          Path subtitlePath = subtitleDownloadService.getValue();
-
-          player.showSubtitle(subtitlePath);
-        }
-        else if(newValue == State.SUCCEEDED || newValue == State.FAILED) {
-          messagePane.getChildren().remove(subtitleDownloadMessage);
-        }
-      }
-    });
+  public PlaybackOverlayPane() {
+    final double w = 1920;  // TODO remove hardcoded values
+    final double h = 1200;
 
     messagePane.getChildren().addListener(new ListChangeListener<Node>() {
       @Override
       public void onChanged(ListChangeListener.Change<? extends Node> change) {
         messagePane.setVisible(!change.getList().isEmpty());
-      }
-    });
-
-    addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-      @Override
-      public void handle(KeyEvent event) {
-        KeyCode code = event.getCode();
-
-        if(code == KeyCode.S) {
-          controller.stop();
-        }
-        else if(code == KeyCode.J) {
-          Subtitle subtitle = controller.nextSubtitle();
-          if(subtitle != null) {
-            osdLine.set("Subtitle: " + subtitle.getDescription());
-          }
-          osdFade.playFromStart();
-        }
-        else if(BACK_SPACE.match(event)) {
-          if(getChildren().size() > 1) {
-            getChildren().remove(1);
-            borderPane.requestFocus();
-          }
-        }
-        else if(code == KeyCode.O) {
-          if(getChildren().size() == 1) {
-            List<Option> options = FXCollections.observableArrayList(
-              new NumericOption(player.volumeProperty(), "Volume", "%3.0f%%", 1, 0, 100),
-              new ListOption<>("Subtitle", player.subtitleProperty(), player.getSubtitles(), new StringConverter<Subtitle>() {
-                @Override
-                public String toString(Subtitle object) {
-                  return object.getDescription();
-                }
-              }),
-              new ListOption<>("Audio Track", player.audioTrackProperty(), player.getAudioTracks(), new StringConverter<AudioTrack>() {
-                @Override
-                public String toString(AudioTrack object) {
-                  return object.getDescription();
-                }
-              }),
-              new NumericOption(player.rateProperty(), "Playback Speed", "%4.1f", 0.1, 0.1, 4.0),
-              new NumericOption(player.audioDelayProperty(), "Audio Delay", "%5.0fms", 100, -30000, 30000),
-              new NumericOption(player.brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2),
-              new SubOption("Download subtitle...", new Callable<List<Option>>() {
-                @Override
-                public List<Option> call() {
-                  return new ArrayList<Option>() {{
-                    final SubtitleSelector subtitleSelector = new SubtitleSelector(controller.getSubtitleProviders());
-
-                    subtitleSelector.query(mediaItem);
-
-                    subtitleSelector.subtitleProviderProperty().addListener(new ChangeListener<SubtitleProvider>() {
-                      @Override
-                      public void changed(ObservableValue<? extends SubtitleProvider> observableValue, SubtitleProvider oldValue, SubtitleProvider newValue) {
-                        subtitleSelector.query(mediaItem);
-                      }
-                    });
-
-                    add(new ListOption<>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringConverter<SubtitleProvider>() {
-                      @Override
-                      public String toString(SubtitleProvider object) {
-                        return object.getName();
-                      }
-                    }));
-                    add(new ListViewOption<>("Subtitles for Download", selectedSubtitleForDownload, subtitleSelector.getSubtitles(), new StringConverter<SubtitleDescriptor>() {
-                      @Override
-                      public String toString(SubtitleDescriptor object) {
-                        return object.getName() + " (" + object.getLanguageName() + ") [" + object.getType() + "]";
-                      }
-                    }));
-                  }};
-                }
-              })
-            );
-
-            DialogScreen dialogScreen = new DialogScreen("Video - Options", options);
-
-            getChildren().add(dialogScreen);
-
-            dialogScreen.requestFocus();
-          }
-        }
-        else if(code == KeyCode.SPACE) {
-          controller.pause();
-          showOSD();
-        }
-        else if(code == KeyCode.NUMPAD4) {
-          controller.move(-10 * 1000);
-          showOSD();
-        }
-        else if(code == KeyCode.NUMPAD6) {
-          controller.move(10 * 1000);
-          showOSD();
-        }
-        else if(code == KeyCode.NUMPAD2) {
-          controller.move(-60 * 1000);
-          showOSD();
-        }
-        else if(code == KeyCode.NUMPAD8) {
-          controller.move(60 * 1000);
-          showOSD();
-        }
-        else if(code == KeyCode.M) {
-          controller.mute();
-          showOSD();
-        }
-        else if(code == KeyCode.DIGIT9) {
-          controller.changeVolume(-1);
-          volumeText.set("Volume " + controller.getVolume() + "%");
-          showOSD();
-        }
-        else if(code == KeyCode.DIGIT0) {
-          controller.changeVolume(1);
-          volumeText.set("Volume " + controller.getVolume() + "%");
-          showOSD();
-        }
-        else if(code == KeyCode.DIGIT1) {
-          controller.changeBrightness(-0.05f);
-        }
-        else if(code == KeyCode.DIGIT2) {
-          controller.changeBrightness(0.05f);
-        }
-        else if(code == KeyCode.Z) {
-          controller.changeSubtitleDelay(-100);
-        }
-        else if(code == KeyCode.X) {
-          controller.changeSubtitleDelay(100);
-        }
       }
     });
 
@@ -356,9 +91,7 @@ public class PlaybackOverlayPane extends StackPane {
 
     bottomPane.setId("video-overlay");
     bottomPane.setLeft(new ImageView() {{
-      if(mediaItem.getPoster() != null) {  // TODO might be loaded at a later time, check for this
-        setImage(ImageCache.loadImage(mediaItem.getPoster()));
-      }
+      imageProperty().bind(poster);
       getStyleClass().add("poster");
       setFitWidth(w * 0.2);
       setFitHeight(h * 0.4);
@@ -375,11 +108,13 @@ public class PlaybackOverlayPane extends StackPane {
       setBottom(new HBox() {{
         getChildren().add(new VBox() {{
           HBox.setHgrow(this, Priority.ALWAYS);
-          getChildren().add(new Label(mediaItem.getTitle()) {{
+          getChildren().add(new Label() {{
+            textProperty().bind(title);
             getStyleClass().add("video-title");
             setEffect(createNeonEffect(64));
           }});
-          getChildren().add(new Label(mediaItem.getSubtitle()) {{
+          getChildren().add(new Label() {{
+            textProperty().bind(subtitle);
             getStyleClass().add("video-subtitle");
           }});
           getChildren().add(new GridPane() {{
@@ -439,9 +174,6 @@ public class PlaybackOverlayPane extends StackPane {
             add(new Label("+"), 3, 1);
           }});
         }});
-//          getChildren().add(new Slider() {{
-//            setOrientation(Orientation.VERTICAL);
-//          }});
       }});
     }});
 
@@ -457,8 +189,52 @@ public class PlaybackOverlayPane extends StackPane {
     });
   }
 
-  private void showOSD() {
+  public void showOSD() {
     fadeInSustainAndFadeOut.playFromStart();
+  }
+
+  public void setOSD(String text) {
+    osdLine.set(text);
+    osdFade.playFromStart();
+  }
+
+  public void displayService(Service<?> service) {
+    final VBox vbox = createMessage(service);
+
+    service.stateProperty().addListener(new ChangeListener<State>() {
+      @Override
+      public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
+        if(newValue == State.SCHEDULED) {
+          messagePane.getChildren().add(vbox);
+        }
+        else if(newValue == State.SUCCEEDED || newValue == State.FAILED) {
+          messagePane.getChildren().remove(vbox);
+        }
+      }
+    });
+  }
+
+  private static VBox createMessage(final Service<?> service) {
+    return new VBox() {{
+      getChildren().add(new VBox() {{
+        getStyleClass().add("item");
+        getChildren().add(new Label("Title") {{
+          getStyleClass().add("title");
+          textProperty().bind(service.titleProperty());
+        }});
+        getChildren().add(new Label() {{
+          setWrapText(true);
+          setMaxWidth(300);
+          getStyleClass().add("description");
+          textProperty().bind(service.messageProperty());
+        }});
+        getChildren().add(new ProgressBar() {{
+          getStyleClass().add("blue-bar");
+          setMaxWidth(300);
+          progressProperty().bind(service.progressProperty());
+        }});
+      }});
+    }};
   }
 
   private static Effect createNeonEffect(final double size) { // font point size
@@ -493,4 +269,40 @@ public class PlaybackOverlayPane extends StackPane {
       }});
     }};
   }
+
+  private final DoubleProperty volume = new SimpleDoubleProperty(0);
+  public double getVolume() { return volume.get(); }
+  public void setVolume(double volume) { this.volume.set(volume); }
+  public DoubleProperty volumeProperty() { return volume; }
+
+  private final LongProperty position = new SimpleLongProperty();
+  public long getPosition() { return position.get(); }
+  public void setPosition(long position) { this.position.set(position); }
+  public LongProperty positionProperty() { return position; }
+
+  private final LongProperty length = new SimpleLongProperty(1);
+  public long getLength() { return length.get(); }
+  public void setLength(long length) { this.length.set(length); }
+  public LongProperty lengthProperty() { return length; }
+
+  private final StringProperty title = new SimpleStringProperty();
+  public String getTitle() { return title.get(); }
+  public void setTitle(String title) { this.title.set(title); }
+  public StringProperty titleProperty() { return title; }
+
+  private final StringProperty subtitle = new SimpleStringProperty();
+  public String getSubtitle() { return subtitle.get(); }
+  public void setSubtitle(String subtitle) { this.subtitle.set(subtitle); }
+  public StringProperty subtitleProperty() { return subtitle; }
+
+  private final StringProperty releaseYear = new SimpleStringProperty();
+  public String getReleaseYear() { return releaseYear.get(); }
+  public void setReleaseYear(String releaseYear) { this.releaseYear.set(releaseYear); }
+  public StringProperty releaseYearProperty() { return releaseYear; }
+
+  private final ObjectProperty<Image> poster = new SimpleObjectProperty<>();
+  public Image getPoster() { return poster.get(); }
+  public void setPoster(Image poster) { this.poster.set(poster); }
+  public ObjectProperty<Image> posterProperty() { return poster; }
+
 }

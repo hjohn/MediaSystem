@@ -167,6 +167,8 @@ public class SublightSubtitleClient {
 		Holder<ArrayOfRelease> releases = new Holder<>();
 		Holder<String> error = new Holder<>();
 
+		System.out.println("[FINE] SublightSubtitleClient.getSubtitleList() - name=" + name + "; year=" + year);
+
 		webservice.searchSubtitles4(session, videoHashes, name, year, season, episode, languages, genres, null, null, null, subtitles, releases, null, error);
 
 		// abort if something went wrong

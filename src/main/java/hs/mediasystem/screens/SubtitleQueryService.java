@@ -26,6 +26,8 @@ public class SubtitleQueryService extends Service<List<SubtitleDescriptor>> {
     final MediaItem mediaItem = this.mediaItem;
     final SubtitleProvider provider = subtitleProvider;
 
+    System.out.println("[FINE] SubtitleQueryService.createTask() - provider=" + subtitleProvider + ": " + mediaItem);
+
     return new Task<List<SubtitleDescriptor>>() {
       @Override
       protected List<SubtitleDescriptor> call() throws Exception {
