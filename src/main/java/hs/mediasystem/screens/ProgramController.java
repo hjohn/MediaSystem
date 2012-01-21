@@ -52,6 +52,7 @@ public class ProgramController {
     overlayGroup = new BorderPane();
 
     mainStage = new Stage(StageStyle.UNDECORATED);
+    mainStage.setFullScreen(true);
     overlayStage = new Stage(StageStyle.TRANSPARENT);
     overlayStage.setFullScreen(true);
 
@@ -105,18 +106,21 @@ public class ProgramController {
 
   private void displayOnMainStage(Node node) {
     mainStage.show();
+    mainStage.setFullScreen(true);
+    mainStage.toFront();
     overlayStage.hide();
     mainGroup.setCenter(node);
   }
 
   private void displayOnOverlayStage(Node node) {
     overlayStage.show();
+    overlayStage.setFullScreen(true);
+    overlayStage.toFront();
     mainStage.hide();
     overlayGroup.setCenter(node);
   }
 
   public void showMainScreen() {
-//    MainScreen mainScreen = new MainScreen(this);
     MainScreen mainScreen = mainScreenProvider.get();
 
     history.forward(new NavigationItem(mainScreen.create(), "MAIN"));
