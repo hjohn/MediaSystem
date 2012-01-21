@@ -23,6 +23,8 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -38,6 +40,9 @@ import javafx.util.Callback;
 import javafx.util.Duration;
 
 public class SelectMediaPane<T> extends StackPane {
+  private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
+  private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
+
   private final TreeView<T> treeView = new TreeView<>();
 
   private final ObjectProperty<String> title = new SimpleObjectProperty<>();
@@ -109,8 +114,12 @@ public class SelectMediaPane<T> extends StackPane {
     treeView.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent event) {
-        if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2 && onItemSelected.get() != null) {
-          onItemSelected.get().handle(new ItemEvent<>(treeView.getSelectionModel().getSelectedItem()));
+        TreeItem<T> focusedItem = treeView.getFocusModel().getFocusedItem();
+
+        if(focusedItem != null) {
+          if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2 && onItemSelected.get() != null) {
+            onItemSelected.get().handle(new ItemEvent<>(focusedItem));
+          }
         }
       }
     });
@@ -118,8 +127,17 @@ public class SelectMediaPane<T> extends StackPane {
     treeView.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
-        if(event.getCode() == KeyCode.ENTER && onItemSelected.get() != null) {
-          onItemSelected.get().handle(new ItemEvent<>(treeView.getSelectionModel().getSelectedItem()));
+        TreeItem<T> focusedItem = treeView.getFocusModel().getFocusedItem();
+
+        if(focusedItem != null) {
+          if(ENTER.match(event) && onItemSelected.get() != null) {
+            onItemSelected.get().handle(new ItemEvent<>(focusedItem));
+            event.consume();
+          }
+          else if(KEY_O.match(event) && onItemAlternateSelect.get() != null) {
+            onItemAlternateSelect.get().handle(new ItemEvent<>(focusedItem));
+            event.consume();
+          }
         }
       }
     });
@@ -232,6 +250,9 @@ public class SelectMediaPane<T> extends StackPane {
 
   private final ObjectProperty<EventHandler<ItemEvent<T>>> onItemSelected = new SimpleObjectProperty<>();
   public ObjectProperty<EventHandler<ItemEvent<T>>> onItemSelected() { return onItemSelected; }
+
+  private final ObjectProperty<EventHandler<ItemEvent<T>>> onItemAlternateSelect = new SimpleObjectProperty<>();
+  public ObjectProperty<EventHandler<ItemEvent<T>>> onItemAlternateSelect() { return onItemAlternateSelect; }
 
   public static class ItemEvent<T> extends Event {
     private final TreeItem<T> treeItem;

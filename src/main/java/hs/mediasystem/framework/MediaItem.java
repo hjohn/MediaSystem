@@ -22,6 +22,7 @@ public interface MediaItem {
   ImageHandle getPoster();
   ImageHandle getBackground();
 
+  void resetItem();
   Item getItem();  // TODO don't want this exposed here
   void setEnriched(boolean enriched);
   boolean isEnriched();

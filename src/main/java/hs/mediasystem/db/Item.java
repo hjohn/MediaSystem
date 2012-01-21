@@ -23,8 +23,15 @@ public class Item {
   private Integer season;
   private Integer episode;
 
+  private String surrogateName;
+  private boolean bypassCache;
+
   public String getSurrogateName() {
-    return type + "/" + title.toLowerCase() + "/" + (subtitle != null ? subtitle.toLowerCase() : "") + "/" + (season == null ? "" : season) + "/" + (episode == null ? "" : episode) + "/" + (releaseYear == null ? "" : releaseYear);
+    if(surrogateName == null) {
+      surrogateName = type + "/" + title.toLowerCase() + "/" + (subtitle != null ? subtitle.toLowerCase() : "") + "/" + (season == null ? "" : season) + "/" + (episode == null ? "" : episode) + "/" + (releaseYear == null ? "" : releaseYear);
+    }
+
+    return surrogateName;
   }
 
   public int getId() {
@@ -169,6 +176,14 @@ public class Item {
 
   public void setReleaseYear(Integer releaseYear) {
     this.releaseYear = releaseYear;
+  }
+
+  public boolean isBypassCache() {
+    return bypassCache;
+  }
+
+  public void setBypassCache(boolean bypassCache) {
+    this.bypassCache = bypassCache;
   }
 
   @Override

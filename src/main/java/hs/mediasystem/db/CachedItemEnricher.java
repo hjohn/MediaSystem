@@ -12,25 +12,29 @@ public class CachedItemEnricher implements ItemEnricher {
     this.providerToCache = providerToCache;
   }
 
-
   @Override
   public void identifyItem(Item item) throws ItemNotFoundException {
     System.out.println("[FINE] CachedItemEnricher.identifyItem() - with surrogatename: " + item.getSurrogateName());
 
-    try {
-      Item identifier = itemsDao.getQuery(item.getSurrogateName());
+    if(!item.isBypassCache()) {
+      try {
+        Item identifier = itemsDao.getQuery(item.getSurrogateName());
 
-      System.out.println("[FINE] CachedItemEnricher.identifyItem() - Cache Hit");
+        System.out.println("[FINE] CachedItemEnricher.identifyItem() - Cache Hit");
 
-      item.setType(identifier.getType());
-      item.setProvider(identifier.getProvider());
-      item.setProviderId(identifier.getProviderId());
+        item.setType(identifier.getType());
+        item.setProvider(identifier.getProvider());
+        item.setProviderId(identifier.getProviderId());
+
+        return;
+      }
+      catch(ItemNotFoundException e) {
+        System.out.println("[FINE] CachedItemEnricher.identifyItem() - Cache Miss");
+      }
     }
-    catch(ItemNotFoundException e) {
-      System.out.println("[FINE] CachedItemEnricher.identifyItem() - Cache Miss");
-      providerToCache.identifyItem(item);
-      itemsDao.storeAsQuery(item);
-    }
+
+    providerToCache.identifyItem(item);
+    itemsDao.storeAsQuery(item);
   }
 
   @Override

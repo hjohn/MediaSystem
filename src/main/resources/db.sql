@@ -27,11 +27,9 @@ CREATE TABLE IF NOT EXISTS items
 
 CREATE TABLE IF NOT EXISTS identifiers
 (
-  id serial4,
   surrogatename character varying(250) NOT NULL,
   "type" character varying(10) NOT NULL,
   provider character varying(20) NOT NULL,
   providerid character varying(20) NOT NULL,
-  CONSTRAINT queries_id PRIMARY KEY (id),
-  CONSTRAINT queries_surrogatename UNIQUE (surrogatename)
+  CONSTRAINT queries_surrogatename PRIMARY KEY (surrogatename)
 )

@@ -22,7 +22,7 @@ public class DialogScreen extends BorderPane {
 
   private int selectedIndex = 0;
 
-  public DialogScreen(final String title, final List<Option> options) {
+  public DialogScreen(final String title, final List<? extends Option> options) {
     final VBox optionList = new VBox() {{
       setId("dialog-list");
 
@@ -53,6 +53,10 @@ public class DialogScreen extends BorderPane {
               getChildren().get(0).requestFocus();
               selectedIndex = 0;
             }
+            else {
+              selectedOption.select();
+            }
+
             event.consume();
           }
           else if(event.getCode() == KeyCode.LEFT) {
@@ -123,7 +127,7 @@ public class DialogScreen extends BorderPane {
     options.get(index).requestFocus();
     selectedIndex = index;
   }
-  
+
   @Override
   public void requestFocus() {
     ((Pane)lookup("#dialog-list")).getChildren().get(0).requestFocus();

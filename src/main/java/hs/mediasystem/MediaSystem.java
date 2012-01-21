@@ -3,10 +3,15 @@ package hs.mediasystem;
 import javafx.application.Application;
 
 // Top 10 stuff:
+// TODO Refactor ItemEnrichers to use LocalInfo and return Item objects
+// TODO Sort sub-items properly in the tree display -- also provide sequence numbers to distinguish movies
+// TODO Change the Option overlay to be generic
+// TODO Change the Message overlay to be generic
+// TODO Use the Message overlay to indicate stuff being loaded in background on Select Media screen
+
 // TODO Some form of remote control support
 // TODO VLCPlayer: Make brightness controls work
 // TODO When changing Options, show this in OSD
-// TODO Tree selection bug (expand node, double click first newly shown item, plays wrong item).  Looks like BUG RT-16565.
 // TODO Background picture is centered, not stretched
 // TODO When returning to select screen, if bg pic is big, the scene will be larger than the stage
 // TODO Style main page

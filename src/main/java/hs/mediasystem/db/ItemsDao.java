@@ -153,6 +153,12 @@ public class ItemsDao {
   public void storeAsQuery(Item item) {
     try {
       try(Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement("DELETE FROM identifiers WHERE surrogatename = ?")) {
+        statement.setString(1, item.getSurrogateName());
+        statement.executeUpdate();
+      }
+
+      try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("INSERT INTO identifiers (surrogatename, type, provider, providerid) VALUES (?, ?, ?, ?)")) {
         statement.setString(1, item.getSurrogateName());
         statement.setString(2, item.getType());

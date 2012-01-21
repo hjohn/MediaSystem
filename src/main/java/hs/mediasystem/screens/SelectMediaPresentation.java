@@ -6,8 +6,14 @@ import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.screens.SelectMediaPane.ItemEvent;
+import hs.mediasystem.util.Callable;
+import hs.mediasystem.util.ImageCache;
+
+import java.util.List;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker.State;
@@ -17,15 +23,22 @@ import javafx.scene.Node;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import javax.inject.Inject;
 
 public class SelectMediaPresentation {
+  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
+
   private final SelectMediaPane<MediaItem> view;
   private final ItemEnricher itemEnricher;
   private final TreeItem<MediaItem> treeRoot = new TreeItem<>();
 
+  private DialogScreen dialogScreen;
   private MediaItem currentItem;
 
   @Inject
@@ -43,6 +56,7 @@ public class SelectMediaPresentation {
         }
       }
     });
+
     view.onItemSelected().set(new EventHandler<ItemEvent<MediaItem>>() {
       @Override
       public void handle(ItemEvent<MediaItem> event) {
@@ -56,6 +70,47 @@ public class SelectMediaPresentation {
         }
         else if(mediaItem instanceof hs.mediasystem.framework.Group) {
           event.getTreeItem().setExpanded(true);
+        }
+      }
+    });
+
+    view.onItemAlternateSelect().set(new EventHandler<ItemEvent<MediaItem>>() {
+      @Override
+      public void handle(ItemEvent<MediaItem> event) {
+        final MediaItem mediaItem = event.getTreeItem().getValue();
+
+        if(mediaItem.isLeaf()) {
+          if(!view.getChildren().contains(dialogScreen)) {
+            List<? extends Option> options = FXCollections.observableArrayList(
+              new ActionOption("Reload meta data", new Callable<Boolean>() {
+                @Override
+                public Boolean call() {
+                  enrichItem(mediaItem, true);
+                  ImageCache.expunge(currentItem.getPoster());
+                  ImageCache.expunge(currentItem.getBackground());
+                  updateCurrentItem();
+                  return true;
+                }
+              })
+            );
+
+            dialogScreen = new DialogScreen("Video - Options", options);
+
+            view.getChildren().add(dialogScreen);
+
+            dialogScreen.requestFocus();
+
+            dialogScreen.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+              @Override
+              public void handle(KeyEvent event) {
+                if(BACK_SPACE.match(event)) {
+                  view.getChildren().remove(dialogScreen);
+                  dialogScreen = null;
+                  event.consume();
+                }
+              }
+            });
+          }
         }
       }
     });
@@ -121,6 +176,22 @@ public class SelectMediaPresentation {
     }
   }
 
+  private void enrichItem(final MediaItem item, boolean bypassCache) {
+    item.getItem().setId(-1);
+    item.resetItem();
+    item.getItem().setBypassCache(bypassCache);
+
+    try {
+      itemEnricher.identifyItem(item.getItem());
+      itemEnricher.enrichItem(item.getItem());
+    }
+    catch(ItemNotFoundException e) {
+      System.out.println("[FINE] SelectMediaPresentation.enrichItem() - Enrichment failed: " + e + ": " + item);
+    }
+
+    item.setEnriched(true);  // set to true, even if something failed as otherwise we keep trying to enrich
+  }
+
   private final class MediaItemTreeCell extends TreeCell<MediaItem> {
     private final CellProvider<MediaItem> provider;
 
@@ -161,17 +232,7 @@ public class SelectMediaPresentation {
 
               synchronized(SelectMediaPresentation.class) {  // TODO so only one gets updated at the time globally...
                 if(item.getItem().getId() == 0) {
-                  item.getItem().setId(-1);
-
-                  try {
-                    itemEnricher.identifyItem(item.getItem());
-                    itemEnricher.enrichItem(item.getItem());
-                  }
-                  catch(ItemNotFoundException e) {
-                    System.out.println("[FINE] AbstractMediaTree.enrichItem() - Enrichment failed: " + e + ": " + item);
-                  }
-
-                  item.setEnriched(true);  // set to true, even if something failed as otherwise we keep trying to enrich
+                  enrichItem(item, false);
                 }
               }
 

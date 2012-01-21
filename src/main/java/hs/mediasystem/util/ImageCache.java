@@ -7,36 +7,58 @@ import java.util.Map;
 import javafx.scene.image.Image;
 
 public class ImageCache {
-  private static final Map<String, Image> CACHE = new HashMap<>();
+  private static final Map<String, Map<String, Image>> CACHE = new HashMap<>();
 
   public static Image loadImage(ImageHandle handle) {
-    Image image = CACHE.get(handle.getKey());
+    Map<String, Image> map = CACHE.get(handle.getKey());
+    Image image = null;
+
+    if(map != null) {
+      image = map.get("original");
+    }
 
     if(image == null && handle.getImageData() != null) {
       image = new Image(new ByteArrayInputStream(handle.getImageData()));
-      CACHE.put(handle.getKey(), image);
+
+      if(map == null) {
+        map = new HashMap<>();
+        CACHE.put(handle.getKey(), map);
+      }
+
+      map.put("original", image);
     }
 
     return image;
   }
 
-  private static String createKey(String key, double w, double h, boolean keepAspect) {
-    return key + "-" + w + "x" + h + "-" + (keepAspect ? "T" : "F");
-  }
-
   public static Image loadImage(ImageHandle handle, double w, double h, boolean keepAspect) {
-    String key = createKey(handle.getKey(), w, h, keepAspect);
-    Image image = CACHE.get(key);
+    String key = createKey(w, h, keepAspect);
+    Map<String, Image> map = CACHE.get(handle.getKey());
+    Image image = null;
+
+    if(map != null) {
+      image = map.get(key);
+    }
 
     if(image == null && handle.getImageData() != null) {
       image = new Image(new ByteArrayInputStream(handle.getImageData()), w, h, keepAspect, true);
 
-      CACHE.put(key, image);
-//        if(image.getWidth() == w && image.getHeight() == h) {
-//          cache.put(handle.getKey(), image);
-//        }
+      if(map == null) {
+        map = new HashMap<>();
+        CACHE.put(handle.getKey(), map);
+      }
+
+      map.put(key, image);
     }
 
     return image;
+  }
+
+  private static String createKey(double w, double h, boolean keepAspect) {
+    return w + "x" + h + "-" + (keepAspect ? "T" : "F");
+  }
+
+  public static void expunge(ImageHandle handle) {
+    CACHE.remove(handle.getKey());
   }
 }

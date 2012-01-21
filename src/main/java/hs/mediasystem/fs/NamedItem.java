@@ -18,6 +18,11 @@ public abstract class NamedItem implements MediaItem {
   public NamedItem(LocalInfo localInfo) {
     this.localInfo = localInfo;
 
+    resetItem();
+  }
+
+  @Override
+  public void resetItem() {
     item.setType(localInfo.getType().name());
     item.setTitle(localInfo.getTitle());
     item.setSubtitle(localInfo.getSubtitle());
