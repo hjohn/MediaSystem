@@ -1,5 +1,6 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.db.Identifier;
 import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.framework.CellProvider;
@@ -182,8 +183,8 @@ public class SelectMediaPresentation {
     item.getItem().setBypassCache(bypassCache);
 
     try {
-      itemEnricher.identifyItem(item.getItem());
-      itemEnricher.enrichItem(item.getItem());
+      Identifier identifier = itemEnricher.identifyItem(item.getItem());
+      itemEnricher.enrichItem(item.getItem(), identifier);
     }
     catch(ItemNotFoundException e) {
       System.out.println("[FINE] SelectMediaPresentation.enrichItem() - Enrichment failed: " + e + ": " + item);

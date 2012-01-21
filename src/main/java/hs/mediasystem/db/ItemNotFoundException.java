@@ -10,6 +10,10 @@ public class ItemNotFoundException extends Exception {
     super(item.toString());
   }
 
+  public ItemNotFoundException(Identifier identifier) {
+    super(identifier.toString());
+  }
+
   public ItemNotFoundException(String surrogateName) {
     super(surrogateName);
   }

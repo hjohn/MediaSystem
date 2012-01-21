@@ -14,26 +14,23 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
   }
 
   @Override
-  public void identifyItem(final Item item) throws ItemNotFoundException {
+  public Identifier identifyItem(final Item item) throws ItemNotFoundException {
     Item serieItem = new Item() {{
       setTitle(item.getTitle());
       setType("SERIE");
     }};
 
-    itemIdentifier.identifyItem(serieItem);
+    Identifier identifier = itemIdentifier.identifyItem(serieItem);
 
-    item.setType("EPISODE");
-    item.setProvider("TVDB");
-    item.setProviderId(serieItem.getProviderId() + "," + item.getSeason() + "," + item.getEpisode());
+    return new Identifier("EPISODE", "TVDB", identifier.getProviderId() + "," + item.getSeason() + "," + item.getEpisode());
   }
 
   @Override
-  public void enrichItem(final Item item) throws ItemNotFoundException {
-    if(item.getEpisode() != null) {
-      System.out.println("[FINE] TvdbEpisodeEnricher: Enriching: " + item.getTitle() + " S" + item.getSeason() + "E" + item.getEpisode() + "; type=" + item.getType() + "; provider=" + item.getProvider() + "; providerId=" + item.getProviderId());
+  public Item enrichItem(final Item item, Identifier identifier) throws ItemNotFoundException {
+    if(identifier.getType().equals("EPISODE") && identifier.getProvider().equals("TVDB")) {
       TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 
-      String[] split = item.getProviderId().split(",");
+      String[] split = identifier.getProviderId().split(",");
 
       final Episode episode = tvDB.getEpisode(split[0], Integer.parseInt(split[1]), Integer.parseInt(split[2]), "en");
 
@@ -41,8 +38,6 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
 
       byte[] poster = Downloader.tryReadURL("http://thetvdb.com/banners/episodes/" + split[0] + "/" + episode.getId() + ".jpg");
 
-      item.setProvider("TVDB");
-      item.setProviderId(episode.getId());
       item.setPlot(episode.getOverview());
       if(episode.getRating() != null) {
         item.setRating(Float.parseFloat(episode.getRating()));
@@ -52,7 +47,15 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
       item.setSeason(item.getSeason());
       item.setEpisode(item.getEpisode());
       item.setPoster(poster);
-      item.setType("EPISODE");
+
+      item.setType(identifier.getType());
+      item.setProvider(identifier.getProvider());
+      item.setProviderId(identifier.getProviderId());
+
+      return item;
+    }
+    else {
+      throw new RuntimeException("Unable to enrich, wrong provider or type: " + identifier);
     }
   }
 }

@@ -20,7 +20,7 @@ import org.json.JSONException;
 public class TmdbMovieEnricher implements ItemEnricher {
 
   @Override
-  public void identifyItem(Item item) throws ItemNotFoundException {
+  public Identifier identifyItem(Item item) throws ItemNotFoundException {
     String title = item.getTitle();
     String subtitle = item.getSubtitle();
     String year = item.getReleaseYear() == null ? null : item.getReleaseYear().toString();
@@ -79,13 +79,10 @@ public class TmdbMovieEnricher implements ItemEnricher {
       }
 
       if(bestMatchingImdbNumber != null) {
-        item.setType("MOVIE");
-        item.setProvider("TMDB");
-        item.setProviderId(bestMatchingImdbNumber);
+        return new Identifier("MOVIE", "TMDB", bestMatchingImdbNumber);
       }
-      else {
-        throw new ItemNotFoundException(item);
-      }
+
+      throw new ItemNotFoundException(item);
     }
     catch(IOException | JSONException e) {
       throw new ItemNotFoundException(item, e);
@@ -93,9 +90,9 @@ public class TmdbMovieEnricher implements ItemEnricher {
   }
 
   @Override
-  public void enrichItem(Item item) throws ItemNotFoundException {
-    if(item.getProvider().equals("TMDB") && item.getType().equals("MOVIE")) {
-      String bestMatchingImdbNumber = item.getProviderId();
+  public Item enrichItem(Item item, Identifier identifier) throws ItemNotFoundException {
+    if(identifier.getType().equals("MOVIE") && identifier.getProvider().equals("TMDB")) {
+      String bestMatchingImdbNumber = identifier.getProviderId();
 
       try {
         System.out.println("best mathcing imdb number: " + bestMatchingImdbNumber);
@@ -136,6 +133,10 @@ public class TmdbMovieEnricher implements ItemEnricher {
         item.setReleaseDate(movie.getReleasedDate());
         item.setRuntime(movie.getRuntime());
 
+        item.setType(identifier.getType());
+        item.setProvider(identifier.getProvider());
+        item.setProviderId(identifier.getProviderId());
+
   //          for(CastInfo castInfo : movie.getCast()) {
   //            castInfo.getCharacterName();
   //            castInfo.getID();
@@ -144,13 +145,15 @@ public class TmdbMovieEnricher implements ItemEnricher {
   //
   //            addCastMember(castInfo.getCastID(), castInfo.getName(), castInfo.getCharacterName());
   //          }
+
+        return item;
       }
       catch(IOException | JSONException e) {
         throw new ItemNotFoundException(item, e);
       }
     }
     else {
-      System.out.println("[FINE] TmdbMovieEnricher.enrichItem() - Unable to enrich, wrong provider or type: " + item);
+      throw new RuntimeException("Unable to enrich, wrong provider or type: " + identifier);
     }
   }
 

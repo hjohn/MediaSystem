@@ -13,36 +13,34 @@ public class CachedItemEnricher implements ItemEnricher {
   }
 
   @Override
-  public void identifyItem(Item item) throws ItemNotFoundException {
+  public Identifier identifyItem(Item item) throws ItemNotFoundException {
     System.out.println("[FINE] CachedItemEnricher.identifyItem() - with surrogatename: " + item.getSurrogateName());
 
     if(!item.isBypassCache()) {
       try {
-        Item identifier = itemsDao.getQuery(item.getSurrogateName());
+        Identifier identifier = itemsDao.getQuery(item.getSurrogateName());
 
         System.out.println("[FINE] CachedItemEnricher.identifyItem() - Cache Hit");
 
-        item.setType(identifier.getType());
-        item.setProvider(identifier.getProvider());
-        item.setProviderId(identifier.getProviderId());
-
-        return;
+        return identifier;
       }
       catch(ItemNotFoundException e) {
         System.out.println("[FINE] CachedItemEnricher.identifyItem() - Cache Miss");
       }
     }
 
-    providerToCache.identifyItem(item);
-    itemsDao.storeAsQuery(item);
+    Identifier identifier = providerToCache.identifyItem(item);
+    itemsDao.storeAsQuery(item.getSurrogateName(), identifier);
+
+    return identifier;
   }
 
   @Override
-  public void enrichItem(Item item) throws ItemNotFoundException {
+  public Item enrichItem(Item item, Identifier identifier) throws ItemNotFoundException {
     try {
       try {
-        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Loading from Cache: " + item);
-        Item cachedItem = itemsDao.getItem(item);
+        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Loading from Cache: " + identifier);
+        Item cachedItem = itemsDao.getItem(identifier);
 
         item.setId(cachedItem.getId());
         item.setVersion(cachedItem.getVersion());
@@ -66,18 +64,22 @@ public class CachedItemEnricher implements ItemEnricher {
           System.out.println("[FINE] CachedItemEnricher.enrichItem() - Old version, updating from cached provider: " + item);
 
           providerToCache.identifyItem(item);
-          providerToCache.enrichItem(item);
+          providerToCache.enrichItem(item, identifier);
           itemsDao.updateItem(cachedItem);
         }
 
         System.out.println("[FINE] CachedItemEnricher.enrichItem() - Succesfully enriched: " + item);
+
+        return item;
       }
       catch(ItemNotFoundException e) {
         System.out.println("[FINE] CachedItemEnricher.enrichItem() - Cache miss, falling back to cached provider: " + item);
 
         providerToCache.identifyItem(item);
-        providerToCache.enrichItem(item);
+        Item item2 = providerToCache.enrichItem(item, identifier);
         itemsDao.storeItem(item);
+
+        return item2;
       }
     }
     catch(Exception e) {

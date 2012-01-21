@@ -13,26 +13,26 @@ public class TypeBasedItemEnricher implements ItemEnricher {
   }
 
   @Override
-  public void identifyItem(Item item) throws ItemNotFoundException {
+  public Identifier identifyItem(Item item) throws ItemNotFoundException {
     ItemEnricher itemEnricher = itemEnrichers.get(item.getType());
 
     if(itemEnricher != null) {
-      itemEnricher.identifyItem(item);
+      return itemEnricher.identifyItem(item);
     }
     else {
       System.out.println("[FINE] TypeBasedItemEnricher.identifyItem() - No matching enricher for type: " + item.getType());
+      return null;
     }
   }
 
   @Override
-  public void enrichItem(Item item) throws ItemNotFoundException {
+  public Item enrichItem(Item item, Identifier identifier) throws ItemNotFoundException {
     ItemEnricher itemEnricher = itemEnrichers.get(item.getType());
 
-    if(itemEnricher != null) {
-      itemEnricher.enrichItem(item);
+    if(itemEnricher == null) {
+      throw new RuntimeException("No matching enricher for type: " + item.getType());
     }
-    else {
-      System.out.println("[FINE] TypeBasedItemEnricher.enrichItem() - No matching enricher for type: " + item.getType());
-    }
+
+    return itemEnricher.enrichItem(item, identifier);
   }
 }

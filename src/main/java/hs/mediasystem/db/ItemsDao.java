@@ -26,15 +26,15 @@ public class ItemsDao {
     return connectionProvider.get();
   }
 
-  public Item getItem(Item item) throws ItemNotFoundException {
+  public Item getItem(Identifier identifier) throws ItemNotFoundException {
     try {
       try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
-        statement.setString(1, item.getType());
-        statement.setString(2, item.getProvider());
-        statement.setString(3, item.getProviderId());
+        statement.setString(1, identifier.getType());
+        statement.setString(2, identifier.getProvider());
+        statement.setString(3, identifier.getProviderId());
 
-        System.out.println("[FINE] ItemsDao.getItem() - Selecting Item with type/provider/providerid = " + item.getType() + "/" + item.getProvider() + "/" + item.getProviderId());
+        System.out.println("[FINE] ItemsDao.getItem() - Selecting Item with type/provider/providerid = " + identifier.getType() + "/" + identifier.getProvider() + "/" + identifier.getProviderId());
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
             return new Item() {{
@@ -60,7 +60,7 @@ public class ItemsDao {
         }
       }
 
-      throw new ItemNotFoundException(item);
+      throw new ItemNotFoundException(identifier);
     }
     catch(SQLException e) {
       throw new RuntimeException(e);
@@ -125,7 +125,7 @@ public class ItemsDao {
     }
   }
 
-  public Item getQuery(String surrogateName) throws ItemNotFoundException {
+  public Identifier getQuery(String surrogateName) throws ItemNotFoundException {
     try {
       try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("SELECT * FROM identifiers WHERE surrogatename = ?")) {
@@ -134,11 +134,7 @@ public class ItemsDao {
         System.out.println("[FINE] ItemsDao.getQuery() - Looking for Identifier with name: " + surrogateName);
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
-            return new Item() {{
-              setType(rs.getString("type"));
-              setProvider(rs.getString("provider"));
-              setProviderId(rs.getString("providerid"));
-            }};
+            return new Identifier(rs.getString("type"), rs.getString("provider"), rs.getString("providerid"));
           }
         }
       }
@@ -150,25 +146,25 @@ public class ItemsDao {
     }
   }
 
-  public void storeAsQuery(Item item) {
+  public void storeAsQuery(String surrogateName, Identifier identifier) {
     try {
       try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("DELETE FROM identifiers WHERE surrogatename = ?")) {
-        statement.setString(1, item.getSurrogateName());
+        statement.setString(1, surrogateName);
         statement.executeUpdate();
       }
 
       try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("INSERT INTO identifiers (surrogatename, type, provider, providerid) VALUES (?, ?, ?, ?)")) {
-        statement.setString(1, item.getSurrogateName());
-        statement.setString(2, item.getType());
-        statement.setString(3, item.getProvider());
-        statement.setString(4, item.getProviderId());
+        statement.setString(1, surrogateName);
+        statement.setString(2, identifier.getType());
+        statement.setString(3, identifier.getProvider());
+        statement.setString(4, identifier.getProviderId());
         statement.execute();
       }
     }
     catch(SQLException e) {
-      throw new RuntimeException("Exception while trying to store: " + item, e);
+      throw new RuntimeException("Exception while trying to store: " + surrogateName, e);
     }
   }
 
