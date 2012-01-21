@@ -1,7 +1,7 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
-import hs.mediasystem.db.LocalInfo.Type;
+import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.Group;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
@@ -15,7 +15,7 @@ public class EpisodeGroup extends NamedItem implements Group {
   private final List<MediaItem> children = new ArrayList<>();
 
   public EpisodeGroup(String title) {
-    super(new LocalInfo(Type.MOVIE, title));
+    super(new LocalInfo(MediaType.MOVIE, title));
   }
 
   public void add(MediaItem child) {

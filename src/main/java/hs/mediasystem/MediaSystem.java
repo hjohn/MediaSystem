@@ -3,7 +3,6 @@ package hs.mediasystem;
 import javafx.application.Application;
 
 // Top 10 stuff:
-// TODO Refactor ItemEnrichers to use LocalInfo and return Item objects
 // TODO Sort sub-items properly in the tree display -- also provide sequence numbers to distinguish movies
 // TODO Change the Option overlay to be generic
 // TODO Change the Message overlay to be generic

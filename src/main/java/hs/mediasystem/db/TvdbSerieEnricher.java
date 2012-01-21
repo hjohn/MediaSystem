@@ -9,8 +9,8 @@ public class TvdbSerieEnricher implements ItemEnricher {
   private static final String TVDB = "TVDB";
 
   @Override
-  public Identifier identifyItem(final Item item) throws ItemNotFoundException {
-    final String name = item.getTitle();
+  public Identifier identifyItem(final LocalInfo localInfo) throws IdentifyException {
+    final String name = localInfo.getTitle();
 
     TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 
@@ -20,43 +20,39 @@ public class TvdbSerieEnricher implements ItemEnricher {
     System.out.println(results);
 
     if(results.isEmpty()) {
-      throw new ItemNotFoundException(item);
+      throw new IdentifyException(localInfo);
     }
 
-    return new Identifier("SERIE", TVDB, results.get(0).getId());
+    return new Identifier(MediaType.SERIE, TVDB, results.get(0).getId());
   }
 
   @Override
-  public Item enrichItem(final Item item, Identifier identifier) throws ItemNotFoundException {
-    if(identifier.getType().equals("SERIE") && identifier.getProvider().equals(TVDB)) {
-      TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
-
-      final Series series = tvDB.getSeries(identifier.getProviderId(), "en");
-
-      if(series != null) {
-        byte[] banner = Downloader.tryReadURL(series.getBanner());
-        byte[] poster = Downloader.tryReadURL(series.getPoster());
-        byte[] background = Downloader.tryReadURL(series.getFanart());
-
-        item.setTitle(series.getSeriesName());
-        item.setPlot(series.getOverview());
-        item.setRating(Float.valueOf(series.getRating()));
-        item.setBanner(banner);
-        item.setPoster(poster);
-        item.setBackground(background);
-
-        item.setType(identifier.getType());
-        item.setProvider(identifier.getProvider());
-        item.setProviderId(identifier.getProviderId());
-
-        return item;
-      }
-      else {
-        throw new ItemNotFoundException(item);
-      }
-    }
-    else {
+  public Item loadItem(Identifier identifier) throws ItemNotFoundException {
+    if(identifier.getType() != MediaType.SERIE || !identifier.getProvider().equals(TVDB)) {
       throw new RuntimeException("Unable to enrich, wrong provider or type: " + identifier);
     }
+
+    TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
+
+    final Series series = tvDB.getSeries(identifier.getProviderId(), "en");
+
+    if(series == null) {
+      throw new ItemNotFoundException(identifier);
+    }
+
+    byte[] banner = Downloader.tryReadURL(series.getBanner());
+    byte[] poster = Downloader.tryReadURL(series.getPoster());
+    byte[] background = Downloader.tryReadURL(series.getFanart());
+
+    Item item = new Item(identifier);
+
+    item.setTitle(series.getSeriesName());
+    item.setPlot(series.getOverview());
+    item.setRating(Float.valueOf(series.getRating()));
+    item.setBanner(banner);
+    item.setPoster(poster);
+    item.setBackground(background);
+
+    return item;
   }
 }

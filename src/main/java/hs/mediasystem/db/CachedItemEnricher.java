@@ -13,12 +13,12 @@ public class CachedItemEnricher implements ItemEnricher {
   }
 
   @Override
-  public Identifier identifyItem(Item item) throws ItemNotFoundException {
-    System.out.println("[FINE] CachedItemEnricher.identifyItem() - with surrogatename: " + item.getSurrogateName());
+  public Identifier identifyItem(LocalInfo localInfo) throws IdentifyException {
+    System.out.println("[FINE] CachedItemEnricher.identifyItem() - with surrogatename: " + localInfo.getSurrogateName());
 
-    if(!item.isBypassCache()) {
+    if(!localInfo.isBypassCache()) {
       try {
-        Identifier identifier = itemsDao.getQuery(item.getSurrogateName());
+        Identifier identifier = itemsDao.getQuery(localInfo.getSurrogateName());
 
         System.out.println("[FINE] CachedItemEnricher.identifyItem() - Cache Hit");
 
@@ -29,57 +29,39 @@ public class CachedItemEnricher implements ItemEnricher {
       }
     }
 
-    Identifier identifier = providerToCache.identifyItem(item);
-    itemsDao.storeAsQuery(item.getSurrogateName(), identifier);
+    Identifier identifier = providerToCache.identifyItem(localInfo);
+    itemsDao.storeAsQuery(localInfo.getSurrogateName(), identifier);
 
     return identifier;
   }
 
   @Override
-  public Item enrichItem(Item item, Identifier identifier) throws ItemNotFoundException {
+  public Item loadItem(Identifier identifier) throws ItemNotFoundException {
     try {
       try {
         System.out.println("[FINE] CachedItemEnricher.enrichItem() - Loading from Cache: " + identifier);
-        Item cachedItem = itemsDao.getItem(identifier);
+        Item item = itemsDao.getItem(identifier);
 
-        item.setId(cachedItem.getId());
-        item.setVersion(cachedItem.getVersion());
-        item.setBackground(cachedItem.getBackground());
-        item.setPoster(cachedItem.getPoster());
-        item.setBanner(cachedItem.getBanner());
-        item.setImdbId(cachedItem.getImdbId());
-        item.setPlot(cachedItem.getPlot());
-        item.setTitle(cachedItem.getTitle());
-        item.setRating(cachedItem.getRating());
-        item.setReleaseDate(cachedItem.getReleaseDate());
-        item.setRuntime(cachedItem.getRuntime());
-        item.setSeason(cachedItem.getSeason());
-        item.setEpisode(cachedItem.getEpisode());
-        item.setType(cachedItem.getType());
-        item.setSubtitle(cachedItem.getSubtitle());
-        item.setProvider(cachedItem.getProvider());
-        item.setProviderId(cachedItem.getProviderId());
-
-        if(cachedItem.getVersion() < ItemsDao.VERSION) {
+        if(item.getVersion() < ItemsDao.VERSION) {
           System.out.println("[FINE] CachedItemEnricher.enrichItem() - Old version, updating from cached provider: " + item);
 
-          providerToCache.identifyItem(item);
-          providerToCache.enrichItem(item, identifier);
-          itemsDao.updateItem(cachedItem);
+          item = providerToCache.loadItem(identifier);
+
+          itemsDao.updateItem(item);  // TODO doubt this works, no id
         }
 
-        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Succesfully enriched: " + item);
+        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Succesfully loaded: " + item);
 
         return item;
       }
       catch(ItemNotFoundException e) {
-        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Cache miss, falling back to cached provider: " + item);
+        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Cache miss, falling back to cached provider: " + identifier);
 
-        providerToCache.identifyItem(item);
-        Item item2 = providerToCache.enrichItem(item, identifier);
+        Item item = providerToCache.loadItem(identifier);
+
         itemsDao.storeItem(item);
 
-        return item2;
+        return item;
       }
     }
     catch(Exception e) {

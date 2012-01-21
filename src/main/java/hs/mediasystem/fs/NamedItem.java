@@ -1,6 +1,5 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.Item;
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.ImageHandle;
@@ -12,29 +11,20 @@ public abstract class NamedItem implements MediaItem {
 
   protected MediaItem parent;
 
-  private Item item = new Item();
+  private String plot;
+  private byte[] banner;
+  private byte[] poster;
+  private byte[] background;
+
   private boolean enriched;
 
   public NamedItem(LocalInfo localInfo) {
     this.localInfo = localInfo;
-
-    resetItem();
   }
 
   @Override
-  public void resetItem() {
-    item.setType(localInfo.getType().name());
-    item.setTitle(localInfo.getTitle());
-    item.setSubtitle(localInfo.getSubtitle());
-    item.setReleaseYear(localInfo.getReleaseYear());
-    item.setImdbId(localInfo.getCode());
-    item.setSeason(localInfo.getSeason());
-    item.setEpisode(localInfo.getEpisode());
-  }
-
-  @Override
-  public Item getItem() {
-    return item;
+  public LocalInfo getLocalInfo() {
+    return localInfo;
   }
 
   @Override
@@ -63,13 +53,6 @@ public abstract class NamedItem implements MediaItem {
   @Override
   public Integer getReleaseYear() {
     return localInfo.getReleaseYear();
-//    if(localInfo.getReleaseDate() == null) {
-//      return null;
-//    }
-//
-//    GregorianCalendar gc = new GregorianCalendar(2000, 0, 1);
-//    gc.setTime(localInfo.getReleaseDate());
-//    return "" + gc.get(Calendar.YEAR);
   }
 
   @Override
@@ -84,17 +67,32 @@ public abstract class NamedItem implements MediaItem {
 
   @Override
   public ImageHandle getBackground() {
-    return item.getBackground() == null ? null : new ImageHandle(item.getBackground(), createKey("background"));
+    return background == null ? null : new ImageHandle(background, createKey("background"));
+  }
+
+  @Override
+  public void setBackground(byte[] background) {
+    this.background = background;
   }
 
   @Override
   public ImageHandle getBanner() {
-    return item.getBanner() == null ? null : new ImageHandle(item.getBanner(), createKey("banner"));
+    return banner == null ? null : new ImageHandle(banner, createKey("banner"));
+  }
+
+  @Override
+  public void setBanner(byte[] banner) {
+    this.banner = banner;
   }
 
   @Override
   public ImageHandle getPoster() {
-    return item.getPoster() == null ? null : new ImageHandle(item.getPoster(), createKey("poster"));
+    return poster == null ? null : new ImageHandle(poster, createKey("poster"));
+  }
+
+  @Override
+  public void setPoster(byte[] poster) {
+    this.poster = poster;
   }
 
   private String createKey(String suffix) {
@@ -103,23 +101,12 @@ public abstract class NamedItem implements MediaItem {
 
   @Override
   public String getPlot() {
-    return item.getPlot();
+    return plot;
   }
 
-  public int getRuntime() {
-    return item.getRuntime();
-  }
-
-  public Float getRating() {
-    return item.getRating();
-  }
-
-  public String getProvider() {
-    return item.getProvider();
-  }
-
-  public String getProviderId() {
-    return item.getProviderId();
+  @Override
+  public void setPlot(String plot) {
+    this.plot = plot;
   }
 
   @Override

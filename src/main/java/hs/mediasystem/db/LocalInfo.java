@@ -4,7 +4,7 @@ import java.nio.file.Path;
 
 public class LocalInfo {
   private final Path path;
-  private final Type type;
+  private final MediaType mediaType;
   private final String title;
   private final String subtitle;
   private final String code;
@@ -12,11 +12,11 @@ public class LocalInfo {
   private final Integer season;
   private final Integer episode;
 
-  public enum Type {MOVIE, SERIE, EPISODE}
+  private boolean bypassCache;
 
-  public LocalInfo(Path path, Type type, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode) {
+  public LocalInfo(Path path, MediaType mediaType, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode) {
     this.path = path;
-    this.type = type;
+    this.mediaType = mediaType;
     this.title = title;
     this.subtitle = subtitle;
     this.code = code;
@@ -25,16 +25,20 @@ public class LocalInfo {
     this.episode = episode;
   }
 
-  public LocalInfo(Type type, String title) {
-    this(null, type, title, null, null, null, null, null);
+  public LocalInfo(MediaType mediaType, String title) {
+    this(null, mediaType, title, null, null, null, null, null);
+  }
+
+  public String getSurrogateName() {
+    return mediaType.name() + "/" + title.toLowerCase() + "/" + (subtitle != null ? subtitle.toLowerCase() : "") + "/" + (season == null ? "" : season) + "/" + (episode == null ? "" : episode) + "/" + (releaseYear == null ? "" : releaseYear);
   }
 
   public Path getPath() {
     return path;
   }
 
-  public Type getType() {
-    return type;
+  public MediaType getType() {
+    return mediaType;
   }
 
   public String getTitle() {
@@ -61,5 +65,11 @@ public class LocalInfo {
     return episode;
   }
 
+  public boolean isBypassCache() {
+    return bypassCache;
+  }
 
+  public void setBypassCache(boolean bypassCache) {
+    this.bypassCache = bypassCache;
+  }
 }

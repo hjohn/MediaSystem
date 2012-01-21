@@ -1,6 +1,6 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.LocalInfo.Type;
+import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
@@ -24,7 +24,7 @@ public class MoviesMediaTree implements MediaTree {
   @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      List<Episode> episodes = new EpisodeScanner(new MovieDecoder(), Type.MOVIE).scan(root);
+      List<Episode> episodes = new EpisodeScanner(new MovieDecoder(), MediaType.MOVIE).scan(root);
       List<MediaItem> items = new ArrayList<>();
 
       Collection<List<MediaItem>> groupedItems = Groups.group(episodes, new TitleGrouper());

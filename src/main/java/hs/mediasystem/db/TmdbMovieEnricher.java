@@ -20,17 +20,17 @@ import org.json.JSONException;
 public class TmdbMovieEnricher implements ItemEnricher {
 
   @Override
-  public Identifier identifyItem(Item item) throws ItemNotFoundException {
-    String title = item.getTitle();
-    String subtitle = item.getSubtitle();
-    String year = item.getReleaseYear() == null ? null : item.getReleaseYear().toString();
-    int seq = item.getEpisode() == null ? 1 : item.getEpisode();
+  public Identifier identifyItem(LocalInfo localInfo) throws IdentifyException {
+    String title = localInfo.getTitle();
+    String subtitle = localInfo.getSubtitle();
+    String year = localInfo.getReleaseYear() == null ? null : localInfo.getReleaseYear().toString();
+    int seq = localInfo.getEpisode() == null ? 1 : localInfo.getEpisode();
 
     try {
       String bestMatchingImdbNumber = null;
 
-      if(item.getImdbId() != null) {
-        bestMatchingImdbNumber = item.getImdbId();
+      if(localInfo.getCode() != null) {
+        bestMatchingImdbNumber = localInfo.getCode();
       }
 
       if(bestMatchingImdbNumber == null) {
@@ -79,81 +79,78 @@ public class TmdbMovieEnricher implements ItemEnricher {
       }
 
       if(bestMatchingImdbNumber != null) {
-        return new Identifier("MOVIE", "TMDB", bestMatchingImdbNumber);
+        return new Identifier(MediaType.MOVIE, "TMDB", bestMatchingImdbNumber);
       }
 
-      throw new ItemNotFoundException(item);
+      throw new IdentifyException(localInfo);
     }
     catch(IOException | JSONException e) {
-      throw new ItemNotFoundException(item, e);
+      throw new IdentifyException(localInfo, e);
     }
   }
 
   @Override
-  public Item enrichItem(Item item, Identifier identifier) throws ItemNotFoundException {
-    if(identifier.getType().equals("MOVIE") && identifier.getProvider().equals("TMDB")) {
-      String bestMatchingImdbNumber = identifier.getProviderId();
-
-      try {
-        System.out.println("best mathcing imdb number: " + bestMatchingImdbNumber);
-        final Movie movie = Movie.imdbLookup(bestMatchingImdbNumber);
-
-        System.out.println("Found movie:");
-        System.out.println("name: " + movie.getName());  // TODO nullpointer here if IMDB is faulty (could be in filename)
-        System.out.println("released date: " + movie.getReleasedDate());
-        System.out.println("type: " + movie.getMovieType());
-        System.out.println("overview: " + movie.getOverview());
-        System.out.println("runtime: " + movie.getRuntime());
-
-        final MovieImages images = movie.getImages();
-        URL url = null;
-        URL backgroundURL = null;
-
-        if(images.posters.size() > 0) {
-          MoviePoster poster = images.posters.iterator().next();
-
-          url = poster.getLargestImage();
-        }
-
-        if(images.backdrops.size() > 0) {
-          MovieBackdrop background = images.backdrops.iterator().next();
-
-          backgroundURL = background.getLargestImage();
-        }
-
-        final byte[] poster = url != null ? Downloader.tryReadURL(url.toExternalForm()) : null;
-        final byte[] background = backgroundURL != null ? Downloader.tryReadURL(backgroundURL.toExternalForm()) : null;
-
-        item.setImdbId(movie.getImdbID());
-        item.setTitle(movie.getName());
-        item.setPoster(poster);
-        item.setBackground(background);
-        item.setPlot(movie.getOverview());
-        item.setRating((float)movie.getRating());
-        item.setReleaseDate(movie.getReleasedDate());
-        item.setRuntime(movie.getRuntime());
-
-        item.setType(identifier.getType());
-        item.setProvider(identifier.getProvider());
-        item.setProviderId(identifier.getProviderId());
-
-  //          for(CastInfo castInfo : movie.getCast()) {
-  //            castInfo.getCharacterName();
-  //            castInfo.getID();
-  //            castInfo.getName();
-  //            castInfo.getThumb();
-  //
-  //            addCastMember(castInfo.getCastID(), castInfo.getName(), castInfo.getCharacterName());
-  //          }
-
-        return item;
-      }
-      catch(IOException | JSONException e) {
-        throw new ItemNotFoundException(item, e);
-      }
-    }
-    else {
+  public Item loadItem(Identifier identifier) throws ItemNotFoundException {
+    if(identifier.getType() != MediaType.MOVIE || !identifier.getProvider().equals("TMDB")) {
       throw new RuntimeException("Unable to enrich, wrong provider or type: " + identifier);
+    }
+
+    String bestMatchingImdbNumber = identifier.getProviderId();
+
+    try {
+      System.out.println("best mathcing imdb number: " + bestMatchingImdbNumber);
+      final Movie movie = Movie.imdbLookup(bestMatchingImdbNumber);
+
+      System.out.println("Found movie:");
+      System.out.println("name: " + movie.getName());  // TODO nullpointer here if IMDB is faulty (could be in filename)
+      System.out.println("released date: " + movie.getReleasedDate());
+      System.out.println("type: " + movie.getMovieType());
+      System.out.println("overview: " + movie.getOverview());
+      System.out.println("runtime: " + movie.getRuntime());
+
+      final MovieImages images = movie.getImages();
+      URL url = null;
+      URL backgroundURL = null;
+
+      if(images.posters.size() > 0) {
+        MoviePoster poster = images.posters.iterator().next();
+
+        url = poster.getLargestImage();
+      }
+
+      if(images.backdrops.size() > 0) {
+        MovieBackdrop background = images.backdrops.iterator().next();
+
+        backgroundURL = background.getLargestImage();
+      }
+
+      final byte[] poster = url != null ? Downloader.tryReadURL(url.toExternalForm()) : null;
+      final byte[] background = backgroundURL != null ? Downloader.tryReadURL(backgroundURL.toExternalForm()) : null;
+
+      Item item = new Item(identifier);
+
+      item.setImdbId(movie.getImdbID());
+      item.setTitle(movie.getName());
+      item.setPoster(poster);
+      item.setBackground(background);
+      item.setPlot(movie.getOverview());
+      item.setRating((float)movie.getRating());
+      item.setReleaseDate(movie.getReleasedDate());
+      item.setRuntime(movie.getRuntime());
+
+//          for(CastInfo castInfo : movie.getCast()) {
+//            castInfo.getCharacterName();
+//            castInfo.getID();
+//            castInfo.getName();
+//            castInfo.getThumb();
+//
+//            addCastMember(castInfo.getCastID(), castInfo.getName(), castInfo.getCharacterName());
+//          }
+
+      return item;
+    }
+    catch(IOException | JSONException e) {
+      throw new ItemNotFoundException(identifier, e);
     }
   }
 

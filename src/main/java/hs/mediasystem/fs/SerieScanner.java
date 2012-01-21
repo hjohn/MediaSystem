@@ -1,7 +1,7 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
-import hs.mediasystem.db.LocalInfo.Type;
+import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.Scanner;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class SerieScanner implements Scanner<Serie> {
       try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
         for(Path path : dirStream) {
           if(Files.isDirectory(path) && !path.getFileName().toString().startsWith(".")) {
-            LocalInfo localInfo = new LocalInfo(path, Type.SERIE, path.getFileName().toString(), null, null, null, null, null);
+            LocalInfo localInfo = new LocalInfo(path, MediaType.SERIE, path.getFileName().toString(), null, null, null, null, null);
 
             series.add(new Serie(localInfo));
           }

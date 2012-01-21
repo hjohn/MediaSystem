@@ -1,6 +1,6 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.db.Item;
+import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.util.ImageHandle;
 
 public interface MediaItem {
@@ -13,17 +13,20 @@ public interface MediaItem {
   String getTitle();
   String getSubtitle();
   Integer getReleaseYear();
-  String getPlot();
-
   Integer getSeason();
   Integer getEpisode();
 
+  String getPlot();
   ImageHandle getBanner();
   ImageHandle getPoster();
   ImageHandle getBackground();
 
-  void resetItem();
-  Item getItem();  // TODO don't want this exposed here
+  void setPlot(String plot);
+  void setBanner(byte[] banner);
+  void setPoster(byte[] poster);
+  void setBackground(byte[] background);
+
+  LocalInfo getLocalInfo();
   void setEnriched(boolean enriched);
   boolean isEnriched();
 }

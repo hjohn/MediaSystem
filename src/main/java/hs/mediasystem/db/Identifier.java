@@ -1,18 +1,18 @@
 package hs.mediasystem.db;
 
 public class Identifier {
-  private final String type;
+  private final MediaType mediaType;
   private final String provider;
   private final String providerId;
 
-  public Identifier(String type, String provider, String providerId) {
-    this.type = type;
+  public Identifier(MediaType mediaType, String provider, String providerId) {
+    this.mediaType = mediaType;
     this.provider = provider;
     this.providerId = providerId;
   }
 
-  public String getType() {
-    return type;
+  public MediaType getType() {
+    return mediaType;
   }
 
   public String getProvider() {
@@ -25,6 +25,6 @@ public class Identifier {
 
   @Override
   public String toString() {
-    return "(" + type + ";" + provider + ";" + providerId + ")";
+    return "(" + mediaType.name() + ";" + provider + ";" + providerId + ")";
   }
 }

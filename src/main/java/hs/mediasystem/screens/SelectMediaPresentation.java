@@ -1,8 +1,11 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.db.Identifier;
+import hs.mediasystem.db.IdentifyException;
+import hs.mediasystem.db.Item;
 import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.db.ItemNotFoundException;
+import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
@@ -177,20 +180,24 @@ public class SelectMediaPresentation {
     }
   }
 
-  private void enrichItem(final MediaItem item, boolean bypassCache) {
-    item.getItem().setId(-1);
-    item.resetItem();
-    item.getItem().setBypassCache(bypassCache);
-
+  private void enrichItem(final MediaItem mediaItem, boolean bypassCache) {
     try {
-      Identifier identifier = itemEnricher.identifyItem(item.getItem());
-      itemEnricher.enrichItem(item.getItem(), identifier);
+      LocalInfo localInfo = mediaItem.getLocalInfo();
+      localInfo.setBypassCache(bypassCache);
+      Identifier identifier = itemEnricher.identifyItem(localInfo);
+
+      Item item = itemEnricher.loadItem(identifier);
+
+      mediaItem.setBanner(item.getBanner());
+      mediaItem.setPoster(item.getPoster());
+      mediaItem.setBackground(item.getBackground());
+      mediaItem.setPlot(item.getPlot());
     }
-    catch(ItemNotFoundException e) {
-      System.out.println("[FINE] SelectMediaPresentation.enrichItem() - Enrichment failed: " + e + ": " + item);
+    catch(ItemNotFoundException | IdentifyException e) {
+      System.out.println("[FINE] SelectMediaPresentation.enrichItem() - Enrichment failed: " + e + ": " + mediaItem);
     }
 
-    item.setEnriched(true);  // set to true, even if something failed as otherwise we keep trying to enrich
+    mediaItem.setEnriched(true);  // set to true, even if something failed as otherwise we keep trying to enrich
   }
 
   private final class MediaItemTreeCell extends TreeCell<MediaItem> {
@@ -232,9 +239,7 @@ public class SelectMediaPresentation {
               System.out.println("[FINE] SelectMediaPresentation.MediaItemTreeCell.updateItem(...).new Task() {...}.call() - Loading data for: " + item);
 
               synchronized(SelectMediaPresentation.class) {  // TODO so only one gets updated at the time globally...
-                if(item.getItem().getId() == 0) {
-                  enrichItem(item, false);
-                }
+                enrichItem(item, false);
               }
 
               return null;

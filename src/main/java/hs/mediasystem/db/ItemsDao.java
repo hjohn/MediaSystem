@@ -30,18 +30,16 @@ public class ItemsDao {
     try {
       try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
-        statement.setString(1, identifier.getType());
+        statement.setString(1, identifier.getType().name());
         statement.setString(2, identifier.getProvider());
         statement.setString(3, identifier.getProviderId());
 
         System.out.println("[FINE] ItemsDao.getItem() - Selecting Item with type/provider/providerid = " + identifier.getType() + "/" + identifier.getProvider() + "/" + identifier.getProviderId());
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
-            return new Item() {{
+            return new Item(identifier) {{
               setId(rs.getInt("id"));
               setImdbId(rs.getString("imdbid"));
-              setProvider(rs.getString("provider"));
-              setProviderId(rs.getString("providerid"));
               setTitle(rs.getString("title"));
               setReleaseDate(rs.getDate("releasedate"));
               setRating(rs.getFloat("rating"));
@@ -53,7 +51,6 @@ public class ItemsDao {
               setVersion(rs.getInt("version"));
               setSeason(rs.getInt("season"));
               setEpisode(rs.getInt("episode"));
-              setType(rs.getString("type"));
               setSubtitle(rs.getString("subtitle"));
             }};
           }
@@ -134,7 +131,7 @@ public class ItemsDao {
         System.out.println("[FINE] ItemsDao.getQuery() - Looking for Identifier with name: " + surrogateName);
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
-            return new Identifier(rs.getString("type"), rs.getString("provider"), rs.getString("providerid"));
+            return new Identifier(MediaType.valueOf(rs.getString("type")), rs.getString("provider"), rs.getString("providerid"));
           }
         }
       }
@@ -157,7 +154,7 @@ public class ItemsDao {
       try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("INSERT INTO identifiers (surrogatename, type, provider, providerid) VALUES (?, ?, ?, ?)")) {
         statement.setString(1, surrogateName);
-        statement.setString(2, identifier.getType());
+        statement.setString(2, identifier.getType().name());
         statement.setString(3, identifier.getProvider());
         statement.setString(4, identifier.getProviderId());
         statement.execute();
@@ -187,8 +184,6 @@ public class ItemsDao {
     Map<String, Object> columns = new LinkedHashMap<>();
 
     columns.put("imdbid", item.getImdbId());
-    columns.put("provider", item.getProvider());
-    columns.put("providerid", item.getProviderId());
     columns.put("rating", item.getRating());
     columns.put("title", item.getTitle());
     columns.put("plot", item.getPlot());
@@ -203,8 +198,11 @@ public class ItemsDao {
     columns.put("version", VERSION);
     columns.put("season", item.getSeason());
     columns.put("episode", item.getEpisode());
-    columns.put("type", item.getType());
     columns.put("subtitle", item.getSubtitle());
+
+    columns.put("type", item.getIdentifier().getType().name());
+    columns.put("provider", item.getIdentifier().getProvider());
+    columns.put("providerid", item.getIdentifier().getProviderId());
 
     return columns;
   }

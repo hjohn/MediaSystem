@@ -1,7 +1,7 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
-import hs.mediasystem.db.LocalInfo.Type;
+import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.Decoder;
 
 import java.nio.file.Path;
@@ -34,7 +34,7 @@ public class MovieDecoder implements Decoder {
   }
 
   @Override
-  public LocalInfo decode(Path path, Type type) {
+  public LocalInfo decode(Path path, MediaType mediaType) {
     String fileName = path.getFileName().toString();
     String extension = getValidExtension(fileName);
 
@@ -68,6 +68,6 @@ public class MovieDecoder implements Decoder {
     Integer year = yearString == null || yearString.isEmpty() ? null : Integer.parseInt(yearString);
     Integer episode = sequence == null ? 1 : Integer.parseInt(sequence);
 
-    return new LocalInfo(path, type, title, subtitle == null ? "" : subtitle, imdbNumber, year, null, episode);
+    return new LocalInfo(path, mediaType, title, subtitle == null ? "" : subtitle, imdbNumber, year, null, episode);
   }
 }

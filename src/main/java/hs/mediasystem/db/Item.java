@@ -5,11 +5,10 @@ import java.util.Date;
 public class Item {
   private int id;
 
+  private final Identifier identifier;
+
   private String title;
   private String subtitle;
-  private String provider;
-  private String providerId;
-  private String type;
   private int version;
   private String imdbId;
   private String plot;
@@ -23,15 +22,12 @@ public class Item {
   private Integer season;
   private Integer episode;
 
-  private String surrogateName;
-  private boolean bypassCache;
+  public Item(Identifier identifier) {
+    this.identifier = identifier;
+  }
 
-  public String getSurrogateName() {
-    if(surrogateName == null) {
-      surrogateName = type + "/" + title.toLowerCase() + "/" + (subtitle != null ? subtitle.toLowerCase() : "") + "/" + (season == null ? "" : season) + "/" + (episode == null ? "" : episode) + "/" + (releaseYear == null ? "" : releaseYear);
-    }
-
-    return surrogateName;
+  public Identifier getIdentifier() {
+    return identifier;
   }
 
   public int getId() {
@@ -48,30 +44,6 @@ public class Item {
 
   public void setTitle(String title) {
     this.title = title;
-  }
-
-  public String getProvider() {
-    return provider;
-  }
-
-  public void setProvider(String provider) {
-    this.provider = provider;
-  }
-
-  public String getProviderId() {
-    return providerId;
-  }
-
-  public void setProviderId(String providerId) {
-    this.providerId = providerId;
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
   }
 
   public int getVersion() {
@@ -178,16 +150,8 @@ public class Item {
     this.releaseYear = releaseYear;
   }
 
-  public boolean isBypassCache() {
-    return bypassCache;
-  }
-
-  public void setBypassCache(boolean bypassCache) {
-    this.bypassCache = bypassCache;
-  }
-
   @Override
   public String toString() {
-    return "('" + title + "', Item[id=" + id + ", subtitle=" + subtitle + ", type=" + type + "])";
+    return "('" + title + "', Item[id=" + id + ", subtitle=" + subtitle + ", identifier=" + identifier + "])";
   }
 }

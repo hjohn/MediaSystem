@@ -1,7 +1,7 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
-import hs.mediasystem.db.LocalInfo.Type;
+import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.Decoder;
 import hs.mediasystem.framework.Scanner;
 
@@ -14,11 +14,11 @@ import java.util.List;
 
 public class EpisodeScanner implements Scanner<Episode> {
   private final Decoder decoder;
-  private final Type type;
+  private final MediaType mediaType;
 
-  public EpisodeScanner(Decoder decoder, Type type) {
+  public EpisodeScanner(Decoder decoder, MediaType mediaType) {
     this.decoder = decoder;
-    this.type = type;
+    this.mediaType = mediaType;
   }
 
   @Override
@@ -29,7 +29,7 @@ public class EpisodeScanner implements Scanner<Episode> {
       try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
         for(Path path : dirStream) {
           if(path.getFileName().toString().matches(MovieDecoder.EXTENSION_PATTERN.pattern())) {
-            LocalInfo localInfo = decoder.decode(path, type);
+            LocalInfo localInfo = decoder.decode(path, mediaType);
 
             if(localInfo != null) {
               episodes.add(new Episode(localInfo));

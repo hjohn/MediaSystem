@@ -1,6 +1,6 @@
 package hs.mediasystem.db;
 
 public interface ItemEnricher {
-  Identifier identifyItem(Item item) throws ItemNotFoundException;
-  Item enrichItem(Item item, Identifier identifier) throws ItemNotFoundException;
+  Identifier identifyItem(LocalInfo localInfo) throws IdentifyException;
+  Item loadItem(Identifier identifier) throws ItemNotFoundException;
 }
