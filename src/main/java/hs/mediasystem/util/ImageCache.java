@@ -59,6 +59,8 @@ public class ImageCache {
   }
 
   public static void expunge(ImageHandle handle) {
-    CACHE.remove(handle.getKey());
+    if(handle != null) {
+      CACHE.remove(handle.getKey());
+    }
   }
 }

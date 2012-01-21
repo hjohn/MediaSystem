@@ -16,6 +16,13 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 public class DialogScreen extends BorderPane {
+  private static final KeyCombination TAB = new KeyCodeCombination(KeyCode.TAB);
+  private static final KeyCombination SHIFT_TAB = new KeyCodeCombination(KeyCode.TAB, KeyCombination.SHIFT_DOWN);
+  private static final KeyCombination DOWN = new KeyCodeCombination(KeyCode.DOWN);
+  private static final KeyCombination UP = new KeyCodeCombination(KeyCode.UP);
+  private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
+  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
+
 //  private final List<Option> options;
   private final ObservableList<Node> options;
   private final List<List<Node>> optionStack  = new ArrayList<>();
@@ -31,18 +38,11 @@ public class DialogScreen extends BorderPane {
       }
 
       addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-        final KeyCombination tab = new KeyCodeCombination(KeyCode.TAB);
-        final KeyCombination shiftTab = new KeyCodeCombination(KeyCode.TAB, KeyCombination.SHIFT_DOWN);
-        final KeyCombination down = new KeyCodeCombination(KeyCode.DOWN);
-        final KeyCombination up = new KeyCodeCombination(KeyCode.UP);
-        final KeyCombination enter = new KeyCodeCombination(KeyCode.ENTER);
-        final KeyCombination backspace = new KeyCodeCombination(KeyCode.BACK_SPACE);
-
         @Override
         public void handle(KeyEvent event) {
           Option selectedOption = options.get(selectedIndex);
 
-          if(enter.match(event)) {
+          if(ENTER.match(event)) {
             if(selectedOption instanceof SubOption) {
               SubOption option = (SubOption)selectedOption;
 
@@ -67,15 +67,15 @@ public class DialogScreen extends BorderPane {
             selectedOption.right();
             event.consume();
           }
-          else if(tab.match(event) || down.match(event)) {
+          else if(TAB.match(event) || DOWN.match(event)) {
             moveFocusNext();
             event.consume();
           }
-          else if(shiftTab.match(event) || up.match(event)) {
+          else if(SHIFT_TAB.match(event) || UP.match(event)) {
             moveFocusPrevious();
             event.consume();
           }
-          else if(backspace.match(event)) {
+          else if(BACK_SPACE.match(event)) {
             if(!optionStack.isEmpty()) {
               getChildren().clear();
               getChildren().addAll(optionStack.remove(optionStack.size() - 1));

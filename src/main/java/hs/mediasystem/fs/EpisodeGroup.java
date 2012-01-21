@@ -14,8 +14,12 @@ import java.util.List;
 public class EpisodeGroup extends NamedItem implements Group {
   private final List<MediaItem> children = new ArrayList<>();
 
-  public EpisodeGroup(String title) {
-    super(new LocalInfo(MediaType.MOVIE, title));
+  public EpisodeGroup(List<MediaItem> items) {
+    super(new LocalInfo(MediaType.MOVIE, items.get(0).getTitle(), items.get(0).getReleaseYear()));
+
+    for(MediaItem item : items) {
+      add(item);
+    }
   }
 
   public void add(MediaItem child) {

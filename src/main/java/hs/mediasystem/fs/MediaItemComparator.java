@@ -12,7 +12,7 @@ public class MediaItemComparator implements Comparator<MediaItem> {
     int result = o1.getTitle().compareTo(o2.getTitle());
 
     if(result == 0) {
-      result = Integer.compare(o1.getSeason(), o2.getSeason());
+      result = Integer.compare(o1.getSeason() != null ? o1.getSeason() : Integer.MAX_VALUE, o2.getSeason() != null ? o2.getSeason() : Integer.MAX_VALUE);
 
       if(result == 0) {
         result = Integer.compare(o1.getEpisode(), o2.getEpisode());

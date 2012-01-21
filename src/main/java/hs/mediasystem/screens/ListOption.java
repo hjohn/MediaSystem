@@ -34,9 +34,7 @@ public class ListOption<T> extends Option {
       index = items.size() - 1;
     }
 
-    if(property != null) {
-      property.set(items.get(index));
-    }
+    property.set(items.get(index));
   }
 
   @Override
@@ -47,9 +45,7 @@ public class ListOption<T> extends Option {
       index = 0;
     }
 
-    if(property != null) {
-      property.set(items.get(index));
-    }
+    property.set(items.get(index));
   }
 
 }

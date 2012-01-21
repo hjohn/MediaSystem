@@ -83,38 +83,36 @@ public class SelectMediaPresentation {
       public void handle(ItemEvent<MediaItem> event) {
         final MediaItem mediaItem = event.getTreeItem().getValue();
 
-        if(mediaItem.isLeaf()) {
-          if(!view.getChildren().contains(dialogScreen)) {
-            List<? extends Option> options = FXCollections.observableArrayList(
-              new ActionOption("Reload meta data", new Callable<Boolean>() {
-                @Override
-                public Boolean call() {
-                  enrichItem(mediaItem, true);
-                  ImageCache.expunge(currentItem.getPoster());
-                  ImageCache.expunge(currentItem.getBackground());
-                  updateCurrentItem();
-                  return true;
-                }
-              })
-            );
-
-            dialogScreen = new DialogScreen("Video - Options", options);
-
-            view.getChildren().add(dialogScreen);
-
-            dialogScreen.requestFocus();
-
-            dialogScreen.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+        if(!view.getChildren().contains(dialogScreen)) {
+          List<? extends Option> options = FXCollections.observableArrayList(
+            new ActionOption("Reload meta data", new Callable<Boolean>() {
               @Override
-              public void handle(KeyEvent event) {
-                if(BACK_SPACE.match(event)) {
-                  view.getChildren().remove(dialogScreen);
-                  dialogScreen = null;
-                  event.consume();
-                }
+              public Boolean call() {
+                enrichItem(mediaItem, true);
+                ImageCache.expunge(currentItem.getPoster());
+                ImageCache.expunge(currentItem.getBackground());
+                updateCurrentItem();
+                return true;
               }
-            });
-          }
+            })
+          );
+
+          dialogScreen = new DialogScreen("Video - Options", options);
+
+          view.getChildren().add(dialogScreen);
+
+          dialogScreen.requestFocus();
+
+          dialogScreen.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+              if(BACK_SPACE.match(event)) {
+                view.getChildren().remove(dialogScreen);
+                dialogScreen = null;
+                event.consume();
+              }
+            }
+          });
         }
       }
     });

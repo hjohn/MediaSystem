@@ -31,11 +31,8 @@ public class MoviesMediaTree implements MediaTree {
 
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
-          EpisodeGroup g = new EpisodeGroup(group.get(0).getTitle());
-
-          for(MediaItem item : group) {
-            g.add(item);
-          }
+          Collections.sort(group, MediaItemComparator.INSTANCE);
+          EpisodeGroup g = new EpisodeGroup(group);
 
           items.add(g);
         }

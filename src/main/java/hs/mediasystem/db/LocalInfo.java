@@ -25,6 +25,10 @@ public class LocalInfo {
     this.episode = episode;
   }
 
+  public LocalInfo(MediaType mediaType, String title, Integer releaseYear) {
+    this(null, mediaType, title, null, null, releaseYear, null, null);
+  }
+
   public LocalInfo(MediaType mediaType, String title) {
     this(null, mediaType, title, null, null, null, null, null);
   }
