@@ -57,15 +57,15 @@ public class TmdbMovieEnricher implements ItemEnricher {
           double score = 0;
 
           if(movieYear.equals(year) && movieYear.length() > 0) {
-            score += 100;
+            score += 45;
           }
           if(movie.getImdbID() != null) {
-            score += 50;
+            score += 15;
           }
 
           double matchScore = Levenshtein.compare(movie.getName().toLowerCase(), searchString.toLowerCase());
 
-          score += matchScore * 90;
+          score += matchScore * 40;
 
           scores.add(new Score(movie, score));
           String name = movie.getName() + (movie.getAlternativeName() != null ? " (" + movie.getAlternativeName() + ")" : "");
