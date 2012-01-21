@@ -23,8 +23,8 @@ public class TmdbMovieEnricher implements ItemEnricher {
   public void identifyItem(Item item) throws ItemNotFoundException {
     String title = item.getTitle();
     String subtitle = item.getSubtitle();
-    String year = extractYear(item.getReleaseDate());
-    int seq = item.getSeason() == null ? 1 : item.getSeason();
+    String year = item.getReleaseYear() == null ? null : item.getReleaseYear().toString();
+    int seq = item.getEpisode() == null ? 1 : item.getEpisode();
 
     try {
       String bestMatchingImdbNumber = null;
@@ -41,6 +41,17 @@ public class TmdbMovieEnricher implements ItemEnricher {
           }
         });
 
+        String searchString = title;
+
+        if(seq > 1) {
+          searchString += " " + seq;
+        }
+        if(subtitle != null && subtitle.length() > 0) {
+          searchString += " " + subtitle;
+        }
+
+        System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Looking to match: " + searchString);
+
         for(Movie movie : Movie.search(title)) {
           String movieYear = extractYear(movie.getReleasedDate());
           double score = 0;
@@ -52,22 +63,13 @@ public class TmdbMovieEnricher implements ItemEnricher {
             score += 50;
           }
 
-          String searchString = title;
-
-          if(seq > 1) {
-            searchString += " " + seq;
-          }
-          if(subtitle != null && subtitle.length() > 0) {
-            searchString += " " + subtitle;
-          }
-
-          System.out.println(movie.getName() + " -vs- " + searchString);
           double matchScore = Levenshtein.compare(movie.getName().toLowerCase(), searchString.toLowerCase());
 
           score += matchScore * 90;
 
           scores.add(new Score(movie, score));
-          System.out.println(new Score(movie, score));
+          String name = movie.getName() + (movie.getAlternativeName() != null ? " (" + movie.getAlternativeName() + ")" : "");
+          System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - " + String.format("Match: %5.1f (%4.2f) IMDB: %9s YEAR: %tY -- %s", score, matchScore, movie.getImdbID(), movie.getReleasedDate(), name));
         }
 
         if(!scores.isEmpty()) {
