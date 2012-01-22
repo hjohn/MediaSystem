@@ -16,11 +16,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
-import javafx.concurrent.Service;
-import javafx.concurrent.Worker.State;
 import javafx.geometry.HPos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -48,10 +44,6 @@ public class PlaybackOverlayPane extends StackPane {
   private final BorderPane borderPane = new BorderPane();
   private final BorderPane bottomPane = new BorderPane();
   private final Label topLabel = new Label();
-  private final VBox messagePane = new VBox() {{
-    setId("messagePane");
-    setVisible(false);
-  }};
 
   private final Timeline osdFade = new Timeline(
     new KeyFrame(Duration.seconds(1), new KeyValue(topLabel.opacityProperty(), 1.0)),
@@ -70,19 +62,10 @@ public class PlaybackOverlayPane extends StackPane {
     final double w = 1920;  // TODO remove hardcoded values
     final double h = 1200;
 
-    messagePane.getChildren().addListener(new ListChangeListener<Node>() {
-      @Override
-      public void onChanged(ListChangeListener.Change<? extends Node> change) {
-        messagePane.setVisible(!change.getList().isEmpty());
-      }
-    });
-
     borderPane.setFocusTraversable(true);
     borderPane.setCenter(new VBox() {{
       getChildren().add(topLabel);
     }});
-
-    borderPane.setRight(messagePane);
 
     topLabel.setId("video-osd-line");
     topLabel.textProperty().bind(osdLine);
@@ -196,45 +179,6 @@ public class PlaybackOverlayPane extends StackPane {
   public void setOSD(String text) {
     osdLine.set(text);
     osdFade.playFromStart();
-  }
-
-  public void displayService(Service<?> service) {
-    final VBox vbox = createMessage(service);
-
-    service.stateProperty().addListener(new ChangeListener<State>() {
-      @Override
-      public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
-        if(newValue == State.SCHEDULED) {
-          messagePane.getChildren().add(vbox);
-        }
-        else if(newValue == State.SUCCEEDED || newValue == State.FAILED) {
-          messagePane.getChildren().remove(vbox);
-        }
-      }
-    });
-  }
-
-  private static VBox createMessage(final Service<?> service) {
-    return new VBox() {{
-      getChildren().add(new VBox() {{
-        getStyleClass().add("item");
-        getChildren().add(new Label("Title") {{
-          getStyleClass().add("title");
-          textProperty().bind(service.titleProperty());
-        }});
-        getChildren().add(new Label() {{
-          setWrapText(true);
-          setMaxWidth(300);
-          getStyleClass().add("description");
-          textProperty().bind(service.messageProperty());
-        }});
-        getChildren().add(new ProgressBar() {{
-          getStyleClass().add("blue-bar");
-          setMaxWidth(300);
-          progressProperty().bind(service.progressProperty());
-        }});
-      }});
-    }};
   }
 
   private static Effect createNeonEffect(final double size) { // font point size

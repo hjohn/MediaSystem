@@ -239,9 +239,9 @@
   -fx-spacing: 10;
   
   -fx-background-color: color-black-50;
-  -fx-background-radius: 0 0 0 20;
+  -fx-background-radius: 0 0 0 15;
   
-  -fx-padding: 20;
+  -fx-padding: 10;
 }
 
 #messagePane .title {

@@ -21,7 +21,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.concurrent.Worker.State;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyCode;
@@ -38,7 +37,6 @@ public class PlaybackOverlayPresentation {
   private final PlaybackOverlayPane view;
 
   private final ObjectProperty<SubtitleDescriptor> selectedSubtitleForDownload = new SimpleObjectProperty<>();
-  private final SubtitleDownloadService subtitleDownloadService = new SubtitleDownloadService();
 
   @Inject
   public PlaybackOverlayPresentation(final ProgramController controller, final PlaybackOverlayPane view) {
@@ -184,19 +182,10 @@ public class PlaybackOverlayPresentation {
       @Override
       public void changed(ObservableValue<? extends SubtitleDescriptor> observable, SubtitleDescriptor oldValue, SubtitleDescriptor newValue) {
         if(newValue != null) {
-          view.displayService(subtitleDownloadService);
+          SubtitleDownloadService service = controller.getSubtitleDownloadService();
 
-          subtitleDownloadService.setSubtitleDescriptor(newValue);
-          subtitleDownloadService.restart();
-        }
-      }
-    });
-
-    subtitleDownloadService.stateProperty().addListener(new ChangeListener<State>() {
-      @Override
-      public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
-        if(newValue == State.SUCCEEDED) {
-          player.showSubtitle(subtitleDownloadService.getValue());
+          service.setSubtitleDescriptor(newValue);
+          service.restart();
         }
       }
     });

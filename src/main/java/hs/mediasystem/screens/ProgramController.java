@@ -11,14 +11,25 @@ import hs.mediasystem.util.ini.Section;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
+import javafx.concurrent.Service;
+import javafx.concurrent.Worker;
+import javafx.concurrent.Worker.State;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -31,13 +42,23 @@ import javax.inject.Singleton;
 @Singleton
 public class ProgramController {
   private final Player player;
-  private final Stage mainStage;  // TODO two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing
+  private final Stage mainStage;  // TODO two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing; refactor this
   private final Stage overlayStage;
-  private final BorderPane mainGroup;
-  private final BorderPane overlayGroup;
+  private final StackPane mainStackPane = new StackPane();
+  private final StackPane transparentStackPane = new StackPane();
+  private final BorderPane mainGroup = new BorderPane();
+  private final BorderPane transparentGroup = new BorderPane();
+  private final BorderPane mainOverlay = new BorderPane();
+  private final BorderPane transparentOverlay = new BorderPane();
   private final Ini ini;
   private final Provider<MainScreen> mainScreenProvider;
   private final Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider;
+  private final SubtitleDownloadService subtitleDownloadService = new SubtitleDownloadService();
+
+  private final VBox messagePane = new VBox() {{
+    setId("messagePane");
+    setVisible(false);
+  }};
 
   private final NavigationHistory<NavigationItem> history = new NavigationHistory<>();
 
@@ -48,16 +69,19 @@ public class ProgramController {
     this.mainScreenProvider = mainScreenProvider;
     this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
 
-    mainGroup = new BorderPane();
-    overlayGroup = new BorderPane();
+    mainStackPane.getChildren().addAll(mainGroup, mainOverlay);
+    transparentStackPane.getChildren().addAll(transparentGroup, transparentOverlay);
+
+    mainOverlay.setMouseTransparent(true);
+    transparentOverlay.setMouseTransparent(true);
 
     mainStage = new Stage(StageStyle.UNDECORATED);
     mainStage.setFullScreen(true);
     overlayStage = new Stage(StageStyle.TRANSPARENT);
     overlayStage.setFullScreen(true);
 
-    setupStage(mainStage, mainGroup, 1.0);
-    setupStage(overlayStage, overlayGroup, 0.0);
+    setupStage(mainStage, mainStackPane, 1.0);
+    setupStage(overlayStage, transparentStackPane, 0.0);
 
 //    mainGroup.addEventHandler(KeyEvent.KEY_TYPED, new EventHandler<KeyEvent>() {
 //      @Override
@@ -82,14 +106,32 @@ public class ProgramController {
         updateScreen();
       }
     });
+
+    messagePane.getChildren().addListener(new ListChangeListener<Node>() {
+      @Override
+      public void onChanged(ListChangeListener.Change<? extends Node> change) {
+        messagePane.setVisible(!change.getList().isEmpty());
+      }
+    });
+
+    registerService(subtitleDownloadService);
+
+    subtitleDownloadService.stateProperty().addListener(new ChangeListener<State>() {
+      @Override
+      public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
+        if(newValue == State.SUCCEEDED) {
+          getPlayer().showSubtitle(subtitleDownloadService.getValue());
+        }
+      }
+    });
   }
 
   public Ini getIni() {
     return ini;
   }
 
-  private static void setupStage(Stage stage, BorderPane borderPane, double transparency) {
-    Scene scene = new Scene(borderPane, new Color(0, 0, 0, transparency));
+  private static void setupStage(Stage stage, Parent parent, double transparency) {
+    Scene scene = new Scene(parent, new Color(0, 0, 0, transparency));
 
     stage.setScene(scene);
 
@@ -109,6 +151,8 @@ public class ProgramController {
     mainStage.setFullScreen(true);
     mainStage.toFront();
     overlayStage.hide();
+    transparentOverlay.setRight(null);
+    mainOverlay.setRight(messagePane);
     mainGroup.setCenter(node);
   }
 
@@ -117,7 +161,9 @@ public class ProgramController {
     overlayStage.setFullScreen(true);
     overlayStage.toFront();
     mainStage.hide();
-    overlayGroup.setCenter(node);
+    mainOverlay.setRight(null);
+    transparentOverlay.setRight(messagePane);
+    transparentGroup.setCenter(node);
   }
 
   public void showMainScreen() {
@@ -155,6 +201,7 @@ public class ProgramController {
   }
 
   public void stop() {
+    subtitleDownloadService.cancel();
     player.stop();
     history.back();
   }
@@ -260,6 +307,51 @@ public class ProgramController {
 
     return new ArrayList<SubtitleProvider>() {{
       add(new SublightSubtitleProvider(general.get("sublight.client"), general.get("sublight.key")));
+    }};
+  }
+
+  public SubtitleDownloadService getSubtitleDownloadService() {
+    return subtitleDownloadService;
+  }
+
+  public void registerService(final Service<?> service) {
+    final VBox vbox = createMessage(service);
+
+    System.out.println("[FINE] ProgramController.registerService() - registering new service: " + service);
+
+    service.stateProperty().addListener(new ChangeListener<State>() {
+      @Override
+      public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
+        if(newValue == State.SCHEDULED) {
+          messagePane.getChildren().add(vbox);
+        }
+        else if(newValue == State.SUCCEEDED || newValue == State.FAILED || newValue == State.CANCELLED) {
+          messagePane.getChildren().remove(vbox);
+        }
+      }
+    });
+  }
+
+  private static VBox createMessage(final Worker<?> worker) {
+    return new VBox() {{
+      getChildren().add(new VBox() {{
+        getStyleClass().add("item");
+        getChildren().add(new Label("Title") {{
+          getStyleClass().add("title");
+          textProperty().bind(worker.titleProperty());
+        }});
+        getChildren().add(new Label() {{
+          setWrapText(true);
+          setMaxWidth(300);
+          getStyleClass().add("description");
+          textProperty().bind(worker.messageProperty());
+        }});
+        getChildren().add(new ProgressBar() {{
+          getStyleClass().add("blue-bar");
+          setMaxWidth(300);
+          progressProperty().bind(worker.progressProperty());
+        }});
+      }});
     }};
   }
 

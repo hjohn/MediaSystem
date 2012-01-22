@@ -3,9 +3,9 @@ package hs.mediasystem;
 import javafx.application.Application;
 
 // Top 10 stuff:
-// TODO Sort sub-items properly in the tree display -- also provide sequence numbers to distinguish movies
+// TODO Include year in duoline
+// TODO Provide sequence numbers for sub-items to distinguish movies
 // TODO Change the Option overlay to be generic
-// TODO Change the Message overlay to be generic
 // TODO Use the Message overlay to indicate stuff being loaded in background on Select Media screen
 
 // TODO Some form of remote control support
@@ -24,7 +24,6 @@ import javafx.application.Application;
 // TODO Make clock in standard border
 // TODO Download + show subtitles, also multiple different ones should work without problem; store them with file I guess
 // TODO Lirc support
-// TODO Include year in duoline
 // TODO Add breadcrumb
 // TODO Auto-scroll plot/overview
 // TODO Possibly with Series/Season, information about episode count
