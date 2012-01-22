@@ -37,4 +37,9 @@ public class Subtitle {
 
     return id == other.id;
   }
+
+  @Override
+  public String toString() {
+    return "('" + description + "', Subtitle[id=" + id + "])";
+  }
 }

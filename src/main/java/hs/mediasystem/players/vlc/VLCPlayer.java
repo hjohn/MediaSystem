@@ -156,6 +156,8 @@ public class VLCPlayer implements Player {
   }
 
   public void setSubtitleInternal(Subtitle subtitle) {
+    System.out.println("[FINE] VLCPlayer.setSubtitleInternal() - Subtitles available: " + getSubtitles());
+    System.out.println("[FINE] VLCPlayer.setSubtitleInternal() - Setting subtitle to: " + subtitle + ", index = " + getSubtitles().indexOf(subtitle));
     mediaPlayer.setSpu(getSubtitles().indexOf(subtitle));
   }
 

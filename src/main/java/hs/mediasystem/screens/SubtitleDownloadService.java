@@ -11,6 +11,8 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 public class SubtitleDownloadService extends Service<Path> {
+  private static int counter;
+
   private SubtitleDescriptor subtitleDescriptor;
 
   public void setSubtitleDescriptor(SubtitleDescriptor subtitleDescriptor) {
@@ -31,14 +33,16 @@ public class SubtitleDownloadService extends Service<Path> {
         ByteBuffer buffer = descriptor.fetch();
         updateProgress(60, 100);
 
-        try(FileOutputStream os = new FileOutputStream("tempsubtitle.srt")) {
+        Path path = Paths.get("tempsubtitle" + ++counter + ".srt");
+
+        try(FileOutputStream os = new FileOutputStream(path.toFile())) {
           os.getChannel().write(buffer);
           updateProgress(90, 100);
         }
 
         updateProgress(100, 100);
 
-        return Paths.get("tempsubtitle.srt");
+        return path;
       }
     };
   }

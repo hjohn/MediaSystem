@@ -32,8 +32,8 @@ public final class BeanObjectProperty<T> extends SimpleObjectProperty<T> {
   @Override
   public void set(T value) {
     synchronized(accessor) {
-      super.set(value);
       accessor.write(value);
+      super.set(value);
     }
   }
 }
