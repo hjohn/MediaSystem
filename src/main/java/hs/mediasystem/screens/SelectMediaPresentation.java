@@ -190,6 +190,7 @@ public class SelectMediaPresentation {
       mediaItem.setPoster(item.getPoster());
       mediaItem.setBackground(item.getBackground());
       mediaItem.setPlot(item.getPlot());
+      mediaItem.setRating(item.getRating());
     }
     catch(ItemNotFoundException | IdentifyException e) {
       System.out.println("[FINE] SelectMediaPresentation.enrichItem() - Enrichment failed: " + e + ": " + mediaItem);

@@ -11,7 +11,8 @@ public abstract class NamedItem implements MediaItem {
 
   protected MediaItem parent;
 
-  private String plot;
+  private String plot = "";
+  private Float rating;
   private byte[] banner;
   private byte[] poster;
   private byte[] background;
@@ -107,6 +108,16 @@ public abstract class NamedItem implements MediaItem {
   @Override
   public void setPlot(String plot) {
     this.plot = plot;
+  }
+
+  @Override
+  public Float getRating() {
+    return rating;
+  }
+
+  @Override
+  public void setRating(Float rating) {
+    this.rating = rating;
   }
 
   @Override

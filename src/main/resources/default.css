@@ -279,13 +279,13 @@
 }
 
 
+.stars {
+	-fx-fill: linear-gradient(from 0% 0% to 0% 100%, orange 0%, white 33%, orange 100%);
+	-fx-stroke: yellow;
+	-fx-stroke-width: 1;
+}
 
-
-
-
-
-
-
-
- 
-
+.stars:disabled {
+  -fx-fill: rgb(50, 50, 50);
+  -fx-stroke: rgb(75, 75, 75);
+}

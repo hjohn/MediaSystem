@@ -17,11 +17,13 @@ public interface MediaItem {
   Integer getEpisode();
 
   String getPlot();
+  Float getRating();
   ImageHandle getBanner();
   ImageHandle getPoster();
   ImageHandle getBackground();
 
   void setPlot(String plot);
+  void setRating(Float rating);
   void setBanner(byte[] banner);
   void setPoster(byte[] poster);
   void setBackground(byte[] background);
