@@ -20,13 +20,13 @@ public class ListViewOption<T> extends Option {
 
     getStyleClass().clear();
     getStyleClass().add("list");
-    
+
     setLeft(null);
     setRight(null);
     setTop(null);
     setCenter(new VBox() {{
       getChildren().add(new VBox() {{
-        getStyleClass().add("title");
+        getStyleClass().add("header");
         getChildren().add(new Label(description));
       }});
       getChildren().add(listView);

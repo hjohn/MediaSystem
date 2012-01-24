@@ -2,8 +2,13 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -17,7 +22,7 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 
 public class DuoLineRenderer implements CellProvider<MediaItem> {
-
+  private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
   private final HBox group = new HBox();
 
   private final Label title = new Label() {{
@@ -25,12 +30,13 @@ public class DuoLineRenderer implements CellProvider<MediaItem> {
   }};
 
   private final Label subtitle = new Label() {{
-    setId("selectItem-listCell-subtitle");
     getStyleClass().add("subtitle");
   }};
 
-  private final Label releaseYear = new Label() {{
-    getStyleClass().add("release-year");
+  private final Label releaseTime = new Label() {{
+    getStyleClass().add("release-time");
+    setAlignment(Pos.CENTER);
+    setMaxWidth(1000);
   }};
 
   private final Label ratingText = new Label() {{
@@ -50,22 +56,20 @@ public class DuoLineRenderer implements CellProvider<MediaItem> {
     }});
   }};
 
-  private HBox stars = new HBox() {{
-    double[] points = createStar(8, 4, 5);
+  private static final double[] STAR_DATA = createStar(7, 3, 5);
 
+  private HBox stars = new HBox() {{
     for(int i = 0; i < 5; i++) {
-      getChildren().add(new Polygon(points) {{
-        getStyleClass().add("stars");
+      getChildren().add(new Polygon(STAR_DATA) {{
+        getStyleClass().add("star");
       }});
     }
   }};
 
   private HBox disabledStars = new HBox() {{
-    double[] points = createStar(8, 4, 5);
-
     for(int i = 0; i < 5; i++) {
-      getChildren().add(new Polygon(points) {{
-        getStyleClass().add("stars");
+      getChildren().add(new Polygon(STAR_DATA) {{
+        getStyleClass().add("star");
       }});
     }
   }};
@@ -83,30 +87,35 @@ public class DuoLineRenderer implements CellProvider<MediaItem> {
     return points;
   }
 
+  private final VBox description = new VBox() {{
+    setAlignment(Pos.CENTER_LEFT);
+  }};
+
   public DuoLineRenderer() {
     final HBox ratingNode = new HBox() {{
+      getStyleClass().add("rating");
+
       getChildren().add(new Group() {{
         getChildren().add(disabledStars);
         disabledStars.setDisable(true);
         getChildren().add(stars);
-        stars.setClip(new Rectangle(0, 0, 0, 20) {{
-          this.widthProperty().bind(disabledStars.widthProperty().multiply(rating).divide(10));
-        }});
       }});
-      getChildren().add(ratingText);
+//      getChildren().add(ratingText);
     }};
 
-    group.getChildren().add(new VBox() {{
-      getChildren().add(new HBox() {{
-        getChildren().add(title);
+    group.getChildren().add(new HBox() {{
+      getChildren().add(new VBox() {{
         getChildren().add(ratingNode);
+        getChildren().add(releaseTime);
       }});
-      getChildren().add(subtitle);
+
+      getChildren().add(description);
       HBox.setHgrow(this, Priority.ALWAYS);
     }});
-    group.getChildren().add(new VBox() {{
-      getChildren().add(releaseYear);
-    }});
+//    group.getChildren().add(new VBox() {{
+//      // getChildren().add(ratingNode);
+//     //  getChildren().add(releaseYear);
+//    }});
     group.getChildren().add(collectionMarker);
   }
 
@@ -115,10 +124,26 @@ public class DuoLineRenderer implements CellProvider<MediaItem> {
     if(item != null) {
       title.setText(item.getTitle());
       subtitle.setText(item.getSubtitle());
-      releaseYear.setText(item.getReleaseYear() == null ? "" : "" + item.getReleaseYear());
+
+      description.getChildren().clear();
+      description.getChildren().add(title);
+      if(!item.getSubtitle().isEmpty()) {
+        description.getChildren().add(subtitle);
+      }
+
+      String releaseDate = item.getReleaseDate() == null ? null : (dateFormat.format(item.getReleaseDate()) + " ");
+      if(releaseDate == null) {
+        releaseDate = item.getReleaseYear() == null ? "" : ("" + item.getReleaseYear() + " ");
+      }
+
+      releaseTime.setText(releaseDate);
       ratingText.setText("" + item.getRating());
       rating.set(item.getRating() == null ? 0.0 : item.getRating());
       collectionMarker.setVisible(item instanceof hs.mediasystem.framework.Group);
+
+      stars.setClip(new Rectangle(0, 0, 0, 20) {{
+        this.widthProperty().bind(disabledStars.widthProperty().multiply(rating).divide(10));  // TODO one would expect this to update automatically, but it doesn't
+      }});
     }
 
     return group;

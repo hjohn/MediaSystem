@@ -1,0 +1,24 @@
+
+#status-messages {
+  -fx-spacing: 10;
+  
+  -fx-background-color: color-black-50;
+  -fx-background-radius: 0 0 0 15;
+  
+  -fx-padding: 10;
+}
+
+#status-messages .title {
+  -fx-font: bold 18pt "Arial";
+}
+
+#status-messages .item {
+  -fx-border-width: 2;
+  -fx-border-color: color-blue-20;
+  -fx-border-radius: 10;
+  -fx-padding: 10;
+}
+
+#status-messages .description {
+  -fx-padding: 0 10 10 10;
+}

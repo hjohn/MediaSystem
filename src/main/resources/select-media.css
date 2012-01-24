@@ -1,0 +1,53 @@
+#select-media *.label {
+  -fx-text-fill: color-blue;
+}
+
+#select-media .content-box-grid {
+  -fx-padding: 10;
+  -fx-hgap: 20;
+  -fx-vgap: 20;
+}
+
+#select-media .content-box {
+  -fx-background-color: derive(color-blue-70, -80%);
+  -fx-border-radius: 20;
+  -fx-background-radius: 20;
+  -fx-padding: 30;
+}
+
+#select-media .tree-view {
+  -fx-background-color: null;
+}
+
+#select-media .detail .title {
+  -fx-font: bold 24pt "Arial";
+}
+
+#select-media .list .title {
+  -fx-font: bold 19pt "Arial";
+}
+
+#select-media .subtitle {
+  -fx-font: 13pt "Arial";
+  -fx-label-padding: 0 0 0 10;
+}
+
+#select-media .list .release-time {
+  -fx-font: 12pt "Arial";
+  -fx-text-fill: color-blue-70;
+}
+
+#select-media .rating {
+	-fx-padding: 0 15 5 15;
+}
+
+#select-media .star {
+  -fx-fill: linear-gradient(from 0% 0% to 0% 100%, orange 0%, white 33%, orange 100%);
+  -fx-stroke: yellow;
+  -fx-stroke-width: 1;
+}
+
+#select-media .star:disabled {
+  -fx-fill: rgb(50, 50, 50);
+  -fx-stroke: rgb(75, 75, 75);
+}

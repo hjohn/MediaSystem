@@ -79,6 +79,8 @@ public class SelectMediaPane<T> extends StackPane {
   );
 
   public SelectMediaPane() {
+    setId("select-media");
+
     timeline.setOnFinished(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
@@ -95,9 +97,7 @@ public class SelectMediaPane<T> extends StackPane {
 
     final GridPane root = new GridPane();
 
-    root.getStyleClass().addAll("select-item-pane", "content-box-grid");
-
-    treeView.setId("selectItem-listView");
+    root.getStyleClass().addAll("content-box-grid");
 
     treeView.setEditable(false);
     treeView.setShowRoot(false);
@@ -161,6 +161,7 @@ public class SelectMediaPane<T> extends StackPane {
     );
 
     root.add(new GridPane() {{
+      getStyleClass().addAll("content-box", "detail");
       setHgap(10);
 
       getColumnConstraints().addAll(
@@ -179,7 +180,6 @@ public class SelectMediaPane<T> extends StackPane {
         }}
       );
 
-      getStyleClass().add("content-box");
       add(new BorderPane() {{
         setTop(new ImageView() {{
           imageProperty().bind(poster);
@@ -196,20 +196,19 @@ public class SelectMediaPane<T> extends StackPane {
       }}, 0, 0);
       add(new BorderPane() {{
         setTop(new VBox() {{
-          getStyleClass().addAll("item-details");
-          getChildren().add(new Label("title") {{
+          getChildren().add(new Label() {{
             textProperty().bind(title);
-            getStyleClass().addAll("movie-name", "title");
+            getStyleClass().addAll("title");
           }});
           getChildren().add(new Label() {{
             textProperty().bind(subtitle);
-            getStyleClass().addAll("movie-subtitle", "subtitle");
+            getStyleClass().addAll("subtitle");
           }});
           getChildren().add(new Label() {{
             textProperty().bind(releaseYear);
-            getStyleClass().addAll("year", "subtitle");
+            getStyleClass().addAll("release-time");
           }});
-          getChildren().add(new Label("Plot text") {{
+          getChildren().add(new Label() {{
             textProperty().bind(plot);
             getStyleClass().addAll("plot");
             setWrapText(true);
@@ -220,7 +219,7 @@ public class SelectMediaPane<T> extends StackPane {
     }}, 0, 1);
 
     root.add(new HBox() {{
-      getStyleClass().add("content-box");
+      getStyleClass().addAll("content-box", "list");
       getChildren().add(treeView);
 
       HBox.setHgrow(treeView, Priority.ALWAYS);

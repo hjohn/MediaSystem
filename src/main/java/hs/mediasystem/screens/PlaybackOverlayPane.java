@@ -59,6 +59,8 @@ public class PlaybackOverlayPane extends StackPane {
   );
 
   public PlaybackOverlayPane() {
+    setId("playback-overlay");
+
     final double w = 1920;  // TODO remove hardcoded values
     final double h = 1200;
 

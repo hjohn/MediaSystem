@@ -14,6 +14,7 @@ import java.util.List;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Worker;
 import javafx.concurrent.Worker.State;
@@ -56,7 +57,7 @@ public class ProgramController {
   private final SubtitleDownloadService subtitleDownloadService = new SubtitleDownloadService();
 
   private final VBox messagePane = new VBox() {{
-    setId("messagePane");
+    setId("status-messages");
     setVisible(false);
   }};
 
@@ -142,11 +143,14 @@ public class ProgramController {
     stage.setY(bounds.getMinY());
     stage.setWidth(bounds.getWidth());
     stage.setHeight(bounds.getHeight());
-
-    scene.getStylesheets().add("default.css");
   }
 
   private void displayOnMainStage(Node node) {
+    ObservableList<String> stylesheets = mainStage.getScene().getStylesheets();
+
+    stylesheets.clear();
+    stylesheets.addAll("default.css", "status-messages.css", node.getId() + ".css");
+
     mainStage.show();
     mainStage.setFullScreen(true);
     mainStage.toFront();
@@ -157,6 +161,11 @@ public class ProgramController {
   }
 
   private void displayOnOverlayStage(Node node) {
+    ObservableList<String> stylesheets = overlayStage.getScene().getStylesheets();
+
+    stylesheets.clear();
+    stylesheets.addAll("default.css", "status-messages.css", node.getId() + ".css");
+
     overlayStage.show();
     overlayStage.setFullScreen(true);
     overlayStage.toFront();

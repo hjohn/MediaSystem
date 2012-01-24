@@ -1,0 +1,46 @@
+#top-bar *.label {
+  -fx-font: bold 18pt "Tahoma";
+  -fx-text-fill: rgb(173, 216, 230);
+}
+
+#top-bar {
+  -fx-background-color: rgba(0, 0, 255, 0.3);
+  -fx-border-color: white;
+  -fx-border-width: 0 0 2 0;
+}
+
+#video-osd-line {
+  -fx-padding: 40;
+  -fx-font: bold 48pt "Arial";
+  -fx-text-fill: white;
+}
+
+#video-overlay {
+  -fx-padding: 40;
+  -fx-background-color: linear-gradient(from 0% 50% to 0% 100%, rgba(0, 0, 0, 0), black 50%);
+}
+
+#video-overlay_info {
+  -fx-padding: 40 0 0 40;
+}
+
+#video-overlay .video-title {
+  -fx-font: bold 64pt "Arial";
+  -fx-text-fill: white;
+}
+
+#video-overlay .video-subtitle {
+  -fx-font: bold 24pt "Arial";
+  -fx-text-fill: white;
+  -fx-padding: 0 0 20 0;
+}
+
+#video-overlay {
+  -fx-font: 24pt "Arial";
+  -fx-text-fill: color-blue;
+}
+
+#video-overlay_info_bar {
+  -fx-spacing: 20;
+  -fx-alignment: CENTER;
+}

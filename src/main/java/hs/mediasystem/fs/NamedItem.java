@@ -5,6 +5,7 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.ImageHandle;
 
 import java.nio.file.Path;
+import java.util.Date;
 
 public abstract class NamedItem implements MediaItem {
   private final LocalInfo localInfo;
@@ -13,11 +14,13 @@ public abstract class NamedItem implements MediaItem {
 
   private String plot = "";
   private Float rating;
+  private Date releaseDate;
   private byte[] banner;
   private byte[] poster;
   private byte[] background;
 
   private boolean enriched;
+
 
   public NamedItem(LocalInfo localInfo) {
     this.localInfo = localInfo;
@@ -118,6 +121,16 @@ public abstract class NamedItem implements MediaItem {
   @Override
   public void setRating(Float rating) {
     this.rating = rating;
+  }
+
+  @Override
+  public Date getReleaseDate() {
+    return releaseDate;
+  }
+
+  @Override
+  public void setReleaseDate(Date date) {
+    this.releaseDate = date;
   }
 
   @Override
