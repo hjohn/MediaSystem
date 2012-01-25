@@ -17,7 +17,7 @@ public class StarRating extends HBox {
 
 
   public StarRating(final double radius, final double innerRadius, final int numberOfPoints) {
-    getStyleClass().add("rating");
+    getStyleClass().add("star-rating");
 
     double[] starData = createStarData(radius, innerRadius, numberOfPoints);
 

@@ -11,7 +11,6 @@ import javafx.application.Application;
 //1 error
 
 // Top 10 stuff:
-// TODO Include year in duoline
 // TODO Provide sequence numbers for sub-items to distinguish movies
 // TODO Change the Option overlay to be generic
 // TODO Use the Message overlay to indicate stuff being loaded in background on Select Media screen
@@ -20,7 +19,6 @@ import javafx.application.Application;
 // TODO VLCPlayer: Make brightness controls work
 // TODO When changing Options, show this in OSD
 // TODO Background picture is centered, not stretched
-// TODO When returning to select screen, if bg pic is big, the scene will be larger than the stage
 // TODO Style main page
 // TODO Separators for Dialog Screen
 // TODO Subtitle selection list must be left with backspace, or exit at top/bottom item

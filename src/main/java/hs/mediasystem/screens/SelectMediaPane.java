@@ -6,8 +6,10 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -16,8 +18,10 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -166,7 +170,6 @@ public class SelectMediaPane<T> extends StackPane {
 
     root.add(new GridPane() {{
       getStyleClass().addAll("content-box", "detail");
-      setHgap(10);
 
       getColumnConstraints().addAll(
         new ColumnConstraints() {{
@@ -184,42 +187,69 @@ public class SelectMediaPane<T> extends StackPane {
         }}
       );
 
-      add(new BorderPane() {{
-        setTop(new ImageView() {{
+      add(new ScrollPane() {{
+        final ReadOnlyDoubleProperty widthProperty = widthProperty();
+        final ReadOnlyDoubleProperty heightProperty = heightProperty();
+
+        setHbarPolicy(ScrollBarPolicy.NEVER);
+        setVbarPolicy(ScrollBarPolicy.NEVER);
+
+        setContent(new ImageView() {{
           imageProperty().bind(poster);
           setPreserveRatio(true);
           setSmooth(true);
           setEffect(new DropShadow());
-          //setEffect(new Reflection());
+//          setEffect(new PerspectiveTransform() {{
+//            setUlx(10.0);
+//            setUly(10.0);
+//            setUrx(310.0);
+//            setUry(40.0);
+//            setLrx(310.0);
+//            setLry(60.0);
+//            setLlx(10.0);
+//            setLly(90.0);
+//            setEffect(new Reflection() {{
+//              setFraction(0.10);
+//            }});
+//          }});
 
-          // HACK: Following three lines is a dirty hack to get the ImageView to respect the size of its parent
-          setManaged(false);
-          fitWidthProperty().bind(widthProperty().subtract(hgapProperty()));  // TODO seems to bug when redisplaying this scene after being hidden?
-          fitHeightProperty().bind(heightProperty());
+          fitWidthProperty().bind(widthProperty);
+          fitHeightProperty().bind(heightProperty);
         }});
       }}, 0, 0);
       add(new BorderPane() {{
         setTop(new VBox() {{
-          getChildren().add(new StarRating(14, 6, 5) {{
-            ratingProperty().bind(rating.divide(10));
-          }});
+          visibleProperty().bind(title.isNotNull());
           getChildren().add(new Label() {{
+            getStyleClass().add("title");
             textProperty().bind(title);
-            getStyleClass().addAll("title");
           }});
           getChildren().add(new Label() {{
+            getStyleClass().add("subtitle");
             textProperty().bind(subtitle);
-            getStyleClass().addAll("subtitle");
+            managedProperty().bind(textProperty().isNotEqualTo(""));
+          }});
+          getChildren().add(new HBox() {{
+            setAlignment(Pos.BOTTOM_LEFT);
+            getChildren().add(new StarRating(12, 5, 5) {{
+              ratingProperty().bind(rating.divide(10));
+            }});
+            getChildren().add(new Label() {{
+              getStyleClass().add("rating");
+              textProperty().bind(Bindings.format("%3.1f/10", rating));
+            }});
+          }});
+          getChildren().add(new Label("PLOT") {{
+            getStyleClass().add("header");
           }});
           getChildren().add(new Label() {{
-            textProperty().bind(releaseTime);
-            getStyleClass().addAll("release-time");
-          }});
-          getChildren().add(new Label() {{
+            getStyleClass().add("plot");
             textProperty().bind(plot);
-            getStyleClass().addAll("plot");
-            setWrapText(true);
             VBox.setVgrow(this, Priority.ALWAYS);
+          }});
+          getChildren().add(new Label() {{
+            getStyleClass().add("release-time");
+            textProperty().bind(releaseTime);
           }});
         }});
       }}, 1, 0);

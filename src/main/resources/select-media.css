@@ -13,38 +13,17 @@
   -fx-border-radius: 20;
   -fx-background-radius: 20;
   -fx-padding: 30;
+  -fx-hgap: 20;
 }
 
 #select-media .tree-view {
   -fx-background-color: null;
 }
 
-#select-media .detail .title {
-  -fx-font: bold 24pt "Arial";
-}
-
-#select-media .list .title {
-  -fx-font: bold 19pt "Arial";
-}
-
 #select-media .subtitle {
   -fx-font: 13pt "Arial";
   -fx-label-padding: 0 0 0 10;
 }
-
-#select-media .list .release-time {
-  -fx-font: 12pt "Arial";
-  -fx-text-fill: color-blue-70;
-}
-
-#select-media .detail .plot {
-  -fx-font: 16pt "Arial";	
-}
-
-#select-media .list .rating {
-	-fx-padding: 0 15 5 15;
-}
-
 
 #select-media .star {
   -fx-fill: linear-gradient(from 0% 0% to 0% 100%, orange 0%, white 33%, orange 100%);
@@ -55,4 +34,41 @@
 #select-media .star:disabled {
   -fx-fill: rgb(125, 125, 125);
   -fx-stroke: rgb(125, 125, 125);
+}
+
+#select-media .detail .title {
+  -fx-font: bold 24pt "Arial";
+  -fx-wrap-text: true;
+}
+
+#select-media .detail .subtitle {
+	-fx-wrap-text: true;
+}
+
+#select-media .detail .star-rating {
+  -fx-padding: 5 10 0 0;
+}
+
+#select-media .detail .plot {
+  -fx-font: 16pt "Arial";	
+  -fx-wrap-text: true;
+}
+
+#select-media .header {
+  -fx-font: bold 12pt "Arial";
+  -fx-text-fill: derive(color-blue, -30%);
+  -fx-label-padding: 30 0 0 0;
+}
+
+#select-media .list .title {
+  -fx-font: bold 19pt "Arial";
+}
+
+#select-media .list .release-time {
+  -fx-font: 12pt "Arial";
+  -fx-text-fill: dervice(color-blue, -30%);
+}
+
+#select-media .list .star-rating {
+	-fx-padding: 0 15 5 15;
 }

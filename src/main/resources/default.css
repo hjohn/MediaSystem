@@ -17,6 +17,10 @@
   -fx-font: 14pt "Arial";
 }
 
+.scroll-pane {
+  -fx-background-color: transparent;
+}
+
 .label {
   -fx-text-fill: color-blue;
 }
