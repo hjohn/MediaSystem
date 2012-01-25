@@ -13,8 +13,8 @@ public class StarRating extends HBox {
   private final DoubleProperty rating = new SimpleDoubleProperty(0.0);
   public DoubleProperty ratingProperty() { return rating; }
 
-  private final Rectangle rectangle = new Rectangle(0, 0, 0, 0) {{  // TODO scale seems to work, but too much work to get it to work for now (with width at 100)
-  }};
+  private final Rectangle rectangle = new Rectangle(0, 0, 0, 0); // TODO scale seems to work, but too much work to get it to work for now (with width at 100)
+
 
   public StarRating(final double radius, final double innerRadius, final int numberOfPoints) {
     getStyleClass().add("rating");
@@ -31,14 +31,20 @@ public class StarRating extends HBox {
       getChildren().addAll(disabledStars, stars);
     }});
 
-    rating.addListener(new ChangeListener<Number>() {
+    ChangeListener<Number> changeListener = new ChangeListener<Number>() {
       @Override
       public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number value) {
         // TODO for some reason, a direct bind on rating is simply not working for changing the width property of the clip.
         // rectangle.scaleXProperty().set(100.0 / disabledStars.getWidth() * rating.get());
-        stars.setClip(new Rectangle(0, 0, disabledStars.getWidth() * rating.get(), disabledStars.getHeight()));
+        if(disabledStars.getWidth() > 0 && disabledStars.getHeight() > 0) {
+          stars.setClip(new Rectangle(0, 0, disabledStars.getWidth() * rating.get(), disabledStars.getHeight()));
+        }
       }
-    });
+    };
+
+    rating.addListener(changeListener);
+    disabledStars.widthProperty().addListener(changeListener);
+    disabledStars.heightProperty().addListener(changeListener);
   }
 
   private static HBox createStars(final double[] points) {

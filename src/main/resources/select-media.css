@@ -37,9 +37,14 @@
   -fx-text-fill: color-blue-70;
 }
 
-#select-media .rating {
+#select-media .detail .plot {
+  -fx-font: 16pt "Arial";	
+}
+
+#select-media .list .rating {
 	-fx-padding: 0 15 5 15;
 }
+
 
 #select-media .star {
   -fx-fill: linear-gradient(from 0% 0% to 0% 100%, orange 0%, white 33%, orange 100%);
@@ -48,6 +53,6 @@
 }
 
 #select-media .star:disabled {
-  -fx-fill: rgb(50, 50, 50);
-  -fx-stroke: rgb(75, 75, 75);
+  -fx-fill: rgb(125, 125, 125);
+  -fx-stroke: rgb(125, 125, 125);
 }

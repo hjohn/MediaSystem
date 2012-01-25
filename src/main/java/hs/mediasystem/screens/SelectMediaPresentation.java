@@ -65,6 +65,7 @@ public class SelectMediaPresentation {
       @Override
       public void handle(ItemEvent<MediaItem> event) {
         MediaItem mediaItem = event.getTreeItem().getValue();
+        System.out.println("[FINE] SelectMediaPresentation.SelectMediaPresentation(...).new EventHandler() {...}.handle() - item selected: " + mediaItem);
 
         if(mediaItem.isLeaf()) {
           controller.play(mediaItem);
@@ -141,7 +142,7 @@ public class SelectMediaPresentation {
     if(currentItem != null) {
       view.setTitle(currentItem.getTitle());
       view.setSubtitle(currentItem.getSubtitle());
-      view.setReleaseYear(currentItem.getReleaseYear() == null ? "" : "" + currentItem.getReleaseYear());
+      view.setReleaseTime(MediaItemFormatter.formatReleaseTime(currentItem));
       view.setPlot(currentItem.getPlot());
       view.setRating(currentItem.getRating() == null ? 0.0 : currentItem.getRating());
       view.setPoster(currentItem.getPoster());
@@ -219,6 +220,8 @@ public class SelectMediaPresentation {
     @Override
     protected void updateItem(final MediaItem item, boolean empty) {
       super.updateItem(item, empty);
+
+      System.out.println("[FINE] SelectMediaPresentation.MediaItemTreeCell.updateItem() - updating: " + item);
 
       if(item != null) {
         if(loadTask != null) {

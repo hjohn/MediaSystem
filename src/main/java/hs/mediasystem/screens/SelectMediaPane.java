@@ -49,7 +49,7 @@ public class SelectMediaPane<T> extends StackPane {
 
   private final ObjectProperty<String> title = new SimpleObjectProperty<>();
   private final ObjectProperty<String> subtitle = new SimpleObjectProperty<>();
-  private final ObjectProperty<String> releaseYear = new SimpleObjectProperty<>();
+  private final ObjectProperty<String> releaseTime = new SimpleObjectProperty<>();
   private final ObjectProperty<String> plot = new SimpleObjectProperty<>();
   private final DoubleProperty rating = new SimpleDoubleProperty();
 
@@ -121,6 +121,7 @@ public class SelectMediaPane<T> extends StackPane {
 
         if(focusedItem != null) {
           if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2 && onItemSelected.get() != null) {
+            System.out.println("[FINE] SelectMediaPane.SelectMediaPane().new EventHandler() {...}.handle() - double clicked");
             onItemSelected.get().handle(new ItemEvent<>(focusedItem));
           }
         }
@@ -211,7 +212,7 @@ public class SelectMediaPane<T> extends StackPane {
             getStyleClass().addAll("subtitle");
           }});
           getChildren().add(new Label() {{
-            textProperty().bind(releaseYear);
+            textProperty().bind(releaseTime);
             getStyleClass().addAll("release-time");
           }});
           getChildren().add(new Label() {{
@@ -280,8 +281,8 @@ public class SelectMediaPane<T> extends StackPane {
     this.subtitle.set(subtitle);
   }
 
-  public void setReleaseYear(String releaseYear) {
-    this.releaseYear.set(releaseYear);
+  public void setReleaseTime(String releaseTime) {
+    this.releaseTime.set(releaseTime);
   }
 
   public void setPlot(String plot) {

@@ -62,6 +62,7 @@ public class ProgramController {
   }};
 
   private final NavigationHistory<NavigationItem> history = new NavigationHistory<>();
+  private final int screenNumber;
 
   @Inject
   public ProgramController(Ini ini, Player player, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider) {
@@ -70,6 +71,8 @@ public class ProgramController {
     this.mainScreenProvider = mainScreenProvider;
     this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
 
+    screenNumber = Integer.parseInt(ini.getSection("general").getDefault("screen", "0"));
+
     mainStackPane.getChildren().addAll(mainGroup, mainOverlay);
     transparentStackPane.getChildren().addAll(transparentGroup, transparentOverlay);
 
@@ -77,9 +80,7 @@ public class ProgramController {
     transparentOverlay.setMouseTransparent(true);
 
     mainStage = new Stage(StageStyle.UNDECORATED);
-    mainStage.setFullScreen(true);
     overlayStage = new Stage(StageStyle.TRANSPARENT);
-    overlayStage.setFullScreen(true);
 
     setupStage(mainStage, mainStackPane, 1.0);
     setupStage(overlayStage, transparentStackPane, 0.0);
@@ -135,14 +136,24 @@ public class ProgramController {
     Scene scene = new Scene(parent, new Color(0, 0, 0, transparency));
 
     stage.setScene(scene);
+  }
 
-    Screen screen = Screen.getPrimary();
+  private void setupStageLocation(Stage stage) {
+    ObservableList<Screen> screens = Screen.getScreens();
+    Screen screen = screens.size() <= screenNumber ? Screen.getPrimary() : screens.get(screenNumber);
+
     Rectangle2D bounds = screen.getVisualBounds();
+    boolean primary = screen.equals(Screen.getPrimary());    // TODO this doesn't work nice in combination with full screen, so this hack is used to prevent going fullscreen when screen is not primary
 
-    stage.setX(bounds.getMinX());
-    stage.setY(bounds.getMinY());
-    stage.setWidth(bounds.getWidth());
-    stage.setHeight(bounds.getHeight());
+    if(primary) {
+      stage.setFullScreen(true);
+    }
+    else {
+      stage.setX(bounds.getMinX());
+      stage.setY(bounds.getMinY());
+      stage.setWidth(bounds.getWidth());
+      stage.setHeight(bounds.getHeight());
+    }
   }
 
   private void displayOnMainStage(Node node) {
@@ -152,7 +163,9 @@ public class ProgramController {
     stylesheets.addAll("default.css", "status-messages.css", node.getId() + ".css");
 
     mainStage.show();
-    mainStage.setFullScreen(true);
+
+    setupStageLocation(mainStage);
+
     mainStage.toFront();
     overlayStage.hide();
     transparentOverlay.setRight(null);
@@ -167,7 +180,9 @@ public class ProgramController {
     stylesheets.addAll("default.css", "status-messages.css", node.getId() + ".css");
 
     overlayStage.show();
-    overlayStage.setFullScreen(true);
+
+    setupStageLocation(overlayStage);
+
     overlayStage.toFront();
     mainStage.hide();
     mainOverlay.setRight(null);

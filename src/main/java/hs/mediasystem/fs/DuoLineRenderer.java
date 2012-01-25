@@ -2,10 +2,8 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.StarRating;
-
-import java.text.DateFormat;
-
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Pos;
@@ -20,7 +18,6 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
 public class DuoLineRenderer implements CellProvider<MediaItem> {
-  private final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
   private final HBox group = new HBox();
 
   private final Label title = new Label() {{
@@ -87,12 +84,7 @@ public class DuoLineRenderer implements CellProvider<MediaItem> {
         description.getChildren().add(subtitle);
       }
 
-      String releaseDate = item.getReleaseDate() == null ? null : (dateFormat.format(item.getReleaseDate()) + " ");
-      if(releaseDate == null) {
-        releaseDate = item.getReleaseYear() == null ? "" : ("" + item.getReleaseYear() + " ");
-      }
-
-      releaseTime.setText(releaseDate);
+      releaseTime.setText(MediaItemFormatter.formatReleaseTime(item));
       ratingText.setText("" + item.getRating());
       rating.set(item.getRating() == null ? 0.0 : item.getRating());
       collectionMarker.setVisible(item instanceof hs.mediasystem.framework.Group);
