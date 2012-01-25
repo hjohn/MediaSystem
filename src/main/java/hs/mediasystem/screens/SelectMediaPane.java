@@ -262,11 +262,20 @@ public class SelectMediaPane<T> extends StackPane {
       HBox.setHgrow(treeView, Priority.ALWAYS);
     }}, 1, 1);
 
-    getChildren().add(new BorderPane() {{
-      setCenter(new Group() {{
-        //this.getStyleClass().add("debug-border");
-        setMinSize(1, 1);
+    getChildren().add(new ScrollPane() {{
+      final ReadOnlyDoubleProperty widthProperty = widthProperty();
+      final ReadOnlyDoubleProperty heightProperty = heightProperty();
+
+      setHbarPolicy(ScrollBarPolicy.NEVER);
+      setVbarPolicy(ScrollBarPolicy.NEVER);
+
+      setContent(new Group() {{
         getChildren().addAll(backgroundImageView, newBackgroundImageView);
+
+        backgroundImageView.fitWidthProperty().bind(widthProperty);
+        backgroundImageView.fitHeightProperty().bind(heightProperty);
+        newBackgroundImageView.fitWidthProperty().bind(widthProperty);
+        newBackgroundImageView.fitHeightProperty().bind(heightProperty);
       }});
     }});
 

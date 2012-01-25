@@ -18,7 +18,6 @@ import javafx.application.Application;
 // TODO Some form of remote control support
 // TODO VLCPlayer: Make brightness controls work
 // TODO When changing Options, show this in OSD
-// TODO Background picture is centered, not stretched
 // TODO Style main page
 // TODO Separators for Dialog Screen
 // TODO Subtitle selection list must be left with backspace, or exit at top/bottom item
