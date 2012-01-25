@@ -143,6 +143,7 @@ public class SelectMediaPresentation {
       view.setSubtitle(currentItem.getSubtitle());
       view.setReleaseYear(currentItem.getReleaseYear() == null ? "" : "" + currentItem.getReleaseYear());
       view.setPlot(currentItem.getPlot());
+      view.setRating(currentItem.getRating() == null ? 0.0 : currentItem.getRating());
       view.setPoster(currentItem.getPoster());
       view.setBackground(currentItem.getBackground());
     }

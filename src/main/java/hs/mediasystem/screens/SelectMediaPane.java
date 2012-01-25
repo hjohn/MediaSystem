@@ -6,7 +6,9 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -49,6 +51,7 @@ public class SelectMediaPane<T> extends StackPane {
   private final ObjectProperty<String> subtitle = new SimpleObjectProperty<>();
   private final ObjectProperty<String> releaseYear = new SimpleObjectProperty<>();
   private final ObjectProperty<String> plot = new SimpleObjectProperty<>();
+  private final DoubleProperty rating = new SimpleDoubleProperty();
 
   private final ObjectProperty<Image> poster = new SimpleObjectProperty<>();
   private final ObjectProperty<Image> background = new SimpleObjectProperty<>();
@@ -196,6 +199,9 @@ public class SelectMediaPane<T> extends StackPane {
       }}, 0, 0);
       add(new BorderPane() {{
         setTop(new VBox() {{
+          getChildren().add(new StarRating(14, 6, 5) {{
+            ratingProperty().bind(rating.divide(10));
+          }});
           getChildren().add(new Label() {{
             textProperty().bind(title);
             getStyleClass().addAll("title");
@@ -280,6 +286,10 @@ public class SelectMediaPane<T> extends StackPane {
 
   public void setPlot(String plot) {
     this.plot.set(plot);
+  }
+
+  public void setRating(double rating) {
+    this.rating.set(rating);
   }
 
   public void setPoster(ImageHandle poster) {
