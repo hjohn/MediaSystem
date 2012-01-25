@@ -6,10 +6,10 @@ import com.moviejukebox.thetvdb.TheTVDB;
 import com.moviejukebox.thetvdb.model.Episode;
 
 public class TvdbEpisodeEnricher implements ItemEnricher {
-  private final ItemEnricher itemIdentifier;
+  private final TvdbSerieEnricher itemIdentifier;
 
   @Inject
-  public TvdbEpisodeEnricher(ItemEnricher itemIdentifier) {
+  public TvdbEpisodeEnricher(TvdbSerieEnricher itemIdentifier) {
     this.itemIdentifier = itemIdentifier;
   }
 

@@ -12,8 +12,6 @@ public class LocalInfo {
   private final Integer season;
   private final Integer episode;
 
-  private boolean bypassCache;
-
   public LocalInfo(Path path, MediaType mediaType, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode) {
     this.path = path;
     this.mediaType = mediaType;
@@ -67,13 +65,5 @@ public class LocalInfo {
 
   public Integer getEpisode() {
     return episode;
-  }
-
-  public boolean isBypassCache() {
-    return bypassCache;
-  }
-
-  public void setBypassCache(boolean bypassCache) {
-    this.bypassCache = bypassCache;
   }
 }

@@ -52,6 +52,11 @@ public class ItemsDao {
               setSeason(rs.getInt("season"));
               setEpisode(rs.getInt("episode"));
               setSubtitle(rs.getString("subtitle"));
+              setLanguage(rs.getString("language"));
+              setTagline(rs.getString("tagline"));
+
+              String genres = rs.getString("genres");
+              setGenres(genres == null ? new String[] {} : genres.split(","));
             }};
           }
         }
@@ -199,6 +204,19 @@ public class ItemsDao {
     columns.put("season", item.getSeason());
     columns.put("episode", item.getEpisode());
     columns.put("subtitle", item.getSubtitle());
+    columns.put("language", item.getLanguage());
+    columns.put("tagline", item.getTagline());
+
+    String genres = "";
+
+    for(String genre : item.getGenres()) {
+      if(genre.length() > 0) {
+        genre += ",";
+      }
+      genres += genre;
+    }
+
+    columns.put("genres", genres);
 
     columns.put("type", item.getIdentifier().getType().name());
     columns.put("provider", item.getIdentifier().getProvider());

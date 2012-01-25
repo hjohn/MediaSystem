@@ -1,10 +1,9 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.db.CachedItemEnricher;
 import hs.mediasystem.db.Identifier;
 import hs.mediasystem.db.IdentifyException;
 import hs.mediasystem.db.Item;
-import hs.mediasystem.db.ItemEnricher;
-import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
@@ -39,14 +38,14 @@ public class SelectMediaPresentation {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
 
   private final SelectMediaPane<MediaItem> view;
-  private final ItemEnricher itemEnricher;
+  private final CachedItemEnricher itemEnricher;
   private final TreeItem<MediaItem> treeRoot = new TreeItem<>();
 
   private DialogScreen dialogScreen;
   private MediaItem currentItem;
 
   @Inject
-  public SelectMediaPresentation(final ProgramController controller, final SelectMediaPane<MediaItem> view, ItemEnricher itemEnricher) {
+  public SelectMediaPresentation(final ProgramController controller, final SelectMediaPane<MediaItem> view, CachedItemEnricher itemEnricher) {
     this.view = view;
     this.itemEnricher = itemEnricher;
 
@@ -183,10 +182,9 @@ public class SelectMediaPresentation {
   private void enrichItem(final MediaItem mediaItem, boolean bypassCache) {
     try {
       LocalInfo localInfo = mediaItem.getLocalInfo();
-      localInfo.setBypassCache(bypassCache);
-      Identifier identifier = itemEnricher.identifyItem(localInfo);
+      Identifier identifier = itemEnricher.identifyItem(localInfo, bypassCache);
 
-      Item item = itemEnricher.loadItem(identifier);
+      Item item = itemEnricher.loadItem(identifier, bypassCache);
 
       mediaItem.setBanner(item.getBanner());
       mediaItem.setPoster(item.getPoster());
@@ -195,8 +193,9 @@ public class SelectMediaPresentation {
       mediaItem.setRating(item.getRating());
       mediaItem.setReleaseDate(item.getReleaseDate());
     }
-    catch(ItemNotFoundException | IdentifyException e) {
+    catch(IdentifyException e) {
       System.out.println("[FINE] SelectMediaPresentation.enrichItem() - Enrichment failed: " + e + ": " + mediaItem);
+      e.printStackTrace(System.out);
     }
 
     mediaItem.setEnriched(true);  // set to true, even if something failed as otherwise we keep trying to enrich

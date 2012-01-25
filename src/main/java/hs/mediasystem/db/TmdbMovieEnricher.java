@@ -4,12 +4,15 @@ import hs.mediasystem.util.Levenshtein;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TreeSet;
 
+import net.sf.jtmdb.Genre;
 import net.sf.jtmdb.Movie;
 import net.sf.jtmdb.MovieBackdrop;
 import net.sf.jtmdb.MovieImages;
@@ -98,15 +101,13 @@ public class TmdbMovieEnricher implements ItemEnricher {
     String bestMatchingImdbNumber = identifier.getProviderId();
 
     try {
-      System.out.println("best mathcing imdb number: " + bestMatchingImdbNumber);
+      System.out.println("best matching imdb number: " + bestMatchingImdbNumber);
       final Movie movie = Movie.imdbLookup(bestMatchingImdbNumber);
 
-      System.out.println("Found movie:");
-      System.out.println("name: " + movie.getName());  // TODO nullpointer here if IMDB is faulty (could be in filename)
+      System.out.println("Found movie: " + movie.getName());  // TODO nullpointer here if IMDB is faulty (could be in filename));
       System.out.println("released date: " + movie.getReleasedDate());
-      System.out.println("type: " + movie.getMovieType());
-      System.out.println("overview: " + movie.getOverview());
       System.out.println("runtime: " + movie.getRuntime());
+      System.out.println("type = " + movie.getMovieType() + "; language = " + movie.getLanguage() + "; tagline = " + movie.getTagline() + "; genres: " + movie.getGenres());
 
       final MovieImages images = movie.getImages();
       URL url = null;
@@ -137,6 +138,18 @@ public class TmdbMovieEnricher implements ItemEnricher {
       item.setRating((float)movie.getRating());
       item.setReleaseDate(movie.getReleasedDate());
       item.setRuntime(movie.getRuntime());
+      item.setTagline(movie.getTagline());
+      item.setLanguage(movie.getLanguage());
+
+      List<String> genres = new ArrayList<>();
+
+      for(Genre genre : movie.getGenres()) {
+        genres.add(genre.getName());
+      }
+
+      item.setGenres(genres.toArray(new String[genres.size()]));
+
+//      movie.getMovieType();
 
 //          for(CastInfo castInfo : movie.getCast()) {
 //            castInfo.getCharacterName();

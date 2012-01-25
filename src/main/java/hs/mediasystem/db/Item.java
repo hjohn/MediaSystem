@@ -21,6 +21,9 @@ public class Item {
   private int runtime;
   private Integer season;
   private Integer episode;
+  private String[] genres = new String[] {};
+  private String language;
+  private String tagline;
 
   public Item(Identifier identifier) {
     this.identifier = identifier;
@@ -148,6 +151,30 @@ public class Item {
 
   public void setReleaseYear(Integer releaseYear) {
     this.releaseYear = releaseYear;
+  }
+
+  public String[] getGenres() {
+    return genres;
+  }
+
+  public void setGenres(String[] genres) {
+    this.genres = genres == null ? new String[] {} : genres;
+  }
+
+  public String getLanguage() {
+    return language;
+  }
+
+  public void setLanguage(String language) {
+    this.language = language;
+  }
+
+  public String getTagline() {
+    return tagline;
+  }
+
+  public void setTagline(String tagline) {
+    this.tagline = tagline;
   }
 
   @Override

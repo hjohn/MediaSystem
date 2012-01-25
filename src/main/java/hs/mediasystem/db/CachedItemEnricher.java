@@ -2,7 +2,7 @@ package hs.mediasystem.db;
 
 import javax.inject.Inject;
 
-public class CachedItemEnricher implements ItemEnricher {
+public class CachedItemEnricher {
   private final ItemsDao itemsDao;
   private final ItemEnricher providerToCache;
 
@@ -12,11 +12,10 @@ public class CachedItemEnricher implements ItemEnricher {
     this.providerToCache = providerToCache;
   }
 
-  @Override
-  public Identifier identifyItem(LocalInfo localInfo) throws IdentifyException {
+  public Identifier identifyItem(LocalInfo localInfo, boolean bypassCache) throws IdentifyException {
     System.out.println("[FINE] CachedItemEnricher.identifyItem() - with surrogatename: " + localInfo.getSurrogateName());
 
-    if(!localInfo.isBypassCache()) {
+    if(!bypassCache) {
       try {
         Identifier identifier = itemsDao.getQuery(localInfo.getSurrogateName());
 
@@ -35,34 +34,35 @@ public class CachedItemEnricher implements ItemEnricher {
     return identifier;
   }
 
-  @Override
-  public Item loadItem(Identifier identifier) throws ItemNotFoundException {
+  public Item loadItem(Identifier identifier, boolean bypassCache) {
     try {
-      try {
-        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Loading from Cache: " + identifier);
-        Item item = itemsDao.getItem(identifier);
+      if(!bypassCache) {
+        try {
+          System.out.println("[FINE] CachedItemEnricher.enrichItem() - Loading from Cache: " + identifier);
+          Item item = itemsDao.getItem(identifier);
 
-        if(item.getVersion() < ItemsDao.VERSION) {
-          System.out.println("[FINE] CachedItemEnricher.enrichItem() - Old version, updating from cached provider: " + item);
+          if(item.getVersion() < ItemsDao.VERSION) {
+            System.out.println("[FINE] CachedItemEnricher.enrichItem() - Old version, updating from cached provider: " + item);
 
-          item = providerToCache.loadItem(identifier);
+            item = providerToCache.loadItem(identifier);
 
-          itemsDao.updateItem(item);  // TODO doubt this works, no id
+            itemsDao.updateItem(item);  // TODO doubt this works, no id
+          }
+
+          System.out.println("[FINE] CachedItemEnricher.enrichItem() - Succesfully loaded: " + item);
+
+          return item;
         }
-
-        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Succesfully loaded: " + item);
-
-        return item;
+        catch(ItemNotFoundException e) {
+          System.out.println("[FINE] CachedItemEnricher.enrichItem() - Cache miss, falling back to cached provider: " + identifier);
+        }
       }
-      catch(ItemNotFoundException e) {
-        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Cache miss, falling back to cached provider: " + identifier);
 
-        Item item = providerToCache.loadItem(identifier);
+      Item item = providerToCache.loadItem(identifier);
 
-        itemsDao.storeItem(item);
+      itemsDao.storeItem(item);
 
-        return item;
-      }
+      return item;
     }
     catch(Exception e) {
       System.out.println("[FINE] CachedItemEnricher.enrichItem() - Enrichment failed: " + e);
