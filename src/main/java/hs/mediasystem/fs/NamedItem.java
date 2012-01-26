@@ -15,12 +15,15 @@ public abstract class NamedItem implements MediaItem {
   private String plot = "";
   private Float rating;
   private Date releaseDate;
+  private String[] genres;
+  private String language;
+  private String tagline;
+  private int runtime;
   private byte[] banner;
   private byte[] poster;
   private byte[] background;
 
   private boolean enriched;
-
 
   public NamedItem(LocalInfo localInfo) {
     this.localInfo = localInfo;
@@ -131,6 +134,46 @@ public abstract class NamedItem implements MediaItem {
   @Override
   public void setReleaseDate(Date date) {
     this.releaseDate = date;
+  }
+
+  @Override
+  public String[] getGenres() {
+    return genres;
+  }
+
+  @Override
+  public void setGenres(String[] genres) {
+    this.genres = genres;
+  }
+
+  @Override
+  public String getLanguage() {
+    return language;
+  }
+
+  @Override
+  public void setLanguage(String language) {
+    this.language = language;
+  }
+
+  @Override
+  public String getTagline() {
+    return tagline;
+  }
+
+  @Override
+  public void setTagline(String tagline) {
+    this.tagline = tagline;
+  }
+
+  @Override
+  public int getRuntime() {
+    return runtime;
+  }
+
+  @Override
+  public void setRuntime(int minutes) {
+    this.runtime = minutes;
   }
 
   @Override

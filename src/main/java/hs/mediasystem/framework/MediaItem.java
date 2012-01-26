@@ -21,6 +21,10 @@ public interface MediaItem {
   String getPlot();
   Float getRating();
   Date getReleaseDate();
+  String[] getGenres();
+  int getRuntime();
+  String getTagline();
+  String getLanguage();
   ImageHandle getBanner();
   ImageHandle getPoster();
   ImageHandle getBackground();
@@ -28,6 +32,10 @@ public interface MediaItem {
   void setPlot(String plot);
   void setRating(Float rating);
   void setReleaseDate(Date date);
+  void setLanguage(String language);
+  void setTagline(String tagline);
+  void setRuntime(int minutes);
+  void setGenres(String[] genres);
   void setBanner(byte[] banner);
   void setPoster(byte[] poster);
   void setBackground(byte[] background);

@@ -144,6 +144,8 @@ public class SelectMediaPresentation {
       view.setReleaseTime(MediaItemFormatter.formatReleaseTime(currentItem));
       view.setPlot(currentItem.getPlot());
       view.setRating(currentItem.getRating() == null ? 0.0 : currentItem.getRating());
+      view.setRuntime(currentItem.getRuntime());
+      view.setGenres(currentItem.getGenres());
       view.setPoster(currentItem.getPoster());
       view.setBackground(currentItem.getBackground());
     }
@@ -192,6 +194,10 @@ public class SelectMediaPresentation {
       mediaItem.setPlot(item.getPlot());
       mediaItem.setRating(item.getRating());
       mediaItem.setReleaseDate(item.getReleaseDate());
+      mediaItem.setGenres(item.getGenres());
+      mediaItem.setLanguage(item.getLanguage());
+      mediaItem.setTagline(item.getTagline());
+      mediaItem.setRuntime(item.getRuntime());
     }
     catch(IdentifyException e) {
       System.out.println("[FINE] SelectMediaPresentation.enrichItem() - Enrichment failed: " + e + ": " + mediaItem);

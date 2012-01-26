@@ -8,10 +8,14 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -56,6 +60,10 @@ public class SelectMediaPane<T> extends StackPane {
   private final ObjectProperty<String> releaseTime = new SimpleObjectProperty<>();
   private final ObjectProperty<String> plot = new SimpleObjectProperty<>();
   private final DoubleProperty rating = new SimpleDoubleProperty();
+//  private final StringProperty language = new SimpleStringProperty();
+//  private final StringProperty tagline = new SimpleStringProperty();
+  private final StringProperty genres = new SimpleStringProperty();
+  private final IntegerProperty runtime = new SimpleIntegerProperty();
 
   private final ObjectProperty<Image> poster = new SimpleObjectProperty<>();
   private final ObjectProperty<Image> background = new SimpleObjectProperty<>();
@@ -230,7 +238,7 @@ public class SelectMediaPane<T> extends StackPane {
             managedProperty().bind(textProperty().isNotEqualTo(""));
           }});
           getChildren().add(new HBox() {{
-            setAlignment(Pos.BOTTOM_LEFT);
+            setAlignment(Pos.CENTER_LEFT);
             getChildren().add(new StarRating(12, 5, 5) {{
               ratingProperty().bind(rating.divide(10));
             }});
@@ -238,6 +246,11 @@ public class SelectMediaPane<T> extends StackPane {
               getStyleClass().add("rating");
               textProperty().bind(Bindings.format("%3.1f/10", rating));
             }});
+          }});
+          getChildren().add(new Label() {{
+            getStyleClass().add("genres");
+            textProperty().bind(genres);
+            managedProperty().bind(textProperty().isNotEqualTo(""));
           }});
           getChildren().add(new Label("PLOT") {{
             getStyleClass().add("header");
@@ -247,9 +260,19 @@ public class SelectMediaPane<T> extends StackPane {
             textProperty().bind(plot);
             VBox.setVgrow(this, Priority.ALWAYS);
           }});
+          getChildren().add(new Label("RELEASED") {{
+            getStyleClass().add("header");
+          }});
           getChildren().add(new Label() {{
             getStyleClass().add("release-time");
             textProperty().bind(releaseTime);
+          }});
+          getChildren().add(new Label("RUNTIME") {{
+            getStyleClass().add("header");
+          }});
+          getChildren().add(new Label() {{
+            getStyleClass().add("runtime");
+            textProperty().bind(Bindings.format("%d minutes", runtime));
           }});
         }});
       }}, 1, 0);
@@ -330,6 +353,24 @@ public class SelectMediaPane<T> extends StackPane {
 
   public void setRating(double rating) {
     this.rating.set(rating);
+  }
+
+  public void setGenres(String[] genres) {
+    String genreText = "";
+
+    for(String genre : genres) {
+      if(!genreText.isEmpty()) {
+        genreText += " • ";
+      }
+
+      genreText += genre;
+    }
+
+    this.genres.set(genreText);
+  }
+
+  public void setRuntime(int runtime) {
+    this.runtime.set(runtime);
   }
 
   public void setPoster(ImageHandle poster) {

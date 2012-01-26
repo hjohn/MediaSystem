@@ -46,7 +46,16 @@
 }
 
 #select-media .detail .star-rating {
-  -fx-padding: 5 10 0 0;
+  -fx-padding: 5 10 5 0;
+}
+
+#select-media .detail .rating {
+  -fx-font: bold 16pt "Arial";
+}
+
+#select-media .detail .genres {
+  -fx-font: bold 14pt "Arial";
+  -fx-wrap-text: true;
 }
 
 #select-media .detail .plot {

@@ -36,26 +36,26 @@ public class CachedItemEnricher {
 
   public Item loadItem(Identifier identifier, boolean bypassCache) {
     try {
-      if(!bypassCache) {
-        try {
-          System.out.println("[FINE] CachedItemEnricher.enrichItem() - Loading from Cache: " + identifier);
-          Item item = itemsDao.getItem(identifier);
+      try {
+        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Loading from Cache: " + identifier);
+        Item item = itemsDao.getItem(identifier);
 
-          if(item.getVersion() < ItemsDao.VERSION) {
-            System.out.println("[FINE] CachedItemEnricher.enrichItem() - Old version, updating from cached provider: " + item);
+        if(item.getVersion() < ItemsDao.VERSION || bypassCache) {
+          System.out.println("[FINE] CachedItemEnricher.enrichItem() - Old version or no cache, updating from cached provider: " + item);
 
-            item = providerToCache.loadItem(identifier);
+          Item oldVersion = item;
+          item = providerToCache.loadItem(identifier);
+          item.setId(oldVersion.getId());
 
-            itemsDao.updateItem(item);  // TODO doubt this works, no id
-          }
-
-          System.out.println("[FINE] CachedItemEnricher.enrichItem() - Succesfully loaded: " + item);
-
-          return item;
+          itemsDao.updateItem(item);  // TODO doubt this works, no id
         }
-        catch(ItemNotFoundException e) {
-          System.out.println("[FINE] CachedItemEnricher.enrichItem() - Cache miss, falling back to cached provider: " + identifier);
-        }
+
+        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Succesfully loaded: " + item);
+
+        return item;
+      }
+      catch(ItemNotFoundException e) {
+        System.out.println("[FINE] CachedItemEnricher.enrichItem() - Cache miss, falling back to cached provider: " + identifier);
       }
 
       Item item = providerToCache.loadItem(identifier);

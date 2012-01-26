@@ -190,4 +190,8 @@ public class Genre implements Serializable {
 		return null;
 	}
 
+	@Override
+	public String toString() {
+	  return name;
+	}
 }
