@@ -26,7 +26,7 @@ public class ItemsDao {
     return connectionProvider.get();
   }
 
-  public Item getItem(Identifier identifier) throws ItemNotFoundException {
+  public Item getItem(final Identifier identifier) throws ItemNotFoundException {
     try {
       try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
@@ -37,7 +37,8 @@ public class ItemsDao {
         System.out.println("[FINE] ItemsDao.getItem() - Selecting Item with type/provider/providerid = " + identifier.getType() + "/" + identifier.getProvider() + "/" + identifier.getProviderId());
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
-            return new Item(identifier) {{
+            return new Item() {{
+              setIdentifier(identifier);
               setId(rs.getInt("id"));
               setImdbId(rs.getString("imdbid"));
               setTitle(rs.getString("title"));

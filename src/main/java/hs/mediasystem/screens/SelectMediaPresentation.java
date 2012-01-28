@@ -200,7 +200,7 @@ public class SelectMediaPresentation {
       mediaItem.setRuntime(item.getRuntime());
     }
     catch(IdentifyException e) {
-      System.out.println("[FINE] SelectMediaPresentation.enrichItem() - Enrichment failed: " + e + ": " + mediaItem);
+      System.out.println("[WARN] SelectMediaPresentation.enrichItem() - Enrichment failed of " + mediaItem + " failed with exception: " + e);
       e.printStackTrace(System.out);
     }
 
@@ -226,9 +226,7 @@ public class SelectMediaPresentation {
     protected void updateItem(final MediaItem item, boolean empty) {
       super.updateItem(item, empty);
 
-      System.out.println("[FINE] SelectMediaPresentation.MediaItemTreeCell.updateItem() - updating: " + item);
-
-      if(item != null) {
+      if(!empty) {
         if(loadTask != null) {
 
           /*

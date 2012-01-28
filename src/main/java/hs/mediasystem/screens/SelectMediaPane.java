@@ -100,7 +100,6 @@ public class SelectMediaPane<T> extends StackPane {
 
     getRowConstraints().addAll(
       new RowConstraints() {{
-        // setVgrow(Priority.NEVER);
         setPercentHeight(100);
       }}
     );
@@ -108,12 +107,12 @@ public class SelectMediaPane<T> extends StackPane {
 
   private final Timeline timeline = new Timeline(
     new KeyFrame(Duration.ZERO,
-      new KeyValue(newBackgroundImageView.opacityProperty(), 0.0),
-      new KeyValue(backgroundImageView.opacityProperty(), 1.0)
+      new KeyValue(backgroundImageView.opacityProperty(), 1.0),
+      new KeyValue(newBackgroundImageView.opacityProperty(), 0.0)
     ),
     new KeyFrame(new Duration(4000),
-      new KeyValue(newBackgroundImageView.opacityProperty(), 1.0),
-      new KeyValue(backgroundImageView.opacityProperty(), 0.0)
+      new KeyValue(backgroundImageView.opacityProperty(), 0.0),
+      new KeyValue(newBackgroundImageView.opacityProperty(), 1.0)
     )
   );
 

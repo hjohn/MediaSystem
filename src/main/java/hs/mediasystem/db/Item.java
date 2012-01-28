@@ -5,7 +5,7 @@ import java.util.Date;
 public class Item {
   private int id;
 
-  private final Identifier identifier;
+  private Identifier identifier;
 
   private String title;
   private String subtitle;
@@ -25,12 +25,12 @@ public class Item {
   private String language;
   private String tagline;
 
-  public Item(Identifier identifier) {
-    this.identifier = identifier;
-  }
-
   public Identifier getIdentifier() {
     return identifier;
+  }
+
+  public void setIdentifier(Identifier identifier) {
+    this.identifier = identifier;
   }
 
   public int getId() {

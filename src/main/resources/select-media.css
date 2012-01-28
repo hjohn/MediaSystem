@@ -75,7 +75,7 @@
 
 #select-media .list .release-time {
   -fx-font: 12pt "Arial";
-  -fx-text-fill: dervice(color-blue, -30%);
+  -fx-text-fill: derive(color-blue, -30%);
 }
 
 #select-media .list .star-rating {

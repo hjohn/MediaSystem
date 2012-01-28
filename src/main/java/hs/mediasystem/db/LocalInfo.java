@@ -66,4 +66,9 @@ public class LocalInfo {
   public Integer getEpisode() {
     return episode;
   }
+
+  @Override
+  public String toString() {
+    return "LocalInfo('" + title + "', type=" + mediaType.name() + ", season=" + season + ", ep=" + episode + ", path=" + path + ")";
+  }
 }

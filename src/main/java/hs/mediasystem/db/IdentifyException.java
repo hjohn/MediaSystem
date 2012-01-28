@@ -9,4 +9,8 @@ public class IdentifyException extends Exception {
   public IdentifyException(LocalInfo localInfo) {
     super(localInfo.toString());
   }
+
+  public IdentifyException(String message) {
+    super(message);
+  }
 }

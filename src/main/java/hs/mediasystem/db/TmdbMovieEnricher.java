@@ -23,7 +23,12 @@ import org.json.JSONException;
 public class TmdbMovieEnricher implements ItemEnricher {
 
   @Override
-  public Identifier identifyItem(LocalInfo localInfo) throws IdentifyException {
+  public String getProviderCode() {
+    return "TMDB";
+  }
+
+  @Override
+  public String identifyItem(LocalInfo localInfo) throws IdentifyException {
     String title = localInfo.getTitle();
     String subtitle = localInfo.getSubtitle();
     String year = localInfo.getReleaseYear() == null ? null : localInfo.getReleaseYear().toString();
@@ -82,7 +87,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
       }
 
       if(bestMatchingImdbNumber != null) {
-        return new Identifier(MediaType.MOVIE, "TMDB", bestMatchingImdbNumber);
+        return bestMatchingImdbNumber;
       }
 
       throw new IdentifyException(localInfo);
@@ -93,12 +98,8 @@ public class TmdbMovieEnricher implements ItemEnricher {
   }
 
   @Override
-  public Item loadItem(Identifier identifier) throws ItemNotFoundException {
-    if(identifier.getType() != MediaType.MOVIE || !identifier.getProvider().equals("TMDB")) {
-      throw new RuntimeException("Unable to enrich, wrong provider or type: " + identifier);
-    }
-
-    String bestMatchingImdbNumber = identifier.getProviderId();
+  public Item loadItem(String identifier) throws ItemNotFoundException {
+    String bestMatchingImdbNumber = identifier;
 
     try {
       System.out.println("best matching imdb number: " + bestMatchingImdbNumber);
@@ -128,7 +129,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
       final byte[] poster = url != null ? Downloader.tryReadURL(url.toExternalForm()) : null;
       final byte[] background = backgroundURL != null ? Downloader.tryReadURL(backgroundURL.toExternalForm()) : null;
 
-      Item item = new Item(identifier);
+      Item item = new Item();
 
       item.setImdbId(movie.getImdbID());
       item.setTitle(movie.getName());

@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-public class TypeBasedItemEnricher implements ItemEnricher {
+public class TypeBasedItemEnricher {
   private final Map<MediaType, ItemEnricher> itemEnrichers;
 
   @Inject
@@ -12,19 +12,16 @@ public class TypeBasedItemEnricher implements ItemEnricher {
     this.itemEnrichers = itemEnrichers;
   }
 
-  @Override
   public Identifier identifyItem(LocalInfo localInfo) throws IdentifyException {
     ItemEnricher itemEnricher = itemEnrichers.get(localInfo.getType());
 
     if(itemEnricher != null) {
-      return itemEnricher.identifyItem(localInfo);
+      return new Identifier(localInfo.getType(), itemEnricher.getProviderCode(), itemEnricher.identifyItem(localInfo));
     }
 
-    System.out.println("[FINE] TypeBasedItemEnricher.identifyItem() - No matching enricher for type: " + localInfo.getType());
-    throw new IdentifyException(localInfo);
+    throw new IdentifyException("Could not identify " + localInfo + "; no matching enricher: " + localInfo.getType());
   }
 
-  @Override
   public Item loadItem(Identifier identifier) throws ItemNotFoundException {
     ItemEnricher itemEnricher = itemEnrichers.get(identifier.getType());
 
@@ -32,6 +29,10 @@ public class TypeBasedItemEnricher implements ItemEnricher {
       throw new RuntimeException("No matching enricher for type: " + identifier.getType());
     }
 
-    return itemEnricher.loadItem(identifier);
+    Item item = itemEnricher.loadItem(identifier.getProviderId());
+
+    item.setIdentifier(identifier);
+
+    return item;
   }
 }

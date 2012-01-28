@@ -15,7 +15,7 @@ public abstract class NamedItem implements MediaItem {
   private String plot = "";
   private Float rating;
   private Date releaseDate;
-  private String[] genres;
+  private String[] genres = new String[0];
   private String language;
   private String tagline;
   private int runtime;

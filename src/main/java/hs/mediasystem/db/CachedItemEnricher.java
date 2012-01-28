@@ -4,10 +4,10 @@ import javax.inject.Inject;
 
 public class CachedItemEnricher {
   private final ItemsDao itemsDao;
-  private final ItemEnricher providerToCache;
+  private final TypeBasedItemEnricher providerToCache;
 
   @Inject
-  public CachedItemEnricher(ItemsDao itemsDao, @Cachable ItemEnricher providerToCache) {
+  public CachedItemEnricher(ItemsDao itemsDao, TypeBasedItemEnricher providerToCache) {
     this.itemsDao = itemsDao;
     this.providerToCache = providerToCache;
   }

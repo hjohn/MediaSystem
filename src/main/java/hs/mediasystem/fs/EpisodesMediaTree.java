@@ -31,8 +31,8 @@ public class EpisodesMediaTree implements MediaTree {
 
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
-          int season = group.get(0) instanceof Episode ? ((Episode)group.get(0)).getSeason() : 0;
-          Season s = new Season(season == 0 ? "Unknown" : "" + season, season);
+          Episode episodeOne = (Episode)group.get(0);
+          Season s = new Season(episodeOne.getTitle(), episodeOne.getSeason());
 
           Collections.sort(group, MediaItemComparator.INSTANCE);
 

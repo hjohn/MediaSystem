@@ -18,6 +18,7 @@ import javafx.application.Application;
 // TODO Clearer serie/group indicator
 // TODO Split off pictures from meta-data information for faster loading
 // TODO Actor / Director information in database
+// TODO ItemEnrichers really should only return relevant data, not a database Item instance
 
 // TODO Some form of remote control support
 // TODO VLCPlayer: Make brightness controls work
