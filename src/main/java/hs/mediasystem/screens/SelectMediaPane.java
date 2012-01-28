@@ -82,6 +82,30 @@ public class SelectMediaPane<T> extends StackPane {
     setSmooth(true);
   }};
 
+  private final HBox listPane = new HBox() {{
+    getStyleClass().addAll("content-box", "list");
+  }};
+
+  private final GridPane detailPane = new GridPane() {{
+    getStyleClass().addAll("content-box", "detail");
+
+    getColumnConstraints().addAll(
+      new ColumnConstraints() {{
+        setPercentWidth(50);
+      }},
+      new ColumnConstraints() {{
+        setPercentWidth(50);
+      }}
+    );
+
+    getRowConstraints().addAll(
+      new RowConstraints() {{
+        // setVgrow(Priority.NEVER);
+        setPercentHeight(100);
+      }}
+    );
+  }};
+
   private final Timeline timeline = new Timeline(
     new KeyFrame(Duration.ZERO,
       new KeyValue(newBackgroundImageView.opacityProperty(), 0.0),
@@ -93,8 +117,21 @@ public class SelectMediaPane<T> extends StackPane {
     )
   );
 
+  private final Timeline intro = new Timeline(
+    new KeyFrame(Duration.ZERO,
+      new KeyValue(listPane.translateXProperty(), 1500),
+      new KeyValue(detailPane.translateXProperty(), -1500)
+    ),
+    new KeyFrame(Duration.seconds(1),
+      new KeyValue(listPane.translateXProperty(), 0),
+      new KeyValue(detailPane.translateXProperty(), 0)
+    )
+  );
+
   public SelectMediaPane() {
     setId("select-media");
+
+    intro.play();
 
     timeline.setOnFinished(new EventHandler<ActionEvent>() {
       @Override
@@ -176,37 +213,19 @@ public class SelectMediaPane<T> extends StackPane {
       }}
     );
 
-    root.add(new GridPane() {{
-      getStyleClass().addAll("content-box", "detail");
 
-      getColumnConstraints().addAll(
-        new ColumnConstraints() {{
-          setPercentWidth(50);
-        }},
-        new ColumnConstraints() {{
-          setPercentWidth(50);
-        }}
-      );
+    detailPane.add(new ScrollPane() {{
+      final ReadOnlyDoubleProperty widthProperty = widthProperty();
+      final ReadOnlyDoubleProperty heightProperty = heightProperty();
 
-      getRowConstraints().addAll(
-        new RowConstraints() {{
-          // setVgrow(Priority.NEVER);
-          setPercentHeight(100);
-        }}
-      );
+      setHbarPolicy(ScrollBarPolicy.NEVER);
+      setVbarPolicy(ScrollBarPolicy.NEVER);
 
-      add(new ScrollPane() {{
-        final ReadOnlyDoubleProperty widthProperty = widthProperty();
-        final ReadOnlyDoubleProperty heightProperty = heightProperty();
-
-        setHbarPolicy(ScrollBarPolicy.NEVER);
-        setVbarPolicy(ScrollBarPolicy.NEVER);
-
-        setContent(new ImageView() {{
-          imageProperty().bind(poster);
-          setPreserveRatio(true);
-          setSmooth(true);
-          setEffect(new DropShadow());
+      setContent(new ImageView() {{
+        imageProperty().bind(poster);
+        setPreserveRatio(true);
+        setSmooth(true);
+        setEffect(new DropShadow());
 //          setEffect(new PerspectiveTransform() {{
 //            setUlx(10.0);
 //            setUly(10.0);
@@ -221,69 +240,67 @@ public class SelectMediaPane<T> extends StackPane {
 //            }});
 //          }});
 
-          fitWidthProperty().bind(widthProperty);
-          fitHeightProperty().bind(heightProperty);
+        fitWidthProperty().bind(widthProperty);
+        fitHeightProperty().bind(heightProperty);
+      }});
+    }}, 0, 0);
+    detailPane.add(new BorderPane() {{
+      setTop(new VBox() {{
+        visibleProperty().bind(title.isNotNull());
+        getChildren().add(new Label() {{
+          getStyleClass().add("title");
+          textProperty().bind(title);
         }});
-      }}, 0, 0);
-      add(new BorderPane() {{
-        setTop(new VBox() {{
-          visibleProperty().bind(title.isNotNull());
-          getChildren().add(new Label() {{
-            getStyleClass().add("title");
-            textProperty().bind(title);
+        getChildren().add(new Label() {{
+          getStyleClass().add("subtitle");
+          textProperty().bind(subtitle);
+          managedProperty().bind(textProperty().isNotEqualTo(""));
+        }});
+        getChildren().add(new HBox() {{
+          setAlignment(Pos.CENTER_LEFT);
+          getChildren().add(new StarRating(12, 5, 5) {{
+            ratingProperty().bind(rating.divide(10));
           }});
           getChildren().add(new Label() {{
-            getStyleClass().add("subtitle");
-            textProperty().bind(subtitle);
-            managedProperty().bind(textProperty().isNotEqualTo(""));
-          }});
-          getChildren().add(new HBox() {{
-            setAlignment(Pos.CENTER_LEFT);
-            getChildren().add(new StarRating(12, 5, 5) {{
-              ratingProperty().bind(rating.divide(10));
-            }});
-            getChildren().add(new Label() {{
-              getStyleClass().add("rating");
-              textProperty().bind(Bindings.format("%3.1f/10", rating));
-            }});
-          }});
-          getChildren().add(new Label() {{
-            getStyleClass().add("genres");
-            textProperty().bind(genres);
-            managedProperty().bind(textProperty().isNotEqualTo(""));
-          }});
-          getChildren().add(new Label("PLOT") {{
-            getStyleClass().add("header");
-          }});
-          getChildren().add(new Label() {{
-            getStyleClass().add("plot");
-            textProperty().bind(plot);
-            VBox.setVgrow(this, Priority.ALWAYS);
-          }});
-          getChildren().add(new Label("RELEASED") {{
-            getStyleClass().add("header");
-          }});
-          getChildren().add(new Label() {{
-            getStyleClass().add("release-time");
-            textProperty().bind(releaseTime);
-          }});
-          getChildren().add(new Label("RUNTIME") {{
-            getStyleClass().add("header");
-          }});
-          getChildren().add(new Label() {{
-            getStyleClass().add("runtime");
-            textProperty().bind(Bindings.format("%d minutes", runtime));
+            getStyleClass().add("rating");
+            textProperty().bind(Bindings.format("%3.1f/10", rating));
           }});
         }});
-      }}, 1, 0);
-    }}, 0, 1);
+        getChildren().add(new Label() {{
+          getStyleClass().add("genres");
+          textProperty().bind(genres);
+          managedProperty().bind(textProperty().isNotEqualTo(""));
+        }});
+        getChildren().add(new Label("PLOT") {{
+          getStyleClass().add("header");
+        }});
+        getChildren().add(new Label() {{
+          getStyleClass().add("plot");
+          textProperty().bind(plot);
+          VBox.setVgrow(this, Priority.ALWAYS);
+        }});
+        getChildren().add(new Label("RELEASED") {{
+          getStyleClass().add("header");
+        }});
+        getChildren().add(new Label() {{
+          getStyleClass().add("release-time");
+          textProperty().bind(releaseTime);
+        }});
+        getChildren().add(new Label("RUNTIME") {{
+          getStyleClass().add("header");
+        }});
+        getChildren().add(new Label() {{
+          getStyleClass().add("runtime");
+          textProperty().bind(Bindings.format("%d minutes", runtime));
+        }});
+      }});
+    }}, 1, 0);
 
-    root.add(new HBox() {{
-      getStyleClass().addAll("content-box", "list");
-      getChildren().add(treeView);
+    listPane.getChildren().add(treeView);
+    HBox.setHgrow(treeView, Priority.ALWAYS);
 
-      HBox.setHgrow(treeView, Priority.ALWAYS);
-    }}, 1, 1);
+    root.add(detailPane, 0, 1);
+    root.add(listPane, 1, 1);
 
     getChildren().add(new ScrollPane() {{
       final ReadOnlyDoubleProperty widthProperty = widthProperty();
