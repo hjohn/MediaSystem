@@ -14,7 +14,6 @@ import javafx.application.Application;
 // TODO Provide sequence numbers for sub-items to distinguish movies
 // TODO Change the Option overlay to be generic
 // TODO Use the Message overlay to indicate stuff being loaded in background on Select Media screen
-// TODO Restyle scrollbar
 // TODO Clearer serie/group indicator
 // TODO Split off pictures from meta-data information for faster loading
 // TODO Actor / Director information in database

@@ -189,3 +189,15 @@
   -fx-background-radius: 8 8 0 0;
   -fx-label-padding: 0 20 0 20;
 }
+
+.scroll-bar {
+  -fx-skin: "hs.mediasystem.ScrollBarSkin";
+}
+
+.scroll-bar .track {
+  -fx-fill: derive(color-blue-50, -80%);
+}
+
+.scroll-bar .thumb {
+  -fx-fill: derive(color-blue-50, -60%);  
+}

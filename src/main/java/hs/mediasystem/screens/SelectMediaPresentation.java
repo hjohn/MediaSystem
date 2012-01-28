@@ -188,6 +188,7 @@ public class SelectMediaPresentation {
 
       Item item = itemEnricher.loadItem(identifier, bypassCache);
 
+      mediaItem.setTitle(item.getTitle());
       mediaItem.setBanner(item.getBanner());
       mediaItem.setPoster(item.getPoster());
       mediaItem.setBackground(item.getBackground());

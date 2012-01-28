@@ -1,6 +1,7 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.ImageHandle;
 
@@ -12,6 +13,7 @@ public abstract class NamedItem implements MediaItem {
 
   protected MediaItem parent;
 
+  private String title;
   private String plot = "";
   private Float rating;
   private Date releaseDate;
@@ -36,7 +38,24 @@ public abstract class NamedItem implements MediaItem {
 
   @Override
   public final String getTitle() {
+    if(localInfo.getType() == MediaType.EPISODE) {
+      if(title != null && !title.isEmpty()) {
+        return title;
+      }
+      else if(localInfo.getSubtitle() == null) {
+        return localInfo.getSeason() + "x" + localInfo.getEpisode();
+      }
+      else {
+        return localInfo.getSubtitle();
+      }
+    }
+
     return localInfo.getTitle();
+  }
+
+  @Override
+  public void setTitle(String title) {
+    this.title = title;
   }
 
   public MediaItem getParent() {

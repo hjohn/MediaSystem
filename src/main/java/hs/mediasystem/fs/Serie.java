@@ -21,6 +21,6 @@ public class Serie extends NamedItem {
 
   @Override
   public MediaTree getRoot() {
-    return new EpisodesMediaTree(getPath());
+    return new EpisodesMediaTree(getPath(), getTitle());
   }
 }

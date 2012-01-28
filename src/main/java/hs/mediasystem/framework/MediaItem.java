@@ -29,6 +29,7 @@ public interface MediaItem {
   ImageHandle getPoster();
   ImageHandle getBackground();
 
+  void setTitle(String title);
   void setPlot(String plot);
   void setRating(Float rating);
   void setReleaseDate(Date date);

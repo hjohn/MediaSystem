@@ -14,11 +14,13 @@ import java.util.List;
 
 public class EpisodesMediaTree implements MediaTree {
   private final Path root;
+  private final String serieName;
 
   private List<? extends MediaItem> children;
 
-  public EpisodesMediaTree(Path root) {
+  public EpisodesMediaTree(Path root, String serieName) {
     this.root = root;
+    this.serieName = serieName;
   }
 
   @Override
@@ -32,7 +34,7 @@ public class EpisodesMediaTree implements MediaTree {
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
           Episode episodeOne = (Episode)group.get(0);
-          Season s = new Season(episodeOne.getTitle(), episodeOne.getSeason());
+          Season s = new Season(serieName, episodeOne.getSeason());
 
           Collections.sort(group, MediaItemComparator.INSTANCE);
 
