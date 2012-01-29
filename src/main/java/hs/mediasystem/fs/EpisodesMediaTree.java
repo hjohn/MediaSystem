@@ -63,7 +63,7 @@ public class EpisodesMediaTree implements MediaTree {
   }
 
   @Override
-  public CellProvider<MediaItem> createListCell() {
-    return new DuoLineRenderer();
+  public CellProvider<MediaItem> getCellProvider() {
+    return new SeasonAndEpisodeCellProvider();
   }
 }

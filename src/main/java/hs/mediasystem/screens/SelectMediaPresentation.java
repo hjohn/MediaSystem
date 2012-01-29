@@ -8,6 +8,7 @@ import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
+import hs.mediasystem.fs.EpisodesMediaTree;
 import hs.mediasystem.screens.SelectMediaPane.ItemEvent;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
@@ -23,6 +24,7 @@ import javafx.concurrent.Worker.State;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -116,6 +118,13 @@ public class SelectMediaPresentation {
         }
       }
     });
+
+    view.activeFilterItemProperty().addListener(new ChangeListener<Node>() {
+      @Override
+      public void changed(ObservableValue<? extends Node> observable, Node oldValue, Node value) {
+        refilter();
+      }
+    });
   }
 
   public SelectMediaPane<MediaItem> getView() {
@@ -123,18 +132,45 @@ public class SelectMediaPresentation {
   }
 
   public void setMediaTree(final MediaTree mediaTree) {
-    treeRoot.getChildren().clear();
+    boolean filterLevel = mediaTree instanceof EpisodesMediaTree;
 
-    for(MediaItem item : mediaTree.children()) {
-      treeRoot.getChildren().add(new MediaTreeItem(item));
+    view.filterItemsProperty().clear();
+
+    if(filterLevel) {
+      for(MediaItem item : mediaTree.children()) {
+        Label label = new Label(item.getTitle());
+
+        view.filterItemsProperty().add(label);
+        label.setUserData(item);
+      }
+
+      view.activeFilterItemProperty().set(view.filterItemsProperty().get(0));
+
+      refilter();
+    }
+    else {
+      treeRoot.getChildren().clear();
+
+      for(MediaItem item : mediaTree.children()) {
+        treeRoot.getChildren().add(new MediaTreeItem(item));
+      }
     }
 
     view.setCellFactory(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
       @Override
       public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
-        return new MediaItemTreeCell(mediaTree.createListCell());
+        return new MediaItemTreeCell(mediaTree.getCellProvider());
       }
     });
+  }
+
+  private void refilter() {
+    treeRoot.getChildren().clear();
+    hs.mediasystem.framework.Group group = (hs.mediasystem.framework.Group)view.activeFilterItemProperty().get().getUserData();
+
+    for(MediaItem item : group.children()) {
+      treeRoot.getChildren().add(new MediaTreeItem(item));
+    }
   }
 
   private void updateCurrentItem() {

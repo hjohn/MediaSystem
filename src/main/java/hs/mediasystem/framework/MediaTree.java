@@ -8,5 +8,5 @@ import java.util.List;
 public interface MediaTree {
   List<? extends MediaItem> children();
   MediaTree parent();
-  CellProvider<MediaItem> createListCell();
+  CellProvider<MediaItem> getCellProvider();
 }

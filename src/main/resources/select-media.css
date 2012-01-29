@@ -73,7 +73,7 @@
   -fx-font: bold 19pt "Arial";
 }
 
-#select-media .list .release-time {
+#select-media .list .extra-info {
   -fx-font: 12pt "Arial";
   -fx-text-fill: derive(color-blue, -30%);
 }

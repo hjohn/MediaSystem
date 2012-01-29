@@ -33,7 +33,7 @@ public class SeriesMediaTree implements MediaTree {
   }
 
   @Override
-  public CellProvider<MediaItem> createListCell() {
+  public CellProvider<MediaItem> getCellProvider() {
     return new BannerRenderer();
   }
 }

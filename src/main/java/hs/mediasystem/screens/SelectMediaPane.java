@@ -18,12 +18,14 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeCell;
@@ -52,6 +54,8 @@ import javafx.util.Duration;
 public class SelectMediaPane<T> extends StackPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
+  private static final KeyCombination LEFT = new KeyCodeCombination(KeyCode.LEFT);
+  private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
 
   private final TreeView<T> treeView = new TreeView<>();
 
@@ -82,7 +86,7 @@ public class SelectMediaPane<T> extends StackPane {
     setSmooth(true);
   }};
 
-  private final HBox listPane = new HBox() {{
+  private final BorderPane listPane = new BorderPane() {{
     getStyleClass().addAll("content-box", "list");
   }};
 
@@ -103,6 +107,11 @@ public class SelectMediaPane<T> extends StackPane {
         setPercentHeight(100);
       }}
     );
+  }};
+
+  private final Filter filter = new Filter() {{
+    getChildren().add(new Label("Season 1"));
+    getChildren().add(new Label("Season 2"));
   }};
 
   private final Timeline timeline = new Timeline(
@@ -191,6 +200,15 @@ public class SelectMediaPane<T> extends StackPane {
             event.consume();
           }
         }
+
+        if(LEFT.match(event)) {
+          filter.activatePrevious();
+          event.consume();
+        }
+        else if(RIGHT.match(event)) {
+          filter.activateNext();
+          event.consume();
+        }
       }
     });
 
@@ -211,7 +229,6 @@ public class SelectMediaPane<T> extends StackPane {
         setPercentHeight(75);
       }}
     );
-
 
     detailPane.add(new ScrollPane() {{
       final ReadOnlyDoubleProperty widthProperty = widthProperty();
@@ -295,8 +312,8 @@ public class SelectMediaPane<T> extends StackPane {
       }});
     }}, 1, 0);
 
-    listPane.getChildren().add(treeView);
-    HBox.setHgrow(treeView, Priority.ALWAYS);
+    listPane.setTop(filter);
+    listPane.setCenter(treeView);
 
     root.add(detailPane, 0, 1);
     root.add(listPane, 1, 1);
@@ -319,6 +336,14 @@ public class SelectMediaPane<T> extends StackPane {
     }});
 
     getChildren().add(root);
+  }
+
+  public ObservableList<Node> filterItemsProperty() {
+    return filter.getChildren();
+  }
+
+  public ObjectProperty<Node> activeFilterItemProperty() {
+    return filter.activeProperty();
   }
 
   public void setRoot(TreeItem<T> root) {

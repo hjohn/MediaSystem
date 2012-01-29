@@ -12,9 +12,10 @@ import javafx.scene.shape.Rectangle;
 public class StarRating extends HBox {
   private final DoubleProperty rating = new SimpleDoubleProperty(0.0);
   public DoubleProperty ratingProperty() { return rating; }
+  public double getRating() { return rating.get(); }
+  public void setRating(double rating) { this.rating.set(rating); }
 
   private final Rectangle rectangle = new Rectangle(0, 0, 0, 0); // TODO scale seems to work, but too much work to get it to work for now (with width at 100)
-
 
   public StarRating(final double radius, final double innerRadius, final int numberOfPoints) {
     getStyleClass().add("star-rating");
@@ -24,12 +25,17 @@ public class StarRating extends HBox {
     final HBox stars = createStars(starData);
     final HBox disabledStars = createStars(starData);
 
-    getChildren().add(new Group() {{
-      disabledStars.setDisable(true);
-      stars.setClip(rectangle);
+    stars.setClip(rectangle);
+    disabledStars.setDisable(true);
 
+    getChildren().add(new Group() {{
       getChildren().addAll(disabledStars, stars);
     }});
+
+//    System.out.println(">>> " + rating.multiply(disabledStars.widthProperty()).getDependencies());
+//
+//    rectangle.widthProperty().bind(rating.multiply(disabledStars.widthProperty()));
+//    rectangle.heightProperty().bind(disabledStars.heightProperty());
 
     ChangeListener<Number> changeListener = new ChangeListener<Number>() {
       @Override

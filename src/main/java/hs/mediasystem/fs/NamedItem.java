@@ -42,12 +42,15 @@ public abstract class NamedItem implements MediaItem {
       if(title != null && !title.isEmpty()) {
         return title;
       }
-      else if(localInfo.getSubtitle() == null) {
-        return localInfo.getSeason() + "x" + localInfo.getEpisode();
-      }
-      else {
+      else if(localInfo.getSubtitle() != null) {
         return localInfo.getSubtitle();
       }
+
+      return localInfo.getSeason() + "x" + localInfo.getEpisode();
+    }
+
+    if(localInfo.getType() == MediaType.SEASON) {
+      return "Season " + localInfo.getSeason();
     }
 
     return localInfo.getTitle();
