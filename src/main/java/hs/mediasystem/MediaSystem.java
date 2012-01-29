@@ -14,13 +14,12 @@ import javafx.application.Application;
 // TODO Provide sequence numbers for sub-items to distinguish movies
 // TODO Change the Option overlay to be generic
 // TODO Use the Message overlay to indicate stuff being loaded in background on Select Media screen
-// TODO Clearer serie/group indicator
 // TODO Split off pictures from meta-data information for faster loading
 // TODO Actor / Director information in database
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance
-// TODO Add memory indicator / time / date
+// TODO Add memory indicator / time / date / Make clock in standard border
 
-// TODO Some form of remote control support
+// TODO Some form of remote control support / Lirc support
 // TODO VLCPlayer: Make brightness controls work
 // TODO When changing Options, show this in OSD
 // TODO Style main page
@@ -31,17 +30,12 @@ import javafx.application.Application;
 // TODO Local names not shown everywhere(?)
 
 // Minimal working system:
-// TODO Make clock in standard border
-// TODO Download + show subtitles, also multiple different ones should work without problem; store them with file I guess
-// TODO Lirc support
-// TODO Add breadcrumb
+// TODO Make subtitles more peristent by storing them with file?
+// TODO Add breadcrumb?
 // TODO Auto-scroll plot/overview
 // TODO Possibly with Series/Season, information about episode count
-// TODO Display Genre, Rating, First Aired, etc.. for all types
 // TODO BUG: When there's an outstanding query for a provider (which is taking long), it is possible for a 2nd query to be triggered on the same item.  When both return finally, they are inserted one after the other.  The second one causes a duplicate key violation.
 // TODO Display alternative banner when there is no banner available
-
-// TODO Display list of video files with IMDB info
 
 // Unable to Fix:
 // - Subtitle list in Video Options should be updated more frequently, especially after downloading a sub (may require Player to notify of changes) --> No indication from VLC when a subtitle actually was fully loaded, so this is not possible

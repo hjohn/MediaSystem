@@ -33,6 +33,7 @@ public class DuoLineCell extends HBox {
 
   private Group collectionMarker = new Group() {{
     getChildren().add(new Path() {{
+      getStyleClass().add("group-marker");
       getElements().addAll(
         new MoveTo(0, 0),
         new LineTo(0, 30),

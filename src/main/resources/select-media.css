@@ -81,3 +81,9 @@
 #select-media .list .star-rating {
 	-fx-padding: 0 15 5 15;
 }
+
+#select-media .list .group-marker {  /* same as star */
+  -fx-fill: linear-gradient(from 0% 0% to 0% 100%, orange 0%, white 33%, orange 100%);
+  -fx-stroke: yellow;
+  -fx-stroke-width: 1;
+}
