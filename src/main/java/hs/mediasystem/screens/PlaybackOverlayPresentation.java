@@ -59,6 +59,7 @@ public class PlaybackOverlayPresentation {
 
         if(code == KeyCode.S) {
           controller.stop();
+          event.consume();
         }
         else if(code == KeyCode.J) {
           Subtitle subtitle = controller.nextSubtitle();
@@ -66,12 +67,14 @@ public class PlaybackOverlayPresentation {
           if(subtitle != null) {
             view.setOSD("Subtitle: " + subtitle.getDescription());
           }
+          event.consume();
         }
         else if(BACK_SPACE.match(event)) {
           if(view.getChildren().size() > 1) {
             view.getChildren().remove(1);
             view.requestFocus();
           }
+          event.consume();
         }
         else if(code == KeyCode.O) {
           if(view.getChildren().size() == 1) {
@@ -130,10 +133,12 @@ public class PlaybackOverlayPresentation {
 
             dialogScreen.requestFocus();
           }
+          event.consume();
         }
         else if(code == KeyCode.SPACE) {
           controller.pause();
           view.showOSD();
+          event.consume();
         }
         else if(code == KeyCode.NUMPAD4) {
           controller.move(-10 * 1000);
@@ -142,38 +147,48 @@ public class PlaybackOverlayPresentation {
         else if(code == KeyCode.NUMPAD6) {
           controller.move(10 * 1000);
           view.showOSD();
+          event.consume();
         }
         else if(code == KeyCode.NUMPAD2) {
           controller.move(-60 * 1000);
           view.showOSD();
+          event.consume();
         }
         else if(code == KeyCode.NUMPAD8) {
           controller.move(60 * 1000);
           view.showOSD();
+          event.consume();
         }
         else if(code == KeyCode.M) {
           controller.mute();
           view.showOSD();
+          event.consume();
         }
         else if(code == KeyCode.DIGIT9) {
           controller.changeVolume(-1);
           view.showOSD();
+          event.consume();
         }
         else if(code == KeyCode.DIGIT0) {
           controller.changeVolume(1);
           view.showOSD();
+          event.consume();
         }
         else if(code == KeyCode.DIGIT1) {
           controller.changeBrightness(-0.05f);
+          event.consume();
         }
         else if(code == KeyCode.DIGIT2) {
           controller.changeBrightness(0.05f);
+          event.consume();
         }
         else if(code == KeyCode.Z) {
           controller.changeSubtitleDelay(-100);
+          event.consume();
         }
         else if(code == KeyCode.X) {
           controller.changeSubtitleDelay(100);
+          event.consume();
         }
       }
     });

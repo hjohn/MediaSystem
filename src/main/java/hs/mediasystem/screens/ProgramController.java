@@ -22,7 +22,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -44,13 +43,11 @@ import javax.inject.Singleton;
 public class ProgramController {
   private final Player player;
   private final Stage mainStage;  // TODO two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing; refactor this
-  private final Stage overlayStage;
-  private final StackPane mainStackPane = new StackPane();
-  private final StackPane transparentStackPane = new StackPane();
-  private final BorderPane mainGroup = new BorderPane();
-  private final BorderPane transparentGroup = new BorderPane();
-  private final BorderPane mainOverlay = new BorderPane();
-  private final BorderPane transparentOverlay = new BorderPane();
+  private final Stage transparentStage;
+  private final Scene scene = new Scene(new BorderPane(), Color.BLACK);
+  private final StackPane sceneRoot = new StackPane();
+  private final BorderPane contentBorderPane = new BorderPane();
+  private final BorderPane overlayBorderPane = new BorderPane();
   private final Ini ini;
   private final Provider<MainScreen> mainScreenProvider;
   private final Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider;
@@ -73,17 +70,17 @@ public class ProgramController {
 
     screenNumber = Integer.parseInt(ini.getSection("general").getDefault("screen", "0"));
 
-    mainStackPane.getChildren().addAll(mainGroup, mainOverlay);
-    transparentStackPane.getChildren().addAll(transparentGroup, transparentOverlay);
+    sceneRoot.getChildren().addAll(contentBorderPane, overlayBorderPane);
+    scene.setRoot(sceneRoot);
 
-    mainOverlay.setMouseTransparent(true);
-    transparentOverlay.setMouseTransparent(true);
+    overlayBorderPane.setMouseTransparent(true);
+    overlayBorderPane.setRight(messagePane);
 
     mainStage = new Stage(StageStyle.UNDECORATED);
-    overlayStage = new Stage(StageStyle.TRANSPARENT);
+    transparentStage = new Stage(StageStyle.TRANSPARENT);
 
-    setupStage(mainStage, mainStackPane, 1.0);
-    setupStage(overlayStage, transparentStackPane, 0.0);
+//    setupStage(mainStage);
+//    setupStage(transparentStage);
 
 //    mainGroup.addEventHandler(KeyEvent.KEY_TYPED, new EventHandler<KeyEvent>() {
 //      @Override
@@ -93,7 +90,7 @@ public class ProgramController {
 //      }
 //    });
 
-    mainGroup.setOnKeyPressed(new EventHandler<KeyEvent>() {
+    contentBorderPane.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
         if(event.getCode().equals(KeyCode.BACK_SPACE)) {
@@ -132,12 +129,6 @@ public class ProgramController {
     return ini;
   }
 
-  private static void setupStage(Stage stage, Parent parent, double transparency) {
-    Scene scene = new Scene(parent, new Color(0, 0, 0, transparency));
-
-    stage.setScene(scene);
-  }
-
   private void setupStageLocation(Stage stage) {
     ObservableList<Screen> screens = Screen.getScreens();
     Screen screen = screens.size() <= screenNumber ? Screen.getPrimary() : screens.get(screenNumber);
@@ -157,37 +148,29 @@ public class ProgramController {
   }
 
   private void displayOnMainStage(Node node) {
-    ObservableList<String> stylesheets = mainStage.getScene().getStylesheets();
-
-    stylesheets.clear();
-    stylesheets.addAll("default.css", "status-messages.css", node.getId() + ".css");
-
-    mainStage.show();
-
-    setupStageLocation(mainStage);
-
-    mainStage.toFront();
-    overlayStage.hide();
-    transparentOverlay.setRight(null);
-    mainOverlay.setRight(messagePane);
-    mainGroup.setCenter(node);
+    displayOnStage(node, mainStage, transparentStage, Color.BLACK);
   }
 
   private void displayOnOverlayStage(Node node) {
-    ObservableList<String> stylesheets = overlayStage.getScene().getStylesheets();
+    displayOnStage(node, transparentStage, mainStage, Color.TRANSPARENT);
+  }
+
+  private void displayOnStage(Node node, Stage newStage, Stage oldStage, Color background) {
+    ObservableList<String> stylesheets = scene.getStylesheets();
 
     stylesheets.clear();
     stylesheets.addAll("default.css", "status-messages.css", node.getId() + ".css");
 
-    overlayStage.show();
+    oldStage.setScene(null);
+    scene.setFill(background);
+    contentBorderPane.setCenter(node);
+    newStage.setScene(scene);
+    newStage.show();
 
-    setupStageLocation(overlayStage);
+    setupStageLocation(newStage);
 
-    overlayStage.toFront();
-    mainStage.hide();
-    mainOverlay.setRight(null);
-    transparentOverlay.setRight(messagePane);
-    transparentGroup.setCenter(node);
+    newStage.toFront();
+    oldStage.hide();
   }
 
   public void showMainScreen() {

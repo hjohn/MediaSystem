@@ -64,6 +64,8 @@ public class DuoLineCell extends HBox {
       HBox.setHgrow(this, Priority.ALWAYS);
     }});
     getChildren().add(collectionMarker);
+
+    collectionMarker.setVisible(false);
   }
 
   public StringProperty titleProperty() { return title.textProperty(); }
