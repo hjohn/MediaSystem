@@ -36,7 +36,7 @@ public class EpisodesMediaTree implements MediaTree {
           Episode episodeOne = (Episode)group.get(0);
           Season s = new Season(serieName, episodeOne.getSeason());
 
-          Collections.sort(group, MediaItemComparator.INSTANCE);
+          Collections.sort(group, EpisodeComparator.INSTANCE);
 
           for(MediaItem item : group) {
             s.add(item);

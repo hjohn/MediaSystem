@@ -18,7 +18,6 @@ import javafx.application.Application;
 // TODO Split off pictures from meta-data information for faster loading
 // TODO Actor / Director information in database
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance
-// TODO Fix sorting order of episodes in season
 // TODO Add memory indicator / time / date
 
 // TODO Some form of remote control support
