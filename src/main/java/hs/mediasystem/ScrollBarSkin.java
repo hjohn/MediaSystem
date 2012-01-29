@@ -31,19 +31,19 @@ public class ScrollBarSkin implements Skin<ScrollBar> {
       }});
       getChildren().add(new Rectangle() {{
         getStyleClass().add("thumb");
-        
+
         NumberBinding range = Bindings.subtract(scrollBar.maxProperty(), scrollBar.minProperty());
         NumberBinding position = Bindings.divide(Bindings.subtract(scrollBar.valueProperty(), scrollBar.minProperty()), range);
-        
+
         if(scrollBar.getOrientation() == Orientation.HORIZONTAL) {
           heightProperty().bind(scrollBar.heightProperty());
-          xProperty().bind(scrollBar.widthProperty().multiply(position));
           widthProperty().bind(scrollBar.visibleAmountProperty().divide(range).multiply(scrollBar.widthProperty()));
+          xProperty().bind(Bindings.subtract(scrollBar.widthProperty(), widthProperty()).multiply(position));
         }
         else {
           widthProperty().bind(scrollBar.widthProperty());
-          yProperty().bind(scrollBar.heightProperty().multiply(position));
           heightProperty().bind(scrollBar.visibleAmountProperty().divide(range).multiply(scrollBar.heightProperty()));
+          yProperty().bind(Bindings.subtract(scrollBar.heightProperty(), heightProperty()).multiply(position));
         }
       }});
     }};
