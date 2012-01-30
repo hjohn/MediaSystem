@@ -122,6 +122,14 @@ public class SelectMediaPresentation {
     view.activeFilterItemProperty().addListener(new ChangeListener<Node>() {
       @Override
       public void changed(ObservableValue<? extends Node> observable, Node oldValue, Node value) {
+        Label oldLabel = (Label)oldValue;
+        Label label = (Label)value;
+
+        if(oldLabel != null) {
+          oldLabel.setText("" + ((MediaItem)oldValue.getUserData()).getSeason());
+        }
+        label.setText("Season " + ((MediaItem)value.getUserData()).getSeason());
+
         refilter();
       }
     });
@@ -138,7 +146,7 @@ public class SelectMediaPresentation {
 
     if(filterLevel) {
       for(MediaItem item : mediaTree.children()) {
-        Label label = new Label(item.getTitle());
+        Label label = new Label("" + item.getSeason());
 
         view.filterItemsProperty().add(label);
         label.setUserData(item);

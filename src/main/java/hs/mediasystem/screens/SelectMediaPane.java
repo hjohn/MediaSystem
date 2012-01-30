@@ -110,6 +110,7 @@ public class SelectMediaPane<T> extends StackPane {
   }};
 
   private final Filter filter = new Filter() {{
+    getStyleClass().add("seasons");
     getChildren().add(new Label("Season 1"));
     getChildren().add(new Label("Season 2"));
   }};

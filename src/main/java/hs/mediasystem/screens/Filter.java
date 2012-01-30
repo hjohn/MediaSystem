@@ -12,6 +12,7 @@ public class Filter extends FlowPane {
   public ObjectProperty<Node> activeProperty() { return active; }
 
   public Filter() {
+    getStyleClass().add("filter");
     getChildren().addListener(new ListChangeListener<Node>() {
       @Override
       public void onChanged(ListChangeListener.Change<? extends Node> event) {
