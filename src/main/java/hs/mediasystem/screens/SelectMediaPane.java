@@ -53,6 +53,7 @@ import javafx.util.Duration;
 
 public class SelectMediaPane<T> extends StackPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
+  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
   private static final KeyCombination LEFT = new KeyCodeCombination(KeyCode.LEFT);
   private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
@@ -210,6 +211,13 @@ public class SelectMediaPane<T> extends StackPane {
           filter.activateNext();
           event.consume();
         }
+        else if(BACK_SPACE.match(event) && onBack.get() != null) {
+          ActionEvent actionEvent = new ActionEvent();
+          onBack.get().handle(actionEvent);
+          if(actionEvent.isConsumed()) {
+            event.consume();
+          }
+        }
       }
     });
 
@@ -363,6 +371,9 @@ public class SelectMediaPane<T> extends StackPane {
 
   private final ObjectProperty<EventHandler<ItemEvent<T>>> onItemAlternateSelect = new SimpleObjectProperty<>();
   public ObjectProperty<EventHandler<ItemEvent<T>>> onItemAlternateSelect() { return onItemAlternateSelect; }
+
+  private final ObjectProperty<EventHandler<ActionEvent>> onBack = new SimpleObjectProperty<>();
+  public ObjectProperty<EventHandler<ActionEvent>> onBack() { return onBack; }
 
   public static class ItemEvent<T> extends Event {
     private final TreeItem<T> treeItem;

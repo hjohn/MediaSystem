@@ -18,6 +18,8 @@ import javafx.application.Application;
 // TODO Actor / Director information in database
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance
 // TODO Add memory indicator / time / date / Make clock in standard border
+// TODO Make NavigationItem/History more generic; inject it into Presentations and allow it to be used as global navigation
+// TODO Indicate serie somehow when selecting episodes (it is now unclear which serie you are selecting)
 
 // TODO Some form of remote control support / Lirc support
 // TODO VLCPlayer: Make brightness controls work

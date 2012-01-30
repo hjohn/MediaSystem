@@ -13,6 +13,8 @@ import hs.mediasystem.screens.SelectMediaPane.ItemEvent;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 
 import javafx.beans.value.ChangeListener;
@@ -21,6 +23,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker.State;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -42,6 +45,7 @@ public class SelectMediaPresentation {
   private final SelectMediaPane<MediaItem> view;
   private final CachedItemEnricher itemEnricher;
   private final TreeItem<MediaItem> treeRoot = new TreeItem<>();
+  private final Deque<MediaTree> mediaTrees = new LinkedList<>();
 
   private DialogScreen dialogScreen;
   private MediaItem currentItem;
@@ -58,6 +62,19 @@ public class SelectMediaPresentation {
         if(event.getTreeItem() != null) {
           currentItem = event.getTreeItem().getValue();
           updateCurrentItem();  // TODO Expensive image loading being done on JavaFX thread
+        }
+      }
+    });
+
+    view.onBack().set(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        mediaTrees.pollLast();
+        MediaTree parent = mediaTrees.pollLast();
+
+        if(parent != null) {
+          setMediaTree(parent);
+          event.consume();
         }
       }
     });
@@ -140,6 +157,7 @@ public class SelectMediaPresentation {
   }
 
   public void setMediaTree(final MediaTree mediaTree) {
+    mediaTrees.addLast(mediaTree);
     boolean filterLevel = mediaTree instanceof EpisodesMediaTree;
 
     view.filterItemsProperty().clear();
