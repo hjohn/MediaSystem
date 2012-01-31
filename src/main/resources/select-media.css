@@ -71,6 +71,7 @@
 
 #select-media .list .title {
   -fx-font: bold 19pt "Arial";
+  -fx-wrap-text: true;
 }
 
 #select-media .list .extra-info {
