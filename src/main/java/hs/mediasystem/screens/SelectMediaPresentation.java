@@ -13,8 +13,6 @@ import hs.mediasystem.screens.SelectMediaPane.ItemEvent;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 
 import javafx.beans.value.ChangeListener;
@@ -23,7 +21,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker.State;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -45,7 +42,6 @@ public class SelectMediaPresentation {
   private final SelectMediaPane<MediaItem> view;
   private final CachedItemEnricher itemEnricher;
   private final TreeItem<MediaItem> treeRoot = new TreeItem<>();
-  private final Deque<MediaTree> mediaTrees = new LinkedList<>();
 
   private DialogScreen dialogScreen;
   private MediaItem currentItem;
@@ -66,30 +62,22 @@ public class SelectMediaPresentation {
       }
     });
 
-    view.onBack().set(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-        mediaTrees.pollLast();
-        MediaTree parent = mediaTrees.pollLast();
-
-        if(parent != null) {
-          setMediaTree(parent);
-          event.consume();
-        }
-      }
-    });
-
     view.onItemSelected().set(new EventHandler<ItemEvent<MediaItem>>() {
       @Override
       public void handle(ItemEvent<MediaItem> event) {
-        MediaItem mediaItem = event.getTreeItem().getValue();
+        final MediaItem mediaItem = event.getTreeItem().getValue();
         System.out.println("[FINE] SelectMediaPresentation.SelectMediaPresentation(...).new EventHandler() {...}.handle() - item selected: " + mediaItem);
 
         if(mediaItem.isLeaf()) {
           controller.play(mediaItem);
         }
         else if(mediaItem.isRoot()) {
-          setMediaTree(mediaItem.getRoot());
+          controller.getNavigator().navigateTo(new Destination("MOVIES..", new Runnable() {
+            @Override
+            public void run() {
+              setMediaTree(mediaItem.getRoot());
+            }
+          }));
         }
         else if(mediaItem instanceof hs.mediasystem.framework.Group) {
           event.getTreeItem().setExpanded(true);
@@ -157,7 +145,6 @@ public class SelectMediaPresentation {
   }
 
   public void setMediaTree(final MediaTree mediaTree) {
-    mediaTrees.addLast(mediaTree);
     boolean filterLevel = mediaTree instanceof EpisodesMediaTree;
 
     view.filterItemsProperty().clear();

@@ -1,6 +1,5 @@
 package hs.mediasystem.screens;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -60,7 +59,12 @@ public class MainScreen {
         setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent event) {
-            mainMenuExtension.select(controller);
+            controller.getNavigator().navigateTo(new Destination("BLA", new Runnable() {
+              @Override
+              public void run() {
+                mainMenuExtension.select(controller);
+              }
+            }));
 //            ItemEnricher itemEnricher = new CachedItemEnricher(new ItemsDao(), new TmdbMovieEnricher());
 //            controller.showSelectItemScreen(new MoviesMediaTree(itemEnricher, Paths.get(controller.getIni().getValue("general", "movies.path"))));
           }

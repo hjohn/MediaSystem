@@ -1,8 +1,8 @@
 package hs.mediasystem.screens;
 
-import java.text.DateFormat;
-
 import hs.mediasystem.framework.MediaItem;
+
+import java.text.DateFormat;
 
 public class MediaItemFormatter {
   private static final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
