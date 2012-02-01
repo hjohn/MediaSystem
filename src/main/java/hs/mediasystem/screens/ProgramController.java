@@ -18,7 +18,6 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Worker;
 import javafx.concurrent.Worker.State;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
@@ -58,7 +57,7 @@ public class ProgramController {
     setVisible(false);
   }};
 
-  private final NavigationHistory<NavigationItem> history = new NavigationHistory<>();
+  private final Navigator navigator = new Navigator();
   private final int screenNumber;
 
   @Inject
@@ -94,15 +93,8 @@ public class ProgramController {
       @Override
       public void handle(KeyEvent event) {
         if(event.getCode().equals(KeyCode.BACK_SPACE)) {
-          history.back();
+          navigator.back();
         }
-      }
-    });
-
-    history.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-        updateScreen();
       }
     });
 
@@ -127,6 +119,10 @@ public class ProgramController {
 
   public Ini getIni() {
     return ini;
+  }
+
+  public Navigator getNavigator() {
+    return navigator;
   }
 
   private void setupStageLocation(Stage stage) {
@@ -174,22 +170,16 @@ public class ProgramController {
   }
 
   public void showMainScreen() {
-    MainScreen mainScreen = mainScreenProvider.get();
-
-    history.forward(new NavigationItem(mainScreen.create(), "MAIN"));
+    navigator.navigateTo(new Destination("Home", new Runnable() {
+      @Override
+      public void run() {
+        displayOnMainStage(mainScreenProvider.get().create());
+      }
+    }));
   }
 
-  public void showScreen(Node node) {
-    history.forward(new NavigationItem(node, "MAIN"));
-  }
-
-  private void updateScreen() {
-    if(history.current().getStage().equals("MAIN")) {
-      displayOnMainStage(history.current().getNode());
-    }
-    else {
-      displayOnOverlayStage(history.current().getNode());
-    }
+  public void showScreen(final Node node) {
+    displayOnMainStage(node);
   }
 
   private MediaItem currentMediaItem;
@@ -203,14 +193,21 @@ public class ProgramController {
 
     currentMediaItem = mediaItem;
 
-    PlaybackOverlayPresentation playbackOverlayPresentation = playbackOverlayPresentationProvider.get();
-    history.forward(new NavigationItem(playbackOverlayPresentation.getView(), "OVERLAY"));
+    final PlaybackOverlayPresentation playbackOverlayPresentation = playbackOverlayPresentationProvider.get();
+
+    navigator.navigateTo(new Destination("Play", new Runnable() {
+      @Override
+      public void run() {
+        displayOnOverlayStage(playbackOverlayPresentation.getView());
+      }
+    }));
   }
 
   public void stop() {
     subtitleDownloadService.cancel();
     player.stop();
-    history.back();
+
+    navigator.back();
   }
 
   public void pause() {
