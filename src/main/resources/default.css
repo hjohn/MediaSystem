@@ -44,6 +44,11 @@
   -fx-border-width: 5;
 }
 
+.debug-background {
+  -fx-background-color: red;
+}
+
+
 /*
  * List & Tree styles
  */
