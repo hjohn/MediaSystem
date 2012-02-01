@@ -298,9 +298,7 @@ public class SelectMediaPresentation {
             public Void call() {
               System.out.println("[FINE] SelectMediaPresentation.MediaItemTreeCell.updateItem(...).new Task() {...}.call() - Loading data for: " + item);
 
-              synchronized(SelectMediaPresentation.class) {  // TODO so only one gets updated at the time globally...
-                enrichItem(item, false);
-              }
+              enrichItem(item, false);
 
               return null;
             }

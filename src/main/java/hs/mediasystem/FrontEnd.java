@@ -104,16 +104,16 @@ public class FrontEnd extends Application {
 
       @Provides @SuppressWarnings("unused")
       public Connection providesConnection() {
-        Connection connection = pool.getConnection();
-
         try {
+          Connection connection = pool.getConnection();
+
           connection.prepareStatement("SET search_path = public").execute();
+
+          return connection;
         }
         catch(SQLException e) {
           throw new RuntimeException(e);
         }
-
-        return connection;
       }
     };
 
