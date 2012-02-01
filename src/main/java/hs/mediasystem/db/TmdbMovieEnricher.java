@@ -61,7 +61,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
           System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Looking to match: " + searchString);
 
-          for(Movie movie : Movie.search(title)) {
+          for(Movie movie : Movie.search(searchString)) {
             String movieYear = extractYear(movie.getReleasedDate());
             double score = 0;
 
