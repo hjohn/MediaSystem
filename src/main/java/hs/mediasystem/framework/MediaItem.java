@@ -9,6 +9,7 @@ public interface MediaItem {
   MediaTree getRoot();
   boolean isRoot();
   boolean isLeaf();
+  MediaItem getParent();
 
   String getUri();
 

@@ -61,6 +61,7 @@ public abstract class NamedItem implements MediaItem {
     this.title = title;
   }
 
+  @Override
   public MediaItem getParent() {
     return parent;
   }

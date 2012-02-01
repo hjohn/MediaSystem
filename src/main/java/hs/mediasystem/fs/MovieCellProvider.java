@@ -10,8 +10,21 @@ public class MovieCellProvider implements CellProvider<MediaItem> {
 
   @Override
   public Node configureCell(MediaItem item) {
-    cell.titleProperty().set(item.getTitle());
-    cell.subtitleProperty().set(item.getSubtitle());
+    String title = item.getTitle();
+    String subtitle = item.getSubtitle();
+
+    if(item.getParent() != null) {
+      if(item.getSubtitle() != null && !item.getSubtitle().isEmpty()) {
+        title = item.getSubtitle();
+        subtitle = "";
+      }
+      else if(item.getEpisode() != null && item.getEpisode() > 1) {
+        title += " " + item.getEpisode();
+      }
+    }
+
+    cell.titleProperty().set(title);
+    cell.subtitleProperty().set(subtitle);
     cell.extraInfoProperty().set(MediaItemFormatter.formatReleaseTime(item));
     cell.ratingProperty().set(item.getRating() == null ? 0.0 : item.getRating() / 10);
     cell.groupProperty().set(item instanceof hs.mediasystem.framework.Group);

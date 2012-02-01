@@ -3,7 +3,6 @@ package hs.mediasystem;
 import javafx.application.Application;
 
 // Top 10 stuff:
-// TODO Provide sequence numbers for sub-items to distinguish movies
 // TODO Change the Option overlay to be generic
 // TODO Use the Message overlay to indicate stuff being loaded in background on Select Media screen
 // TODO Split off pictures from meta-data information for faster loading
