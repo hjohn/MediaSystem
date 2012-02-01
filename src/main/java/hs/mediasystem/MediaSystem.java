@@ -2,14 +2,6 @@ package hs.mediasystem;
 
 import javafx.application.Application;
 
-//[FINE] CachedItemEnricher.enrichItem() - Enrichment failed: com.google.inject.ProvisionException: Guice provision errors:
-//
-//1) Error in custom provider, java.lang.IllegalStateException: Interrupted while waiting for a database connection
-//  at hs.mediasystem.FrontEnd$1.providesConnection(FrontEnd.java:113)
-//  while locating java.sql.Connection
-//
-//1 error
-
 // Top 10 stuff:
 // TODO Provide sequence numbers for sub-items to distinguish movies
 // TODO Change the Option overlay to be generic
