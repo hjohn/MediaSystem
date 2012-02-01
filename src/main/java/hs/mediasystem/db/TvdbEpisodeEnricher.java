@@ -20,39 +20,43 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
 
   @Override
   public String identifyItem(final LocalInfo localInfo) throws IdentifyException {
-    String identifier = itemIdentifier.identifyItem(new LocalInfo(MediaType.SERIE, localInfo.getTitle()));
+    synchronized(TheTVDB.class) {
+      String identifier = itemIdentifier.identifyItem(new LocalInfo(MediaType.SERIE, localInfo.getTitle()));
 
-    return identifier + "," + localInfo.getSeason() + "," + (localInfo.getEpisode() == null ? 0 : localInfo.getEpisode());
+      return identifier + "," + localInfo.getSeason() + "," + (localInfo.getEpisode() == null ? 0 : localInfo.getEpisode());
+    }
   }
 
   @Override
   public Item loadItem(String identifier) throws ItemNotFoundException {
-    TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
+    synchronized(TheTVDB.class) {
+      TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 
-    String[] split = identifier.split(",");
-    int seasonNumber = Integer.parseInt(split[1]);
-    int episodeNumber = Integer.parseInt(split[2]);
+      String[] split = identifier.split(",");
+      int seasonNumber = Integer.parseInt(split[1]);
+      int episodeNumber = Integer.parseInt(split[2]);
 
-    final Episode episode = tvDB.getEpisode(split[0], seasonNumber, episodeNumber, "en");
+      final Episode episode = tvDB.getEpisode(split[0], seasonNumber, episodeNumber, "en");
 
-    System.out.println("[FINE] TvdbEpisodeProvider: serieId = " + split[0] + ": Result: " + episode);
+      System.out.println("[FINE] TvdbEpisodeProvider: serieId = " + split[0] + ": Result: " + episode);
 
-    byte[] poster = Downloader.tryReadURL("http://thetvdb.com/banners/episodes/" + split[0] + "/" + episode.getId() + ".jpg");
+      byte[] poster = Downloader.tryReadURL("http://thetvdb.com/banners/episodes/" + split[0] + "/" + episode.getId() + ".jpg");
 
-    Item item = new Item();
+      Item item = new Item();
 
-    item.setTitle(episode.getEpisodeName());
-    item.setSeason(seasonNumber);
-    item.setEpisode(episodeNumber);
-    if(episode.getRating() != null) {
-      item.setRating(Float.parseFloat(episode.getRating()));
+      item.setTitle(episode.getEpisodeName());
+      item.setSeason(seasonNumber);
+      item.setEpisode(episodeNumber);
+      if(episode.getRating() != null) {
+        item.setRating(Float.parseFloat(episode.getRating()));
+      }
+      item.setPlot(episode.getOverview());
+      item.setPoster(poster);
+
+      System.out.println(">>> Do something with this: first Aired = " + episode.getFirstAired());  // "2002-02-26"
+      item.setLanguage(episode.getLanguage());
+
+      return item;
     }
-    item.setPlot(episode.getOverview());
-    item.setPoster(poster);
-
-    System.out.println(">>> Do something with this: first Aired = " + episode.getFirstAired());  // "2002-02-26"
-    item.setLanguage(episode.getLanguage());
-
-    return item;
   }
 }
