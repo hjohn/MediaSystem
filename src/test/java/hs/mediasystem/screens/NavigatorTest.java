@@ -66,7 +66,7 @@ public class NavigatorTest {
   }
 
   @Test
-  public void shouldNest() {
+  public void shouldHandleNestedNavigations() {
     Deque<String> trip = new LinkedList<>();
 
     final Destination ba = new TestDestination(trip, "B-A", EMPTY_RUNNABLE);
@@ -82,34 +82,34 @@ public class NavigatorTest {
 
     navigator.navigateTo(a);
 
-    assertEquals("Ain", trip.pollFirst());
+    assertEquals("A/in", trip.pollFirst());
     assertEquals("A", trip.pollFirst());
 
     navigator.navigateTo(b);
 
-    assertEquals("Aout", trip.pollFirst());
-    assertEquals("Bin", trip.pollFirst());
+    assertEquals("A/out", trip.pollFirst());
+    assertEquals("B/in", trip.pollFirst());
     assertEquals("B", trip.pollFirst());
-    assertEquals("B-Ain", trip.pollFirst());
+    assertEquals("B-A/in", trip.pollFirst());
     assertEquals("B-A", trip.pollFirst());
 
     navigator.navigateTo(bb);
 
-    assertEquals("B-Aout", trip.pollFirst());
-    assertEquals("B-Bin", trip.pollFirst());
+    assertEquals("B-A/out", trip.pollFirst());
+    assertEquals("B-B/in", trip.pollFirst());
     assertEquals("B-B", trip.pollFirst());
 
     navigator.back();
 
-    assertEquals("B-Bout", trip.pollFirst());
-    assertEquals("B-Ain", trip.pollFirst());
+    assertEquals("B-B/out", trip.pollFirst());
+    assertEquals("B-A/in", trip.pollFirst());
     assertEquals("B-A", trip.pollFirst());
 
     navigator.back();
 
-    assertEquals("B-Aout", trip.pollFirst());
-    assertEquals("Bout", trip.pollFirst());
-    assertEquals("Ain", trip.pollFirst());
+    assertEquals("B-A/out", trip.pollFirst());
+    assertEquals("B/out", trip.pollFirst());
+    assertEquals("A/in", trip.pollFirst());
     assertEquals("A", trip.pollFirst());
   }
 
@@ -123,7 +123,7 @@ public class NavigatorTest {
 
     @Override
     public void intro() {
-      trip.add(getDescription() + "in");
+      trip.add(getDescription() + "/in");
     }
 
     @Override
@@ -134,7 +134,7 @@ public class NavigatorTest {
 
     @Override
     public void outro() {
-      trip.add(getDescription() + "out");
+      trip.add(getDescription() + "/out");
     }
   }
 }

@@ -39,6 +39,7 @@ import javax.inject.Inject;
 public class SelectMediaPresentation {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
 
+  private final ProgramController controller;
   private final SelectMediaPane<MediaItem> view;
   private final CachedItemEnricher itemEnricher;
   private final TreeItem<MediaItem> treeRoot = new TreeItem<>();
@@ -46,8 +47,10 @@ public class SelectMediaPresentation {
   private DialogScreen dialogScreen;
   private MediaItem currentItem;
 
+
   @Inject
   public SelectMediaPresentation(final ProgramController controller, final SelectMediaPane<MediaItem> view, CachedItemEnricher itemEnricher) {
+    this.controller = controller;
     this.view = view;
     this.itemEnricher = itemEnricher;
 
@@ -72,12 +75,7 @@ public class SelectMediaPresentation {
           controller.play(mediaItem);
         }
         else if(mediaItem.isRoot()) {
-          controller.getNavigator().navigateTo(new Destination("MOVIES..", new Runnable() {
-            @Override
-            public void run() {
-              setMediaTree(mediaItem.getRoot());
-            }
-          }));
+          setMediaTree(mediaItem.getRoot());
         }
         else if(mediaItem instanceof hs.mediasystem.framework.Group) {
           event.getTreeItem().setExpanded(true);
@@ -145,36 +143,41 @@ public class SelectMediaPresentation {
   }
 
   public void setMediaTree(final MediaTree mediaTree) {
-    boolean filterLevel = mediaTree instanceof EpisodesMediaTree;
-
-    view.filterItemsProperty().clear();
-
-    if(filterLevel) {
-      for(MediaItem item : mediaTree.children()) {
-        Label label = new Label("" + item.getSeason());
-
-        view.filterItemsProperty().add(label);
-        label.setUserData(item);
-      }
-
-      view.activeFilterItemProperty().set(view.filterItemsProperty().get(0));
-
-      refilter();
-    }
-    else {
-      treeRoot.getChildren().clear();
-
-      for(MediaItem item : mediaTree.children()) {
-        treeRoot.getChildren().add(new MediaTreeItem(item));
-      }
-    }
-
-    view.setCellFactory(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
+    controller.getNavigator().navigateTo(new Destination("Movie...", new Runnable() {
       @Override
-      public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
-        return new MediaItemTreeCell(mediaTree.getCellProvider());
+      public void run() {
+        boolean filterLevel = mediaTree instanceof EpisodesMediaTree;
+
+        view.filterItemsProperty().clear();
+
+        if(filterLevel) {
+          for(MediaItem item : mediaTree.children()) {
+            Label label = new Label("" + item.getSeason());
+
+            view.filterItemsProperty().add(label);
+            label.setUserData(item);
+          }
+
+          view.activeFilterItemProperty().set(view.filterItemsProperty().get(0));
+
+          refilter();
+        }
+        else {
+          treeRoot.getChildren().clear();
+
+          for(MediaItem item : mediaTree.children()) {
+            treeRoot.getChildren().add(new MediaTreeItem(item));
+          }
+        }
+
+        view.setCellFactory(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
+          @Override
+          public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
+            return new MediaItemTreeCell(mediaTree.getCellProvider());
+          }
+        });
       }
-    });
+    }));
   }
 
   private void refilter() {
