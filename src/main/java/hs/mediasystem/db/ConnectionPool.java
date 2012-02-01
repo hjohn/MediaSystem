@@ -118,7 +118,7 @@ public class ConnectionPool implements AutoCloseable {
    * @param maxConnections maximum number of connections
    */
   public ConnectionPool(ConnectionPoolDataSource dataSource, int maxConnections) {
-    this(dataSource, maxConnections, 60);
+    this(dataSource, maxConnections, 10 * 1000);
   }
 
   /**
@@ -131,11 +131,13 @@ public class ConnectionPool implements AutoCloseable {
    * @throws TimeOutException when the time out expired while attempting to get a connection
    * @return a new Connection object.
    */
-  public synchronized Connection getConnection() {
-    closeIdleConnections();
+  public Connection getConnection() {
+    synchronized(this) {
+      closeIdleConnections();
 
-    if(isClosed) {
-      throw new IllegalStateException("Connection pool is closed");
+      if(isClosed) {
+        throw new IllegalStateException("Connection pool is closed");
+      }
     }
 
     try {
