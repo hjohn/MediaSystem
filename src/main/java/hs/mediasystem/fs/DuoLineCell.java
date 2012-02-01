@@ -44,17 +44,16 @@ public class DuoLineCell extends HBox {
   }};
 
   private final VBox description = new VBox() {{
-    setAlignment(Pos.CENTER_LEFT);
+    getChildren().addAll(title, subtitle);
   }};
 
   public DuoLineCell() {
-    description.getChildren().add(title);
-    description.getChildren().add(subtitle);
-
     subtitle.managedProperty().bind(subtitle.textProperty().isNotEqualTo(""));
     extraInfo.managedProperty().bind(extraInfo.textProperty().isNotEqualTo(""));
 
     getChildren().add(new HBox() {{
+      setAlignment(Pos.CENTER_LEFT);
+
       getChildren().add(new VBox() {{
         getChildren().add(starRating);
         getChildren().add(extraInfo);
@@ -63,6 +62,7 @@ public class DuoLineCell extends HBox {
       getChildren().add(description);
       HBox.setHgrow(this, Priority.ALWAYS);
     }});
+
     getChildren().add(collectionMarker);
 
     collectionMarker.setVisible(false);
