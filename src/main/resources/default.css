@@ -209,3 +209,18 @@
 .scroll-bar .thumb {
   -fx-fill: derive(color-blue-50, -60%);  
 }
+
+.memory {
+  -fx-border-width: 1;
+  -fx-border-color: color-blue;
+  -fx-padding: 2;
+  
+  -fx-font: bold 12pt "Arial";
+}
+
+.memory .label {
+  -fx-font: bold 12pt "Arial";
+  -fx-text-fill: white;
+}
+
+
