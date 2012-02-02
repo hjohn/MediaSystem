@@ -5,6 +5,7 @@ import hs.mediasystem.framework.SublightSubtitleProvider;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
+import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
@@ -25,6 +26,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -40,6 +43,8 @@ import javax.inject.Singleton;
 
 @Singleton
 public class ProgramController {
+  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
+
   private final Player player;
   private final Stage mainStage;  // TODO two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing; refactor this
   private final Stage transparentStage;
@@ -92,8 +97,9 @@ public class ProgramController {
     contentBorderPane.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
-        if(event.getCode().equals(KeyCode.BACK_SPACE)) {
+        if(BACK_SPACE.match(event)) {
           navigator.back();
+          event.consume();
         }
       }
     });
@@ -170,12 +176,12 @@ public class ProgramController {
   }
 
   public void showMainScreen() {
-    navigator.navigateTo(new Destination("Home", new Runnable() {
+    navigator.navigateTo(new Destination("Home") {
       @Override
-      public void run() {
+      public void go() {
         displayOnMainStage(mainScreenProvider.get().create());
       }
-    }));
+    });
   }
 
   public void showScreen(final Node node) {
@@ -195,12 +201,12 @@ public class ProgramController {
 
     final PlaybackOverlayPresentation playbackOverlayPresentation = playbackOverlayPresentationProvider.get();
 
-    navigator.navigateTo(new Destination("Play", new Runnable() {
+    navigator.navigateTo(new Destination("Play") {
       @Override
-      public void run() {
+      public void go() {
         displayOnOverlayStage(playbackOverlayPresentation.getView());
       }
-    }));
+    });
   }
 
   public void stop() {
@@ -332,6 +338,35 @@ public class ProgramController {
         else if(newValue == State.SUCCEEDED || newValue == State.FAILED || newValue == State.CANCELLED) {
           messagePane.getChildren().remove(vbox);
         }
+      }
+    });
+  }
+
+  public void showOptionScreen(final String title, final List<? extends Option> options) {
+    navigator.navigateToModal(new Destination(title) {
+      private DialogScreen dialogScreen;
+
+      @Override
+      public void go() {
+        dialogScreen = new DialogScreen(title, options);
+
+        sceneRoot.getChildren().add(dialogScreen);
+
+        dialogScreen.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+          @Override
+          public void handle(KeyEvent event) {
+            if(BACK_SPACE.match(event)) {
+              navigator.back();
+            }
+            event.consume();
+          }
+        });
+        dialogScreen.requestFocus();
+      }
+
+      @Override
+      public void outro() {
+        sceneRoot.getChildren().remove(dialogScreen);
       }
     });
   }

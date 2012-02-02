@@ -70,69 +70,59 @@ public class PlaybackOverlayPresentation {
           event.consume();
         }
         else if(BACK_SPACE.match(event)) {
-          if(view.getChildren().size() > 1) {
-            view.getChildren().remove(1);
-            view.requestFocus();
-          }
           event.consume();
         }
         else if(code == KeyCode.O) {
-          if(view.getChildren().size() == 1) {
-            List<Option> options = FXCollections.observableArrayList(
-              new NumericOption(player.volumeProperty(), "Volume", "%3.0f%%", 1, 0, 100),
-              new ListOption<>("Subtitle", player.subtitleProperty(), player.getSubtitles(), new StringConverter<Subtitle>() {
-                @Override
-                public String toString(Subtitle object) {
-                  return object.getDescription();
-                }
-              }),
-              new ListOption<>("Audio Track", player.audioTrackProperty(), player.getAudioTracks(), new StringConverter<AudioTrack>() {
-                @Override
-                public String toString(AudioTrack object) {
-                  return object.getDescription();
-                }
-              }),
-              new NumericOption(player.rateProperty(), "Playback Speed", "%4.1f", 0.1, 0.1, 4.0),
-              new NumericOption(player.audioDelayProperty(), "Audio Delay", "%5.0fms", 100, -30000, 30000),
-              new NumericOption(player.brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2),
-              new SubOption("Download subtitle...", new Callable<List<Option>>() {
-                @Override
-                public List<Option> call() {
-                  return new ArrayList<Option>() {{
-                    final SubtitleSelector subtitleSelector = new SubtitleSelector(controller.getSubtitleProviders());
+          List<Option> options = FXCollections.observableArrayList(
+            new NumericOption(player.volumeProperty(), "Volume", "%3.0f%%", 1, 0, 100),
+            new ListOption<>("Subtitle", player.subtitleProperty(), player.getSubtitles(), new StringConverter<Subtitle>() {
+              @Override
+              public String toString(Subtitle object) {
+                return object.getDescription();
+              }
+            }),
+            new ListOption<>("Audio Track", player.audioTrackProperty(), player.getAudioTracks(), new StringConverter<AudioTrack>() {
+              @Override
+              public String toString(AudioTrack object) {
+                return object.getDescription();
+              }
+            }),
+            new NumericOption(player.rateProperty(), "Playback Speed", "%4.1f", 0.1, 0.1, 4.0),
+            new NumericOption(player.audioDelayProperty(), "Audio Delay", "%5.0fms", 100, -30000, 30000),
+            new NumericOption(player.brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2),
+            new SubOption("Download subtitle...", new Callable<List<Option>>() {
+              @Override
+              public List<Option> call() {
+                return new ArrayList<Option>() {{
+                  final SubtitleSelector subtitleSelector = new SubtitleSelector(controller.getSubtitleProviders());
 
-                    subtitleSelector.query(mediaItem);
+                  subtitleSelector.query(mediaItem);
 
-                    subtitleSelector.subtitleProviderProperty().addListener(new ChangeListener<SubtitleProvider>() {
-                      @Override
-                      public void changed(ObservableValue<? extends SubtitleProvider> observableValue, SubtitleProvider oldValue, SubtitleProvider newValue) {
-                        subtitleSelector.query(mediaItem);
-                      }
-                    });
+                  subtitleSelector.subtitleProviderProperty().addListener(new ChangeListener<SubtitleProvider>() {
+                    @Override
+                    public void changed(ObservableValue<? extends SubtitleProvider> observableValue, SubtitleProvider oldValue, SubtitleProvider newValue) {
+                      subtitleSelector.query(mediaItem);
+                    }
+                  });
 
-                    add(new ListOption<>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringConverter<SubtitleProvider>() {
-                      @Override
-                      public String toString(SubtitleProvider object) {
-                        return object.getName();
-                      }
-                    }));
-                    add(new ListViewOption<>("Subtitles for Download", selectedSubtitleForDownload, subtitleSelector.getSubtitles(), new StringConverter<SubtitleDescriptor>() {
-                      @Override
-                      public String toString(SubtitleDescriptor object) {
-                        return object.getName() + " (" + object.getLanguageName() + ") [" + object.getType() + "]";
-                      }
-                    }));
-                  }};
-                }
-              })
-            );
+                  add(new ListOption<>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringConverter<SubtitleProvider>() {
+                    @Override
+                    public String toString(SubtitleProvider object) {
+                      return object.getName();
+                    }
+                  }));
+                  add(new ListViewOption<>("Subtitles for Download", selectedSubtitleForDownload, subtitleSelector.getSubtitles(), new StringConverter<SubtitleDescriptor>() {
+                    @Override
+                    public String toString(SubtitleDescriptor object) {
+                      return object.getName() + " (" + object.getLanguageName() + ") [" + object.getType() + "]";
+                    }
+                  }));
+                }};
+              }
+            })
+          );
 
-            DialogScreen dialogScreen = new DialogScreen("Video - Options", options);
-
-            view.getChildren().add(dialogScreen);
-
-            dialogScreen.requestFocus();
-          }
+          controller.showOptionScreen("Video - Options", options);
           event.consume();
         }
         else if(code == KeyCode.SPACE) {

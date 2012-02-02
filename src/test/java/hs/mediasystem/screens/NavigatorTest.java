@@ -1,84 +1,82 @@
 package hs.mediasystem.screens;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import hs.mediasystem.screens.Navigator.Destination;
 
 import java.util.Deque;
 import java.util.LinkedList;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class NavigatorTest {
-  private static Runnable EMPTY_RUNNABLE = new Runnable() {
-    @Override
-    public void run() {
-    }
-  };
-
   private Navigator navigator;
+  private Deque<String> trip;
 
   @Before
   public void before() {
     navigator = new Navigator();
+
+    trip = new LinkedList<>();
   }
 
   @Test
   public void shouldNavigateToDestination() {
-    Destination dest = mock(Destination.class);
+    Destination a = new TestDestination(trip, "A");
 
-    navigator.navigateTo(dest);
+    navigator.navigateTo(a);
 
-    verify(dest).intro();
-    verify(dest).go();
-    verifyNoMoreInteractions(dest);
+    assertEquals("A/in", trip.pollFirst());
+    assertEquals("A", trip.pollFirst());
+    assertTrue(trip.isEmpty());
+  }
+
+  @Test
+  public void shouldIgnoreBackAtTopLevel() {
+    Destination a = new TestDestination(trip, "A");
+
+    navigator.navigateTo(a);
+    trip.clear();
+
+    navigator.back();
+
+    assertTrue(trip.isEmpty());
   }
 
   @Test
   public void shouldGoBackToPrevious() {
-    Destination dest = mock(Destination.class);
-    Destination dest2 = mock(Destination.class);
+    Destination a = new TestDestination(trip, "A");
+    Destination b = new TestDestination(trip, "B");
 
-    navigator.navigateTo(dest);
-
-    verify(dest).intro();
-    verify(dest).go();
-    verifyNoMoreInteractions(dest, dest2);
-    Mockito.reset(dest, dest2);
-
-    navigator.navigateTo(dest2);
-
-    verify(dest).outro();
-    verify(dest2).intro();
-    verify(dest2).go();
-    verifyNoMoreInteractions(dest, dest2);
-    Mockito.reset(dest, dest2);
+    navigator.navigateTo(a);
+    navigator.navigateTo(b);
+    trip.clear();
 
     navigator.back();
 
-    verify(dest2).outro();
-    verify(dest).intro();
-    verify(dest).go();
-    verifyNoMoreInteractions(dest, dest2);
+    assertEquals("B/out", trip.pollFirst());
+    assertEquals("A/in", trip.pollFirst());
+    assertEquals("A", trip.pollFirst());
+    assertTrue(trip.isEmpty());
   }
 
   @Test
   public void shouldHandleNestedNavigations() {
-    Deque<String> trip = new LinkedList<>();
+    final Destination ba = new TestDestination(trip, "B-A");
+    Destination bb = new TestDestination(trip, "B-B");
+    Destination bm = new TestDestination(trip, "B-M");
+    Destination play = new TestDestination(trip, "play");
 
-    final Destination ba = new TestDestination(trip, "B-A", EMPTY_RUNNABLE);
-    Destination bb = new TestDestination(trip, "B-B", EMPTY_RUNNABLE);
-
-    Destination a = new TestDestination(trip, "A", EMPTY_RUNNABLE);
-    Destination b = new TestDestination(trip, "B", new Runnable() {
+    Destination a = new TestDestination(trip, "A");
+    Destination b = new TestDestination(trip, "B") {
       @Override
-      public void run() {
+      public void intro() {
+        super.intro();
         navigator.navigateTo(ba);
       }
-    });
+    };
 
     navigator.navigateTo(a);
 
@@ -89,9 +87,9 @@ public class NavigatorTest {
 
     assertEquals("A/out", trip.pollFirst());
     assertEquals("B/in", trip.pollFirst());
-    assertEquals("B", trip.pollFirst());
     assertEquals("B-A/in", trip.pollFirst());
     assertEquals("B-A", trip.pollFirst());
+    assertEquals("B", trip.pollFirst());
 
     navigator.navigateTo(bb);
 
@@ -102,6 +100,31 @@ public class NavigatorTest {
     navigator.back();
 
     assertEquals("B-B/out", trip.pollFirst());
+    assertEquals("B", trip.pollFirst());
+    assertEquals("B-A/in", trip.pollFirst());
+    assertEquals("B-A", trip.pollFirst());
+
+    navigator.navigateToModal(bm);
+
+    assertEquals("B-M/in", trip.pollFirst());
+    assertEquals("B-M", trip.pollFirst());
+
+    navigator.back();
+
+    assertEquals("B-M/out", trip.pollFirst());
+
+    navigator.navigateParentTo(play);
+
+    assertEquals(ba, play.getPrevious());
+    assertNull(play.getParent());
+    assertEquals("B-A/out", trip.pollFirst());
+    assertEquals("play/in", trip.pollFirst());
+    assertEquals("play", trip.pollFirst());
+
+    navigator.back();
+
+    assertEquals("play/out", trip.pollFirst());
+    assertEquals("B", trip.pollFirst());
     assertEquals("B-A/in", trip.pollFirst());
     assertEquals("B-A", trip.pollFirst());
 
@@ -111,13 +134,14 @@ public class NavigatorTest {
     assertEquals("B/out", trip.pollFirst());
     assertEquals("A/in", trip.pollFirst());
     assertEquals("A", trip.pollFirst());
+    assertTrue(trip.isEmpty());
   }
 
   private class TestDestination extends Destination {
     private final Deque<String> trip;
 
-    public TestDestination(Deque<String> trip, String description, Runnable runnable) {
-      super(description, runnable);
+    public TestDestination(Deque<String> trip, String description) {
+      super(description);
       this.trip = trip;
     }
 
@@ -129,7 +153,6 @@ public class NavigatorTest {
     @Override
     public void go() {
       trip.add(getDescription());
-      super.go();
     }
 
     @Override

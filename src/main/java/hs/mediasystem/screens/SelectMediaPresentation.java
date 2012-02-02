@@ -9,6 +9,7 @@ import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.EpisodesMediaTree;
+import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.SelectMediaPane.ItemEvent;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
@@ -28,25 +29,17 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import javax.inject.Inject;
 
 public class SelectMediaPresentation {
-  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
-
   private final ProgramController controller;
   private final SelectMediaPane<MediaItem> view;
   private final CachedItemEnricher itemEnricher;
   private final TreeItem<MediaItem> treeRoot = new TreeItem<>();
 
-  private DialogScreen dialogScreen;
   private MediaItem currentItem;
-
 
   @Inject
   public SelectMediaPresentation(final ProgramController controller, final SelectMediaPane<MediaItem> view, CachedItemEnricher itemEnricher) {
@@ -62,6 +55,7 @@ public class SelectMediaPresentation {
           currentItem = event.getTreeItem().getValue();
           updateCurrentItem();  // TODO Expensive image loading being done on JavaFX thread
         }
+        event.consume();
       }
     });
 
@@ -80,6 +74,7 @@ public class SelectMediaPresentation {
         else if(mediaItem instanceof hs.mediasystem.framework.Group) {
           event.getTreeItem().setExpanded(true);
         }
+        event.consume();
       }
     });
 
@@ -88,37 +83,21 @@ public class SelectMediaPresentation {
       public void handle(ItemEvent<MediaItem> event) {
         final MediaItem mediaItem = event.getTreeItem().getValue();
 
-        if(!view.getChildren().contains(dialogScreen)) {
-          List<? extends Option> options = FXCollections.observableArrayList(
-            new ActionOption("Reload meta data", new Callable<Boolean>() {
-              @Override
-              public Boolean call() {
-                enrichItem(mediaItem, true);
-                ImageCache.expunge(currentItem.getPoster());
-                ImageCache.expunge(currentItem.getBackground());
-                updateCurrentItem();
-                return true;
-              }
-            })
-          );
-
-          dialogScreen = new DialogScreen("Video - Options", options);
-
-          view.getChildren().add(dialogScreen);
-
-          dialogScreen.requestFocus();
-
-          dialogScreen.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+        List<? extends Option> options = FXCollections.observableArrayList(
+          new ActionOption("Reload meta data", new Callable<Boolean>() {
             @Override
-            public void handle(KeyEvent event) {
-              if(BACK_SPACE.match(event)) {
-                view.getChildren().remove(dialogScreen);
-                dialogScreen = null;
-                event.consume();
-              }
+            public Boolean call() {
+              enrichItem(mediaItem, true);
+              ImageCache.expunge(currentItem.getPoster());
+              ImageCache.expunge(currentItem.getBackground());
+              updateCurrentItem();
+              return true;
             }
-          });
-        }
+          })
+        );
+
+        controller.showOptionScreen("Media - Options", options);
+        event.consume();
       }
     });
 
@@ -143,9 +122,9 @@ public class SelectMediaPresentation {
   }
 
   public void setMediaTree(final MediaTree mediaTree) {
-    controller.getNavigator().navigateTo(new Destination("Movie...", new Runnable() {
+    controller.getNavigator().navigateTo(new Destination("Movie...") {
       @Override
-      public void run() {
+      public void go() {
         boolean filterLevel = mediaTree instanceof EpisodesMediaTree;
 
         view.filterItemsProperty().clear();
@@ -177,7 +156,7 @@ public class SelectMediaPresentation {
           }
         });
       }
-    }));
+    });
   }
 
   private void refilter() {

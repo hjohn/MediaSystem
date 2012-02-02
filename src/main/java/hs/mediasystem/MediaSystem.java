@@ -3,14 +3,13 @@ package hs.mediasystem;
 import javafx.application.Application;
 
 // Top 10 stuff:
-// TODO Change the Option overlay to be generic
 // TODO Use the Message overlay to indicate stuff being loaded in background on Select Media screen
 // TODO Split off pictures from meta-data information for faster loading
 // TODO Actor / Director information in database
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance
 // TODO Add memory indicator / time / date / Make clock in standard border
-// TODO Make NavigationItem/History more generic; inject it into Presentations and allow it to be used as global navigation
 // TODO Indicate serie somehow when selecting episodes (it is now unclear which serie you are selecting)
+// TODO Movie controls (play, pause, volume up/down, etc) should be handled much more globally in ProgramController
 
 // TODO Some form of remote control support / Lirc support
 // TODO VLCPlayer: Make brightness controls work

@@ -4,6 +4,7 @@ import hs.mediasystem.fs.SeriesMediaTree;
 
 import java.nio.file.Paths;
 
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 
 import javax.inject.Inject;
@@ -28,11 +29,11 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   }
 
   @Override
-  public void select(ProgramController controller) {
+  public Node select(ProgramController controller) {
     SelectMediaPresentation presentation = selectMediaPresentationProvider.get();
 
     presentation.setMediaTree(new SeriesMediaTree(Paths.get(controller.getIni().getValue("general", "series.path"))));
 
-    controller.showScreen(presentation.getView());
+    return presentation.getView();
   }
 }
