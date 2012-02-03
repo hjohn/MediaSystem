@@ -1,8 +1,18 @@
 package hs.mediasystem.screens;
 
 public class Navigator {
+  private final Navigator parentNavigator;
+
   private Destination parent;
   private Destination current;
+
+  public Navigator(Navigator parent) {
+    this.parentNavigator = parent;
+  }
+
+  public Navigator() {
+    this(null);
+  }
 
   public void back() {
     System.out.println("[INFO] Navigator.back() - From: " + current);

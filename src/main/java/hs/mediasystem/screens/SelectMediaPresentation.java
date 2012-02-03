@@ -34,16 +34,16 @@ import javafx.util.Callback;
 import javax.inject.Inject;
 
 public class SelectMediaPresentation {
-  private final ProgramController controller;
   private final SelectMediaPane<MediaItem> view;
   private final CachedItemEnricher itemEnricher;
   private final TreeItem<MediaItem> treeRoot = new TreeItem<>();
+  private final Navigator navigator;
 
   private MediaItem currentItem;
 
   @Inject
   public SelectMediaPresentation(final ProgramController controller, final SelectMediaPane<MediaItem> view, CachedItemEnricher itemEnricher) {
-    this.controller = controller;
+    this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
     this.itemEnricher = itemEnricher;
 
@@ -122,7 +122,7 @@ public class SelectMediaPresentation {
   }
 
   public void setMediaTree(final MediaTree mediaTree) {
-    controller.getNavigator().navigateTo(new Destination("Movie...") {
+    navigator.navigateTo(new Destination("Movie...") {
       @Override
       public void go() {
         boolean filterLevel = mediaTree instanceof EpisodesMediaTree;
