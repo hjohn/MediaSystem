@@ -196,8 +196,9 @@ public class VLCPlayer implements Player {
       @Override
       public void run() {
         try {
-          Thread.sleep(10 * 1000);
-        } catch (InterruptedException e) {
+          Thread.sleep(10 * 1000);  // TODO document this WTF
+        }
+        catch (InterruptedException e) {
           e.printStackTrace();
         }
 
