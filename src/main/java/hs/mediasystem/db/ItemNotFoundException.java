@@ -10,7 +10,7 @@ public class ItemNotFoundException extends Exception {
     super(identifier, cause);
   }
 
-  public ItemNotFoundException(String surrogateName) {
-    super(surrogateName);
+  public ItemNotFoundException(String message) {
+    super(message);
   }
 }
