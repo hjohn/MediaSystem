@@ -124,7 +124,7 @@ public class SelectMediaPresentation {
   public void setMediaTree(final MediaTree mediaTree) {
     navigator.navigateTo(new Destination("Movie...") {
       @Override
-      public void go() {
+      public void intro() {
         boolean filterLevel = mediaTree instanceof EpisodesMediaTree;
 
         view.filterItemsProperty().clear();
@@ -275,11 +275,15 @@ public class SelectMediaPresentation {
           loadTask = new Task<Void>() {
             @Override
             public Void call() {
-              System.out.println("[FINE] SelectMediaPresentation.MediaItemTreeCell.updateItem(...).new Task() {...}.call() - Loading data for: " + item);
+              synchronized(item) {  // TODO Need to figure out a better way of enriching the same item only once at the same time
+                System.out.println("[FINE] SelectMediaPresentation.MediaItemTreeCell.updateItem(...).new Task() {...}.call() - Loading data for: " + item);
 
-              enrichItem(item, false);
+                if(!item.isEnriched()) {
+                  enrichItem(item, false);
+                }
 
-              return null;
+                return null;
+              }
             }
           };
 

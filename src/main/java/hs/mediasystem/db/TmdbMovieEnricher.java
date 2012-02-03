@@ -108,6 +108,10 @@ public class TmdbMovieEnricher implements ItemEnricher {
         System.out.println("best matching imdb number: " + bestMatchingImdbNumber);
         final Movie movie = Movie.imdbLookup(bestMatchingImdbNumber);
 
+        if(movie == null) {
+          throw new ItemNotFoundException("TMDB lookup by IMDB id failed: " + identifier);
+        }
+
         System.out.println("Found movie: " + movie.getName());  // TODO nullpointer here if IMDB is faulty (could be in filename));
         System.out.println("released date: " + movie.getReleasedDate());
         System.out.println("runtime: " + movie.getRuntime());
