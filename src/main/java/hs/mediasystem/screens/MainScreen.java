@@ -40,20 +40,6 @@ public class MainScreen {
     final BorderPane root = new BorderPane();
 
     final List<Button> buttons = new ArrayList<>();
-//    {{
-//      add(new Button("Movies") {{
-//        setGraphic(new ImageView(new Image("images/package_multimedia.png")));
-//      }});
-//      add(new Button("Series") {{
-//        setGraphic(new ImageView(new Image("images/aktion.png")));
-//      }});
-//      add(new Button("Nederland 24") {{
-//        setGraphic(new ImageView(new Image("images/browser.png")));
-//      }});
-//      add(new Button("Youtube") {{
-//        setGraphic(new ImageView(new Image("images/tv.png")));
-//      }});
-//    }};
 
     for(final MainMenuExtension mainMenuExtension : mainMenuExtensions) {
       buttons.add(new Button(mainMenuExtension.getTitle()) {{
@@ -62,20 +48,13 @@ public class MainScreen {
           @Override
           public void handle(ActionEvent event) {
             controller.getNavigator().navigateTo(new Destination("BLA") {
-              private Node view;
-
-              @Override
-              public void intro() {
-                view = mainMenuExtension.select(controller);
-              }
+              private Node view = mainMenuExtension.select(controller);
 
               @Override
               public void go() {
                 controller.showScreen(view);
               }
             });
-//            ItemEnricher itemEnricher = new CachedItemEnricher(new ItemsDao(), new TmdbMovieEnricher());
-//            controller.showSelectItemScreen(new MoviesMediaTree(itemEnricher, Paths.get(controller.getIni().getValue("general", "movies.path"))));
           }
         });
       }});
@@ -115,28 +94,7 @@ public class MainScreen {
 
     for(final Button button : buttons) {
       button.focusedProperty().addListener(changeListener);
-//      button.addEventHandler(EventType.ROOT, new EventHandler<Event>() {
-//        @Override
-//        public void handle(Event event) {
-//          System.out.println("Button " + button.getText() + " received " + event);
-//        }
-//      });
     }
-
-//    buttons.get(0).setOnAction(new EventHandler<ActionEvent>() {
-//      @Override
-//      public void handle(ActionEvent event) {
-//        ItemEnricher itemEnricher = new CachedItemEnricher(new ItemsDao(), new TmdbMovieEnricher());
-//        controller.showSelectItemScreen(new MoviesMediaTree(itemEnricher, Paths.get(controller.getIni().getValue("general", "movies.path"))));
-//      }
-//    });
-//
-//    buttons.get(1).setOnAction(new EventHandler<ActionEvent>() {
-//      @Override
-//      public void handle(ActionEvent event) {
-//        controller.showSelectItemScreen(new SeriesMediaTree(Paths.get(controller.getIni().getValue("general", "series.path"))));
-//      }
-//    });
 
     root.setCenter(box);
 
