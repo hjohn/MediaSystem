@@ -4,19 +4,24 @@ import javafx.application.Application;
 
 // Top 10 stuff:
 // TODO Use the Message overlay to indicate stuff being loaded in background on Select Media screen
-// TODO Split off pictures from meta-data information for faster loading
 // TODO Actor / Director information in database
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance
-// TODO Add memory indicator / time / date / Make clock in standard border
 // TODO Indicate serie somehow when selecting episodes (it is now unclear which serie you are selecting)
 // TODO Movie controls (play, pause, volume up/down, etc) should be handled much more globally in ProgramController
+// TODO Alice in Wonderland, not a serie, donot group?
+// TODO Options Screen: Modal navigation should use own Navigator as well?
+// TODO Options Screen: Subtitle selection list must be left with backspace, or exit at top/bottom item
+// TODO Memory: Split off pictures from meta-data information for faster loading
+// TODO Memory: Load pics when needed and discard under memory pressure
+// TODO Make plug-ins of various looks of Select Media
+// TODO Remove CellProvider responsibility from MediaTree
+// TODO Make plug-ins from MediaTrees
 
 // TODO Some form of remote control support / Lirc support
 // TODO VLCPlayer: Make brightness controls work
-// TODO When changing Options, show this in OSD
+// TODO Options Screen: When changing Options, show this in OSD
 // TODO Style main page
-// TODO Separators for Dialog Screen
-// TODO Subtitle selection list must be left with backspace, or exit at top/bottom item
+// TODO Options Screen: Separators for Dialog Screen
 
 // Minimal working system:
 // TODO Make subtitles more peristent by storing them with file?

@@ -29,11 +29,17 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import javax.inject.Inject;
 
 public class SelectMediaPresentation {
+  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
+
   private final SelectMediaPane<MediaItem> view;
   private final CachedItemEnricher itemEnricher;
   private final TreeItem<MediaItem> treeRoot = new TreeItem<>();
@@ -48,6 +54,17 @@ public class SelectMediaPresentation {
     this.itemEnricher = itemEnricher;
 
     view.setRoot(treeRoot);
+
+    view.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+      @Override
+      public void handle(KeyEvent event) {
+        if(BACK_SPACE.match(event)) {
+          navigator.back();
+          event.consume();
+        }
+      }
+    });
+
     view.onItemFocused().set(new EventHandler<ItemEvent<MediaItem>>() {
       @Override
       public void handle(ItemEvent<MediaItem> event) {
@@ -124,7 +141,7 @@ public class SelectMediaPresentation {
   public void setMediaTree(final MediaTree mediaTree) {
     navigator.navigateTo(new Destination("Movie...") {
       @Override
-      public void intro() {
+      public void go() {
         boolean filterLevel = mediaTree instanceof EpisodesMediaTree;
 
         view.filterItemsProperty().clear();

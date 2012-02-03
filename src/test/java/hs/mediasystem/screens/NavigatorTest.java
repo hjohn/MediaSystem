@@ -1,7 +1,6 @@
 package hs.mediasystem.screens;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import hs.mediasystem.screens.Navigator.Destination;
 
@@ -63,74 +62,29 @@ public class NavigatorTest {
   }
 
   @Test
-  public void shouldHandleNestedNavigations() {
-    final Destination ba = new TestDestination(trip, "B-A");
-    Destination bb = new TestDestination(trip, "B-B");
-    Destination bm = new TestDestination(trip, "B-M");
-    Destination play = new TestDestination(trip, "play");
-
+  public void shouldGoBackToTopLevel() {
     Destination a = new TestDestination(trip, "A");
-    Destination b = new TestDestination(trip, "B") {
-      @Override
-      public void intro() {
-        super.intro();
-        navigator.navigateTo(ba);
-      }
-    };
+    Destination b = new TestDestination(trip, "B");
+    Destination subA = new TestDestination(trip, "subA");
+    Destination subB = new TestDestination(trip, "subB");
+    Navigator subNavigator = new Navigator(navigator);
 
     navigator.navigateTo(a);
-
-    assertEquals("A/in", trip.pollFirst());
-    assertEquals("A", trip.pollFirst());
-
     navigator.navigateTo(b);
+    subNavigator.navigateTo(subA);
+    subNavigator.navigateTo(subB);
 
-    assertEquals("A/out", trip.pollFirst());
-    assertEquals("B/in", trip.pollFirst());
-    assertEquals("B-A/in", trip.pollFirst());
-    assertEquals("B-A", trip.pollFirst());
-    assertEquals("B", trip.pollFirst());
+    trip.clear();
 
-    navigator.navigateTo(bb);
+    subNavigator.back();
 
-    assertEquals("B-A/out", trip.pollFirst());
-    assertEquals("B-B/in", trip.pollFirst());
-    assertEquals("B-B", trip.pollFirst());
+    assertEquals("subB/out", trip.pollFirst());
+    assertEquals("subA/in", trip.pollFirst());
+    assertEquals("subA", trip.pollFirst());
+    assertTrue(trip.isEmpty());
 
-    navigator.back();
+    subNavigator.back();
 
-    assertEquals("B-B/out", trip.pollFirst());
-    assertEquals("B", trip.pollFirst());
-    assertEquals("B-A/in", trip.pollFirst());
-    assertEquals("B-A", trip.pollFirst());
-
-    navigator.navigateToModal(bm);
-
-    assertEquals("B-M/in", trip.pollFirst());
-    assertEquals("B-M", trip.pollFirst());
-
-    navigator.back();
-
-    assertEquals("B-M/out", trip.pollFirst());
-
-    navigator.navigateParentTo(play);
-
-    assertEquals(ba, play.getPrevious());
-    assertNull(play.getParent());
-    assertEquals("B-A/out", trip.pollFirst());
-    assertEquals("play/in", trip.pollFirst());
-    assertEquals("play", trip.pollFirst());
-
-    navigator.back();
-
-    assertEquals("play/out", trip.pollFirst());
-    assertEquals("B", trip.pollFirst());
-    assertEquals("B-A/in", trip.pollFirst());
-    assertEquals("B-A", trip.pollFirst());
-
-    navigator.back();
-
-    assertEquals("B-A/out", trip.pollFirst());
     assertEquals("B/out", trip.pollFirst());
     assertEquals("A/in", trip.pollFirst());
     assertEquals("A", trip.pollFirst());
