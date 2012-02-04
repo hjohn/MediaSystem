@@ -61,6 +61,12 @@ import javafx.application.Application;
 // Home              = menu                       --> Home (windows)
 // 't'               = video: sub title menu      --> Teletext
 
+// Code conventions:
+//
+// Method naming:
+// - get() methods return null or a checked exception when data is missing; runtime exceptions are thrown for any unexpected errors
+// - load() methods never return null and throw a (specific) runtime exception when data is missing or other runtime exceptions for any unexpected errors
+
 public class MediaSystem {
 
   public static void main(String[] args) {
