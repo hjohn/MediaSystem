@@ -170,7 +170,8 @@ public class GeneralSettings {
 	 *            The file to use as a log.
 	 * @throws FileNotFoundException
 	 */
-	public static void setLogStream(File fileLog) throws FileNotFoundException {
+	@SuppressWarnings("resource")
+  public static void setLogStream(File fileLog) throws FileNotFoundException {
 		setLogStream(new PrintStream(fileLog));
 	}
 

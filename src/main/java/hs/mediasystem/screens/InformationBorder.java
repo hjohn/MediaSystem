@@ -1,6 +1,7 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.util.SizeFormatter;
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
@@ -67,7 +68,7 @@ public class InformationBorder extends HBox {
       })
     );
 
-    updater.setCycleCount(Timeline.INDEFINITE);
+    updater.setCycleCount(Animation.INDEFINITE);
     updater.play();
   }
 }

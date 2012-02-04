@@ -5,16 +5,16 @@ public class RomanLiteral {
     StringBuilder builder = new StringBuilder();
     String[] digits = {"L", "IL", "XL", "X", "IX", "V", "IV", "I"};
     int[] limits = {50, 49, 40, 10, 9, 5, 4, 1};
+    int v = value;
 
     for(int limit = 0; limit < limits.length; limit++) {
-      while(value > 0) {
-        if(value >= limits[limit]) {
-          builder.append(digits[limit]);
-          value -= limits[limit];
-        }
-        else {
+      while(v > 0) {
+        if(v < limits[limit]) {
           break;
         }
+
+        builder.append(digits[limit]);
+        v -= limits[limit];
       }
     }
 

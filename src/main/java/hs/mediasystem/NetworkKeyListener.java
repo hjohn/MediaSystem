@@ -30,9 +30,9 @@ public class NetworkKeyListener {
     }
   });
 
-  public NetworkKeyListener() throws IOException {
-    final ServerSocket socket = new ServerSocket(1111);
+  private final ServerSocket socket = new ServerSocket(1111);
 
+  public NetworkKeyListener() throws IOException {
     Thread thread = new Thread() {
       @Override
       public void run() {

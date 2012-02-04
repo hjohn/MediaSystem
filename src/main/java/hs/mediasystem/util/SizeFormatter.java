@@ -89,18 +89,17 @@ public class SizeFormatter {
       if(formats == null) {
         return String.format(formatString, ((double)number) / divisor);
       }
-      else {
-        String[] args = new String[formats.length];
-        long n = number;
 
-        for(int i = 0; i < formats.length; i++) {
-          long mod = i == formats.length - 1 ? 0 : n % formats[i].divisor;
-          args[i] = formats[i].format(n - mod);
-          n = mod;
-        }
+      String[] args = new String[formats.length];
+      long n = number;
 
-        return String.format(formatString, (Object[])args);
+      for(int i = 0; i < formats.length; i++) {
+        long mod = i == formats.length - 1 ? 0 : n % formats[i].divisor;
+        args[i] = formats[i].format(n - mod);
+        n = mod;
       }
+
+      return String.format(formatString, (Object[])args);
     }
   }
 }

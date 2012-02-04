@@ -9,9 +9,8 @@ public class Levenshtein {
     if(n == 0 || m == 0) {
       return 0;
     }
-    else {
-      return 1.0 - (compare(s1, n, s2, m) / (Math.max(n, m)));
-    }
+
+    return 1.0 - (compare(s1, n, s2, m) / (Math.max(n, m)));
   }
 
   private static double compare(final String s1, final int n, final String s2, final int m) {

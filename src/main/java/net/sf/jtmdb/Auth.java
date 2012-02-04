@@ -22,114 +22,114 @@ import org.json.JSONObject;
  */
 public class Auth {
 
-	private Auth() {
+  private Auth() {
 
-	}
+  }
 
-	/**
-	 * Gets the session for the authenticated token. Will return a pair of
-	 * Session and the ServerResponse or null if there was an error with the API
-	 * or an IOException occurred.
-	 *
-	 * @param token
-	 *            The authenticated token.
-	 * @return A pair of Session and the ServerResponse or null if there was an
-	 *         error with the API or an IOException occurred.
-	 */
-	public static Pair<Session, ServerResponse> getSession(String token) {
-		Log.log("Getting session for token " + token, Verbosity.NORMAL);
-		if (GeneralSettings.getApiKey() != null
-				&& !GeneralSettings.getApiKey().equals("")) {
-			try {
-				URL call = new URL(GeneralSettings.BASE_URL
-						+ GeneralSettings.AUTH_SESSION_URL
-						+ GeneralSettings.API_MODE_URL + "/"
-						+ GeneralSettings.getApiKey() + "/" + token);
-				String jsonString = Utilities.readUrlResponse(call);
-				try {
-					JSONObject jsonObject = new JSONObject(jsonString
-							.toString());
-					if (jsonObject.has("code")) {
-						return new Pair<>(null,
-								ServerResponse.forID(jsonObject.getInt("code")));
-					}
-					String userName = jsonObject.getString("username");
-					String session = jsonObject.getString("session");
-					return new Pair<>(new Session(
-							userName, session), ServerResponse.SUCCESS);
-				} catch (JSONException e) {
-					Log.log(e, Verbosity.NORMAL);
-					return new Pair<>(null,
-							ServerResponse.UNKNOWN_ERROR);
-				}
-			} catch (IOException e) {
-				Log.log(e, Verbosity.ERROR);
-			}
-		} else {
-			Log.log("Error with the API key", Verbosity.ERROR);
-		}
-		return null;
-	}
+  /**
+   * Gets the session for the authenticated token. Will return a pair of
+   * Session and the ServerResponse or null if there was an error with the API
+   * or an IOException occurred.
+   *
+   * @param token
+   *            The authenticated token.
+   * @return A pair of Session and the ServerResponse or null if there was an
+   *         error with the API or an IOException occurred.
+   */
+  public static Pair<Session, ServerResponse> getSession(String token) {
+    Log.log("Getting session for token " + token, Verbosity.NORMAL);
+    if (GeneralSettings.getApiKey() != null
+        && !GeneralSettings.getApiKey().equals("")) {
+      try {
+        URL call = new URL(GeneralSettings.BASE_URL
+            + GeneralSettings.AUTH_SESSION_URL
+            + GeneralSettings.API_MODE_URL + "/"
+            + GeneralSettings.getApiKey() + "/" + token);
+        String jsonString = Utilities.readUrlResponse(call);
+        try {
+          JSONObject jsonObject = new JSONObject(jsonString
+              .toString());
+          if (jsonObject.has("code")) {
+            return new Pair<>(null,
+                ServerResponse.forID(jsonObject.getInt("code")));
+          }
+          String userName = jsonObject.getString("username");
+          String session = jsonObject.getString("session");
+          return new Pair<>(new Session(
+              userName, session), ServerResponse.SUCCESS);
+        } catch (JSONException e) {
+          Log.log(e, Verbosity.NORMAL);
+          return new Pair<>(null,
+              ServerResponse.UNKNOWN_ERROR);
+        }
+      } catch (IOException e) {
+        Log.log(e, Verbosity.ERROR);
+      }
+    } else {
+      Log.log("Error with the API key", Verbosity.ERROR);
+    }
+    return null;
+  }
 
-	/**
-	 * Will return the URL that the user must browse to, in order to
-	 * authenticate the provided token.
-	 *
-	 * @param token
-	 *            The token to authenticate.
-	 * @return The URL that the user must browse to, in order to authenticate
-	 *         the provided token.
-	 */
-	public static URL authorizeToken(String token) {
-		try {
-			return new URL("http://www.themoviedb.org/auth/" + token);
-		} catch (MalformedURLException e) {
-			Log.log(e, Verbosity.ERROR);
-		}
-		return null;
-	}
+  /**
+   * Will return the URL that the user must browse to, in order to
+   * authenticate the provided token.
+   *
+   * @param token
+   *            The token to authenticate.
+   * @return The URL that the user must browse to, in order to authenticate
+   *         the provided token.
+   */
+  public static URL authorizeToken(String token) {
+    try {
+      return new URL("http://www.themoviedb.org/auth/" + token);
+    } catch (MalformedURLException e) {
+      Log.log(e, Verbosity.ERROR);
+    }
+    return null;
+  }
 
-	/**
-	 * Requests a token from the server that can be used to create an
-	 * authenticated session. Will be null if an error occurred.
-	 *
-	 * @return A token from the server that can be used to create an
-	 *         authenticated session. Will be null if an error occurred.
-	 * @throws IOException
-	 * @throws JSONException
-	 */
-	public static String getToken() throws IOException, JSONException {
-		Log.log("Getting token for authentication", Verbosity.NORMAL);
-		if (GeneralSettings.getApiKey() != null
-				&& !GeneralSettings.getApiKey().equals("")) {
-			try {
-				URL call = new URL(GeneralSettings.BASE_URL
-						+ GeneralSettings.AUTH_TOKEN_URL
-						+ GeneralSettings.API_MODE_URL + "/"
-						+ GeneralSettings.getApiKey());
-				String jsonString = Utilities.readUrlResponse(call).trim();
-				if ((jsonString.startsWith("[") || jsonString.startsWith("{"))
-						&& !jsonString.equals("[\"Nothing found.\"]")) {
-					JSONObject jsonObject = new JSONObject(jsonString
-							.toString());
-					String token = jsonObject.getString("token");
-					return token;
-				} else {
-					Log
-							.log(
-									"Getting token for authentication returned no results",
-									Verbosity.NORMAL);
-				}
-			} catch (IOException e) {
-				Log.log(e, Verbosity.ERROR);
-				throw e;
-			} catch (JSONException e) {
-				Log.log(e, Verbosity.ERROR);
-				throw e;
-			}
-		} else {
-			Log.log("Error with the API key", Verbosity.ERROR);
-		}
-		return null;
-	}
+  /**
+   * Requests a token from the server that can be used to create an
+   * authenticated session. Will be null if an error occurred.
+   *
+   * @return A token from the server that can be used to create an
+   *         authenticated session. Will be null if an error occurred.
+   * @throws IOException
+   * @throws JSONException
+   */
+  public static String getToken() throws IOException, JSONException {
+    Log.log("Getting token for authentication", Verbosity.NORMAL);
+    if (GeneralSettings.getApiKey() != null
+        && !GeneralSettings.getApiKey().equals("")) {
+      try {
+        URL call = new URL(GeneralSettings.BASE_URL
+            + GeneralSettings.AUTH_TOKEN_URL
+            + GeneralSettings.API_MODE_URL + "/"
+            + GeneralSettings.getApiKey());
+        String jsonString = Utilities.readUrlResponse(call).trim();
+        if ((jsonString.startsWith("[") || jsonString.startsWith("{"))
+            && !jsonString.equals("[\"Nothing found.\"]")) {
+          JSONObject jsonObject = new JSONObject(jsonString
+              .toString());
+          String token = jsonObject.getString("token");
+          return token;
+        }
+
+        Log.log("Getting token for authentication returned no results", Verbosity.NORMAL);
+      }
+      catch (IOException e) {
+        Log.log(e, Verbosity.ERROR);
+        throw e;
+      }
+      catch (JSONException e) {
+        Log.log(e, Verbosity.ERROR);
+        throw e;
+      }
+    }
+    else {
+      Log.log("Error with the API key", Verbosity.ERROR);
+    }
+    return null;
+  }
 }
