@@ -44,11 +44,6 @@ public class FrontEnd extends Application {
   public void init() throws Exception {
     Section section = INI.getSection("general");
 
-//    Path moviesPath = Paths.get(section.get("movies.path"));
-//    Path seriesPath = Paths.get(section.get("series.path"));
-//    String sublightKey = section.get("sublight.key");
-//    String sublightClientName = section.get("sublight.client");
-
     GeneralSettings.setApiKey(section.get("jtmdb.key"));
     GeneralSettings.setLogEnabled(false);
     GeneralSettings.setLogStream(System.out);
@@ -92,17 +87,17 @@ public class FrontEnd extends Application {
         MapBinder.newMapBinder(binder(), MediaType.class, ItemEnricher.class).addBinding(MediaType.EPISODE).to(TvdbEpisodeEnricher.class);
       }
 
-      @Provides @SuppressWarnings("unused")
+      @Provides
       public Player providesPlayer() {
         return player;
       }
 
-      @Provides @SuppressWarnings("unused")
+      @Provides
       public Ini providesIni() {
         return INI;
       }
 
-      @Provides @SuppressWarnings("unused")
+      @Provides
       public Connection providesConnection() {
         try {
           Connection connection = pool.getConnection();
