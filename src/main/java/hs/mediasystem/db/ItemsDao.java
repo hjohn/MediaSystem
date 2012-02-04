@@ -11,7 +11,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
+@Singleton
 public class ItemsDao {
   public static final int VERSION = 2;
 
@@ -26,10 +28,36 @@ public class ItemsDao {
     return connectionProvider.get();
   }
 
+  public enum ImageType {BACKGROUND, BANNER, POSTER}
+
+  public byte[] getImage(int id, ImageType type) {
+    System.out.println("[FINE] ItemsDao.getImage() - Loading image " + type + "(id=" + id + ")");
+
+    try {
+      String column = type.name().toLowerCase();
+
+      try(Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement("SELECT " + column + " FROM items WHERE id = ?")) {
+        statement.setInt(1, id);
+
+        try(ResultSet rs = statement.executeQuery()) {
+          if(rs.next()) {
+            return rs.getBytes(column);
+          }
+        }
+      }
+
+      return null;
+    }
+    catch(SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public Item getItem(final Identifier identifier) throws ItemNotFoundException {
     try {
       try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("SELECT * FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
+          PreparedStatement statement = connection.prepareStatement("SELECT id, imdbid, title, subtitle, releasedate, rating, plot, runtime, version, season, episode, language, tagline, genres FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
         statement.setString(1, identifier.getType().name());
         statement.setString(2, identifier.getProvider());
         statement.setString(3, identifier.getProviderId());
@@ -42,19 +70,20 @@ public class ItemsDao {
               setId(rs.getInt("id"));
               setImdbId(rs.getString("imdbid"));
               setTitle(rs.getString("title"));
-              setReleaseDate(rs.getDate("releasedate"));
-              setRating(rs.getFloat("rating"));
-              setPlot(rs.getString("plot"));
-              setPoster(rs.getBytes("poster"));
-              setBanner(rs.getBytes("banner"));
-              setBackground(rs.getBytes("background"));
-              setRuntime(rs.getInt("runtime"));
-              setVersion(rs.getInt("version"));
+              setSubtitle(rs.getString("subtitle"));
               setSeason(rs.getInt("season"));
               setEpisode(rs.getInt("episode"));
-              setSubtitle(rs.getString("subtitle"));
+              setReleaseDate(rs.getDate("releasedate"));
+              setPlot(rs.getString("plot"));
+              setRating(rs.getFloat("rating"));
+              setRuntime(rs.getInt("runtime"));
+              setVersion(rs.getInt("version"));
               setLanguage(rs.getString("language"));
               setTagline(rs.getString("tagline"));
+
+              setBackground(new ImageSource(getId(), ImageType.BACKGROUND));
+              setBanner(new ImageSource(getId(), ImageType.BANNER));
+              setPoster(new ImageSource(getId(), ImageType.POSTER));
 
               String genres = rs.getString("genres");
               setGenres(genres == null ? new String[] {} : genres.split(","));
@@ -190,21 +219,18 @@ public class ItemsDao {
     Map<String, Object> columns = new LinkedHashMap<>();
 
     columns.put("imdbid", item.getImdbId());
-    columns.put("rating", item.getRating());
     columns.put("title", item.getTitle());
+    columns.put("subtitle", item.getSubtitle());
+    columns.put("season", item.getSeason());
+    columns.put("episode", item.getEpisode());
+    columns.put("releasedate", item.getReleaseDate());
     columns.put("plot", item.getPlot());
-    columns.put("poster", item.getPoster());
-    columns.put("banner", item.getBanner());
-    columns.put("background", item.getBackground());
+    columns.put("rating", item.getRating());
     columns.put("lasthit", new Date());
     columns.put("lastupdated", new Date());
     columns.put("lastchecked", new Date());
-    columns.put("releasedate", item.getReleaseDate());
     columns.put("runtime", item.getRuntime());
     columns.put("version", VERSION);
-    columns.put("season", item.getSeason());
-    columns.put("episode", item.getEpisode());
-    columns.put("subtitle", item.getSubtitle());
     columns.put("language", item.getLanguage());
     columns.put("tagline", item.getTagline());
 
@@ -219,10 +245,29 @@ public class ItemsDao {
 
     columns.put("genres", genres);
 
+    columns.put("background", item.getBackground().get());
+    columns.put("banner", item.getBanner().get());
+    columns.put("poster", item.getPoster().get());
+
     columns.put("type", item.getIdentifier().getType().name());
     columns.put("provider", item.getIdentifier().getProvider());
     columns.put("providerid", item.getIdentifier().getProviderId());
 
     return columns;
+  }
+
+  private class ImageSource implements Source<byte[]> {
+    private final int id;
+    private final ImageType type;
+
+    public ImageSource(int id, ImageType type) {
+      this.id = id;
+      this.type = type;
+    }
+
+    @Override
+    public byte[] get() {
+      return ItemsDao.this.getImage(id, type);
+    }
   }
 }

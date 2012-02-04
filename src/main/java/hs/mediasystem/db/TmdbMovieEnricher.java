@@ -140,14 +140,16 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
         item.setImdbId(movie.getImdbID());
         item.setTitle(movie.getName());
-        item.setPoster(poster);
-        item.setBackground(background);
         item.setPlot(movie.getOverview());
         item.setRating((float)movie.getRating());
         item.setReleaseDate(movie.getReleasedDate());
         item.setRuntime(movie.getRuntime());
         item.setTagline(movie.getTagline());
         item.setLanguage(movie.getLanguage());
+
+        item.setBackground(new MemorySource<>(background));
+        item.setBanner(Item.NULL);
+        item.setPoster(new MemorySource<>(poster));
 
         List<String> genres = new ArrayList<>();
 

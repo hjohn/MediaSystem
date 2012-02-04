@@ -17,15 +17,19 @@ public class ImageCache {
       image = map.get("original");
     }
 
-    if(image == null && handle.getImageData() != null) {
-      image = new Image(new ByteArrayInputStream(handle.getImageData()));
+    if(image == null) {
+      byte[] data = handle.getImageData();
 
-      if(map == null) {
-        map = new HashMap<>();
-        CACHE.put(handle.getKey(), map);
+      if(data != null) {
+        image = new Image(new ByteArrayInputStream(data));
+
+        if(map == null) {
+          map = new HashMap<>();
+          CACHE.put(handle.getKey(), map);
+        }
+
+        map.put("original", image);
       }
-
-      map.put("original", image);
     }
 
     return image;
@@ -40,15 +44,19 @@ public class ImageCache {
       image = map.get(key);
     }
 
-    if(image == null && handle.getImageData() != null) {
-      image = new Image(new ByteArrayInputStream(handle.getImageData()), w, h, keepAspect, true);
+    if(image == null) {
+      byte[] data = handle.getImageData();
 
-      if(map == null) {
-        map = new HashMap<>();
-        CACHE.put(handle.getKey(), map);
+      if(data != null) {
+        image = new Image(new ByteArrayInputStream(data), w, h, keepAspect, true);
+
+        if(map == null) {
+          map = new HashMap<>();
+          CACHE.put(handle.getKey(), map);
+        }
+
+        map.put(key, image);
       }
-
-      map.put(key, image);
     }
 
     return image;

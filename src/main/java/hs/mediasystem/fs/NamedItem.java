@@ -2,6 +2,7 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.db.MediaType;
+import hs.mediasystem.db.Source;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.ImageHandle;
 
@@ -21,9 +22,9 @@ public abstract class NamedItem implements MediaItem {
   private String language;
   private String tagline;
   private int runtime;
-  private byte[] banner;
-  private byte[] poster;
-  private byte[] background;
+  private ImageHandle banner;
+  private ImageHandle poster;
+  private ImageHandle background;
 
   private boolean enriched;
 
@@ -97,32 +98,32 @@ public abstract class NamedItem implements MediaItem {
 
   @Override
   public ImageHandle getBackground() {
-    return background == null ? null : new ImageHandle(background, createKey("background"));
+    return background;
   }
 
   @Override
-  public void setBackground(byte[] background) {
-    this.background = background;
+  public void setBackground(Source<byte[]> background) {
+    this.background = new SourceImageHandle(background, createKey("background"));
   }
 
   @Override
   public ImageHandle getBanner() {
-    return banner == null ? null : new ImageHandle(banner, createKey("banner"));
+    return banner;
   }
 
   @Override
-  public void setBanner(byte[] banner) {
-    this.banner = banner;
+  public void setBanner(Source<byte[]> banner) {
+    this.banner = new SourceImageHandle(banner, createKey("banner"));
   }
 
   @Override
   public ImageHandle getPoster() {
-    return poster == null ? null : new ImageHandle(poster, createKey("poster"));
+    return poster;
   }
 
   @Override
-  public void setPoster(byte[] poster) {
-    this.poster = poster;
+  public void setPoster(Source<byte[]> poster) {
+    this.poster = new SourceImageHandle(poster, createKey("poster"));
   }
 
   private String createKey(String suffix) {

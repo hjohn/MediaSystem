@@ -3,6 +3,8 @@ package hs.mediasystem.db;
 import java.util.Date;
 
 public class Item {
+  public static final Source<byte[]> NULL = new MemorySource<>(null);
+
   private int id;
 
   private Identifier identifier;
@@ -12,9 +14,9 @@ public class Item {
   private int version;
   private String imdbId;
   private String plot;
-  private byte[] poster;
-  private byte[] background;
-  private byte[] banner;
+  private Source<byte[]> poster;
+  private Source<byte[]> background;
+  private Source<byte[]> banner;
   private Float rating;
   private Integer releaseYear;
   private Date releaseDate;
@@ -73,20 +75,28 @@ public class Item {
     this.plot = plot;
   }
 
-  public byte[] getPoster() {
+  public Source<byte[]> getPoster() {
     return poster;
   }
 
-  public void setPoster(byte[] poster) {
+  public void setPoster(Source<byte[]> poster) {
     this.poster = poster;
   }
 
-  public byte[] getBackground() {
+  public Source<byte[]> getBackground() {
     return background;
   }
 
-  public void setBackground(byte[] background) {
+  public void setBackground(Source<byte[]> background) {
     this.background = background;
+  }
+
+  public Source<byte[]> getBanner() {
+    return banner;
+  }
+
+  public void setBanner(Source<byte[]> banner) {
+    this.banner = banner;
   }
 
   public Float getRating() {
@@ -135,14 +145,6 @@ public class Item {
 
   public void setSubtitle(String subtitle) {
     this.subtitle = subtitle;
-  }
-
-  public byte[] getBanner() {
-    return banner;
-  }
-
-  public void setBanner(byte[] banner) {
-    this.banner = banner;
   }
 
   public Integer getReleaseYear() {

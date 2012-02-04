@@ -11,7 +11,6 @@ import javafx.application.Application;
 // TODO Alice in Wonderland, not a serie, donot group?
 // TODO Options Screen: Modal navigation should use own Navigator as well?
 // TODO Options Screen: Subtitle selection list must be left with backspace, or exit at top/bottom item
-// TODO Memory: Split off pictures from meta-data information for faster loading
 // TODO Memory: Load pics when needed and discard under memory pressure
 // TODO Make plug-ins of various looks of Select Media
 // TODO Remove CellProvider responsibility from MediaTree
