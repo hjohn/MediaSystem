@@ -9,8 +9,7 @@
 }
 
 #select-media .content-box {
-  -fx-background-color: derive(color-blue-70, -80%);
-  -fx-border-radius: 20;
+  -fx-background-color: color-content-background;
   -fx-background-radius: 20;
   -fx-padding: 30;
   -fx-hgap: 20;

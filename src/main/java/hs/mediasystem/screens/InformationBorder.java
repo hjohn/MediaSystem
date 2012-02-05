@@ -22,48 +22,61 @@ public class InformationBorder extends HBox {
     getStyleClass().add("clock");
   }};
 
-  private final Rectangle memoryBar = new Rectangle();
-
-  private final Label memText = new Label() {{
-    setBlendMode(BlendMode.DIFFERENCE);
+  private final HBox clockElement = new HBox() {{
+    getStyleClass().add("element");
+    getChildren().add(clock);
   }};
 
+  private final Rectangle memoryBar = new Rectangle();
+  private final Label memText = new Label();
+
   private final StackPane gc = new StackPane() {{
-    getStyleClass().add("memory");
-    getChildren().add(memoryBar);
-    getChildren().add(memText);
+    getStyleClass().addAll("element", "memory");
+
+    getChildren().add(new StackPane() {{
+      getStyleClass().add("bar");
+      getChildren().addAll(memoryBar, memText);
+    }});
+
+    memText.setBlendMode(BlendMode.DIFFERENCE);
+
+    memoryBar.setWidth(250);
+    memoryBar.heightProperty().bind(memText.heightProperty());
   }};
 
   public InformationBorder() {
-    getChildren().addAll(clock, gc);
+    getStyleClass().add("information-border");
+
+    getChildren().add(new HBox() {{
+      getStyleClass().add("elements");
+      getChildren().addAll(clockElement, gc);
+    }});
 
     Timeline updater = new Timeline(
-      new KeyFrame(Duration.seconds(0.10), new EventHandler<ActionEvent>() {
+      new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-          clock.setText(String.format("%1$tA, %1$te %1$tB %1$tY %1$tT", System.currentTimeMillis()));
+          clock.setText(String.format("%1$tA, %1$te %1$tB %1$tY  %1$tR", System.currentTimeMillis()));
+
           Runtime runtime = Runtime.getRuntime();
 
-          long totalMemory = runtime.totalMemory();
-          long freeMemory = runtime.freeMemory();
           long maxMemory = runtime.maxMemory();
+          long totalMemory = runtime.totalMemory();
+          long usedMemory = totalMemory - runtime.freeMemory();
 
-          double percentageUsed = (double)(totalMemory - freeMemory) / maxMemory;
-          double percentageFree = percentageUsed + (double)freeMemory / maxMemory;
+          double percentageUsed = (double)usedMemory / maxMemory;
+          double percentageTotal = (double)totalMemory / maxMemory;
 
           memoryBar.setFill(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE,
             new Stop(0.0, Color.YELLOW),
             new Stop(percentageUsed, Color.YELLOW),
             new Stop(percentageUsed + 0.0001, Color.LIGHTGRAY),
-            new Stop(percentageFree, Color.LIGHTGRAY),
-            new Stop(percentageFree + 0.0001, Color.TRANSPARENT),
+            new Stop(percentageTotal, Color.LIGHTGRAY),
+            new Stop(percentageTotal + 0.0001, Color.TRANSPARENT),
             new Stop(1, Color.TRANSPARENT)
           ));
 
-          memoryBar.setWidth(300);
-          memoryBar.setHeight(memText.getHeight());
-
-          memText.setText(SizeFormatter.BYTES_THREE_SIGNIFICANT.format(runtime.totalMemory()) + "/" + SizeFormatter.BYTES_THREE_SIGNIFICANT.format(runtime.maxMemory()));
+          memText.setText(SizeFormatter.BYTES_THREE_SIGNIFICANT.format(usedMemory) + "/" + SizeFormatter.BYTES_THREE_SIGNIFICANT.format(totalMemory));
         }
       })
     );

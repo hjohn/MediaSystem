@@ -77,9 +77,8 @@ public class ProgramController {
     sceneRoot.getChildren().addAll(contentBorderPane, overlayBorderPane);
     scene.setRoot(sceneRoot);
 
-    contentBorderPane.setTop(new InformationBorder());
-
     overlayBorderPane.setMouseTransparent(true);
+    overlayBorderPane.setTop(new InformationBorder());
     overlayBorderPane.setRight(messagePane);
 
     mainStage = new Stage(StageStyle.UNDECORATED);
