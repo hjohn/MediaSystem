@@ -9,6 +9,7 @@ import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.EpisodesMediaTree;
+import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.SelectMediaPane.ItemEvent;
 import hs.mediasystem.util.Callable;
@@ -237,9 +238,9 @@ public class SelectMediaPresentation {
       Item item = itemEnricher.loadItem(identifier, bypassCache);
 
       mediaItem.setTitle(item.getTitle());
-      mediaItem.setBanner(item.getBanner());
-      mediaItem.setPoster(item.getPoster());
-      mediaItem.setBackground(item.getBackground());
+      mediaItem.setBackground(new SourceImageHandle(item.getBackground(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-background"));
+      mediaItem.setBanner(new SourceImageHandle(item.getBanner(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-banner"));
+      mediaItem.setPoster(new SourceImageHandle(item.getPoster(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-poster"));
       mediaItem.setPlot(item.getPlot());
       mediaItem.setRating(item.getRating());
       mediaItem.setReleaseDate(item.getReleaseDate());

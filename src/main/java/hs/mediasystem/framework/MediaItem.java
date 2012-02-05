@@ -1,7 +1,6 @@
 package hs.mediasystem.framework;
 
 import hs.mediasystem.db.LocalInfo;
-import hs.mediasystem.db.Source;
 import hs.mediasystem.util.ImageHandle;
 
 import java.util.Date;
@@ -39,9 +38,9 @@ public interface MediaItem {
   void setTagline(String tagline);
   void setRuntime(int minutes);
   void setGenres(String[] genres);
-  void setBanner(Source<byte[]> banner);
-  void setPoster(Source<byte[]> poster);
-  void setBackground(Source<byte[]> background);
+  void setBanner(ImageHandle banner);
+  void setPoster(ImageHandle poster);
+  void setBackground(ImageHandle background);
 
   LocalInfo getLocalInfo();
   void setEnriched(boolean enriched);

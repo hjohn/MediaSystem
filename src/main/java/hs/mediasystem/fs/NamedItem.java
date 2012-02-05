@@ -2,7 +2,6 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.db.MediaType;
-import hs.mediasystem.db.Source;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.ImageHandle;
 
@@ -102,8 +101,8 @@ public abstract class NamedItem implements MediaItem {
   }
 
   @Override
-  public void setBackground(Source<byte[]> background) {
-    this.background = new SourceImageHandle(background, createKey("background"));
+  public void setBackground(ImageHandle background) {
+    this.background = background;
   }
 
   @Override
@@ -112,8 +111,8 @@ public abstract class NamedItem implements MediaItem {
   }
 
   @Override
-  public void setBanner(Source<byte[]> banner) {
-    this.banner = new SourceImageHandle(banner, createKey("banner"));
+  public void setBanner(ImageHandle banner) {
+    this.banner = banner;
   }
 
   @Override
@@ -122,12 +121,8 @@ public abstract class NamedItem implements MediaItem {
   }
 
   @Override
-  public void setPoster(Source<byte[]> poster) {
-    this.poster = new SourceImageHandle(poster, createKey("poster"));
-  }
-
-  private String createKey(String suffix) {
-    return getTitle() + "-" + getSeason() + "x" + getEpisode() + "-" + getSubtitle() + "-" + suffix;
+  public void setPoster(ImageHandle poster) {
+    this.poster = poster;
   }
 
   @Override
