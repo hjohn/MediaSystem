@@ -3,7 +3,6 @@ package hs.mediasystem;
 import javafx.application.Application;
 
 // Top 10 stuff:
-// FIXME Fix the reloading of data in Select Media screen
 // TODO For Episodes of Series, use background of parent
 // TODO Decode images in background thread, not on JavaFX thread
 // TODO Titles / Subtitles should not be overriden by enriched data (setting?)

@@ -4,6 +4,7 @@ import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.EpisodesMediaTree;
+import hs.mediasystem.fs.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.SelectMediaPane.ItemEvent;
 import hs.mediasystem.util.Callable;
@@ -41,7 +42,7 @@ public class SelectMediaPresentation {
   private MediaItem currentItem;
 
   @Inject
-  public SelectMediaPresentation(final ProgramController controller, final SelectMediaPane<MediaItem> view) {
+  public SelectMediaPresentation(final ProgramController controller, final SelectMediaPane<MediaItem> view, final MediaItemEnrichmentEventHandler enrichmentHandler) {
     this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
 
@@ -96,11 +97,11 @@ public class SelectMediaPresentation {
           new ActionOption("Reload meta data", new Callable<Boolean>() {
             @Override
             public Boolean call() {
-              // enrichItem(mediaItem, true);  // FIXME
+              enrichmentHandler.enrich(mediaItem, true);
 
+              ImageCache.expunge(currentItem.getBanner());
               ImageCache.expunge(currentItem.getPoster());
               ImageCache.expunge(currentItem.getBackground());
-              // updateCurrentItem();
               return true;
             }
           })
