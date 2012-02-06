@@ -4,6 +4,8 @@ import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.ImageHandle;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
@@ -26,21 +28,24 @@ public class BannerRenderer implements CellProvider<MediaItem> {
   }
 
   @Override
-  public Node configureCell(MediaItem item) {
+  public Node configureCell(final MediaItem item) {
     if(item != null) {
-      ImageHandle banner = item.getBanner();
+      title.textProperty().bind(Bindings.when(item.bannerProperty().isNull()).then(item.titleProperty()).otherwise(""));
+      title.graphicProperty().bind(Bindings.when(item.bannerProperty().isNull()).then((ImageView)null).otherwise(new ObjectBinding<ImageView>() {
+        {
+          bind(item.bannerProperty());
+        }
 
-      if(banner != null) {
-        title.setGraphic(new ImageView(ImageCache.loadImage(banner)) {{
-          setPreserveRatio(true);
-          setFitHeight(60);  // TODO No absolute values
-        }});
-        title.setText("");
-      }
-      else {
-        title.setGraphic(null);
-        title.setText(item.getTitle());
-      }
+        @Override
+        protected ImageView computeValue() {
+          ImageHandle banner = item.getBanner();
+
+          return banner == null ? null : new ImageView(ImageCache.loadImage(banner)) {{
+            setPreserveRatio(true);
+            setFitHeight(60);  // TODO No absolute values
+          }};
+        }
+      }));
     }
 
     return group;

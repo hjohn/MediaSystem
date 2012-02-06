@@ -3,6 +3,7 @@ package hs.mediasystem.fs;
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.Decoder;
+import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Scanner;
 
 import java.io.IOException;
@@ -15,8 +16,10 @@ import java.util.List;
 public class EpisodeScanner implements Scanner<Episode> {
   private final Decoder decoder;
   private final MediaType mediaType;
+  private final MediaTree mediaTree;
 
-  public EpisodeScanner(Decoder decoder, MediaType mediaType) {
+  public EpisodeScanner(MediaTree mediaTree, Decoder decoder, MediaType mediaType) {
+    this.mediaTree = mediaTree;
     this.decoder = decoder;
     this.mediaType = mediaType;
   }
@@ -32,7 +35,7 @@ public class EpisodeScanner implements Scanner<Episode> {
             LocalInfo localInfo = decoder.decode(path, mediaType);
 
             if(localInfo != null) {
-              episodes.add(new Episode(localInfo));
+              episodes.add(new Episode(mediaTree, localInfo));
             }
             else {
               System.err.println("EpisodeScanner: Could not decode as movie: " + path);

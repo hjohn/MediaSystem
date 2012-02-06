@@ -1,7 +1,9 @@
 package hs.mediasystem.db;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class CachedItemEnricher {
   private final ItemsDao itemsDao;
   private final TypeBasedItemEnricher providerToCache;

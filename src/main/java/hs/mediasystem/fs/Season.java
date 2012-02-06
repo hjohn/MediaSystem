@@ -11,16 +11,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class Season extends NamedItem implements Group {
+public class Season extends MediaItem implements Group {
   private final List<MediaItem> children = new ArrayList<>();
 
-  public Season(String serieName, int season) {
-    super(new LocalInfo(null, MediaType.SEASON, serieName, null, null, null, season, null));
+  public Season(MediaTree mediaTree, String serieName, int season) {
+    super(mediaTree, new LocalInfo(null, MediaType.SEASON, serieName, null, null, null, season, null));
   }
 
   public void add(MediaItem child) {
     children.add(child);
-    ((NamedItem)child).parent = this;
+    child.setParent(this);
   }
 
   public int size() {

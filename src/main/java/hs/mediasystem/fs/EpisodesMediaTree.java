@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class EpisodesMediaTree implements MediaTree {
+public class EpisodesMediaTree extends AbstractMediaTree {
   private final Path root;
   private final String serieName;
 
@@ -26,7 +26,7 @@ public class EpisodesMediaTree implements MediaTree {
   @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      List<Episode> episodes = new EpisodeScanner(new EpisodeDecoder(), MediaType.EPISODE).scan(root);
+      List<Episode> episodes = new EpisodeScanner(this, new EpisodeDecoder(), MediaType.EPISODE).scan(root);
       List<MediaItem> items = new ArrayList<>();
 
       Collection<List<MediaItem>> groupedItems = Groups.group(episodes, new SeasonGrouper());
@@ -34,7 +34,7 @@ public class EpisodesMediaTree implements MediaTree {
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
           Episode episodeOne = (Episode)group.get(0);
-          Season s = new Season(serieName, episodeOne.getSeason());
+          Season s = new Season(this, serieName, episodeOne.getSeason());
 
           Collections.sort(group, EpisodeComparator.INSTANCE);
 

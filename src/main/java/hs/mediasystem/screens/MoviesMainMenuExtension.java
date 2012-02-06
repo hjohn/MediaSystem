@@ -1,5 +1,6 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.fs.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.fs.MoviesMediaTree;
 
 import java.nio.file.Paths;
@@ -12,10 +13,12 @@ import javax.inject.Provider;
 
 public class MoviesMainMenuExtension implements MainMenuExtension {
   private final Provider<SelectMediaPresentation> selectMediaPresentationProvider;
+  private final MediaItemEnrichmentEventHandler enrichmentHandler;
 
   @Inject
-  public MoviesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider) {
+  public MoviesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, MediaItemEnrichmentEventHandler enrichmentHandler) {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
+    this.enrichmentHandler = enrichmentHandler;
   }
 
   @Override
@@ -31,8 +34,11 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
   @Override
   public Node select(ProgramController controller) {
     SelectMediaPresentation presentation = selectMediaPresentationProvider.get();
+    MoviesMediaTree mediaTree = new MoviesMediaTree(Paths.get(controller.getIni().getValue("general", "movies.path")));
 
-    presentation.setMediaTree(new MoviesMediaTree(Paths.get(controller.getIni().getValue("general", "movies.path"))));
+    mediaTree.onItemQueued().set(enrichmentHandler);
+
+    presentation.setMediaTree(mediaTree);
 
     return presentation.getView();
   }

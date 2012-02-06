@@ -3,6 +3,11 @@ package hs.mediasystem;
 import javafx.application.Application;
 
 // Top 10 stuff:
+// FIXME Fix the reloading of data in Select Media screen
+// TODO For Episodes of Series, use background of parent
+// TODO Decode images in background thread, not on JavaFX thread
+// TODO Titles / Subtitles should not be overriden by enriched data (setting?)
+
 // TODO Use the Message overlay to indicate stuff being loaded in background on Select Media screen
 // TODO Actor / Director information in database
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance
@@ -11,10 +16,11 @@ import javafx.application.Application;
 // TODO Alice in Wonderland, not a serie, donot group?
 // TODO Options Screen: Modal navigation should use own Navigator as well?
 // TODO Options Screen: Subtitle selection list must be left with backspace, or exit at top/bottom item
-// TODO Memory: Load pics when needed and discard under memory pressure
 // TODO Make plug-ins of various looks of Select Media
 // TODO Remove CellProvider responsibility from MediaTree
 // TODO Make plug-ins from MediaTrees
+// TODO Hide detail headers when their content is empty
+// TODO Perhaps use GridPane on playback overlay instead of hard coded values for the poster size
 
 // TODO Some form of remote control support / Lirc support
 // TODO VLCPlayer: Make brightness controls work
@@ -22,7 +28,6 @@ import javafx.application.Application;
 // TODO Style main page
 // TODO Options Screen: Separators for Dialog Screen
 
-// Minimal working system:
 // TODO Make subtitles more peristent by storing them with file?
 // TODO Add breadcrumb?
 // TODO Auto-scroll plot/overview

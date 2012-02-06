@@ -1,15 +1,9 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.db.CachedItemEnricher;
-import hs.mediasystem.db.Identifier;
-import hs.mediasystem.db.IdentifyException;
-import hs.mediasystem.db.Item;
-import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.EpisodesMediaTree;
-import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.SelectMediaPane.ItemEvent;
 import hs.mediasystem.util.Callable;
@@ -17,12 +11,11 @@ import hs.mediasystem.util.ImageCache;
 
 import java.util.List;
 
+import javafx.beans.binding.StringBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
-import javafx.concurrent.Worker.State;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -42,17 +35,15 @@ public class SelectMediaPresentation {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
 
   private final SelectMediaPane<MediaItem> view;
-  private final CachedItemEnricher itemEnricher;
   private final TreeItem<MediaItem> treeRoot = new TreeItem<>();
   private final Navigator navigator;
 
   private MediaItem currentItem;
 
   @Inject
-  public SelectMediaPresentation(final ProgramController controller, final SelectMediaPane<MediaItem> view, CachedItemEnricher itemEnricher) {
+  public SelectMediaPresentation(final ProgramController controller, final SelectMediaPane<MediaItem> view) {
     this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
-    this.itemEnricher = itemEnricher;
 
     view.setRoot(treeRoot);
 
@@ -71,7 +62,7 @@ public class SelectMediaPresentation {
       public void handle(ItemEvent<MediaItem> event) {
         if(event.getTreeItem() != null) {
           currentItem = event.getTreeItem().getValue();
-          updateCurrentItem();  // TODO Expensive image loading being done on JavaFX thread
+          bind(event.getTreeItem().getValue());
         }
         event.consume();
       }
@@ -105,10 +96,11 @@ public class SelectMediaPresentation {
           new ActionOption("Reload meta data", new Callable<Boolean>() {
             @Override
             public Boolean call() {
-              enrichItem(mediaItem, true);
+              // enrichItem(mediaItem, true);  // FIXME
+
               ImageCache.expunge(currentItem.getPoster());
               ImageCache.expunge(currentItem.getBackground());
-              updateCurrentItem();
+              // updateCurrentItem();
               return true;
             }
           })
@@ -186,17 +178,37 @@ public class SelectMediaPresentation {
     }
   }
 
-  private void updateCurrentItem() {
-    if(currentItem != null) {
-      view.setTitle(currentItem.getTitle());
-      view.setSubtitle(currentItem.getSubtitle());
-      view.setReleaseTime(MediaItemFormatter.formatReleaseTime(currentItem));
-      view.setPlot(currentItem.getPlot());
-      view.setRating(currentItem.getRating() == null ? 0.0 : currentItem.getRating());
-      view.setRuntime(currentItem.getRuntime());
-      view.setGenres(currentItem.getGenres());
-      view.setPoster(currentItem.getPoster());
-      view.setBackground(currentItem.getBackground());
+  private void bind(final MediaItem mediaItem) {
+    if(mediaItem != null) {
+      view.titleProperty().bind(mediaItem.titleProperty());
+      view.subtitleProperty().bind(mediaItem.subtitleProperty());
+      view.releaseTimeProperty().bind(MediaItemFormatter.releaseTimeBinding(mediaItem));
+      view.ratingProperty().bind(mediaItem.ratingProperty());
+      view.plotProperty().bind(mediaItem.plotProperty());
+      view.runtimeProperty().bind(mediaItem.runtimeProperty());
+      view.backgroundProperty().bind(mediaItem.backgroundProperty());  // TODO Expensive image loading being done on JavaFX thread
+      view.posterProperty().bind(mediaItem.posterProperty());
+
+      view.genresProperty().bind(new StringBinding() {
+        {
+          bind(mediaItem.genresProperty());
+        }
+
+        @Override
+        protected String computeValue() {
+          String genreText = "";
+
+          for(String genre : mediaItem.genresProperty().get()) {
+            if(!genreText.isEmpty()) {
+              genreText += " • ";
+            }
+
+            genreText += genre;
+          }
+
+          return genreText;
+        }
+      });
     }
   }
 
@@ -230,37 +242,8 @@ public class SelectMediaPresentation {
     }
   }
 
-  private void enrichItem(final MediaItem mediaItem, boolean bypassCache) {
-    try {
-      LocalInfo localInfo = mediaItem.getLocalInfo();
-      Identifier identifier = itemEnricher.identifyItem(localInfo, bypassCache);
-
-      Item item = itemEnricher.loadItem(identifier, bypassCache);
-
-      mediaItem.setTitle(item.getTitle());
-      mediaItem.setBackground(new SourceImageHandle(item.getBackground(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-background"));
-      mediaItem.setBanner(new SourceImageHandle(item.getBanner(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-banner"));
-      mediaItem.setPoster(new SourceImageHandle(item.getPoster(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-poster"));
-      mediaItem.setPlot(item.getPlot());
-      mediaItem.setRating(item.getRating());
-      mediaItem.setReleaseDate(item.getReleaseDate());
-      mediaItem.setGenres(item.getGenres());
-      mediaItem.setLanguage(item.getLanguage());
-      mediaItem.setTagline(item.getTagline());
-      mediaItem.setRuntime(item.getRuntime());
-    }
-    catch(IdentifyException e) {
-      System.out.println("[WARN] SelectMediaPresentation.enrichItem() - Enrichment failed of " + mediaItem + " failed with exception: " + e);
-      e.printStackTrace(System.out);
-    }
-
-    mediaItem.setEnriched(true);  // set to true, even if something failed as otherwise we keep trying to enrich
-  }
-
   private final class MediaItemTreeCell extends TreeCell<MediaItem> {
     private final CellProvider<MediaItem> provider;
-
-    private Task<Void> loadTask;
 
     private MediaItemTreeCell(CellProvider<MediaItem> provider) {
       this.provider = provider;
@@ -268,61 +251,12 @@ public class SelectMediaPresentation {
       setDisclosureNode(new Group());
     }
 
-    private Node createNodeGraphic(MediaItem item) {
-      return provider.configureCell(item);
-    }
-
     @Override
     protected void updateItem(final MediaItem item, boolean empty) {
       super.updateItem(item, empty);
 
       if(!empty) {
-        if(loadTask != null) {
-
-          /*
-           * Cancel any load task before updating the graphic, as otherwise an older use of
-           * this cell might update it with the wrong data when the task completes.
-           */
-
-          loadTask.cancel();
-        }
-
-        setGraphic(createNodeGraphic(item));
-
-        if(!item.isEnriched()) {
-          loadTask = new Task<Void>() {
-            @Override
-            public Void call() {
-              synchronized(item) {  // TODO Need to figure out a better way of enriching the same item only once at the same time
-                System.out.println("[FINE] SelectMediaPresentation.MediaItemTreeCell.updateItem(...).new Task() {...}.call() - Loading data for: " + item);
-
-                if(!item.isEnriched()) {
-                  enrichItem(item, false);
-                }
-
-                return null;
-              }
-            }
-          };
-
-          loadTask.stateProperty().addListener(new ChangeListener<State>() {
-            @Override
-            public void changed(ObservableValue<? extends State> source, State oldState, State state) {
-              if(state == State.SUCCEEDED) {
-                setGraphic(createNodeGraphic(item));
-                if(item.equals(currentItem)) {
-                  updateCurrentItem();
-                }
-              }
-              else if(state == State.FAILED) {
-                System.err.println("Exception while enriching: " + item);
-                loadTask.getException().printStackTrace();
-              }
-            }
-          });
-
-          new Thread(loadTask).start();
-        }
+        setGraphic(provider.configureCell(item));
       }
     }
   }

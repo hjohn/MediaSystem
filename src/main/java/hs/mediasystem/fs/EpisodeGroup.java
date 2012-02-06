@@ -11,11 +11,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class EpisodeGroup extends NamedItem implements Group {
+public class EpisodeGroup extends MediaItem implements Group {
   private final List<MediaItem> children = new ArrayList<>();
 
-  public EpisodeGroup(List<MediaItem> items) {
-    super(new LocalInfo(MediaType.MOVIE, items.get(0).getTitle(), items.get(0).getReleaseYear()));
+  public EpisodeGroup(MediaTree mediaTree, List<MediaItem> items) {
+    super(mediaTree, new LocalInfo(MediaType.MOVIE, items.get(0).getTitle(), items.get(0).getReleaseYear()));
 
     for(MediaItem item : items) {
       add(item);
@@ -24,7 +24,7 @@ public class EpisodeGroup extends NamedItem implements Group {
 
   public void add(MediaItem child) {
     children.add(child);
-    ((NamedItem)child).parent = this;
+    child.setParent(this);
   }
 
   public int size() {

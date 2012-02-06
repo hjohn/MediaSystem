@@ -60,15 +60,16 @@ public class SelectMediaPane<T> extends StackPane {
 
   private final TreeView<T> treeView = new TreeView<>();
 
-  private final ObjectProperty<String> title = new SimpleObjectProperty<>();
-  private final ObjectProperty<String> subtitle = new SimpleObjectProperty<>();
-  private final ObjectProperty<String> releaseTime = new SimpleObjectProperty<>();
-  private final ObjectProperty<String> plot = new SimpleObjectProperty<>();
+  private final StringProperty title = new SimpleStringProperty();
+  private final StringProperty subtitle = new SimpleStringProperty();
+  private final StringProperty releaseTime = new SimpleStringProperty();
+  private final StringProperty plot = new SimpleStringProperty();
   private final DoubleProperty rating = new SimpleDoubleProperty();
-//  private final StringProperty language = new SimpleStringProperty();
-//  private final StringProperty tagline = new SimpleStringProperty();
   private final StringProperty genres = new SimpleStringProperty();
   private final IntegerProperty runtime = new SimpleIntegerProperty();
+
+  private final ObjectProperty<ImageHandle> backgroundHandle = new SimpleObjectProperty<>();
+  private final ObjectProperty<ImageHandle> posterHandle = new SimpleObjectProperty<>();
 
   private final ObjectProperty<Image> poster = new SimpleObjectProperty<>();
   private final ObjectProperty<Image> background = new SimpleObjectProperty<>();
@@ -150,7 +151,7 @@ public class SelectMediaPane<T> extends StackPane {
         backgroundImageView.setOpacity(1.0);
         newBackgroundImageView.setOpacity(0.0);
 
-        if(!wantedBackground.get().equals(background.get())) {
+        if(wantedBackground.get() == null || !wantedBackground.get().equals(background.get())) {
           newBackground.set(wantedBackground.get());
           timeline.play();
         }
@@ -345,6 +346,25 @@ public class SelectMediaPane<T> extends StackPane {
     }});
 
     getChildren().add(root);
+
+    backgroundHandle.addListener(new ChangeListener<ImageHandle>() {
+      @Override
+      public void changed(ObservableValue<? extends ImageHandle> observable, ImageHandle oldValue, ImageHandle newValue) {
+        if(trySetImage(newValue, wantedBackground, backgroundImageView.getFitWidth(), backgroundImageView.getFitHeight())) {
+          if(timeline.getStatus() == Animation.Status.STOPPED) {
+            newBackground.set(wantedBackground.get());
+            timeline.play();
+          }
+        }
+      }
+    });
+
+    posterHandle.addListener(new ChangeListener<ImageHandle>() {
+      @Override
+      public void changed(ObservableValue<? extends ImageHandle> observable, ImageHandle oldValue, ImageHandle newValue) {
+        trySetImage(newValue, poster);
+      }
+    });
   }
 
   public ObservableList<Node> filterItemsProperty() {
@@ -388,56 +408,15 @@ public class SelectMediaPane<T> extends StackPane {
     }
   }
 
-  public void setTitle(String title) {
-    this.title.set(title);
-  }
-
-  public void setSubtitle(String subtitle) {
-    this.subtitle.set(subtitle);
-  }
-
-  public void setReleaseTime(String releaseTime) {
-    this.releaseTime.set(releaseTime);
-  }
-
-  public void setPlot(String plot) {
-    this.plot.set(plot);
-  }
-
-  public void setRating(double rating) {
-    this.rating.set(rating);
-  }
-
-  public void setGenres(String[] genres) {
-    String genreText = "";
-
-    for(String genre : genres) {
-      if(!genreText.isEmpty()) {
-        genreText += " • ";
-      }
-
-      genreText += genre;
-    }
-
-    this.genres.set(genreText);
-  }
-
-  public void setRuntime(int runtime) {
-    this.runtime.set(runtime);
-  }
-
-  public void setPoster(ImageHandle poster) {
-    trySetImage(poster, this.poster);
-  }
-
-  public void setBackground(ImageHandle background) {
-    if(trySetImage(background, wantedBackground, backgroundImageView.getFitWidth(), backgroundImageView.getFitHeight())) {
-      if(timeline.getStatus() == Animation.Status.STOPPED) {
-        newBackground.set(wantedBackground.get());
-        timeline.play();
-      }
-    }
-  }
+  public StringProperty titleProperty() { return title; }
+  public StringProperty subtitleProperty() { return subtitle; }
+  public StringProperty releaseTimeProperty() { return releaseTime; }
+  public StringProperty plotProperty() { return plot; }
+  public DoubleProperty ratingProperty() { return rating; }
+  public IntegerProperty runtimeProperty() { return runtime; }
+  public StringProperty genresProperty() { return genres; }
+  public ObjectProperty<ImageHandle> backgroundProperty() { return backgroundHandle; }
+  public ObjectProperty<ImageHandle> posterProperty() { return posterHandle; }
 
   private static boolean trySetImage(ImageHandle handle, ObjectProperty<Image> image) {
     if(handle != null) {

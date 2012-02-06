@@ -3,6 +3,7 @@ package hs.mediasystem.fs;
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.MediaItemFormatter;
+import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 
 public class MovieCellProvider implements CellProvider<MediaItem> {
@@ -10,23 +11,23 @@ public class MovieCellProvider implements CellProvider<MediaItem> {
 
   @Override
   public Node configureCell(MediaItem item) {
-    String title = item.getTitle();
-    String subtitle = item.getSubtitle();
+    cell.titleProperty().bind(item.titleProperty());
+    cell.subtitleProperty().bind(item.subtitleProperty());
 
     if(item.getParent() != null) {
       if(item.getSubtitle() != null && !item.getSubtitle().isEmpty()) {
-        title = item.getSubtitle();
-        subtitle = "";
+        cell.titleProperty().bind(item.subtitleProperty());
+        cell.subtitleProperty().unbind();
+        cell.subtitleProperty().set("");
       }
       else if(item.getEpisode() != null && item.getEpisode() > 1) {
-        title += " " + item.getEpisode();
+        cell.titleProperty().bind(Bindings.concat(item.titleProperty(), " ", item.episodeProperty()));
+        cell.subtitleProperty().bind(item.subtitleProperty());
       }
     }
 
-    cell.titleProperty().set(title);
-    cell.subtitleProperty().set(subtitle);
-    cell.extraInfoProperty().set(MediaItemFormatter.formatReleaseTime(item));
-    cell.ratingProperty().set(item.getRating() == null ? 0.0 : item.getRating() / 10);
+    cell.extraInfoProperty().bind(MediaItemFormatter.releaseTimeBinding(item));
+    cell.ratingProperty().bind(item.ratingProperty().divide(10));
     cell.groupProperty().set(item instanceof hs.mediasystem.framework.Group);
 
     return cell;

@@ -1,12 +1,13 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 
-public class Serie extends NamedItem {
+public class Serie extends MediaItem {
 
-  public Serie(LocalInfo localInfo) {
-    super(localInfo);
+  public Serie(MediaTree mediaTree, LocalInfo localInfo) {
+    super(mediaTree, localInfo);
   }
 
   @Override
@@ -21,6 +22,10 @@ public class Serie extends NamedItem {
 
   @Override
   public MediaTree getRoot() {
-    return new EpisodesMediaTree(getPath(), getTitle());
+    EpisodesMediaTree mediaTree = new EpisodesMediaTree(getPath(), getTitle());
+
+    mediaTree.onItemQueued().set(getMediaTree().onItemQueued().get());
+
+    return mediaTree;
   }
 }

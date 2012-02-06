@@ -7,6 +7,7 @@ import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
+import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.StringConverter;
 import hs.sublight.SubtitleDescriptor;
 
@@ -16,6 +17,8 @@ import java.util.List;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -23,6 +26,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -45,12 +49,21 @@ public class PlaybackOverlayPresentation {
     final Player player = controller.getPlayer();
     final MediaItem mediaItem = controller.getCurrentMediaItem();
 
-    view.setTitle(mediaItem.getTitle());
-    view.setSubtitle(mediaItem.getSubtitle());
-    view.setReleaseYear("" + mediaItem.getReleaseYear());
-    if(mediaItem.getPoster() != null) {
-      view.setPoster(ImageCache.loadImage(mediaItem.getPoster())); // TODO might not be loaded yet!
-    }
+    view.titleProperty().bind(mediaItem.titleProperty());
+    view.subtitleProperty().bind(mediaItem.subtitleProperty());
+    view.releaseYearProperty().bind(Bindings.convert(mediaItem.releaseYearProperty()));
+    view.posterProperty().bind(new ObjectBinding<Image>() {
+      {
+        bind(mediaItem.posterProperty());
+      }
+
+      @Override
+      protected Image computeValue() {
+        ImageHandle handle = mediaItem.posterProperty().get();
+
+        return handle != null ? ImageCache.loadImage(handle) : null;
+      }
+    });
 
     view.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
