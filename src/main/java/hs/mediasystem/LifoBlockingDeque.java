@@ -8,9 +8,24 @@ public class LifoBlockingDeque<T> extends LinkedBlockingDeque<T> {
     super(capacity);
   }
 
+  public LifoBlockingDeque() {
+    super();
+  }
+
+  @Override
+  public boolean add(T t) {
+    addFirst(t);
+    return true;
+  }
+
   @Override
   public boolean offer(T t) {
     return super.offerFirst(t);
+  }
+
+  @Override
+  public T poll() {
+    return super.pollLast();
   }
 
   @Override
