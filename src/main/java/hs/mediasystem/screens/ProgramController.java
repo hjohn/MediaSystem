@@ -19,16 +19,18 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.concurrent.Worker.State;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -84,17 +86,6 @@ public class ProgramController {
 
     mainStage = new Stage(StageStyle.UNDECORATED);
     transparentStage = new Stage(StageStyle.TRANSPARENT);
-
-//    setupStage(mainStage);
-//    setupStage(transparentStage);
-
-//    mainGroup.addEventHandler(KeyEvent.KEY_TYPED, new EventHandler<KeyEvent>() {
-//      @Override
-//      public void handle(KeyEvent event) {
-//        System.out.println(event);
-//
-//      }
-//    });
 
     contentBorderPane.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
@@ -377,37 +368,22 @@ public class ProgramController {
     return new VBox() {{
       getChildren().add(new VBox() {{
         getStyleClass().add("item");
-        getChildren().add(new Label() {{
-          getStyleClass().add("title");
-          textProperty().bind(worker.titleProperty());
+        getChildren().add(new HBox() {{
+          setAlignment(Pos.CENTER_LEFT);
+          getChildren().add(new ProgressIndicator() {{
+            progressProperty().bind(worker.progressProperty());
+          }});
+          getChildren().add(new Label() {{
+            getStyleClass().add("title");
+            textProperty().bind(worker.titleProperty());
+          }});
         }});
         getChildren().add(new Label() {{
-          setWrapText(true);
           setMaxWidth(400);
           getStyleClass().add("description");
           textProperty().bind(worker.messageProperty());
         }});
-        getChildren().add(new ProgressBar() {{
-          getStyleClass().add("blue-bar");
-          setMaxWidth(300);
-          progressProperty().bind(worker.progressProperty());
-        }});
       }});
     }};
   }
-
-  // SelectItemScene...
-  // NavigationInterface
-  //  - back();
-  //  - play();
-  //  - editItem();
-  //  - castInfo();
-  //
-  // MainNavInterface
-  //  - selectItem();
-  //  - exitProgram();
-  //
-  // TransparentPlayingNavInterface
-  //  - back();
-  //  - selectSubtitle();
 }

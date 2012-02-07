@@ -10,6 +10,7 @@
 
 #status-messages .title {
   -fx-font: bold 18pt "Arial";
+  -fx-wrap-text: true;
 }
 
 #status-messages .item {
@@ -21,4 +22,14 @@
 
 #status-messages .description {
   -fx-padding: 0 10 10 10;
+  -fx-wrap-text: true;
+}
+
+#status-messages .progress-indicator {
+  -fx-translate-y: 5;
+  -fx-padding: 0 10 0 0;
+}
+
+#status-messages .progress-indicator .percentage {
+  visibility: hidden;
 }
