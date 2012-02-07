@@ -7,28 +7,50 @@ import hs.mediasystem.db.Item;
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemEvent;
+import hs.mediasystem.screens.MessagePaneExecutorService;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 
 import javax.inject.Inject;
 
 public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEvent> {
   private final CachedItemEnricher cachedItemEnricher;
+  private final MessagePaneExecutorService executorService;
 
   @Inject
-  public MediaItemEnrichmentEventHandler(CachedItemEnricher cachedItemEnricher) {
+  public MediaItemEnrichmentEventHandler(CachedItemEnricher cachedItemEnricher, MessagePaneExecutorService executorService) {
     this.cachedItemEnricher = cachedItemEnricher;
+    this.executorService = executorService;
   }
 
   public void enrich(final MediaItem mediaItem, final boolean bypassCache) {
-    new Thread("MediaItemEnrichmentEventHandler") {
+    executorService.execute(new Task<Void>() {
       @Override
-      public void run() {
+      public Void call() {
+        updateTitle("Fetching metadata");
+        updateProgress(0, 2);
+
         try {
           LocalInfo localInfo = mediaItem.getLocalInfo();
+          String message = localInfo.getTitle();
+
+          if(localInfo.getSeason() != null) {
+            message += " " + localInfo.getSeason() + "x" + localInfo.getEpisode();
+          }
+          else if(localInfo.getEpisode() != null && localInfo.getEpisode() > 1) {
+            message += " " + localInfo.getEpisode();
+          }
+
+          updateMessage(message);
+
           Identifier identifier = cachedItemEnricher.identifyItem(localInfo, bypassCache);
 
+          updateProgress(1, 2);
+
           final Item item = cachedItemEnricher.loadItem(identifier, bypassCache);
+
+          updateProgress(2, 2);
 
           Platform.runLater(new Runnable() {
             @Override
@@ -52,8 +74,10 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
           System.out.println("[FINE] MediaItemEnrichmentEventHandler.enrich() - Enrichment failed of " + mediaItem + " failed with exception: " + e);
           e.printStackTrace(System.out);
         }
+
+        return null;
       }
-    }.start();
+    });
   }
 
   @Override

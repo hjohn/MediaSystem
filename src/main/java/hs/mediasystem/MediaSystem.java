@@ -7,7 +7,6 @@ import javafx.application.Application;
 // TODO Decode images in background thread, not on JavaFX thread
 // TODO Titles / Subtitles should not be overriden by enriched data (setting?)
 
-// TODO Use the Message overlay to indicate stuff being loaded in background on Select Media screen
 // TODO Actor / Director information in database
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance
 // TODO Indicate serie somehow when selecting episodes (it is now unclear which serie you are selecting)

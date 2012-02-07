@@ -16,7 +16,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Service;
 import javafx.concurrent.Worker;
 import javafx.concurrent.Worker.State;
 import javafx.event.EventHandler;
@@ -78,7 +77,9 @@ public class ProgramController {
     scene.setRoot(sceneRoot);
 
     overlayBorderPane.setMouseTransparent(true);
-    overlayBorderPane.setTop(new InformationBorder());
+    overlayBorderPane.setCenter(new BorderPane() {{
+      setTop(new InformationBorder());
+    }});
     overlayBorderPane.setRight(messagePane);
 
     mainStage = new Stage(StageStyle.UNDECORATED);
@@ -112,7 +113,7 @@ public class ProgramController {
       }
     });
 
-    registerService(subtitleDownloadService);
+    registerWorker(subtitleDownloadService);
 
     subtitleDownloadService.stateProperty().addListener(new ChangeListener<State>() {
       @Override
@@ -325,12 +326,12 @@ public class ProgramController {
     return subtitleDownloadService;
   }
 
-  public void registerService(final Service<?> service) {
-    final VBox vbox = createMessage(service);
+  public void registerWorker(final Worker<?> worker) {
+    final VBox vbox = createMessage(worker);
 
-    System.out.println("[FINE] ProgramController.registerService() - registering new service: " + service);
+    System.out.println("[FINE] ProgramController.registerService() - registering new service: " + worker);
 
-    service.stateProperty().addListener(new ChangeListener<State>() {
+    worker.stateProperty().addListener(new ChangeListener<State>() {
       @Override
       public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
         if(newValue == State.SCHEDULED) {
@@ -376,13 +377,13 @@ public class ProgramController {
     return new VBox() {{
       getChildren().add(new VBox() {{
         getStyleClass().add("item");
-        getChildren().add(new Label("Title") {{
+        getChildren().add(new Label() {{
           getStyleClass().add("title");
           textProperty().bind(worker.titleProperty());
         }});
         getChildren().add(new Label() {{
           setWrapText(true);
-          setMaxWidth(300);
+          setMaxWidth(400);
           getStyleClass().add("description");
           textProperty().bind(worker.messageProperty());
         }});
