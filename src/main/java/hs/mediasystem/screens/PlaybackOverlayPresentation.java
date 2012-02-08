@@ -14,9 +14,6 @@ import hs.sublight.SubtitleDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
@@ -24,14 +21,12 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-import javafx.util.Duration;
 
 import javax.inject.Inject;
 
@@ -43,10 +38,10 @@ public class PlaybackOverlayPresentation {
   private final ObjectProperty<SubtitleDescriptor> selectedSubtitleForDownload = new SimpleObjectProperty<>();
 
   @Inject
-  public PlaybackOverlayPresentation(final ProgramController controller, final PlaybackOverlayPane view) {
+  public PlaybackOverlayPresentation(final ProgramController controller, final PlayerPresentation playerPresentation, final PlaybackOverlayPane view) {
     this.view = view;
 
-    final Player player = controller.getPlayer();
+    final Player player = playerPresentation.getPlayer();
     final MediaItem mediaItem = controller.getCurrentMediaItem();
 
     view.titleProperty().bind(mediaItem.titleProperty());
@@ -70,12 +65,8 @@ public class PlaybackOverlayPresentation {
       public void handle(KeyEvent event) {
         KeyCode code = event.getCode();
 
-        if(code == KeyCode.S) {
-          controller.stop();
-          event.consume();
-        }
-        else if(code == KeyCode.J) {
-          Subtitle subtitle = controller.nextSubtitle();
+        if(code == KeyCode.J) {
+          Subtitle subtitle = playerPresentation.nextSubtitle();
 
           if(subtitle != null) {
             view.setOSD("Subtitle: " + subtitle.getDescription());
@@ -138,61 +129,6 @@ public class PlaybackOverlayPresentation {
           controller.showOptionScreen("Video - Options", options);
           event.consume();
         }
-        else if(code == KeyCode.SPACE) {
-          controller.pause();
-          view.showOSD();
-          event.consume();
-        }
-        else if(code == KeyCode.NUMPAD4) {
-          controller.move(-10 * 1000);
-          view.showOSD();
-        }
-        else if(code == KeyCode.NUMPAD6) {
-          controller.move(10 * 1000);
-          view.showOSD();
-          event.consume();
-        }
-        else if(code == KeyCode.NUMPAD2) {
-          controller.move(-60 * 1000);
-          view.showOSD();
-          event.consume();
-        }
-        else if(code == KeyCode.NUMPAD8) {
-          controller.move(60 * 1000);
-          view.showOSD();
-          event.consume();
-        }
-        else if(code == KeyCode.M) {
-          controller.mute();
-          view.showOSD();
-          event.consume();
-        }
-        else if(code == KeyCode.DIGIT9) {
-          controller.changeVolume(-1);
-          view.showOSD();
-          event.consume();
-        }
-        else if(code == KeyCode.DIGIT0) {
-          controller.changeVolume(1);
-          view.showOSD();
-          event.consume();
-        }
-        else if(code == KeyCode.DIGIT1) {
-          controller.changeBrightness(-0.05f);
-          event.consume();
-        }
-        else if(code == KeyCode.DIGIT2) {
-          controller.changeBrightness(0.05f);
-          event.consume();
-        }
-        else if(code == KeyCode.Z) {
-          controller.changeSubtitleDelay(-100);
-          event.consume();
-        }
-        else if(code == KeyCode.X) {
-          controller.changeSubtitleDelay(100);
-          event.consume();
-        }
       }
     });
 
@@ -208,26 +144,17 @@ public class PlaybackOverlayPresentation {
       }
     });
 
-    Timeline positionUpdater = new Timeline(
-      new KeyFrame(Duration.seconds(0.10), new EventHandler<ActionEvent>() {
-        @Override
-        public void handle(ActionEvent event) {
-          view.setVolume(controller.getVolume() / 100.0);
-          view.setPosition(controller.getPosition());
+    view.positionProperty().bind(player.positionProperty());
+    view.lengthProperty().bind(player.lengthProperty());
 
-          long len = controller.getLength();
-
-          if(len == 0) {
-            len = 1;
-          }
-
-          view.setLength(len);
+    player.positionProperty().addListener(new ChangeListener<Number>() {
+      @Override
+      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+        if(Math.abs(oldValue.longValue() - newValue.longValue()) > 2500) {
+          view.showOSD();
         }
-      })
-    );
-
-    positionUpdater.setCycleCount(Animation.INDEFINITE);
-    positionUpdater.play();
+      }
+    });
   }
 
   public PlaybackOverlayPane getView() {

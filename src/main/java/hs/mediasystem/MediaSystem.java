@@ -10,7 +10,6 @@ import javafx.application.Application;
 // TODO Actor / Director information in database
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance
 // TODO Indicate serie somehow when selecting episodes (it is now unclear which serie you are selecting)
-// TODO Movie controls (play, pause, volume up/down, etc) should be handled much more globally in ProgramController
 // TODO Alice in Wonderland, not a serie, donot group?
 // TODO Options Screen: Modal navigation should use own Navigator as well?
 // TODO Options Screen: Subtitle selection list must be left with backspace, or exit at top/bottom item
@@ -26,7 +25,7 @@ import javafx.application.Application;
 // TODO Style main page
 // TODO Options Screen: Separators for Dialog Screen
 
-// TODO Make subtitles more peristent by storing them with file?
+// TODO Make subtitles more persistent by storing them with file?
 // TODO Add breadcrumb?
 // TODO Auto-scroll plot/overview
 // TODO Possibly with Series/Season, information about episode count

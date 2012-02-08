@@ -9,6 +9,7 @@ import hs.mediasystem.db.TvdbSerieEnricher;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MoviesMainMenuExtension;
+import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SeriesMainMenuExtension;
 import hs.mediasystem.util.ini.Ini;
@@ -77,6 +78,8 @@ public class FrontEnd extends Application {
     pool = new ConnectionPool(dataSource, 5);
 
     Module module = new AbstractModule() {
+      private final PlayerPresentation playerPresentation = new PlayerPresentation(player);
+
       @Override
       protected void configure() {
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(MoviesMainMenuExtension.class);
@@ -88,8 +91,8 @@ public class FrontEnd extends Application {
       }
 
       @Provides
-      public Player providesPlayer() {
-        return player;
+      public PlayerPresentation providesPlayerPresentation() {
+        return playerPresentation;
       }
 
       @Provides

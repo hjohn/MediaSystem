@@ -3,8 +3,6 @@ package hs.mediasystem.screens;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SublightSubtitleProvider;
 import hs.mediasystem.framework.SubtitleProvider;
-import hs.mediasystem.framework.player.Player;
-import hs.mediasystem.framework.player.Subtitle;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
@@ -45,8 +43,8 @@ import javax.inject.Singleton;
 @Singleton
 public class ProgramController {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
+  private static final KeyCombination KEY_S = new KeyCodeCombination(KeyCode.S);
 
-  private final Player player;
   private final Stage mainStage;  // TODO two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing; refactor this
   private final Stage transparentStage;
   private final Scene scene = new Scene(new BorderPane(), Color.BLACK);
@@ -57,6 +55,7 @@ public class ProgramController {
   private final Provider<MainScreen> mainScreenProvider;
   private final Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider;
   private final SubtitleDownloadService subtitleDownloadService = new SubtitleDownloadService();
+  private final PlayerPresentation playerPresentation;
 
   private final VBox messagePane = new VBox() {{
     setId("status-messages");
@@ -67,9 +66,9 @@ public class ProgramController {
   private final int screenNumber;
 
   @Inject
-  public ProgramController(Ini ini, Player player, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider) {
+  public ProgramController(Ini ini, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider) {
     this.ini = ini;
-    this.player = player;
+    this.playerPresentation = playerPresentation;
     this.mainScreenProvider = mainScreenProvider;
     this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
 
@@ -87,12 +86,68 @@ public class ProgramController {
     mainStage = new Stage(StageStyle.UNDECORATED);
     transparentStage = new Stage(StageStyle.TRANSPARENT);
 
-    contentBorderPane.setOnKeyPressed(new EventHandler<KeyEvent>() {
+    sceneRoot.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
         if(BACK_SPACE.match(event)) {
           navigator.back();
           event.consume();
+        }
+        else if(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
+          KeyCode code = event.getCode();
+
+          if(KEY_S.match(event)) {
+            stop();
+            event.consume();
+          }
+          else if(code == KeyCode.SPACE) {
+            playerPresentation.pause();
+            event.consume();
+          }
+          else if(code == KeyCode.NUMPAD4) {
+            playerPresentation.move(-10 * 1000);
+            event.consume();
+          }
+          else if(code == KeyCode.NUMPAD6) {
+            playerPresentation.move(10 * 1000);
+            event.consume();
+          }
+          else if(code == KeyCode.NUMPAD2) {
+            playerPresentation.move(-60 * 1000);
+            event.consume();
+          }
+          else if(code == KeyCode.NUMPAD8) {
+            playerPresentation.move(60 * 1000);
+            event.consume();
+          }
+          else if(code == KeyCode.M) {
+            playerPresentation.mute();
+            event.consume();
+          }
+          else if(code == KeyCode.DIGIT9) {
+            playerPresentation.changeVolume(-1);
+            event.consume();
+          }
+          else if(code == KeyCode.DIGIT0) {
+            playerPresentation.changeVolume(1);
+            event.consume();
+          }
+          else if(code == KeyCode.DIGIT1) {
+            playerPresentation.changeBrightness(-0.05f);
+            event.consume();
+          }
+          else if(code == KeyCode.DIGIT2) {
+            playerPresentation.changeBrightness(0.05f);
+            event.consume();
+          }
+          else if(code == KeyCode.Z) {
+            playerPresentation.changeSubtitleDelay(-100);
+            event.consume();
+          }
+          else if(code == KeyCode.X) {
+            playerPresentation.changeSubtitleDelay(100);
+            event.consume();
+          }
         }
       }
     });
@@ -110,7 +165,7 @@ public class ProgramController {
       @Override
       public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
         if(newValue == State.SUCCEEDED) {
-          getPlayer().showSubtitle(subtitleDownloadService.getValue());
+          playerPresentation.showSubtitle(subtitleDownloadService.getValue());
         }
       }
     });
@@ -139,6 +194,7 @@ public class ProgramController {
       stage.setY(bounds.getMinY());
       stage.setWidth(bounds.getWidth());
       stage.setHeight(bounds.getHeight());
+      stage.toFront();
     }
   }
 
@@ -168,6 +224,10 @@ public class ProgramController {
     oldStage.hide();
   }
 
+  public Node getActiveScreen() {
+    return contentBorderPane.getCenter();
+  }
+
   public void showMainScreen() {
     navigator.navigateTo(new Destination("Home") {
       @Override
@@ -188,7 +248,7 @@ public class ProgramController {
   }
 
   public void play(MediaItem mediaItem) {
-    player.play(mediaItem.getUri());
+    playerPresentation.play(mediaItem.getUri());
 
     currentMediaItem = mediaItem;
 
@@ -204,105 +264,11 @@ public class ProgramController {
 
   public void stop() {
     subtitleDownloadService.cancel();
-    player.stop();
+    playerPresentation.stop();
 
-    navigator.back();
-  }
-
-  public void pause() {
-    player.pause();
-  }
-
-  public void move(int ms) {
-    long position = player.getPosition();
-    long length = player.getLength();
-    long newPosition = position + ms;
-
-    System.out.println("Position = " + position + "; length = " + length + "; np = " + newPosition);
-
-    if(newPosition > length - 5000) {
-      newPosition = length - 5000;
+    while(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
+      navigator.back();
     }
-    if(newPosition < 0) {
-      newPosition = 0;
-    }
-
-    if(Math.abs(newPosition - position) > 5000) {
-      player.setPosition(newPosition);
-    }
-  }
-
-  public void mute() {
-    player.setMute(!player.isMute());
-  }
-
-  public void changeVolume(int volumeDiff) {
-    int volume = player.getVolume() + volumeDiff;
-
-    if(volume > 100) {
-      volume = 100;
-    }
-    if(volume < 0) {
-      volume = 0;
-    }
-
-    player.setVolume(volume);
-  }
-
-  public void changeBrightness(float brightnessDiff) {
-    float brightness = player.getBrightness() + brightnessDiff;
-
-    if(brightness > 2.0) {
-      brightness = 2.0f;
-    }
-    else if(brightness < 0.0) {
-      brightness = 0.0f;
-    }
-
-    player.setBrightness(brightness);
-  }
-
-  public void changeSubtitleDelay(int msDelayDiff) {
-    int delay = player.getSubtitleDelay() + msDelayDiff;
-
-    player.setSubtitleDelay(delay);
-  }
-
-  public int getVolume() {
-    return player.getVolume();
-  }
-
-  public long getPosition() {
-    return player.getPosition();
-  }
-
-  public long getLength() {
-    return player.getLength();
-  }
-
-  /**
-   * Returns the current subtitle.  Never returns <code>null</code> but will return a special Subtitle
-   * instance for when subtitles are unavailable or disabled.
-   *
-   * @return the current subtitle
-   */
-  public Subtitle nextSubtitle() {
-    List<Subtitle> subtitles = player.getSubtitles();
-
-    Subtitle currentSubtitle = player.getSubtitle();
-    int index = subtitles.indexOf(currentSubtitle) + 1;
-
-    if(index >= subtitles.size()) {
-      index = 0;
-    }
-
-    player.setSubtitle(subtitles.get(index));
-
-    return subtitles.get(index);
-  }
-
-  public Player getPlayer() {
-    return player;
   }
 
   public List<SubtitleProvider> getSubtitleProviders() {
@@ -345,15 +311,6 @@ public class ProgramController {
 
         sceneRoot.getChildren().add(dialogScreen);
 
-        dialogScreen.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-          @Override
-          public void handle(KeyEvent event) {
-            if(BACK_SPACE.match(event)) {
-              navigator.back();
-            }
-            event.consume();
-          }
-        });
         dialogScreen.requestFocus();
       }
 
