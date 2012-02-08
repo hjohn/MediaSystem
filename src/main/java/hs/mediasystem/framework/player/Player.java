@@ -4,7 +4,9 @@ import java.nio.file.Path;
 
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.collections.ObservableList;
 
 public interface Player {
@@ -13,16 +15,13 @@ public interface Player {
 
   void pause();
 
-  /**
-   * Returns the position of the stream in milliseconds.
-   *
-   * @return the position of the stream in milliseconds
-   */
-  long getPosition();
-
-  void setPosition(long position);
-
   boolean isPlaying();
+
+  void stop();
+
+  void dispose();
+
+  void showSubtitle(Path path);
 
   /**
    * Returns the length of the stream in milliseconds.
@@ -30,12 +29,16 @@ public interface Player {
    * @return the length of the stream in milliseconds
    */
   long getLength();
+  ReadOnlyLongProperty lengthProperty();
 
-  void stop();
-
-  void dispose();
-
-  void showSubtitle(Path path);
+  /**
+   * Returns the position of the stream in milliseconds.
+   *
+   * @return the position of the stream in milliseconds
+   */
+  long getPosition();
+  void setPosition(long position);
+  LongProperty positionProperty();
 
   /**
    * Returns the current volume in percent.

@@ -22,7 +22,9 @@ import java.util.regex.Pattern;
 
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.collections.ObservableList;
 
 public class MPlayerPlayer implements Player {
@@ -407,6 +409,18 @@ public class MPlayerPlayer implements Player {
 
   @Override
   public ObservableList<AudioTrack> getAudioTracks() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public LongProperty positionProperty() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ReadOnlyLongProperty lengthProperty() {
     // TODO Auto-generated method stub
     return null;
   }

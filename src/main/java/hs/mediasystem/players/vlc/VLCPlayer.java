@@ -5,6 +5,7 @@ import hs.mediasystem.beans.BeanAccessor;
 import hs.mediasystem.beans.BeanFloatProperty;
 import hs.mediasystem.beans.BeanObjectProperty;
 import hs.mediasystem.beans.ComplexIntegerProperty;
+import hs.mediasystem.beans.UpdatableLongProperty;
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
@@ -21,7 +22,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
@@ -56,6 +59,16 @@ public class VLCPlayer implements Player {
     mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
     mediaPlayer.addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
       private AtomicInteger ignoreFinish = new AtomicInteger();
+
+      @Override
+      public void timeChanged(MediaPlayer mediaPlayer, final long newTime) {
+        position.update(newTime);
+      }
+
+      @Override
+      public void lengthChanged(MediaPlayer mediaPlayer, long newLength) {
+        length.update(newLength);
+      }
 
       @Override
       public void newMedia(MediaPlayer mediaPlayer) {
@@ -120,6 +133,15 @@ public class VLCPlayer implements Player {
       }
     });
 
+    length = new UpdatableLongProperty();
+    position = new UpdatableLongProperty() {
+      @Override
+      public void set(long v) {
+        long value = v < 1 ? 1 : v;
+        mediaPlayer.setTime(value);
+        super.set(value);
+      }
+    };
     volume = new ComplexIntegerProperty(new BeanAccessor<Integer>(mediaPlayer, "volume"));
     audioDelay = new ComplexIntegerProperty(new Accessor<Integer>() {
       @Override
@@ -191,38 +213,11 @@ public class VLCPlayer implements Player {
     mediaPlayer.playMedia(uri);
 
     System.out.println("[FINE] Playing: " + uri);
-
-    new Thread() {
-      @Override
-      public void run() {
-        try {
-          Thread.sleep(10 * 1000);  // TODO document this WTF
-        }
-        catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-
-        System.out.println("[FINE] Found " + mediaPlayer.getSpuCount() + " subtitle(s)");
-        for(TrackDescription spuDescription : mediaPlayer.getSpuDescriptions()) {
-          System.out.println("[FINE] Subtitle " + spuDescription.id() + ": " + spuDescription.description());
-        }
-      }
-    }.start();
   }
 
   @Override
   public void pause() {
     mediaPlayer.pause();
-  }
-
-  @Override
-  public long getPosition() {
-    return mediaPlayer.getTime();
-  }
-
-  @Override
-  public void setPosition(long position) {
-    mediaPlayer.setTime(position);
   }
 
   @Override
@@ -263,6 +258,14 @@ public class VLCPlayer implements Player {
       }
     }
   }
+
+  private final UpdatableLongProperty length;
+  @Override public ReadOnlyLongProperty lengthProperty() { return length; }
+
+  private final UpdatableLongProperty position;
+  @Override public long getPosition() { return position.get(); }
+  @Override public void setPosition(long position) { this.position.set(position); }
+  @Override public LongProperty positionProperty() { return position; }
 
   private final IntegerProperty volume;
   @Override public int getVolume() { return volume.get(); }
