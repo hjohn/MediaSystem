@@ -5,7 +5,6 @@ import javafx.application.Application;
 // Top 10 stuff:
 // TODO For Episodes of Series, use background of parent
 // TODO Decode images in background thread, not on JavaFX thread
-// TODO Titles / Subtitles should not be overriden by enriched data (setting?)
 
 // TODO Actor / Director information in database
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance

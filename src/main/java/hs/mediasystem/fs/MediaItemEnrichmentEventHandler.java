@@ -55,7 +55,7 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
           Platform.runLater(new Runnable() {
             @Override
             public void run() {
-              mediaItem.titleProperty().set(item.getTitle());
+              mediaItem.officialTitleProperty().set(item.getTitle());
               mediaItem.backgroundProperty().set(new SourceImageHandle(item.getBackground(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-background"));
               mediaItem.bannerProperty().set(new SourceImageHandle(item.getBanner(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-banner"));
               mediaItem.posterProperty().set(new SourceImageHandle(item.getPoster(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-poster"));
