@@ -15,7 +15,6 @@ import javafx.application.Application;
 // TODO Make plug-ins of various looks of Select Media
 // TODO Remove CellProvider responsibility from MediaTree
 // TODO Make plug-ins from MediaTrees
-// TODO Hide detail headers when their content is empty
 // TODO Perhaps use GridPane on playback overlay instead of hard coded values for the poster size
 
 // TODO Some form of remote control support / Lirc support

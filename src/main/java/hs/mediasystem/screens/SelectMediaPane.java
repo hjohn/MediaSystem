@@ -291,6 +291,8 @@ public class SelectMediaPane<T> extends StackPane {
             getStyleClass().add("rating");
             textProperty().bind(Bindings.format("%3.1f/10", rating));
           }});
+          managedProperty().bind(rating.greaterThan(0.0));
+          visibleProperty().bind(rating.greaterThan(0.0));
         }});
         getChildren().add(new Label() {{
           getStyleClass().add("genres");
@@ -299,25 +301,37 @@ public class SelectMediaPane<T> extends StackPane {
         }});
         getChildren().add(new Label("PLOT") {{
           getStyleClass().add("header");
+          managedProperty().bind(plot.isNotEqualTo(""));
+          visibleProperty().bind(plot.isNotEqualTo(""));
         }});
         getChildren().add(new Label() {{
           getStyleClass().add("plot");
           textProperty().bind(plot);
+          managedProperty().bind(plot.isNotEqualTo(""));
+          visibleProperty().bind(plot.isNotEqualTo(""));
           VBox.setVgrow(this, Priority.ALWAYS);
         }});
         getChildren().add(new Label("RELEASED") {{
           getStyleClass().add("header");
+          managedProperty().bind(releaseTime.isNotEqualTo(""));
+          visibleProperty().bind(releaseTime.isNotEqualTo(""));
         }});
         getChildren().add(new Label() {{
           getStyleClass().add("release-time");
           textProperty().bind(releaseTime);
+          managedProperty().bind(releaseTime.isNotEqualTo(""));
+          visibleProperty().bind(releaseTime.isNotEqualTo(""));
         }});
         getChildren().add(new Label("RUNTIME") {{
           getStyleClass().add("header");
+          managedProperty().bind(runtime.greaterThan(0.0));
+          visibleProperty().bind(runtime.greaterThan(0.0));
         }});
         getChildren().add(new Label() {{
           getStyleClass().add("runtime");
           textProperty().bind(Bindings.format("%d minutes", runtime));
+          managedProperty().bind(runtime.greaterThan(0.0));
+          visibleProperty().bind(runtime.greaterThan(0.0));
         }});
       }});
     }}, 1, 0);
