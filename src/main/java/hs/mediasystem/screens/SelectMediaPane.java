@@ -443,8 +443,11 @@ public class SelectMediaPane<T> extends StackPane {
 
   private static boolean trySetImage(ImageHandle handle, ObjectProperty<Image> image, double w, double h) {
     if(handle != null) {
-      image.set(ImageCache.loadImage(handle, w, h, true));
-      return true;
+      Image loadedImage = ImageCache.loadImage(handle, w, h, true);
+      if(loadedImage != null) {
+        image.set(loadedImage);
+        return true;
+      }
     }
 
     return false;
