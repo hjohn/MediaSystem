@@ -1,6 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.fs.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.fs.SeriesMediaTree;
 
 import java.nio.file.Paths;

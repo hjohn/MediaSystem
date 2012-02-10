@@ -1,7 +1,6 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.MediaType;
-import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
@@ -52,10 +51,5 @@ public class MoviesMediaTree extends AbstractMediaTree {
   @Override
   public MediaTree parent() {
     return null;
-  }
-
-  @Override
-  public CellProvider<MediaItem> getCellProvider() {
-    return new MovieCellProvider();
   }
 }

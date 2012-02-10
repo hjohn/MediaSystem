@@ -1,4 +1,4 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;

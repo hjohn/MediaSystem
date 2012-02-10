@@ -11,7 +11,6 @@ import javafx.event.EventHandler;
 public interface MediaTree {
   List<? extends MediaItem> children();
   MediaTree parent();
-  CellProvider<MediaItem> getCellProvider();
   void queue(MediaItem mediaItem);
   ObjectProperty<EventHandler<MediaItemEvent>> onItemQueued();
 }

@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.LifoBlockingDeque;
+import hs.mediasystem.util.LifoBlockingDeque;
 
 import java.util.ArrayList;
 import java.util.List;

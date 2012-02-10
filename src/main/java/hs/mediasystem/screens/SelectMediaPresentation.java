@@ -4,7 +4,6 @@ import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.EpisodesMediaTree;
-import hs.mediasystem.fs.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.SelectMediaPane.ItemEvent;
 import hs.mediasystem.util.Callable;
@@ -40,6 +39,7 @@ public class SelectMediaPresentation {
   private final Navigator navigator;
 
   private MediaItem currentItem;
+  private StandardLayout layout = new StandardLayout();
 
   @Inject
   public SelectMediaPresentation(final ProgramController controller, final SelectMediaPane<MediaItem> view, final MediaItemEnrichmentEventHandler enrichmentHandler) {
@@ -163,7 +163,7 @@ public class SelectMediaPresentation {
         view.setCellFactory(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
           @Override
           public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
-            return new MediaItemTreeCell(mediaTree.getCellProvider());
+            return new MediaItemTreeCell(layout.getCellProvider(mediaTree));
           }
         });
       }

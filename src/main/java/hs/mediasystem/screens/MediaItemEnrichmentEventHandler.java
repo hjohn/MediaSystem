@@ -1,4 +1,4 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.screens;
 
 import hs.mediasystem.db.CachedItemEnricher;
 import hs.mediasystem.db.Identifier;
@@ -7,7 +7,7 @@ import hs.mediasystem.db.Item;
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemEvent;
-import hs.mediasystem.screens.MessagePaneExecutorService;
+import hs.mediasystem.fs.SourceImageHandle;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;

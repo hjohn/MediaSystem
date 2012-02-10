@@ -12,7 +12,6 @@ import javafx.application.Application;
 // TODO Options Screen: Modal navigation should use own Navigator as well?
 // TODO Options Screen: Subtitle selection list must be left with backspace, or exit at top/bottom item
 // TODO Make plug-ins of various looks of Select Media
-// TODO Remove CellProvider responsibility from MediaTree
 // TODO Make plug-ins from MediaTrees
 // TODO Perhaps use GridPane on playback overlay instead of hard coded values for the poster size
 
