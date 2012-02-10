@@ -3,9 +3,7 @@ package hs.mediasystem;
 import javafx.application.Application;
 
 // Top 10 stuff:
-// TODO For Episodes of Series, use background of parent
 // TODO Decode images in background thread, not on JavaFX thread
-// TODO Titles / Subtitles should not be overriden by enriched data (setting?)
 
 // TODO Actor / Director information in database
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance
@@ -16,7 +14,6 @@ import javafx.application.Application;
 // TODO Make plug-ins of various looks of Select Media
 // TODO Remove CellProvider responsibility from MediaTree
 // TODO Make plug-ins from MediaTrees
-// TODO Hide detail headers when their content is empty
 // TODO Perhaps use GridPane on playback overlay instead of hard coded values for the poster size
 
 // TODO Some form of remote control support / Lirc support

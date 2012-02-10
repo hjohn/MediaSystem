@@ -7,6 +7,7 @@ import hs.mediasystem.util.ImageHandle;
 import java.nio.file.Path;
 import java.util.Date;
 
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -28,11 +29,32 @@ public class MediaItem {
   private String language;
   private String tagline;
 
-  public MediaItem(MediaTree mediaTree, LocalInfo localInfo) {
+  public MediaItem(MediaTree mediaTree, final LocalInfo localInfo) {
     this.mediaTree = mediaTree;
     this.localInfo = localInfo;
 
-    title.set(createTitle());
+    title.bind(new StringBinding() {
+      {
+        bind(officialTitle);
+      }
+
+      @Override
+      protected String computeValue() {
+        if(localInfo.getType() == MediaType.EPISODE) {
+          if(getOfficialTitle() != null && !getOfficialTitle().isEmpty()) {
+            return getOfficialTitle();
+          }
+
+          return localInfo.getTitle() + " " + localInfo.getSeason() + "x" + localInfo.getEpisode();
+        }
+
+        if(localInfo.getType() == MediaType.SEASON) {
+          return "Season " + localInfo.getSeason();
+        }
+
+        return localInfo.getTitle();
+      }
+    });
     subtitle.set(localInfo.getSubtitle() == null ? "" : localInfo.getSubtitle());
     releaseYear.set(localInfo.getReleaseYear());
     season.set(localInfo.getSeason());
@@ -41,25 +63,6 @@ public class MediaItem {
 
   public LocalInfo getLocalInfo() {
     return localInfo;
-  }
-
-  private final String createTitle() {
-    if(localInfo.getType() == MediaType.EPISODE) {
-      if(localInfo.getTitle() != null && !localInfo.getTitle().isEmpty()) {
-        return localInfo.getTitle();
-      }
-      else if(localInfo.getSubtitle() != null) {
-        return localInfo.getSubtitle();
-      }
-
-      return localInfo.getSeason() + "x" + localInfo.getEpisode();
-    }
-
-    if(localInfo.getType() == MediaType.SEASON) {
-      return "Season " + localInfo.getSeason();
-    }
-
-    return localInfo.getTitle();
   }
 
   public MediaItem getParent() {
@@ -130,6 +133,10 @@ public class MediaItem {
       mediaTree.queue(this);
     }
   }
+
+  private final StringProperty officialTitle = new SimpleStringProperty();
+  public String getOfficialTitle() { return officialTitle.get(); }
+  public StringProperty officialTitleProperty() { return officialTitle; }
 
   private final StringProperty title = new SimpleStringProperty();
   public String getTitle() { return title.get(); }
