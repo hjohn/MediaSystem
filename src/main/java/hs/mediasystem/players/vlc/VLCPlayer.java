@@ -137,7 +137,7 @@ public class VLCPlayer implements Player {
     position = new UpdatableLongProperty() {
       @Override
       public void set(long v) {
-        long value = v < 1 ? 1 : v;
+        long value = v < 1 ? 1 : v;  // TODO workaround for VLC bug with MKV files (it doesn't like skipping to 0)
         mediaPlayer.setTime(value);
         super.set(value);
       }
