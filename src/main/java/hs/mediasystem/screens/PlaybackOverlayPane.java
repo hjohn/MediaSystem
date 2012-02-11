@@ -1,6 +1,7 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.util.SizeFormatter;
+import hs.mediasystem.util.SpecialEffects;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -21,10 +22,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.effect.Blend;
-import javafx.scene.effect.BlendMode;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.Effect;
-import javafx.scene.effect.InnerShadow;
 import javafx.scene.effect.Reflection;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -35,7 +33,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 public class PlaybackOverlayPane extends StackPane {
@@ -96,7 +93,7 @@ public class PlaybackOverlayPane extends StackPane {
           getChildren().add(new Label() {{
             textProperty().bind(title);
             getStyleClass().add("video-title");
-            setEffect(createNeonEffect(64));
+            setEffect(SpecialEffects.createNeonEffect(64));
           }});
           getChildren().add(new Label() {{
             textProperty().bind(subtitle);
@@ -179,39 +176,6 @@ public class PlaybackOverlayPane extends StackPane {
   public void setOSD(String text) {
     osdLine.set(text);
     osdFade.playFromStart();
-  }
-
-  private static Effect createNeonEffect(final double size) { // font point size
-    return new Blend() {{
-      setMode(BlendMode.MULTIPLY);
-      setBottomInput(new DropShadow() {{
-        setColor(Color.rgb(254, 235, 66, 0.3));
-        setOffsetX(size / 22);
-        setOffsetY(size / 22);
-        setSpread(0.2);
-      }});
-      setTopInput(new Blend() {{
-        setMode(BlendMode.MULTIPLY);
-        setBottomInput(new DropShadow() {{
-          setColor(Color.web("#f13a00"));
-          setRadius(size / 5.5);
-          setSpread(0.2);
-        }});
-        setTopInput(new Blend() {{
-          setMode(BlendMode.MULTIPLY);
-          setBottomInput(new InnerShadow() {{
-            setColor(Color.web("#feeb42"));
-            setRadius(size / 12);
-            setChoke(0.8);
-          }});
-          setTopInput(new InnerShadow() {{
-            setColor(Color.web("#f13a00"));
-            setRadius(size / 22);
-            setChoke(0.4);
-          }});
-        }});
-      }});
-    }};
   }
 
   private final DoubleProperty volume = new SimpleDoubleProperty(0);
