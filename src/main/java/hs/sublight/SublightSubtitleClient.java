@@ -26,39 +26,20 @@ import net.sublight.webservice.SublightSoap;
 import net.sublight.webservice.Subtitle;
 import net.sublight.webservice.SubtitleLanguage;
 
-
 public class SublightSubtitleClient {
-
-  private static final String iid = "42cc1701-3752-49e2-a148-332960073452";
+  private static final String IID = "42cc1701-3752-49e2-a148-332960073452";
 
   private final ClientInfo clientInfo = new ClientInfo();
 
   private SublightSoap webservice;
-
   private String session;
-
-  public static void main(String[] args) throws Exception {
-    SublightSubtitleClient client = new SublightSubtitleClient("FileBot", "afa9ecb2-a3ee-42b1-9225-000b4038bc85");
-
-    List<SearchResult> search = client.search("Stargate SG1");
-
-    System.out.println(search);
-
-    List<SubtitleDescriptor> subtitleList = client.getSubtitleList(search.get(0), "English");
-
-    System.out.println(subtitleList.size());
-    System.out.println(subtitleList);
-
-    List<SubtitleDescriptor> subtitleList2 = client.getSubtitleList("Stargate SG1", null, (short)1, 3, "English");
-    System.out.println(subtitleList2);
-  }
 
   public SublightSubtitleClient(String clientIdentity, String apikey) {
     clientInfo.setClientId(clientIdentity);
     clientInfo.setApiKey(apikey);
   }
 
-  public List<SearchResult> search(String query) throws WebServiceException {
+  public List<SearchResult> search(String query) {
     // require login
     login();
 
@@ -84,7 +65,7 @@ public class SublightSubtitleClient {
     return results;
   }
 
-  public List<SubtitleDescriptor> getSubtitleList(SearchResult searchResult, String languageName) throws WebServiceException {
+  public List<SubtitleDescriptor> getSubtitleList(SearchResult searchResult, String languageName) {
     MovieDescriptor movie = (MovieDescriptor) searchResult;
 
     List<SubtitleDescriptor> subtitles = new ArrayList<>();
@@ -97,7 +78,7 @@ public class SublightSubtitleClient {
     return subtitles;
   }
 
-  public List<SubtitleDescriptor> getSubtitleList(String name, Integer year, Short season, Integer episode, String languageName) throws WebServiceException {
+  public List<SubtitleDescriptor> getSubtitleList(String name, Integer year, Short season, Integer episode, String languageName) {
     List<SubtitleDescriptor> subtitles = new ArrayList<>();
 
     // retrieve subtitles by name and year
@@ -108,38 +89,38 @@ public class SublightSubtitleClient {
     return subtitles;
   }
 
-  //	public Map<File, List<SubtitleDescriptor>> getSubtitleList(File[] files, final String languageName) throws Exception {
-  //		Map<File, List<SubtitleDescriptor>> subtitles = new HashMap<File, List<SubtitleDescriptor>>(files.length);
-  //
-  //		for (final File file : files) {
-  //			subtitles.put(file, getSubtitleList(file, languageName));
-  //		}
-  //
-  //		return subtitles;
-  //	}
+//  public Map<File, List<SubtitleDescriptor>> getSubtitleList(File[] files, final String languageName) throws Exception {
+//    Map<File, List<SubtitleDescriptor>> subtitles = new HashMap<File, List<SubtitleDescriptor>>(files.length);
+//
+//    for (final File file : files) {
+//      subtitles.put(file, getSubtitleList(file, languageName));
+//    }
+//
+//    return subtitles;
+//  }
 
 
-  //	public List<SubtitleDescriptor> getSubtitleList(File videoFile, String languageName) throws WebServiceException, IOException {
-  //		List<SubtitleDescriptor> subtitles = new ArrayList<SubtitleDescriptor>();
-  //
-  //		try {
-  //			// retrieve subtitles by video hash
-  //			for (Subtitle subtitle : getSubtitleList(SublightVideoHasher.computeHash(videoFile), null, null, null, null, languageName)) {
-  //				// only keep linked subtitles
-  //				if (subtitle.isIsLinked()) {
-  //					subtitles.add(new SublightSubtitleDescriptor(subtitle, this));
-  //				}
-  //			}
-  //		} catch (LinkageError e) {
-  //			// MediaInfo native lib not available
-  //			throw new UnsupportedOperationException(e.getMessage(), e);
-  //		}
-  //
-  //		return subtitles;
-  //	}
+//  public List<SubtitleDescriptor> getSubtitleList(File videoFile, String languageName) throws IOException {
+//    List<SubtitleDescriptor> subtitles = new ArrayList<SubtitleDescriptor>();
+//
+//    try {
+//      // retrieve subtitles by video hash
+//      for (Subtitle subtitle : getSubtitleList(SublightVideoHasher.computeHash(videoFile), null, null, null, null, languageName)) {
+//        // only keep linked subtitles
+//        if (subtitle.isIsLinked()) {
+//          subtitles.add(new SublightSubtitleDescriptor(subtitle, this));
+//        }
+//      }
+//    } catch (LinkageError e) {
+//      // MediaInfo native lib not available
+//      throw new UnsupportedOperationException(e.getMessage(), e);
+//    }
+//
+//    return subtitles;
+//  }
 
 
-  protected List<Subtitle> getSubtitleList(String videoHash, String name,  Integer year, Short season, Integer episode, String languageName) throws WebServiceException {
+  protected List<Subtitle> getSubtitleList(String videoHash, String name,  Integer year, Short season, Integer episode, String languageName) {
     // require login
     login();
 
@@ -197,13 +178,6 @@ public class SublightSubtitleClient {
     return subtitles.value.getSubtitle();
   }
 
-  //
-  //	@Override
-  //	public boolean publishSubtitle(int imdbid, String languageName, File videoFile, File subtitleFile) throws Exception {
-  //		//TODO implement upload feature
-  //		return false;
-  //	}
-
 
   public void publishSubtitle(int imdbid, String videoHash, String languageName, String releaseName, byte[] data) {
     // require login
@@ -247,14 +221,16 @@ public class SublightSubtitleClient {
   protected static SubtitleLanguage getSubtitleLanguage(String languageName) {
     // check subtitle language enum
     for (SubtitleLanguage language : SubtitleLanguage.values()) {
-      if (language.value().equalsIgnoreCase(languageName))
+      if (language.value().equalsIgnoreCase(languageName)) {
         return language;
+      }
     }
 
     // check alias list
     for (Entry<String, SubtitleLanguage> alias : getLanguageAliasMap().entrySet()) {
-      if (alias.getKey().equalsIgnoreCase(languageName))
+      if (alias.getKey().equalsIgnoreCase(languageName)) {
         return alias.getValue();
+      }
     }
 
     // illegal language name
@@ -265,8 +241,9 @@ public class SublightSubtitleClient {
   protected static String getLanguageName(SubtitleLanguage language) {
     // check alias list first
     for (Entry<String, SubtitleLanguage> alias : getLanguageAliasMap().entrySet()) {
-      if (language == alias.getValue())
+      if (language == alias.getValue()) {
         return alias.getKey();
+      }
     }
 
     // use language value by default
@@ -274,7 +251,7 @@ public class SublightSubtitleClient {
   }
 
 
-  protected byte[] getZipArchive(Subtitle subtitle) throws WebServiceException, InterruptedException {
+  protected byte[] getZipArchive(Subtitle subtitle) throws InterruptedException {
     // require login
     login();
 
@@ -300,7 +277,7 @@ public class SublightSubtitleClient {
     return data.value;
   }
 
-  protected synchronized void login() throws WebServiceException {
+  protected synchronized void login() {
     if (webservice == null) {
       // lazy initialize because all the JAX-WS class loading can take quite some time
       webservice = new Sublight().getSublightSoap();
@@ -309,7 +286,7 @@ public class SublightSubtitleClient {
     if (session == null) {
       // args contains only iid
       ArrayOfString args = new ArrayOfString();
-      args.getString().add(iid);
+      args.getString().add(IID);
 
       Holder<String> session = new Holder<>();
       Holder<String> error = new Holder<>();
@@ -328,7 +305,7 @@ public class SublightSubtitleClient {
   }
 
 
-  protected synchronized void logout() throws WebServiceException {
+  protected synchronized void logout() {
     if (session != null) {
       Holder<String> error = new Holder<>();
 
@@ -346,19 +323,17 @@ public class SublightSubtitleClient {
   }
 
 
-  protected static void checkError(Holder<?> error) throws WebServiceException {
+  protected static void checkError(Holder<?> error) {
     if (error.value != null) {
       throw new WebServiceException("Response indicates error: " + error.value);
     }
   }
 
 
-  protected final Timer logoutTimer = new Timer() {
-
+  private final Timer logoutTimer = new Timer() {
     @Override
     public void run() {
       logout();
     }
   };
-
 }
