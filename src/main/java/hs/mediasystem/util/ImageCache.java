@@ -4,13 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.util.Iterator;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import javafx.scene.image.Image;
 
 public class ImageCache {
-  private static ReferenceQueue<Image> REFERENCE_QUEUE = new ReferenceQueue<>();
-  private static final TreeMap<String, SoftReference<Image>> CACHE = new TreeMap<>();
+  private static final ReferenceQueue<Image> REFERENCE_QUEUE = new ReferenceQueue<>();
+  private static final NavigableMap<String, SoftReference<Image>> CACHE = new TreeMap<>();
 
   public static Image loadImage(ImageHandle handle) {
     cleanReferenceQueue();
