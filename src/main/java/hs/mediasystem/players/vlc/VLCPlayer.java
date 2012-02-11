@@ -122,8 +122,9 @@ public class VLCPlayer implements Player {
           System.out.println("Finished: " + subItems.get(index));
         }
 
-        if(ignoreFinish.get() == 0) {
+        if(ignoreFinish.get() == 0) {  // TODO Fix/Remove this code
           // finishedNotifier.notifyListeners("FINISH");
+          System.out.println("VLCPlayer: Finished");
         }
         else {
           ignoreFinish.decrementAndGet();

@@ -289,7 +289,7 @@ public class SublightSubtitleClient {
 		checkError(error);
 
 		// wait x seconds as specified by the download ticket response, download ticket is not valid until then
-		Thread.sleep(que.value * 1000);
+		Thread.sleep(que.value * 1000L);
 
 		webservice.downloadByID4(session, subtitle.getSubtitleID(), -1, false, ticket.value, null, data, null, error);
 
