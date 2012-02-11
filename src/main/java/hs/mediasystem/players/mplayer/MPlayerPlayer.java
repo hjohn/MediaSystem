@@ -87,7 +87,7 @@ public class MPlayerPlayer implements Player {
   //        "-colorkey", "0x101010",
        //   "-ontop"
 
-      final Process process = Runtime.getRuntime().exec(commands.toArray(new String[] {}));
+      final Process process = Runtime.getRuntime().exec(commands.toArray(new String[commands.size()]));
 
       commandStream = new PrintStream(process.getOutputStream());
       resultStream = new LineNumberReader(new InputStreamReader(process.getInputStream()));
@@ -319,109 +319,91 @@ public class MPlayerPlayer implements Player {
 
   @Override
   public void setSubtitle(Subtitle subtitle) {
-    // TODO Auto-generated method stub
-
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Subtitle getSubtitle() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public ObservableList<Subtitle> getSubtitles() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public IntegerProperty volumeProperty() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public ObjectProperty<Subtitle> subtitleProperty() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public float getRate() {
-    // TODO Auto-generated method stub
-    return 0;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public void setRate(float rate) {
-    // TODO Auto-generated method stub
-
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public FloatProperty rateProperty() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public int getAudioDelay() {
-    // TODO Auto-generated method stub
-    return 0;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public void setAudioDelay(int rate) {
-    // TODO Auto-generated method stub
-
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public IntegerProperty audioDelayProperty() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public AudioTrack getAudioTrack() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public void setAudioTrack(AudioTrack audioTrack) {
-    // TODO Auto-generated method stub
-
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public ObjectProperty<AudioTrack> audioTrackProperty() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public FloatProperty brightnessProperty() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public ObservableList<AudioTrack> getAudioTracks() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public LongProperty positionProperty() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public ReadOnlyLongProperty lengthProperty() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 }
