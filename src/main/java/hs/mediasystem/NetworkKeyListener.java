@@ -38,56 +38,57 @@ public class NetworkKeyListener {
       public void run() {
         try {
           for(;;) {
-            try(final Socket client = socket.accept()) {
-              threadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                  try {
-                    client.setSoTimeout(500);
+            @SuppressWarnings("resource")
+            final Socket client = socket.accept();  // Blocks until there is a connection -- closing happens in spawned thread
 
-                    try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(client.getOutputStream()));
-                        LineNumberReader reader = new LineNumberReader(new InputStreamReader(client.getInputStream()))) {
-                      for(;;) {
-                        String line = reader.readLine();
+            threadPool.execute(new Runnable() {
+              @Override
+              public void run() {
+                try {
+                  client.setSoTimeout(500);
 
-                        if(line == null) {
-                          break;
-                        }
+                  try(PrintWriter writer = new PrintWriter(new OutputStreamWriter(client.getOutputStream()));
+                      LineNumberReader reader = new LineNumberReader(new InputStreamReader(client.getInputStream()))) {
+                    for(;;) {
+                      String line = reader.readLine();
 
-                        if(line.equals("quintessence")) {
-                          writer.print("cookie");
-                          writer.flush();
-                        }
-                        else if(line.equals("f882a23cc28ace6fd543abc94322344e")) {
-                          writer.print("accept");
-                          writer.flush();
-                        }
-                        else if(line.startsWith("EVENT ")) {
-                          System.out.println(">>> " + line);
+                      if(line == null) {
+                        break;
+                      }
 
-                          KeyStroke stroke = KeyStroke.getKeyStroke(line.substring(6));
-                          KeyEvent event = new KeyEvent(component, stroke.getKeyEventType(), System.currentTimeMillis(), stroke.getModifiers(), stroke.getKeyCode(), stroke.getKeyChar());
+                      if(line.equals("quintessence")) {
+                        writer.print("cookie");
+                        writer.flush();
+                      }
+                      else if(line.equals("f882a23cc28ace6fd543abc94322344e")) {
+                        writer.print("accept");
+                        writer.flush();
+                      }
+                      else if(line.startsWith("EVENT ")) {
+                        System.out.println(">>> " + line);
 
-                          Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(event);
-                          break;
-                        }
+                        KeyStroke stroke = KeyStroke.getKeyStroke(line.substring(6));
+                        KeyEvent event = new KeyEvent(component, stroke.getKeyEventType(), System.currentTimeMillis(), stroke.getModifiers(), stroke.getKeyCode(), stroke.getKeyChar());
+
+                        Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(event);
+                        break;
                       }
                     }
                   }
-                  catch (IOException e) {
-                    e.printStackTrace();
+                }
+                catch (IOException e) {
+                  e.printStackTrace();
+                }
+                finally {
+                  try {
+                    client.close();
                   }
-                  finally {
-                    try {
-                      client.close();
-                    }
-                    catch (IOException e) {
-                      // Not interested
-                    }
+                  catch (IOException e) {
+                    // Not interested
                   }
                 }
-              });
-            }
+              }
+            });
           }
         }
         catch(Exception e) {
