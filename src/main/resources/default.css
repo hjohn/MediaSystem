@@ -212,28 +212,3 @@
   -fx-fill: derive(color-blue-50, -60%);  
 }
 
-.information-border .elements {
-  -fx-spacing: 20;
-  
-  -fx-background-color: color-content-background;
-  -fx-background-radius: 0 0 8 0;
-  -fx-font: bold 12pt "Arial";
-}
-
-.information-border .element {
-  -fx-padding: 5 20 5 20;
-  -fx-alignment: center;
-}
-
-.memory .bar {
-  -fx-border-width: 1;
-  -fx-border-color: color-blue;
-  -fx-padding: 2;
-}
-
-.memory .label {
-  -fx-font: bold 12pt "Arial";
-  -fx-text-fill: white;
-}
-
-

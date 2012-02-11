@@ -1,6 +1,7 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.util.SizeFormatter;
+import hs.mediasystem.util.SpecialEffects;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -19,6 +20,20 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 public class InformationBorder extends HBox {
+  private final HBox programName = new HBox() {{
+    getStyleClass().addAll("program-name", "element");
+    getChildren().add(new Label("Media") {{
+      getStyleClass().add("left");
+    }});
+    getChildren().add(new Label("S") {{
+      getStyleClass().add("center");
+    }});
+    getChildren().add(new Label("ystem") {{
+      getStyleClass().add("right");
+    }});
+    setEffect(SpecialEffects.createNeonEffect(12));
+  }};
+
   private final Label clock = new Label() {{
     getStyleClass().add("clock");
   }};
@@ -59,7 +74,7 @@ public class InformationBorder extends HBox {
 
     getChildren().add(new HBox() {{
       getStyleClass().add("elements");
-      getChildren().addAll(clockElement, gc, breadCrumbElement);
+      getChildren().addAll(programName, clockElement, gc, breadCrumbElement);
     }});
 
     Timeline updater = new Timeline(
@@ -78,8 +93,8 @@ public class InformationBorder extends HBox {
           double percentageTotal = (double)totalMemory / maxMemory;
 
           memoryBar.setFill(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE,
-            new Stop(0.0, Color.YELLOW),
-            new Stop(percentageUsed, Color.YELLOW),
+            new Stop(0.0, Color.WHITE),
+            new Stop(percentageUsed, Color.WHITE),
             new Stop(percentageUsed + 0.0001, Color.LIGHTGRAY),
             new Stop(percentageTotal, Color.LIGHTGRAY),
             new Stop(percentageTotal + 0.0001, Color.TRANSPARENT),

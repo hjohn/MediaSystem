@@ -230,7 +230,7 @@ public class ProgramController {
     ObservableList<String> stylesheets = scene.getStylesheets();
 
     stylesheets.clear();
-    stylesheets.addAll("default.css", "status-messages.css", node.getId() + ".css");
+    stylesheets.addAll("default.css", "status-messages.css", "information-border.css", node.getId() + ".css");
 
     oldStage.setScene(null);
     scene.setFill(background);
