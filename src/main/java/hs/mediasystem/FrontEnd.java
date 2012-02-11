@@ -19,6 +19,7 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import javafx.application.Application;
@@ -105,7 +106,9 @@ public class FrontEnd extends Application {
         try {
           Connection connection = pool.getConnection();
 
-          connection.prepareStatement("SET search_path = public").execute();
+          try(PreparedStatement statement = connection.prepareStatement("SET search_path = public")) {
+            statement.execute();
+          }
 
           return connection;
         }
