@@ -7,15 +7,15 @@ import java.nio.ByteBuffer;
 
 public interface SubtitleDescriptor {
 
-	String getName();
+  String getName();
 
 
-	String getLanguageName();
+  String getLanguageName();
 
 
-	String getType();
+  String getType();
 
 
-	ByteBuffer fetch() throws Exception;
+  ByteBuffer fetch() throws Exception;
 
 }

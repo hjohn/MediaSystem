@@ -4,27 +4,27 @@ package hs.sublight;
 
 public abstract class SearchResult {
 
-	protected final String name;
+  protected final String name;
 
 
-	protected SearchResult() {
-		this.name = null;
-	}
+  protected SearchResult() {
+    this.name = null;
+  }
 
 
-	public SearchResult(String name) {
-		this.name = name;
-	}
+  public SearchResult(String name) {
+    this.name = name;
+  }
 
 
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
 
-	@Override
-	public String toString() {
-		return getName();
-	}
+  @Override
+  public String toString() {
+    return getName();
+  }
 
 }
