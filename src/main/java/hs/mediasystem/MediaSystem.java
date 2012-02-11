@@ -4,6 +4,9 @@ import javafx.application.Application;
 
 // Top 10 stuff:
 // TODO Decode images in background thread, not on JavaFX thread
+// TODO Playing new movie shortly shows wrong start time for a moment
+// TODO VLC settitle show should be off
+// TODO Add breadcrumb?
 
 // TODO Actor / Director information in database
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance
@@ -22,7 +25,6 @@ import javafx.application.Application;
 // TODO Options Screen: Separators for Dialog Screen
 
 // TODO Make subtitles more persistent by storing them with file?
-// TODO Add breadcrumb?
 // TODO Auto-scroll plot/overview
 // TODO Possibly with Series/Season, information about episode count
 // TODO BUG: When there's an outstanding query for a provider (which is taking long), it is possible for a 2nd query to be triggered on the same item.  When both return finally, they are inserted one after the other.  The second one causes a duplicate key violation.
