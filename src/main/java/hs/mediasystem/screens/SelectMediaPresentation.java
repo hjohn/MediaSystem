@@ -131,7 +131,7 @@ public class SelectMediaPresentation {
   private void setTreeRoot(final MediaItem root) {
     navigator.navigateTo(new Destination("Movie...") {
       @Override
-      public void go() {
+      public void execute() {
         TreeItem<MediaItem> treeRoot = new TreeItem<>(root);
 
         view.setRoot(treeRoot);

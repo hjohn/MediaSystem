@@ -105,7 +105,7 @@ public class NavigatorTest {
     }
 
     @Override
-    public void go() {
+    public void execute() {
       trip.add(getDescription());
     }
 

@@ -27,7 +27,7 @@ public class Navigator {
           current = current.previous;
 
           current.intro();
-          current.go();
+          current.execute();
         }
       }
       else if(parentNavigator != null) {
@@ -59,7 +59,7 @@ public class Navigator {
     current = destination;
 
     destination.intro();
-    destination.go();
+    destination.execute();
   }
 
   public static abstract class Destination {
@@ -81,7 +81,7 @@ public class Navigator {
       return previous;
     }
 
-    protected abstract void go();
+    protected abstract void execute();
 
     protected void intro() {
     }

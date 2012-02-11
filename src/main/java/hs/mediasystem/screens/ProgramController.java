@@ -231,7 +231,7 @@ public class ProgramController {
   public void showMainScreen() {
     navigator.navigateTo(new Destination("Home") {
       @Override
-      public void go() {
+      public void execute() {
         displayOnMainStage(mainScreenProvider.get().create());
       }
     });
@@ -256,7 +256,7 @@ public class ProgramController {
 
     navigator.navigateTo(new Destination("Play") {
       @Override
-      public void go() {
+      public void execute() {
         displayOnOverlayStage(playbackOverlayPresentation.getView());
       }
     });
@@ -306,7 +306,7 @@ public class ProgramController {
       private DialogScreen dialogScreen;
 
       @Override
-      public void go() {
+      public void execute() {
         dialogScreen = new DialogScreen(title, options);
 
         sceneRoot.getChildren().add(dialogScreen);

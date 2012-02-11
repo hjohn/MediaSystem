@@ -106,8 +106,7 @@ public class PlaybackOverlayPane extends StackPane {
 //              setSpacing(20);
             setHgap(20);
             getColumnConstraints().addAll(
-              new ColumnConstraints() {{
-              }},
+              new ColumnConstraints(),
               new ColumnConstraints() {{
                 setPercentWidth(60.0);   // this is not working as I want it.
                 setHalignment(HPos.RIGHT);
@@ -115,8 +114,7 @@ public class PlaybackOverlayPane extends StackPane {
               new ColumnConstraints() {{
                 setPercentWidth(20.0);
               }},
-              new ColumnConstraints() {{
-              }}
+              new ColumnConstraints()
             );
             setId("video-overlay_info_bar");
             add(new Label() {{

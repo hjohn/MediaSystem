@@ -51,7 +51,7 @@ public class MainScreen {
               private Node view = mainMenuExtension.select(controller);
 
               @Override
-              public void go() {
+              public void execute() {
                 controller.showScreen(view);
               }
             });
