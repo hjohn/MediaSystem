@@ -46,7 +46,7 @@ public class ProgramController {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
   private static final KeyCombination KEY_S = new KeyCodeCombination(KeyCode.S);
 
-  private final Stage mainStage;  // TODO two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing; refactor this
+  private final Stage mainStage;  // WORKAROUND: Two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing; refactor this
   private final Stage transparentStage;
   private final Scene scene = new Scene(new BorderPane(), Color.BLACK);
   private final StackPane sceneRoot = new StackPane();
@@ -204,7 +204,7 @@ public class ProgramController {
     Screen screen = screens.size() <= screenNumber ? Screen.getPrimary() : screens.get(screenNumber);
 
     Rectangle2D bounds = screen.getVisualBounds();
-    boolean primary = screen.equals(Screen.getPrimary());    // TODO this doesn't work nice in combination with full screen, so this hack is used to prevent going fullscreen when screen is not primary
+    boolean primary = screen.equals(Screen.getPrimary());    // WORKAROUND: this doesn't work nice in combination with full screen, so this hack is used to prevent going fullscreen when screen is not primary
 
     if(primary) {
       stage.setFullScreen(true);
