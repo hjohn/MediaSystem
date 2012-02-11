@@ -238,7 +238,7 @@ public class ItemsDao {
 
     for(String genre : item.getGenres()) {
       if(genre.length() > 0) {
-        genre += ",";
+        genres += ",";
       }
       genres += genre;
     }
