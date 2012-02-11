@@ -17,6 +17,7 @@ import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,7 +40,11 @@ public class VLCPlayer implements Player {
   private final Frame frame;
 
   public VLCPlayer(GraphicsDevice device, String... args) {
-    MediaPlayerFactory factory = new MediaPlayerFactory(args);
+    List<String> arguments = new ArrayList<>(Arrays.asList(args));
+
+    arguments.add("--no-video-title-show");
+
+    MediaPlayerFactory factory = new MediaPlayerFactory(arguments);
 
     mediaPlayer = factory.newEmbeddedMediaPlayer();
 
