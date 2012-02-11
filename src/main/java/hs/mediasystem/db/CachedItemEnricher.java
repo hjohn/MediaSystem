@@ -49,7 +49,7 @@ public class CachedItemEnricher {
           item = providerToCache.loadItem(identifier);
           item.setId(oldVersion.getId());
 
-          itemsDao.updateItem(item);  // TODO doubt this works, no id
+          itemsDao.updateItem(item);
         }
 
         System.out.println("[FINE] CachedItemEnricher.enrichItem() - Succesfully loaded: " + item);
