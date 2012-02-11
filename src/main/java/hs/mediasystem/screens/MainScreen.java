@@ -16,8 +16,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -72,13 +70,6 @@ public class MainScreen {
 
     HBox box = new HBox() {{
       getChildren().add(menuBox);
-      getChildren().add(new ProgressBar() {{
-        setProgress(0.25);
-        setMinSize(300, 30);
-        setStyle("-fx-background-color: black;");
-        getStyleClass().add("position");
-        setTranslateY(10);
-      }});
     }};
 
     ChangeListener<Boolean> changeListener = new ChangeListener<Boolean>() {
@@ -102,11 +93,6 @@ public class MainScreen {
     }
 
     root.setCenter(box);
-
-    root.setTop(new HBox() {{
-      setId("top-bar");
-      getChildren().add(new Label("MediaSystem"));
-    }});
 
     return root;
   }
