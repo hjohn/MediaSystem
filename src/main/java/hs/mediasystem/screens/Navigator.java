@@ -58,8 +58,8 @@ public class Navigator {
         fireActionEvent();
       }
       else if(parentNavigator != null) {
-        current.childNavigator = null;
-        current.childNavigator.onNavigation.set(null);
+        parentNavigator.current.childNavigator.onNavigation.set(null);
+        parentNavigator.current.childNavigator = null;
         parentNavigator.back();
       }
     }
