@@ -47,8 +47,13 @@ public class MainScreen {
         setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent event) {
-            controller.getNavigator().navigateTo(new Destination("BLA") {
-              private Node view = mainMenuExtension.select(controller);
+            controller.getNavigator().navigateTo(new Destination(mainMenuExtension.getTitle()) {
+              private Node view;
+
+              @Override
+              public void init() {
+                view = mainMenuExtension.select(controller);
+              }
 
               @Override
               public void execute() {

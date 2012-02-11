@@ -4,6 +4,7 @@ import hs.mediasystem.util.SizeFormatter;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
@@ -25,6 +26,15 @@ public class InformationBorder extends HBox {
   private final HBox clockElement = new HBox() {{
     getStyleClass().add("element");
     getChildren().add(clock);
+  }};
+
+  private final Label breadCrumb = new Label() {{
+    getStyleClass().add("bread-crumb");
+  }};
+
+  private final HBox breadCrumbElement = new HBox() {{
+    getStyleClass().add("element");
+    getChildren().add(breadCrumb);
   }};
 
   private final Rectangle memoryBar = new Rectangle();
@@ -49,7 +59,7 @@ public class InformationBorder extends HBox {
 
     getChildren().add(new HBox() {{
       getStyleClass().add("elements");
-      getChildren().addAll(clockElement, gc);
+      getChildren().addAll(clockElement, gc, breadCrumbElement);
     }});
 
     Timeline updater = new Timeline(
@@ -83,5 +93,9 @@ public class InformationBorder extends HBox {
 
     updater.setCycleCount(Animation.INDEFINITE);
     updater.play();
+  }
+
+  public StringProperty breadCrumbProperty() {
+    return breadCrumb.textProperty();
   }
 }

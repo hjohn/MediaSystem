@@ -16,6 +16,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.concurrent.Worker.State;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -77,14 +78,33 @@ public class ProgramController {
     sceneRoot.getChildren().addAll(contentBorderPane, overlayBorderPane);
     scene.setRoot(sceneRoot);
 
+    final InformationBorder informationBorder = new InformationBorder();
+
     overlayBorderPane.setMouseTransparent(true);
     overlayBorderPane.setCenter(new BorderPane() {{
-      setTop(new InformationBorder());
+      setTop(informationBorder);
     }});
     overlayBorderPane.setRight(messagePane);
 
     mainStage = new Stage(StageStyle.UNDECORATED);
     transparentStage = new Stage(StageStyle.TRANSPARENT);
+
+    navigator.onNavigation().set(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        List<Destination> trail = navigator.getTrail();
+        StringBuilder builder = new StringBuilder();
+
+        for(Destination dest : trail) {
+          if(builder.length() > 0) {
+            builder.append(" > ");
+          }
+          builder.append(dest.getDescription());
+        }
+
+        informationBorder.breadCrumbProperty().set(builder.toString());
+      }
+    });
 
     sceneRoot.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
@@ -254,7 +274,7 @@ public class ProgramController {
 
     final PlaybackOverlayPresentation playbackOverlayPresentation = playbackOverlayPresentationProvider.get();
 
-    navigator.navigateTo(new Destination("Play") {
+    navigator.navigateTo(new Destination(mediaItem.getTitle()) {
       @Override
       public void execute() {
         displayOnOverlayStage(playbackOverlayPresentation.getView());
