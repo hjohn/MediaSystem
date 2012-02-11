@@ -1,18 +1,17 @@
 package hs.mediasystem.fs;
 
+import java.util.List;
+
 import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 
 public class Serie extends MediaItem {
+  private List<? extends MediaItem> children;
 
   public Serie(MediaTree mediaTree, LocalInfo localInfo) {
     super(mediaTree, localInfo);
-  }
-
-  @Override
-  public boolean isRoot() {
-    return true;
   }
 
   @Override
@@ -21,11 +20,11 @@ public class Serie extends MediaItem {
   }
 
   @Override
-  public MediaTree getRoot() {
-    EpisodesMediaTree mediaTree = new EpisodesMediaTree(getPath(), getTitle());
+  public List<? extends MediaItem> children() {
+    if(children == null) {
+      children = new EpisodeScanner(getMediaTree(), new EpisodeDecoder(), MediaType.EPISODE).scan(getLocalInfo().getPath());
+    }
 
-    mediaTree.onItemQueued().set(getMediaTree().onItemQueued().get());
-
-    return mediaTree;
+    return children;
   }
 }

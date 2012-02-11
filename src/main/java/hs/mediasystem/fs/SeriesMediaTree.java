@@ -1,10 +1,10 @@
 package hs.mediasystem.fs;
 
+import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.MediaTree;
 
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 
 public class SeriesMediaTree extends AbstractMediaTree {
@@ -17,17 +17,16 @@ public class SeriesMediaTree extends AbstractMediaTree {
   }
 
   @Override
-  public List<? extends MediaItem> children() {
-    if(children == null) {
-      children = new SerieScanner(this).scan(root);
-      Collections.sort(children, MediaItemComparator.INSTANCE);
-    }
+  public MediaItem getRoot() {
+    return new MediaItem(this, new LocalInfo(MediaType.SERIE_ROOT, "Series")) {
+      @Override
+      public List<? extends MediaItem> children() {
+        if(children == null) {
+          children = new SerieScanner(SeriesMediaTree.this).scan(root);
+        }
 
-    return children;
-  }
-
-  @Override
-  public MediaTree parent() {
-    return null;
+        return children;
+      }
+    };
   }
 }

@@ -3,6 +3,7 @@ package hs.mediasystem.fs;
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.Decoder;
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.Scanner;
 
@@ -13,7 +14,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EpisodeScanner implements Scanner<Episode> {
+public class EpisodeScanner implements Scanner<MediaItem> {
   private final Decoder decoder;
   private final MediaType mediaType;
   private final MediaTree mediaTree;
@@ -25,9 +26,9 @@ public class EpisodeScanner implements Scanner<Episode> {
   }
 
   @Override
-  public List<Episode> scan(Path scanPath) {
+  public List<MediaItem> scan(Path scanPath) {
     try {
-      List<Episode> episodes = new ArrayList<>();
+      List<MediaItem> episodes = new ArrayList<>();
 
       try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
         for(Path path : dirStream) {
@@ -35,7 +36,7 @@ public class EpisodeScanner implements Scanner<Episode> {
             LocalInfo localInfo = decoder.decode(path, mediaType);
 
             if(localInfo != null) {
-              episodes.add(new Episode(mediaTree, localInfo));
+              episodes.add(new MediaItem(mediaTree, localInfo));
             }
             else {
               System.err.println("EpisodeScanner: Could not decode as movie: " + path);

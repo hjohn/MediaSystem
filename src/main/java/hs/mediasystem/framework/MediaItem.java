@@ -5,7 +5,9 @@ import hs.mediasystem.db.MediaType;
 import hs.mediasystem.util.ImageHandle;
 
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.DoubleProperty;
@@ -22,8 +24,6 @@ public class MediaItem {
 
   private final LocalInfo localInfo;
   private final MediaTree mediaTree;
-
-  protected MediaItem parent;
 
   private State state = State.STANDARD;
   private String language;
@@ -65,12 +65,8 @@ public class MediaItem {
     return localInfo;
   }
 
-  public MediaItem getParent() {
-    return parent;
-  }
-
-  public void setParent(MediaItem parent) {  // TODO don't really want this public
-    this.parent = parent;
+  public MediaType getMediaType() {
+    return localInfo.getType();
   }
 
   public Path getPath() {
@@ -107,19 +103,15 @@ public class MediaItem {
 
   @Override
   public String toString() {
-    return "('" + localInfo.getTitle() + "', NamedItem[subtitle=" + localInfo.getSubtitle() + ", type=" + localInfo.getType() + "])";
-  }
-
-  public MediaTree getRoot() {
-    return null;
-  }
-
-  public boolean isRoot() {
-    return false;
+    return "('" + localInfo.getTitle() + "', MediaItem[subtitle=" + localInfo.getSubtitle() + ", type=" + localInfo.getType() + "])";
   }
 
   public boolean isLeaf() {
     return true;
+  }
+
+  public List<? extends MediaItem> children() {
+    return Collections.emptyList();
   }
 
   public MediaTree getMediaTree() {

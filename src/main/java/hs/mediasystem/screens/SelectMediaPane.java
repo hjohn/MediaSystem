@@ -389,6 +389,10 @@ public class SelectMediaPane<T> extends StackPane {
     return filter.activeProperty();
   }
 
+  public TreeItem<T> getRoot() {
+    return treeView.getRoot();
+  }
+
   public void setRoot(TreeItem<T> root) {
     treeView.setRoot(root);
   }

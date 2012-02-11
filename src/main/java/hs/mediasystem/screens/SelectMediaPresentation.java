@@ -3,7 +3,6 @@ package hs.mediasystem.screens;
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.fs.EpisodesMediaTree;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.SelectMediaPane.ItemEvent;
 import hs.mediasystem.util.Callable;
@@ -35,18 +34,15 @@ public class SelectMediaPresentation {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
 
   private final SelectMediaPane<MediaItem> view;
-  private final TreeItem<MediaItem> treeRoot = new TreeItem<>();
   private final Navigator navigator;
 
   private MediaItem currentItem;
-  private StandardLayout layout = new StandardLayout();
+  private final StandardLayout layout = new StandardLayout();
 
   @Inject
   public SelectMediaPresentation(final ProgramController controller, final SelectMediaPane<MediaItem> view, final MediaItemEnrichmentEventHandler enrichmentHandler) {
     this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
-
-    view.setRoot(treeRoot);
 
     view.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
@@ -78,10 +74,10 @@ public class SelectMediaPresentation {
         if(mediaItem.isLeaf()) {
           controller.play(mediaItem);
         }
-        else if(mediaItem.isRoot()) {
-          setMediaTree(mediaItem.getRoot());
+        else if(layout.isRoot(mediaItem)) {
+          setTreeRoot(mediaItem);
         }
-        else if(mediaItem instanceof hs.mediasystem.framework.Group) {
+        else {
           event.getTreeItem().setExpanded(true);
         }
         event.consume();
@@ -132,16 +128,20 @@ public class SelectMediaPresentation {
     return view;
   }
 
-  public void setMediaTree(final MediaTree mediaTree) {
+  private void setTreeRoot(final MediaItem root) {
     navigator.navigateTo(new Destination("Movie...") {
       @Override
       public void go() {
-        boolean filterLevel = mediaTree instanceof EpisodesMediaTree;
+        TreeItem<MediaItem> treeRoot = new TreeItem<>(root);
+
+        view.setRoot(treeRoot);
+
+        boolean filterLevel = layout.isFilterLevel(root);
 
         view.filterItemsProperty().clear();
 
         if(filterLevel) {
-          for(MediaItem item : mediaTree.children()) {
+          for(MediaItem item : layout.getChildren(root)) {
             Label label = new Label("" + item.getSeason());
 
             view.filterItemsProperty().add(label);
@@ -149,13 +149,11 @@ public class SelectMediaPresentation {
           }
 
           view.activeFilterItemProperty().set(view.filterItemsProperty().get(0));
-
-          refilter();
         }
         else {
           treeRoot.getChildren().clear();
 
-          for(MediaItem item : mediaTree.children()) {
+          for(MediaItem item : layout.getChildren(root)) {
             treeRoot.getChildren().add(new MediaTreeItem(item));
           }
         }
@@ -163,16 +161,23 @@ public class SelectMediaPresentation {
         view.setCellFactory(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
           @Override
           public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
-            return new MediaItemTreeCell(layout.getCellProvider(mediaTree));
+            return new MediaItemTreeCell(layout.getCellProvider(root));
           }
         });
       }
     });
   }
 
+  public void setMediaTree(final MediaTree mediaTree) {
+    setTreeRoot(mediaTree.getRoot());
+  }
+
   private void refilter() {
+    TreeItem<MediaItem> treeRoot = view.getRoot();
+
     treeRoot.getChildren().clear();
-    hs.mediasystem.framework.Group group = (hs.mediasystem.framework.Group)view.activeFilterItemProperty().get().getUserData();
+
+    MediaItem group = (MediaItem)view.activeFilterItemProperty().get().getUserData();
 
     for(MediaItem item : group.children()) {
       treeRoot.getChildren().add(new MediaTreeItem(item));
@@ -213,7 +218,7 @@ public class SelectMediaPresentation {
     }
   }
 
-  private static final class MediaTreeItem extends TreeItem<MediaItem> {
+  private final class MediaTreeItem extends TreeItem<MediaItem> {
     private boolean childrenPopulated;
 
     private MediaTreeItem(MediaItem value) {
@@ -222,7 +227,7 @@ public class SelectMediaPresentation {
 
     @Override
     public boolean isLeaf() {
-      return !(getValue() instanceof hs.mediasystem.framework.Group);
+      return layout.isRoot(getValue()) || getValue().isLeaf();
     }
 
     @Override
@@ -230,10 +235,8 @@ public class SelectMediaPresentation {
       if(!childrenPopulated) {
         childrenPopulated = true;
 
-        if(getValue() instanceof hs.mediasystem.framework.Group) {
-          hs.mediasystem.framework.Group group = (hs.mediasystem.framework.Group)getValue();
-
-          for(MediaItem child : group.children()) {
+        if(layout.hasChildren(getValue())) {
+          for(MediaItem child : layout.getChildren(getValue())) {
             super.getChildren().add(new MediaTreeItem(child));
           }
         }
@@ -257,7 +260,7 @@ public class SelectMediaPresentation {
       super.updateItem(item, empty);
 
       if(!empty) {
-        setGraphic(provider.configureCell(item));
+        setGraphic(provider.configureCell(getTreeItem()));
       }
     }
   }
