@@ -214,6 +214,7 @@ public class VLCPlayer implements Player {
 
   @Override
   public void play(String uri) {
+    position.update(0);
     mediaPlayer.setRepeat(true);
     mediaPlayer.setPlaySubItems(true);
     mediaPlayer.playMedia(uri);
