@@ -1,20 +1,21 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.util.StringConverter;
 import javafx.beans.value.WritableNumberValue;
 
 public class NumericOption extends Option {
   private final WritableNumberValue property;
-  private final String format;
+  private final StringConverter<Number> converter;
   private final double stepSize;
   private final double min;
   private final double max;
 
   private double value;
 
-  public NumericOption(WritableNumberValue property, String description, String format, double stepSize, double min, double max) {
+  public NumericOption(WritableNumberValue property, String description, double stepSize, double min, double max, StringConverter<Number> converter) {
     super(description);
     this.property = property;
-    this.format = format;
+    this.converter = converter;
     this.stepSize = stepSize;
     this.min = min;
     this.max = max;
@@ -26,12 +27,21 @@ public class NumericOption extends Option {
     updateControl();
   }
 
-  public NumericOption(String description, String format, double stepSize, double min, double max) {
-    this(null, description, format, stepSize, min, max);
+  public NumericOption(WritableNumberValue property, String description, double stepSize, double min, double max, final String format) {
+    this(property, description, stepSize, min, max, new StringConverter<Number>() {
+      @Override
+      public String toString(Number object) {
+        return String.format(format, object);
+      }
+    });
   }
 
-  public NumericOption(String description, String format, double stepSize) {
-    this(description, format, stepSize, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+  public NumericOption(String description, double stepSize, double min, double max, String format) {
+    this(null, description, stepSize, min, max, format);
+  }
+
+  public NumericOption(String description, double stepSize, String format) {
+    this(description, stepSize, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, format);
   }
 
   @Override
@@ -60,6 +70,6 @@ public class NumericOption extends Option {
     if(property != null) {
       property.setValue(value);
     }
-    label.setText(String.format(format, value));
+    label.setText(converter.toString(value));
   }
 }

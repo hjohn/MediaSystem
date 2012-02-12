@@ -78,7 +78,7 @@ public class PlaybackOverlayPresentation {
         }
         else if(code == KeyCode.O) {
           List<Option> options = FXCollections.observableArrayList(
-            new NumericOption(player.volumeProperty(), "Volume", "%3.0f%%", 1, 0, 100),
+            new NumericOption(player.volumeProperty(), "Volume", 1, 0, 100, "%3.0f%%"),
             new ListOption<>("Subtitle", player.subtitleProperty(), player.getSubtitles(), new StringConverter<Subtitle>() {
               @Override
               public String toString(Subtitle object) {
@@ -91,9 +91,15 @@ public class PlaybackOverlayPresentation {
                 return object.getDescription();
               }
             }),
-            new NumericOption(player.rateProperty(), "Playback Speed", "%4.1f", 0.1, 0.1, 4.0),
-            new NumericOption(player.audioDelayProperty(), "Audio Delay", "%5.0fms", 100, -30000, 30000),
-            new NumericOption(player.brightnessProperty(), "Brightness", "%4.1f", 0.1, 0, 2),
+            new NumericOption(player.rateProperty(), "Playback Speed", 0.1, 0.1, 4.0, "%4.1f"),
+            new NumericOption(player.audioDelayProperty(), "Audio Delay", 100, -30000, 30000, "%5.0fms"),
+            new NumericOption(player.brightnessProperty(), "Brightness adjustment", 0.01, 0, 2, new StringConverter<Number>() {
+              @Override
+              public String toString(Number object) {
+                long value = Math.round((object.doubleValue() - 1.0) * 100);
+                return value == 0 ? "0%" : String.format("%+3d%%", value);
+              }
+            }),
             new SubOption("Download subtitle...", new Callable<List<Option>>() {
               @Override
               public List<Option> call() {
