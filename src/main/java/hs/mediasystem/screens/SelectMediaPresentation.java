@@ -186,6 +186,7 @@ public class SelectMediaPresentation {
 
   private void bind(final MediaItem mediaItem) {
     if(mediaItem != null) {
+      view.groupNameProperty().bind(mediaItem.groupNameProperty());
       view.titleProperty().bind(mediaItem.titleProperty());
       view.subtitleProperty().bind(mediaItem.subtitleProperty());
       view.releaseTimeProperty().bind(MediaItemFormatter.releaseTimeBinding(mediaItem));

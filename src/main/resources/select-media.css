@@ -35,6 +35,11 @@
   -fx-stroke: rgb(125, 125, 125);
 }
 
+#select-media .detail .group-name {
+  -fx-font: bold 16pt "Arial";
+  -fx-wrap-text: true;
+}
+
 #select-media .detail .title {
   -fx-font: bold 24pt "Arial";
   -fx-wrap-text: true;

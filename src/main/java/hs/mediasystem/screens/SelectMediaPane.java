@@ -60,6 +60,7 @@ public class SelectMediaPane<T> extends StackPane {
 
   private final TreeView<T> treeView = new TreeView<>();
 
+  private final StringProperty groupName = new SimpleStringProperty();
   private final StringProperty title = new SimpleStringProperty();
   private final StringProperty subtitle = new SimpleStringProperty();
   private final StringProperty releaseTime = new SimpleStringProperty();
@@ -274,6 +275,12 @@ public class SelectMediaPane<T> extends StackPane {
       setTop(new VBox() {{
         visibleProperty().bind(title.isNotNull());
         getChildren().add(new Label() {{
+          getStyleClass().add("group-name");
+          textProperty().bind(groupName);
+          managedProperty().bind(groupName.isNotEqualTo(""));
+          visibleProperty().bind(groupName.isNotEqualTo(""));
+        }});
+        getChildren().add(new Label() {{
           getStyleClass().add("title");
           textProperty().bind(title);
         }});
@@ -426,6 +433,7 @@ public class SelectMediaPane<T> extends StackPane {
     }
   }
 
+  public StringProperty groupNameProperty() { return groupName; }
   public StringProperty titleProperty() { return title; }
   public StringProperty subtitleProperty() { return subtitle; }
   public StringProperty releaseTimeProperty() { return releaseTime; }
