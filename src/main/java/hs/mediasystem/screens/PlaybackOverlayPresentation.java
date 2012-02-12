@@ -1,5 +1,6 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.AudioTrack;
@@ -44,8 +45,14 @@ public class PlaybackOverlayPresentation {
     final Player player = playerPresentation.getPlayer();
     final MediaItem mediaItem = controller.getCurrentMediaItem();
 
-    view.titleProperty().bind(mediaItem.titleProperty());
-    view.subtitleProperty().bind(mediaItem.subtitleProperty());
+    if(mediaItem.getMediaType() == MediaType.EPISODE) {
+      view.titleProperty().bind(mediaItem.groupNameProperty());
+      view.subtitleProperty().bind(mediaItem.titleProperty());
+    }
+    else {
+      view.titleProperty().bind(mediaItem.titleProperty());
+      view.subtitleProperty().bind(mediaItem.subtitleProperty());
+    }
     view.releaseYearProperty().bind(Bindings.convert(mediaItem.releaseYearProperty()));
     view.posterProperty().bind(new ObjectBinding<Image>() {
       {
