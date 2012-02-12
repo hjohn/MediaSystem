@@ -64,10 +64,14 @@ public class VLCPlayer implements Player {
     mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
     mediaPlayer.addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
       private AtomicInteger ignoreFinish = new AtomicInteger();
+      private boolean videoAdjusted;
 
       @Override
       public void timeChanged(MediaPlayer mediaPlayer, final long newTime) {
         position.update(newTime);
+        if(!videoAdjusted) {
+          mediaPlayer.setAdjustVideo(true);
+        }
       }
 
       @Override
@@ -79,6 +83,7 @@ public class VLCPlayer implements Player {
       public void newMedia(MediaPlayer mediaPlayer) {
         System.out.println("[FINE] VLCPlayer: Event[newMedia]");
         updateSubtitles();
+        videoAdjusted = false;
       }
 
       @Override
