@@ -33,6 +33,7 @@ public class MediaItem {
     this.mediaTree = mediaTree;
     this.localInfo = localInfo;
 
+    groupName.set(localInfo.getGroupName() == null ? "" : localInfo.getGroupName());
     title.bind(new StringBinding() {
       {
         bind(officialTitle);
@@ -45,7 +46,7 @@ public class MediaItem {
             return getOfficialTitle();
           }
 
-          return localInfo.getTitle() + " " + localInfo.getSeason() + "x" + localInfo.getEpisode();
+          return localInfo.getGroupName() + " " + localInfo.getSeason() + "x" + localInfo.getEpisode();
         }
 
         if(localInfo.getType() == MediaType.SEASON) {
@@ -125,6 +126,10 @@ public class MediaItem {
       mediaTree.queue(this);
     }
   }
+
+  private final StringProperty groupName = new SimpleStringProperty();
+  public String getGroupName() { return groupName.get(); }
+  public StringProperty groupNameProperty() { return groupName; }
 
   private final StringProperty officialTitle = new SimpleStringProperty();
   public String getOfficialTitle() { return officialTitle.get(); }

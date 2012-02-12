@@ -35,6 +35,10 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
           LocalInfo localInfo = mediaItem.getLocalInfo();
           String message = localInfo.getTitle();
 
+          if(message == null) {
+            message = localInfo.getGroupName();
+          }
+
           if(localInfo.getSeason() != null) {
             message += " " + localInfo.getSeason() + "x" + localInfo.getEpisode();
           }

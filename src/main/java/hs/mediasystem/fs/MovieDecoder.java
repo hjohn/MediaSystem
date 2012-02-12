@@ -68,6 +68,6 @@ public class MovieDecoder implements Decoder {
     Integer year = yearString == null || yearString.isEmpty() ? null : Integer.parseInt(yearString);
     Integer episode = sequence == null ? 1 : Integer.parseInt(sequence);
 
-    return new LocalInfo(path, mediaType, title, subtitle == null ? "" : subtitle, imdbNumber, year, null, episode);
+    return new LocalInfo(path, mediaType, null, title, subtitle == null ? "" : subtitle, imdbNumber, year, null, episode);
   }
 }

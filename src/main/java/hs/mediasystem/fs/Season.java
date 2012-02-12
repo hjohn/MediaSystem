@@ -13,7 +13,7 @@ public class Season extends MediaItem {
   private final List<MediaItem> children = new ArrayList<>();
 
   public Season(MediaTree mediaTree, String serieName, int season) {
-    super(mediaTree, new LocalInfo(null, MediaType.SEASON, serieName, null, null, null, season, null));
+    super(mediaTree, new LocalInfo(null, MediaType.SEASON, null, serieName, null, null, null, season, null));
   }
 
   public void add(MediaItem child) {

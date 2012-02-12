@@ -31,9 +31,9 @@ public class EpisodeDecoder implements Decoder {
       return null;
     }
 
-    String title = matcher.group(1);
+    String serieName = matcher.group(1);
     String sequence = matcher.group(2);
-    String subtitle = matcher.group(3);
+    String title = matcher.group(3);
     String yearString = matcher.group(4);
 
     String imdb = matcher.group(5);
@@ -55,6 +55,6 @@ public class EpisodeDecoder implements Decoder {
       episode = Integer.parseInt(sequence.split("x")[1]);
     }
 
-    return new LocalInfo(path, mediaType, title, subtitle.isEmpty() ? null : subtitle, imdbNumber, year, season, episode);
+    return new LocalInfo(path, mediaType, serieName, title.isEmpty() ? null : title, null, imdbNumber, year, season, episode);
   }
 }
