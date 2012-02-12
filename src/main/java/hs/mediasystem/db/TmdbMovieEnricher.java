@@ -50,40 +50,51 @@ public class TmdbMovieEnricher implements ItemEnricher {
             }
           });
 
-          String searchString = title;
+          List<String> variations = new ArrayList<>();
 
-          if(seq > 1) {
-            searchString += " " + seq;
+          variations.add(title);
+          if(title.contains(", ")) {
+            int comma = title.indexOf(", ");
+
+            variations.add(title.substring(comma + 2) + " " + title.substring(0, comma));
           }
-          if(subtitle != null && subtitle.length() > 0) {
-            searchString += " " + subtitle;
-          }
 
-          System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Looking to match: " + searchString);
+          for(String variation : variations) {
+            String searchString = variation;
 
-          for(Movie movie : Movie.search(searchString)) {
-            String movieYear = extractYear(movie.getReleasedDate());
-            double score = 0;
-
-            if(movieYear.equals(year) && movieYear.length() > 0) {
-              score += 45;
+            if(seq > 1) {
+              searchString += " " + seq;
             }
-            if(movie.getImdbID() != null) {
-              score += 15;
+            if(subtitle != null && subtitle.length() > 0) {
+              searchString += " " + subtitle;
             }
 
-            double matchScore = Levenshtein.compare(movie.getName().toLowerCase(), searchString.toLowerCase());
+            System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Looking to match: " + searchString);
 
-            score += matchScore * 40;
+            for(Movie movie : Movie.search(searchString)) {
+              String movieYear = extractYear(movie.getReleasedDate());
+              double score = 0;
 
-            scores.add(new Score(movie, score));
-            String name = movie.getName() + (movie.getAlternativeName() != null ? " (" + movie.getAlternativeName() + ")" : "");
-            System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - " + String.format("Match: %5.1f (%4.2f) IMDB: %9s YEAR: %tY -- %s", score, matchScore, movie.getImdbID(), movie.getReleasedDate(), name));
-          }
+              if(movieYear.equals(year) && movieYear.length() > 0) {
+                score += 45;
+              }
+              if(movie.getImdbID() != null) {
+                score += 15;
+              }
 
-          if(!scores.isEmpty()) {
-            bestMatchingImdbNumber = scores.first().movie.getImdbID();
-            System.out.println("Best was: " + scores.first());
+              double matchScore = Levenshtein.compare(movie.getName().toLowerCase(), searchString.toLowerCase());
+
+              score += matchScore * 40;
+
+              scores.add(new Score(movie, score));
+              String name = movie.getName() + (movie.getAlternativeName() != null ? " (" + movie.getAlternativeName() + ")" : "");
+              System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - " + String.format("Match: %5.1f (%4.2f) IMDB: %9s YEAR: %tY -- %s", score, matchScore, movie.getImdbID(), movie.getReleasedDate(), name));
+            }
+
+            if(!scores.isEmpty()) {
+              bestMatchingImdbNumber = scores.first().movie.getImdbID();
+              System.out.println("Best was: " + scores.first());
+            }
           }
         }
 
