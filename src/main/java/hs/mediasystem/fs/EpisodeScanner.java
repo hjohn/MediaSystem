@@ -13,8 +13,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class EpisodeScanner implements Scanner<MediaItem> {
+  private static final Pattern EXTENSION_PATTERN = Pattern.compile("(?i).+\\.(avi|flv|mkv|mov|mp4|mpg|mpeg)");
+
   private final Decoder decoder;
   private final MediaType mediaType;
   private final MediaTree mediaTree;
@@ -32,7 +35,7 @@ public class EpisodeScanner implements Scanner<MediaItem> {
 
       try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
         for(Path path : dirStream) {
-          if(path.getFileName().toString().matches(MovieDecoder.EXTENSION_PATTERN.pattern())) {
+          if(path.getFileName().toString().matches(EXTENSION_PATTERN.pattern())) {
             LocalInfo localInfo = decoder.decode(path, mediaType);
 
             if(localInfo != null) {
