@@ -1,3 +1,8 @@
+#main-screen .menu-scroll-box {
+  -fx-alignment: center;
+  -fx-spacing: 50;
+}
+
 #main-screen .button {
   -fx-content-display: top;
   -fx-text-fill: color-blue-70;
@@ -6,6 +11,10 @@
 }
 
 #main-screen .button:focused {
-  -fx-background-color: color-blue-20;
+  -fx-background-color: radial-gradient(radius 150%, color-blue-20, color-blue-10, color-blue-20);
   -fx-text-fill: white;
+}
+
+#main-screen .menu-scroll-box-overlay {
+  -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, black 0%, transparent 50%, black 100%);
 }

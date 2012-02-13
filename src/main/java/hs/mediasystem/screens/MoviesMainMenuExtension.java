@@ -41,4 +41,9 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
 
     return presentation.getView();
   }
+
+  @Override
+  public double order() {
+    return 0.1;
+  }
 }
