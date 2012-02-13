@@ -28,6 +28,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -42,6 +43,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -318,27 +320,34 @@ public class SelectMediaPane<T> extends StackPane {
           visibleProperty().bind(plot.isNotEqualTo(""));
           VBox.setVgrow(this, Priority.ALWAYS);
         }});
-        getChildren().add(new Label("RELEASED") {{
-          getStyleClass().add("header");
-          managedProperty().bind(releaseTime.isNotEqualTo(""));
-          visibleProperty().bind(releaseTime.isNotEqualTo(""));
-        }});
-        getChildren().add(new Label() {{
-          getStyleClass().add("release-time");
-          textProperty().bind(releaseTime);
-          managedProperty().bind(releaseTime.isNotEqualTo(""));
-          visibleProperty().bind(releaseTime.isNotEqualTo(""));
-        }});
-        getChildren().add(new Label("RUNTIME") {{
-          getStyleClass().add("header");
-          managedProperty().bind(runtime.greaterThan(0.0));
-          visibleProperty().bind(runtime.greaterThan(0.0));
-        }});
-        getChildren().add(new Label() {{
-          getStyleClass().add("runtime");
-          textProperty().bind(Bindings.format("%d minutes", runtime));
-          managedProperty().bind(runtime.greaterThan(0.0));
-          visibleProperty().bind(runtime.greaterThan(0.0));
+        getChildren().add(new FlowPane() {{
+          getStyleClass().add("fields");
+          getChildren().add(new VBox() {{
+            getChildren().add(new Label("RELEASED") {{
+              getStyleClass().add("header");
+              managedProperty().bind(releaseTime.isNotEqualTo(""));
+              visibleProperty().bind(releaseTime.isNotEqualTo(""));
+            }});
+            getChildren().add(new Label() {{
+              getStyleClass().add("release-time");
+              textProperty().bind(releaseTime);
+              managedProperty().bind(releaseTime.isNotEqualTo(""));
+              visibleProperty().bind(releaseTime.isNotEqualTo(""));
+            }});
+          }});
+          getChildren().add(new VBox() {{
+            getChildren().add(new Label("RUNTIME") {{
+              getStyleClass().add("header");
+              managedProperty().bind(runtime.greaterThan(0.0));
+              visibleProperty().bind(runtime.greaterThan(0.0));
+            }});
+            getChildren().add(new Label() {{
+              getStyleClass().add("runtime");
+              textProperty().bind(Bindings.format("%d minutes", runtime));
+              managedProperty().bind(runtime.greaterThan(0.0));
+              visibleProperty().bind(runtime.greaterThan(0.0));
+            }});
+          }});
         }});
       }});
     }}, 1, 0);

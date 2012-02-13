@@ -67,6 +67,10 @@
   -fx-wrap-text: true;
 }
 
+#select-media .detail .fields {
+  -fx-hgap: 20;
+}
+
 #select-media .header {
   -fx-font: bold 12pt "Arial";
   -fx-text-fill: derive(color-blue, -30%);
