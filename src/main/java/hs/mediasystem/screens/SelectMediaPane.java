@@ -22,7 +22,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -115,8 +114,6 @@ public class SelectMediaPane<T> extends StackPane {
 
   private final Filter filter = new Filter() {{
     getStyleClass().add("seasons");
-    getChildren().add(new Label("Season 1"));
-    getChildren().add(new Label("Season 2"));
   }};
 
   private final Timeline timeline = new Timeline(
@@ -170,9 +167,7 @@ public class SelectMediaPane<T> extends StackPane {
     treeView.getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<T>>() {
       @Override
       public void changed(ObservableValue<? extends TreeItem<T>> observable, TreeItem<T> oldValue, final TreeItem<T> newValue) {
-        if(onItemFocused.get() != null) {
-          onItemFocused.get().handle(new ItemEvent<>(newValue));
-        }
+        dispatchEvent(onItemFocused, new TreeItemEvent<>(newValue), null);  // TODO perhaps expose this in a similar fashion instead of as event?
       }
     });
 
@@ -182,9 +177,8 @@ public class SelectMediaPane<T> extends StackPane {
         TreeItem<T> focusedItem = treeView.getFocusModel().getFocusedItem();
 
         if(focusedItem != null) {
-          if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2 && onItemSelected.get() != null) {
-            System.out.println("[FINE] SelectMediaPane.SelectMediaPane().new EventHandler() {...}.handle() - double clicked");
-            onItemSelected.get().handle(new ItemEvent<>(focusedItem));
+          if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+            dispatchEvent(onItemSelected, new TreeItemEvent<>(focusedItem), event);
           }
         }
       }
@@ -196,13 +190,11 @@ public class SelectMediaPane<T> extends StackPane {
         TreeItem<T> focusedItem = treeView.getFocusModel().getFocusedItem();
 
         if(focusedItem != null) {
-          if(ENTER.match(event) && onItemSelected.get() != null) {
-            onItemSelected.get().handle(new ItemEvent<>(focusedItem));
-            event.consume();
+          if(ENTER.match(event)) {
+            dispatchEvent(onItemSelected, new TreeItemEvent<>(focusedItem), event);
           }
-          else if(KEY_O.match(event) && onItemAlternateSelect.get() != null) {
-            onItemAlternateSelect.get().handle(new ItemEvent<>(focusedItem));
-            event.consume();
+          else if(KEY_O.match(event)) {
+            dispatchEvent(onItemAlternateSelect, new TreeItemEvent<>(focusedItem), event);
           }
         }
 
@@ -214,12 +206,14 @@ public class SelectMediaPane<T> extends StackPane {
           filter.activateNext();
           event.consume();
         }
-        else if(BACK_SPACE.match(event) && onBack.get() != null) {
-          ActionEvent actionEvent = new ActionEvent();
-          onBack.get().handle(actionEvent);
-          if(actionEvent.isConsumed()) {
-            event.consume();
-          }
+      }
+    });
+
+    addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+      @Override
+      public void handle(KeyEvent event) {
+        if(BACK_SPACE.match(event)) {
+          dispatchEvent(onBack, new ActionEvent(SelectMediaPane.this, null), event);
         }
       }
     });
@@ -396,6 +390,24 @@ public class SelectMediaPane<T> extends StackPane {
     });
   }
 
+  private <E extends Event> void dispatchEvent(ObjectProperty<EventHandler<E>> eventHandlerProperty, E event, Event originatingEvent) {
+    EventHandler<E> eventHandler = eventHandlerProperty.get();
+
+    if(eventHandler != null) {
+      eventHandler.handle(event);
+      if(event.isConsumed() && originatingEvent != null) {
+        originatingEvent.consume();
+      }
+    }
+  }
+
+  @Override
+  public void requestFocus() {
+    super.requestFocus();
+    treeView.requestFocus();
+    treeView.getFocusModel().focus(0);
+  }
+
   public ObservableList<Node> filterItemsProperty() {
     return filter.getChildren();
   }
@@ -416,30 +428,17 @@ public class SelectMediaPane<T> extends StackPane {
     treeView.setCellFactory(cellFactory);
   }
 
-  private final ObjectProperty<EventHandler<ItemEvent<T>>> onItemFocused = new SimpleObjectProperty<>();
-  public ObjectProperty<EventHandler<ItemEvent<T>>> onItemFocused() { return onItemFocused; }
+  private final ObjectProperty<EventHandler<TreeItemEvent<T>>> onItemFocused = new SimpleObjectProperty<>();
+  public ObjectProperty<EventHandler<TreeItemEvent<T>>> onItemFocused() { return onItemFocused; }
 
-  private final ObjectProperty<EventHandler<ItemEvent<T>>> onItemSelected = new SimpleObjectProperty<>();
-  public ObjectProperty<EventHandler<ItemEvent<T>>> onItemSelected() { return onItemSelected; }
+  private final ObjectProperty<EventHandler<TreeItemEvent<T>>> onItemSelected = new SimpleObjectProperty<>();
+  public ObjectProperty<EventHandler<TreeItemEvent<T>>> onItemSelected() { return onItemSelected; }
 
-  private final ObjectProperty<EventHandler<ItemEvent<T>>> onItemAlternateSelect = new SimpleObjectProperty<>();
-  public ObjectProperty<EventHandler<ItemEvent<T>>> onItemAlternateSelect() { return onItemAlternateSelect; }
+  private final ObjectProperty<EventHandler<TreeItemEvent<T>>> onItemAlternateSelect = new SimpleObjectProperty<>();
+  public ObjectProperty<EventHandler<TreeItemEvent<T>>> onItemAlternateSelect() { return onItemAlternateSelect; }
 
   private final ObjectProperty<EventHandler<ActionEvent>> onBack = new SimpleObjectProperty<>();
   public ObjectProperty<EventHandler<ActionEvent>> onBack() { return onBack; }
-
-  public static class ItemEvent<T> extends Event {
-    private final TreeItem<T> treeItem;
-
-    public ItemEvent(TreeItem<T> treeItem) {
-      super(EventType.ROOT);
-      this.treeItem = treeItem;
-    }
-
-    public TreeItem<T> getTreeItem() {
-      return treeItem;
-    }
-  }
 
   public StringProperty groupNameProperty() { return groupName; }
   public StringProperty titleProperty() { return title; }

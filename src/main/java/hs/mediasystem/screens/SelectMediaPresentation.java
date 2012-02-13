@@ -4,7 +4,6 @@ import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.screens.Navigator.Destination;
-import hs.mediasystem.screens.SelectMediaPane.ItemEvent;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
 
@@ -15,6 +14,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -22,17 +22,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import javax.inject.Inject;
 
 public class SelectMediaPresentation {
-  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
-
   private final SelectMediaPane<MediaItem> view;
   private final Navigator navigator;
 
@@ -44,19 +38,17 @@ public class SelectMediaPresentation {
     this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
 
-    view.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+    view.onBack().set(new EventHandler<ActionEvent>() {
       @Override
-      public void handle(KeyEvent event) {
-        if(BACK_SPACE.match(event)) {
-          navigator.back();
-          event.consume();
-        }
+      public void handle(ActionEvent event) {
+        navigator.back();
+        event.consume();
       }
     });
 
-    view.onItemFocused().set(new EventHandler<ItemEvent<MediaItem>>() {
+    view.onItemFocused().set(new EventHandler<TreeItemEvent<MediaItem>>() {
       @Override
-      public void handle(ItemEvent<MediaItem> event) {
+      public void handle(TreeItemEvent<MediaItem> event) {
         if(event.getTreeItem() != null) {
           currentItem = event.getTreeItem().getValue();
           bind(event.getTreeItem().getValue());
@@ -65,9 +57,9 @@ public class SelectMediaPresentation {
       }
     });
 
-    view.onItemSelected().set(new EventHandler<ItemEvent<MediaItem>>() {
+    view.onItemSelected().set(new EventHandler<TreeItemEvent<MediaItem>>() {
       @Override
-      public void handle(ItemEvent<MediaItem> event) {
+      public void handle(TreeItemEvent<MediaItem> event) {
         final MediaItem mediaItem = event.getTreeItem().getValue();
         System.out.println("[FINE] SelectMediaPresentation.SelectMediaPresentation(...).new EventHandler() {...}.handle() - item selected: " + mediaItem);
 
@@ -84,9 +76,9 @@ public class SelectMediaPresentation {
       }
     });
 
-    view.onItemAlternateSelect().set(new EventHandler<ItemEvent<MediaItem>>() {
+    view.onItemAlternateSelect().set(new EventHandler<TreeItemEvent<MediaItem>>() {
       @Override
-      public void handle(ItemEvent<MediaItem> event) {
+      public void handle(TreeItemEvent<MediaItem> event) {
         final MediaItem mediaItem = event.getTreeItem().getValue();
 
         List<? extends Option> options = FXCollections.observableArrayList(
@@ -115,9 +107,9 @@ public class SelectMediaPresentation {
         Label label = (Label)value;
 
         if(oldLabel != null) {
-          oldLabel.setText("" + ((MediaItem)oldValue.getUserData()).getSeason());
+          oldLabel.setText(((FilterItem)oldValue.getUserData()).getShortText());
         }
-        label.setText("Season " + ((MediaItem)value.getUserData()).getSeason());
+        label.setText(((FilterItem)value.getUserData()).getLongText());
 
         refilter();
       }
@@ -134,15 +126,20 @@ public class SelectMediaPresentation {
       public void execute() {
         TreeItem<MediaItem> treeRoot = new TreeItem<>(root);
 
+        view.setCellFactory(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
+          @Override
+          public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
+            return new MediaItemTreeCell(layout.getCellProvider(root));
+          }
+        });
         view.setRoot(treeRoot);
-
-        boolean filterLevel = layout.isFilterLevel(root);
-
         view.filterItemsProperty().clear();
 
-        if(filterLevel) {
-          for(MediaItem item : layout.getChildren(root)) {
-            Label label = new Label("" + item.getSeason());
+        List<FilterItem> filterItems = layout.getFilterItems(root);
+
+        if(!filterItems.isEmpty()) {
+          for(FilterItem item : filterItems) {
+            Label label = new Label(item.getShortText());
 
             view.filterItemsProperty().add(label);
             label.setUserData(item);
@@ -157,13 +154,6 @@ public class SelectMediaPresentation {
             treeRoot.getChildren().add(new MediaTreeItem(item));
           }
         }
-
-        view.setCellFactory(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
-          @Override
-          public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
-            return new MediaItemTreeCell(layout.getCellProvider(root));
-          }
-        });
       }
     });
   }
@@ -177,9 +167,9 @@ public class SelectMediaPresentation {
 
     treeRoot.getChildren().clear();
 
-    MediaItem group = (MediaItem)view.activeFilterItemProperty().get().getUserData();
+    FilterItem group = (FilterItem)view.activeFilterItemProperty().get().getUserData();
 
-    for(MediaItem item : group.children()) {
+    for(MediaItem item : group.getMediaItem().children()) {
       treeRoot.getChildren().add(new MediaTreeItem(item));
     }
   }

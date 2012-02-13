@@ -10,8 +10,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.concurrent.Worker.State;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -26,12 +29,21 @@ public class MessagePaneExecutorService {
     controller.registerWorker(groupService);
   }
 
-  public synchronized void execute(Task<?> task) {
-    groupService.queue.offer(task);
+  public synchronized void execute(final Task<?> task) {
+    groupService.queue.add(task);
 
     if(!groupService.isRunning()) {
       groupService.restart();
     }
+
+    task.stateProperty().addListener(new ChangeListener<State>() {
+      @Override
+      public void changed(ObservableValue<? extends State> observable, State oldValue, State newValue) {
+        if(newValue == State.FAILED) {
+          System.out.println("[WARN] Worker " + task.getTitle() + " failed with exception: " + task.getException());
+        }
+      }
+    });
   }
 
   private class GroupWorker extends Service<Void> {

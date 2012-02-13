@@ -80,8 +80,16 @@ public class StandardLayout {
     return output;
   }
 
-  public boolean isFilterLevel(MediaItem mediaItem) {
-    return mediaItem.getMediaType() == MediaType.SERIE;
+  public List<FilterItem> getFilterItems(MediaItem root) {
+    List<FilterItem> filterItems = new ArrayList<>();
+
+    if(root.getMediaType() == MediaType.SERIE) {
+      for(MediaItem item : getChildren(root)) {
+        filterItems.add(new FilterItem(item, "Season " + item.getSeason(), "" + item.getSeason()));
+      }
+    }
+
+    return filterItems;
   }
 
   public boolean hasChildren(MediaItem mediaItem) {

@@ -10,6 +10,7 @@ import hs.mediasystem.util.ini.Section;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -226,7 +227,7 @@ public class ProgramController {
     displayOnStage(node, transparentStage, mainStage, Color.TRANSPARENT);
   }
 
-  private void displayOnStage(Node node, Stage newStage, Stage oldStage, Color background) {
+  private void displayOnStage(final Node node, Stage newStage, Stage oldStage, Color background) {
     ObservableList<String> stylesheets = scene.getStylesheets();
 
     stylesheets.clear();
@@ -242,6 +243,13 @@ public class ProgramController {
 
     newStage.toFront();
     oldStage.hide();
+
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+        node.requestFocus();
+      }
+    });
   }
 
   public Node getActiveScreen() {
