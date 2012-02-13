@@ -14,33 +14,26 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import javax.inject.Inject;
 
-public class MainScreen {
-  private final ProgramController controller;
-  private final Set<MainMenuExtension> mainMenuExtensions;
+public class MainScreen extends BorderPane {
+  private final List<Button> buttons = new ArrayList<>();
 
   @Inject
-  public MainScreen(ProgramController controller, Set<MainMenuExtension> mainMenuExtensions) {
-    this.controller = controller;
-    this.mainMenuExtensions = mainMenuExtensions;
-  }
-
-  public Node create() {
-    final BorderPane root = new BorderPane();
-
-    final List<Button> buttons = new ArrayList<>();
+  public MainScreen(final ProgramController controller, final Set<MainMenuExtension> mainMenuExtensions) {
+    setId("main-screen");
 
     for(final MainMenuExtension mainMenuExtension : mainMenuExtensions) {
       buttons.add(new Button(mainMenuExtension.getTitle()) {{
+        getStyleClass().add("option");
         setGraphic(new ImageView(mainMenuExtension.getImage()));
         setOnAction(new EventHandler<ActionEvent>() {
           @Override
@@ -64,12 +57,9 @@ public class MainScreen {
     }
 
 
-    final VBox menuBox = new VBox() {{
+    final HBox menuBox = new HBox() {{
+      setAlignment(Pos.CENTER);
       getChildren().addAll(buttons);
-    }};
-
-    HBox box = new HBox() {{
-      getChildren().add(menuBox);
     }};
 
     ChangeListener<Boolean> changeListener = new ChangeListener<Boolean>() {
@@ -78,10 +68,10 @@ public class MainScreen {
         Timeline timeline = new Timeline();
         Button b = (Button)(((ReadOnlyProperty<? extends Boolean>)observable).getBean());
 
-        double d = b.getParent().getLayoutBounds().getHeight();
+        double d = b.getParent().getLayoutBounds().getWidth() - b.getLayoutBounds().getWidth();
         timeline.getKeyFrames().addAll(
-          new KeyFrame(Duration.ZERO, new KeyValue(menuBox.translateYProperty(), menuBox.getTranslateY())),
-          new KeyFrame(new Duration(500), new KeyValue(menuBox.translateYProperty(), -b.getLayoutY() + d / 2))
+          // new KeyFrame(Duration.ZERO, new KeyValue(menuBox.translateYProperty(), menuBox.getTranslateY())),
+          new KeyFrame(new Duration(500), new KeyValue(menuBox.translateXProperty(), -b.getLayoutX() + d / 2))
         );
 
         timeline.play();
@@ -92,8 +82,11 @@ public class MainScreen {
       button.focusedProperty().addListener(changeListener);
     }
 
-    root.setCenter(box);
+    setCenter(menuBox);
+  }
 
-    return root;
+  @Override
+  public void requestFocus() {
+    buttons.get(0).requestFocus();
   }
 }

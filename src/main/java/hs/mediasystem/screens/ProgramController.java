@@ -260,7 +260,7 @@ public class ProgramController {
     navigator.navigateTo(new Destination("Home") {
       @Override
       public void execute() {
-        displayOnMainStage(mainScreenProvider.get().create());
+        displayOnMainStage(mainScreenProvider.get());
       }
     });
   }

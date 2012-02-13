@@ -1,0 +1,11 @@
+#main-screen .button {
+  -fx-content-display: top;
+  -fx-text-fill: color-blue-70;
+  -fx-font: bold 24pt "Arial";
+  -fx-background-color: transparent;
+}
+
+#main-screen .button:focused {
+  -fx-background-color: color-blue-20;
+  -fx-text-fill: white;
+}
