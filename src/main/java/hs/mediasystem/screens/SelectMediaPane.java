@@ -352,28 +352,24 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
           getChildren().add(new VBox() {{
             getChildren().add(new Label("RELEASED") {{
               getStyleClass().add("header");
-              managedProperty().bind(releaseTime.isNotEqualTo(""));
-              visibleProperty().bind(releaseTime.isNotEqualTo(""));
             }});
             getChildren().add(new Label() {{
               getStyleClass().add("release-time");
               textProperty().bind(releaseTime);
-              managedProperty().bind(releaseTime.isNotEqualTo(""));
-              visibleProperty().bind(releaseTime.isNotEqualTo(""));
             }});
+            managedProperty().bind(releaseTime.isNotEqualTo(""));
+            visibleProperty().bind(releaseTime.isNotEqualTo(""));
           }});
           getChildren().add(new VBox() {{
             getChildren().add(new Label("RUNTIME") {{
               getStyleClass().add("header");
-              managedProperty().bind(runtime.greaterThan(0.0));
-              visibleProperty().bind(runtime.greaterThan(0.0));
             }});
             getChildren().add(new Label() {{
               getStyleClass().add("runtime");
               textProperty().bind(Bindings.format("%d minutes", runtime));
-              managedProperty().bind(runtime.greaterThan(0.0));
-              visibleProperty().bind(runtime.greaterThan(0.0));
             }});
+            managedProperty().bind(runtime.greaterThan(0.0));
+            visibleProperty().bind(runtime.greaterThan(0.0));
           }});
         }});
       }});
