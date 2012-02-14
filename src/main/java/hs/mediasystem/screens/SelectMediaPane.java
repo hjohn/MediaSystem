@@ -1,5 +1,7 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.SelectMediaView;
 import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.ImageHandle;
 import javafx.animation.Animation;
@@ -7,15 +9,13 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.IntegerBinding;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -51,26 +51,60 @@ import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.Duration;
 
-public class SelectMediaPane<T> extends StackPane {
+public class SelectMediaPane extends StackPane implements SelectMediaView {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
   private static final KeyCombination LEFT = new KeyCodeCombination(KeyCode.LEFT);
   private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
 
-  private final TreeView<T> treeView = new TreeView<>();
+  private final TreeView<MediaItem> treeView = new TreeView<>();
 
-  private final StringProperty groupName = new SimpleStringProperty();
-  private final StringProperty title = new SimpleStringProperty();
-  private final StringProperty subtitle = new SimpleStringProperty();
-  private final StringProperty releaseTime = new SimpleStringProperty();
-  private final StringProperty plot = new SimpleStringProperty();
-  private final DoubleProperty rating = new SimpleDoubleProperty();
-  private final StringProperty genres = new SimpleStringProperty();
-  private final IntegerProperty runtime = new SimpleIntegerProperty();
+  private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
+  private final StringBinding groupName = Bindings.selectString(mediaItem, "groupName");
+  private final StringBinding title = Bindings.selectString(mediaItem, "title");
+  private final StringBinding subtitle = Bindings.selectString(mediaItem, "subtitle");
+  private final StringBinding releaseTime = MediaItemFormatter.releaseTimeBinding(mediaItem);
+  private final StringBinding plot = Bindings.selectString(mediaItem, "plot");
+  private final DoubleBinding rating = Bindings.selectDouble(mediaItem, "rating");
+  private final StringBinding genres = new StringBinding() {
+    {
+      onInvalidating();
+    }
 
-  private final ObjectProperty<ImageHandle> backgroundHandle = new SimpleObjectProperty<>();
-  private final ObjectProperty<ImageHandle> posterHandle = new SimpleObjectProperty<>();
+    @Override
+    protected void onInvalidating() {
+      unbind(getDependencies());
+      bind(mediaItem);
+      if(mediaItem.get() != null) {
+        bind(mediaItem.get().genresProperty());
+      }
+    }
+
+    @Override
+    protected String computeValue() {
+      String genreText = "";
+
+      ObjectBinding<String[]> binding = Bindings.select(mediaItem, "genres");
+      String[] genres = binding.get();
+
+      if(genres != null) {
+        for(String genre : genres) {
+          if(!genreText.isEmpty()) {
+            genreText += " • ";
+          }
+
+          genreText += genre;
+        }
+      }
+
+      return genreText;
+    }
+  };
+  private final IntegerBinding runtime = Bindings.selectInteger(mediaItem, "runtime");
+
+  private final ObjectBinding<ImageHandle> backgroundHandle = Bindings.select(mediaItem, "background");
+  private final ObjectBinding<ImageHandle> posterHandle = Bindings.select(mediaItem, "poster");
 
   private final ObjectProperty<Image> poster = new SimpleObjectProperty<>();
   private final ObjectProperty<Image> background = new SimpleObjectProperty<>();
@@ -164,9 +198,9 @@ public class SelectMediaPane<T> extends StackPane {
     treeView.setEditable(false);
     treeView.setShowRoot(false);
 
-    treeView.getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<T>>() {
+    treeView.getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<MediaItem>>() {
       @Override
-      public void changed(ObservableValue<? extends TreeItem<T>> observable, TreeItem<T> oldValue, final TreeItem<T> newValue) {
+      public void changed(ObservableValue<? extends TreeItem<MediaItem>> observable, TreeItem<MediaItem> oldValue, final TreeItem<MediaItem> newValue) {
         dispatchEvent(onItemFocused, new TreeItemEvent<>(newValue), null);  // TODO perhaps expose this in a similar fashion instead of as event?
       }
     });
@@ -174,7 +208,7 @@ public class SelectMediaPane<T> extends StackPane {
     treeView.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent event) {
-        TreeItem<T> focusedItem = treeView.getFocusModel().getFocusedItem();
+        TreeItem<MediaItem> focusedItem = treeView.getFocusModel().getFocusedItem();
 
         if(focusedItem != null) {
           if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
@@ -187,7 +221,7 @@ public class SelectMediaPane<T> extends StackPane {
     treeView.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
-        TreeItem<T> focusedItem = treeView.getFocusModel().getFocusedItem();
+        TreeItem<MediaItem> focusedItem = treeView.getFocusModel().getFocusedItem();
 
         if(focusedItem != null) {
           if(ENTER.match(event)) {
@@ -408,48 +442,49 @@ public class SelectMediaPane<T> extends StackPane {
     treeView.getFocusModel().focus(0);
   }
 
+  @Override
   public ObservableList<Node> filterItemsProperty() {
     return filter.getChildren();
   }
 
+  @Override
   public ObjectProperty<Node> activeFilterItemProperty() {
     return filter.activeProperty();
   }
 
-  public TreeItem<T> getRoot() {
+  @Override
+  public TreeItem<MediaItem> getRoot() {
     return treeView.getRoot();
   }
 
-  public void setRoot(TreeItem<T> root) {
+  @Override
+  public void setRoot(TreeItem<MediaItem> root) {
     treeView.setRoot(root);
   }
 
-  public void setCellFactory(Callback<TreeView<T>, TreeCell<T>> cellFactory) {
+  @Override
+  public void setCellFactory(Callback<TreeView<MediaItem>, TreeCell<MediaItem>> cellFactory) {
     treeView.setCellFactory(cellFactory);
   }
 
-  private final ObjectProperty<EventHandler<TreeItemEvent<T>>> onItemFocused = new SimpleObjectProperty<>();
-  public ObjectProperty<EventHandler<TreeItemEvent<T>>> onItemFocused() { return onItemFocused; }
+  private final ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemFocused = new SimpleObjectProperty<>();
+  @Override
+  public ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemFocused() { return onItemFocused; }
 
-  private final ObjectProperty<EventHandler<TreeItemEvent<T>>> onItemSelected = new SimpleObjectProperty<>();
-  public ObjectProperty<EventHandler<TreeItemEvent<T>>> onItemSelected() { return onItemSelected; }
+  private final ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemSelected = new SimpleObjectProperty<>();
+  @Override
+  public ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemSelected() { return onItemSelected; }
 
-  private final ObjectProperty<EventHandler<TreeItemEvent<T>>> onItemAlternateSelect = new SimpleObjectProperty<>();
-  public ObjectProperty<EventHandler<TreeItemEvent<T>>> onItemAlternateSelect() { return onItemAlternateSelect; }
+  private final ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemAlternateSelect = new SimpleObjectProperty<>();
+  @Override
+  public ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemAlternateSelect() { return onItemAlternateSelect; }
 
   private final ObjectProperty<EventHandler<ActionEvent>> onBack = new SimpleObjectProperty<>();
+  @Override
   public ObjectProperty<EventHandler<ActionEvent>> onBack() { return onBack; }
 
-  public StringProperty groupNameProperty() { return groupName; }
-  public StringProperty titleProperty() { return title; }
-  public StringProperty subtitleProperty() { return subtitle; }
-  public StringProperty releaseTimeProperty() { return releaseTime; }
-  public StringProperty plotProperty() { return plot; }
-  public DoubleProperty ratingProperty() { return rating; }
-  public IntegerProperty runtimeProperty() { return runtime; }
-  public StringProperty genresProperty() { return genres; }
-  public ObjectProperty<ImageHandle> backgroundProperty() { return backgroundHandle; }
-  public ObjectProperty<ImageHandle> posterProperty() { return posterHandle; }
+  @Override
+  public ObjectProperty<MediaItem> mediaItemProperty() { return mediaItem; }
 
   private static boolean trySetImage(ImageHandle handle, ObjectProperty<Image> image) {
     if(handle != null) {

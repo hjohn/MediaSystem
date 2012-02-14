@@ -3,13 +3,13 @@ package hs.mediasystem.screens;
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
+import hs.mediasystem.framework.SelectMediaView;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
 
 import java.util.List;
 
-import javafx.beans.binding.StringBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -27,14 +27,14 @@ import javafx.util.Callback;
 import javax.inject.Inject;
 
 public class SelectMediaPresentation {
-  private final SelectMediaPane<MediaItem> view;
+  private final SelectMediaView view;
   private final Navigator navigator;
 
   private MediaItem currentItem;
   private final StandardLayout layout = new StandardLayout();
 
   @Inject
-  public SelectMediaPresentation(final ProgramController controller, final SelectMediaPane<MediaItem> view, final MediaItemEnrichmentEventHandler enrichmentHandler) {
+  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final MediaItemEnrichmentEventHandler enrichmentHandler) {
     this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
 
@@ -116,8 +116,8 @@ public class SelectMediaPresentation {
     });
   }
 
-  public SelectMediaPane<MediaItem> getView() {
-    return view;
+  public Node getView() {
+    return (Node)view;
   }
 
   private void setTreeRoot(final MediaItem root) {
@@ -176,36 +176,7 @@ public class SelectMediaPresentation {
 
   private void bind(final MediaItem mediaItem) {
     if(mediaItem != null) {
-      view.groupNameProperty().bind(mediaItem.groupNameProperty());
-      view.titleProperty().bind(mediaItem.titleProperty());
-      view.subtitleProperty().bind(mediaItem.subtitleProperty());
-      view.releaseTimeProperty().bind(MediaItemFormatter.releaseTimeBinding(mediaItem));
-      view.ratingProperty().bind(mediaItem.ratingProperty());
-      view.plotProperty().bind(mediaItem.plotProperty());
-      view.runtimeProperty().bind(mediaItem.runtimeProperty());
-      view.backgroundProperty().bind(mediaItem.backgroundProperty());  // TODO Expensive image loading being done on JavaFX thread
-      view.posterProperty().bind(mediaItem.posterProperty());
-
-      view.genresProperty().bind(new StringBinding() {
-        {
-          bind(mediaItem.genresProperty());
-        }
-
-        @Override
-        protected String computeValue() {
-          String genreText = "";
-
-          for(String genre : mediaItem.genresProperty().get()) {
-            if(!genreText.isEmpty()) {
-              genreText += " • ";
-            }
-
-            genreText += genre;
-          }
-
-          return genreText;
-        }
-      });
+      view.mediaItemProperty().set(mediaItem);
     }
   }
 

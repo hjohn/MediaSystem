@@ -6,11 +6,13 @@ import hs.mediasystem.db.MediaType;
 import hs.mediasystem.db.TmdbMovieEnricher;
 import hs.mediasystem.db.TvdbEpisodeEnricher;
 import hs.mediasystem.db.TvdbSerieEnricher;
+import hs.mediasystem.framework.SelectMediaView;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MoviesMainMenuExtension;
 import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.ProgramController;
+import hs.mediasystem.screens.SelectMediaPane;
 import hs.mediasystem.screens.SeriesMainMenuExtension;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
@@ -89,6 +91,8 @@ public class FrontEnd extends Application {
         MapBinder.newMapBinder(binder(), MediaType.class, ItemEnricher.class).addBinding(MediaType.SERIE).to(TvdbSerieEnricher.class);
         MapBinder.newMapBinder(binder(), MediaType.class, ItemEnricher.class).addBinding(MediaType.MOVIE).to(TmdbMovieEnricher.class);
         MapBinder.newMapBinder(binder(), MediaType.class, ItemEnricher.class).addBinding(MediaType.EPISODE).to(TvdbEpisodeEnricher.class);
+
+        bind(SelectMediaView.class).to(SelectMediaPane.class);
       }
 
       @Provides
