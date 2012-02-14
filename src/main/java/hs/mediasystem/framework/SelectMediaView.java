@@ -12,16 +12,14 @@ import javafx.scene.control.TreeView;
 import javafx.util.Callback;
 
 public interface SelectMediaView {
-  ObjectProperty<MediaItem> mediaItemProperty();
   ObjectProperty<EventHandler<ActionEvent>> onBack();
   ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemAlternateSelect();
   ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemSelected();
-  ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemFocused();
 
-  void setCellFactory(Callback<TreeView<MediaItem>, TreeCell<MediaItem>> cellFactory);
+  void setCellFactory(Callback<TreeView<MediaItem>, TreeCell<MediaItem>> cellFactory);  // TODO remove
 
-  TreeItem<MediaItem> getRoot();
-  void setRoot(TreeItem<MediaItem> root);
+  TreeItem<MediaItem> getRoot();           // TODO no TreeItem wrapper
+  void setRoot(TreeItem<MediaItem> root);  // TODO no TreeItem wrapper
 
   ObjectProperty<Node> activeFilterItemProperty();
   ObservableList<Node> filterItemsProperty();

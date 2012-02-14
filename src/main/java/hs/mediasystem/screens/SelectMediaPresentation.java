@@ -29,8 +29,6 @@ import javax.inject.Inject;
 public class SelectMediaPresentation {
   private final SelectMediaView view;
   private final Navigator navigator;
-
-  private MediaItem currentItem;
   private final StandardLayout layout = new StandardLayout();
 
   @Inject
@@ -42,17 +40,6 @@ public class SelectMediaPresentation {
       @Override
       public void handle(ActionEvent event) {
         navigator.back();
-        event.consume();
-      }
-    });
-
-    view.onItemFocused().set(new EventHandler<TreeItemEvent<MediaItem>>() {
-      @Override
-      public void handle(TreeItemEvent<MediaItem> event) {
-        if(event.getTreeItem() != null) {
-          currentItem = event.getTreeItem().getValue();
-          bind(event.getTreeItem().getValue());
-        }
         event.consume();
       }
     });
@@ -87,9 +74,9 @@ public class SelectMediaPresentation {
             public Boolean call() {
               enrichmentHandler.enrich(mediaItem, true);
 
-              ImageCache.expunge(currentItem.getBanner());
-              ImageCache.expunge(currentItem.getPoster());
-              ImageCache.expunge(currentItem.getBackground());
+              ImageCache.expunge(mediaItem.getBanner());
+              ImageCache.expunge(mediaItem.getPoster());
+              ImageCache.expunge(mediaItem.getBackground());
               return true;
             }
           })
@@ -171,12 +158,6 @@ public class SelectMediaPresentation {
 
     for(MediaItem item : group.getMediaItem().children()) {
       treeRoot.getChildren().add(new MediaTreeItem(item));
-    }
-  }
-
-  private void bind(final MediaItem mediaItem) {
-    if(mediaItem != null) {
-      view.mediaItemProperty().set(mediaItem);
     }
   }
 

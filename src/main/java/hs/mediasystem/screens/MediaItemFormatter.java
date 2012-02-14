@@ -4,8 +4,8 @@ import hs.mediasystem.framework.MediaItem;
 
 import java.text.DateFormat;
 
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
-import javafx.beans.property.ObjectProperty;
 
 public class MediaItemFormatter {
   private static final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
@@ -32,7 +32,7 @@ public class MediaItemFormatter {
     };
   }
 
-  public static synchronized StringBinding releaseTimeBinding(final ObjectProperty<MediaItem> item) {
+  public static synchronized StringBinding releaseTimeBinding(final ObjectBinding<MediaItem> item) {
     return new StringBinding() {
       {
         onInvalidating();

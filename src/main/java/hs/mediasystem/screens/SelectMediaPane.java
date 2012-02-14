@@ -60,13 +60,26 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
 
   private final TreeView<MediaItem> treeView = new TreeView<>();
 
-  private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
+  private final ObjectBinding<MediaItem> mediaItem = new ObjectBinding<MediaItem>() {
+    {
+      bind(treeView.getFocusModel().focusedItemProperty());
+    }
+
+    @Override
+    protected MediaItem computeValue() {
+      TreeItem<MediaItem> focusedItem = treeView.getFocusModel().getFocusedItem();
+
+      return focusedItem != null ? focusedItem.getValue() : null;
+    }
+  };
+
   private final StringBinding groupName = Bindings.selectString(mediaItem, "groupName");
   private final StringBinding title = Bindings.selectString(mediaItem, "title");
   private final StringBinding subtitle = Bindings.selectString(mediaItem, "subtitle");
   private final StringBinding releaseTime = MediaItemFormatter.releaseTimeBinding(mediaItem);
   private final StringBinding plot = Bindings.selectString(mediaItem, "plot");
   private final DoubleBinding rating = Bindings.selectDouble(mediaItem, "rating");
+  private final IntegerBinding runtime = Bindings.selectInteger(mediaItem, "runtime");
   private final StringBinding genres = new StringBinding() {
     {
       onInvalidating();
@@ -101,7 +114,6 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
       return genreText;
     }
   };
-  private final IntegerBinding runtime = Bindings.selectInteger(mediaItem, "runtime");
 
   private final ObjectBinding<ImageHandle> backgroundHandle = Bindings.select(mediaItem, "background");
   private final ObjectBinding<ImageHandle> posterHandle = Bindings.select(mediaItem, "poster");
@@ -197,13 +209,6 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
 
     treeView.setEditable(false);
     treeView.setShowRoot(false);
-
-    treeView.getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<MediaItem>>() {
-      @Override
-      public void changed(ObservableValue<? extends TreeItem<MediaItem>> observable, TreeItem<MediaItem> oldValue, final TreeItem<MediaItem> newValue) {
-        dispatchEvent(onItemFocused, new TreeItemEvent<>(newValue), null);  // TODO perhaps expose this in a similar fashion instead of as event?
-      }
-    });
 
     treeView.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
       @Override
@@ -463,24 +468,14 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
     treeView.setCellFactory(cellFactory);
   }
 
-  private final ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemFocused = new SimpleObjectProperty<>();
-  @Override
-  public ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemFocused() { return onItemFocused; }
-
   private final ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemSelected = new SimpleObjectProperty<>();
-  @Override
-  public ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemSelected() { return onItemSelected; }
+  @Override public ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemSelected() { return onItemSelected; }
 
   private final ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemAlternateSelect = new SimpleObjectProperty<>();
-  @Override
-  public ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemAlternateSelect() { return onItemAlternateSelect; }
+  @Override public ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemAlternateSelect() { return onItemAlternateSelect; }
 
   private final ObjectProperty<EventHandler<ActionEvent>> onBack = new SimpleObjectProperty<>();
-  @Override
-  public ObjectProperty<EventHandler<ActionEvent>> onBack() { return onBack; }
-
-  @Override
-  public ObjectProperty<MediaItem> mediaItemProperty() { return mediaItem; }
+  @Override public ObjectProperty<EventHandler<ActionEvent>> onBack() { return onBack; }
 
   private static boolean trySetImage(ImageHandle handle, ObjectProperty<Image> image) {
     if(handle != null) {
