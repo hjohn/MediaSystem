@@ -4,31 +4,40 @@ import javafx.application.Application;
 
 // Top 10 stuff:
 // TODO Decode images in background thread, not on JavaFX thread
-// TODO Playing new movie shortly shows wrong start time for a moment
-// TODO VLC settitle show should be off
-// TODO Add breadcrumb?
+// TODO Further refactorings involving StandardLayout
+// TODO Focus issues / Keyboard navigation
+// TODO [Select Media] Holding down key down in Select Media view causes 100% CPU bug
+// TODO [Select Media] TreeView with few items has weird blank area at bottom
+// TODO VLCPlayer check if playing with normal items and subitems goes correctly
+// TODO Remove MediaType dependency in MediaItem constructor
+// TODO Remove MediaType dependency in PlaybackOverlayPane constructor
 
-// TODO Actor / Director information in database
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance
-// TODO Indicate serie somehow when selecting episodes (it is now unclear which serie you are selecting)
 // TODO Alice in Wonderland, not a serie, donot group?
 // TODO Options Screen: Modal navigation should use own Navigator as well?
 // TODO Options Screen: Subtitle selection list must be left with backspace, or exit at top/bottom item
 // TODO Make plug-ins of various looks of Select Media
 // TODO Make plug-ins from MediaTrees
+// TODO Make plug-ins of subtitle provider
 // TODO Perhaps use GridPane on playback overlay instead of hard coded values for the poster size
 
 // TODO Some form of remote control support / Lirc support
-// TODO VLCPlayer: Make brightness controls work
 // TODO Options Screen: When changing Options, show this in OSD
-// TODO Style main page
 // TODO Options Screen: Separators for Dialog Screen
 
 // TODO Make subtitles more persistent by storing them with file?
-// TODO Auto-scroll plot/overview
-// TODO Possibly with Series/Season, information about episode count
-// TODO BUG: When there's an outstanding query for a provider (which is taking long), it is possible for a 2nd query to be triggered on the same item.  When both return finally, they are inserted one after the other.  The second one causes a duplicate key violation.
-// TODO Display alternative banner when there is no banner available
+
+// TODO [Playback] Main overlay only visible when asked for (info)
+// TODO [Playback] Mini-volume overlay
+
+// TODO [Select Media] Filtering possibilities (Action movies, Recent movies, etc)
+// TODO [Select Media] Remember last selection / scroll position
+// TODO [Select Media] Menu to change View layout
+
+// TODO Actor / Director information in database
+// TODO Show Actor information somewhere
+// TODO Settings screen
+// TODO Keep interface between Presentation / View lean -- Should have the means to support alternative layouts without changing Presentation logic
 
 // Unable to Fix:
 // - Subtitle list in Video Options should be updated more frequently, especially after downloading a sub (may require Player to notify of changes) --> No indication from VLC when a subtitle actually was fully loaded, so this is not possible
