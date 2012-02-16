@@ -75,29 +75,6 @@ public class MainScreen extends BorderPane {
       }
     });
 
-
-    extensions.add(new MainMenuExtension() {
-      @Override
-      public String getTitle() {
-        return "Youtube";
-      }
-
-      @Override
-      public Image getImage() {
-        return new Image("images/musicstore.png");
-      }
-
-      @Override
-      public Node select(ProgramController controller) {
-        return null;
-      }
-
-      @Override
-      public double order() {
-        return 0.9;
-      }
-    });
-
     for(final MainMenuExtension mainMenuExtension : extensions) {
       final Button b = new Button(mainMenuExtension.getTitle()) {{
         getStyleClass().add("option");
