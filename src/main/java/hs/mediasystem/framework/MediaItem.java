@@ -4,7 +4,6 @@ import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.db.MediaType;
 import hs.mediasystem.util.ImageHandle;
 
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -70,12 +69,8 @@ public class MediaItem {
     return localInfo.getType();
   }
 
-  public Path getPath() {
-    return localInfo.getPath();
-  }
-
   public String getUri() {
-    return localInfo.getPath().toString();
+    return localInfo.getUri();
   }
 
   public String getLanguage() {

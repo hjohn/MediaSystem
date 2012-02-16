@@ -1,9 +1,8 @@
 package hs.mediasystem.db;
 
-import java.nio.file.Path;
 
 public class LocalInfo {
-  private final Path path;
+  private final String uri;
   private final MediaType mediaType;
   private final String groupName;
   private final String title;
@@ -13,8 +12,8 @@ public class LocalInfo {
   private final Integer season;
   private final Integer episode;
 
-  public LocalInfo(Path path, MediaType mediaType, String groupName, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode) {
-    this.path = path;
+  public LocalInfo(String uri, MediaType mediaType, String groupName, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode) {
+    this.uri = uri;
     this.mediaType = mediaType;
     this.groupName = groupName;
     this.title = title;
@@ -37,8 +36,8 @@ public class LocalInfo {
     return mediaType.name() + "/" + (groupName != null ? groupName.toLowerCase() : "") + "/" + (title != null ? title.toLowerCase() : "") + "/" + (subtitle != null ? subtitle.toLowerCase() : "") + "/" + (season == null ? "" : season) + "/" + (episode == null ? "" : episode) + "/" + (releaseYear == null ? "" : releaseYear);
   }
 
-  public Path getPath() {
-    return path;
+  public String getUri() {
+    return uri;
   }
 
   public MediaType getType() {
@@ -75,6 +74,6 @@ public class LocalInfo {
 
   @Override
   public String toString() {
-    return "LocalInfo('" + title + "', type=" + mediaType.name() + ", season=" + season + ", ep=" + episode + ", path=" + path + ")";
+    return "LocalInfo('" + title + "', type=" + mediaType.name() + ", season=" + season + ", ep=" + episode + ", uri=" + uri + ")";
   }
 }

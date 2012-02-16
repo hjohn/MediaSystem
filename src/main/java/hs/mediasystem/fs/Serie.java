@@ -1,5 +1,6 @@
 package hs.mediasystem.fs;
 
+import java.nio.file.Paths;
 import java.util.List;
 
 import hs.mediasystem.db.LocalInfo;
@@ -22,7 +23,7 @@ public class Serie extends MediaItem {
   @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      children = new EpisodeScanner(getMediaTree(), new EpisodeDecoder(), MediaType.EPISODE).scan(getLocalInfo().getPath());
+      children = new EpisodeScanner(getMediaTree(), new EpisodeDecoder(), MediaType.EPISODE).scan(Paths.get(getLocalInfo().getUri()));
     }
 
     return children;

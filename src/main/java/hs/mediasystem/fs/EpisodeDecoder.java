@@ -28,6 +28,6 @@ public class EpisodeDecoder implements Decoder {
       episode = Integer.parseInt(split[1]);
     }
 
-    return new LocalInfo(path, mediaType, serieName, title, null, null, year, season, episode);
+    return new LocalInfo(path.toString(), mediaType, serieName, title, null, null, year, season, episode);
   }
 }
