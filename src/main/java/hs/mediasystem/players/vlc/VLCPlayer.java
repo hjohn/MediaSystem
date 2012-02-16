@@ -43,6 +43,8 @@ public class VLCPlayer implements Player {
     List<String> arguments = new ArrayList<>(Arrays.asList(args));
 
     arguments.add("--no-video-title-show");
+    arguments.add("--network-caching");
+    arguments.add("20000");
 
     MediaPlayerFactory factory = new MediaPlayerFactory(arguments);
 
@@ -139,7 +141,7 @@ public class VLCPlayer implements Player {
         else {
           ignoreFinish.decrementAndGet();
           System.out.println("VLCPlayer: Adding more media");
-//          mediaPlayer.playMedia(uri);
+          mediaPlayer.playMedia(subItems.get(index));
         }
       }
     });
