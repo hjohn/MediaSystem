@@ -1,7 +1,6 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
-import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.Decoder;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
@@ -19,10 +18,10 @@ public class EpisodeScanner implements Scanner<MediaItem> {
   private static final Pattern EXTENSION_PATTERN = Pattern.compile("(?i).+\\.(avi|flv|mkv|mov|mp4|mpg|mpeg)");
 
   private final Decoder decoder;
-  private final MediaType mediaType;
+  private final String mediaType;
   private final MediaTree mediaTree;
 
-  public EpisodeScanner(MediaTree mediaTree, Decoder decoder, MediaType mediaType) {
+  public EpisodeScanner(MediaTree mediaTree, Decoder decoder, String mediaType) {
     this.mediaTree = mediaTree;
     this.decoder = decoder;
     this.mediaType = mediaType;

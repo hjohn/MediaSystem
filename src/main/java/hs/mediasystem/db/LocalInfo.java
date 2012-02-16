@@ -1,9 +1,8 @@
 package hs.mediasystem.db;
 
-
 public class LocalInfo {
   private final String uri;
-  private final MediaType mediaType;
+  private final String mediaType;
   private final String groupName;
   private final String title;
   private final String subtitle;
@@ -12,7 +11,7 @@ public class LocalInfo {
   private final Integer season;
   private final Integer episode;
 
-  public LocalInfo(String uri, MediaType mediaType, String groupName, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode) {
+  public LocalInfo(String uri, String mediaType, String groupName, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode) {
     this.uri = uri;
     this.mediaType = mediaType;
     this.groupName = groupName;
@@ -24,23 +23,23 @@ public class LocalInfo {
     this.episode = episode;
   }
 
-  public LocalInfo(MediaType mediaType, String title, Integer releaseYear) {
+  public LocalInfo(String mediaType, String title, Integer releaseYear) {
     this(null, mediaType, null, title, null, null, releaseYear, null, null);
   }
 
-  public LocalInfo(MediaType mediaType, String title) {
+  public LocalInfo(String mediaType, String title) {
     this(null, mediaType, null, title, null, null, null, null, null);
   }
 
   public String getSurrogateName() {
-    return mediaType.name() + "/" + (groupName != null ? groupName.toLowerCase() : "") + "/" + (title != null ? title.toLowerCase() : "") + "/" + (subtitle != null ? subtitle.toLowerCase() : "") + "/" + (season == null ? "" : season) + "/" + (episode == null ? "" : episode) + "/" + (releaseYear == null ? "" : releaseYear);
+    return mediaType + "/" + (groupName != null ? groupName.toLowerCase() : "") + "/" + (title != null ? title.toLowerCase() : "") + "/" + (subtitle != null ? subtitle.toLowerCase() : "") + "/" + (season == null ? "" : season) + "/" + (episode == null ? "" : episode) + "/" + (releaseYear == null ? "" : releaseYear);
   }
 
   public String getUri() {
     return uri;
   }
 
-  public MediaType getType() {
+  public String getType() {
     return mediaType;
   }
 
@@ -74,6 +73,6 @@ public class LocalInfo {
 
   @Override
   public String toString() {
-    return "LocalInfo('" + title + "', type=" + mediaType.name() + ", season=" + season + ", ep=" + episode + ", uri=" + uri + ")";
+    return "LocalInfo('" + title + "', type=" + mediaType + ", season=" + season + ", ep=" + episode + ", uri=" + uri + ")";
   }
 }

@@ -21,7 +21,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
   @Override
   public String identifyItem(final LocalInfo localInfo) throws IdentifyException {
     synchronized(TheTVDB.class) {
-      String identifier = itemIdentifier.identifyItem(new LocalInfo(MediaType.SERIE, localInfo.getGroupName()));
+      String identifier = itemIdentifier.identifyItem(new LocalInfo("SERIE", localInfo.getGroupName()));
 
       return identifier + "," + localInfo.getSeason() + "," + (localInfo.getEpisode() == null ? 0 : localInfo.getEpisode());
     }

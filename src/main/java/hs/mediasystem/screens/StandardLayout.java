@@ -1,6 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
@@ -19,12 +18,12 @@ import java.util.List;
 public class StandardLayout {
 
   public CellProvider<MediaItem> getCellProvider(MediaItem parent) {
-    MediaType mediaType = parent.getMediaType();
+    String mediaType = parent.getMediaType();
 
-    if(mediaType == MediaType.MOVIE_ROOT) {
+    if(mediaType.equals("MOVIE_ROOT")) {
       return new MovieCellProvider();
     }
-    else if(mediaType == MediaType.SERIE_ROOT) {
+    else if(mediaType.equals("SERIE_ROOT")) {
       return new BannerCellProvider();
     }
 
@@ -35,7 +34,7 @@ public class StandardLayout {
     List<? extends MediaItem> children = parent.children();
     List<MediaItem> output = new ArrayList<>();
 
-    if(parent.getMediaType() == MediaType.MOVIE_ROOT) {
+    if(parent.getMediaType().equals("MOVIE_ROOT")) {
       Collection<List<MediaItem>> groupedItems = Groups.group(children, new TitleGrouper());
 
       for(List<MediaItem> group : groupedItems) {
@@ -50,7 +49,7 @@ public class StandardLayout {
         }
       }
     }
-    else if(parent.getMediaType() == MediaType.SERIE) {
+    else if(parent.getMediaType().equals("SERIE")) {
       Collection<List<MediaItem>> groupedItems = Groups.group(children, new SeasonGrouper());
 
       for(List<MediaItem> group : groupedItems) {
@@ -83,7 +82,7 @@ public class StandardLayout {
   public List<FilterItem> getFilterItems(MediaItem root) {
     List<FilterItem> filterItems = new ArrayList<>();
 
-    if(root.getMediaType() == MediaType.SERIE) {
+    if(root.getMediaType().equals("SERIE")) {
       for(MediaItem item : getChildren(root)) {
         filterItems.add(new FilterItem(item, "Season " + item.getSeason(), "" + item.getSeason()));
       }
@@ -97,8 +96,8 @@ public class StandardLayout {
   }
 
   public boolean isRoot(MediaItem mediaItem) {
-    MediaType mediaType = mediaItem.getMediaType();
+    String mediaType = mediaItem.getMediaType();
 
-    return mediaType == MediaType.MOVIE_ROOT || mediaType == MediaType.SERIE_ROOT || mediaType == MediaType.SERIE;
+    return mediaType.equals("MOVIE_ROOT") || mediaType.equals("SERIE_ROOT") || mediaType.equals("SERIE");
   }
 }

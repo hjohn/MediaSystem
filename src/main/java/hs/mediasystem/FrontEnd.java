@@ -1,11 +1,6 @@
 package hs.mediasystem;
 
 import hs.mediasystem.db.ConnectionPool;
-import hs.mediasystem.db.ItemEnricher;
-import hs.mediasystem.db.MediaType;
-import hs.mediasystem.db.TmdbMovieEnricher;
-import hs.mediasystem.db.TvdbEpisodeEnricher;
-import hs.mediasystem.db.TvdbSerieEnricher;
 import hs.mediasystem.framework.SelectMediaView;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -36,7 +31,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Provides;
-import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 
 public class FrontEnd extends Application {
@@ -89,10 +83,6 @@ public class FrontEnd extends Application {
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(MoviesMainMenuExtension.class);
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(SeriesMainMenuExtension.class);
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(YouTubeMainMenuExtension.class);
-
-        MapBinder.newMapBinder(binder(), MediaType.class, ItemEnricher.class).addBinding(MediaType.SERIE).to(TvdbSerieEnricher.class);
-        MapBinder.newMapBinder(binder(), MediaType.class, ItemEnricher.class).addBinding(MediaType.MOVIE).to(TmdbMovieEnricher.class);
-        MapBinder.newMapBinder(binder(), MediaType.class, ItemEnricher.class).addBinding(MediaType.EPISODE).to(TvdbEpisodeEnricher.class);
 
         bind(SelectMediaView.class).to(SelectMediaPane.class);
       }

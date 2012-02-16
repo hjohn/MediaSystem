@@ -1,7 +1,6 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
-import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 
@@ -13,7 +12,7 @@ public class Season extends MediaItem {
   private final List<MediaItem> children = new ArrayList<>();
 
   public Season(MediaTree mediaTree, String serieName, int season) {
-    super(mediaTree, new LocalInfo(null, MediaType.SEASON, null, serieName, null, null, null, season, null));
+    super(mediaTree, new LocalInfo(null, "SEASON", null, serieName, null, null, null, season, null));
   }
 
   public void add(MediaItem child) {

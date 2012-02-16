@@ -1,7 +1,6 @@
 package hs.mediasystem.framework;
 
 import hs.mediasystem.db.LocalInfo;
-import hs.mediasystem.db.MediaType;
 import hs.mediasystem.util.ImageHandle;
 
 import java.util.Collections;
@@ -40,7 +39,7 @@ public class MediaItem {
 
       @Override
       protected String computeValue() {
-        if(localInfo.getType() == MediaType.EPISODE) {
+        if(localInfo.getType().equals("EPISODE")) {
           if(getOfficialTitle() != null && !getOfficialTitle().isEmpty()) {
             return getOfficialTitle();
           }
@@ -48,7 +47,7 @@ public class MediaItem {
           return localInfo.getGroupName() + " " + localInfo.getSeason() + "x" + localInfo.getEpisode();
         }
 
-        if(localInfo.getType() == MediaType.SEASON) {
+        if(localInfo.getType().equals("SEASON")) {
           return "Season " + localInfo.getSeason();
         }
 
@@ -65,7 +64,7 @@ public class MediaItem {
     return localInfo;
   }
 
-  public MediaType getMediaType() {
+  public String getMediaType() {
     return localInfo.getType();
   }
 

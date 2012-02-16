@@ -1,5 +1,8 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.db.TvdbEpisodeEnricher;
+import hs.mediasystem.db.TvdbSerieEnricher;
+import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.fs.SeriesMediaTree;
 
 import java.nio.file.Paths;
@@ -18,6 +21,11 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   public SeriesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, MediaItemEnrichmentEventHandler enrichmentHandler) {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
     this.enrichmentHandler = enrichmentHandler;
+
+    TvdbSerieEnricher serieEnricher = new TvdbSerieEnricher();
+
+    TypeBasedItemEnricher.registerEnricher("SERIE", serieEnricher);
+    TypeBasedItemEnricher.registerEnricher("EPISODE", new TvdbEpisodeEnricher(serieEnricher));
   }
 
   @Override

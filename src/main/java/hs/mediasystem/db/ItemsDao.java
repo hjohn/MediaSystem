@@ -58,7 +58,7 @@ public class ItemsDao {
     try {
       try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("SELECT id, imdbid, title, subtitle, releasedate, rating, plot, runtime, version, season, episode, language, tagline, genres FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
-        statement.setString(1, identifier.getType().name());
+        statement.setString(1, identifier.getType());
         statement.setString(2, identifier.getProvider());
         statement.setString(3, identifier.getProviderId());
 
@@ -166,7 +166,7 @@ public class ItemsDao {
         System.out.println("[FINE] ItemsDao.getQuery() - Looking for Identifier with name: " + surrogateName);
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
-            return new Identifier(MediaType.valueOf(rs.getString("type")), rs.getString("provider"), rs.getString("providerid"));
+            return new Identifier(rs.getString("type"), rs.getString("provider"), rs.getString("providerid"));
           }
         }
       }
@@ -189,7 +189,7 @@ public class ItemsDao {
       try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("INSERT INTO identifiers (surrogatename, type, provider, providerid) VALUES (?, ?, ?, ?)")) {
         statement.setString(1, surrogateName);
-        statement.setString(2, identifier.getType().name());
+        statement.setString(2, identifier.getType());
         statement.setString(3, identifier.getProvider());
         statement.setString(4, identifier.getProviderId());
         statement.execute();
@@ -249,7 +249,7 @@ public class ItemsDao {
     columns.put("banner", item.getBanner().get());
     columns.put("poster", item.getPoster().get());
 
-    columns.put("type", item.getIdentifier().getType().name());
+    columns.put("type", item.getIdentifier().getType());
     columns.put("provider", item.getIdentifier().getProvider());
     columns.put("providerid", item.getIdentifier().getProviderId());
 

@@ -1,7 +1,6 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
-import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.MediaItem;
 
 import java.io.IOException;
@@ -21,7 +20,7 @@ public class YouTubeMediaTree extends AbstractMediaTree {
 
   @Override
   public MediaItem getRoot() {
-    return new MediaItem(this, new LocalInfo(MediaType.MOVIE_ROOT, "YouTube")) {
+    return new MediaItem(this, new LocalInfo("YOUTUBE_ROOT", "YouTube")) {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {
@@ -36,7 +35,7 @@ public class YouTubeMediaTree extends AbstractMediaTree {
               YouTubeMediaGroup mediaGroup = videoEntry.getMediaGroup();
 
               for(YouTubeMediaContent mediaContent : mediaGroup.getYouTubeContents()) {
-                children.add(new MediaItem(YouTubeMediaTree.this, new LocalInfo(mediaContent.getUrl().toString(), MediaType.MOVIE, "", videoEntry.getTitle().getPlainText(), null, null, null, null, null)));
+                children.add(new MediaItem(YouTubeMediaTree.this, new LocalInfo(mediaContent.getUrl().toString(), "YOUTUBE_ITEM", "", videoEntry.getTitle().getPlainText(), null, null, null, null, null)));
                 break;
               }
             }

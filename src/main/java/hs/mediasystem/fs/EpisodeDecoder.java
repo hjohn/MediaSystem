@@ -1,7 +1,6 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
-import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.Decoder;
 import hs.mediasystem.fs.NameDecoder.DecodeResult;
 
@@ -10,7 +9,7 @@ import java.nio.file.Path;
 public class EpisodeDecoder implements Decoder {
 
   @Override
-  public LocalInfo decode(Path path, MediaType mediaType) {
+  public LocalInfo decode(Path path, String mediaType) {
     DecodeResult result = NameDecoder.decode(path.getFileName().toString());
 
     String serieName = result.getTitle();

@@ -1,5 +1,7 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.db.TmdbMovieEnricher;
+import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.fs.MoviesMediaTree;
 
 import java.nio.file.Paths;
@@ -18,6 +20,8 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
   public MoviesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, MediaItemEnrichmentEventHandler enrichmentHandler) {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
     this.enrichmentHandler = enrichmentHandler;
+
+    TypeBasedItemEnricher.registerEnricher("MOVIE", new TmdbMovieEnricher());
   }
 
   @Override

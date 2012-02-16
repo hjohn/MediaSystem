@@ -1,7 +1,6 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
-import hs.mediasystem.db.MediaType;
 import hs.mediasystem.framework.MediaItem;
 
 import java.nio.file.Path;
@@ -18,7 +17,7 @@ public class SeriesMediaTree extends AbstractMediaTree {
 
   @Override
   public MediaItem getRoot() {
-    return new MediaItem(this, new LocalInfo(MediaType.SERIE_ROOT, "Series")) {
+    return new MediaItem(this, new LocalInfo("SERIE_ROOT", "Series")) {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {
