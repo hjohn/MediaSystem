@@ -3,50 +3,58 @@ package hs.mediasystem.fs;
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gdata.client.youtube.YouTubeService;
-import com.google.gdata.data.youtube.VideoEntry;
-import com.google.gdata.data.youtube.VideoFeed;
-import com.google.gdata.data.youtube.YouTubeMediaContent;
-import com.google.gdata.data.youtube.YouTubeMediaGroup;
-import com.google.gdata.util.ServiceException;
-
 public class YouTubeMediaTree extends AbstractMediaTree {
+  private static final List<Feed> FEEDS = new ArrayList<>();
+
+  static {
+    FEEDS.add(new Feed("Most Viewed", "https://gdata.youtube.com/feeds/api/standardfeeds/most_viewed"));
+    FEEDS.add(new Feed("Top Rated", "https://gdata.youtube.com/feeds/api/standardfeeds/top_rated"));
+    FEEDS.add(new Feed("Recently Featured", "https://gdata.youtube.com/feeds/api/standardfeeds/recently_featured"));
+    FEEDS.add(new Feed("Most Discussed", "https://gdata.youtube.com/feeds/api/standardfeeds/most_discussed"));
+    FEEDS.add(new Feed("Top Favourites", "https://gdata.youtube.com/feeds/api/standardfeeds/top_favorites"));
+    FEEDS.add(new Feed("Most Responded", "https://gdata.youtube.com/feeds/api/standardfeeds/most_responded"));
+    FEEDS.add(new Feed("Most Recent", "https://gdata.youtube.com/feeds/api/standardfeeds/most_recent"));
+    FEEDS.add(new Feed("Most Recent Comedy", "https://gdata.youtube.com/feeds/api/standardfeeds/most_recent_Comedy"));
+  }
+
   private List<MediaItem> children;
 
   @Override
   public MediaItem getRoot() {
-    return new MediaItem(this, new LocalInfo("YOUTUBE_ROOT", "YouTube")) {
+    return new MediaItem(this, new LocalInfo<>("YOUTUBE_ROOT", "YouTube")) {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {
-          YouTubeService service = new YouTubeService("MediaSystem");
-          String feedUrl = "https://gdata.youtube.com/feeds/api/standardfeeds/top_rated";
           children = new ArrayList<>();
 
-          try {
-            VideoFeed videoFeed = service.getFeed(new URL(feedUrl), VideoFeed.class);
-
-            for(VideoEntry videoEntry : videoFeed.getEntries() ) {
-              YouTubeMediaGroup mediaGroup = videoEntry.getMediaGroup();
-
-              for(YouTubeMediaContent mediaContent : mediaGroup.getYouTubeContents()) {
-                children.add(new MediaItem(YouTubeMediaTree.this, new LocalInfo(mediaContent.getUrl().toString(), "YOUTUBE_ITEM", "", videoEntry.getTitle().getPlainText(), null, null, null, null, null)));
-                break;
-              }
-            }
-          }
-          catch(ServiceException | IOException e) {
-            e.printStackTrace();
+          for(Feed feed : FEEDS) {
+            children.add(new YouTubeFeed(YouTubeMediaTree.this, new LocalInfo<>("YOUTUBE_FEED", feed.getName()), feed));
           }
         }
 
         return children;
       }
     };
+  }
+
+  public static class Feed {
+    private final String name;
+    private final String url;
+
+    public Feed(String name, String url) {
+      this.name = name;
+      this.url = url;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getUrl() {
+      return url;
+    }
   }
 }

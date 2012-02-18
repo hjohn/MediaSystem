@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import com.moviejukebox.thetvdb.TheTVDB;
 import com.moviejukebox.thetvdb.model.Episode;
 
-public class TvdbEpisodeEnricher implements ItemEnricher {
+public class TvdbEpisodeEnricher implements ItemEnricher<Object> {
   private final TvdbSerieEnricher itemIdentifier;
 
   @Inject
@@ -19,16 +19,16 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
   }
 
   @Override
-  public String identifyItem(final LocalInfo localInfo) throws IdentifyException {
+  public String identifyItem(final LocalInfo<Object> localInfo) throws IdentifyException {
     synchronized(TheTVDB.class) {
-      String identifier = itemIdentifier.identifyItem(new LocalInfo("SERIE", localInfo.getGroupName()));
+      String identifier = itemIdentifier.identifyItem(new LocalInfo<>("SERIE", localInfo.getGroupName()));
 
       return identifier + "," + localInfo.getSeason() + "," + (localInfo.getEpisode() == null ? 0 : localInfo.getEpisode());
     }
   }
 
   @Override
-  public Item loadItem(String identifier) throws ItemNotFoundException {
+  public Item loadItem(String identifier, LocalInfo<Object> localInfo) throws ItemNotFoundException {
     synchronized(TheTVDB.class) {
       TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 

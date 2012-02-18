@@ -10,7 +10,7 @@ import java.util.List;
 public class Serie extends MediaItem {
   private List<? extends MediaItem> children;
 
-  public Serie(MediaTree mediaTree, LocalInfo localInfo) {
+  public Serie(MediaTree mediaTree, LocalInfo<?> localInfo) {
     super(mediaTree, localInfo);
   }
 

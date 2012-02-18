@@ -20,14 +20,14 @@ import javafx.beans.property.StringProperty;
 public class MediaItem {
   public enum State {STANDARD, QUEUED, ENRICHED}
 
-  private final LocalInfo localInfo;
+  private final LocalInfo<?> localInfo;
   private final MediaTree mediaTree;
 
   private State state = State.STANDARD;
   private String language;
   private String tagline;
 
-  public MediaItem(MediaTree mediaTree, final LocalInfo localInfo) {
+  public MediaItem(MediaTree mediaTree, final LocalInfo<?> localInfo) {
     this.mediaTree = mediaTree;
     this.localInfo = localInfo;
 
@@ -60,7 +60,7 @@ public class MediaItem {
     episode.set(localInfo.getEpisode());
   }
 
-  public LocalInfo getLocalInfo() {
+  public LocalInfo<?> getLocalInfo() {
     return localInfo;
   }
 

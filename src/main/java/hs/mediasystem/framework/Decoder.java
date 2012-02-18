@@ -5,5 +5,5 @@ import hs.mediasystem.db.LocalInfo;
 import java.nio.file.Path;
 
 public interface Decoder {
-  LocalInfo decode(Path path, String mediaType);
+  LocalInfo<?> decode(Path path, String mediaType);
 }

@@ -27,12 +27,18 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
   public void enrich(final MediaItem mediaItem, final boolean bypassCache) {
     executorService.execute(new Task<Void>() {
       @Override
+      public String toString() {
+        return "Initial Debug Title: " + mediaItem.getTitle() + " : " + mediaItem.getEpisode();  // TODO remove once task bug is discovered
+      }
+
+      @Override
       public Void call() {
         updateTitle("Fetching metadata");
         updateProgress(0, 2);
 
         try {
-          LocalInfo localInfo = mediaItem.getLocalInfo();
+          @SuppressWarnings("unchecked")
+          LocalInfo<Object> localInfo = (LocalInfo<Object>)mediaItem.getLocalInfo();
           String message = localInfo.getTitle();
 
           if(message == null) {
@@ -50,9 +56,17 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
 
           Identifier identifier = cachedItemEnricher.identifyItem(localInfo, bypassCache);
 
+          try {
+            Thread.sleep(10000);
+          }
+          catch(InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+
           updateProgress(1, 2);
 
-          final Item item = cachedItemEnricher.loadItem(identifier, bypassCache);
+          final Item item = cachedItemEnricher.loadItem(identifier, localInfo, bypassCache);
 
           updateProgress(2, 2);
 

@@ -9,7 +9,7 @@ import java.nio.file.Path;
 public class EpisodeDecoder implements Decoder {
 
   @Override
-  public LocalInfo decode(Path path, String mediaType) {
+  public LocalInfo<?> decode(Path path, String mediaType) {
     DecodeResult result = NameDecoder.decode(path.getFileName().toString());
 
     String serieName = result.getTitle();
@@ -27,6 +27,6 @@ public class EpisodeDecoder implements Decoder {
       episode = Integer.parseInt(split[1]);
     }
 
-    return new LocalInfo(path.toString(), mediaType, serieName, title, null, null, year, season, episode);
+    return new LocalInfo<>(path.toString(), mediaType, serieName, title, null, null, year, season, episode, null);
   }
 }

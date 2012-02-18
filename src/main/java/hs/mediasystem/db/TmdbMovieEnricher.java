@@ -20,7 +20,7 @@ import net.sf.jtmdb.MoviePoster;
 
 import org.json.JSONException;
 
-public class TmdbMovieEnricher implements ItemEnricher {
+public class TmdbMovieEnricher implements ItemEnricher<Object> {
 
   @Override
   public String getProviderCode() {
@@ -28,7 +28,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
   }
 
   @Override
-  public String identifyItem(LocalInfo localInfo) throws IdentifyException {
+  public String identifyItem(LocalInfo<Object> localInfo) throws IdentifyException {
     synchronized(Movie.class) {
       String title = localInfo.getTitle();
       String subtitle = localInfo.getSubtitle();
@@ -111,7 +111,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
   }
 
   @Override
-  public Item loadItem(String identifier) throws ItemNotFoundException {
+  public Item loadItem(String identifier, LocalInfo<Object> localInfo) throws ItemNotFoundException {
     synchronized(Movie.class) {
       String bestMatchingImdbNumber = identifier;
 

@@ -35,7 +35,8 @@ public class EpisodeScanner implements Scanner<MediaItem> {
       try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
         for(Path path : dirStream) {
           if(path.getFileName().toString().matches(EXTENSION_PATTERN.pattern())) {
-            LocalInfo localInfo = decoder.decode(path, mediaType);
+            @SuppressWarnings("unchecked")
+            LocalInfo<Object> localInfo = (LocalInfo<Object>)decoder.decode(path, mediaType);
 
             if(localInfo != null) {
               episodes.add(new MediaItem(mediaTree, localInfo));

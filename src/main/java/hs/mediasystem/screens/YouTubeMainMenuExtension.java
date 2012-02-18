@@ -1,5 +1,7 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.db.YouTubeEnricher;
 import hs.mediasystem.fs.YouTubeMediaTree;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
@@ -15,6 +17,8 @@ public class YouTubeMainMenuExtension implements MainMenuExtension {
   public YouTubeMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, MediaItemEnrichmentEventHandler enrichmentHandler) {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
     this.enrichmentHandler = enrichmentHandler;
+
+    TypeBasedItemEnricher.registerEnricher("YOUTUBE", new YouTubeEnricher());
   }
 
   @Override

@@ -14,7 +14,7 @@ public class CachedItemEnricher {
     this.providerToCache = providerToCache;
   }
 
-  public Identifier identifyItem(LocalInfo localInfo, boolean bypassCache) throws IdentifyException {
+  public Identifier identifyItem(LocalInfo<Object> localInfo, boolean bypassCache) throws IdentifyException {
     System.out.println("[FINE] CachedItemEnricher.identifyItem() - with surrogatename: " + localInfo.getSurrogateName());
 
     if(!bypassCache) {
@@ -36,7 +36,7 @@ public class CachedItemEnricher {
     return identifier;
   }
 
-  public Item loadItem(Identifier identifier, boolean bypassCache) {
+  public Item loadItem(Identifier identifier, LocalInfo<Object> localInfo, boolean bypassCache) {
     try {
       try {
         System.out.println("[FINE] CachedItemEnricher.enrichItem() - Loading from Cache: " + identifier);
@@ -46,7 +46,7 @@ public class CachedItemEnricher {
           System.out.println("[FINE] CachedItemEnricher.enrichItem() - Old version or no cache, updating from cached provider: " + item);
 
           Item oldVersion = item;
-          item = providerToCache.loadItem(identifier);
+          item = providerToCache.loadItem(identifier, localInfo);
           item.setId(oldVersion.getId());
 
           itemsDao.updateItem(item);
@@ -60,7 +60,7 @@ public class CachedItemEnricher {
         System.out.println("[FINE] CachedItemEnricher.enrichItem() - Cache miss, falling back to cached provider: " + identifier);
       }
 
-      Item item = providerToCache.loadItem(identifier);
+      Item item = providerToCache.loadItem(identifier, localInfo);
 
       itemsDao.storeItem(item);
 
