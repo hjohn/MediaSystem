@@ -1,5 +1,9 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.util.Levenshtein;
+
+import java.util.List;
+
 import javax.inject.Inject;
 
 import com.moviejukebox.thetvdb.TheTVDB;
@@ -20,46 +24,79 @@ public class TvdbEpisodeEnricher implements ItemEnricher<Object> {
 
   @Override
   public String identifyItem(final LocalInfo<Object> localInfo) throws IdentifyException {
-    synchronized(TheTVDB.class) {
-      String identifier = itemIdentifier.identifyItem(new LocalInfo<>("SERIE", localInfo.getGroupName()));
+    String serieId = itemIdentifier.identifyItem(new LocalInfo<>("SERIE", localInfo.getGroupName()));
 
-      return identifier + "," + localInfo.getSeason() + "," + (localInfo.getEpisode() == null ? 0 : localInfo.getEpisode());
-    }
+    // TODO may need some TVDB caching here, as we're doing this query twice for each episode... and TVDB returns whole seasons I think
+    Episode episode = findEpisode(serieId, localInfo);
+
+    return serieId + "," + episode.getSeasonNumber() + "," + episode.getEpisodeNumber();  // TODO better would be episode id -- this is done here for specials, with season 0 and a nonsense episode number
   }
 
   @Override
   public Item loadItem(String identifier, LocalInfo<Object> localInfo) throws ItemNotFoundException {
+    String[] split = identifier.split(",");
+
+    Episode episode = findEpisode(split[0], localInfo);
+
+    byte[] poster = Downloader.tryReadURL("http://thetvdb.com/banners/episodes/" + split[0] + "/" + episode.getId() + ".jpg");
+
+    Item item = new Item();
+
+    item.setTitle(episode.getEpisodeName());
+    item.setSeason(episode.getSeasonNumber());
+    item.setEpisode(episode.getEpisodeNumber());
+    if(episode.getRating() != null && !episode.getRating().isEmpty()) {
+      item.setRating(Float.parseFloat(episode.getRating()));
+    }
+    item.setPlot(episode.getOverview());
+
+    item.setBackground(Item.NULL);
+    item.setBanner(Item.NULL);
+    item.setPoster(new MemorySource<>(poster));
+
+    System.out.println(">>> Do something with this: first Aired = " + episode.getFirstAired());  // "2002-02-26"
+    item.setLanguage(episode.getLanguage());
+
+    return item;
+  }
+
+  private static Episode findEpisode(String serieId, LocalInfo<Object> localInfo) {
     synchronized(TheTVDB.class) {
       TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 
-      String[] split = identifier.split(",");
-      int seasonNumber = Integer.parseInt(split[1]);
-      int episodeNumber = Integer.parseInt(split[2]);
+      Episode episode;
 
-      final Episode episode = tvDB.getEpisode(split[0], seasonNumber, episodeNumber, "en");
-
-      System.out.println("[FINE] TvdbEpisodeProvider: serieId = " + split[0] + ": Result: " + episode);
-
-      byte[] poster = Downloader.tryReadURL("http://thetvdb.com/banners/episodes/" + split[0] + "/" + episode.getId() + ".jpg");
-
-      Item item = new Item();
-
-      item.setTitle(episode.getEpisodeName());
-      item.setSeason(seasonNumber);
-      item.setEpisode(episodeNumber);
-      if(episode.getRating() != null) {
-        item.setRating(Float.parseFloat(episode.getRating()));
+      if(localInfo.getSeason() == null) {
+        episode = selectBestMatchByTitle(tvDB, serieId, localInfo.getTitle());
       }
-      item.setPlot(episode.getOverview());
+      else {
+        episode = tvDB.getEpisode(serieId, localInfo.getSeason(), localInfo.getEpisode(), "en");
+      }
 
-      item.setBackground(Item.NULL);
-      item.setBanner(Item.NULL);
-      item.setPoster(new MemorySource<>(poster));
+      System.out.println("[FINE] TvdbEpisodeProvider: serieId = " + serieId + ": Result: " + episode);
 
-      System.out.println(">>> Do something with this: first Aired = " + episode.getFirstAired());  // "2002-02-26"
-      item.setLanguage(episode.getLanguage());
-
-      return item;
+      return episode;
     }
+  }
+
+  private static Episode selectBestMatchByTitle(TheTVDB tvDB, String key, String matchString) {
+    List<Episode> episodes = tvDB.getSeasonEpisodes(key, 0, "en");
+    Episode bestMatch = null;
+    double bestScore = -1;
+
+    System.out.println("[FINE] TvdbEpisodeEnricher.selectBestMatch() - Looking to match: " + matchString);
+
+    for(Episode episode : episodes) {
+      double matchScore = Levenshtein.compare(episode.getEpisodeName(), matchString);
+
+      if(matchScore > bestScore) {
+        bestMatch = episode;
+        bestScore = matchScore;
+      }
+
+      System.out.println("[FINE] TvdbEpisodeEnricher.selectBestMatch() - " + String.format("Match: %5.1f (%4.2f) -- %s", matchScore * 100, matchScore, episode.getEpisodeName()));
+    }
+
+    return bestMatch;
   }
 }

@@ -55,7 +55,14 @@ public class StandardLayout {
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
           MediaItem episodeOne = group.get(0);
-          Season s = new Season(parent.getMediaTree(), parent.getTitle(), episodeOne.getSeason());
+          Season s;
+
+          if(episodeOne.getSeason() == null) {
+            s = new Season(parent.getMediaTree(), parent.getTitle(), 0);
+          }
+          else {
+            s = new Season(parent.getMediaTree(), parent.getTitle(), episodeOne.getSeason());
+          }
 
           Collections.sort(group, EpisodeComparator.INSTANCE);
 
@@ -84,7 +91,12 @@ public class StandardLayout {
 
     if(root.getMediaType().equals("SERIE")) {
       for(MediaItem item : getChildren(root)) {
-        filterItems.add(new FilterItem(item, "Season " + item.getSeason(), "" + item.getSeason()));
+        if(item.getSeason() == 0) {
+          filterItems.add(new FilterItem(item, "Specials", "Sp."));
+        }
+        else {
+          filterItems.add(new FilterItem(item, "Season " + item.getSeason(), "" + item.getSeason()));
+        }
       }
     }
 
