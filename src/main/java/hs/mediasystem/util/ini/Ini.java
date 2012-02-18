@@ -74,7 +74,7 @@ public class Ini implements Iterable<Section> {
       try {
         try(PrintWriter writer = new PrintWriter(new FileWriter(iniFile))) {
           boolean first = true;
-  
+
           for(Section section : sections.values()) {
             if(!first) {
               writer.println();
@@ -102,30 +102,35 @@ public class Ini implements Iterable<Section> {
     try(BufferedReader reader = new BufferedReader(new FileReader(iniFile))) {
       Map<String, Section> sections = new LinkedHashMap<>();
       Section currentSection = null;
-  
+
       for(;;) {
         String line = reader.readLine();
-  
+
         if(line == null) {
           break;
         }
-  
+
         line = line.trim();
+
+        if(line.startsWith("#")) {
+          continue;
+        }
+
         Matcher matcher = SECTION_PATTERN.matcher(line);
-  
+
         if(matcher.matches()) {
           String sectionName = matcher.group(1);
           currentSection = sections.get(sectionName);
-  
+
           Section parentSection = null;
-  
+
           if(matcher.group(3) != null) {
             parentSection = sections.get(matcher.group(3));
             if(parentSection == null) {
               throw new RuntimeException("Parse Error, Parent '" + matcher.group(3) + "' not found for section '" + sectionName + "'");
             }
           }
-  
+
           if(currentSection == null) {
             currentSection = new Section(sectionName, parentSection);
             sections.put(currentSection.getName(), currentSection);
@@ -133,13 +138,13 @@ public class Ini implements Iterable<Section> {
         }
         else if(currentSection != null) {
           int eq = line.indexOf('=');
-  
+
           if(eq > 1) {
             currentSection.put(line.substring(0, eq).trim(), line.substring(eq + 1).trim());
           }
         }
       }
-      
+
       return sections;
     }
   }
