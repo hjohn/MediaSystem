@@ -56,14 +56,6 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
 
           Identifier identifier = cachedItemEnricher.identifyItem(localInfo, bypassCache);
 
-          try {
-            Thread.sleep(10000);
-          }
-          catch(InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-
           updateProgress(1, 2);
 
           final Item item = cachedItemEnricher.loadItem(identifier, localInfo, bypassCache);
