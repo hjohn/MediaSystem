@@ -6,6 +6,8 @@ import java.text.DateFormat;
 
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 public class MediaItemFormatter {
   private static final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
@@ -35,16 +37,17 @@ public class MediaItemFormatter {
   public static synchronized StringBinding releaseTimeBinding(final ObjectBinding<MediaItem> item) {
     return new StringBinding() {
       {
-        onInvalidating();
-      }
-
-      @Override
-      protected void onInvalidating() {
-        unbind(getDependencies());
-        bind(item);
-        if(item.get() != null) {
-          bind(item.get().releaseDateProperty(), item.get().releaseYearProperty());
-        }
+        item.addListener(new ChangeListener<MediaItem>() {
+          @Override
+          public void changed(ObservableValue<? extends MediaItem> observable, MediaItem oldValue, MediaItem value) {
+            if(oldValue != null) {
+              unbind(oldValue.releaseDateProperty(), value.releaseYearProperty());
+            }
+            if(value != null) {
+              bind(value.releaseDateProperty(), value.releaseYearProperty());
+            }
+          }
+        });
       }
 
       @Override

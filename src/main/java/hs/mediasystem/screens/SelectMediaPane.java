@@ -82,16 +82,17 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
   private final IntegerBinding runtime = Bindings.selectInteger(mediaItem, "runtime");
   private final StringBinding genres = new StringBinding() {
     {
-      onInvalidating();
-    }
-
-    @Override
-    protected void onInvalidating() {
-      unbind(getDependencies());
-      bind(mediaItem);
-      if(mediaItem.get() != null) {
-        bind(mediaItem.get().genresProperty());
-      }
+      mediaItem.addListener(new ChangeListener<MediaItem>() {
+        @Override
+        public void changed(ObservableValue<? extends MediaItem> observable, MediaItem oldValue, MediaItem value) {
+          if(oldValue != null) {
+            unbind(oldValue.genresProperty());
+          }
+          if(value != null) {
+            bind(value.genresProperty());
+          }
+        }
+      });
     }
 
     @Override
@@ -279,8 +280,8 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
       final ReadOnlyDoubleProperty widthProperty = widthProperty();
       final ReadOnlyDoubleProperty heightProperty = heightProperty();
 
-      setHbarPolicy(ScrollBarPolicy.NEVER);
-      setVbarPolicy(ScrollBarPolicy.NEVER);
+      setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+      setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
       setContent(new ImageView() {{
         imageProperty().bind(poster);
@@ -390,8 +391,8 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
       final ReadOnlyDoubleProperty widthProperty = widthProperty();
       final ReadOnlyDoubleProperty heightProperty = heightProperty();
 
-      setHbarPolicy(ScrollBarPolicy.NEVER);
-      setVbarPolicy(ScrollBarPolicy.NEVER);
+      setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+      setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
       setContent(new Group() {{
         getChildren().addAll(backgroundImageView, newBackgroundImageView);
