@@ -43,6 +43,9 @@ public class MediaItem {
           if(getOfficialTitle() != null && !getOfficialTitle().isEmpty()) {
             return getOfficialTitle();
           }
+          else if(localInfo.getTitle() != null && !localInfo.getTitle().isEmpty()) {
+            return localInfo.getTitle();
+          }
 
           return localInfo.getGroupName() + " " + localInfo.getSeason() + "x" + localInfo.getEpisode();
         }
