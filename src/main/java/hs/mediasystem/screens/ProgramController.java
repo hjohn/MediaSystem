@@ -312,7 +312,7 @@ public class ProgramController {
   }
 
   public void registerWorker(final Worker<?> worker) {
-    final VBox vbox = createMessage(worker);
+    final Node node = createMessage(worker);
 
     System.out.println("[FINE] ProgramController.registerService() - registering new service: " + worker);
 
@@ -320,10 +320,10 @@ public class ProgramController {
       @Override
       public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
         if(newValue == State.SCHEDULED) {
-          messagePane.getChildren().add(vbox);
+          messagePane.getChildren().add(node);
         }
         else if(newValue == State.SUCCEEDED || newValue == State.FAILED || newValue == State.CANCELLED) {
-          messagePane.getChildren().remove(vbox);
+          messagePane.getChildren().remove(node);
         }
       }
     });
@@ -349,9 +349,10 @@ public class ProgramController {
     });
   }
 
-  private static VBox createMessage(final Worker<?> worker) {
-    return new VBox() {{
+  private static Node createMessage(final Worker<?> worker) {
+    return new StackPane() {{
       getChildren().add(new VBox() {{
+        setFillWidth(false);
         getStyleClass().add("item");
         getChildren().add(new HBox() {{
           setAlignment(Pos.CENTER_LEFT);
