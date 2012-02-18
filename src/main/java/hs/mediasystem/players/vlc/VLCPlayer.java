@@ -44,7 +44,7 @@ public class VLCPlayer implements Player {
 
     arguments.add("--no-video-title-show");
     arguments.add("--network-caching");
-    arguments.add("20000");
+    arguments.add("5000");
 
     MediaPlayerFactory factory = new MediaPlayerFactory(arguments);
 
