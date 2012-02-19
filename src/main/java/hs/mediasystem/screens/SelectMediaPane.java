@@ -1,8 +1,8 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SelectMediaView;
-import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.ImageHandle;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -119,10 +119,11 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
   private final ObjectBinding<ImageHandle> backgroundHandle = Bindings.select(mediaItem, "background");
   private final ObjectBinding<ImageHandle> posterHandle = Bindings.select(mediaItem, "poster");
 
-  private final ObjectProperty<Image> poster = new SimpleObjectProperty<>();
+  private final ObjectProperty<Image> poster = new AsyncImageProperty(posterHandle);
+  private final ObjectProperty<Image> wantedBackground = new AsyncImageProperty(backgroundHandle);
+
   private final ObjectProperty<Image> background = new SimpleObjectProperty<>();
   private final ObjectProperty<Image> newBackground = new SimpleObjectProperty<>();
-  private final ObjectProperty<Image> wantedBackground = new SimpleObjectProperty<>();
 
   private final ImageView backgroundImageView = new ImageView() {{
     imageProperty().bind(background);
@@ -406,22 +407,13 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
 
     getChildren().add(root);
 
-    backgroundHandle.addListener(new ChangeListener<ImageHandle>() {
+    wantedBackground.addListener(new ChangeListener<Image>() {
       @Override
-      public void changed(ObservableValue<? extends ImageHandle> observable, ImageHandle oldValue, ImageHandle newValue) {
-        if(trySetImage(newValue, wantedBackground, backgroundImageView.getFitWidth(), backgroundImageView.getFitHeight())) {
-          if(timeline.getStatus() == Animation.Status.STOPPED) {
-            newBackground.set(wantedBackground.get());
-            timeline.play();
-          }
+      public void changed(ObservableValue<? extends Image> observable, Image oldValue, Image newValue) {
+        if(timeline.getStatus() == Animation.Status.STOPPED) {
+          newBackground.set(wantedBackground.get());
+          timeline.play();
         }
-      }
-    });
-
-    posterHandle.addListener(new ChangeListener<ImageHandle>() {
-      @Override
-      public void changed(ObservableValue<? extends ImageHandle> observable, ImageHandle oldValue, ImageHandle newValue) {
-        trySetImage(newValue, poster);
       }
     });
   }
@@ -477,25 +469,4 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
 
   private final ObjectProperty<EventHandler<ActionEvent>> onBack = new SimpleObjectProperty<>();
   @Override public ObjectProperty<EventHandler<ActionEvent>> onBack() { return onBack; }
-
-  private static boolean trySetImage(ImageHandle handle, ObjectProperty<Image> image) {
-    if(handle != null) {
-      image.set(ImageCache.loadImage(handle));
-      return true;
-    }
-
-    return false;
-  }
-
-  private static boolean trySetImage(ImageHandle handle, ObjectProperty<Image> image, double w, double h) {
-    if(handle != null) {
-      Image loadedImage = ImageCache.loadImage(handle, w, h, true);
-      if(loadedImage != null) {
-        image.set(loadedImage);
-        return true;
-      }
-    }
-
-    return false;
-  }
 }

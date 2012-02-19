@@ -1,11 +1,9 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.util.ImageCache;
-import hs.mediasystem.util.ImageHandle;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ObjectBinding;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
@@ -33,22 +31,13 @@ public class BannerCellProvider implements CellProvider<MediaItem> {
     final MediaItem item = treeItem.getValue();
 
     if(item != null) {
-      title.textProperty().bind(Bindings.when(item.bannerProperty().isNull()).then(item.titleProperty()).otherwise(""));
-      title.graphicProperty().bind(Bindings.when(item.bannerProperty().isNull()).then((ImageView)null).otherwise(new ObjectBinding<ImageView>() {
-        {
-          bind(item.bannerProperty());
-        }
-
-        @Override
-        protected ImageView computeValue() {
-          ImageHandle banner = item.getBanner();
-
-          return banner == null ? null : new ImageView(ImageCache.loadImage(banner)) {{
-            setPreserveRatio(true);
-            setFitHeight(60);  // TODO No absolute values
-          }};
-        }
-      }));
+      final AsyncImageProperty asyncImageProperty = new AsyncImageProperty(item.bannerProperty());
+      title.textProperty().bind(Bindings.when(asyncImageProperty.isNull()).then(item.titleProperty()).otherwise(""));
+      title.graphicProperty().bind(Bindings.when(asyncImageProperty.isNull()).then((ImageView)null).otherwise(new ImageView() {{
+        imageProperty().bind(asyncImageProperty);
+        setPreserveRatio(true);
+        setFitHeight(60);  // TODO No absolute values
+      }}));
     }
 
     return group;

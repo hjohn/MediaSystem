@@ -1,13 +1,12 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
 import hs.mediasystem.util.Callable;
-import hs.mediasystem.util.ImageCache;
-import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.StringConverter;
 import hs.sublight.SubtitleDescriptor;
 
@@ -15,14 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -53,18 +50,7 @@ public class PlaybackOverlayPresentation {
       view.subtitleProperty().bind(mediaItem.subtitleProperty());
     }
     view.releaseYearProperty().bind(Bindings.convert(mediaItem.releaseYearProperty()));
-    view.posterProperty().bind(new ObjectBinding<Image>() {
-      {
-        bind(mediaItem.posterProperty());
-      }
-
-      @Override
-      protected Image computeValue() {
-        ImageHandle handle = mediaItem.posterProperty().get();
-
-        return handle != null ? ImageCache.loadImage(handle) : null;
-      }
-    });
+    view.posterProperty().bind(new AsyncImageProperty(mediaItem.posterProperty()));
 
     view.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
