@@ -41,7 +41,7 @@ public class MediaItemFormatter {
           @Override
           public void changed(ObservableValue<? extends MediaItem> observable, MediaItem oldValue, MediaItem value) {
             if(oldValue != null) {
-              unbind(oldValue.releaseDateProperty(), value.releaseYearProperty());
+              unbind(oldValue.releaseDateProperty(), oldValue.releaseYearProperty());
             }
             if(value != null) {
               bind(value.releaseDateProperty(), value.releaseYearProperty());
