@@ -146,9 +146,7 @@ public class ConnectionPool implements AutoCloseable {
       }
     }
     catch(InterruptedException e) {
-      System.out.println("[FINE] ConnectionPool.getConnection() - semaphore: " + semaphore);
-      e.printStackTrace();
-      throw new IllegalStateException("Interrupted while waiting for a database connection", e);
+      throw new IllegalStateException("Interrupted while waiting for a database connection (semaphore = " + semaphore + ")", e);
     }
 
     try {
