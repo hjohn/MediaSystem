@@ -54,7 +54,7 @@ import javafx.util.Duration;
 public class SelectMediaPane extends StackPane implements SelectMediaView {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
-  private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
+  private static final KeyCombination KEY_C = new KeyCodeCombination(KeyCode.C);
   private static final KeyCombination LEFT = new KeyCodeCombination(KeyCode.LEFT);
   private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
 
@@ -234,7 +234,7 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
           if(ENTER.match(event)) {
             dispatchEvent(onItemSelected, new TreeItemEvent<>(focusedItem), event);
           }
-          else if(KEY_O.match(event)) {
+          else if(KEY_C.match(event)) {
             dispatchEvent(onItemAlternateSelect, new TreeItemEvent<>(focusedItem), event);
           }
         }
