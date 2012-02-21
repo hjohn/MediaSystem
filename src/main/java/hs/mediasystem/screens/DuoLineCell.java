@@ -51,6 +51,7 @@ public class DuoLineCell extends HBox {
     extraInfo.managedProperty().bind(extraInfo.textProperty().isNotEqualTo(""));
 
     getChildren().add(new HBox() {{
+      setFillHeight(false);
       setAlignment(Pos.CENTER_LEFT);
 
       getChildren().add(new VBox() {{
