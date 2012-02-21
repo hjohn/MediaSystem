@@ -50,29 +50,23 @@ public class SelectMediaPresentation {
       }
     });
 
-    view.onItemSelected().set(new EventHandler<TreeItemEvent<MediaItem>>() {
+    view.onItemSelected().set(new EventHandler<MediaItemEvent>() {
       @Override
-      public void handle(TreeItemEvent<MediaItem> event) {
-        final MediaItem mediaItem = event.getTreeItem().getValue();
-        System.out.println("[FINE] SelectMediaPresentation.SelectMediaPresentation(...).new EventHandler() {...}.handle() - item selected: " + mediaItem);
-
-        if(mediaItem.isLeaf()) {
-          controller.play(mediaItem);
-        }
-        else if(layout.isRoot(mediaItem)) {
-          setTreeRoot(mediaItem);
+      public void handle(MediaItemEvent event) {
+        if(event.getMediaItem().isLeaf()) {
+          controller.play(event.getMediaItem());
         }
         else {
-          event.getTreeItem().setExpanded(true);
+          setTreeRoot(event.getMediaItem()); // TODO Could trigger a new pane altogether
         }
         event.consume();
       }
     });
 
-    view.onItemAlternateSelect().set(new EventHandler<TreeItemEvent<MediaItem>>() {
+    view.onItemAlternateSelect().set(new EventHandler<MediaItemEvent>() {
       @Override
-      public void handle(TreeItemEvent<MediaItem> event) {
-        final MediaItem mediaItem = event.getTreeItem().getValue();
+      public void handle(MediaItemEvent event) {
+        final MediaItem mediaItem = event.getMediaItem();
 
         List<? extends Option> options = FXCollections.observableArrayList(
           new ActionOption("Reload meta data", new Callable<Boolean>() {

@@ -219,7 +219,10 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
 
         if(focusedItem != null) {
           if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-            dispatchEvent(onItemSelected, new TreeItemEvent<>(focusedItem), event);
+            itemSelected(event, focusedItem);
+          }
+          else if(event.getButton() == MouseButton.SECONDARY && event.getClickCount() == 1) {
+            dispatchEvent(onItemAlternateSelect, new MediaItemEvent(focusedItem.getValue()), event);
           }
         }
       }
@@ -232,10 +235,10 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
 
         if(focusedItem != null) {
           if(ENTER.match(event)) {
-            dispatchEvent(onItemSelected, new TreeItemEvent<>(focusedItem), event);
+            itemSelected(event, focusedItem);
           }
           else if(KEY_C.match(event)) {
-            dispatchEvent(onItemAlternateSelect, new TreeItemEvent<>(focusedItem), event);
+            dispatchEvent(onItemAlternateSelect, new MediaItemEvent(focusedItem.getValue()), event);
           }
         }
 
@@ -429,6 +432,16 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
     }
   }
 
+  private void itemSelected(Event event, TreeItem<MediaItem> focusedItem) {
+    if(focusedItem.isLeaf()) {
+      dispatchEvent(onItemSelected, new MediaItemEvent(focusedItem.getValue()), event);
+    }
+    else {
+      focusedItem.setExpanded(!focusedItem.isExpanded());
+      event.consume();
+    }
+  }
+
   @Override
   public void requestFocus() {
     super.requestFocus();
@@ -461,11 +474,11 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
     treeView.setCellFactory(cellFactory);
   }
 
-  private final ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemSelected = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemSelected() { return onItemSelected; }
+  private final ObjectProperty<EventHandler<MediaItemEvent>> onItemSelected = new SimpleObjectProperty<>();
+  @Override public ObjectProperty<EventHandler<MediaItemEvent>> onItemSelected() { return onItemSelected; }
 
-  private final ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemAlternateSelect = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemAlternateSelect() { return onItemAlternateSelect; }
+  private final ObjectProperty<EventHandler<MediaItemEvent>> onItemAlternateSelect = new SimpleObjectProperty<>();
+  @Override public ObjectProperty<EventHandler<MediaItemEvent>> onItemAlternateSelect() { return onItemAlternateSelect; }
 
   private final ObjectProperty<EventHandler<ActionEvent>> onBack = new SimpleObjectProperty<>();
   @Override public ObjectProperty<EventHandler<ActionEvent>> onBack() { return onBack; }

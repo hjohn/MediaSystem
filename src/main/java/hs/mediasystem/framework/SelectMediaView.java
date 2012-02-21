@@ -1,6 +1,6 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.screens.TreeItemEvent;
+import hs.mediasystem.screens.MediaItemEvent;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -13,8 +13,8 @@ import javafx.util.Callback;
 
 public interface SelectMediaView {
   ObjectProperty<EventHandler<ActionEvent>> onBack();
-  ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemAlternateSelect();
-  ObjectProperty<EventHandler<TreeItemEvent<MediaItem>>> onItemSelected();
+  ObjectProperty<EventHandler<MediaItemEvent>> onItemAlternateSelect();
+  ObjectProperty<EventHandler<MediaItemEvent>> onItemSelected();
 
   void setCellFactory(Callback<TreeView<MediaItem>, TreeCell<MediaItem>> cellFactory);  // TODO remove
 
