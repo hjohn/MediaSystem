@@ -15,11 +15,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
 public class StandardLayout {
 
   public CellProvider<MediaItem> getCellProvider(MediaItem parent) {
@@ -58,7 +53,7 @@ public class StandardLayout {
       Collection<List<MediaItem>> groupedItems = Groups.group(children, new SeasonGrouper());
 
       for(List<MediaItem> group : groupedItems) {
-        if(group.size() > 1) {
+        if(group.size() > 1) { // TODO really?  We want to add seasons with just 1 episode as a seperate one and not as a Season??  Test this.
           MediaItem episodeOne = group.get(0);
           Season s;
 
@@ -91,21 +86,8 @@ public class StandardLayout {
     return output;
   }
 
-  public List<FilterItem> getFilterItems(MediaItem root) {
-    List<FilterItem> filterItems = new ArrayList<>();
-
-    if(root.getMediaType().equals("SERIE")) {
-      for(MediaItem item : getChildren(root)) {
-        if(item.getSeason() == 0) {
-          filterItems.add(new FilterItem(item, "Specials", "Sp."));
-        }
-        else {
-          filterItems.add(new FilterItem(item, "Season " + item.getSeason(), "" + item.getSeason()));
-        }
-      }
-    }
-
-    return filterItems;
+  public boolean expandTopLevel(MediaItem root) {
+    return root.getMediaType().equals("SERIE");
   }
 
   public boolean hasChildren(MediaItem mediaItem) {
@@ -116,27 +98,5 @@ public class StandardLayout {
     String mediaType = mediaItem.getMediaType();
 
     return mediaType.equals("MOVIE_ROOT") || mediaType.equals("SERIE_ROOT") || mediaType.equals("SERIE");
-  }
-
-  private final ObservableList<GroupSet> groupSets = FXCollections.observableArrayList(new GroupSet("(ungrouped)"), new GroupSet("Decade"), new GroupSet("Genre"));
-  private final ObservableList<SortOrder> sortOrders = FXCollections.observableArrayList(new SortOrder("Alphabetically"), new SortOrder("Chronologically"));
-
-  private final ObjectProperty<GroupSet> groupSet = new SimpleObjectProperty<>(groupSets.get(0));
-  private final ObjectProperty<SortOrder> sortOrder = new SimpleObjectProperty<>(sortOrders.get(0));
-
-  public ObservableList<GroupSet> availableGroupSetsProperty() {
-    return groupSets;
-  }
-
-  public ObjectProperty<GroupSet> groupSetProperty() {
-    return groupSet;
-  }
-
-  public ObservableList<SortOrder> availableSortOrdersProperty() {
-    return sortOrders;
-  }
-
-  public ObjectProperty<SortOrder> sortOrderProperty() {
-    return sortOrder;
   }
 }

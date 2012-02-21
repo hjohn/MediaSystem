@@ -1,6 +1,7 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.beans.AsyncImageProperty;
+import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SelectMediaView;
 import hs.mediasystem.util.ImageHandle;
@@ -59,6 +60,7 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
   private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
 
   private final TreeView<MediaItem> treeView = new TreeView<>();
+  private final StandardLayout layout = new StandardLayout();
 
   private final ObjectBinding<MediaItem> mediaItem = new ObjectBinding<MediaItem>() {
     {
@@ -262,6 +264,21 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
       }
     });
 
+    filter.activeProperty().addListener(new ChangeListener<Node>() {
+      @Override
+      public void changed(ObservableValue<? extends Node> observable, Node oldValue, Node value) {
+        Label oldLabel = (Label)oldValue;
+        Label label = (Label)value;
+
+        if(oldLabel != null) {
+          oldLabel.setText(((MediaItem)oldValue.getUserData()).getShortTitle());
+        }
+        label.setText(((MediaItem)value.getUserData()).getTitle());
+
+        refilter();
+      }
+    });
+
     root.getColumnConstraints().addAll(
       new ColumnConstraints() {{
         setPercentWidth(50);
@@ -450,26 +467,53 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
   }
 
   @Override
-  public ObservableList<Node> filterItemsProperty() {
-    return filter.getChildren();
+  public void setRoot(final MediaItem root) {
+    TreeItem<MediaItem> treeRoot = new TreeItem<>(root);
+
+    setCellFactory(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
+      @Override
+      public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
+        return new MediaItemTreeCell(layout.getCellProvider(root));
+      }
+    });
+
+    treeView.setRoot(treeRoot);
+
+    filter.getChildren().clear();
+
+    boolean expandTopLevel = layout.expandTopLevel(root);
+
+    if(expandTopLevel) {
+      for(MediaItem item : layout.getChildren(root)) {
+        Label label = new Label(item.getShortTitle());
+
+        filter.getChildren().add(label);
+        label.setUserData(item);
+      }
+
+      filter.activeProperty().set(filter.getChildren().get(0));
+    }
+    else {
+      treeRoot.getChildren().clear();
+
+      for(MediaItem item : layout.getChildren(root)) {
+        treeRoot.getChildren().add(new MediaTreeItem(item));
+      }
+    }
   }
 
-  @Override
-  public ObjectProperty<Node> activeFilterItemProperty() {
-    return filter.activeProperty();
+  private void refilter() {
+    TreeItem<MediaItem> treeRoot = treeView.getRoot();
+
+    treeRoot.getChildren().clear();
+
+    MediaItem group = (MediaItem)filter.activeProperty().get().getUserData();
+
+    for(MediaItem item : group.children()) {
+      treeRoot.getChildren().add(new MediaTreeItem(item));
+    }
   }
 
-  @Override
-  public TreeItem<MediaItem> getRoot() {
-    return treeView.getRoot();
-  }
-
-  @Override
-  public void setRoot(TreeItem<MediaItem> root) {
-    treeView.setRoot(root);
-  }
-
-  @Override
   public void setCellFactory(Callback<TreeView<MediaItem>, TreeCell<MediaItem>> cellFactory) {
     treeView.setCellFactory(cellFactory);
   }
@@ -482,4 +526,51 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
 
   private final ObjectProperty<EventHandler<ActionEvent>> onBack = new SimpleObjectProperty<>();
   @Override public ObjectProperty<EventHandler<ActionEvent>> onBack() { return onBack; }
+
+  private final class MediaTreeItem extends TreeItem<MediaItem> {
+    private boolean childrenPopulated;
+
+    private MediaTreeItem(MediaItem value) {
+      super(value);
+    }
+
+    @Override
+    public boolean isLeaf() {
+      return layout.isRoot(getValue()) || getValue().isLeaf();
+    }
+
+    @Override
+    public ObservableList<TreeItem<MediaItem>> getChildren() {
+      if(!childrenPopulated) {
+        childrenPopulated = true;
+
+        if(layout.hasChildren(getValue())) {
+          for(MediaItem child : layout.getChildren(getValue())) {
+            super.getChildren().add(new MediaTreeItem(child));
+          }
+        }
+      }
+
+      return super.getChildren();
+    }
+  }
+
+  private final class MediaItemTreeCell extends TreeCell<MediaItem> {
+    private final CellProvider<MediaItem> provider;
+
+    private MediaItemTreeCell(CellProvider<MediaItem> provider) {
+      this.provider = provider;
+
+      setDisclosureNode(new Group());
+    }
+
+    @Override
+    protected void updateItem(final MediaItem item, boolean empty) {
+      super.updateItem(item, empty);
+
+      if(!empty) {
+        setGraphic(provider.configureCell(getTreeItem()));
+      }
+    }
+  }
 }
