@@ -1,5 +1,9 @@
-#select-media *.label {
+#select-media .label {
   -fx-text-fill: color-blue;
+}
+
+#select-media .cell:focused .label {
+  -fx-text-fill: derive(color-blue, +50%);
 }
 
 #select-media .content-box-grid {
