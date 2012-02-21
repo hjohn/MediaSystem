@@ -21,6 +21,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -85,7 +86,7 @@ public class ProgramController {
     overlayBorderPane.setCenter(new BorderPane() {{
       setTop(informationBorder);
     }});
-    overlayBorderPane.setRight(messagePane);
+    overlayBorderPane.setRight(new Group(messagePane));
 
     mainStage = new Stage(StageStyle.UNDECORATED);
     transparentStage = new Stage(StageStyle.TRANSPARENT);
