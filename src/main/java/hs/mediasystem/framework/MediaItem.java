@@ -50,10 +50,6 @@ public class MediaItem {
           return localInfo.getGroupName() + " " + localInfo.getSeason() + "x" + localInfo.getEpisode();
         }
 
-        if(localInfo.getType().equals("SEASON")) {
-          return "Season " + localInfo.getSeason();
-        }
-
         return localInfo.getTitle();
       }
     });
@@ -73,6 +69,10 @@ public class MediaItem {
 
   public String getUri() {
     return localInfo.getUri();
+  }
+
+  public String getShortTitle() {
+    return getTitle();
   }
 
   public String getLanguage() {
