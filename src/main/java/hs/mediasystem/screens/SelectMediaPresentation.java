@@ -7,6 +7,7 @@ import hs.mediasystem.framework.SelectMediaView;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
+import hs.mediasystem.util.StringConverter;
 
 import java.util.List;
 
@@ -22,11 +23,16 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
 import javax.inject.Inject;
 
 public class SelectMediaPresentation {
+  private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
   private final SelectMediaView view;
   private final Navigator navigator;
   private final StandardLayout layout = new StandardLayout();
@@ -82,7 +88,7 @@ public class SelectMediaPresentation {
           })
         );
 
-        controller.showOptionScreen("Media - Options", options);
+        controller.showOptionScreen("Options: " + mediaItem.getTitle(), options);
         event.consume();
       }
     });
@@ -99,6 +105,32 @@ public class SelectMediaPresentation {
         label.setText(((FilterItem)value.getUserData()).getLongText());
 
         refilter();
+      }
+    });
+
+    getView().setOnKeyPressed(new EventHandler<KeyEvent>() {
+      @Override
+      public void handle(KeyEvent event) {
+        if(KEY_O.match(event)) {
+          @SuppressWarnings("unchecked")
+          List<? extends Option> options = FXCollections.observableArrayList(
+            new ListOption<>("Group by", layout.groupSetProperty(), layout.availableGroupSetsProperty(), new StringConverter<GroupSet>() {
+              @Override
+              public String toString(GroupSet set) {
+                return set.getTitle();
+              }
+            }),
+            new ListOption<>("Order by", layout.sortOrderProperty(), layout.availableSortOrdersProperty(), new StringConverter<SortOrder>() {
+              @Override
+              public String toString(SortOrder order) {
+                return order.getTitle();
+              }
+            })
+          );
+
+          controller.showOptionScreen("Media - Options", options);
+          event.consume();
+        }
       }
     });
   }
