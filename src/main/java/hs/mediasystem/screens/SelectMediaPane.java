@@ -83,26 +83,16 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
   private final DoubleBinding rating = Bindings.selectDouble(mediaItem, "rating");
   private final IntegerBinding runtime = Bindings.selectInteger(mediaItem, "runtime");
   private final StringBinding genres = new StringBinding() {
+    final ObjectBinding<String[]> selectGenres = Bindings.select(mediaItem, "genres");
+
     {
-      mediaItem.addListener(new ChangeListener<MediaItem>() {
-        @Override
-        public void changed(ObservableValue<? extends MediaItem> observable, MediaItem oldValue, MediaItem value) {
-          if(oldValue != null) {
-            unbind(oldValue.genresProperty());
-          }
-          if(value != null) {
-            bind(value.genresProperty());
-          }
-        }
-      });
+      bind(selectGenres);
     }
 
     @Override
     protected String computeValue() {
       String genreText = "";
-
-      ObjectBinding<String[]> binding = Bindings.select(mediaItem, "genres");
-      String[] genres = binding.get();
+      String[] genres = selectGenres.get();
 
       if(genres != null) {
         for(String genre : genres) {
