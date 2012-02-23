@@ -59,8 +59,7 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
   private static final KeyCombination LEFT = new KeyCodeCombination(KeyCode.LEFT);
   private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
 
-  private final TreeView<MediaItem> treeView = new TreeView<>();
-  private final StandardLayout layout = new StandardLayout();
+  private final TreeView<MediaNode> treeView = new TreeView<>();
 
   private final ObjectBinding<MediaItem> mediaItem = new ObjectBinding<MediaItem>() {
     {
@@ -69,9 +68,9 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
 
     @Override
     protected MediaItem computeValue() {
-      TreeItem<MediaItem> focusedItem = treeView.getFocusModel().getFocusedItem();
+      TreeItem<MediaNode> focusedItem = treeView.getFocusModel().getFocusedItem();
 
-      return focusedItem != null ? focusedItem.getValue() : null;
+      return focusedItem != null ? focusedItem.getValue().getMediaItem() : null;
     }
   };
 
@@ -207,14 +206,14 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
     treeView.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent event) {
-        TreeItem<MediaItem> focusedItem = treeView.getFocusModel().getFocusedItem();
+        TreeItem<MediaNode> focusedItem = treeView.getFocusModel().getFocusedItem();
 
         if(focusedItem != null) {
           if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
             itemSelected(event, focusedItem);
           }
           else if(event.getButton() == MouseButton.SECONDARY && event.getClickCount() == 1) {
-            dispatchEvent(onItemAlternateSelect, new MediaItemEvent(focusedItem.getValue()), event);
+            dispatchEvent(onItemAlternateSelect, new MediaNodeEvent(focusedItem.getValue()), event);
           }
         }
       }
@@ -223,14 +222,14 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
     treeView.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
-        TreeItem<MediaItem> focusedItem = treeView.getFocusModel().getFocusedItem();
+        TreeItem<MediaNode> focusedItem = treeView.getFocusModel().getFocusedItem();
 
         if(focusedItem != null) {
           if(ENTER.match(event)) {
             itemSelected(event, focusedItem);
           }
           else if(KEY_C.match(event)) {
-            dispatchEvent(onItemAlternateSelect, new MediaItemEvent(focusedItem.getValue()), event);
+            dispatchEvent(onItemAlternateSelect, new MediaNodeEvent(focusedItem.getValue()), event);
           }
         }
 
@@ -261,9 +260,9 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
         Label label = (Label)value;
 
         if(oldLabel != null) {
-          oldLabel.setText(((MediaItem)oldValue.getUserData()).getShortTitle());
+          oldLabel.setText(((MediaNode)oldValue.getUserData()).getMediaItem().getShortTitle());
         }
-        label.setText(((MediaItem)value.getUserData()).getTitle());
+        label.setText(((MediaNode)value.getUserData()).getMediaItem().getTitle());
 
         refilter();
       }
@@ -439,9 +438,9 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
     }
   }
 
-  private void itemSelected(Event event, TreeItem<MediaItem> focusedItem) {
+  private void itemSelected(Event event, TreeItem<MediaNode> focusedItem) {
     if(focusedItem.isLeaf()) {
-      dispatchEvent(onItemSelected, new MediaItemEvent(focusedItem.getValue()), event);
+      dispatchEvent(onItemSelected, new MediaNodeEvent(focusedItem.getValue()), event);
     }
     else {
       focusedItem.setExpanded(!focusedItem.isExpanded());
@@ -457,13 +456,13 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
   }
 
   @Override
-  public void setRoot(final MediaItem root) {
-    TreeItem<MediaItem> treeRoot = new TreeItem<>(root);
+  public void setRoot(final MediaNode root) {
+    TreeItem<MediaNode> treeRoot = new TreeItem<>(root);
 
-    setCellFactory(new Callback<TreeView<MediaItem>, TreeCell<MediaItem>>() {
+    setCellFactory(new Callback<TreeView<MediaNode>, TreeCell<MediaNode>>() {
       @Override
-      public TreeCell<MediaItem> call(TreeView<MediaItem> param) {
-        return new MediaItemTreeCell(layout.getCellProvider(root));
+      public TreeCell<MediaNode> call(TreeView<MediaNode> param) {
+        return new MediaItemTreeCell(root.getCellProvider());
       }
     });
 
@@ -471,14 +470,14 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
 
     filter.getChildren().clear();
 
-    boolean expandTopLevel = layout.expandTopLevel(root);
+    boolean expandTopLevel = root.expandTopLevel();
 
     if(expandTopLevel) {
-      for(MediaItem item : layout.getChildren(root)) {
-        Label label = new Label(item.getShortTitle());
+      for(MediaNode node : root.getChildren()) {
+        Label label = new Label(node.getMediaItem().getShortTitle());
 
         filter.getChildren().add(label);
-        label.setUserData(item);
+        label.setUserData(node);
       }
 
       filter.activeProperty().set(filter.getChildren().get(0));
@@ -486,57 +485,57 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
     else {
       treeRoot.getChildren().clear();
 
-      for(MediaItem item : layout.getChildren(root)) {
-        treeRoot.getChildren().add(new MediaTreeItem(item));
+      for(MediaNode node : root.getChildren()) {
+        treeRoot.getChildren().add(new MediaNodeTreeItem(node));
       }
     }
   }
 
   private void refilter() {
-    TreeItem<MediaItem> treeRoot = treeView.getRoot();
+    TreeItem<MediaNode> treeRoot = treeView.getRoot();
 
     treeRoot.getChildren().clear();
 
-    MediaItem group = (MediaItem)filter.activeProperty().get().getUserData();
+    MediaNode group = (MediaNode)filter.activeProperty().get().getUserData();
 
-    for(MediaItem item : group.children()) {
-      treeRoot.getChildren().add(new MediaTreeItem(item));
+    for(MediaNode item : group.getChildren()) {
+      treeRoot.getChildren().add(new MediaNodeTreeItem(item));
     }
   }
 
-  public void setCellFactory(Callback<TreeView<MediaItem>, TreeCell<MediaItem>> cellFactory) {
+  public void setCellFactory(Callback<TreeView<MediaNode>, TreeCell<MediaNode>> cellFactory) {
     treeView.setCellFactory(cellFactory);
   }
 
-  private final ObjectProperty<EventHandler<MediaItemEvent>> onItemSelected = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<MediaItemEvent>> onItemSelected() { return onItemSelected; }
+  private final ObjectProperty<EventHandler<MediaNodeEvent>> onItemSelected = new SimpleObjectProperty<>();
+  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onItemSelected() { return onItemSelected; }
 
-  private final ObjectProperty<EventHandler<MediaItemEvent>> onItemAlternateSelect = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<MediaItemEvent>> onItemAlternateSelect() { return onItemAlternateSelect; }
+  private final ObjectProperty<EventHandler<MediaNodeEvent>> onItemAlternateSelect = new SimpleObjectProperty<>();
+  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onItemAlternateSelect() { return onItemAlternateSelect; }
 
   private final ObjectProperty<EventHandler<ActionEvent>> onBack = new SimpleObjectProperty<>();
   @Override public ObjectProperty<EventHandler<ActionEvent>> onBack() { return onBack; }
 
-  private final class MediaTreeItem extends TreeItem<MediaItem> {
+  private final class MediaNodeTreeItem extends TreeItem<MediaNode> {
     private boolean childrenPopulated;
 
-    private MediaTreeItem(MediaItem value) {
+    private MediaNodeTreeItem(MediaNode value) {
       super(value);
     }
 
     @Override
     public boolean isLeaf() {
-      return layout.isRoot(getValue()) || getValue().isLeaf();
+      return getValue().isLeaf();
     }
 
     @Override
-    public ObservableList<TreeItem<MediaItem>> getChildren() {
+    public ObservableList<TreeItem<MediaNode>> getChildren() {
       if(!childrenPopulated) {
         childrenPopulated = true;
 
-        if(layout.hasChildren(getValue())) {
-          for(MediaItem child : layout.getChildren(getValue())) {
-            super.getChildren().add(new MediaTreeItem(child));
+        if(getValue().hasChildren()) {
+          for(MediaNode child : getValue().getChildren()) {
+            super.getChildren().add(new MediaNodeTreeItem(child));
           }
         }
       }
@@ -545,17 +544,17 @@ public class SelectMediaPane extends StackPane implements SelectMediaView {
     }
   }
 
-  private final class MediaItemTreeCell extends TreeCell<MediaItem> {
-    private final CellProvider<MediaItem> provider;
+  private final class MediaItemTreeCell extends TreeCell<MediaNode> {
+    private final CellProvider<MediaNode> provider;
 
-    private MediaItemTreeCell(CellProvider<MediaItem> provider) {
+    private MediaItemTreeCell(CellProvider<MediaNode> provider) {
       this.provider = provider;
 
       setDisclosureNode(new Group());
     }
 
     @Override
-    protected void updateItem(final MediaItem item, boolean empty) {
+    protected void updateItem(final MediaNode item, boolean empty) {
       super.updateItem(item, empty);
 
       if(!empty) {

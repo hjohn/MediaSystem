@@ -8,7 +8,11 @@ import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.StringConverter;
 
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -28,6 +32,7 @@ public class SelectMediaPresentation {
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
   private final SelectMediaView view;
   private final Navigator navigator;
+  private final StandardLayout layout = new StandardLayout();
 
   @Inject
   public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final MediaItemEnrichmentEventHandler enrichmentHandler) {
@@ -42,23 +47,23 @@ public class SelectMediaPresentation {
       }
     });
 
-    view.onItemSelected().set(new EventHandler<MediaItemEvent>() {
+    view.onItemSelected().set(new EventHandler<MediaNodeEvent>() {
       @Override
-      public void handle(MediaItemEvent event) {
-        if(event.getMediaItem().isLeaf()) {
-          controller.play(event.getMediaItem());
+      public void handle(MediaNodeEvent event) {
+        if(event.getMediaNode().getMediaItem().isLeaf()) {
+          controller.play(event.getMediaNode().getMediaItem());
         }
         else {
-          setTreeRoot(event.getMediaItem()); // TODO Could trigger a new pane altogether
+          setTreeRoot(event.getMediaNode().getMediaItem()); // TODO Could trigger a new pane altogether
         }
         event.consume();
       }
     });
 
-    view.onItemAlternateSelect().set(new EventHandler<MediaItemEvent>() {
+    view.onItemAlternateSelect().set(new EventHandler<MediaNodeEvent>() {
       @Override
-      public void handle(MediaItemEvent event) {
-        final MediaItem mediaItem = event.getMediaItem();
+      public void handle(MediaNodeEvent event) {
+        final MediaItem mediaItem = event.getMediaNode().getMediaItem();
 
         List<? extends Option> options = FXCollections.observableArrayList(
           new ActionOption("Reload meta data", new Callable<Boolean>() {
@@ -114,9 +119,25 @@ public class SelectMediaPresentation {
     navigator.navigateTo(new Destination(root.getTitle()) {
       @Override
       public void execute() {
-        view.setRoot(root);
+        view.setRoot(layout.wrap(root));
       }
     });
+  }
+
+  public static void main(String[] args) {
+    Date date = new Date();
+
+
+    GregorianCalendar gc = new GregorianCalendar();
+    gc.setTime(date);
+    System.out.println(gc.getTimeZone());
+    gc.setTimeZone(TimeZone.getTimeZone("EST"));
+
+    System.out.println(date.getTime());
+    System.out.println(gc);
+    DateFormat dateTimeInstance = DateFormat.getDateTimeInstance();
+    dateTimeInstance.setTimeZone(TimeZone.getTimeZone("EST"));
+    System.out.println(dateTimeInstance.format(gc.getTime()));
   }
 
   public void setMediaTree(final MediaTree mediaTree) {

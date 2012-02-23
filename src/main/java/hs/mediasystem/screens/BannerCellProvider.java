@@ -12,7 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-public class BannerCellProvider implements CellProvider<MediaItem> {
+public class BannerCellProvider implements CellProvider<MediaNode> {
   private final HBox group = new HBox();
 
   private final Label title = new Label() {{
@@ -27,8 +27,8 @@ public class BannerCellProvider implements CellProvider<MediaItem> {
   }
 
   @Override
-  public Node configureCell(TreeItem<MediaItem> treeItem) {
-    final MediaItem item = treeItem.getValue();
+  public Node configureCell(TreeItem<MediaNode> treeItem) {
+    final MediaItem item = treeItem.getValue().getMediaItem();
 
     if(item != null) {
       final AsyncImageProperty asyncImageProperty = new AsyncImageProperty(item.bannerProperty());

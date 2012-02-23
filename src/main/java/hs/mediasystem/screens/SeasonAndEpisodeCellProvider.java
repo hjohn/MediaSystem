@@ -6,12 +6,12 @@ import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 
-public class SeasonAndEpisodeCellProvider implements CellProvider<MediaItem> {
+public class SeasonAndEpisodeCellProvider implements CellProvider<MediaNode> {
   private final DuoLineCell cell = new DuoLineCell();
 
   @Override
-  public Node configureCell(TreeItem<MediaItem> treeItem) {
-    MediaItem item = treeItem.getValue();
+  public Node configureCell(TreeItem<MediaNode> treeItem) {
+    MediaItem item = treeItem.getValue().getMediaItem();
 
     cell.titleProperty().bind(item.titleProperty());
     cell.subtitleProperty().set("");

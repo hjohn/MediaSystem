@@ -1,14 +1,15 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.screens.MediaItemEvent;
+import hs.mediasystem.screens.MediaNodeEvent;
+import hs.mediasystem.screens.MediaNode;
 import javafx.beans.property.ObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
 public interface SelectMediaView {
   ObjectProperty<EventHandler<ActionEvent>> onBack();
-  ObjectProperty<EventHandler<MediaItemEvent>> onItemAlternateSelect();
-  ObjectProperty<EventHandler<MediaItemEvent>> onItemSelected();
+  ObjectProperty<EventHandler<MediaNodeEvent>> onItemAlternateSelect();
+  ObjectProperty<EventHandler<MediaNodeEvent>> onItemSelected();
 
-  void setRoot(MediaItem root);
+  void setRoot(MediaNode root);
 }

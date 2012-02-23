@@ -17,7 +17,7 @@ import java.util.List;
 
 public class StandardLayout {
 
-  public CellProvider<MediaItem> getCellProvider(MediaItem parent) {
+  public CellProvider<MediaNode> getCellProvider(MediaItem parent) {
     String mediaType = parent.getMediaType();
 
     if(mediaType.equals("MOVIE_ROOT")) {
@@ -30,9 +30,9 @@ public class StandardLayout {
     return new SeasonAndEpisodeCellProvider();
   }
 
-  public List<? extends MediaItem> getChildren(MediaItem parent) {
+  public List<MediaNode> getChildren(MediaItem parent) {
     List<? extends MediaItem> children = parent.children();
-    List<MediaItem> output = new ArrayList<>();
+    List<MediaNode> output = new ArrayList<>();
 
     if(parent.getMediaType().equals("MOVIE_ROOT")) {
       Collection<List<MediaItem>> groupedItems = Groups.group(children, new TitleGrouper());
@@ -42,10 +42,15 @@ public class StandardLayout {
           Collections.sort(group, MediaItemComparator.INSTANCE);
           EpisodeGroup g = new EpisodeGroup(parent.getMediaTree(), group);
 
-          output.add(g);
+          List<MediaNode> nodeChildren = new ArrayList<>();
+          for(MediaItem item : group) {
+            nodeChildren.add(new MediaNode(this, item));
+          }
+
+          output.add(new MediaNode(this, g, nodeChildren));
         }
         else {
-          output.add(group.get(0));
+          output.add(new MediaNode(this, group.get(0)));
         }
       }
     }
@@ -65,23 +70,26 @@ public class StandardLayout {
           }
 
           Collections.sort(group, EpisodeComparator.INSTANCE);
+          List<MediaNode> nodeChildren = new ArrayList<>();
 
           for(MediaItem item : group) {
-            s.add(item);
+            nodeChildren.add(new MediaNode(this, item));
           }
 
-          output.add(s);
+          output.add(new MediaNode(this, s, nodeChildren));
         }
         else {
-          output.add(group.get(0));
+          output.add(new MediaNode(this, group.get(0)));
         }
       }
     }
     else {
-      output.addAll(children);
+      for(MediaItem child : children) {
+        output.add(new MediaNode(this, child));
+      }
     }
 
-    Collections.sort(output, MediaItemComparator.INSTANCE);
+    Collections.sort(output, MediaNodeComparator.INSTANCE);
 
     return output;
   }
@@ -98,5 +106,9 @@ public class StandardLayout {
     String mediaType = mediaItem.getMediaType();
 
     return mediaType.equals("MOVIE_ROOT") || mediaType.equals("SERIE_ROOT") || mediaType.equals("SERIE");
+  }
+
+  public MediaNode wrap(MediaItem root) {
+    return new MediaNode(this, root);
   }
 }
