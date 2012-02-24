@@ -15,6 +15,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 public class StandardLayout {
 
   public CellProvider<MediaNode> getCellProvider(MediaItem parent) {
@@ -89,7 +94,7 @@ public class StandardLayout {
       }
     }
 
-    Collections.sort(output, MediaNodeComparator.INSTANCE);
+    Collections.sort(output, sortOrder.get().getComparator());
 
     return output;
   }
@@ -110,5 +115,27 @@ public class StandardLayout {
 
   public MediaNode wrap(MediaItem root) {
     return new MediaNode(this, root);
+  }
+
+  private final ObservableList<GroupSet> groupSets = FXCollections.observableArrayList(new GroupSet("(ungrouped)"), new GroupSet("Decade"), new GroupSet("Genre"));
+  private final ObservableList<SortOrder> sortOrders = FXCollections.observableArrayList(new SortOrder("Alphabetically", MediaNodeComparator.INSTANCE), new SortOrder("Chronologically", ChronologicalMediaNodeComparator.INSTANCE));
+
+  private final ObjectProperty<GroupSet> groupSet = new SimpleObjectProperty<>(groupSets.get(0));
+  private final ObjectProperty<SortOrder> sortOrder = new SimpleObjectProperty<>(sortOrders.get(0));
+
+  public ObservableList<GroupSet> availableGroupSetsProperty() {
+    return groupSets;
+  }
+
+  public ObjectProperty<GroupSet> groupSetProperty() {
+    return groupSet;
+  }
+
+  public ObservableList<SortOrder> availableSortOrdersProperty() {
+    return sortOrders;
+  }
+
+  public ObjectProperty<SortOrder> sortOrderProperty() {
+    return sortOrder;
   }
 }

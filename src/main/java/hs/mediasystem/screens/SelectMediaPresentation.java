@@ -8,16 +8,11 @@ import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.StringConverter;
 
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.TimeZone;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -64,7 +59,6 @@ public class SelectMediaPresentation {
       @Override
       public void handle(MediaNodeEvent event) {
         final MediaItem mediaItem = event.getMediaNode().getMediaItem();
-
         List<? extends Option> options = FXCollections.observableArrayList(
           new ActionOption("Reload meta data", new Callable<Boolean>() {
             @Override
@@ -90,13 +84,13 @@ public class SelectMediaPresentation {
         if(KEY_O.match(event)) {
           @SuppressWarnings("unchecked")
           List<? extends Option> options = FXCollections.observableArrayList(
-            new ListOption<>("Group by", groupSetProperty(), availableGroupSetsProperty(), new StringConverter<GroupSet>() {
+            new ListOption<>("Group by", layout.groupSetProperty(), layout.availableGroupSetsProperty(), new StringConverter<GroupSet>() {
               @Override
               public String toString(GroupSet set) {
                 return set.getTitle();
               }
             }),
-            new ListOption<>("Order by", sortOrderProperty(), availableSortOrdersProperty(), new StringConverter<SortOrder>() {
+            new ListOption<>("Order by", layout.sortOrderProperty(), layout.availableSortOrdersProperty(), new StringConverter<SortOrder>() {
               @Override
               public String toString(SortOrder order) {
                 return order.getTitle();
@@ -109,13 +103,23 @@ public class SelectMediaPresentation {
         }
       }
     });
+
+    layout.sortOrderProperty().addListener(new InvalidationListener() {
+      @Override
+      public void invalidated(Observable observable) {
+        view.setRoot(layout.wrap(currentRoot));
+      }
+    });
   }
 
   public Node getView() {
     return (Node)view;
   }
 
+  private MediaItem currentRoot;
+
   private void setTreeRoot(final MediaItem root) {
+    currentRoot = root;
     navigator.navigateTo(new Destination(root.getTitle()) {
       @Override
       public void execute() {
@@ -124,45 +128,7 @@ public class SelectMediaPresentation {
     });
   }
 
-  public static void main(String[] args) {
-    Date date = new Date();
-
-
-    GregorianCalendar gc = new GregorianCalendar();
-    gc.setTime(date);
-    System.out.println(gc.getTimeZone());
-    gc.setTimeZone(TimeZone.getTimeZone("EST"));
-
-    System.out.println(date.getTime());
-    System.out.println(gc);
-    DateFormat dateTimeInstance = DateFormat.getDateTimeInstance();
-    dateTimeInstance.setTimeZone(TimeZone.getTimeZone("EST"));
-    System.out.println(dateTimeInstance.format(gc.getTime()));
-  }
-
   public void setMediaTree(final MediaTree mediaTree) {
     setTreeRoot(mediaTree.getRoot());
-  }
-
-  private final ObservableList<GroupSet> groupSets = FXCollections.observableArrayList(new GroupSet("(ungrouped)"), new GroupSet("Decade"), new GroupSet("Genre"));
-  private final ObservableList<SortOrder> sortOrders = FXCollections.observableArrayList(new SortOrder("Alphabetically"), new SortOrder("Chronologically"));
-
-  private final ObjectProperty<GroupSet> groupSet = new SimpleObjectProperty<>(groupSets.get(0));
-  private final ObjectProperty<SortOrder> sortOrder = new SimpleObjectProperty<>(sortOrders.get(0));
-
-  public ObservableList<GroupSet> availableGroupSetsProperty() {
-    return groupSets;
-  }
-
-  public ObjectProperty<GroupSet> groupSetProperty() {
-    return groupSet;
-  }
-
-  public ObservableList<SortOrder> availableSortOrdersProperty() {
-    return sortOrders;
-  }
-
-  public ObjectProperty<SortOrder> sortOrderProperty() {
-    return sortOrder;
   }
 }
