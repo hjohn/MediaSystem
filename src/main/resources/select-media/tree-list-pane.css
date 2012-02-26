@@ -1,5 +1,7 @@
 .tree-view {
   -fx-background-color: transparent;
+  -fx-border-color: color-blue-20;
+  -fx-border-width: 1;
 }
 
 .title {
@@ -31,11 +33,6 @@
   -fx-hgap: 5;
 }
 
-.tree-view {
-  -fx-border-color: color-blue-20;
-  -fx-border-width: 1;
-}
-
 .seasons .label {
   -fx-font: bold 18pt "Arial";
   -fx-text-fill: color-focused-text;
@@ -47,4 +44,8 @@
   
   -fx-background-color: derive(color-blue-20, -30%);
   -fx-background-radius: 8 8 0 0;
+}
+
+.tree-disclosure-node {
+  visibility: hidden;
 }

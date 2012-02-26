@@ -226,8 +226,6 @@ public class TreeListPane extends BorderPane implements ListPane {
 
     private MediaItemTreeCell(CellProvider<MediaNode> provider) {
       this.provider = provider;
-
-      setDisclosureNode(new Group());
     }
 
     @Override
