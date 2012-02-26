@@ -59,7 +59,7 @@ public class TvdbSerieEnricher implements ItemEnricher<Object> {
       item.setGenres(series.getGenres().toArray(new String[series.getGenres().size()]));
       item.setLanguage(series.getLanguage());
       item.setRuntime(Integer.parseInt(series.getRuntime()));
-      System.out.println(">>> Status of serie : " + series.getStatus());  // "Ended"
+      System.out.println(">>> Status of serie : " + series.getStatus());  // "Ended", "Continuing"
       System.out.println(">>> First aired : " +  series.getFirstAired());
 
       return item;
