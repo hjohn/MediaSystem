@@ -29,27 +29,31 @@ public class Filter extends FlowPane {
   }
 
   public void activateNext() {
-    int index = getChildren().indexOf(active.get());
+    if(!getChildren().isEmpty()) {
+      int index = getChildren().indexOf(active.get());
 
-    index++;
+      index++;
 
-    if(index >= getChildren().size()) {
-      index = 0;
+      if(index >= getChildren().size()) {
+        index = 0;
+      }
+
+      active.set(getChildren().get(index));
     }
-
-    active.set(getChildren().get(index));
   }
 
   public void activatePrevious() {
-    int index = getChildren().indexOf(active.get());
+    if(!getChildren().isEmpty()) {
+      int index = getChildren().indexOf(active.get());
 
-    index--;
+      index--;
 
-    if(index < 0) {
-      index = getChildren().size() - 1;
+      if(index < 0) {
+        index = getChildren().size() - 1;
+      }
+
+      active.set(getChildren().get(index));
     }
-
-    active.set(getChildren().get(index));
   }
 
   private void update() {
