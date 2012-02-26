@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class NameDecoder {
-  private static final String RELEASE_YEAR = "[0-9]{4}";
+  private static final String RELEASE_YEAR = "[0-9]{4}(?=(?:[ ,]|$))";  // match exactly 4 digits, but only if followed by space, comma or EOL
   private static final String IMDB = "\\(([0-9]++)\\)";
 
   private static final Pattern MAIN = Pattern.compile("(?i)([^\\[]+)(?: \\[(.+)\\])?");
