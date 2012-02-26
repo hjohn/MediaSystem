@@ -4,14 +4,13 @@ import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
-import javafx.scene.control.TreeItem;
 
 public class SeasonAndEpisodeCellProvider implements CellProvider<MediaNode> {
   private final DuoLineCell cell = new DuoLineCell();
 
   @Override
-  public Node configureCell(TreeItem<MediaNode> treeItem) {
-    MediaItem item = treeItem.getValue().getMediaItem();
+  public Node configureCell(MediaNode mediaNode) {
+    MediaItem item = mediaNode.getMediaItem();
 
     cell.titleProperty().bind(item.titleProperty());
     cell.subtitleProperty().set("");

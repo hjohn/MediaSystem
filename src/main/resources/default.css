@@ -55,12 +55,14 @@
  * List & Tree styles
  */
 
-.list-cell:even, .tree-cell:even {
-  -fx-background-color: null;
+.list-cell:even, .tree-cell:even, .table-cell:even {
+  -fx-background-color: transparent;
 }
-.list-cell:odd, .tree-cell:odd {
-  -fx-background-color: null;
+
+.list-cell:odd, .tree-cell:odd, .table-cell:odd {
+  -fx-background-color: transparent;
 }
+
 .list-cell:focused, .tree-cell:focused {
   -fx-background-color: rgba(173, 216, 230, 0.3);
 }
@@ -134,7 +136,7 @@
   -fx-text-fill: color-blue;
 }
 
-.cell {
+.list-cell, .tree-cell, .option-cell {
   -fx-background-color: transparent;
 
   -fx-border-color: linear-gradient(to right, transparent, color-blue-20 15%, color-blue-20 85%, transparent);
@@ -142,13 +144,13 @@
   -fx-border-insets: 1;
 }
 
-.cell:empty {  
+.list-cell:empty, .tree-cell:empty {  
   -fx-border-color: transparent;
   -fx-border-width: 1;
   -fx-border-insets: 1;
 }
 
-.cell:focused {
+.list-cell:focused, .tree-cell:focused, .option-cell:focused {
   -fx-background-insets: 1, 1, 1;
   -fx-background-color: radial-gradient(center 25% 0%, radius 25%, color-blue 0%, transparent),
                         radial-gradient(center 75% 100%, radius 25%, color-blue 0%, transparent),
@@ -161,7 +163,7 @@
                     
 }
 
-.cell:focused .label {
+.list-cell:focused .label, .tree-cell:focused .label, .option-cell:focused .label {
   -fx-text-fill: color-white;
 }
 
@@ -209,6 +211,20 @@
 }
 
 .scroll-bar .thumb {
+  -fx-stroke-width: 2;
+  -fx-stroke: derive(color-blue-50, -30%);
+  -fx-stroke-type: inside;
   -fx-fill: derive(color-blue-50, -60%);  
+}
+
+.star {
+  -fx-fill: linear-gradient(from 0% 0% to 0% 100%, orange 0%, white 33%, orange 100%);
+  -fx-stroke: yellow;
+  -fx-stroke-width: 1;
+}
+
+.star:disabled {
+  -fx-fill: rgb(125, 125, 125);
+  -fx-stroke: rgb(125, 125, 125);
 }
 

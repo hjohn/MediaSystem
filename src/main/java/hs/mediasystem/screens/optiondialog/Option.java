@@ -1,4 +1,4 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.optiondialog;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -12,7 +12,7 @@ public class Option extends BorderPane {
     this.description = description;
 
     setFocusTraversable(true);
-    getStyleClass().add("cell");
+    getStyleClass().add("option-cell");
 
     setLeft(new Label(description));
     setRight(label);

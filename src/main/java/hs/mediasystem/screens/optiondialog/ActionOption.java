@@ -1,4 +1,4 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.optiondialog;
 
 import hs.mediasystem.util.Callable;
 

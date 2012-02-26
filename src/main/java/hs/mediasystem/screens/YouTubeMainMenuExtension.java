@@ -3,6 +3,7 @@ package hs.mediasystem.screens;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.db.YouTubeEnricher;
 import hs.mediasystem.fs.YouTubeMediaTree;
+import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 

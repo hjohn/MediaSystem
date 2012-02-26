@@ -9,6 +9,7 @@ import java.util.Date;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
+import javafx.beans.value.ObservableValue;
 
 public class MediaItemFormatter {
   private static final ThreadSafeDateFormat DATE_FORMAT = new ThreadSafeDateFormat(DateFormat.getDateInstance(DateFormat.MEDIUM));
@@ -32,7 +33,7 @@ public class MediaItemFormatter {
     };
   }
 
-  public static StringBinding releaseTimeBinding(final ObjectBinding<MediaItem> item) {
+  public static StringBinding releaseTimeBinding(final ObservableValue<MediaItem> item) {
     return new StringBinding() {
       final ObjectBinding<Date> selectReleaseDate = Bindings.select(item, "releaseDate");
       final ObjectBinding<Integer> selectReleaseYear = Bindings.select(item, "releaseYear");

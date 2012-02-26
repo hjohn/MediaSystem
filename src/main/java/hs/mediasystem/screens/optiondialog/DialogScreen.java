@@ -1,4 +1,4 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.optiondialog;
 
 import java.util.ArrayList;
 import java.util.List;

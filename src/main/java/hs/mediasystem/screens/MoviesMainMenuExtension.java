@@ -3,6 +3,7 @@ package hs.mediasystem.screens;
 import hs.mediasystem.db.TmdbMovieEnricher;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.fs.MoviesMediaTree;
+import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
 
 import java.nio.file.Paths;
 

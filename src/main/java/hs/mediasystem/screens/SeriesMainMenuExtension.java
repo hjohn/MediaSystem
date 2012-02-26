@@ -4,6 +4,7 @@ import hs.mediasystem.db.TvdbEpisodeEnricher;
 import hs.mediasystem.db.TvdbSerieEnricher;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.fs.SeriesMediaTree;
+import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
 
 import java.nio.file.Paths;
 

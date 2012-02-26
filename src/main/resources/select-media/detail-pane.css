@@ -1,0 +1,43 @@
+.group-name {
+  -fx-font: bold 16pt "Arial";
+  -fx-wrap-text: true;
+}
+
+.title {
+  -fx-font: bold 24pt "Arial";
+  -fx-wrap-text: true;
+}
+
+.subtitle {
+  -fx-font: 13pt "Arial";
+  -fx-label-padding: 0 0 0 10;
+  -fx-wrap-text: true;
+}
+
+.star-rating {
+  -fx-padding: 5 10 5 0;
+}
+
+.rating {
+  -fx-font: bold 16pt "Arial";
+}
+
+.genres {
+  -fx-font: bold 14pt "Arial";
+  -fx-wrap-text: true;
+}
+
+.plot {
+  -fx-font: 16pt "Arial"; 
+  -fx-wrap-text: true;
+}
+
+.fields {
+  -fx-hgap: 20;
+}
+
+.header {
+  -fx-font: bold 12pt "Arial";
+  -fx-text-fill: derive(color-blue, -30%);
+  -fx-label-padding: 30 0 0 0;
+}

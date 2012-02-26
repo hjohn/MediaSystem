@@ -1,4 +1,4 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.optiondialog;
 
 import hs.mediasystem.util.StringConverter;
 import javafx.beans.binding.StringBinding;

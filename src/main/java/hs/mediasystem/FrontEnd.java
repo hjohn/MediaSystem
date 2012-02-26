@@ -7,9 +7,9 @@ import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MoviesMainMenuExtension;
 import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.ProgramController;
-import hs.mediasystem.screens.SelectMediaPane;
 import hs.mediasystem.screens.SeriesMainMenuExtension;
 import hs.mediasystem.screens.YouTubeMainMenuExtension;
+import hs.mediasystem.screens.selectmedia.ListSelectMediaView;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
@@ -84,7 +84,7 @@ public class FrontEnd extends Application {
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(SeriesMainMenuExtension.class);
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(YouTubeMainMenuExtension.class);
 
-        bind(SelectMediaView.class).to(SelectMediaPane.class);
+        bind(SelectMediaView.class).to(ListSelectMediaView.class);
       }
 
       @Provides

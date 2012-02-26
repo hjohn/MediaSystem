@@ -4,6 +4,8 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SublightSubtitleProvider;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.screens.Navigator.Destination;
+import hs.mediasystem.screens.optiondialog.DialogScreen;
+import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 

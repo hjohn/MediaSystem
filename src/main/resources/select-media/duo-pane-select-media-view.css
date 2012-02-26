@@ -1,0 +1,13 @@
+
+.content-box-grid {
+  -fx-padding: 10;
+  -fx-hgap: 20;
+  -fx-vgap: 20;
+}
+
+.content-box {
+  -fx-background-color: color-content-background;
+  -fx-background-radius: 20;
+  -fx-padding: 30;
+  -fx-hgap: 20;
+}
