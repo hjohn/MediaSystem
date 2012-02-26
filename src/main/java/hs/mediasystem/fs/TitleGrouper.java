@@ -7,7 +7,10 @@ public class TitleGrouper implements Grouper<MediaItem> {
 
   @Override
   public Object getGroup(MediaItem item) {
-    return item.getTitle();
+    if(item.getEpisode() != null) {
+      return item.getTitle();
+    }
+    return item.getTitle() + "/" + item.getReleaseYear();
   }
 
 }
