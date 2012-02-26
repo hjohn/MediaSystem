@@ -26,8 +26,14 @@ public class ScrollBarSkin implements Skin<ScrollBar> {
     return new Group() {{
       getChildren().add(new Rectangle() {{
         getStyleClass().add("track");
-        widthProperty().bind(scrollBar.widthProperty());
-        heightProperty().bind(scrollBar.heightProperty());
+        if(scrollBar.getOrientation() == Orientation.HORIZONTAL) {
+          widthProperty().bind(scrollBar.widthProperty());
+          setHeight(16);
+        }
+        else {
+          setWidth(16);
+          heightProperty().bind(scrollBar.heightProperty());
+        }
       }});
       getChildren().add(new Rectangle() {{
         getStyleClass().add("thumb");
@@ -36,12 +42,12 @@ public class ScrollBarSkin implements Skin<ScrollBar> {
         NumberBinding position = Bindings.divide(Bindings.subtract(scrollBar.valueProperty(), scrollBar.minProperty()), range);
 
         if(scrollBar.getOrientation() == Orientation.HORIZONTAL) {
-          heightProperty().bind(scrollBar.heightProperty());
+          setHeight(16);
           widthProperty().bind(scrollBar.visibleAmountProperty().divide(range).multiply(scrollBar.widthProperty()));
           xProperty().bind(Bindings.subtract(scrollBar.widthProperty(), widthProperty()).multiply(position));
         }
         else {
-          widthProperty().bind(scrollBar.widthProperty());
+          setWidth(16);
           heightProperty().bind(scrollBar.visibleAmountProperty().divide(range).multiply(scrollBar.heightProperty()));
           yProperty().bind(Bindings.subtract(scrollBar.heightProperty(), heightProperty()).multiply(position));
         }
