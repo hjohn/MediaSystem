@@ -205,17 +205,19 @@ public class TreeListPane extends BorderPane implements ListPane {
 
     @Override
     public ObservableList<TreeItem<MediaNode>> getChildren() {
+      ObservableList<TreeItem<MediaNode>> treeChildren = super.getChildren();
+
       if(!childrenPopulated) {
         childrenPopulated = true;
 
         if(getValue().hasChildren()) {
           for(MediaNode child : getValue().getChildren()) {
-            super.getChildren().add(new MediaNodeTreeItem(child));
+            treeChildren.add(new MediaNodeTreeItem(child));
           }
         }
       }
 
-      return super.getChildren();
+      return treeChildren;
     }
   }
 
