@@ -24,7 +24,7 @@ public class MovieDecoder implements Decoder {
       imdbNumber = String.format("tt%07d", Integer.parseInt(imdb));
     }
 
-    Integer episode = sequence == null ? 1 : Integer.parseInt(sequence);
+    Integer episode = sequence == null ? null : Integer.parseInt(sequence);
 
     return new LocalInfo<>(path.toString(), mediaType, null, title, subtitle, imdbNumber, year, null, episode, null);
   }

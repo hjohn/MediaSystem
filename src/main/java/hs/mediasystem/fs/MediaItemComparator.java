@@ -15,7 +15,7 @@ public class MediaItemComparator implements Comparator<MediaItem> {
       result = Integer.compare(o1.getSeason() != null ? o1.getSeason() : Integer.MAX_VALUE, o2.getSeason() != null ? o2.getSeason() : Integer.MAX_VALUE);
 
       if(result == 0) {
-        result = Integer.compare(o1.getEpisode(), o2.getEpisode());
+        result = Integer.compare(o1.getEpisode() != null ? o1.getEpisode() : Integer.MAX_VALUE, o2.getEpisode() != null ? o2.getEpisode() : Integer.MAX_VALUE);
 
         if(result == 0) {
           result = o1.getSubtitle().compareTo(o2.getSubtitle());
