@@ -63,29 +63,24 @@ public class StandardLayout {
       Collection<List<MediaItem>> groupedItems = Groups.group(children, new SeasonGrouper());
 
       for(List<MediaItem> group : groupedItems) {
-        if(group.size() > 1) { // TODO really?  We want to add seasons with just 1 episode as a seperate one and not as a Season??  Test this.
-          MediaItem episodeOne = group.get(0);
-          Season s;
+        MediaItem episodeOne = group.get(0);
+        Season s;
 
-          if(episodeOne.getSeason() == null) {
-            s = new Season(parent.getMediaTree(), parent.getTitle(), 0);
-          }
-          else {
-            s = new Season(parent.getMediaTree(), parent.getTitle(), episodeOne.getSeason());
-          }
-
-          Collections.sort(group, EpisodeComparator.INSTANCE);
-          List<MediaNode> nodeChildren = new ArrayList<>();
-
-          for(MediaItem item : group) {
-            nodeChildren.add(new MediaNode(this, item));
-          }
-
-          output.add(new MediaNode(this, s, nodeChildren));
+        if(episodeOne.getSeason() == null) {
+          s = new Season(parent.getMediaTree(), parent.getTitle(), 0);
         }
         else {
-          output.add(new MediaNode(this, group.get(0)));
+          s = new Season(parent.getMediaTree(), parent.getTitle(), episodeOne.getSeason());
         }
+
+        Collections.sort(group, EpisodeComparator.INSTANCE);
+        List<MediaNode> nodeChildren = new ArrayList<>();
+
+        for(MediaItem item : group) {
+          nodeChildren.add(new MediaNode(this, item));
+        }
+
+        output.add(new MediaNode(this, s, nodeChildren));
       }
     }
     else {
