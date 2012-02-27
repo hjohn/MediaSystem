@@ -406,4 +406,9 @@ public class MPlayerPlayer implements Player {
   public ReadOnlyLongProperty lengthProperty() {
     throw new UnsupportedOperationException();
   }
+
+  @Override
+  public void setScreen(int screenNumber) {
+    throw new UnsupportedOperationException();
+  }
 }

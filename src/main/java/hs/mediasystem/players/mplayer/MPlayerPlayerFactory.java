@@ -4,7 +4,6 @@ import hs.mediasystem.PlayerFactory;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.util.ini.Ini;
 
-import java.awt.GraphicsDevice;
 import java.nio.file.Path;
 
 /**
@@ -18,7 +17,7 @@ public class MPlayerPlayerFactory implements PlayerFactory {
   }
 
   @Override
-  public Player create(Ini ini, GraphicsDevice device) {
+  public Player create(Ini ini) {
     return new MPlayerPlayer(mplayerPath, true);
   }
 }

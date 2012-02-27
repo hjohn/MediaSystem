@@ -13,8 +13,6 @@ import hs.mediasystem.screens.selectmedia.ListSelectMediaView;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -49,20 +47,14 @@ public class FrontEnd extends Application {
 
     String factoryClassName = section.getDefault("player.factoryClass", "hs.mediasystem.players.vlc.VLCPlayerFactory");
 
-    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    GraphicsDevice[] gs = ge.getScreenDevices();
-
-    int screen = Integer.parseInt(INI.getSection("general").getDefault("screen", "0"));
-    GraphicsDevice graphicsDevice = (screen >= 0 && screen < gs.length) ? gs[screen] : gs[0];
-
-    System.out.println("Using display: " + graphicsDevice + "; " + graphicsDevice.getDisplayMode().getWidth() + "x" + graphicsDevice.getDisplayMode().getHeight() + "x" + graphicsDevice.getDisplayMode().getBitDepth() + " @ " + graphicsDevice.getDisplayMode().getRefreshRate() + " Hz");
-
     PlayerFactory playerFactory = (PlayerFactory)Class.forName(factoryClassName).newInstance();
-    player = playerFactory.create(INI, graphicsDevice);
+    player = playerFactory.create(INI);
   }
 
   @Override
   public void start(Stage primaryStage) throws Exception {
+    System.out.println("javafx.runtime.version: " + System.getProperties().get("javafx.runtime.version"));
+
     PGConnectionPoolDataSource dataSource = new PGConnectionPoolDataSource();
 
     Section db = INI.getSection("database");

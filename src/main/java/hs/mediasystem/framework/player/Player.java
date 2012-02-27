@@ -110,4 +110,6 @@ public interface Player {
   FloatProperty brightnessProperty();
 
   ObservableList<AudioTrack> getAudioTracks();
+
+  void setScreen(int screenNumber);
 }

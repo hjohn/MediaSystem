@@ -15,6 +15,8 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,34 +38,36 @@ import uk.co.caprica.vlcj.player.TrackDescription;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 public class VLCPlayer implements Player {
+  private final MediaPlayerFactory factory;
   private final EmbeddedMediaPlayer mediaPlayer;
-  private final Frame frame;
+  private Frame frame;
 
-  public VLCPlayer(GraphicsDevice device, String... args) {
+  public VLCPlayer(int screenNumber, String... args) {
     List<String> arguments = new ArrayList<>(Arrays.asList(args));
 
     arguments.add("--no-video-title-show");
     arguments.add("--network-caching");
     arguments.add("5000");
 
-    MediaPlayerFactory factory = new MediaPlayerFactory(arguments);
-
+    factory = new MediaPlayerFactory(arguments);
     mediaPlayer = factory.newEmbeddedMediaPlayer();
 
-    Canvas canvas = new Canvas();
-
-    frame = new Frame(device.getDefaultConfiguration());
-
-    frame.setLayout(new BorderLayout());
-    frame.setUndecorated(true);
-    frame.setExtendedState(Frame.MAXIMIZED_BOTH);
-//    device.setFullScreenWindow(frame);
-
-    frame.add(canvas, BorderLayout.CENTER);
-    frame.setBackground(new Color(0, 0, 0));
-    frame.setVisible(true);
-
-    mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
+    setScreen(screenNumber);
+//
+//    Canvas canvas = new Canvas();
+//
+//    frame = new Frame(device.getDefaultConfiguration());
+//
+//    frame.setLayout(new BorderLayout());
+//    frame.setUndecorated(true);
+//    frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+////    device.setFullScreenWindow(frame);
+//
+//    frame.add(canvas, BorderLayout.CENTER);
+//    frame.setBackground(new Color(0, 0, 0));
+//    frame.setVisible(true);
+//
+//    mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
     mediaPlayer.addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
       private AtomicInteger ignoreFinish = new AtomicInteger();
       private boolean videoAdjusted;
@@ -270,6 +274,33 @@ public class VLCPlayer implements Player {
       if(spuDescription.id() > 0) {
         subtitles.add(new Subtitle(spuDescription.id(), spuDescription.description()));
       }
+    }
+  }
+
+  @Override
+  public final void setScreen(int screenNumber) {
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice[] gs = ge.getScreenDevices();
+
+    GraphicsDevice graphicsDevice = (screenNumber >= 0 && screenNumber < gs.length) ? gs[screenNumber] : gs[0];
+
+    if(frame == null) {
+      Canvas canvas = new Canvas();
+
+      frame = new Frame(graphicsDevice.getDefaultConfiguration());
+      frame.setLayout(new BorderLayout());
+      frame.setUndecorated(true);
+      frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+      frame.add(canvas, BorderLayout.CENTER);
+      frame.setBackground(new Color(0, 0, 0));
+      frame.setVisible(true);
+
+      mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
+    }
+    else {
+      Rectangle rectangle = graphicsDevice.getDefaultConfiguration().getBounds();
+
+      frame.setBounds(rectangle);
     }
   }
 

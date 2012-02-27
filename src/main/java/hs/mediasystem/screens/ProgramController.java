@@ -49,6 +49,7 @@ import javax.inject.Singleton;
 public class ProgramController {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
   private static final KeyCombination KEY_S = new KeyCodeCombination(KeyCode.S);
+  private static final KeyCombination KEY_CTRL_ALT_S = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN);
 
   private final Stage mainStage;  // WORKAROUND: Two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing; refactor this
   private final Stage transparentStage;
@@ -68,7 +69,7 @@ public class ProgramController {
   }};
 
   private final Navigator navigator = new Navigator();
-  private final int screenNumber;
+  private int screenNumber;
 
   @Inject
   public ProgramController(Ini ini, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider) {
@@ -93,6 +94,9 @@ public class ProgramController {
     mainStage = new Stage(StageStyle.UNDECORATED);
     transparentStage = new Stage(StageStyle.TRANSPARENT);
 
+    mainStage.setTitle("MediaSystem");
+    transparentStage.setTitle("MediaSystem");
+
     navigator.onNavigation().set(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
@@ -116,6 +120,18 @@ public class ProgramController {
         if(BACK_SPACE.match(event)) {
           navigator.back();
           event.consume();
+        }
+        else if(KEY_CTRL_ALT_S.match(event)) {
+          ObservableList<Screen> screens = Screen.getScreens();
+          screenNumber++;
+
+          if(screenNumber >= screens.size()) {
+            screenNumber = 0;
+          }
+
+          playerPresentation.setScreen(screenNumber);
+          setupStageLocation(mainStage);
+          setupStageLocation(transparentStage);
         }
         else if(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
           KeyCode code = event.getCode();
@@ -207,10 +223,14 @@ public class ProgramController {
     ObservableList<Screen> screens = Screen.getScreens();
     Screen screen = screens.size() <= screenNumber ? Screen.getPrimary() : screens.get(screenNumber);
 
-    Rectangle2D bounds = screen.getVisualBounds();
+    Rectangle2D bounds = screen.getBounds();
     boolean primary = screen.equals(Screen.getPrimary());    // WORKAROUND: this doesn't work nice in combination with full screen, so this hack is used to prevent going fullscreen when screen is not primary
 
     if(primary) {
+      stage.setX(bounds.getMinX());
+      stage.setY(bounds.getMinY());
+      stage.setWidth(bounds.getWidth());
+      stage.setHeight(bounds.getHeight());
       stage.setFullScreen(true);
     }
     else {
