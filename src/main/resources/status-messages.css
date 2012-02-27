@@ -1,5 +1,5 @@
 
-#status-messages {
+.status-messages {
   -fx-spacing: 10;
   
   -fx-background-color: color-black-50;
@@ -8,28 +8,28 @@
   -fx-padding: 10;
 }
 
-#status-messages .title {
+.title {
   -fx-font: bold 18pt "Arial";
   -fx-wrap-text: true;
 }
 
-#status-messages .item {
+.item {
   -fx-border-width: 2;
   -fx-border-color: color-blue-20;
   -fx-border-radius: 10;
   -fx-padding: 10;
 }
 
-#status-messages .description {
+.description {
   -fx-padding: 0 10 10 10;
   -fx-wrap-text: true;
 }
 
-#status-messages .progress-indicator {
+.progress-indicator {
   -fx-translate-y: 5;
   -fx-padding: 0 10 0 0;
 }
 
-#status-messages .progress-indicator .percentage {
+.progress-indicator .percentage {
   visibility: hidden;
 }

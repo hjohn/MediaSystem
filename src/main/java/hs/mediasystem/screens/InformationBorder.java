@@ -70,7 +70,7 @@ public class InformationBorder extends HBox {
   }};
 
   public InformationBorder() {
-    getStyleClass().add("information-border");
+    getStylesheets().add("information-border.css");
 
     getChildren().add(new HBox() {{
       getStyleClass().add("elements");

@@ -42,7 +42,7 @@ public class MainScreen extends BorderPane {
 
   @Inject
   public MainScreen(final ProgramController controller, final Set<MainMenuExtension> mainMenuExtensions) {
-    setId("main-screen");
+    getStylesheets().add("main-screen.css");
 
     final Set<MainMenuExtension> extensions = new TreeSet<>(new Comparator<MainMenuExtension>() {
       @Override

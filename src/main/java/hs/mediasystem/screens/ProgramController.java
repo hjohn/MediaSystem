@@ -64,7 +64,8 @@ public class ProgramController {
   private final PlayerPresentation playerPresentation;
 
   private final VBox messagePane = new VBox() {{
-    setId("status-messages");
+    getStylesheets().add("status-messages.css");
+    getStyleClass().add("status-messages");
     setVisible(false);
   }};
 
@@ -82,6 +83,7 @@ public class ProgramController {
 
     sceneRoot.getChildren().addAll(contentBorderPane, overlayBorderPane);
     scene.setRoot(sceneRoot);
+    scene.getStylesheets().add("default.css");
 
     final InformationBorder informationBorder = new InformationBorder();
 
@@ -251,11 +253,6 @@ public class ProgramController {
   }
 
   private void displayOnStage(final Node node, Stage newStage, Stage oldStage, Color background) {
-    ObservableList<String> stylesheets = scene.getStylesheets();
-
-    stylesheets.clear();
-    stylesheets.addAll("default.css", "status-messages.css", "information-border.css", node.getId() + ".css");
-
     oldStage.setScene(null);
     scene.setFill(background);
     contentBorderPane.setCenter(node);

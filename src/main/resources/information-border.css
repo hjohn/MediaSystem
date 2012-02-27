@@ -1,10 +1,10 @@
-.information-border .elements {
+.elements {
   -fx-background-color: color-content-background;
   -fx-background-radius: 0 0 8 0;
   -fx-font: bold 12pt "Arial";
 }
 
-.information-border .element {
+.element {
   -fx-padding: 5 22 5 20;
   -fx-alignment: center;
   -fx-border-color: derive(color-content-background, -100%), derive(color-content-background, -100%);
@@ -12,38 +12,38 @@
   -fx-border-width: 0 0 0 1, 0 0 0 1;
 }
 
-.information-border .memory .bar {
+.memory .bar {
   -fx-border-width: 1;
   -fx-border-color: color-blue;
   -fx-padding: 2;
 }
 
-.information-border .memory .label {
+.memory .label {
   -fx-font: bold 12pt "Arial";
   -fx-text-fill: white;
 }
 
-.information-border .program-name .label {
+.program-name .label {
   -fx-text-fill: white;
 }
 
-.information-border .program-name {
+.program-name {
   -fx-padding: 0 40 0 30;
   -fx-scale-x: 1.5;
   -fx-scale-y: 1.5;
 }
 
-.information-border .program-name .left {
+.program-name .left {
   -fx-translate-y: -2; 
 }
 
-.information-border .program-name .center {
+.program-name .center {
   -fx-label-padding: 0 2 0 1;
   -fx-font: bold italic 12pt "Arial";
   -fx-scale-x: 2.0;
   -fx-scale-y: 2.0;
 }
 
-.information-border .program-name .right {
+.program-name .right {
   -fx-translate-y: 2; 
 }
