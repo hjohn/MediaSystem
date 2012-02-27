@@ -57,7 +57,7 @@ public class ItemsDao {
   public Item getItem(final Identifier identifier) throws ItemNotFoundException {
     try {
       try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("SELECT id, imdbid, title, subtitle, releasedate, rating, plot, runtime, version, season, episode, language, tagline, genres FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
+          PreparedStatement statement = connection.prepareStatement("SELECT id, imdbid, title, subtitle, releasedate, rating, plot, runtime, version, season, episode, language, tagline, genres, background IS NOT NULL AS hasBackground, banner IS NOT NULL AS hasBanner, poster IS NOT NULL AS hasPoster FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
         statement.setString(1, identifier.getType());
         statement.setString(2, identifier.getProvider());
         statement.setString(3, identifier.getProviderId());
@@ -81,9 +81,15 @@ public class ItemsDao {
               setLanguage(rs.getString("language"));
               setTagline(rs.getString("tagline"));
 
-              setBackground(new ImageSource(getId(), ImageType.BACKGROUND));
-              setBanner(new ImageSource(getId(), ImageType.BANNER));
-              setPoster(new ImageSource(getId(), ImageType.POSTER));
+              if(rs.getBoolean("hasBackground")) {
+                setBackground(new ImageSource(getId(), ImageType.BACKGROUND));
+              }
+              if(rs.getBoolean("hasBanner")) {
+                setBanner(new ImageSource(getId(), ImageType.BANNER));
+              }
+              if(rs.getBoolean("hasPoster")) {
+                setPoster(new ImageSource(getId(), ImageType.POSTER));
+              }
 
               String genres = rs.getString("genres");
               setGenres(genres == null ? new String[] {} : genres.split(","));

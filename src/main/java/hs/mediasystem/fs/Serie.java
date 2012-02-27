@@ -5,10 +5,11 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Serie extends MediaItem {
-  private List<? extends MediaItem> children;
+  private List<MediaItem> children;
 
   public Serie(MediaTree mediaTree, LocalInfo<?> localInfo) {
     super(mediaTree, localInfo);
@@ -22,7 +23,13 @@ public class Serie extends MediaItem {
   @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      children = new EpisodeScanner(getMediaTree(), new EpisodeDecoder(), "EPISODE").scan(Paths.get(getLocalInfo().getUri()));
+      List<LocalInfo<Object>> scanResults = new EpisodeScanner(new EpisodeDecoder(), "EPISODE").scan(Paths.get(getLocalInfo().getUri()));
+
+      children = new ArrayList<>();
+
+      for(LocalInfo<Object> localInfo : scanResults) {
+        children.add(new MediaItem(this, localInfo));
+      }
     }
 
     return children;

@@ -52,9 +52,9 @@ public class TvdbSerieEnricher implements ItemEnricher<Object> {
       item.setRating(Float.valueOf(series.getRating()));
       item.setPlot(series.getOverview());
 
-      item.setBanner(new MemorySource<>(banner));
-      item.setPoster(new MemorySource<>(poster));
-      item.setBackground(new MemorySource<>(background));
+      item.setBackground(background == null ? null : new MemorySource<>(background));
+      item.setBanner(banner == null ? null : new MemorySource<>(banner));
+      item.setPoster(poster == null ? null : new MemorySource<>(poster));
 
       item.setGenres(series.getGenres().toArray(new String[series.getGenres().size()]));
       item.setLanguage(series.getLanguage());

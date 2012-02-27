@@ -2,7 +2,6 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.db.Source;
 import hs.mediasystem.util.ImageHandle;
-import hs.mediasystem.util.annotation.Nullable;
 
 public class SourceImageHandle implements ImageHandle {
   private final Source<byte[]> source;
@@ -15,7 +14,7 @@ public class SourceImageHandle implements ImageHandle {
     this.key = key;
   }
 
-  @Override @Nullable
+  @Override
   public byte[] getImageData() {
     return source.get();
   }

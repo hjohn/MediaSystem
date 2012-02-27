@@ -158,9 +158,9 @@ public class TmdbMovieEnricher implements ItemEnricher<Object> {
         item.setTagline(movie.getTagline());
         item.setLanguage(movie.getLanguage());
 
-        item.setBackground(new MemorySource<>(background));
-        item.setBanner(Item.NULL);
-        item.setPoster(new MemorySource<>(poster));
+        item.setBackground(background == null ? null : new MemorySource<>(background));
+        item.setBanner(null);
+        item.setPoster(poster == null ? null : new MemorySource<>(poster));
 
         List<String> genres = new ArrayList<>();
 

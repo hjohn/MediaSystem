@@ -4,12 +4,13 @@ import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SeriesMediaTree extends AbstractMediaTree {
   private final Path root;
 
-  private List<? extends MediaItem> children;
+  private List<MediaItem> children;
 
   public SeriesMediaTree(Path root) {
     this.root = root;
@@ -21,7 +22,13 @@ public class SeriesMediaTree extends AbstractMediaTree {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {
-          children = new SerieScanner(SeriesMediaTree.this).scan(root);
+          List<LocalInfo<Object>> scanResults = new SerieScanner().scan(root);
+
+          children = new ArrayList<>();
+
+          for(LocalInfo<Object> localInfo : scanResults) {
+            children.add(new Serie(SeriesMediaTree.this, localInfo));
+          }
         }
 
         return children;

@@ -50,9 +50,9 @@ public class TvdbEpisodeEnricher implements ItemEnricher<Object> {
     }
     item.setPlot(episode.getOverview());
 
-    item.setBackground(Item.NULL);
-    item.setBanner(Item.NULL);
-    item.setPoster(new MemorySource<>(poster));
+    item.setBackground(null);
+    item.setBanner(null);
+    item.setPoster(poster == null ? null : new MemorySource<>(poster));
 
     System.out.println(">>> Do something with this: first Aired = " + episode.getFirstAired());  // "2002-02-26"
     item.setLanguage(episode.getLanguage());

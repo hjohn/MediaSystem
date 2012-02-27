@@ -26,7 +26,25 @@ public class BackgroundPane extends ScrollPane {
   private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
   public ObjectProperty<MediaItem> mediaItemProperty() { return mediaItem; }
 
-  private final ObjectBinding<ImageHandle> backgroundHandle = Bindings.select(mediaItem, "background");
+  private final ObjectBinding<ImageHandle> backgroundHandle = new ObjectBinding<ImageHandle>() {
+    private final ObjectBinding<ImageHandle> selectBackground = Bindings.select(mediaItem, "background");
+
+    {
+      bind(selectBackground);
+    }
+
+    @Override
+    protected ImageHandle computeValue() {
+      ImageHandle handle = selectBackground.get();
+      MediaItem item = mediaItem.get();
+
+      if(handle == null && item != null && item.getParent() != null) {
+        handle = item.getParent().getBackground();
+      }
+
+      return handle;
+    }
+  };
 
   private final ObjectProperty<Image> wantedBackground = new AsyncImageProperty(backgroundHandle);
 

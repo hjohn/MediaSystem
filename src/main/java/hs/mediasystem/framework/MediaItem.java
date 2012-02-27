@@ -20,15 +20,17 @@ import javafx.beans.property.StringProperty;
 public class MediaItem {
   public enum State {STANDARD, QUEUED, ENRICHED}
 
-  private final LocalInfo<?> localInfo;
   private final MediaTree mediaTree;
+  private final MediaItem parent;
+  private final LocalInfo<?> localInfo;
 
   private State state = State.STANDARD;
   private String language;
   private String tagline;
 
-  public MediaItem(MediaTree mediaTree, final LocalInfo<?> localInfo) {
+  private MediaItem(MediaTree mediaTree, MediaItem parent, final LocalInfo<?> localInfo) {
     this.mediaTree = mediaTree;
+    this.parent = parent;
     this.localInfo = localInfo;
 
     groupName.set(localInfo.getGroupName() == null ? "" : localInfo.getGroupName());
@@ -57,6 +59,18 @@ public class MediaItem {
     releaseYear.set(localInfo.getReleaseYear());
     season.set(localInfo.getSeason());
     episode.set(localInfo.getEpisode());
+  }
+
+  public MediaItem(MediaTree mediaTree, final LocalInfo<?> localInfo) {
+    this(mediaTree, null, localInfo);
+  }
+
+  public MediaItem(MediaItem parent, final LocalInfo<?> localInfo) {
+    this(parent.getMediaTree(), parent, localInfo);
+  }
+
+  public MediaItem getParent() {
+    return parent;
   }
 
   public LocalInfo<?> getLocalInfo() {

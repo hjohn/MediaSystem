@@ -5,6 +5,7 @@ import hs.mediasystem.db.Identifier;
 import hs.mediasystem.db.IdentifyException;
 import hs.mediasystem.db.Item;
 import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.db.Source;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemEvent;
 import hs.mediasystem.fs.SourceImageHandle;
@@ -66,9 +67,9 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
             @Override
             public void run() {
               mediaItem.officialTitleProperty().set(item.getTitle());
-              mediaItem.backgroundProperty().set(new SourceImageHandle(item.getBackground(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-background"));
-              mediaItem.bannerProperty().set(new SourceImageHandle(item.getBanner(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-banner"));
-              mediaItem.posterProperty().set(new SourceImageHandle(item.getPoster(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-poster"));
+              mediaItem.backgroundProperty().set(createImageHandle(item.getBackground(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-background"));
+              mediaItem.bannerProperty().set(createImageHandle(item.getBanner(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-banner"));
+              mediaItem.posterProperty().set(createImageHandle(item.getPoster(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-poster"));
               mediaItem.plotProperty().set(item.getPlot());
               mediaItem.ratingProperty().set(item.getRating());
               mediaItem.releaseDateProperty().set(item.getReleaseDate());
@@ -77,6 +78,10 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
               mediaItem.setTagline(item.getTagline());
               mediaItem.runtimeProperty().set(item.getRuntime());
               mediaItem.setState(MediaItem.State.ENRICHED);
+            }
+
+            private SourceImageHandle createImageHandle(Source<byte[]> data, String key) {
+              return data == null ? null : new SourceImageHandle(data, key);
             }
           });
         }
