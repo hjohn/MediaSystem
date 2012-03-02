@@ -26,7 +26,7 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
   }
 
   public void enrich(final MediaItem mediaItem, final boolean bypassCache) {
-    executorService.execute(new Task<Void>() {
+    executorService.execute(mediaItem, new Task<Void>() {
       @Override
       public Void call() {
         updateTitle("Fetching metadata");
