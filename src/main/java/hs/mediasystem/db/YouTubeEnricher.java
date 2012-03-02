@@ -38,8 +38,6 @@ public class YouTubeEnricher implements ItemEnricher<VideoEntry> {
 
     String url = bestThumbnail == null ? null : bestThumbnail.getUrl();
 
-    final byte[] poster = url != null ? Downloader.tryReadURL(url) : null;
-
     YouTubeMediaGroup mediaGroup = entry.getMediaGroup();
 
     Item item = new Item();
@@ -58,9 +56,9 @@ public class YouTubeEnricher implements ItemEnricher<VideoEntry> {
 //      stats.getViewCount();
 //    }
 
-    item.setBackground(Item.NULL);
-    item.setBanner(Item.NULL);
-    item.setPoster(new MemorySource<>(poster));
+    item.setBackgroundURL(null);
+    item.setBannerURL(null);
+    item.setPosterURL(url);
 
     return item;
   }

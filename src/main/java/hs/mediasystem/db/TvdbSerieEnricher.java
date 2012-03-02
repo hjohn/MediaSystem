@@ -42,19 +42,15 @@ public class TvdbSerieEnricher implements ItemEnricher<Object> {
         throw new ItemNotFoundException(identifier);
       }
 
-      byte[] banner = Downloader.tryReadURL(series.getBanner());
-      byte[] poster = Downloader.tryReadURL(series.getPoster());
-      byte[] background = Downloader.tryReadURL(series.getFanart());
-
       Item item = new Item();
 
       item.setTitle(series.getSeriesName());
       item.setRating(Float.valueOf(series.getRating()));
       item.setPlot(series.getOverview());
 
-      item.setBackground(background == null ? null : new MemorySource<>(background));
-      item.setBanner(banner == null ? null : new MemorySource<>(banner));
-      item.setPoster(poster == null ? null : new MemorySource<>(poster));
+      item.setBackgroundURL(series.getFanart());
+      item.setBannerURL(series.getBanner());
+      item.setPosterURL(series.getPoster());
 
       item.setGenres(series.getGenres().toArray(new String[series.getGenres().size()]));
       item.setLanguage(series.getLanguage());

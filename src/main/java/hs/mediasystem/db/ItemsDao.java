@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -54,10 +55,29 @@ public class ItemsDao {
     }
   }
 
+  public void storeImage(int id, ImageType type, byte[] data) {
+    System.out.println("[FINE] ItemsDao.storeImage() - Storing image " + type + "(id=" + id + ")");
+
+    try {
+      String column = type.name().toLowerCase();
+
+      try(Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement("UPDATE items SET " + column + "=? WHERE id = ?")) {
+        statement.setObject(1, data);
+        statement.setInt(2, id);
+
+        statement.execute();
+      }
+    }
+    catch(SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public Item getItem(final Identifier identifier) throws ItemNotFoundException {
     try {
       try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("SELECT id, imdbid, title, subtitle, releasedate, rating, plot, runtime, version, season, episode, language, tagline, genres, background IS NOT NULL AS hasBackground, banner IS NOT NULL AS hasBanner, poster IS NOT NULL AS hasPoster FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
+          PreparedStatement statement = connection.prepareStatement("SELECT id, imdbid, title, subtitle, releasedate, rating, plot, runtime, version, season, episode, language, tagline, genres, backgroundurl, bannerurl, posterurl, background IS NOT NULL AS hasBackground, banner IS NOT NULL AS hasBanner, poster IS NOT NULL AS hasPoster FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
         statement.setString(1, identifier.getType());
         statement.setString(2, identifier.getProvider());
         statement.setString(3, identifier.getProviderId());
@@ -80,15 +100,29 @@ public class ItemsDao {
               setVersion(rs.getInt("version"));
               setLanguage(rs.getString("language"));
               setTagline(rs.getString("tagline"));
+              setBackgroundURL(rs.getString("backgroundurl"));
+              setBannerURL(rs.getString("bannerurl"));
+              setPosterURL(rs.getString("posterurl"));
 
               if(rs.getBoolean("hasBackground")) {
                 setBackground(new ImageSource(getId(), ImageType.BACKGROUND));
               }
+              else if(getBackgroundURL() != null) {
+                setBackground(new URLImageSource(getId(), getBackgroundURL(), ImageType.BACKGROUND));
+              }
+
               if(rs.getBoolean("hasBanner")) {
                 setBanner(new ImageSource(getId(), ImageType.BANNER));
               }
+              else if(getBannerURL() != null) {
+                setBanner(new URLImageSource(getId(), getBannerURL(), ImageType.BANNER));
+              }
+
               if(rs.getBoolean("hasPoster")) {
                 setPoster(new ImageSource(getId(), ImageType.POSTER));
+              }
+              else if(getPosterURL() != null) {
+                setPoster(new URLImageSource(getId(), getPosterURL(), ImageType.POSTER));
               }
 
               String genres = rs.getString("genres");
@@ -123,14 +157,29 @@ public class ItemsDao {
       }
 
       try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")")) {
+          PreparedStatement statement = connection.prepareStatement("INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")", Statement.RETURN_GENERATED_KEYS)) {
         setParameters(parameters, statement);
         statement.execute();
+
+        try(ResultSet rs = statement.getGeneratedKeys()) {
+          if(rs.next()) {
+            item.setId(rs.getInt(1));
+            putImagePlaceHolders(item);
+          }
+        }
       }
     }
     catch(SQLException e) {
       throw new RuntimeException("Exception while trying to store: " + item, e);
     }
+  }
+
+  private void putImagePlaceHolders(Item item) {
+    int id = item.getId();
+
+    item.setBackground(item.getBackgroundURL() == null ? null : new URLImageSource(id, item.getBackgroundURL(), ImageType.BACKGROUND));
+    item.setBanner(item.getBannerURL() == null ? null : new URLImageSource(id, item.getBannerURL(), ImageType.BANNER));
+    item.setPoster(item.getPosterURL() == null ? null : new URLImageSource(id, item.getPosterURL(), ImageType.POSTER));
   }
 
   public void updateItem(Item item) {
@@ -150,12 +199,13 @@ public class ItemsDao {
 
       try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("UPDATE items SET " + set.toString() + " WHERE id = ?")) {
-        parameters.put("1", item.getId());
+        parameters.put("(irrelevant)", item.getId());
 
         System.out.println("[FINE] ItemsDao.updateItem() - Updating item with id: " + item.getId());
 
         setParameters(parameters, statement);
         statement.execute();
+        putImagePlaceHolders(item);
       }
     }
     catch(SQLException e) {
@@ -251,6 +301,10 @@ public class ItemsDao {
 
     columns.put("genres", genres);
 
+    columns.put("backgroundurl", item.getBackgroundURL());
+    columns.put("bannerurl", item.getBannerURL());
+    columns.put("posterurl", item.getPosterURL());
+
     columns.put("background", item.getBackground() == null ? null : item.getBackground().get());
     columns.put("banner", item.getBanner() == null ? null : item.getBanner().get());
     columns.put("poster", item.getPoster() == null ? null : item.getPoster().get());
@@ -273,6 +327,37 @@ public class ItemsDao {
 
     @Override
     public byte[] get() {
+      return ItemsDao.this.getImage(id, type);
+    }
+  }
+
+  private class URLImageSource implements Source<byte[]> {
+    private final int id;
+    private final ImageType type;
+    private final String url;
+
+    private boolean triedDownloading;
+
+    public URLImageSource(int id, String url, ImageType type) {
+      this.id = id;
+      this.url = url;
+      this.type = type;
+    }
+
+    @Override
+    public byte[] get() {
+      if(!triedDownloading) {
+        triedDownloading = true;
+
+        byte[] imageData = Downloader.tryReadURL(url);
+
+        if(imageData != null) {
+          ItemsDao.this.storeImage(id, type, imageData);
+        }
+
+        return imageData;
+      }
+
       return ItemsDao.this.getImage(id, type);
     }
   }

@@ -129,13 +129,13 @@ public class TmdbMovieEnricher implements ItemEnricher<Object> {
         System.out.println("type = " + movie.getMovieType() + "; language = " + movie.getLanguage() + "; tagline = " + movie.getTagline() + "; genres: " + movie.getGenres());
 
         final MovieImages images = movie.getImages();
-        URL url = null;
+        URL posterURL = null;
         URL backgroundURL = null;
 
         if(images.posters.size() > 0) {
           MoviePoster poster = images.posters.iterator().next();
 
-          url = poster.getLargestImage();
+          posterURL = poster.getLargestImage();
         }
 
         if(images.backdrops.size() > 0) {
@@ -143,9 +143,6 @@ public class TmdbMovieEnricher implements ItemEnricher<Object> {
 
           backgroundURL = background.getLargestImage();
         }
-
-        final byte[] poster = url != null ? Downloader.tryReadURL(url.toExternalForm()) : null;
-        final byte[] background = backgroundURL != null ? Downloader.tryReadURL(backgroundURL.toExternalForm()) : null;
 
         Item item = new Item();
 
@@ -158,9 +155,9 @@ public class TmdbMovieEnricher implements ItemEnricher<Object> {
         item.setTagline(movie.getTagline());
         item.setLanguage(movie.getLanguage());
 
-        item.setBackground(background == null ? null : new MemorySource<>(background));
-        item.setBanner(null);
-        item.setPoster(poster == null ? null : new MemorySource<>(poster));
+        item.setBackgroundURL(backgroundURL == null ? null : backgroundURL.toExternalForm());
+        item.setBannerURL(null);
+        item.setPosterURL(posterURL == null ? null : posterURL.toExternalForm());
 
         List<String> genres = new ArrayList<>();
 

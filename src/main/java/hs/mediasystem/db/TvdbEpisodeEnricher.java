@@ -38,8 +38,6 @@ public class TvdbEpisodeEnricher implements ItemEnricher<Object> {
 
     Episode episode = findEpisode(split[0], localInfo);
 
-    byte[] poster = Downloader.tryReadURL("http://thetvdb.com/banners/episodes/" + split[0] + "/" + episode.getId() + ".jpg");
-
     Item item = new Item();
 
     item.setTitle(episode.getEpisodeName());
@@ -50,9 +48,9 @@ public class TvdbEpisodeEnricher implements ItemEnricher<Object> {
     }
     item.setPlot(episode.getOverview());
 
-    item.setBackground(null);
-    item.setBanner(null);
-    item.setPoster(poster == null ? null : new MemorySource<>(poster));
+    item.setBackgroundURL(null);
+    item.setBannerURL(null);
+    item.setPosterURL("http://thetvdb.com/banners/episodes/" + split[0] + "/" + episode.getId() + ".jpg");
 
     System.out.println(">>> Do something with this: first Aired = " + episode.getFirstAired());  // "2002-02-26"
     item.setLanguage(episode.getLanguage());

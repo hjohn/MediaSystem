@@ -21,9 +21,12 @@ CREATE TABLE IF NOT EXISTS items
   lasthit timestamp without time zone NOT NULL,
   lastchecked timestamp without time zone NOT NULL,
   "version" integer NOT NULL,
-  poster bytea,
+  backgroundurl character varying(1000),
+  bannerurl character varying(1000),
+  posterurl character varying(1000),
   background bytea,
   banner bytea,
+  poster bytea,
   CONSTRAINT items_id PRIMARY KEY (id),
   CONSTRAINT items_providerkey UNIQUE ("type", provider, providerid)
 );
