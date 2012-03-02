@@ -28,11 +28,6 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
   public void enrich(final MediaItem mediaItem, final boolean bypassCache) {
     executorService.execute(new Task<Void>() {
       @Override
-      public String toString() {
-        return "Initial Debug Title: " + mediaItem.getTitle() + " : " + mediaItem.getEpisode();  // TODO remove once task bug is discovered
-      }
-
-      @Override
       public Void call() {
         updateTitle("Fetching metadata");
         updateProgress(0, 2);
@@ -67,9 +62,9 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
             @Override
             public void run() {
               mediaItem.officialTitleProperty().set(item.getTitle());
-              mediaItem.backgroundProperty().set(createImageHandle(item.getBackground(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-background"));
-              mediaItem.bannerProperty().set(createImageHandle(item.getBanner(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-banner"));
-              mediaItem.posterProperty().set(createImageHandle(item.getPoster(), item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-poster"));
+              mediaItem.backgroundProperty().set(createImageHandle(item.getBackground(), item, "background"));
+              mediaItem.bannerProperty().set(createImageHandle(item.getBanner(), item, "banner"));
+              mediaItem.posterProperty().set(createImageHandle(item.getPoster(), item, "poster"));
               mediaItem.plotProperty().set(item.getPlot());
               mediaItem.ratingProperty().set(item.getRating());
               mediaItem.releaseDateProperty().set(item.getReleaseDate());
@@ -78,10 +73,6 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
               mediaItem.setTagline(item.getTagline());
               mediaItem.runtimeProperty().set(item.getRuntime());
               mediaItem.setState(MediaItem.State.ENRICHED);
-            }
-
-            private SourceImageHandle createImageHandle(Source<byte[]> data, String key) {
-              return data == null ? null : new SourceImageHandle(data, key);
             }
           });
         }
@@ -98,5 +89,11 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
   @Override
   public void handle(MediaItemEvent event) {
     enrich(event.getMediaItem(), false);
+  }
+
+  private static SourceImageHandle createImageHandle(Source<byte[]> source, Item item, String keyPostFix) {
+    String key = item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-" + keyPostFix;
+
+    return source == null ? null : new SourceImageHandle(source, key);
   }
 }
