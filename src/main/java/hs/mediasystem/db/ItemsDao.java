@@ -251,9 +251,9 @@ public class ItemsDao {
 
     columns.put("genres", genres);
 
-    columns.put("background", item.getBackground().get());
-    columns.put("banner", item.getBanner().get());
-    columns.put("poster", item.getPoster().get());
+    columns.put("background", item.getBackground() == null ? null : item.getBackground().get());
+    columns.put("banner", item.getBanner() == null ? null : item.getBanner().get());
+    columns.put("poster", item.getPoster() == null ? null : item.getPoster().get());
 
     columns.put("type", item.getIdentifier().getType());
     columns.put("provider", item.getIdentifier().getProvider());
