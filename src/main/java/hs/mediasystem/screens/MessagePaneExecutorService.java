@@ -17,4 +17,8 @@ public class MessagePaneExecutorService {
   public void execute(Object key, Task<?> task) {
     groupService.submit(key, task);
   }
+
+  public void promote(Object key) {
+    groupService.promote(key);
+  }
 }

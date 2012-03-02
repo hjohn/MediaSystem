@@ -7,6 +7,7 @@ import hs.mediasystem.db.Item;
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.db.Source;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaItem.State;
 import hs.mediasystem.framework.MediaItemEvent;
 import hs.mediasystem.fs.SourceImageHandle;
 import javafx.application.Platform;
@@ -72,7 +73,7 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
               mediaItem.setLanguage(item.getLanguage());
               mediaItem.setTagline(item.getTagline());
               mediaItem.runtimeProperty().set(item.getRuntime());
-              mediaItem.setState(MediaItem.State.ENRICHED);
+              mediaItem.setEnriched();
             }
           });
         }
@@ -88,7 +89,15 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
 
   @Override
   public void handle(MediaItemEvent event) {
-    enrich(event.getMediaItem(), false);
+    MediaItem mediaItem = event.getMediaItem();
+    State state = mediaItem.getState();
+
+    if(state == MediaItem.State.STANDARD) {
+      enrich(mediaItem, false);
+    }
+    else if(state == MediaItem.State.QUEUED) {
+      executorService.promote(mediaItem);
+    }
   }
 
   private static SourceImageHandle createImageHandle(Source<byte[]> source, Item item, String keyPostFix) {

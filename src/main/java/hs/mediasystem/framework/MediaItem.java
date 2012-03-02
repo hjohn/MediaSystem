@@ -109,8 +109,8 @@ public class MediaItem {
     return state;
   }
 
-  public void setState(State state) {
-    this.state = state;
+  public synchronized void setEnriched() {
+    this.state = State.ENRICHED;
   }
 
   @Override
@@ -131,10 +131,9 @@ public class MediaItem {
   }
 
   private synchronized void queueForEnrichment() {
-    if(state == State.STANDARD) {
-      state = State.QUEUED;
-
+    if(state != State.ENRICHED) {
       mediaTree.queue(this);
+      state = State.QUEUED;
     }
   }
 
