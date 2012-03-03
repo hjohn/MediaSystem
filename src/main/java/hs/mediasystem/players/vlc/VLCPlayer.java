@@ -45,6 +45,7 @@ public class VLCPlayer implements Player {
   public VLCPlayer(int screenNumber, String... args) {
     List<String> arguments = new ArrayList<>(Arrays.asList(args));
 
+    arguments.add("--input-fast-seek");
     arguments.add("--no-video-title-show");
     arguments.add("--network-caching");
     arguments.add("5000");
@@ -169,6 +170,17 @@ public class VLCPlayer implements Player {
       @Override
       public Integer read() {
         return (int)(mediaPlayer.getAudioDelay() / 1000);
+      }
+    });
+    subtitleDelay = new ComplexIntegerProperty(new Accessor<Integer>() {
+      @Override
+      public void write(Integer value) {
+        mediaPlayer.setSpuDelay(-value * 1000L);
+      }
+
+      @Override
+      public Integer read() {
+        return (int)(-mediaPlayer.getSpuDelay() / 1000);
       }
     });
     rate = new BeanFloatProperty(mediaPlayer, "rate");
@@ -342,6 +354,11 @@ public class VLCPlayer implements Player {
   @Override public void setAudioTrack(AudioTrack audioTrack) { this.audioTrack.set(audioTrack); }
   @Override public ObjectProperty<AudioTrack> audioTrackProperty() { return audioTrack; }
 
+  private final IntegerProperty subtitleDelay;
+  @Override public int getSubtitleDelay() { return subtitleDelay.get(); }
+  @Override public void setSubtitleDelay(int subtitleDelay) { this.subtitleDelay.set(subtitleDelay); }
+  @Override public IntegerProperty subtitleDelayProperty() { return subtitleDelay; }
+
   @Override
   public boolean isMute() {
     return mediaPlayer.isMute();
@@ -350,15 +367,5 @@ public class VLCPlayer implements Player {
   @Override
   public void setMute(boolean mute) {
     mediaPlayer.mute(mute);
-  }
-
-  @Override
-  public int getSubtitleDelay() {
-    return 0;
-  }
-
-  @Override
-  public void setSubtitleDelay(int delay) {
-    throw new UnsupportedOperationException("Method not implemented");
   }
 }

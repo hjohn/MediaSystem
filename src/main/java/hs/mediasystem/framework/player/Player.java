@@ -59,6 +59,7 @@ public interface Player {
    */
   int getSubtitleDelay();
   void setSubtitleDelay(int delay);
+  IntegerProperty subtitleDelayProperty();
 
   /**
    * Returns a list of Subtitles.  This list always includes as the first element

@@ -411,4 +411,9 @@ public class MPlayerPlayer implements Player {
   public void setScreen(int screenNumber) {
     throw new UnsupportedOperationException();
   }
+
+  @Override
+  public IntegerProperty subtitleDelayProperty() {
+    throw new UnsupportedOperationException();
+  }
 }
