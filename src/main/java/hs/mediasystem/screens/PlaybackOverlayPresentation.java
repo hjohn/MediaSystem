@@ -90,6 +90,7 @@ public class PlaybackOverlayPresentation {
             }),
             new NumericOption(player.rateProperty(), "Playback Speed", 0.1, 0.1, 4.0, "%4.1f"),
             new NumericOption(player.audioDelayProperty(), "Audio Delay", 100, -30000, 30000, "%5.0fms"),
+            new NumericOption(player.subtitleDelayProperty(), "Subtitle Delay", 100, -30000, 30000, "%5.0fms"),
             new NumericOption(player.brightnessProperty(), "Brightness adjustment", 0.01, 0, 2, new StringConverter<Number>() {
               @Override
               public String toString(Number object) {
