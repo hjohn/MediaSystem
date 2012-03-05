@@ -80,6 +80,19 @@ public class PlayerPresentation {
     player.setSubtitleDelay(delay);
   }
 
+  public void changeRate(float rateDiff) {
+    float rate = player.getRate() + rateDiff;
+
+    if(rate > 4.0) {
+      rate = 4.0f;
+    }
+    else if(rate < 0.1) {
+      rate = 0.1f;
+    }
+
+    player.setRate(Math.round(rate * 100.0f) / 100.0f);
+  }
+
   public int getVolume() {
     return player.getVolume();
   }

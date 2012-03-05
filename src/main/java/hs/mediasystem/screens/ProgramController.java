@@ -50,6 +50,8 @@ public class ProgramController {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
   private static final KeyCombination KEY_S = new KeyCodeCombination(KeyCode.S);
   private static final KeyCombination KEY_CTRL_ALT_S = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN);
+  private static final KeyCombination KEY_OPEN_BRACKET = new KeyCodeCombination(KeyCode.OPEN_BRACKET);
+  private static final KeyCombination KEY_CLOSE_BRACKET = new KeyCodeCombination(KeyCode.CLOSE_BRACKET);
 
   private final Stage mainStage;  // WORKAROUND: Two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing; refactor this
   private final Stage transparentStage;
@@ -188,6 +190,14 @@ public class ProgramController {
           }
           else if(code == KeyCode.X) {
             playerPresentation.changeSubtitleDelay(100);
+            event.consume();
+          }
+          else if(KEY_OPEN_BRACKET.match(event)) {
+            playerPresentation.changeRate(-0.1f);
+            event.consume();
+          }
+          else if(KEY_CLOSE_BRACKET.match(event)) {
+            playerPresentation.changeRate(0.1f);
             event.consume();
           }
         }
