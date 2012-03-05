@@ -1,6 +1,10 @@
 
 .root {
-  color-main: rgb(173, 216, 230);
+  -c-main: rgb(173, 216, 230);
+  -c-shadow-highlight: derive(-c-main, -50%);
+  
+  color-main: -c-main;
+  
   color-focused-text: derive(color-main, 30%);
 
   color-content-background: derive(color-blue-70, -80%);
