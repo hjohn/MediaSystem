@@ -1,37 +1,33 @@
 package hs.mediasystem.screens.optiondialog;
 
-import hs.mediasystem.util.StringConverter;
-import javafx.beans.value.WritableNumberValue;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.Property;
 
 public class NumericOption extends Option {
-  private final WritableNumberValue property;
-  private final StringConverter<Number> converter;
+  private final Property<Number> property;
   private final double stepSize;
   private final double min;
   private final double max;
 
-  private double value;
-
-  public NumericOption(WritableNumberValue property, String description, double stepSize, double min, double max, StringConverter<Number> converter) {
+  public NumericOption(Property<Number> property, String description, double stepSize, double min, double max, StringBinding binding) {
     super(description);
     this.property = property;
-    this.converter = converter;
     this.stepSize = stepSize;
     this.min = min;
     this.max = max;
 
-    if(property != null) {
-      value = property.getValue().doubleValue();
-    }
-
-    updateControl();
+    label.textProperty().bind(binding);
   }
 
-  public NumericOption(WritableNumberValue property, String description, double stepSize, double min, double max, final String format) {
-    this(property, description, stepSize, min, max, new StringConverter<Number>() {
+  public NumericOption(final Property<Number> property, String description, double stepSize, double min, double max, final String format) {
+    this(property, description, stepSize, min, max, new StringBinding() {
+      {
+        bind(property);
+      }
+
       @Override
-      public String toString(Number object) {
-        return String.format(format, object);
+      protected String computeValue() {
+        return String.format(format, property.getValue().doubleValue());
       }
     });
   }
@@ -46,30 +42,27 @@ public class NumericOption extends Option {
 
   @Override
   public void left() {
+    double value = property.getValue().doubleValue();
+
     value -= stepSize;
 
     if(value < min) {
       value = min;
     }
 
-    updateControl();
+    property.setValue(value);
   }
 
   @Override
   public void right() {
+    double value = property.getValue().doubleValue();
+
     value += stepSize;
 
     if(value > max) {
       value = max;
     }
 
-    updateControl();
-  }
-
-  private void updateControl() {
-    if(property != null) {
-      property.setValue(value);
-    }
-    label.setText(converter.toString(value));
-  }
+    property.setValue(value);
+ }
 }

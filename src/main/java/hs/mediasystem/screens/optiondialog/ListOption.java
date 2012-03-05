@@ -1,6 +1,5 @@
 package hs.mediasystem.screens.optiondialog;
 
-import hs.mediasystem.util.StringConverter;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
@@ -9,21 +8,12 @@ public class ListOption<T> extends Option {
   private final ObjectProperty<T> property;
   private final ObservableList<T> items;
 
-  public ListOption(String description, final ObjectProperty<T> property, ObservableList<T> items, final StringConverter<T> stringConverter) {
+  public ListOption(String description, final ObjectProperty<T> property, ObservableList<T> items, final StringBinding binding) {
     super(description);
     this.property = property;
     this.items = items;
 
-    label.textProperty().bind(new StringBinding() {
-      {
-        bind(property);
-      }
-
-      @Override
-      protected String computeValue() {
-        return stringConverter.toString(property.get());
-      }
-    });
+    label.textProperty().bind(binding);
   }
 
   @Override

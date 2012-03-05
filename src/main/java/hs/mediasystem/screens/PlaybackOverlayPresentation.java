@@ -55,6 +55,56 @@ public class PlaybackOverlayPresentation {
     final Player player = playerPresentation.getPlayer();
     final MediaItem mediaItem = controller.getCurrentMediaItem();
 
+    final StringBinding formattedVolume = new StringBinding(player.volumeProperty()) {
+      @Override
+      protected String computeValue() {
+        return String.format("%3d%%", player.volumeProperty().get());
+      }
+    };
+
+    final StringBinding formattedRate = new StringBinding(player.rateProperty()) {
+      @Override
+      protected String computeValue() {
+        return String.format("%4.1fx", player.rateProperty().get());
+      }
+    };
+
+    final StringBinding formattedAudioDelay = new StringBinding(player.audioDelayProperty()) {
+      @Override
+      protected String computeValue() {
+        return String.format("%5.1fs", player.audioDelayProperty().get() / 1000.0);
+      }
+    };
+
+    final StringBinding formattedSubtitleDelay = new StringBinding(player.subtitleDelayProperty()) {
+      @Override
+      protected String computeValue() {
+        return String.format("%5.1fs", player.subtitleDelayProperty().get() / 1000.0);
+      }
+    };
+
+    final StringBinding formattedBrightness = new StringBinding(player.brightnessProperty()) {
+      @Override
+      protected String computeValue() {
+        long value = Math.round((player.getBrightness() - 1.0) * 100);
+        return value == 0 ? "0%" : String.format("%+3d%%", value);
+      }
+    };
+
+    final StringBinding formattedAudioTrack = new StringBinding(player.audioTrackProperty()) {
+      @Override
+      protected String computeValue() {
+        return player.audioTrackProperty().get().getDescription();
+      }
+    };
+
+    final StringBinding formattedSubtitle = new StringBinding(player.subtitleProperty()) {
+      @Override
+      protected String computeValue() {
+        return player.subtitleProperty().get().getDescription();
+      }
+    };
+
     if(mediaItem.getMediaType().equals("EPISODE")) {
       view.titleProperty().bind(mediaItem.groupNameProperty());
       view.subtitleProperty().bind(mediaItem.titleProperty());
@@ -72,7 +122,7 @@ public class PlaybackOverlayPresentation {
         KeyCode code = event.getCode();
 
         if(code == KeyCode.J) {
-          Subtitle subtitle = playerPresentation.nextSubtitle();
+          playerPresentation.nextSubtitle();
           event.consume();
         }
         else if(BACK_SPACE.match(event)) {
@@ -80,29 +130,13 @@ public class PlaybackOverlayPresentation {
         }
         else if(code == KeyCode.O) {
           List<Option> options = FXCollections.observableArrayList(
-            new NumericOption(player.volumeProperty(), "Volume", 1, 0, 100, "%3.0f%%"),
-            new ListOption<>("Subtitle", player.subtitleProperty(), player.getSubtitles(), new StringConverter<Subtitle>() {
-              @Override
-              public String toString(Subtitle object) {
-                return object.getDescription();
-              }
-            }),
-            new ListOption<>("Audio Track", player.audioTrackProperty(), player.getAudioTracks(), new StringConverter<AudioTrack>() {
-              @Override
-              public String toString(AudioTrack object) {
-                return object.getDescription();
-              }
-            }),
-            new NumericOption(player.rateProperty(), "Playback Speed", 0.1, 0.1, 4.0, "%4.1f"),
-            new NumericOption(player.audioDelayProperty(), "Audio Delay", 100, -1200000, 1200000, "%5.0fms"),
-            new NumericOption(player.subtitleDelayProperty(), "Subtitle Delay", 100, -1200000, 1200000, "%5.0fms"),
-            new NumericOption(player.brightnessProperty(), "Brightness adjustment", 0.01, 0, 2, new StringConverter<Number>() {
-              @Override
-              public String toString(Number object) {
-                long value = Math.round((object.doubleValue() - 1.0) * 100);
-                return value == 0 ? "0%" : String.format("%+3d%%", value);
-              }
-            }),
+            new NumericOption(player.volumeProperty(), "Volume", 1, 0, 100, formattedVolume),
+            new ListOption<>("Subtitle", player.subtitleProperty(), player.getSubtitles(), formattedSubtitle),
+            new ListOption<>("Audio Track", player.audioTrackProperty(), player.getAudioTracks(), formattedAudioTrack),
+            new NumericOption(player.rateProperty(), "Playback Speed", 0.1, 0.1, 4.0, formattedRate),
+            new NumericOption(player.audioDelayProperty(), "Audio Delay", 100, -1200000, 1200000, formattedAudioDelay),
+            new NumericOption(player.subtitleDelayProperty(), "Subtitle Delay", 100, -1200000, 1200000, formattedSubtitleDelay),
+            new NumericOption(player.brightnessProperty(), "Brightness Adjustment", 0.01, 0, 2, formattedBrightness),
             new SubOption("Download subtitle...", new Callable<List<Option>>() {
               @Override
               public List<Option> call() {
@@ -118,10 +152,10 @@ public class PlaybackOverlayPresentation {
                     }
                   });
 
-                  add(new ListOption<>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringConverter<SubtitleProvider>() {
+                  add(new ListOption<>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringBinding(subtitleSelector.subtitleProviderProperty()) {
                     @Override
-                    public String toString(SubtitleProvider object) {
-                      return object.getName();
+                    protected String computeValue() {
+                      return subtitleSelector.subtitleProviderProperty().get().getName();
                     }
                   }));
                   add(new ListViewOption<>("Subtitles for Download", selectedSubtitleForDownload, subtitleSelector.getSubtitles(), new StringConverter<SubtitleDescriptor>() {
@@ -173,66 +207,71 @@ public class PlaybackOverlayPresentation {
     player.volumeProperty().addListener(new ChangeListener<Number>() {
       @Override
       public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        view.addOSD(createOSDItem("Volume", 0.0, 100.0, player.volumeProperty(), new StringBinding(player.volumeProperty()) {
-          @Override
-          protected String computeValue() {
-            return String.format("%3d%%", player.volumeProperty().get());
-          }
-        }));
+        view.addOSD(createOSDItem("Volume", 0.0, 100.0, player.volumeProperty(), formattedVolume));
       }
     });
 
     player.rateProperty().addListener(new ChangeListener<Number>() {
       @Override
       public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        view.addOSD(createOSDItem("Playback Speed", 0.0, 4.0, player.rateProperty(), new StringBinding(player.rateProperty()) {
-          @Override
-          protected String computeValue() {
-            return String.format("%4.1f speed", player.rateProperty().get());
-          }
-        }));
+        view.addOSD(createOSDItem("Playback Speed", 0.0, 4.0, player.rateProperty(), formattedRate));
       }
     });
 
     player.audioDelayProperty().addListener(new ChangeListener<Number>() {
       @Override
       public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        view.addOSD(createOSDItem("Audio Delay", -120.0, 120.0, player.audioDelayProperty().divide(1000.0), new StringBinding(player.audioDelayProperty()) {
-          @Override
-          protected String computeValue() {
-            return String.format("%5.1fs", player.audioDelayProperty().get() / 1000.0);
-          }
-        }));
+        view.addOSD(createOSDItem("Audio Delay", -120.0, 120.0, player.audioDelayProperty().divide(1000.0), formattedAudioDelay));
       }
     });
 
     player.subtitleDelayProperty().addListener(new ChangeListener<Number>() {
       @Override
       public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        view.addOSD(createOSDItem("Subtitle Delay", -120.0, 120.0, player.subtitleDelayProperty().divide(1000.0), new StringBinding(player.subtitleDelayProperty()) {
-          @Override
-          protected String computeValue() {
-            return String.format("%5.1fs", player.subtitleDelayProperty().get() / 1000.0);
-          }
-        }));
+        view.addOSD(createOSDItem("Subtitle Delay", -120.0, 120.0, player.subtitleDelayProperty().divide(1000.0), formattedSubtitleDelay));
       }
     });
 
     player.brightnessProperty().addListener(new ChangeListener<Number>() {
       @Override
       public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        view.addOSD(createOSDItem("Brightness", -100.0, 100.0, player.brightnessProperty().subtract(1.0).multiply(100.0), new StringBinding(player.brightnessProperty()) {
-          @Override
-          protected String computeValue() {
-            return String.format("%+3d%%", Math.round((player.brightnessProperty().get() - 1.0) * 100.0));
-          }
-        }));
+        view.addOSD(createOSDItem("Brightness Adjustment", -100.0, 100.0, player.brightnessProperty().subtract(1.0).multiply(100.0), formattedBrightness));
+      }
+    });
+
+    player.audioTrackProperty().addListener(new ChangeListener<AudioTrack>() {
+      @Override
+      public void changed(ObservableValue<? extends AudioTrack> observable, AudioTrack oldValue, AudioTrack value) {
+        view.addOSD(createOSDItem("Audio Track", formattedAudioTrack));
+      }
+    });
+
+    player.subtitleProperty().addListener(new ChangeListener<Subtitle>() {
+      @Override
+      public void changed(ObservableValue<? extends Subtitle> observable, Subtitle oldValue, Subtitle value) {
+        view.addOSD(createOSDItem("Subtitle", formattedSubtitle));
       }
     });
   }
 
   public PlaybackOverlayPane getView() {
     return view;
+  }
+
+  private Node createOSDItem(final String title, final StringExpression valueText) {
+    return new VBox() {{
+      setId(title);
+      getStyleClass().add("item");
+      getChildren().add(new BorderPane() {{
+        setLeft(new Label(title) {{
+          getStyleClass().add("title");
+        }});
+        setRight(new Label() {{
+          getStyleClass().add("value");
+          textProperty().bind(valueText);
+        }});
+      }});
+    }};
   }
 
   private Node createOSDItem(final String title, final double min, final double max, final NumberExpression value, final StringExpression valueText) {
@@ -243,7 +282,7 @@ public class PlaybackOverlayPresentation {
         setLeft(new Label(title) {{
           getStyleClass().add("title");
         }});
-        setCenter(new Label() {{
+        setRight(new Label() {{
           getStyleClass().add("value");
           textProperty().bind(valueText);
         }});

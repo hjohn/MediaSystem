@@ -3,20 +3,18 @@ package hs.mediasystem.screens.selectmedia;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.SelectMediaView;
-import hs.mediasystem.screens.GroupSet;
 import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.Navigator;
-import hs.mediasystem.screens.ProgramController;
-import hs.mediasystem.screens.SortOrder;
-import hs.mediasystem.screens.StandardLayout;
 import hs.mediasystem.screens.Navigator.Destination;
+import hs.mediasystem.screens.ProgramController;
+import hs.mediasystem.screens.StandardLayout;
 import hs.mediasystem.screens.optiondialog.ActionOption;
 import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
-import hs.mediasystem.util.StringConverter;
+import hs.mediasystem.util.StringBinding;
 
 import java.util.List;
 
@@ -94,16 +92,16 @@ public class SelectMediaPresentation {
         if(KEY_O.match(event)) {
           @SuppressWarnings("unchecked")
           List<? extends Option> options = FXCollections.observableArrayList(
-            new ListOption<>("Group by", layout.groupSetProperty(), layout.availableGroupSetsProperty(), new StringConverter<GroupSet>() {
+            new ListOption<>("Group by", layout.groupSetProperty(), layout.availableGroupSetsProperty(), new StringBinding(layout.groupSetProperty()) {
               @Override
-              public String toString(GroupSet set) {
-                return set.getTitle();
+              protected String computeValue() {
+                return layout.groupSetProperty().get().getTitle();
               }
             }),
-            new ListOption<>("Order by", layout.sortOrderProperty(), layout.availableSortOrdersProperty(), new StringConverter<SortOrder>() {
+            new ListOption<>("Order by", layout.sortOrderProperty(), layout.availableSortOrdersProperty(), new StringBinding(layout.sortOrderProperty()) {
               @Override
-              public String toString(SortOrder order) {
-                return order.getTitle();
+              protected String computeValue() {
+                return layout.sortOrderProperty().get().getTitle();
               }
             })
           );
