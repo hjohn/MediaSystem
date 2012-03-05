@@ -71,7 +71,7 @@ public class PlayerPresentation {
       brightness = 0.0f;
     }
 
-    player.setBrightness(brightness);
+    player.setBrightness(Math.round(brightness * 100.0f) / 100.0f);
   }
 
   public void changeSubtitleDelay(int msDelayDiff) {
