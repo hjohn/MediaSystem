@@ -8,9 +8,9 @@
 }
 
 .slider .thumb {
-  -fx-background-color: black, rgb(64, 64, 64), linear-gradient(to bottom, yellow, white, orange);
+  -fx-background-color: rgb(0, 0, 0, 0.5), rgb(64, 64, 64), linear-gradient(to bottom, yellow, white, orange);
   -fx-background-insets: 0, 1, 2;
-  -fx-background-radius: 0.2em;
+  -fx-background-radius: 0.3em, 0.25em, 0.2em;
 
   -fx-padding: 0.75em 0.3em 0.75em 0.3em;
 }
@@ -21,6 +21,23 @@
   -fx-background-radius: 0.2em, 0.2em, 0.1em;
   
   -fx-padding: 0.208333em;
+}
+
+.axis:top {
+    -fx-border-color: transparent transparent #aaaaaa transparent;
+}
+.axis:right {
+    -fx-border-color: transparent transparent transparent #aaaaaa;
+}
+.axis:bottom {
+    -fx-border-color: #aaaaaa transparent transparent transparent;
+}
+.axis:left {
+    -fx-border-color: transparent #aaaaaa transparent transparent;
+}
+
+.axis-tick-mark {
+  -fx-stroke: #aaaaaa;
 }
 
 .item {
