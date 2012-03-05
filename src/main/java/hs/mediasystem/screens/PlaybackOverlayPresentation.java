@@ -217,6 +217,18 @@ public class PlaybackOverlayPresentation {
         }));
       }
     });
+
+    player.brightnessProperty().addListener(new ChangeListener<Number>() {
+      @Override
+      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+        view.addOSD(createOSDItem("Brightness", -100.0, 100.0, player.brightnessProperty().subtract(1.0).multiply(100.0), new StringBinding(player.brightnessProperty()) {
+          @Override
+          protected String computeValue() {
+            return String.format("%+3d%%", Math.round((player.brightnessProperty().get() - 1.0) * 100.0));
+          }
+        }));
+      }
+    });
   }
 
   public PlaybackOverlayPane getView() {
