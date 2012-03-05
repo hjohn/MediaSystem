@@ -2,6 +2,7 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.util.SizeFormatter;
 import hs.mediasystem.util.SpecialEffects;
+import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -17,7 +18,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -31,22 +37,20 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 public class PlaybackOverlayPane extends StackPane {
-  private final StringProperty osdLine = new SimpleStringProperty("");
-
   private final BorderPane borderPane = new BorderPane();
   private final BorderPane bottomPane = new BorderPane();
-  private final Label topLabel = new Label();
 
-  private final Timeline osdFade = new Timeline(
-    new KeyFrame(Duration.seconds(1), new KeyValue(topLabel.opacityProperty(), 1.0)),
-    new KeyFrame(Duration.seconds(6), new KeyValue(topLabel.opacityProperty(), 1.0)),
-    new KeyFrame(Duration.seconds(9), new KeyValue(topLabel.opacityProperty(), 0.0))
-  );
+  private final VBox playbackStateOverlay = new VBox() {{
+    getStylesheets().add("playback-state-overlay.css");
+    getStyleClass().add("content-box");
+    setVisible(false);
+  }};
 
   private final Timeline fadeInSustainAndFadeOut = new Timeline(
     new KeyFrame(Duration.seconds(0)),
@@ -62,14 +66,14 @@ public class PlaybackOverlayPane extends StackPane {
     final double w = 1920;  // TODO remove hardcoded values
     final double h = 1200;
 
+    playbackStateOverlay.getChildren().addListener(new ListChangeListener<Node>() {
+      @Override
+      public void onChanged(ListChangeListener.Change<? extends Node> change) {
+        playbackStateOverlay.setVisible(!change.getList().isEmpty());
+      }
+    });
+
     borderPane.setFocusTraversable(true);
-    borderPane.setCenter(new VBox() {{
-      getChildren().add(topLabel);
-    }});
-
-    topLabel.setId("video-osd-line");
-    topLabel.textProperty().bind(osdLine);
-
     borderPane.setBottom(bottomPane);
 
     bottomPane.setId("video-overlay");
@@ -160,6 +164,23 @@ public class PlaybackOverlayPane extends StackPane {
 
     getChildren().add(borderPane);
 
+    getChildren().add(new GridPane() {{
+      getColumnConstraints().add(new ColumnConstraints() {{
+        setPercentWidth(25);
+      }});
+      getColumnConstraints().add(new ColumnConstraints() {{
+        setPercentWidth(50);
+      }});
+      getColumnConstraints().add(new ColumnConstraints() {{
+        setPercentWidth(25);
+      }});
+      getRowConstraints().add(new RowConstraints() {{
+        setPercentHeight(25);
+      }});
+
+      add(playbackStateOverlay, 1, 1);
+    }});
+
     sceneProperty().addListener(new ChangeListener<Scene>() {
       @Override
       public void changed(ObservableValue<? extends Scene> observable, Scene oldValue, Scene newValue) {
@@ -174,9 +195,73 @@ public class PlaybackOverlayPane extends StackPane {
     fadeInSustainAndFadeOut.playFromStart();
   }
 
-  public void setOSD(String text) {
-    osdLine.set(text);
-    osdFade.playFromStart();
+  public void addOSD(final Node node) {  // id of node is used to distinguish same items
+    String id = node.getId();
+
+    for(Node child : playbackStateOverlay.getChildren()) {
+      if(id.equals(child.getId())) {
+        Timeline timeline = (Timeline)child.getUserData();
+
+        if(timeline.getStatus() == Status.RUNNING) {
+          timeline.playFromStart();
+        }
+        return;
+      }
+    }
+
+    final StackPane stackPane = new StackPane() {{
+      getChildren().add(node);
+      setPrefWidth(playbackStateOverlay.getWidth() - playbackStateOverlay.getInsets().getLeft() - playbackStateOverlay.getInsets().getRight());
+    }};
+
+    node.opacityProperty().set(0);
+
+    final Group group = new Group(stackPane);
+    group.setId(node.getId());
+    stackPane.setScaleY(0.0);
+
+    final EventHandler<ActionEvent> shrinkFinished = new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        playbackStateOverlay.getChildren().remove(group);
+      }
+    };
+
+    final Timeline shrinkTimeline = new Timeline(
+      new KeyFrame(Duration.seconds(0.25), shrinkFinished, new KeyValue(stackPane.scaleYProperty(), 0))
+    );
+
+    final EventHandler<ActionEvent> fadeInOutFinished = new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        group.setId(null);
+        shrinkTimeline.play();
+      }
+    };
+
+    final Timeline fadeInOutTimeline = new Timeline(
+      new KeyFrame(Duration.seconds(0.5), new KeyValue(node.opacityProperty(), 1.0)),
+      new KeyFrame(Duration.seconds(2.5), new KeyValue(node.opacityProperty(), 1.0)),
+      new KeyFrame(Duration.seconds(3.0), fadeInOutFinished, new KeyValue(node.opacityProperty(), 0.0))
+    );
+
+
+    EventHandler<ActionEvent> expansionFinished = new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        fadeInOutTimeline.play();
+      }
+    };
+
+    Timeline expansionTimeline = new Timeline(
+      new KeyFrame(Duration.seconds(0.25), expansionFinished, new KeyValue(stackPane.scaleYProperty(), 1.0))
+    );
+
+    group.setUserData(fadeInOutTimeline);
+
+    playbackStateOverlay.getChildren().add(group);
+
+    expansionTimeline.play();
   }
 
   private final DoubleProperty volume = new SimpleDoubleProperty(0);

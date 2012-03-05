@@ -1,0 +1,35 @@
+.slider {
+  -fx-show-tick-labels: true;
+  -fx-show-tick-marks: true;
+}
+
+.slider .axis {
+  -fx-tick-label-fill: -c-main;
+}
+
+.slider .thumb {
+  -fx-background-color: black, rgb(64, 64, 64), linear-gradient(to bottom, yellow, white, orange);
+  -fx-background-insets: 0, 1, 2;
+  -fx-background-radius: 0.2em;
+
+  -fx-padding: 0.75em 0.3em 0.75em 0.3em;
+}
+
+.slider .track {
+  -fx-background-color: -c-shadow-highlight, derive(-c-main, -22%), linear-gradient(to bottom, derive(-c-main,-15.5%), derive(-c-main,34%) 30%, derive(-c-main,68%));
+  -fx-background-insets: 1 0 -1 0, 0, 1;
+  -fx-background-radius: 0.2em, 0.2em, 0.1em;
+  
+  -fx-padding: 0.208333em;
+}
+
+.item {
+  -fx-font: 22pt "Arial";
+}
+
+.content-box {
+  -fx-background-color: color-content-background;
+  -fx-background-radius: 20;
+  -fx-padding: 30;
+  -fx-hgap: 20;  
+}
