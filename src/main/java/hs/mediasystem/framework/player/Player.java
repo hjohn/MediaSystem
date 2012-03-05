@@ -80,7 +80,7 @@ public interface Player {
   ObjectProperty<Subtitle> subtitleProperty();
 
   /**
-   * Returns the current rate of playback.
+   * Returns the current rate of playback as factor of normal speed.
    *
    * @return the current rate of playback
    */
@@ -102,7 +102,7 @@ public interface Player {
   ObjectProperty<AudioTrack> audioTrackProperty();
 
   /**
-   * Returns the brightness.
+   * Returns the brightness as a float between 0 and 2, with 1 being normal.
    *
    * @return the brightness
    */
