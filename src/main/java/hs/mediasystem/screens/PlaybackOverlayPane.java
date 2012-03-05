@@ -175,7 +175,7 @@ public class PlaybackOverlayPane extends StackPane {
         setPercentWidth(25);
       }});
       getRowConstraints().add(new RowConstraints() {{
-        setPercentHeight(25);
+        setPercentHeight(10);
       }});
 
       add(playbackStateOverlay, 1, 1);
