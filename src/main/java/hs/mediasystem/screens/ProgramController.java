@@ -296,6 +296,7 @@ public class ProgramController {
   }
 
   public void play(MediaItem mediaItem) {
+    playerPresentation.getPlayer().positionProperty().set(0);
     playerPresentation.play(mediaItem.getUri());
 
     currentMediaItem = mediaItem;
