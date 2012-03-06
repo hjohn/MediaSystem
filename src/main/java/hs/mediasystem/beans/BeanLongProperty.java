@@ -2,12 +2,16 @@ package hs.mediasystem.beans;
 
 import javafx.beans.property.SimpleLongProperty;
 
-public final class ComplexLongProperty extends SimpleLongProperty {
+public final class BeanLongProperty extends SimpleLongProperty {
   private final Accessor<Long> accessor;
 
   private boolean initialized;
 
-  public ComplexLongProperty(Accessor<Long> accessor) {
+  public BeanLongProperty(Object bean, String propertyName) {
+    accessor = new BeanAccessor<>(bean, propertyName);
+  }
+
+  public BeanLongProperty(Accessor<Long> accessor) {
     this.accessor = accessor;
   }
 

@@ -2,9 +2,10 @@ package hs.mediasystem.players.vlc;
 
 import hs.mediasystem.beans.Accessor;
 import hs.mediasystem.beans.BeanAccessor;
+import hs.mediasystem.beans.BeanBooleanProperty;
 import hs.mediasystem.beans.BeanFloatProperty;
 import hs.mediasystem.beans.BeanObjectProperty;
-import hs.mediasystem.beans.ComplexIntegerProperty;
+import hs.mediasystem.beans.BeanIntegerProperty;
 import hs.mediasystem.beans.UpdatableLongProperty;
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Player;
@@ -23,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
@@ -104,8 +106,10 @@ public class VLCPlayer implements Player {
       }
 
       @Override
-      public void mediaStateChanged(MediaPlayer mediaPlayer, int newState) {
+      public void mediaStateChanged(MediaPlayer mediaPlayer, int newState) {  // 1 = loaded(?), 3 = playing, 4 = paused
         System.out.println("[FINE] VLCPlayer: Event[mediaStateChanged]: " + newState);
+
+        pausedProperty.update(newState == 4);
       }
 
       @Override
@@ -160,8 +164,8 @@ public class VLCPlayer implements Player {
         super.set(value);
       }
     };
-    volume = new ComplexIntegerProperty(new BeanAccessor<Integer>(mediaPlayer, "volume"));
-    audioDelay = new ComplexIntegerProperty(new Accessor<Integer>() {
+    volume = new BeanIntegerProperty(new BeanAccessor<Integer>(mediaPlayer, "volume"));
+    audioDelay = new BeanIntegerProperty(new Accessor<Integer>() {
       @Override
       public void write(Integer value) {
         mediaPlayer.setAudioDelay(value * 1000L);
@@ -172,7 +176,7 @@ public class VLCPlayer implements Player {
         return (int)(mediaPlayer.getAudioDelay() / 1000);
       }
     });
-    subtitleDelay = new ComplexIntegerProperty(new Accessor<Integer>() {
+    subtitleDelay = new BeanIntegerProperty(new Accessor<Integer>() {
       @Override
       public void write(Integer value) {
         mediaPlayer.setSpuDelay(-value * 1000L);
@@ -185,6 +189,28 @@ public class VLCPlayer implements Player {
     });
     rate = new BeanFloatProperty(mediaPlayer, "rate");
     brightness = new BeanFloatProperty(mediaPlayer, "brightness");
+    mutedProperty = new BeanBooleanProperty(new Accessor<Boolean>() {
+      @Override
+      public Boolean read() {
+        return mediaPlayer.isMute();
+      }
+
+      @Override
+      public void write(Boolean value) {
+        mediaPlayer.mute(value);
+      }
+    });
+    pausedProperty = new BeanBooleanProperty(new Accessor<Boolean>() {
+      @Override
+      public Boolean read() {
+        return false;
+      }
+
+      @Override
+      public void write(Boolean value) {
+        mediaPlayer.setPause(value);
+      }
+    });
   }
 
   public AudioTrack getAudioTrackInternal() {
@@ -243,16 +269,6 @@ public class VLCPlayer implements Player {
     mediaPlayer.playMedia(uri);
 
     System.out.println("[FINE] Playing: " + uri);
-  }
-
-  @Override
-  public void pause() {
-    mediaPlayer.pause();
-  }
-
-  @Override
-  public boolean isPlaying() {
-    return mediaPlayer.isPlaying();
   }
 
   @Override
@@ -359,13 +375,13 @@ public class VLCPlayer implements Player {
   @Override public void setSubtitleDelay(int subtitleDelay) { this.subtitleDelay.set(subtitleDelay); }
   @Override public IntegerProperty subtitleDelayProperty() { return subtitleDelay; }
 
-  @Override
-  public boolean isMute() {
-    return mediaPlayer.isMute();
-  }
+  private final BooleanProperty mutedProperty;
+  @Override public boolean isMuted() { return mutedProperty.get(); }
+  @Override public void setMuted(boolean muted) { mutedProperty.set(muted); }
+  @Override public BooleanProperty mutedProperty() { return mutedProperty; }
 
-  @Override
-  public void setMute(boolean mute) {
-    mediaPlayer.mute(mute);
-  }
+  private final BeanBooleanProperty pausedProperty;
+  @Override public boolean isPaused() { return pausedProperty.get(); }
+  @Override public void setPaused(boolean paused) { pausedProperty.set(paused); }
+  @Override public BooleanProperty pausedProperty() { return pausedProperty; }
 }

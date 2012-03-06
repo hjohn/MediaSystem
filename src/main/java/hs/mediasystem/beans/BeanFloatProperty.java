@@ -3,7 +3,7 @@ package hs.mediasystem.beans;
 import javafx.beans.property.SimpleFloatProperty;
 
 public final class BeanFloatProperty extends SimpleFloatProperty {
-  private final BeanAccessor<Float> accessor;
+  private final Accessor<Float> accessor;
 
   private boolean initialized;
 
@@ -11,11 +11,15 @@ public final class BeanFloatProperty extends SimpleFloatProperty {
     accessor = new BeanAccessor<>(bean, propertyName);
   }
 
+  public BeanFloatProperty(Accessor<Float> accessor) {
+    this.accessor = accessor;
+  }
+
   @Override
   public float get() {
     if(!initialized) {
       initialized = true;
-      set(accessor.read());
+      super.set(accessor.read());
     }
 
     return super.get();

@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
@@ -184,11 +185,6 @@ public class MPlayerPlayer implements Player {
   }
 
   @Override
-  public void pause() {
-    sendCommand("pause");
-  }
-
-  @Override
   public long getPosition() {
     try {
       return (long)(Float.parseFloat(getProperty("time_pos")) * 1000);
@@ -203,7 +199,6 @@ public class MPlayerPlayer implements Player {
     sendCommand("seek %10.3f 2", (double)time / 1000);
   }
 
-  @Override
   public boolean isPlaying() {
     return isPlaying;
   }
@@ -272,7 +267,7 @@ public class MPlayerPlayer implements Player {
   }
 
   @Override
-  public boolean isMute() {
+  public boolean isMuted() {
     try {
       return getProperty("mute").equals("yes");
     }
@@ -282,7 +277,7 @@ public class MPlayerPlayer implements Player {
   }
 
   @Override
-  public void setMute(boolean mute) {
+  public void setMuted(boolean mute) {
     setProperty("mute", mute ? "1" : "0");
   }
 
@@ -414,6 +409,26 @@ public class MPlayerPlayer implements Player {
 
   @Override
   public IntegerProperty subtitleDelayProperty() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public BooleanProperty mutedProperty() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public BooleanProperty pausedProperty() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean isPaused() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void setPaused(boolean paused) {
     throw new UnsupportedOperationException();
   }
 }

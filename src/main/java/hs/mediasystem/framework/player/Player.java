@@ -2,6 +2,7 @@ package hs.mediasystem.framework.player;
 
 import java.nio.file.Path;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
@@ -12,10 +13,6 @@ import javafx.collections.ObservableList;
 public interface Player {
 
   void play(String uri);
-
-  void pause();
-
-  boolean isPlaying();
 
   void stop();
 
@@ -49,8 +46,13 @@ public interface Player {
   void setVolume(int volume);
   IntegerProperty volumeProperty();
 
-  boolean isMute();
-  void setMute(boolean mute);
+  boolean isMuted();
+  void setMuted(boolean mute);
+  BooleanProperty mutedProperty();
+
+  boolean isPaused();
+  void setPaused(boolean paused);
+  BooleanProperty pausedProperty();
 
   /**
    * Returns the current subtitle delay in milliseconds.

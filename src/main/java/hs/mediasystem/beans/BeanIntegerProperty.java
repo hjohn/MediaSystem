@@ -2,12 +2,16 @@ package hs.mediasystem.beans;
 
 import javafx.beans.property.SimpleIntegerProperty;
 
-public final class ComplexIntegerProperty extends SimpleIntegerProperty {
+public final class BeanIntegerProperty extends SimpleIntegerProperty {
   private final Accessor<Integer> accessor;
 
   private boolean initialized;
 
-  public ComplexIntegerProperty(Accessor<Integer> accessor) {
+  public BeanIntegerProperty(Object bean, String propertyName) {
+    accessor = new BeanAccessor<>(bean, propertyName);
+  }
+
+  public BeanIntegerProperty(Accessor<Integer> accessor) {
     this.accessor = accessor;
   }
 

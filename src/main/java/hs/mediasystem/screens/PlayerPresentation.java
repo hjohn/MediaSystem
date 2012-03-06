@@ -22,7 +22,7 @@ public class PlayerPresentation {
   }
 
   public void pause() {
-    player.pause();
+    player.setPaused(!player.isPaused());
   }
 
   public void move(int ms) {
@@ -45,7 +45,7 @@ public class PlayerPresentation {
   }
 
   public void mute() {
-    player.setMute(!player.isMute());
+    player.setMuted(!player.isMuted());
   }
 
   public void changeVolume(int volumeDiff) {

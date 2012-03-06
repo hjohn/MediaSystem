@@ -3,7 +3,7 @@ package hs.mediasystem.beans;
 import javafx.beans.property.SimpleDoubleProperty;
 
 public final class BeanDoubleProperty extends SimpleDoubleProperty {
-  private final BeanAccessor<Double> accessor;
+  private final Accessor<Double> accessor;
 
   private boolean initialized;
 
@@ -11,11 +11,15 @@ public final class BeanDoubleProperty extends SimpleDoubleProperty {
     accessor = new BeanAccessor<>(bean, propertyName);
   }
 
+  public BeanDoubleProperty(Accessor<Double> accessor) {
+    this.accessor = accessor;
+  }
+
   @Override
   public double get() {
     if(!initialized) {
       initialized = true;
-      set(accessor.read());
+      super.set(accessor.read());
     }
 
     return super.get();
