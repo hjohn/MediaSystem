@@ -72,6 +72,8 @@ public class ProgramController {
   }};
 
   private final Navigator navigator = new Navigator();
+  private final InformationBorder informationBorder = new InformationBorder();
+
   private int screenNumber;
 
   @Inject
@@ -86,8 +88,6 @@ public class ProgramController {
     sceneRoot.getChildren().addAll(contentBorderPane, overlayBorderPane);
     scene.setRoot(sceneRoot);
     scene.getStylesheets().add("default.css");
-
-    final InformationBorder informationBorder = new InformationBorder();
 
     overlayBorderPane.setMouseTransparent(true);
     overlayBorderPane.setCenter(new BorderPane() {{
@@ -169,11 +169,11 @@ public class ProgramController {
             event.consume();
           }
           else if(code == KeyCode.DIGIT9) {
-            playerPresentation.changeVolume(-1);
+            playerPresentation.changeVolume(-5);
             event.consume();
           }
           else if(code == KeyCode.DIGIT0) {
-            playerPresentation.changeVolume(1);
+            playerPresentation.changeVolume(5);
             event.consume();
           }
           else if(code == KeyCode.DIGIT1) {
@@ -319,6 +319,8 @@ public class ProgramController {
         displayOnOverlayStage(playbackOverlayPresentation.getView());
       }
     });
+
+    informationBorder.setVisible(false);
   }
 
   public void stop() {
@@ -328,6 +330,8 @@ public class ProgramController {
     while(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
       navigator.back();
     }
+
+    informationBorder.setVisible(true);
   }
 
   public List<SubtitleProvider> getSubtitleProviders() {
