@@ -1,6 +1,12 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.util.SizeFormatter;
+import hs.mediasystem.beans.AsyncImageProperty;
+import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.PlaybackOverlayView;
+import hs.mediasystem.framework.player.AudioTrack;
+import hs.mediasystem.framework.player.Player;
+import hs.mediasystem.framework.player.Subtitle;
+import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.SpecialEffects;
 import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
@@ -8,15 +14,11 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.binding.StringBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.LongProperty;
+import javafx.beans.binding.NumberExpression;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -29,6 +31,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Slider;
 import javafx.scene.effect.Blend;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Reflection;
@@ -39,14 +42,26 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
-public class PlaybackOverlayPane extends StackPane {
+public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayView {
+  private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
+  @Override public ObjectProperty<MediaItem> mediaItemProperty() { return mediaItem; }
+
+  private final ObjectProperty<Player> player = new SimpleObjectProperty<>();
+  @Override public ObjectProperty<Player> playerProperty() { return player; }
+
+  private final PlayerBindings playerBindings = new PlayerBindings(player);
+
   private final BorderPane borderPane = new BorderPane();
   private final BorderPane bottomPane = new BorderPane();
+
+  private final ObjectBinding<ImageHandle> posterHandle = Bindings.select(mediaItem, "poster");
+  private final ObjectProperty<Image> poster = new AsyncImageProperty(posterHandle);
 
   private final VBox playbackStateOverlay = new VBox() {{
     getStyleClass().add("content-box");
@@ -68,6 +83,8 @@ public class PlaybackOverlayPane extends StackPane {
 
   public PlaybackOverlayPane() {
     getStylesheets().add("playback-overlay.css");
+    getStylesheets().add("playback-state-overlay.css");
+
     setId("playback-overlay");
 
     final double w = 1920;  // TODO remove hardcoded values
@@ -103,12 +120,12 @@ public class PlaybackOverlayPane extends StackPane {
         getChildren().add(new VBox() {{
           HBox.setHgrow(this, Priority.ALWAYS);
           getChildren().add(new Label() {{
-            textProperty().bind(title);
+            textProperty().bind(Bindings.selectString(mediaItem, "title"));
             getStyleClass().add("video-title");
             setEffect(SpecialEffects.createNeonEffect(64));
           }});
           getChildren().add(new Label() {{
-            textProperty().bind(subtitle);
+            textProperty().bind(Bindings.selectString(mediaItem, "subtitle"));
             getStyleClass().add("video-subtitle");
           }});
           getChildren().add(new GridPane() {{
@@ -127,39 +144,21 @@ public class PlaybackOverlayPane extends StackPane {
             );
             setId("video-overlay_info_bar");
             add(new Label() {{
-              textProperty().bind(new StringBinding() {
-                {
-                  bind(position);
-                }
-
-                @Override
-                protected String computeValue() {
-                  return SizeFormatter.SECONDS_AS_POSITION.format(position.get() / 1000);
-                }
-              });
+              textProperty().bind(playerBindings.formattedPosition);
             }}, 0, 0);
             add(new ProgressBar(0) {{
               getStyleClass().add("orange-bar");
-              progressProperty().bind(Bindings.divide(Bindings.add(position, 0.0), length));
+              progressProperty().bind(Bindings.divide(Bindings.add(playerBindings.position, 0.0), playerBindings.length));
               setMaxWidth(100000);
               HBox.setHgrow(this, Priority.ALWAYS);
             }}, 1, 0, 2, 1);
             add(new Label() {{
-              textProperty().bind(new StringBinding() {
-                {
-                  bind(length);
-                }
-
-                @Override
-                protected String computeValue() {
-                  return SizeFormatter.SECONDS_AS_POSITION.format(length.get() / 1000);
-                }
-              });
+              textProperty().bind(playerBindings.formattedLength);
             }}, 3, 0);
             add(new Label("-"), 1, 1);
             add(new ProgressBar(0) {{
               getStyleClass().add("red-bar");
-              progressProperty().bind(volume);
+              progressProperty().bind(playerBindings.volume);
               setMaxWidth(100000);
               HBox.setHgrow(this, Priority.ALWAYS);
             }}, 2, 1);
@@ -209,6 +208,117 @@ public class PlaybackOverlayPane extends StackPane {
         }
       }
     });
+
+    playerBindings.position.addListener(new ChangeListener<Number>() {
+      @Override
+      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+        if(Math.abs(oldValue.longValue() - newValue.longValue()) > 2500) {
+          addOSD(createOSDItem("Position", 0.0, 100.0, playerBindings.position.multiply(100.0).divide(playerBindings.length), playerBindings.formattedPosition));
+        }
+      }
+    });
+
+    playerBindings.volume.addListener(new FirstChangeFilter<>(new ChangeListener<Number>() {
+      @Override
+      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+        addOSD(createOSDItem("Volume", 0.0, 100.0, playerBindings.volume, playerBindings.formattedVolume));
+      }
+    }));
+
+    playerBindings.rate.addListener(new FirstChangeFilter<>(new ChangeListener<Number>() {
+      @Override
+      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+        addOSD(createOSDItem("Playback Speed", 0.0, 4.0, playerBindings.rate, playerBindings.formattedRate));
+      }
+    }));
+
+    playerBindings.audioDelay.addListener(new FirstChangeFilter<>(new ChangeListener<Number>() {
+      @Override
+      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+        addOSD(createOSDItem("Audio Delay", -120.0, 120.0, playerBindings.audioDelay.divide(1000.0), playerBindings.formattedAudioDelay));
+      }
+    }));
+
+    playerBindings.subtitleDelay.addListener(new FirstChangeFilter<>(new ChangeListener<Number>() {
+      @Override
+      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+        addOSD(createOSDItem("Subtitle Delay", -120.0, 120.0, playerBindings.subtitleDelay.divide(1000.0), playerBindings.formattedSubtitleDelay));
+      }
+    }));
+
+    playerBindings.brightness.addListener(new FirstChangeFilter<>(new ChangeListener<Number>() {
+      @Override
+      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+        addOSD(createOSDItem("Brightness Adjustment", -100.0, 100.0, playerBindings.brightness.subtract(1.0).multiply(100.0), playerBindings.formattedBrightness));
+      }
+    }));
+
+    playerBindings.audioTrack.addListener(new FirstChangeFilter<>(new ChangeListener<AudioTrack>() {
+      @Override
+      public void changed(ObservableValue<? extends AudioTrack> observable, AudioTrack oldValue, AudioTrack value) {
+        addOSD(createOSDItem("Audio Track", playerBindings.formattedAudioTrack));
+      }
+    }));
+
+    playerBindings.subtitle.addListener(new FirstChangeFilter<>(new ChangeListener<Subtitle>() {
+      @Override
+      public void changed(ObservableValue<? extends Subtitle> observable, Subtitle oldValue, Subtitle value) {
+        addOSD(createOSDItem("Subtitle", playerBindings.formattedSubtitle));
+      }
+    }));
+
+    registerConditionalOSD(playerBindings.muted, new BorderPane() {{
+      getStyleClass().add("content-box");
+      setCenter(new Region() {{
+        setMinSize(40, 40);
+        getStyleClass().add("mute-shape");
+      }});
+    }});
+
+    registerConditionalOSD(playerBindings.paused, new VBox() {{
+      getStyleClass().add("content-box");
+      getChildren().add(new Region() {{
+        setMinSize(40, 40);
+        getStyleClass().add("pause-shape");
+      }});
+    }});
+  }
+
+  private Node createOSDItem(final String title, final StringExpression valueText) {
+    return new VBox() {{
+      setId(title);
+      getStyleClass().add("item");
+      getChildren().add(new BorderPane() {{
+        setLeft(new Label(title) {{
+          getStyleClass().add("title");
+        }});
+        setRight(new Label() {{
+          getStyleClass().add("value");
+          textProperty().bind(valueText);
+        }});
+      }});
+    }};
+  }
+
+  private Node createOSDItem(final String title, final double min, final double max, final NumberExpression value, final StringExpression valueText) {
+    return new VBox() {{
+      setId(title);
+      getStyleClass().add("item");
+      getChildren().add(new BorderPane() {{
+        setLeft(new Label(title) {{
+          getStyleClass().add("title");
+        }});
+        setRight(new Label() {{
+          getStyleClass().add("value");
+          textProperty().bind(valueText);
+        }});
+      }});
+      getChildren().add(new Slider(min, max * 1.01, 0) {{  // WORKAROUND: 1.01 to work around last label display bug
+        valueProperty().bind(value);
+        setMinorTickCount(4);
+        setMajorTickUnit(max / 4);
+      }});
+    }};
   }
 
   public void showOSD() {
@@ -311,39 +421,22 @@ public class PlaybackOverlayPane extends StackPane {
     expansionTimeline.play();
   }
 
-  private final DoubleProperty volume = new SimpleDoubleProperty(0);
-  public double getVolume() { return volume.get(); }
-  public void setVolume(double volume) { this.volume.set(volume); }
-  public DoubleProperty volumeProperty() { return volume; }
+  private static class FirstChangeFilter<T> implements ChangeListener<T> {
+    private final ChangeListener<T> changeListener;
 
-  private final LongProperty position = new SimpleLongProperty();
-  public long getPosition() { return position.get(); }
-  public void setPosition(long position) { this.position.set(position); }
-  public LongProperty positionProperty() { return position; }
+    private boolean notFirst;
 
-  private final LongProperty length = new SimpleLongProperty(1);
-  public long getLength() { return length.get(); }
-  public void setLength(long length) { this.length.set(length); }
-  public LongProperty lengthProperty() { return length; }
+    public FirstChangeFilter(ChangeListener<T> changeListener) {
+      this.changeListener = changeListener;
+    }
 
-  private final StringProperty title = new SimpleStringProperty();
-  public String getTitle() { return title.get(); }
-  public void setTitle(String title) { this.title.set(title); }
-  public StringProperty titleProperty() { return title; }
+    @Override
+    public void changed(ObservableValue<? extends T> observable, T oldValue, T value) {
+      if(notFirst) {
+        changeListener.changed(observable, oldValue, value);
+      }
 
-  private final StringProperty subtitle = new SimpleStringProperty();
-  public String getSubtitle() { return subtitle.get(); }
-  public void setSubtitle(String subtitle) { this.subtitle.set(subtitle); }
-  public StringProperty subtitleProperty() { return subtitle; }
-
-  private final StringProperty releaseYear = new SimpleStringProperty();
-  public String getReleaseYear() { return releaseYear.get(); }
-  public void setReleaseYear(String releaseYear) { this.releaseYear.set(releaseYear); }
-  public StringProperty releaseYearProperty() { return releaseYear; }
-
-  private final ObjectProperty<Image> poster = new SimpleObjectProperty<>();
-  public Image getPoster() { return poster.get(); }
-  public void setPoster(Image poster) { this.poster.set(poster); }
-  public ObjectProperty<Image> posterProperty() { return poster; }
-
+      notFirst = true;
+    }
+  }
 }

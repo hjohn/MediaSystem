@@ -1,10 +1,12 @@
 package hs.mediasystem;
 
 import hs.mediasystem.db.ConnectionPool;
+import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.SelectMediaView;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MoviesMainMenuExtension;
+import hs.mediasystem.screens.PlaybackOverlayPane;
 import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SeriesMainMenuExtension;
@@ -77,6 +79,7 @@ public class FrontEnd extends Application {
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(YouTubeMainMenuExtension.class);
 
         bind(SelectMediaView.class).to(ListSelectMediaView.class);
+        bind(PlaybackOverlayView.class).to(PlaybackOverlayPane.class);
       }
 
       @Provides
