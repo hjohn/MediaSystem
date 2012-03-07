@@ -7,6 +7,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.LongProperty;
@@ -22,6 +23,7 @@ import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -47,9 +49,14 @@ public class PlaybackOverlayPane extends StackPane {
   private final BorderPane bottomPane = new BorderPane();
 
   private final VBox playbackStateOverlay = new VBox() {{
-    getStylesheets().add("playback-state-overlay.css");
     getStyleClass().add("content-box");
     setVisible(false);
+  }};
+
+  private final HBox conditionalStateOverlay = new HBox() {{
+    setSpacing(30);
+    setAlignment(Pos.BOTTOM_LEFT);
+    setFillHeight(false);
   }};
 
   private final Timeline fadeInSustainAndFadeOut = new Timeline(
@@ -165,8 +172,12 @@ public class PlaybackOverlayPane extends StackPane {
     getChildren().add(borderPane);
 
     getChildren().add(new GridPane() {{
+      setHgap(0);
       getColumnConstraints().add(new ColumnConstraints() {{
-        setPercentWidth(25);
+        setPercentWidth(5);
+      }});
+      getColumnConstraints().add(new ColumnConstraints() {{
+        setPercentWidth(20);
       }});
       getColumnConstraints().add(new ColumnConstraints() {{
         setPercentWidth(50);
@@ -177,8 +188,17 @@ public class PlaybackOverlayPane extends StackPane {
       getRowConstraints().add(new RowConstraints() {{
         setPercentHeight(10);
       }});
+      getRowConstraints().add(new RowConstraints());
+      getRowConstraints().add(new RowConstraints() {{
+        setVgrow(Priority.ALWAYS);
+        setFillHeight(true);
+      }});
+      getRowConstraints().add(new RowConstraints() {{
+        setPercentHeight(5);
+      }});
 
-      add(playbackStateOverlay, 1, 1);
+      add(playbackStateOverlay, 2, 1);
+      add(conditionalStateOverlay, 1, 2);
     }});
 
     sceneProperty().addListener(new ChangeListener<Scene>() {
@@ -193,6 +213,33 @@ public class PlaybackOverlayPane extends StackPane {
 
   public void showOSD() {
     fadeInSustainAndFadeOut.playFromStart();
+  }
+
+  public void registerConditionalOSD(BooleanExpression showCondition, final Node node) {  // id of node is used to distinguish same items
+    node.setOpacity(0);
+    conditionalStateOverlay.getChildren().add(node);
+
+    final Timeline fadeIn = new Timeline(
+      new KeyFrame(Duration.ZERO, new KeyValue(node.opacityProperty(), 0.0)),
+      new KeyFrame(Duration.seconds(0.5), new KeyValue(node.opacityProperty(), 1.0))
+    );
+
+    final Timeline fadeOut = new Timeline(
+      new KeyFrame(Duration.ZERO, new KeyValue(node.opacityProperty(), 1.0)),
+      new KeyFrame(Duration.seconds(0.5), new KeyValue(node.opacityProperty(), 0.0))
+    );
+
+    showCondition.addListener(new ChangeListener<Boolean>() {
+      @Override
+      public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean value) {
+        if(value) {
+          fadeIn.play();
+        }
+        else {
+          fadeOut.play();
+        }
+      }
+    });
   }
 
   public void addOSD(final Node node) {  // id of node is used to distinguish same items

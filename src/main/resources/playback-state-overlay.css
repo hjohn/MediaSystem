@@ -50,3 +50,13 @@
   -fx-padding: 30;
   -fx-hgap: 20;  
 }
+
+.pause-shape {
+  -fx-background-color: -c-main;
+  -fx-shape: "M 3 3 L 1 3 L 1 -3 L 3 -3 Z M -3 3 L -1 3 L -1 -3 L -3 -3 Z M -4 -4 L 4 4";
+}
+
+.mute-shape {
+  -fx-background-color: -c-main;
+  -fx-shape: "M -16 -6 L -16 6 L -8 6 L 0 15 L 0 -15 L -8 -6 Z M 5 6 L 8 9 L 14 3 L 20 9 L 23 6 L 17 0 L 23 -6 L 20 -9 L 14 -3 L 8 -9 L 5 -6 L 11 0 Z";
+}

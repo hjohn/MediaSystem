@@ -37,6 +37,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import javax.inject.Inject;
@@ -51,6 +52,7 @@ public class PlaybackOverlayPresentation {
   @Inject
   public PlaybackOverlayPresentation(final ProgramController controller, final PlayerPresentation playerPresentation, final PlaybackOverlayPane view) {
     this.view = view;
+    view.getStylesheets().add("playback-state-overlay.css");
 
     final Player player = playerPresentation.getPlayer();
     final MediaItem mediaItem = controller.getCurrentMediaItem();
@@ -252,6 +254,22 @@ public class PlaybackOverlayPresentation {
         view.addOSD(createOSDItem("Subtitle", formattedSubtitle));
       }
     });
+
+    view.registerConditionalOSD(player.mutedProperty(), new BorderPane() {{
+      getStyleClass().add("content-box");
+      setCenter(new Region() {{
+        setMinSize(40, 40);
+        getStyleClass().add("mute-shape");
+      }});
+    }});
+
+    view.registerConditionalOSD(player.pausedProperty(), new VBox() {{
+      getStyleClass().add("content-box");
+      getChildren().add(new Region() {{
+        setMinSize(40, 40);
+        getStyleClass().add("pause-shape");
+      }});
+    }});
   }
 
   public PlaybackOverlayPane getView() {
