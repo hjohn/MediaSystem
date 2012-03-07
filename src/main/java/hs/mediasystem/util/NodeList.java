@@ -5,6 +5,11 @@ public class NodeList<T> {
 
   public synchronized Node addHead(T content) {
     head = new Node(content, head, null);
+
+    if(head.next != null) {
+      head.next.previous = head;
+    }
+
     return head;
   }
 
