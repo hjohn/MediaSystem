@@ -7,6 +7,7 @@ import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
 import hs.mediasystem.util.ImageHandle;
+import hs.mediasystem.util.ScaledImageView;
 import hs.mediasystem.util.SpecialEffects;
 import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
@@ -36,7 +37,6 @@ import javafx.scene.effect.Blend;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Reflection;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -48,6 +48,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import org.tbee.javafx.scene.layout.MigPane;
+
 public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayView {
   private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
   @Override public ObjectProperty<MediaItem> mediaItemProperty() { return mediaItem; }
@@ -57,8 +59,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
 
   private final PlayerBindings playerBindings = new PlayerBindings(player);
 
-  private final BorderPane borderPane = new BorderPane();
-  private final BorderPane bottomPane = new BorderPane();
+  private final MigPane detailsOverlay = new MigPane("fill", "[5%!][20%!][5%!][65%!][5%!]", "[45%!][50%!][5%!]");
 
   private final ObjectBinding<ImageHandle> posterHandle = Bindings.select(mediaItem, "poster");
   private final ObjectProperty<Image> poster = new AsyncImageProperty(posterHandle);
@@ -76,9 +77,9 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
 
   private final Timeline fadeInSustainAndFadeOut = new Timeline(
     new KeyFrame(Duration.seconds(0)),
-    new KeyFrame(Duration.seconds(1), new KeyValue(bottomPane.opacityProperty(), 1.0)),
-    new KeyFrame(Duration.seconds(6), new KeyValue(bottomPane.opacityProperty(), 1.0)),
-    new KeyFrame(Duration.seconds(9), new KeyValue(bottomPane.opacityProperty(), 0.0))
+    new KeyFrame(Duration.seconds(1), new KeyValue(detailsOverlay.opacityProperty(), 1.0)),
+    new KeyFrame(Duration.seconds(6), new KeyValue(detailsOverlay.opacityProperty(), 1.0)),
+    new KeyFrame(Duration.seconds(9), new KeyValue(detailsOverlay.opacityProperty(), 0.0))
   );
 
   public PlaybackOverlayPane() {
@@ -87,9 +88,6 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
 
     setId("playback-overlay");
 
-    final double w = 1920;  // TODO remove hardcoded values
-    final double h = 1200;
-
     playbackStateOverlay.getChildren().addListener(new ListChangeListener<Node>() {
       @Override
       public void onChanged(ListChangeListener.Change<? extends Node> change) {
@@ -97,24 +95,21 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
       }
     });
 
-    borderPane.setFocusTraversable(true);
-    borderPane.setBottom(bottomPane);
+    setFocusTraversable(true);
 
-    bottomPane.setId("video-overlay");
-    bottomPane.setLeft(new ImageView() {{
+    detailsOverlay.setId("video-overlay");
+    detailsOverlay.add(new ScaledImageView() {{
       imageProperty().bind(poster);
+      setAlignment(Pos.BOTTOM_RIGHT);
       getStyleClass().add("poster");
-      setFitWidth(w * 0.2);
-      setFitHeight(h * 0.4);
-      setPreserveRatio(true);
       setEffect(new Blend() {{
         setBottomInput(new DropShadow());
         setTopInput(new Reflection() {{
           this.setFraction(0.10);
         }});
       }});
-    }});
-    bottomPane.setCenter(new BorderPane() {{
+    }}, "cell 1 1, grow, bottom, left");
+    detailsOverlay.add(new BorderPane() {{
       setId("video-overlay_info");
       setBottom(new HBox() {{
         getChildren().add(new VBox() {{
@@ -166,9 +161,9 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
           }});
         }});
       }});
-    }});
+    }}, "cell 3 1, growx, bottom");
 
-    getChildren().add(borderPane);
+    getChildren().add(detailsOverlay);
 
     getChildren().add(new GridPane() {{
       setHgap(0);
