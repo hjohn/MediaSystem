@@ -117,6 +117,7 @@ public class VLCPlayer implements Player {
         System.out.println("[FINE] VLCPlayer: Event[mediaParsedChanged]: " + parsed);
         if(parsed == 1) {
           updateSubtitles();
+          audioTrack.update();
         }
       }
 
@@ -365,7 +366,7 @@ public class VLCPlayer implements Player {
   @Override public void setSubtitle(Subtitle subtitle) { this.subtitle.set(subtitle); }
   @Override public ObjectProperty<Subtitle> subtitleProperty() { return subtitle; }
 
-  private final ObjectProperty<AudioTrack> audioTrack = new BeanObjectProperty<>(this, "audioTrackInternal");
+  private final BeanObjectProperty<AudioTrack> audioTrack = new BeanObjectProperty<>(this, "audioTrackInternal");
   @Override public AudioTrack getAudioTrack() { return audioTrack.get(); }
   @Override public void setAudioTrack(AudioTrack audioTrack) { this.audioTrack.set(audioTrack); }
   @Override public ObjectProperty<AudioTrack> audioTrackProperty() { return audioTrack; }
