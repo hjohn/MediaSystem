@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.sublight.SubtitleDescriptor;
+import hs.subtitle.SubtitleDescriptor;
 
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;

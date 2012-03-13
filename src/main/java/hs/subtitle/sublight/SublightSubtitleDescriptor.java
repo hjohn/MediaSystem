@@ -1,4 +1,7 @@
-package hs.sublight;
+package hs.subtitle.sublight;
+
+import hs.subtitle.ByteBufferOutputStream;
+import hs.subtitle.SubtitleDescriptor;
 
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;

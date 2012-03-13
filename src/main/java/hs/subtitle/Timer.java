@@ -1,4 +1,4 @@
-package hs.sublight;
+package hs.subtitle;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -6,28 +6,26 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 public abstract class Timer implements Runnable {
-
   private final ThreadFactory threadFactory = new DefaultThreadFactory("Timer", Thread.NORM_PRIORITY, true);
 
   private ScheduledThreadPoolExecutor executor;
   private ScheduledFuture<?> scheduledFuture;
   private Thread shutdownHook;
 
-
   public synchronized void set(long delay, TimeUnit unit, boolean runBeforeShutdown) {
     // create executor if necessary
-    if (executor == null) {
+    if(executor == null) {
       executor = new ScheduledThreadPoolExecutor(1, threadFactory);
     }
 
     // cancel existing future task
-    if (scheduledFuture != null) {
+    if(scheduledFuture != null) {
       scheduledFuture.cancel(true);
     }
 
     Runnable runnable = this;
 
-    if (runBeforeShutdown) {
+    if(runBeforeShutdown) {
       addShutdownHook();
 
       // remove shutdown hook after execution
@@ -37,19 +35,20 @@ public abstract class Timer implements Runnable {
         public void run() {
           try {
             Timer.this.run();
-          } finally {
+          }
+          finally {
             cancel();
           }
         }
       };
-    } else {
+    }
+    else {
       // remove existing shutdown hook, if any
       removeShutdownHook();
     }
 
     scheduledFuture = executor.schedule(runnable, delay, unit);
   }
-
 
   public synchronized void cancel() {
     removeShutdownHook();
@@ -61,27 +60,25 @@ public abstract class Timer implements Runnable {
     executor = null;
   }
 
-
   private synchronized void addShutdownHook() {
-    if (shutdownHook == null) {
+    if(shutdownHook == null) {
       shutdownHook = new Thread(this);
       Runtime.getRuntime().addShutdownHook(shutdownHook);
     }
   }
 
-
   private synchronized void removeShutdownHook() {
-    if (shutdownHook != null) {
+    if(shutdownHook != null) {
       try {
-        if (shutdownHook != Thread.currentThread()) {
+        if(shutdownHook != Thread.currentThread()) {
           // can't remove shutdown hooks anymore, once runtime is shutting down,
           // so don't remove the shutdown hook, if we are running on the shutdown hook
           Runtime.getRuntime().removeShutdownHook(shutdownHook);
         }
-      } finally {
+      }
+      finally {
         shutdownHook = null;
       }
     }
   }
-
 }

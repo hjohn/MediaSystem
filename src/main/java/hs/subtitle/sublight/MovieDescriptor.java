@@ -1,6 +1,8 @@
 
-package hs.sublight;
+package hs.subtitle.sublight;
 
+
+import hs.subtitle.SearchResult;
 
 import java.util.Arrays;
 

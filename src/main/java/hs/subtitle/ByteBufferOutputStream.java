@@ -1,4 +1,4 @@
-package hs.sublight;
+package hs.subtitle;
 
 import java.io.IOException;
 import java.io.InputStream;

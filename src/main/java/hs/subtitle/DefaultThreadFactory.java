@@ -1,5 +1,5 @@
 
-package hs.sublight;
+package hs.subtitle;
 
 
 import java.util.concurrent.ThreadFactory;

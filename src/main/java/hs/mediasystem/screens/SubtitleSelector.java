@@ -2,7 +2,7 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SubtitleProvider;
-import hs.sublight.SubtitleDescriptor;
+import hs.subtitle.SubtitleDescriptor;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,6 +53,7 @@ public class SubtitleSelector {
         }
         else if(newValue == Service.State.FAILED) {
           System.out.println("[FINE] SubtitleSelector.SubtitleSelector(...).new ChangeListener() {...}.changed() - Exception search for subtitles: " + subtitleQueryService.getException());
+          subtitleQueryService.getException().printStackTrace();
         }
       }
     });

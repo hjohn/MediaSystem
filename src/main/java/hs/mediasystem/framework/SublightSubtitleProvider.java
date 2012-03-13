@@ -1,7 +1,7 @@
 package hs.mediasystem.framework;
 
-import hs.sublight.SublightSubtitleClient;
-import hs.sublight.SubtitleDescriptor;
+import hs.subtitle.SubtitleDescriptor;
+import hs.subtitle.sublight.SublightSubtitleClient;
 
 import java.util.List;
 

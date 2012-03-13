@@ -1,10 +1,10 @@
 package hs.mediasystem.framework;
 
-import hs.sublight.SubtitleDescriptor;
+import hs.subtitle.SubtitleDescriptor;
 
 import java.util.List;
 
 public interface SubtitleProvider {
   String getName();
-  List<SubtitleDescriptor> query(MediaItem mediaItem) throws SubtitleProviderException;
+  List<? extends SubtitleDescriptor> query(MediaItem mediaItem) throws SubtitleProviderException;
 }
