@@ -27,6 +27,7 @@ public class MediaItem {
   private State state = State.STANDARD;
   private String language;
   private String tagline;
+  private String imdbId;
 
   private MediaItem(MediaTree mediaTree, MediaItem parent, final LocalInfo<?> localInfo) {
     this.mediaTree = mediaTree;
@@ -83,6 +84,14 @@ public class MediaItem {
 
   public String getUri() {
     return localInfo.getUri();
+  }
+
+  public String getImdbId() {
+    return imdbId;
+  }
+
+  public void setImdbId(String imdbId) {
+    this.imdbId = imdbId;
   }
 
   public String getShortTitle() {
