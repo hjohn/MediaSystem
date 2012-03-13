@@ -62,6 +62,7 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
           Platform.runLater(new Runnable() {
             @Override
             public void run() {
+              mediaItem.setImdbId(item.getImdbId());
               mediaItem.officialTitleProperty().set(item.getTitle());
               mediaItem.backgroundProperty().set(createImageHandle(item.getBackground(), item, "background"));
               mediaItem.bannerProperty().set(createImageHandle(item.getBanner(), item, "banner"));
