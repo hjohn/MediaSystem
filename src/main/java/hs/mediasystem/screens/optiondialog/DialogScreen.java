@@ -40,7 +40,7 @@ public class DialogScreen extends BorderPane {
       addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
         @Override
         public void handle(KeyEvent event) {
-          Option selectedOption = options.get(selectedIndex);
+          Option selectedOption = (Option)getChildren().get(selectedIndex);
 
           if(ENTER.match(event)) {
             if(selectedOption instanceof SubOption) {
