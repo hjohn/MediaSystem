@@ -1,6 +1,7 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.OpenSubtitlesSubtitleProvider;
 import hs.mediasystem.framework.SublightSubtitleProvider;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.screens.Navigator.Destination;
@@ -339,6 +340,7 @@ public class ProgramController {
 
     return new ArrayList<SubtitleProvider>() {{
       add(new SublightSubtitleProvider(general.get("sublight.client"), general.get("sublight.key")));
+      add(new OpenSubtitlesSubtitleProvider("MediaSystem v1"));
     }};
   }
 
