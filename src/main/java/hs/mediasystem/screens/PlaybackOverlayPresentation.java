@@ -12,7 +12,7 @@ import hs.mediasystem.screens.optiondialog.SubOption;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.StringBinding;
 import hs.mediasystem.util.StringConverter;
-import hs.sublight.SubtitleDescriptor;
+import hs.subtitle.SubtitleDescriptor;
 
 import java.util.ArrayList;
 import java.util.List;
