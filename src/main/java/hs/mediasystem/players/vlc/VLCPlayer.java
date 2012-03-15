@@ -4,20 +4,15 @@ import hs.mediasystem.beans.Accessor;
 import hs.mediasystem.beans.BeanAccessor;
 import hs.mediasystem.beans.BeanBooleanProperty;
 import hs.mediasystem.beans.BeanFloatProperty;
-import hs.mediasystem.beans.BeanObjectProperty;
 import hs.mediasystem.beans.BeanIntegerProperty;
+import hs.mediasystem.beans.BeanObjectProperty;
 import hs.mediasystem.beans.UpdatableLongProperty;
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
 
-import java.awt.BorderLayout;
 import java.awt.Canvas;
-import java.awt.Color;
-import java.awt.Frame;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
+import java.awt.Component;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,9 +37,9 @@ import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 public class VLCPlayer implements Player {
   private final MediaPlayerFactory factory;
   private final EmbeddedMediaPlayer mediaPlayer;
-  private Frame frame;
+  private final Canvas canvas = new Canvas();
 
-  public VLCPlayer(int screenNumber, String... args) {
+  public VLCPlayer(String... args) {
     List<String> arguments = new ArrayList<>(Arrays.asList(args));
 
     arguments.add("--input-fast-seek");
@@ -54,23 +49,8 @@ public class VLCPlayer implements Player {
 
     factory = new MediaPlayerFactory(arguments);
     mediaPlayer = factory.newEmbeddedMediaPlayer();
+    mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
 
-    setScreen(screenNumber);
-//
-//    Canvas canvas = new Canvas();
-//
-//    frame = new Frame(device.getDefaultConfiguration());
-//
-//    frame.setLayout(new BorderLayout());
-//    frame.setUndecorated(true);
-//    frame.setExtendedState(Frame.MAXIMIZED_BOTH);
-////    device.setFullScreenWindow(frame);
-//
-//    frame.add(canvas, BorderLayout.CENTER);
-//    frame.setBackground(new Color(0, 0, 0));
-//    frame.setVisible(true);
-//
-//    mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
     mediaPlayer.addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
       private AtomicInteger ignoreFinish = new AtomicInteger();
       private boolean videoAdjusted;
@@ -285,7 +265,11 @@ public class VLCPlayer implements Player {
   @Override
   public void dispose() {
     mediaPlayer.release();
-    frame.dispose();
+  }
+
+  @Override
+  public Component getDisplayComponent() {
+    return canvas;
   }
 
   @Override
@@ -303,33 +287,6 @@ public class VLCPlayer implements Player {
       if(spuDescription.id() > 0) {
         subtitles.add(new Subtitle(spuDescription.id(), spuDescription.description()));
       }
-    }
-  }
-
-  @Override
-  public final void setScreen(int screenNumber) {
-    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    GraphicsDevice[] gs = ge.getScreenDevices();
-
-    GraphicsDevice graphicsDevice = (screenNumber >= 0 && screenNumber < gs.length) ? gs[screenNumber] : gs[0];
-
-    if(frame == null) {
-      Canvas canvas = new Canvas();
-
-      frame = new Frame(graphicsDevice.getDefaultConfiguration());
-      frame.setLayout(new BorderLayout());
-      frame.setUndecorated(true);
-      frame.setExtendedState(Frame.MAXIMIZED_BOTH);
-      frame.add(canvas, BorderLayout.CENTER);
-      frame.setBackground(new Color(0, 0, 0));
-      frame.setVisible(true);
-
-      mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
-    }
-    else {
-      Rectangle rectangle = graphicsDevice.getDefaultConfiguration().getBounds();
-
-      frame.setBounds(rectangle);
     }
   }
 

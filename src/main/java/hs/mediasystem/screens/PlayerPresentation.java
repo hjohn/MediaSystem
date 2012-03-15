@@ -130,10 +130,6 @@ public class PlayerPresentation {
     player.showSubtitle(path);
   }
 
-  public void setScreen(int screenNumber) {
-    player.setScreen(screenNumber);
-  }
-
   public Player getPlayer() {
     return player;
   }

@@ -36,6 +36,7 @@ import com.google.inject.multibindings.Multibinder;
 public class FrontEnd extends Application {
   private static final Ini INI = new Ini(new File("mediasystem.ini"));
 
+  private SceneManager sceneManager;
   private Player player;
   private ConnectionPool pool;
 
@@ -56,6 +57,11 @@ public class FrontEnd extends Application {
   @Override
   public void start(Stage primaryStage) throws Exception {
     System.out.println("javafx.runtime.version: " + System.getProperties().get("javafx.runtime.version"));
+
+    int screenNumber = Integer.parseInt(INI.getSection("general").getDefault("screen", "0"));
+
+    sceneManager = new DuoWindowSceneManager("MediaSystem", screenNumber);
+    sceneManager.setPlayerRoot(player.getDisplayComponent());
 
     PGConnectionPoolDataSource dataSource = new PGConnectionPoolDataSource();
 
@@ -85,6 +91,11 @@ public class FrontEnd extends Application {
       @Provides
       public PlayerPresentation providesPlayerPresentation() {
         return playerPresentation;
+      }
+
+      @Provides
+      public SceneManager providesSceneManager() {
+        return sceneManager;
       }
 
       @Provides

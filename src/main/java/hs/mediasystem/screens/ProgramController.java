@@ -1,5 +1,6 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.SceneManager;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.OpenSubtitlesSubtitleProvider;
 import hs.mediasystem.framework.SublightSubtitleProvider;
@@ -23,7 +24,6 @@ import javafx.concurrent.Worker.State;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -39,8 +39,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -54,8 +52,6 @@ public class ProgramController {
   private static final KeyCombination KEY_OPEN_BRACKET = new KeyCodeCombination(KeyCode.OPEN_BRACKET);
   private static final KeyCombination KEY_CLOSE_BRACKET = new KeyCodeCombination(KeyCode.CLOSE_BRACKET);
 
-  private final Stage mainStage;  // WORKAROUND: Two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing; refactor this
-  private final Stage transparentStage;
   private final Scene scene = new Scene(new BorderPane(), Color.BLACK);
   private final StackPane sceneRoot = new StackPane();
   private final BorderPane contentBorderPane = new BorderPane();
@@ -75,32 +71,24 @@ public class ProgramController {
   private final Navigator navigator = new Navigator();
   private final InformationBorder informationBorder = new InformationBorder();
 
-  private int screenNumber;
-
   @Inject
-  public ProgramController(Ini ini, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider) {
+  public ProgramController(Ini ini, final SceneManager sceneManager, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider) {
     this.ini = ini;
     this.playerPresentation = playerPresentation;
     this.mainScreenProvider = mainScreenProvider;
     this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
 
-    screenNumber = Integer.parseInt(ini.getSection("general").getDefault("screen", "0"));
-
     sceneRoot.getChildren().addAll(contentBorderPane, overlayBorderPane);
     scene.setRoot(sceneRoot);
     scene.getStylesheets().add("default.css");
+
+    sceneManager.setScene(scene);
 
     overlayBorderPane.setMouseTransparent(true);
     overlayBorderPane.setCenter(new BorderPane() {{
       setTop(informationBorder);
     }});
     overlayBorderPane.setRight(new Group(messagePane));
-
-    mainStage = new Stage(StageStyle.UNDECORATED);
-    transparentStage = new Stage(StageStyle.TRANSPARENT);
-
-    mainStage.setTitle("MediaSystem");
-    transparentStage.setTitle("MediaSystem");
 
     navigator.onNavigation().set(new EventHandler<ActionEvent>() {
       @Override
@@ -128,15 +116,14 @@ public class ProgramController {
         }
         else if(KEY_CTRL_ALT_S.match(event)) {
           ObservableList<Screen> screens = Screen.getScreens();
+          int screenNumber = sceneManager.getScreenNumber();
           screenNumber++;
 
           if(screenNumber >= screens.size()) {
             screenNumber = 0;
           }
 
-          playerPresentation.setScreen(screenNumber);
-          setupStageLocation(mainStage);
-          setupStageLocation(transparentStage);
+          sceneManager.setScreenNumber(screenNumber);
         }
         else if(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
           KeyCode code = event.getCode();
@@ -232,48 +219,18 @@ public class ProgramController {
     return navigator;
   }
 
-  private void setupStageLocation(Stage stage) {
-    ObservableList<Screen> screens = Screen.getScreens();
-    Screen screen = screens.size() <= screenNumber ? Screen.getPrimary() : screens.get(screenNumber);
-
-    Rectangle2D bounds = screen.getBounds();
-    boolean primary = screen.equals(Screen.getPrimary());    // WORKAROUND: this doesn't work nice in combination with full screen, so this hack is used to prevent going fullscreen when screen is not primary
-
-    if(primary) {
-      stage.setX(bounds.getMinX());
-      stage.setY(bounds.getMinY());
-      stage.setWidth(bounds.getWidth());
-      stage.setHeight(bounds.getHeight());
-      stage.setFullScreen(true);
-    }
-    else {
-      stage.setX(bounds.getMinX());
-      stage.setY(bounds.getMinY());
-      stage.setWidth(bounds.getWidth());
-      stage.setHeight(bounds.getHeight());
-      stage.toFront();
-    }
-  }
-
   private void displayOnMainStage(Node node) {
-    displayOnStage(node, mainStage, transparentStage, Color.BLACK);
+    displayOnStage(node, Color.BLACK);
   }
 
   private void displayOnOverlayStage(Node node) {
-    displayOnStage(node, transparentStage, mainStage, Color.TRANSPARENT);
+    displayOnStage(node, Color.TRANSPARENT);
   }
 
-  private void displayOnStage(final Node node, Stage newStage, Stage oldStage, Color background) {
-    oldStage.setScene(null);
-    scene.setFill(background);
+  private void displayOnStage(final Node node, Color background) {
     contentBorderPane.setCenter(node);
-    newStage.setScene(scene);
-    newStage.show();
 
-    setupStageLocation(newStage);
-
-    newStage.toFront();
-    oldStage.hide();
+    scene.setFill(background);
 
     Platform.runLater(new Runnable() {
       @Override

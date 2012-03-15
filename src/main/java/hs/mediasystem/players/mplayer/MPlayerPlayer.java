@@ -5,6 +5,7 @@ import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Window;
 import java.io.IOException;
@@ -403,11 +404,6 @@ public class MPlayerPlayer implements Player {
   }
 
   @Override
-  public void setScreen(int screenNumber) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public IntegerProperty subtitleDelayProperty() {
     throw new UnsupportedOperationException();
   }
@@ -429,6 +425,11 @@ public class MPlayerPlayer implements Player {
 
   @Override
   public void setPaused(boolean paused) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Component getDisplayComponent() {
     throw new UnsupportedOperationException();
   }
 }

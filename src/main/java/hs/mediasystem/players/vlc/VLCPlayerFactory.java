@@ -26,8 +26,6 @@ public class VLCPlayerFactory implements PlayerFactory {
       args.add(section.get(key));
     }
 
-    int screen = Integer.parseInt(ini.getSection("general").getDefault("screen", "0"));
-
-    return new VLCPlayer(screen, args.toArray(new String[args.size()]));
+    return new VLCPlayer(args.toArray(new String[args.size()]));
   }
 }

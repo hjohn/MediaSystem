@@ -1,5 +1,6 @@
 package hs.mediasystem.framework.player;
 
+import java.awt.Component;
 import java.nio.file.Path;
 
 import javafx.beans.property.BooleanProperty;
@@ -114,5 +115,5 @@ public interface Player {
 
   ObservableList<AudioTrack> getAudioTracks();
 
-  void setScreen(int screenNumber);
+  Component getDisplayComponent();
 }
