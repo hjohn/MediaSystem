@@ -1,8 +1,9 @@
 package hs.mediasystem.beans;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleLongProperty;
 
-public final class BeanLongProperty extends SimpleLongProperty {
+public final class BeanLongProperty extends SimpleLongProperty implements Updatable {
   private final Accessor<Long> accessor;
 
   private boolean initialized;
@@ -12,6 +13,9 @@ public final class BeanLongProperty extends SimpleLongProperty {
   }
 
   public BeanLongProperty(Accessor<Long> accessor) {
+    if(accessor == null) {
+      throw new IllegalArgumentException("parameter 'accessor' cannot be null");
+    }
     this.accessor = accessor;
   }
 
@@ -19,7 +23,8 @@ public final class BeanLongProperty extends SimpleLongProperty {
   public long get() {
     if(!initialized) {
       initialized = true;
-      super.set(accessor.read());
+      Long value = accessor.read();
+      super.set(value == null ? 0 : value);
     }
 
     return super.get();
@@ -29,5 +34,20 @@ public final class BeanLongProperty extends SimpleLongProperty {
   public void set(long value) {
     super.set(value);
     accessor.write(value);
+  }
+
+  @Override
+  public void update() {
+    initialized = false;
+    fireValueChangedEvent();
+  }
+
+  public void update(final long value) {
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+        BeanLongProperty.super.set(value);
+      }
+    });
   }
 }
