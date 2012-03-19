@@ -85,6 +85,12 @@ public class DuoWindowSceneManager implements SceneManager {
   public void setPlayerRoot(Component playerDisplay) {
     playerFrame.removeAll();
     playerFrame.add(playerDisplay, BorderLayout.CENTER);
+    playerFrame.doLayout();
+  }
+
+  @Override
+  public void disposePlayerRoot() {
+    playerFrame.removeAll();
   }
 
   @Override

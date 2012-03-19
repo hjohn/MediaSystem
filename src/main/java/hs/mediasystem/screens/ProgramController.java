@@ -60,6 +60,7 @@ public class ProgramController {
   private final Provider<MainScreen> mainScreenProvider;
   private final Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider;
   private final SubtitleDownloadService subtitleDownloadService = new SubtitleDownloadService();
+  private final SceneManager sceneManager;
   private final PlayerPresentation playerPresentation;
 
   private final VBox messagePane = new VBox() {{
@@ -74,6 +75,7 @@ public class ProgramController {
   @Inject
   public ProgramController(Ini ini, final SceneManager sceneManager, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider) {
     this.ini = ini;
+    this.sceneManager = sceneManager;
     this.playerPresentation = playerPresentation;
     this.mainScreenProvider = mainScreenProvider;
     this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
@@ -264,8 +266,9 @@ public class ProgramController {
   }
 
   public void play(MediaItem mediaItem) {
-    playerPresentation.getPlayer().positionProperty().set(0);
     playerPresentation.play(mediaItem.getUri());
+
+    sceneManager.setPlayerRoot(playerPresentation.getPlayer().getDisplayComponent());
 
     currentMediaItem = mediaItem;
 
@@ -282,6 +285,8 @@ public class ProgramController {
   }
 
   public void stop() {
+    sceneManager.disposePlayerRoot();
+
     subtitleDownloadService.cancel();
     playerPresentation.stop();
 

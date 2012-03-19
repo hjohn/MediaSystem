@@ -61,7 +61,6 @@ public class FrontEnd extends Application {
     int screenNumber = Integer.parseInt(INI.getSection("general").getDefault("screen", "0"));
 
     sceneManager = new DuoWindowSceneManager("MediaSystem", screenNumber);
-    sceneManager.setPlayerRoot(player.getDisplayComponent());
 
     PGConnectionPoolDataSource dataSource = new PGConnectionPoolDataSource();
 
