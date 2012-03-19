@@ -253,11 +253,6 @@ public class VLCPlayer implements Player {
   }
 
   @Override
-  public long getLength() {
-    return mediaPlayer.getLength();
-  }
-
-  @Override
   public void stop() {
     mediaPlayer.stop();
   }
@@ -291,6 +286,7 @@ public class VLCPlayer implements Player {
   }
 
   private final UpdatableLongProperty length;
+  @Override public long getLength() { return length.get(); }
   @Override public ReadOnlyLongProperty lengthProperty() { return length; }
 
   private final UpdatableLongProperty position;
