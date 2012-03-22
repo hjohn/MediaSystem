@@ -85,6 +85,7 @@ public class NavigatorTest {
 
     subNavigator.back();
 
+    assertEquals("subA/out", trip.pollFirst());
     assertEquals("B/out", trip.pollFirst());
     assertEquals("A/in", trip.pollFirst());
     assertEquals("A", trip.pollFirst());

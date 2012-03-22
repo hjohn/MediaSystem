@@ -58,6 +58,8 @@ public class Navigator {
         fireActionEvent();
       }
       else if(parentNavigator != null) {
+        current.doOutro();
+
         parentNavigator.current.childNavigator.onNavigation.set(null);
         parentNavigator.current.childNavigator = null;
         parentNavigator.back();
