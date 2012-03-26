@@ -3,8 +3,8 @@ package hs.mediasystem.screens;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.db.YouTubeEnricher;
 import hs.mediasystem.fs.YouTubeMediaTree;
+import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
-import javafx.scene.Node;
 import javafx.scene.image.Image;
 
 import javax.inject.Inject;
@@ -33,15 +33,28 @@ public class YouTubeMainMenuExtension implements MainMenuExtension {
   }
 
   @Override
-  public Node select(ProgramController controller) {
-    SelectMediaPresentation presentation = selectMediaPresentationProvider.get();
-    YouTubeMediaTree mediaTree = new YouTubeMediaTree();
+  public Destination getDestination(final ProgramController controller) {
+    return new Destination(getTitle()) {
+      private SelectMediaPresentation presentation;
+      private YouTubeMediaTree mediaTree;
 
-    mediaTree.onItemQueued().set(enrichmentHandler);
+      @Override
+      protected void init() {
+        presentation = selectMediaPresentationProvider.get();
+        mediaTree = new YouTubeMediaTree();
+        mediaTree.onItemQueued().set(enrichmentHandler);
+      }
 
-    presentation.setMediaTree(mediaTree);
+      @Override
+      protected void intro() {
+        controller.showScreen(presentation.getView());
+      }
 
-    return presentation.getView();
+      @Override
+      protected void execute() {
+        presentation.setMediaTree(mediaTree);
+      }
+    };
   }
 
   @Override

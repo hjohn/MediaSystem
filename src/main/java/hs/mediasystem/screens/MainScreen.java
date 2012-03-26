@@ -65,7 +65,7 @@ public class MainScreen extends BorderPane {
       }
 
       @Override
-      public Node select(ProgramController controller) {
+      public Destination getDestination(ProgramController controller) {
         return null;
       }
 
@@ -82,19 +82,7 @@ public class MainScreen extends BorderPane {
         setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent event) {
-            controller.getNavigator().navigateTo(new Destination(mainMenuExtension.getTitle()) {
-              private Node view;
-
-              @Override
-              public void init() {
-                view = mainMenuExtension.select(controller);
-              }
-
-              @Override
-              public void execute() {
-                controller.showScreen(view);
-              }
-            });
+            controller.getNavigator().navigateTo(mainMenuExtension.getDestination(controller));
           }
         });
       }};
