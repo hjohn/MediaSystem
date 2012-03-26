@@ -36,8 +36,12 @@ public class BannerCellProvider implements CellProvider<MediaNode> {
   public Node configureCell(MediaNode mediaNode) {
     final MediaItem item = mediaNode.getMediaItem();
 
+    // A banner from TVDB is 758 x 140
+
     if(item != null) {
       final AsyncImageProperty asyncImageProperty = new AsyncImageProperty(item.bannerProperty());
+
+      title.setMinHeight(fitWidth * 140 / 758);
       title.textProperty().bind(Bindings.when(asyncImageProperty.isNull()).then(item.titleProperty()).otherwise(""));
       title.graphicProperty().bind(Bindings.when(asyncImageProperty.isNull()).then((ImageView)null).otherwise(new ImageView() {{
         imageProperty().bind(asyncImageProperty);
