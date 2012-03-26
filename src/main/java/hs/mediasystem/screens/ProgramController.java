@@ -248,9 +248,16 @@ public class ProgramController {
 
   public void showMainScreen() {
     navigator.navigateTo(new Destination("Home") {
+      private MainScreen mainScreen;
+
+      @Override
+      protected void init() {
+        mainScreen = mainScreenProvider.get();
+      }
+
       @Override
       public void execute() {
-        displayOnMainStage(mainScreenProvider.get());
+        displayOnMainStage(mainScreen);
       }
     });
   }
