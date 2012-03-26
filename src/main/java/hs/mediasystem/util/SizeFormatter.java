@@ -28,6 +28,10 @@ public class SizeFormatter {
     new Format("%s:%s:%s", -1, new Format("%.0f", 60 * 60), new Format("%02.0f", 60), new Format("%02.0f", 1))  // h:mm:ss
   });
 
+  public static final FormatSet MILLISECONDS = new FormatSet(new Format[] {
+    new Format("%sd %s:%s:%s", -1, new Format("%.0f", 24L * 60 * 60 * 1000), new Format("%02.0f", 60L * 60 * 1000), new Format("%02.0f", 60 * 1000), new Format("%06.3f", 1000))
+  });
+
   public static String formatBytes(long bytes) {
     long b = bytes + 1023;
 
