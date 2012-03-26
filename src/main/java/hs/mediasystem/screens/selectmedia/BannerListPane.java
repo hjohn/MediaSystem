@@ -36,10 +36,10 @@ public class BannerListPane extends BorderPane implements ListPane {
   private final TableColumn<DuoMediaNode, MediaNode> rightColumn = new TableColumn<>("Right");
 
   private final ObjectProperty<EventHandler<MediaNodeEvent>> onItemSelected = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onItemSelected() { return onItemSelected; }
+  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected() { return onItemSelected; }
 
   private final ObjectProperty<EventHandler<MediaNodeEvent>> onItemAlternateSelect = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onItemAlternateSelect() { return onItemAlternateSelect; }
+  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect() { return onItemAlternateSelect; }
 
   private final TableView<DuoMediaNode> tableView = new TableView<DuoMediaNode>() {{
     getColumns().add(leftColumn);
@@ -204,5 +204,15 @@ public class BannerListPane extends BorderPane implements ListPane {
     private final ObjectProperty<MediaNode> right = new SimpleObjectProperty<>();
     public ObjectProperty<MediaNode> rightProperty() { return right; }
     public MediaNode getRight() { return right.get(); }
+  }
+
+  @Override
+  public MediaNode getSelectedNode() {
+    return getFocusedMediaNode();
+  }
+
+  @Override
+  public void setSelectedNode(MediaNode mediaNode) {
+    throw new UnsupportedOperationException();
   }
 }

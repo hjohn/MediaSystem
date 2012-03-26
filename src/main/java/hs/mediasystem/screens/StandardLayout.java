@@ -35,43 +35,39 @@ public class StandardLayout {
     return new SeasonAndEpisodeCellProvider();
   }
 
-  public List<MediaNode> getChildren(MediaItem parent) {
-    List<? extends MediaItem> children = parent.children();
+  public List<MediaNode> getChildren(MediaNode parentNode) {
+    MediaItem parentItem = parentNode.getMediaItem();
+    List<? extends MediaItem> children = parentItem.children();
     List<MediaNode> output = new ArrayList<>();
 
-    if(parent.getMediaType().equals("MOVIE_ROOT")) {
+    if(parentItem.getMediaType().equals("MOVIE_ROOT")) {
       Collection<List<MediaItem>> groupedItems = Groups.group(children, new TitleGrouper());
 
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
           Collections.sort(group, MediaItemComparator.INSTANCE);
-          EpisodeGroup g = new EpisodeGroup(parent.getMediaTree(), group);
+          MediaNode episodeGroupNode = new MediaNode(this, new EpisodeGroup(parentItem.getMediaTree(), group));
 
           List<MediaNode> nodeChildren = new ArrayList<>();
           for(MediaItem item : group) {
             nodeChildren.add(new MediaNode(this, item));
           }
 
-          output.add(new MediaNode(this, g, nodeChildren));
+          episodeGroupNode.setChildren(nodeChildren);
+
+          output.add(episodeGroupNode);
         }
         else {
           output.add(new MediaNode(this, group.get(0)));
         }
       }
     }
-    else if(parent.getMediaType().equals("SERIE")) {
+    else if(parentItem.getMediaType().equals("SERIE")) {
       Collection<List<MediaItem>> groupedItems = Groups.group(children, new SeasonGrouper());
 
       for(List<MediaItem> group : groupedItems) {
         MediaItem episodeOne = group.get(0);
-        Season s;
-
-        if(episodeOne.getSeason() == null) {
-          s = new Season(parent.getMediaTree(), parent.getTitle(), 0);
-        }
-        else {
-          s = new Season(parent.getMediaTree(), parent.getTitle(), episodeOne.getSeason());
-        }
+        MediaNode seasonNode = new MediaNode(this, new Season(parentItem.getMediaTree(), parentItem.getTitle(), episodeOne.getSeason() == null ? 0 : episodeOne.getSeason()));
 
         Collections.sort(group, EpisodeComparator.INSTANCE);
         List<MediaNode> nodeChildren = new ArrayList<>();
@@ -80,7 +76,8 @@ public class StandardLayout {
           nodeChildren.add(new MediaNode(this, item));
         }
 
-        output.add(new MediaNode(this, s, nodeChildren));
+        seasonNode.setChildren(nodeChildren);
+        output.add(seasonNode);
       }
     }
     else {

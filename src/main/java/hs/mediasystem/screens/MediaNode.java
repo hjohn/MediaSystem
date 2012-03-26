@@ -9,16 +9,55 @@ import java.util.List;
 public class MediaNode {
   private final StandardLayout layout;
   private final MediaItem mediaItem;
-  private final List<MediaNode> children;
+  private final String id;
 
-  public MediaNode(StandardLayout layout, MediaItem mediaItem, List<MediaNode> children) {
+  private MediaNode parent;
+  private List<MediaNode> children;
+
+  public MediaNode(StandardLayout layout, MediaItem mediaItem) {
     this.layout = layout;
     this.mediaItem = mediaItem;
+    this.id = mediaItem.getUri() == null ? mediaItem.getLocalInfo().getTitle() : mediaItem.getUri();
+
+    assert this.mediaItem != null;
+    assert this.id != null;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public MediaNode getParent() {
+    return parent;
+  }
+
+  public void setChildren(List<MediaNode> children) {
+    for(MediaNode child : children) {
+      if(child.parent != null) {
+        throw new IllegalStateException("cannot add child twice: " + child);
+      }
+
+      child.parent = this;
+    }
+
     this.children = children;
   }
 
-  public MediaNode(StandardLayout layout, MediaItem mediaItem) {
-    this(layout, mediaItem, null);
+  public MediaNode findMediaNode(String id) {
+    for(MediaNode node : getChildren()) {
+      if(node.getId().equalsIgnoreCase(id)) {
+        return node;
+      }
+      else if(!node.isLeaf()) {
+        MediaNode childNode = node.findMediaNode(id);
+
+        if(childNode != null) {
+          return childNode;
+        }
+      }
+    }
+
+    return null;
   }
 
   public MediaItem getMediaItem() {
@@ -26,11 +65,11 @@ public class MediaNode {
   }
 
   public List<MediaNode> getChildren() {
-    return children != null ? Collections.unmodifiableList(children) : layout.getChildren(mediaItem);
-  }
+    if(children == null) {
+      setChildren(layout.getChildren(this));
+    }
 
-  public boolean hasChildren() {
-    return children != null ? !children.isEmpty() : layout.hasChildren(mediaItem);
+    return Collections.unmodifiableList(children);
   }
 
   public boolean isLeaf() {
@@ -43,5 +82,24 @@ public class MediaNode {
 
   public boolean expandTopLevel() {
     return layout.expandTopLevel(mediaItem);
+  }
+
+  @Override
+  public int hashCode() {
+    return id.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) {
+      return true;
+    }
+    if(obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+
+    MediaNode other = (MediaNode) obj;
+
+    return id.equals(other.id);
   }
 }

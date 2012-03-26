@@ -1,9 +1,11 @@
 package hs.mediasystem.screens.selectmedia;
 
+import hs.mediasystem.StateCache;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.SelectMediaView;
 import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
+import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.Navigator;
 import hs.mediasystem.screens.Navigator.Destination;
@@ -36,9 +38,11 @@ public class SelectMediaPresentation {
   private final SelectMediaView view;
   private final Navigator navigator;
   private final StandardLayout layout = new StandardLayout();
+  private final StateCache stateCache;
 
   @Inject
-  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final MediaItemEnrichmentEventHandler enrichmentHandler) {
+  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final MediaItemEnrichmentEventHandler enrichmentHandler, final StateCache stateCache) {
+    this.stateCache = stateCache;
     this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
 
@@ -50,7 +54,7 @@ public class SelectMediaPresentation {
       }
     });
 
-    view.onItemSelected().set(new EventHandler<MediaNodeEvent>() {
+    view.onNodeSelected().set(new EventHandler<MediaNodeEvent>() {
       @Override
       public void handle(MediaNodeEvent event) {
         if(event.getMediaNode().getMediaItem().isLeaf()) {
@@ -63,7 +67,7 @@ public class SelectMediaPresentation {
       }
     });
 
-    view.onItemAlternateSelect().set(new EventHandler<MediaNodeEvent>() {
+    view.onNodeAlternateSelect().set(new EventHandler<MediaNodeEvent>() {
       @Override
       public void handle(MediaNodeEvent event) {
         final MediaItem mediaItem = event.getMediaNode().getMediaItem();
@@ -131,7 +135,41 @@ public class SelectMediaPresentation {
     navigator.navigateTo(new Destination(root.getTitle()) {
       @Override
       public void execute() {
-        view.setRoot(layout.wrap(root));
+        MediaNode mediaNode = layout.wrap(root);
+
+        view.setRoot(mediaNode);
+
+        String key = createKeyFromTrail();
+        String id = stateCache.getState(key);
+        MediaNode nodeToSelect = null;
+
+        if(id != null) {
+          nodeToSelect = mediaNode.findMediaNode(id);
+        }
+
+        view.setSelectedNode(nodeToSelect);
+      }
+
+      @Override
+      protected void outro() {
+        MediaNode selectedNode = view.getSelectedNode();
+
+        String key = createKeyFromTrail();
+
+        stateCache.putState(key, selectedNode.getId());
+      }
+
+      private String createKeyFromTrail() {
+        String key = "";
+
+        for(Destination destination : navigator.getTrail()) {
+          if(!key.isEmpty()) {
+            key += ";";
+          }
+          key += destination.getDescription();
+        }
+
+        return key;
       }
     });
   }

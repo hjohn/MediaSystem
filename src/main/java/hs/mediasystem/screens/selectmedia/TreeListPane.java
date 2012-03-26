@@ -6,6 +6,11 @@ import hs.mediasystem.screens.Filter;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.util.Events;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javafx.application.Platform;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -34,11 +39,11 @@ public class TreeListPane extends BorderPane implements ListPane {
   private static final KeyCombination LEFT = new KeyCodeCombination(KeyCode.LEFT);
   private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
 
-  private final ObjectProperty<EventHandler<MediaNodeEvent>> onItemSelected = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onItemSelected() { return onItemSelected; }
+  private final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected = new SimpleObjectProperty<>();
+  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected() { return onNodeSelected; }
 
-  private final ObjectProperty<EventHandler<MediaNodeEvent>> onItemAlternateSelect = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onItemAlternateSelect() { return onItemAlternateSelect; }
+  private final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect = new SimpleObjectProperty<>();
+  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect() { return onNodeAlternateSelect; }
 
   private final TreeView<MediaNode> treeView = new TreeView<>();
 
@@ -76,7 +81,7 @@ public class TreeListPane extends BorderPane implements ListPane {
             itemSelected(event, focusedItem);
           }
           else if(event.getButton() == MouseButton.SECONDARY && event.getClickCount() == 1) {
-            Events.dispatchEvent(onItemAlternateSelect, new MediaNodeEvent(focusedItem.getValue()), event);
+            Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(focusedItem.getValue()), event);
           }
         }
       }
@@ -85,17 +90,6 @@ public class TreeListPane extends BorderPane implements ListPane {
     treeView.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
-        TreeItem<MediaNode> focusedItem = treeView.getFocusModel().getFocusedItem();
-
-        if(focusedItem != null) {
-          if(ENTER.match(event)) {
-            itemSelected(event, focusedItem);
-          }
-          else if(KEY_C.match(event)) {
-            Events.dispatchEvent(onItemAlternateSelect, new MediaNodeEvent(focusedItem.getValue()), event);
-          }
-        }
-
         if(LEFT.match(event)) {
           filter.activatePrevious();
           event.consume();
@@ -103,6 +97,18 @@ public class TreeListPane extends BorderPane implements ListPane {
         else if(RIGHT.match(event)) {
           filter.activateNext();
           event.consume();
+        }
+        else {
+          TreeItem<MediaNode> focusedItem = treeView.getFocusModel().getFocusedItem();
+
+          if(focusedItem != null) {
+            if(ENTER.match(event)) {
+              itemSelected(event, focusedItem);
+            }
+            else if(KEY_C.match(event)) {
+              Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(focusedItem.getValue()), event);
+            }
+          }
         }
       }
     });
@@ -114,9 +120,9 @@ public class TreeListPane extends BorderPane implements ListPane {
         Label label = (Label)value;
 
         if(oldLabel != null) {
-          oldLabel.setText(((MediaNode)oldValue.getUserData()).getMediaItem().getShortTitle());
+          oldLabel.setText(((MediaNodeTreeItem)oldValue.getUserData()).getValue().getMediaItem().getShortTitle());
         }
-        label.setText(((MediaNode)value.getUserData()).getMediaItem().getTitle());
+        label.setText(((MediaNodeTreeItem)value.getUserData()).getValue().getMediaItem().getTitle());
 
         refilter();
       }
@@ -128,8 +134,6 @@ public class TreeListPane extends BorderPane implements ListPane {
 
   @Override
   public void setRoot(final MediaNode root) {
-    TreeItem<MediaNode> treeRoot = new TreeItem<>(root);
-
     treeView.setCellFactory(new Callback<TreeView<MediaNode>, TreeCell<MediaNode>>() {
       @Override
       public TreeCell<MediaNode> call(TreeView<MediaNode> param) {
@@ -137,40 +141,31 @@ public class TreeListPane extends BorderPane implements ListPane {
       }
     });
 
-    treeView.setRoot(treeRoot);
-
     filter.getChildren().clear();
 
-    boolean expandTopLevel = root.expandTopLevel();
-
-    if(expandTopLevel) {
+    if(root.expandTopLevel()) {
       for(MediaNode node : root.getChildren()) {
         Label label = new Label(node.getMediaItem().getShortTitle());
 
         filter.getChildren().add(label);
-        label.setUserData(node);
+        label.setUserData(new MediaNodeTreeItem(node));
       }
 
       filter.activeProperty().set(filter.getChildren().get(0));
     }
     else {
-      treeRoot.getChildren().clear();
-
-      for(MediaNode node : root.getChildren()) {
-        treeRoot.getChildren().add(new MediaNodeTreeItem(node));
-      }
+      treeView.setRoot(new MediaNodeTreeItem(root, false));
     }
   }
 
   @Override
   public void requestFocus() {
     treeView.requestFocus();
-    treeView.getFocusModel().focus(0);
   }
 
   private void itemSelected(Event event, TreeItem<MediaNode> focusedItem) {
     if(focusedItem.isLeaf()) {
-      Events.dispatchEvent(onItemSelected, new MediaNodeEvent(focusedItem.getValue()), event);
+      Events.dispatchEvent(onNodeSelected, new MediaNodeEvent(focusedItem.getValue()), event);
     }
     else {
       focusedItem.setExpanded(!focusedItem.isExpanded());
@@ -179,27 +174,28 @@ public class TreeListPane extends BorderPane implements ListPane {
   }
 
   private void refilter() {
-    TreeItem<MediaNode> treeRoot = treeView.getRoot();
-
-    treeRoot.getChildren().clear();
-
-    MediaNode group = (MediaNode)filter.activeProperty().get().getUserData();
-
-    for(MediaNode item : group.getChildren()) {
-      treeRoot.getChildren().add(new MediaNodeTreeItem(item));
-    }
+    MediaNodeTreeItem group = (MediaNodeTreeItem)filter.activeProperty().get().getUserData();
+    treeView.setRoot(group);
   }
 
   private final class MediaNodeTreeItem extends TreeItem<MediaNode> {
+    private final boolean isLeaf;
+
     private boolean childrenPopulated;
 
-    private MediaNodeTreeItem(MediaNode value) {
+    private MediaNodeTreeItem(MediaNode value, boolean isLeaf) {
       super(value);
+
+      this.isLeaf = isLeaf;
+    }
+
+    private MediaNodeTreeItem(MediaNode value) {
+      this(value, value.isLeaf());
     }
 
     @Override
     public boolean isLeaf() {
-      return getValue().isLeaf();
+      return isLeaf;
     }
 
     @Override
@@ -209,10 +205,8 @@ public class TreeListPane extends BorderPane implements ListPane {
       if(!childrenPopulated) {
         childrenPopulated = true;
 
-        if(getValue().hasChildren()) {
-          for(MediaNode child : getValue().getChildren()) {
-            treeChildren.add(new MediaNodeTreeItem(child));
-          }
+        for(MediaNode child : getValue().getChildren()) {
+          treeChildren.add(new MediaNodeTreeItem(child));
         }
       }
 
@@ -220,7 +214,7 @@ public class TreeListPane extends BorderPane implements ListPane {
     }
   }
 
-  private final class MediaItemTreeCell extends TreeCell<MediaNode> {
+  private static final class MediaItemTreeCell extends TreeCell<MediaNode> {
     private final CellProvider<MediaNode> provider;
 
     private MediaItemTreeCell(CellProvider<MediaNode> provider) {
@@ -235,5 +229,73 @@ public class TreeListPane extends BorderPane implements ListPane {
         setGraphic(provider.configureCell(item));
       }
     }
+  }
+
+  @Override
+  public MediaNode getSelectedNode() {
+    TreeItem<MediaNode> focusedItem = treeView.getFocusModel().getFocusedItem();
+
+    return focusedItem == null ? null : focusedItem.getValue();
+  }
+
+  @Override
+  public void setSelectedNode(MediaNode mediaNode) {
+    if(mediaNode == null) {
+      treeView.getFocusModel().focus(0);
+    }
+    else {
+      List<MediaNode> stack = new ArrayList<>();
+
+      stack.add(mediaNode);
+
+      while(stack.get(0).getParent() != null) {
+        stack.add(0, stack.get(0).getParent());
+      }
+
+      stack.remove(0);
+      TreeItem<MediaNode> root = treeView.getRoot();
+
+      stack:
+      for(MediaNode node : stack) {
+        for(Node n : filter.getChildren()) {
+          if(((MediaNodeTreeItem)n.getUserData()).getValue().equals(node)) {
+            filter.activeProperty().set(n);
+            root = treeView.getRoot();
+            continue stack;
+          }
+        }
+
+        root.setExpanded(true);
+
+        root = findTreeItem(root, node);
+
+        if(root == null) {
+          break;
+        }
+      }
+
+      if(root != null) {
+        final int index = treeView.getRow(root);
+
+        treeView.getFocusModel().focus(index);
+
+        Platform.runLater(new Runnable() {
+          @Override
+          public void run() {
+            treeView.scrollTo(index);
+          }
+        });
+      }
+    }
+  }
+
+  private TreeItem<MediaNode> findTreeItem(TreeItem<MediaNode> root, MediaNode mediaNode) {
+    for(TreeItem<MediaNode> child : root.getChildren()) {
+      if(child.getValue().equals(mediaNode)) {
+        return child;
+      }
+    }
+
+    return null;
   }
 }

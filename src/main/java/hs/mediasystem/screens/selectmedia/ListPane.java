@@ -9,8 +9,11 @@ import javafx.beans.property.ObjectProperty;
 import javafx.event.EventHandler;
 
 public interface ListPane extends BasicNode {
-  ObjectProperty<EventHandler<MediaNodeEvent>> onItemSelected();
-  ObjectProperty<EventHandler<MediaNodeEvent>> onItemAlternateSelect();
+  ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected();
+  ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect();
   ObjectBinding<MediaItem> mediaItemBinding();
+
   void setRoot(final MediaNode root);
+  MediaNode getSelectedNode();
+  void setSelectedNode(MediaNode mediaNode);
 }

@@ -36,6 +36,8 @@ import com.google.inject.multibindings.Multibinder;
 public class FrontEnd extends Application {
   private static final Ini INI = new Ini(new File("mediasystem.ini"));
 
+  private final StateCache stateCache = new StateCache();
+
   private SceneManager sceneManager;
   private Player player;
   private ConnectionPool pool;
@@ -85,6 +87,11 @@ public class FrontEnd extends Application {
 
         bind(SelectMediaView.class).to(ListSelectMediaView.class);
         bind(PlaybackOverlayView.class).to(PlaybackOverlayPane.class);
+      }
+
+      @Provides
+      public StateCache providesStateCache() {
+        return stateCache;
       }
 
       @Provides

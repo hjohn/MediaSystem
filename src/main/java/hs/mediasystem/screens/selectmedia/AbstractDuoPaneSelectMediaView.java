@@ -83,8 +83,18 @@ public abstract class AbstractDuoPaneSelectMediaView extends StackPane implement
     listPane.setRoot(root);
   }
 
-  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onItemSelected() { return listPane.onItemSelected(); }
-  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onItemAlternateSelect() { return listPane.onItemAlternateSelect(); }
+  @Override
+  public MediaNode getSelectedNode() {
+    return listPane.getSelectedNode();
+  }
+
+  @Override
+  public void setSelectedNode(MediaNode mediaNode) {
+    listPane.setSelectedNode(mediaNode);
+  }
+
+  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected() { return listPane.onNodeSelected(); }
+  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect() { return listPane.onNodeAlternateSelect(); }
 
   private final ObjectProperty<EventHandler<ActionEvent>> onBack = new SimpleObjectProperty<>();
   @Override public ObjectProperty<EventHandler<ActionEvent>> onBack() { return onBack; }
