@@ -1,6 +1,7 @@
 package hs.mediasystem;
 
 import hs.mediasystem.db.ConnectionPool;
+import hs.mediasystem.db.DatabaseUpdater;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.SelectMediaView;
 import hs.mediasystem.framework.player.Player;
@@ -127,6 +128,10 @@ public class FrontEnd extends Application {
     };
 
     Injector injector = Guice.createInjector(module);
+
+    DatabaseUpdater updater = injector.getInstance(DatabaseUpdater.class);
+
+    updater.updateDatabase();
 
     ProgramController controller = injector.getInstance(ProgramController.class);
 
