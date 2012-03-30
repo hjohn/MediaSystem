@@ -30,7 +30,7 @@ This program is currently under heavy development and as such getting it to run 
 
 1) First make sure you have all the requirements installed.
 
-2) Create a database in PostgreSQL called 'mediasystem' and run the 'db.sql' file from 'src/main/resources' to create the needed tables.
+2) Create a database in PostgreSQL called 'mediasystem' with create rights.
    
 3) Look at 'mediasystem-example.ini', make a copy of it in the root of the project and rename it 'mediasystem.ini'.  Edit it as needed.
 
