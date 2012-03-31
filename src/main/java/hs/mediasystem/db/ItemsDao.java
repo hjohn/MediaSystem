@@ -1,11 +1,11 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.db.Database.Transaction;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,59 +19,20 @@ public class ItemsDao {
   public static final int VERSION = 2;
 
   private final Provider<Connection> connectionProvider;
+  private final Database database;
+  private final PersonsDao personsDao;
 
   @Inject
-  public ItemsDao(Provider<Connection> connectionProvider) {
+  public ItemsDao(Database database, Provider<Connection> connectionProvider, PersonsDao personsDao) {
+    this.database = database;
     this.connectionProvider = connectionProvider;
+    this.personsDao = personsDao;
+
+    Database.registerFetcher(new CastingsFetcher(connectionProvider));
   }
 
   private Connection getConnection() {
     return connectionProvider.get();
-  }
-
-  public enum ImageType {BACKGROUND, BANNER, POSTER}
-
-  public byte[] getImage(int id, ImageType type) {
-    System.out.println("[FINE] ItemsDao.getImage() - Loading image " + type + "(id=" + id + ")");
-
-    try {
-      String column = type.name().toLowerCase();
-
-      try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("SELECT " + column + " FROM items WHERE id = ?")) {
-        statement.setInt(1, id);
-
-        try(ResultSet rs = statement.executeQuery()) {
-          if(rs.next()) {
-            return rs.getBytes(column);
-          }
-        }
-      }
-
-      return null;
-    }
-    catch(SQLException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public void storeImage(int id, ImageType type, byte[] data) {
-    System.out.println("[FINE] ItemsDao.storeImage() - Storing image " + type + "(id=" + id + ")");
-
-    try {
-      String column = type.name().toLowerCase();
-
-      try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("UPDATE items SET " + column + "=? WHERE id = ?")) {
-        statement.setObject(1, data);
-        statement.setInt(2, id);
-
-        statement.execute();
-      }
-    }
-    catch(SQLException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public Item getItem(final Identifier identifier) throws ItemNotFoundException {
@@ -83,6 +44,7 @@ public class ItemsDao {
         statement.setString(3, identifier.getProviderId());
 
         System.out.println("[FINE] ItemsDao.getItem() - Selecting Item with type/provider/providerid = " + identifier.getType() + "/" + identifier.getProvider() + "/" + identifier.getProviderId());
+
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
             return new Item() {{
@@ -104,25 +66,14 @@ public class ItemsDao {
               setBannerURL(rs.getString("bannerurl"));
               setPosterURL(rs.getString("posterurl"));
 
-              if(rs.getBoolean("hasBackground")) {
-                setBackground(new ImageSource(getId(), ImageType.BACKGROUND));
+              if(getBackgroundURL() != null) {
+                setBackground(new URLImageSource(connectionProvider, getId(), "items", "background", rs.getBoolean("hasBackground") ? null : getBackgroundURL()));
               }
-              else if(getBackgroundURL() != null) {
-                setBackground(new URLImageSource(getId(), getBackgroundURL(), ImageType.BACKGROUND));
+              if(getBannerURL() != null) {
+                setBanner(new URLImageSource(connectionProvider, getId(), "items", "banner", rs.getBoolean("hasBanner") ? null : getBannerURL()));
               }
-
-              if(rs.getBoolean("hasBanner")) {
-                setBanner(new ImageSource(getId(), ImageType.BANNER));
-              }
-              else if(getBannerURL() != null) {
-                setBanner(new URLImageSource(getId(), getBannerURL(), ImageType.BANNER));
-              }
-
-              if(rs.getBoolean("hasPoster")) {
-                setPoster(new ImageSource(getId(), ImageType.POSTER));
-              }
-              else if(getPosterURL() != null) {
-                setPoster(new URLImageSource(getId(), getPosterURL(), ImageType.POSTER));
+              if(getPosterURL() != null) {
+                setPoster(new URLImageSource(connectionProvider, getId(), "items", "poster", rs.getBoolean("hasPoster") ? null: getPosterURL()));
               }
 
               String genres = rs.getString("genres");
@@ -130,9 +81,9 @@ public class ItemsDao {
             }};
           }
         }
-      }
 
-      throw new ItemNotFoundException(identifier);
+        throw new ItemNotFoundException(identifier);
+      }
     }
     catch(SQLException e) {
       throw new RuntimeException(e);
@@ -140,77 +91,64 @@ public class ItemsDao {
   }
 
   public void storeItem(Item item) {
-    try {
-      Map<String, Object> parameters = createFieldMap(item);
+    try(Transaction transaction = database.beginTransaction()) {
+      Map<String, Object> generatedKeys = transaction.insert("items", createFieldMap(item));
 
-      StringBuilder fields = new StringBuilder();
-      StringBuilder values = new StringBuilder();
+      item.setId((int)generatedKeys.get("id"));
+      putImagePlaceHolders(item);
 
-      for(String key : parameters.keySet()) {
-        if(fields.length() > 0) {
-          fields.append(",");
-          values.append(",");
-        }
+      storeCastings(item, transaction);
 
-        fields.append(key);
-        values.append("?");
-      }
-
-      try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("INSERT INTO items (" + fields.toString() + ") VALUES (" + values.toString() + ")", Statement.RETURN_GENERATED_KEYS)) {
-        setParameters(parameters, statement);
-        statement.execute();
-
-        try(ResultSet rs = statement.getGeneratedKeys()) {
-          if(rs.next()) {
-            item.setId(rs.getInt(1));
-            putImagePlaceHolders(item);
-          }
-        }
-      }
+      transaction.commit();
     }
     catch(SQLException e) {
-      throw new RuntimeException("Exception while trying to store: " + item, e);
+      throw new RuntimeException("exception while storing: " + item, e);
+    }
+  }
+
+  public void updateItem(Item item) {
+    try(Transaction transaction = database.beginTransaction()) {
+      Map<String, Object> parameters = createFieldMap(item);
+
+      transaction.update("items", item.getId(), parameters);
+
+      putImagePlaceHolders(item);
+
+      if(item.isCastingsLoaded()) {
+        transaction.deleteChildren("castings", "items", item.getId());
+
+        storeCastings(item, transaction);
+      }
+
+      transaction.commit();
+    }
+    catch(SQLException e) {
+      throw new RuntimeException("exception while updating: " + item, e);
+    }
+  }
+
+  private void storeCastings(Item item, Transaction transaction) throws SQLException {
+    for(Casting casting : item.getCastings()) {
+      Person person = personsDao.findByName(casting.getPerson().getName());
+
+      if(person == null) {
+        person = casting.getPerson();
+        personsDao.store(person);
+      }
+      else {
+        casting.setPerson(person);
+      }
+
+      transaction.insert("castings", createCastingsFieldMap(casting));
     }
   }
 
   private void putImagePlaceHolders(Item item) {
     int id = item.getId();
 
-    item.setBackground(item.getBackgroundURL() == null ? null : new URLImageSource(id, item.getBackgroundURL(), ImageType.BACKGROUND));
-    item.setBanner(item.getBannerURL() == null ? null : new URLImageSource(id, item.getBannerURL(), ImageType.BANNER));
-    item.setPoster(item.getPosterURL() == null ? null : new URLImageSource(id, item.getPosterURL(), ImageType.POSTER));
-  }
-
-  public void updateItem(Item item) {
-    try {
-      Map<String, Object> parameters = createFieldMap(item);
-
-      StringBuilder set = new StringBuilder();
-
-      for(String key : parameters.keySet()) {
-        if(set.length() > 0) {
-          set.append(",");
-        }
-
-        set.append(key);
-        set.append("=?");
-      }
-
-      try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("UPDATE items SET " + set.toString() + " WHERE id = ?")) {
-        parameters.put("(irrelevant)", item.getId());
-
-        System.out.println("[FINE] ItemsDao.updateItem() - Updating item with id: " + item.getId());
-
-        setParameters(parameters, statement);
-        statement.execute();
-        putImagePlaceHolders(item);
-      }
-    }
-    catch(SQLException e) {
-      throw new RuntimeException(e);
-    }
+    item.setBackground(item.getBackgroundURL() == null ? null : new URLImageSource(connectionProvider, id, "items", "background", item.getBackgroundURL()));
+    item.setBanner(item.getBannerURL() == null ? null : new URLImageSource(connectionProvider, id, "items", "banner", item.getBannerURL()));
+    item.setPoster(item.getPosterURL() == null ? null : new URLImageSource(connectionProvider, id, "items", "poster", item.getPosterURL()));
   }
 
   public Identifier getQuery(String surrogateName) throws ItemNotFoundException {
@@ -253,21 +191,6 @@ public class ItemsDao {
     }
     catch(SQLException e) {
       throw new RuntimeException("Exception while trying to store: " + surrogateName, e);
-    }
-  }
-
-  private static void setParameters(Map<String, Object> columns, PreparedStatement statement) throws SQLException {
-    int parameterIndex = 1;
-
-    for(String key : columns.keySet()) {
-      Object value = columns.get(key);
-
-      if(value instanceof Date) {
-        statement.setTimestamp(parameterIndex++, new Timestamp(((Date)value).getTime()));
-      }
-      else {
-        statement.setObject(parameterIndex++, value);
-      }
     }
   }
 
@@ -316,49 +239,15 @@ public class ItemsDao {
     return columns;
   }
 
-  private class ImageSource implements Source<byte[]> {
-    private final int id;
-    private final ImageType type;
+  private static Map<String, Object> createCastingsFieldMap(Casting casting) {
+    Map<String, Object> columns = new LinkedHashMap<>();
 
-    public ImageSource(int id, ImageType type) {
-      this.id = id;
-      this.type = type;
-    }
+    columns.put("items_id", casting.getItem().getId());
+    columns.put("persons_id", casting.getPerson().getId());
+    columns.put("role", casting.getRole());
+    columns.put("charactername", casting.getCharacterName());
+    columns.put("index", casting.getIndex());
 
-    @Override
-    public byte[] get() {
-      return ItemsDao.this.getImage(id, type);
-    }
-  }
-
-  private class URLImageSource implements Source<byte[]> {
-    private final int id;
-    private final ImageType type;
-    private final String url;
-
-    private boolean triedDownloading;
-
-    public URLImageSource(int id, String url, ImageType type) {
-      this.id = id;
-      this.url = url;
-      this.type = type;
-    }
-
-    @Override
-    public byte[] get() {
-      if(!triedDownloading) {
-        triedDownloading = true;
-
-        byte[] imageData = Downloader.tryReadURL(url);
-
-        if(imageData != null) {
-          ItemsDao.this.storeImage(id, type, imageData);
-        }
-
-        return imageData;
-      }
-
-      return ItemsDao.this.getImage(id, type);
-    }
+    return columns;
   }
 }

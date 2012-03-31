@@ -1,6 +1,8 @@
 package hs.mediasystem.db;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Item {
   private int id;
@@ -27,6 +29,12 @@ public class Item {
   private String[] genres = new String[] {};
   private String language;
   private String tagline;
+
+  private boolean viewed;
+  private int resumePosition;
+  private double matchAccuracy;
+
+  private List<Casting> castings = new ArrayList<>(0);
 
   public Identifier getIdentifier() {
     return identifier;
@@ -202,6 +210,41 @@ public class Item {
 
   public void setPosterURL(String posterURL) {
     this.posterURL = posterURL;
+  }
+
+  public boolean isCastingsLoaded() {
+    return castings != null;
+  }
+
+  public List<Casting> getCastings() {
+    if(castings == null) {
+      castings = Database.fetch(this, CastingsFetcher.class);
+    }
+    return castings;
+  }
+
+  public boolean isViewed() {
+    return viewed;
+  }
+
+  public void setViewed(boolean viewed) {
+    this.viewed = viewed;
+  }
+
+  public int getResumePosition() {
+    return resumePosition;
+  }
+
+  public void setResumePosition(int resumePosition) {
+    this.resumePosition = resumePosition;
+  }
+
+  public double getMatchAccuracy() {
+    return matchAccuracy;
+  }
+
+  public void setMatchAccuracy(double matchAccuracy) {
+    this.matchAccuracy = matchAccuracy;
   }
 
   @Override
