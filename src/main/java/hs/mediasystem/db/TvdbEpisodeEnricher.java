@@ -55,6 +55,34 @@ public class TvdbEpisodeEnricher implements ItemEnricher<Object> {
     System.out.println(">>> Do something with this: first Aired = " + episode.getFirstAired());  // "2002-02-26"
     item.setLanguage(episode.getLanguage());
 
+    for(String director : episode.getDirectors()) {
+      Person person = new Person();
+
+      person.setName(director);
+
+      Casting casting = new Casting();
+
+      casting.setItem(item);
+      casting.setPerson(person);
+      casting.setRole("director");
+
+      item.getCastings().add(casting);
+    }
+
+    for(String guestStar : episode.getGuestStars()) {
+      Person person = new Person();
+
+      person.setName(guestStar);
+
+      Casting casting = new Casting();
+
+      casting.setItem(item);
+      casting.setPerson(person);
+      casting.setRole("actor");
+
+      item.getCastings().add(casting);
+    }
+
     return item;
   }
 

@@ -3,6 +3,7 @@ package hs.mediasystem.db;
 import java.util.List;
 
 import com.moviejukebox.thetvdb.TheTVDB;
+import com.moviejukebox.thetvdb.model.Actor;
 import com.moviejukebox.thetvdb.model.Series;
 
 public class TvdbSerieEnricher implements ItemEnricher<Object> {
@@ -55,6 +56,26 @@ public class TvdbSerieEnricher implements ItemEnricher<Object> {
       item.setGenres(series.getGenres().toArray(new String[series.getGenres().size()]));
       item.setLanguage(series.getLanguage());
       item.setRuntime(Integer.parseInt(series.getRuntime()));
+
+      List<Actor> actors = tvDB.getActors(identifier);
+
+      for(Actor actor : actors) {
+        Person person = new Person();
+
+        person.setName(actor.getName());
+        person.setPhotoURL(actor.getImage());
+
+        Casting casting = new Casting();
+
+        casting.setItem(item);
+        casting.setPerson(person);
+        casting.setRole("actor");
+        casting.setCharacterName(actor.getRole());
+        casting.setIndex(actor.getSortOrder());
+
+        item.getCastings().add(casting);
+      }
+
       System.out.println(">>> Status of serie : " + series.getStatus());  // "Ended", "Continuing"
       System.out.println(">>> First aired : " +  series.getFirstAired());
 
