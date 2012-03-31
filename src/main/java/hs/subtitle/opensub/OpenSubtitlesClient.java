@@ -24,8 +24,8 @@ import redstone.xmlrpc.XmlRpcFault;
 public class OpenSubtitlesClient {
   private final OpenSubtitlesXmlRpc xmlrpc;
 
-  public OpenSubtitlesClient(String useragent) {
-    this.xmlrpc = new OpenSubtitlesXmlRpc("OS Test User Agent");
+  public OpenSubtitlesClient(String userAgent) {
+    this.xmlrpc = new OpenSubtitlesXmlRpc(userAgent);
   }
 
   public List<SearchResult> search(String query) throws Exception {
