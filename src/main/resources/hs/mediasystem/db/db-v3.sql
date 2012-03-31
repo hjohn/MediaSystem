@@ -1,0 +1,1 @@
+ALTER TABLE castings ADD COLUMN index integer NOT NULL;
