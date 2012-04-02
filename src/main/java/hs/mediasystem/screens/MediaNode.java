@@ -15,11 +15,12 @@ public class MediaNode {
   private List<MediaNode> children;
 
   public MediaNode(StandardLayout layout, MediaItem mediaItem) {
+    assert mediaItem != null;
+
     this.layout = layout;
     this.mediaItem = mediaItem;
     this.id = mediaItem.getUri() == null ? mediaItem.getLocalInfo().getTitle() : mediaItem.getUri();
 
-    assert this.mediaItem != null;
     assert this.id != null;
   }
 

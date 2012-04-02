@@ -8,7 +8,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 
 public class BeanProperties {
-  private static final Map<Updatable, TimedUpdatable> timedUpdatables = new WeakHashMap<>();
+  private static final Map<Updatable, TimedUpdatable> TIMED_UPDATABLES = new WeakHashMap<>();
 
   static {
     new Thread() {
@@ -24,8 +24,8 @@ public class BeanProperties {
             Platform.runLater(new Runnable() {
               @Override
               public void run() {
-                for(Updatable updatable : timedUpdatables.keySet()) {
-                  if(updatable != null && timedUpdatables.get(updatable).shouldUpdate()) {
+                for(Updatable updatable : TIMED_UPDATABLES.keySet()) {
+                  if(updatable != null && TIMED_UPDATABLES.get(updatable).shouldUpdate()) {
                     updatable.update();
                   }
                 }
@@ -80,10 +80,10 @@ public class BeanProperties {
   }
 
   public static void pollProperty(Updatable property, long pollMillis) {
-    timedUpdatables.put(property, new TimedUpdatable(pollMillis));
+    TIMED_UPDATABLES.put(property, new TimedUpdatable(pollMillis));
   }
 
   public static void stopPollProperty(Updatable property) {
-    timedUpdatables.remove(property);
+    TIMED_UPDATABLES.remove(property);
   }
 }

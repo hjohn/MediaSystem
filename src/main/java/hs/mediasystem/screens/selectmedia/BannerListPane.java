@@ -178,10 +178,10 @@ public class BannerListPane extends BorderPane implements ListPane {
     return null;
   }
 
-  private final class MediaNodeTableCell extends TableCell<DuoMediaNode, MediaNode> {
+  private static final class MediaNodeTableCell extends TableCell<DuoMediaNode, MediaNode> {
     private final CellProvider<MediaNode> provider;
 
-    private MediaNodeTableCell(CellProvider<MediaNode> provider) {
+    MediaNodeTableCell(CellProvider<MediaNode> provider) {
       this.provider = provider;
     }
 

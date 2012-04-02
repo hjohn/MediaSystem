@@ -1,47 +1,56 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.selectmedia;
 
+import hs.mediasystem.db.TvdbEpisodeEnricher;
+import hs.mediasystem.db.TvdbSerieEnricher;
 import hs.mediasystem.db.TypeBasedItemEnricher;
-import hs.mediasystem.db.YouTubeEnricher;
-import hs.mediasystem.fs.YouTubeMediaTree;
+import hs.mediasystem.fs.SeriesMediaTree;
+import hs.mediasystem.screens.MainMenuExtension;
+import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.screens.Navigator.Destination;
-import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
+import hs.mediasystem.screens.ProgramController;
+
+import java.nio.file.Paths;
+
 import javafx.scene.image.Image;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class YouTubeMainMenuExtension implements MainMenuExtension {
+public class SeriesMainMenuExtension implements MainMenuExtension {
   private final Provider<SelectMediaPresentation> selectMediaPresentationProvider;
   private final MediaItemEnrichmentEventHandler enrichmentHandler;
 
   @Inject
-  public YouTubeMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, MediaItemEnrichmentEventHandler enrichmentHandler) {
+  public SeriesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, MediaItemEnrichmentEventHandler enrichmentHandler) {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
     this.enrichmentHandler = enrichmentHandler;
 
-    TypeBasedItemEnricher.registerEnricher("YOUTUBE", new YouTubeEnricher());
+    TvdbSerieEnricher serieEnricher = new TvdbSerieEnricher();
+
+    TypeBasedItemEnricher.registerEnricher("SERIE", serieEnricher);
+    TypeBasedItemEnricher.registerEnricher("EPISODE", new TvdbEpisodeEnricher(serieEnricher));
   }
 
   @Override
   public String getTitle() {
-    return "YouTube";
+    return "Series";
   }
 
   @Override
   public Image getImage() {
-    return new Image("images/video.png");
+    return new Image("images/aktion.png");
   }
 
   @Override
   public Destination getDestination(final ProgramController controller) {
     return new Destination(getTitle()) {
       private SelectMediaPresentation presentation;
-      private YouTubeMediaTree mediaTree;
+      private SeriesMediaTree mediaTree;
 
       @Override
       protected void init() {
         presentation = selectMediaPresentationProvider.get();
-        mediaTree = new YouTubeMediaTree();
+        mediaTree = new SeriesMediaTree(Paths.get(controller.getIni().getValue("general", "series.path")));
         mediaTree.onItemQueued().set(enrichmentHandler);
       }
 
@@ -59,6 +68,6 @@ public class YouTubeMainMenuExtension implements MainMenuExtension {
 
   @Override
   public double order() {
-    return 0.3;
+    return 0.2;
   }
 }

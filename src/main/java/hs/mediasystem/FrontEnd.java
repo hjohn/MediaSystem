@@ -3,16 +3,19 @@ package hs.mediasystem;
 import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.DatabaseUpdater;
 import hs.mediasystem.framework.PlaybackOverlayView;
-import hs.mediasystem.framework.SelectMediaView;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.MainMenuExtension;
-import hs.mediasystem.screens.MoviesMainMenuExtension;
 import hs.mediasystem.screens.PlaybackOverlayPane;
 import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.ProgramController;
-import hs.mediasystem.screens.SeriesMainMenuExtension;
-import hs.mediasystem.screens.YouTubeMainMenuExtension;
+import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.screens.selectmedia.ListSelectMediaView;
+import hs.mediasystem.screens.selectmedia.MoviesMainMenuExtension;
+import hs.mediasystem.screens.selectmedia.SeriesMainMenuExtension;
+import hs.mediasystem.screens.selectmedia.YouTubeMainMenuExtension;
+import hs.mediasystem.util.DuoWindowSceneManager;
+import hs.mediasystem.util.SceneManager;
+import hs.mediasystem.util.StateCache;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
@@ -44,7 +47,7 @@ public class FrontEnd extends Application {
   private ConnectionPool pool;
 
   @Override
-  public void init() throws Exception {
+  public void init() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
     Section section = INI.getSection("general");
 
     GeneralSettings.setApiKey(section.get("jtmdb.key"));
@@ -58,7 +61,7 @@ public class FrontEnd extends Application {
   }
 
   @Override
-  public void start(Stage primaryStage) throws Exception {
+  public void start(Stage primaryStage) {
     System.out.println("javafx.runtime.version: " + System.getProperties().get("javafx.runtime.version"));
 
     int screenNumber = Integer.parseInt(INI.getSection("general").getDefault("screen", "0"));
@@ -139,7 +142,7 @@ public class FrontEnd extends Application {
   }
 
   @Override
-  public void stop() throws Exception {
+  public void stop() {
     if(pool != null) {
       pool.close();
     }

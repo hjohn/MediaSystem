@@ -1,10 +1,12 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.db.TmdbMovieEnricher;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.fs.MoviesMediaTree;
+import hs.mediasystem.screens.MainMenuExtension;
+import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.screens.Navigator.Destination;
-import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
+import hs.mediasystem.screens.ProgramController;
 
 import java.nio.file.Paths;
 

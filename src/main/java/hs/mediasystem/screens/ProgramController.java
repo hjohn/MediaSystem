@@ -1,6 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.SceneManager;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.OpenSubtitlesSubtitleProvider;
 import hs.mediasystem.framework.SublightSubtitleProvider;
@@ -8,6 +7,7 @@ import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.optiondialog.DialogScreen;
 import hs.mediasystem.screens.optiondialog.Option;
+import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
@@ -317,7 +317,7 @@ public class ProgramController {
     return subtitleDownloadService;
   }
 
-  public void registerWorker(final Worker<?> worker) {
+  public final void registerWorker(final Worker<?> worker) {
     final Node node = createMessage(worker);
 
     System.out.println("[FINE] ProgramController.registerService() - registering new service: " + worker);

@@ -12,6 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TreeSet;
 
+import net.sf.jtmdb.CastInfo;
 import net.sf.jtmdb.Genre;
 import net.sf.jtmdb.Movie;
 import net.sf.jtmdb.MovieBackdrop;
@@ -167,16 +168,15 @@ public class TmdbMovieEnricher implements ItemEnricher<Object> {
 
         item.setGenres(genres.toArray(new String[genres.size()]));
 
-  //      movie.getMovieType();
+        System.out.println(">>> TmdbMovieEnricher: type = " + movie.getMovieType());
+        System.out.println(">>> TmdbMovieEnricher: certification = " + movie.getCertification());
+        System.out.println(">>> TmdbMovieEnricher: votes = " + movie.getVotes());
+        System.out.println(">>> TmdbMovieEnricher: last mod date = " + movie.getLastModifiedAtDate());
+        System.out.println(">>> TmdbMovieEnricher: reduced = " + movie.isReduced());
 
-  //          for(CastInfo castInfo : movie.getCast()) {
-  //            castInfo.getCharacterName();
-  //            castInfo.getID();
-  //            castInfo.getName();
-  //            castInfo.getThumb();
-  //
-  //            addCastMember(castInfo.getCastID(), castInfo.getName(), castInfo.getCharacterName());
-  //          }
+        for(CastInfo castInfo : movie.getCast()) {
+          System.out.println(">>> TmdbMovieEnricher: Cast: id/castid = " + castInfo.getID() + "/" + castInfo.getCastID() + " : " + castInfo.getCharacterName() + " => " + castInfo.getName() + " ; " + castInfo.getJob() + " ; " + castInfo.getJob());
+        }
 
         return item;
       }

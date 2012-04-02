@@ -75,7 +75,7 @@ public class Database {
   }
 
   private synchronized void commit(Transaction transaction) throws SQLException {
-    if(transaction == activeTransaction) {
+    if(transaction.equals(activeTransaction)) {
       activeTransaction = null;
 
       try {
@@ -96,7 +96,7 @@ public class Database {
   private synchronized void rollback(Transaction transaction) throws SQLException {
     rollbackOnly = true;
 
-    if(transaction == activeTransaction) {
+    if(transaction.equals(activeTransaction)) {
       activeTransaction = null;
 
       try {
@@ -133,7 +133,7 @@ public class Database {
      *
      * @param connection a Connection (with auto commit set to false)
      */
-    private Transaction(Connection connection) {
+    Transaction(Connection connection) {
       this.connection = connection;
     }
 

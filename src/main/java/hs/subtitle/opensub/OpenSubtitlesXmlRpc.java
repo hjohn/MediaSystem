@@ -41,7 +41,7 @@ public class OpenSubtitlesXmlRpc {
   }
 
   /**
-   * Login as anonymous user
+   * Login as anonymous user.
    */
   public void loginAnonymous() throws XmlRpcFault {
     login("", "", "en");
@@ -105,7 +105,7 @@ public class OpenSubtitlesXmlRpc {
     Map<?, ?> response = invoke("SearchSubtitles", token, queryList);
 
     try {
-      List<Map<String, String>> subtitleData = (List<Map<String, String>>) response.get("data");
+      List<Map<String, String>> subtitleData = (List<Map<String, String>>)response.get("data");
 
       for(Map<String, String> propertyMap : subtitleData) {
         subtitles.add(new OpenSubtitlesSubtitleDescriptor(Property.asEnumMap(propertyMap)));
@@ -131,20 +131,22 @@ public class OpenSubtitlesXmlRpc {
     for(Map<String, String> movie : movieData) {
       try {
         String imdbid = movie.get("id");
-        if(!imdbid.matches("\\d{1,7}"))
+        if(!imdbid.matches("\\d{1,7}")) {
           throw new IllegalArgumentException("Illegal IMDb movie ID");
+        }
 
         // match movie name and movie year from search result
         Matcher matcher = pattern.matcher(movie.get("title"));
-        if(!matcher.find())
+        if(!matcher.find()) {
           throw new IllegalArgumentException("Illegal title");
+        }
 
         String name = matcher.group(1).replaceAll("\"", "").trim();
         int year = Integer.parseInt(matcher.group(2));
 
         movies.add(new Movie(name, year, Integer.parseInt(imdbid)));
       }
-      catch(Exception e) {
+      catch(RuntimeException e) {
         Logger.getLogger(OpenSubtitlesXmlRpc.class.getName()).log(Level.INFO, String.format("Ignore movie %s: %s", movie, e.getMessage()));
       }
     }
@@ -292,8 +294,9 @@ public class OpenSubtitlesXmlRpc {
     }
     catch(XmlRpcFault e) {
       // invalidate session token if session has expired
-      if(e.getErrorCode() == 406)
+      if(e.getErrorCode() == 406) {
         token = null;
+      }
 
       // rethrow exception
       throw e;
@@ -323,7 +326,7 @@ public class OpenSubtitlesXmlRpc {
   }
 
   /**
-   * Check whether status is OK or not
+   * Check whether status is OK or not.
    *
    * @param status status code and message (e.g. 200 OK, 401 Unauthorized, ...)
    * @throws XmlRpcFault thrown if status code is not OK
@@ -340,7 +343,7 @@ public class OpenSubtitlesXmlRpc {
       throw new XmlRpcFault(new Scanner(status).nextInt(), status);
     }
     catch(NoSuchElementException e) {
-      throw new XmlRpcException("Illegal status code: " + status);
+      throw new XmlRpcException("Illegal status code: " + status, e);
     }
   }
 
@@ -456,7 +459,7 @@ public class OpenSubtitlesXmlRpc {
 
     private final Map<Property, String> subtitleData;
 
-    private TryUploadResponse(boolean uploadRequired, Map<Property, String> subtitleData) {
+    TryUploadResponse(boolean uploadRequired, Map<Property, String> subtitleData) {
       this.uploadRequired = uploadRequired;
       this.subtitleData = subtitleData;
     }

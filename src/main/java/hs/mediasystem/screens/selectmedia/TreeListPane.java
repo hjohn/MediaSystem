@@ -183,13 +183,13 @@ public class TreeListPane extends BorderPane implements ListPane {
 
     private boolean childrenPopulated;
 
-    private MediaNodeTreeItem(MediaNode value, boolean isLeaf) {
+    MediaNodeTreeItem(MediaNode value, boolean isLeaf) {
       super(value);
 
       this.isLeaf = isLeaf;
     }
 
-    private MediaNodeTreeItem(MediaNode value) {
+    MediaNodeTreeItem(MediaNode value) {
       this(value, value.isLeaf());
     }
 
@@ -217,7 +217,7 @@ public class TreeListPane extends BorderPane implements ListPane {
   private static final class MediaItemTreeCell extends TreeCell<MediaNode> {
     private final CellProvider<MediaNode> provider;
 
-    private MediaItemTreeCell(CellProvider<MediaNode> provider) {
+    MediaItemTreeCell(CellProvider<MediaNode> provider) {
       this.provider = provider;
     }
 

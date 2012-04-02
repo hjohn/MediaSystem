@@ -14,7 +14,7 @@ public class Levenshtein {
   }
 
   private static double compare(final String s1, final int n, final String s2, final int m) {
-    int matrix[][] = new int[n + 1][m + 1];
+    int[][] matrix = new int[n + 1][m + 1];
 
     for(int i = 0; i <= n; i++) {
       matrix[i][0] = i;

@@ -2,6 +2,7 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SubtitleProvider;
+import hs.mediasystem.framework.SubtitleProviderException;
 import hs.subtitle.SubtitleDescriptor;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public class SubtitleQueryService extends Service<List<? extends SubtitleDescrip
 
     return new Task<List<? extends SubtitleDescriptor>>() {
       @Override
-      protected List<? extends SubtitleDescriptor> call() throws Exception {
+      protected List<? extends SubtitleDescriptor> call() throws SubtitleProviderException {
         return provider.query(mediaItem);
       }
     };

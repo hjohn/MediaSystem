@@ -69,8 +69,9 @@ public class ByteBufferOutputStream extends OutputStream {
     int newCapacity = (int) (buffer.capacity() * (1 + loadFactor));
 
     // ensure minCapacity
-    if (newCapacity < minCapacity)
+    if(newCapacity < minCapacity) {
       newCapacity = minCapacity;
+    }
 
     // create new buffer with increased capacity
     ByteBuffer newBuffer = ByteBuffer.allocate(newCapacity);

@@ -7,7 +7,7 @@ import hs.mediasystem.util.ini.Ini;
 import java.nio.file.Path;
 
 /**
- * Handles the main window(s) and media playback
+ * Handles the main window(s) and media playback.
  */
 public class MPlayerPlayerFactory implements PlayerFactory {
   private final Path mplayerPath;

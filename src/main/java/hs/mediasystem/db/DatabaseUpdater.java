@@ -21,16 +21,86 @@ public class DatabaseUpdater {
   }
 
   public void updateDatabase() {
-    int version = 0;
+    int version = getDatabaseVersion();
 
     try {
-      try(Connection connection = connectionProvider.get();
-          PreparedStatement statement = connection.prepareStatement("SELECT value FROM dbinfo WHERE name = 'version'")) {
+      for(;;) {
+        version++;
 
-        try(ResultSet rs = statement.executeQuery()) {
-          if(rs.next()) {
-            version = Integer.parseInt(rs.getString("value"));
+        try(InputStream sqlStream = getClass().getClassLoader().getResourceAsStream("hs/mediasystem/db/db-v" + version + ".sql")) {
+          if(sqlStream == null) {
+            version--;
+            break;
           }
+
+          System.out.println("[INFO] Updating database to version " + version);
+
+          applyUpdateScript(version, sqlStream);
+        }
+      }
+
+      System.out.println("[INFO] Database up to date at version " + version);
+    }
+    catch(IOException | SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void applyUpdateScript(int version, InputStream sqlStream) throws SQLException, IOException {
+    try(Connection connection = connectionProvider.get()) {
+      try {
+        connection.setAutoCommit(false);
+
+        try(LineNumberReader reader = new LineNumberReader(new InputStreamReader(sqlStream))) {
+
+          statementExecuteLoop:
+          for(;;) {
+            String sqlStatement = "";
+
+            while(!sqlStatement.endsWith(";")) {
+              String line = reader.readLine();
+
+              if(line == null) {
+                if(!sqlStatement.trim().isEmpty()) {
+                  throw new RuntimeException("unexpected EOF in db-v" + version + ".sql: " + sqlStatement);
+                }
+
+                break statementExecuteLoop;
+              }
+
+              sqlStatement += line;
+            }
+
+            try(PreparedStatement statement = connection.prepareStatement(sqlStatement)) {
+              System.out.println("[FINE] " + sqlStatement);
+              statement.execute();
+            }
+          }
+        }
+
+        try(PreparedStatement statement = connection.prepareStatement("UPDATE dbinfo SET value = '" + version + "' WHERE name = 'version'")) {
+          if(statement.executeUpdate() != 1) {
+            throw new RuntimeException("unable to update version information to " + version);
+          }
+        }
+
+        connection.commit();
+      }
+      finally {
+        connection.rollback();
+      }
+    }
+  }
+
+  private int getDatabaseVersion() {
+    int version = 0;
+
+    try(Connection connection = connectionProvider.get();
+        PreparedStatement statement = connection.prepareStatement("SELECT value FROM dbinfo WHERE name = 'version'")) {
+
+      try(ResultSet rs = statement.executeQuery()) {
+        if(rs.next()) {
+          version = Integer.parseInt(rs.getString("value"));
         }
       }
     }
@@ -38,75 +108,6 @@ public class DatabaseUpdater {
       throw new RuntimeException("unable to get version information from the database", e);
     }
 
-    try {
-      try(Connection connection = connectionProvider.get()) {
-        for(;;) {
-          version++;
-
-          try(InputStream sqlStream = getClass().getClassLoader().getResourceAsStream("hs/mediasystem/db/db-v" + version + ".sql")) {
-            if(sqlStream == null) {
-              version--;
-              break;
-            }
-
-            System.out.println("[INFO] Updating database to version " + version);
-
-            connection.setAutoCommit(false);
-
-            try {
-              try(LineNumberReader reader = new LineNumberReader(new InputStreamReader(sqlStream))) {
-
-                statementExecuteLoop:
-                for(;;) {
-                  String sqlStatement = "";
-
-                  while(!sqlStatement.endsWith(";")) {
-                    String line = reader.readLine();
-
-                    if(line == null) {
-                      if(!sqlStatement.trim().isEmpty()) {
-                        throw new RuntimeException("unexpected EOF in db-v" + version + ".sql: " + sqlStatement);
-                      }
-
-                      break statementExecuteLoop;
-                    }
-
-                    sqlStatement += line;
-                  }
-
-                  try(PreparedStatement statement = connection.prepareStatement(sqlStatement)) {
-                    System.out.println("[FINE] " + sqlStatement);
-                    statement.execute();
-                  }
-                }
-              }
-
-              try(PreparedStatement statement = connection.prepareStatement("UPDATE dbinfo SET value = '" + version + "' WHERE name = 'version'")) {
-                if(statement.executeUpdate() != 1) {
-                  throw new RuntimeException("unable to update version information to " + version);
-                }
-              }
-
-              connection.commit();
-            }
-            catch(SQLException e) {
-              System.out.println("[SEVERE] Failed to update database to version " + version);
-              throw new RuntimeException(e);
-            }
-            catch(IOException e) {
-              throw new RuntimeException("Unable to read resource", e);
-            }
-            finally {
-              connection.rollback();
-            }
-          }
-        }
-
-        System.out.println("[INFO] Database up to date at version " + version);
-      }
-    }
-    catch(IOException | SQLException e) {
-      throw new RuntimeException(e);
-    }
+    return version;
   }
 }

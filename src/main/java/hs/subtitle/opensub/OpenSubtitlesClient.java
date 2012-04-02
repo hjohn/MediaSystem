@@ -28,24 +28,24 @@ public class OpenSubtitlesClient {
     this.xmlrpc = new OpenSubtitlesXmlRpc(userAgent);
   }
 
-  public List<SearchResult> search(String query) throws Exception {
+  public List<SearchResult> search(String query) throws XmlRpcFault {
     // require login
     login();
 
     try {
       // search for movies / series
       List<Movie> resultSet = xmlrpc.searchMoviesOnIMDB(query);
-      return Arrays.asList(resultSet.toArray(new SearchResult[0]));
+      return Arrays.asList(resultSet.toArray(new SearchResult[resultSet.size()]));
     }
     catch(ClassCastException e) {
       // unexpected xmlrpc responses (e.g. error messages instead of results) will trigger this
-      throw new XmlRpcException("Illegal XMLRPC response on searchMoviesOnIMDB");
+      throw new XmlRpcException("Illegal XMLRPC response on searchMoviesOnIMDB", e);
     }
   }
 
   public List<SubtitleDescriptor> getSubtitleList(SearchResult searchResult, String languageName) throws XmlRpcFault {
     // singleton array with or empty array
-    int imdbid = ((Movie) searchResult).getImdbId();
+    int imdbid = ((Movie)searchResult).getImdbId();
     String[] languageFilter = languageName != null ? new String[] {getSubLanguageID(languageName)} : new String[0];
 
     // require login
@@ -70,7 +70,7 @@ public class OpenSubtitlesClient {
     return xmlrpc.searchSubtitles(new Query(searchImdbId, name, season, episode, null, null, languageName));
   }
 
-  public Locale detectLanguage(byte[] data) throws Exception {
+  public Locale detectLanguage(byte[] data) throws XmlRpcFault {
     // require login
     login();
 
@@ -78,7 +78,7 @@ public class OpenSubtitlesClient {
     List<String> languages = xmlrpc.detectLanguage(data);
 
     // return first language
-    return languages.size() > 0 ? new Locale(languages.get(0)) : null;
+    return !languages.isEmpty() ? new Locale(languages.get(0)) : null;
   }
 
   protected synchronized void login() throws XmlRpcFault {
@@ -102,7 +102,7 @@ public class OpenSubtitlesClient {
     logoutTimer.cancel();
   }
 
-  protected final Timer logoutTimer = new Timer() {
+  private final Timer logoutTimer = new Timer() {
     @Override
     public void run() {
       logout();
@@ -112,12 +112,11 @@ public class OpenSubtitlesClient {
   private Map<String, String> cachedLanguages;
 
   /**
-   * SubLanguageID by English language name
+   * SubLanguageID by English language name.
    */
   protected synchronized Map<String, String> getSubLanguageMap() throws XmlRpcFault {
-
     if(cachedLanguages == null) {
-      Map<String, String> cachedLanguages = new HashMap<>();
+      cachedLanguages = new HashMap<>();
 
       // fetch language data
       for(Entry<String, String> entry : xmlrpc.getSubLanguages().entrySet()) {
@@ -142,14 +141,4 @@ public class OpenSubtitlesClient {
 
     return subLanguageMap.get(key);
   }
-
-  protected String getLanguageName(String subLanguageID) throws Exception {
-    for(Entry<String, String> it : getSubLanguageMap().entrySet()) {
-      if(it.getValue().equals(subLanguageID.toLowerCase()))
-        return it.getKey();
-    }
-
-    return null;
-  }
-
 }

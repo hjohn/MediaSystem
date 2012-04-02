@@ -3,6 +3,7 @@ package hs.mediasystem.screens;
 import hs.subtitle.SubtitleDescriptor;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,7 +26,7 @@ public class SubtitleDownloadService extends Service<Path> {
 
     return new Task<Path>() {
       @Override
-      protected Path call() throws Exception {
+      protected Path call() throws IOException {
         updateProgress(10, 100);
         updateTitle("Fetching subtitle");
         updateMessage("Downloading " + descriptor.getName() + "...");

@@ -55,8 +55,9 @@ public class MovieDescriptor extends SearchResult {
 
   @Override
   public String toString() {
-    if (year < 0)
+    if(year < 0) {
       return name;
+    }
 
     return String.format("%s (%d)", name, year);
   }

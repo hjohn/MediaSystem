@@ -70,7 +70,7 @@ public class SublightSubtitleClient {
   }
 
   public List<SubtitleDescriptor> getSubtitleList(SearchResult searchResult, String languageName) {
-    MovieDescriptor movie = (MovieDescriptor) searchResult;
+    MovieDescriptor movie = (MovieDescriptor)searchResult;
 
     List<SubtitleDescriptor> subtitles = new ArrayList<>();
 
@@ -194,7 +194,7 @@ public class SublightSubtitleClient {
     return language.value();
   }
 
-  public byte[] getZipArchive(Subtitle subtitle) throws InterruptedException {
+  public byte[] getZipArchive(Subtitle subtitle) {
     // require login
     login();
 
@@ -209,7 +209,12 @@ public class SublightSubtitleClient {
     checkError(error);
 
     // wait x seconds as specified by the download ticket response, download ticket is not valid until then
-    Thread.sleep(que.value * 1000L);
+    try {
+      Thread.sleep(que.value * 1000L);
+    }
+    catch(InterruptedException e) {
+      throw new RuntimeException(e);
+    }
 
     webservice.downloadByID4(session, subtitle.getSubtitleID(), -1, false, ticket.value, null, data, null, error);
 

@@ -46,7 +46,7 @@ public class YouTubeFeed extends MediaItem {
           YouTubeMediaGroup mediaGroup = videoEntry.getMediaGroup();
 
           for(YouTubeMediaContent mediaContent : mediaGroup.getYouTubeContents()) {
-            children.add(new MediaItem(getMediaTree(), new LocalInfo<>(mediaContent.getUrl().toString(), "YOUTUBE", "", videoEntry.getTitle().getPlainText(), null, videoEntry.getMediaGroup().getVideoId(), null, null, null, videoEntry)));
+            children.add(new MediaItem(getMediaTree(), new LocalInfo<>(mediaContent.getUrl(), "YOUTUBE", "", videoEntry.getTitle().getPlainText(), null, videoEntry.getMediaGroup().getVideoId(), null, null, null, videoEntry)));
             break;
           }
         }

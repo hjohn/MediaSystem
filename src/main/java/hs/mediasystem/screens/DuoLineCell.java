@@ -30,7 +30,7 @@ public class DuoLineCell extends HBox {
 
   private final StarRating starRating = new StarRating(7, 3, 5);
 
-  private Group collectionMarker = new Group() {{
+  private final Group collectionMarker = new Group() {{
     getChildren().add(new Path() {{
       getStyleClass().add("group-marker");
       getElements().addAll(

@@ -79,7 +79,7 @@ public class GroupWorker extends Service<Void> {
   protected Task<Void> createTask() {
     return new Task<Void>() {
       @Override
-      protected Void call() throws Exception {
+      protected Void call() throws InterruptedException {
         for(;;) {
           Platform.runLater(new Runnable() {
             @Override
@@ -168,7 +168,7 @@ public class GroupWorker extends Service<Void> {
     }
   }
 
-  private class KeyedTask {
+  private static class KeyedTask {
     private final Object key;
     private final Task<?> task;
 

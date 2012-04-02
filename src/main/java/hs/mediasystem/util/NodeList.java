@@ -28,7 +28,7 @@ public class NodeList<T> {
     if(node.next != null) {
       node.next.previous = node.previous;
     }
-    if(node == head) {
+    if(node.equals(head)) {
       head = node.next;
     }
 
@@ -41,7 +41,7 @@ public class NodeList<T> {
     private Node next;
     private Node previous;
 
-    private Node(T content, Node next, Node previous) {
+    Node(T content, Node next, Node previous) {
       this.content = content;
       this.next = next;
       this.previous = previous;

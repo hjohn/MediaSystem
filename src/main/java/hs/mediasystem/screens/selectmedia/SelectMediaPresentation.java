@@ -1,13 +1,12 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.StateCache;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.framework.SelectMediaView;
 import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.Navigator;
+import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.StandardLayout;
@@ -16,6 +15,7 @@ import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
+import hs.mediasystem.util.StateCache;
 import hs.mediasystem.util.StringBinding;
 
 import java.util.List;

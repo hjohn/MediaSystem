@@ -224,7 +224,7 @@ public class MediaItem {
   public Double getRating() { return rating.get(); }
   public DoubleProperty ratingProperty() { return rating; }
 
-  private ObjectProperty<ImageHandle> background = new SimpleObjectProperty<ImageHandle>() {
+  private final ObjectProperty<ImageHandle> background = new SimpleObjectProperty<ImageHandle>() {
     @Override
     public ImageHandle get() {
       queueForEnrichment();
@@ -234,7 +234,7 @@ public class MediaItem {
   public ImageHandle getBackground() { return background.get(); }
   public ObjectProperty<ImageHandle> backgroundProperty() { return background; }
 
-  private ObjectProperty<ImageHandle> banner = new SimpleObjectProperty<ImageHandle>() {
+  private final ObjectProperty<ImageHandle> banner = new SimpleObjectProperty<ImageHandle>() {
     @Override
     public ImageHandle get() {
       queueForEnrichment();
@@ -244,7 +244,7 @@ public class MediaItem {
   public ImageHandle getBanner() { return banner.get(); }
   public ObjectProperty<ImageHandle> bannerProperty() { return banner; }
 
-  private ObjectProperty<ImageHandle> poster = new SimpleObjectProperty<ImageHandle>() {
+  private final ObjectProperty<ImageHandle> poster = new SimpleObjectProperty<ImageHandle>() {
     @Override
     public ImageHandle get() {
       queueForEnrichment();

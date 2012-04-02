@@ -320,7 +320,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
     fadeInSustainAndFadeOut.playFromStart();
   }
 
-  public void registerConditionalOSD(BooleanExpression showCondition, final Node node) {  // id of node is used to distinguish same items
+  public final void registerConditionalOSD(BooleanExpression showCondition, final Node node) {  // id of node is used to distinguish same items
     node.setOpacity(0);
     conditionalStateOverlay.getChildren().add(node);
 

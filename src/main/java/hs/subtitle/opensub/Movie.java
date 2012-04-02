@@ -39,11 +39,6 @@ public class Movie extends SearchResult {
   }
 
   @Override
-  public Movie clone() {
-    return new Movie(this);
-  }
-
-  @Override
   public int hashCode() {
     return imdbId;
   }

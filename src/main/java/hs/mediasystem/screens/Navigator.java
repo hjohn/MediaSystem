@@ -115,7 +115,7 @@ public class Navigator {
   private final ObjectProperty<EventHandler<ActionEvent>> onNavigation = new SimpleObjectProperty<>();
   public ObjectProperty<EventHandler<ActionEvent>> onNavigation() { return onNavigation; }
 
-  public static abstract class Destination {
+  public abstract static class Destination {
     private final String description;
 
     private Navigator childNavigator;

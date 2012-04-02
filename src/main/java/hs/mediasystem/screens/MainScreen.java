@@ -144,7 +144,7 @@ public class MainScreen extends BorderPane {
     private final StackPane menuBox;
     private final int buttonIndex;
 
-    private FocusListener(StackPane menuBox, int button) {
+    FocusListener(StackPane menuBox, int button) {
       this.menuBox = menuBox;
       this.buttonIndex = button;
     }

@@ -1,8 +1,8 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.framework.SelectMediaView;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
+import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.util.Events;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

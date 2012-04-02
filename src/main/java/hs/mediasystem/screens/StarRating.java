@@ -15,16 +15,14 @@ public class StarRating extends Group {
   public void setRating(double rating) { this.rating.set(rating); }
 
   private final Rectangle rectangle = new Rectangle(0, 0, 0, 0);
-  private final HBox stars;
-  private final HBox disabledStars;
 
   public StarRating(final double radius, final double innerRadius, final int numberOfPoints) {
     getStyleClass().add("star-rating");
 
     double[] starData = createStarData(radius, innerRadius, numberOfPoints);
 
-    stars = createStars(starData);
-    disabledStars = createStars(starData);
+    HBox stars = createStars(starData);
+    HBox disabledStars = createStars(starData);
 
     stars.setClip(rectangle);
     disabledStars.setDisable(true);

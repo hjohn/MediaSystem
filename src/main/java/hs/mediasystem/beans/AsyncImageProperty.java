@@ -58,7 +58,7 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
 
       return new Task<Image>() {
         @Override
-        protected Image call() throws Exception {
+        protected Image call() {
           return ImageCache.loadImage(imageHandle);
         }
       };

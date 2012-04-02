@@ -1,7 +1,5 @@
-package hs.mediasystem.framework;
+package hs.mediasystem.screens;
 
-import hs.mediasystem.screens.MediaNodeEvent;
-import hs.mediasystem.screens.MediaNode;
 import javafx.beans.property.ObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;

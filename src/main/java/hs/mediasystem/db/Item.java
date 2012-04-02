@@ -117,11 +117,11 @@ public class Item {
   }
 
   public Date getReleaseDate() {
-    return releaseDate;
+    return releaseDate == null ? null : (Date)releaseDate.clone();
   }
 
   public void setReleaseDate(Date releaseDate) {
-    this.releaseDate = releaseDate;
+    this.releaseDate = releaseDate == null ? null : (Date)releaseDate.clone();
   }
 
   public int getRuntime() {
@@ -165,7 +165,7 @@ public class Item {
   }
 
   public String[] getGenres() {
-    return genres;
+    return genres.clone();
   }
 
   public void setGenres(String[] genres) {

@@ -35,7 +35,6 @@ import uk.co.caprica.vlcj.player.TrackDescription;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 public class VLCPlayer implements Player {
-  private final MediaPlayerFactory factory;
   private final EmbeddedMediaPlayer mediaPlayer;
   private final Canvas canvas = new Canvas();
 
@@ -47,7 +46,7 @@ public class VLCPlayer implements Player {
     arguments.add("--network-caching");
     arguments.add("5000");
 
-    factory = new MediaPlayerFactory(arguments);
+    MediaPlayerFactory factory = new MediaPlayerFactory(arguments);
     mediaPlayer = factory.newEmbeddedMediaPlayer();
     mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
 
