@@ -38,7 +38,7 @@ public class ItemsDao {
   public Item getItem(final Identifier identifier) throws ItemNotFoundException {
     try {
       try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("SELECT id, imdbid, title, subtitle, releasedate, rating, plot, runtime, version, season, episode, language, tagline, genres, backgroundurl, bannerurl, posterurl, background IS NOT NULL AS hasBackground, banner IS NOT NULL AS hasBanner, poster IS NOT NULL AS hasPoster FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
+          PreparedStatement statement = connection.prepareStatement("SELECT id, imdbid, title, subtitle, releasedate, rating, plot, runtime, version, season, episode, language, tagline, viewed, resumeposition, matchaccuracy, genres, backgroundurl, bannerurl, posterurl, background IS NOT NULL AS hasBackground, banner IS NOT NULL AS hasBanner, poster IS NOT NULL AS hasPoster FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
         statement.setString(1, identifier.getType());
         statement.setString(2, identifier.getProvider());
         statement.setString(3, identifier.getProviderId());
@@ -62,6 +62,9 @@ public class ItemsDao {
               setVersion(rs.getInt("version"));
               setLanguage(rs.getString("language"));
               setTagline(rs.getString("tagline"));
+              setViewed(rs.getBoolean("viewed"));
+              setResumePosition(rs.getInt("resumeposition"));
+              setMatchAccuracy(rs.getDouble("matchaccuracy"));
               setBackgroundURL(rs.getString("backgroundurl"));
               setBannerURL(rs.getString("bannerurl"));
               setPosterURL(rs.getString("posterurl"));
@@ -212,6 +215,9 @@ public class ItemsDao {
     columns.put("version", VERSION);
     columns.put("language", item.getLanguage());
     columns.put("tagline", item.getTagline());
+    columns.put("viewed", item.isViewed());
+    columns.put("resumeposition", item.getResumePosition());
+    columns.put("matchaccuracy", item.getMatchAccuracy());
 
     String genres = "";
 
