@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -43,69 +44,18 @@ public class Database {
     this.connectionProvider = connectionProvider;
   }
 
-  private Transaction activeTransaction;
-  private boolean rollbackOnly;
+  private static final ThreadLocal<Transaction> currentTransaction = new ThreadLocal<>();
 
-  public synchronized Transaction beginTransaction() {
-    if(activeTransaction != null) {
-      return new Transaction(activeTransaction.getConnection());
-    }
+  public synchronized Transaction beginTransaction() throws SQLException {
+    Transaction transaction = new Transaction(currentTransaction.get());
 
-    @SuppressWarnings("resource")
-    Connection connection = connectionProvider.get();
+    currentTransaction.set(transaction);
 
-    try {
-      connection.setAutoCommit(false);
-
-      activeTransaction = new Transaction(connection);
-      rollbackOnly = false;
-
-      return activeTransaction;
-    }
-    catch(SQLException e) {
-      try {
-        connection.close();
-      }
-      catch(SQLException e2) {
-        // ignore, original exception is more important
-      }
-
-      throw new RuntimeException(e);
-    }
+    return transaction;
   }
 
-  private synchronized void commit(Transaction transaction) throws SQLException {
-    if(transaction.equals(activeTransaction)) {
-      activeTransaction = null;
-
-      try {
-        if(!rollbackOnly) {
-          transaction.getConnection().commit();
-        }
-        else {
-          transaction.getConnection().rollback();
-          throw new SQLException("transaction was rollback only");
-        }
-      }
-      finally {
-        transaction.getConnection().close();
-      }
-    }
-  }
-
-  private synchronized void rollback(Transaction transaction) throws SQLException {
-    rollbackOnly = true;
-
-    if(transaction.equals(activeTransaction)) {
-      activeTransaction = null;
-
-      try {
-        transaction.getConnection().rollback();
-      }
-      finally {
-        transaction.getConnection().close();
-      }
-    }
+  synchronized void endTransaction() {
+    currentTransaction.set(currentTransaction.get().parent);
   }
 
   private static void setParameters(Map<String, Object> columns, PreparedStatement statement) throws SQLException {
@@ -124,30 +74,44 @@ public class Database {
   }
 
   public class Transaction implements AutoCloseable {
+    private final Transaction parent;
     private final Connection connection;
+    private final Savepoint savepoint;
 
+    private int activeNestedTransactions;
     private boolean finished;
 
-    /**
-     * Creates a Transaction object which uses the same connection for all operations.
-     *
-     * @param connection a Connection (with auto commit set to false)
-     */
-    Transaction(Connection connection) {
-      this.connection = connection;
+    Transaction(Transaction parent) throws SQLException {
+      this.parent = parent;
+
+      if(parent == null) {
+        this.connection = connectionProvider.get();
+        this.savepoint = null;
+
+        connection.setAutoCommit(false);
+      }
+      else {
+        this.connection = parent.getConnection();
+        this.savepoint = connection.setSavepoint();
+
+        parent.activeNestedTransactions++;
+      }
+
+      assert this.connection != null;
+      assert (this.parent != null && this.savepoint != null) || (this.parent == null && this.savepoint == null);
     }
 
     public Connection getConnection() {
       return connection;
     }
 
-    private void ensureNotFinished() throws SQLException {
+    private void ensureNotFinished() {
       if(finished) {
-        throw new SQLException("transaction already ended");
+        throw new IllegalStateException("transaction already ended");
       }
     }
 
-    public Map<String, Object> insert(String tableName, Map<String, Object> parameters) throws SQLException {
+    public synchronized Map<String, Object> insert(String tableName, Map<String, Object> parameters) throws SQLException {
       ensureNotFinished();
 
       StringBuilder fields = new StringBuilder();
@@ -186,7 +150,7 @@ public class Database {
       return generatedKeys;
     }
 
-    public int update(String tableName, int id, Map<String, Object> parameters) throws SQLException {
+    public synchronized int update(String tableName, int id, Map<String, Object> parameters) throws SQLException {
       ensureNotFinished();
 
       StringBuilder set = new StringBuilder();
@@ -203,14 +167,15 @@ public class Database {
       try(PreparedStatement statement = connection.prepareStatement("UPDATE " + tableName + " SET " + set.toString() + " WHERE id = ?")) {
         System.out.println("[FINE] Database.Transaction.update() - Updating '" + tableName + "' with id: " + id);
 
-        parameters.put("(irrelevant)", id);
-
         setParameters(parameters, statement);
+
+        statement.setLong(parameters.size() + 1, id);
+
         return statement.executeUpdate();
       }
     }
 
-    public int deleteChildren(String tableName, String parentTableName, long parentId) throws SQLException {
+    public synchronized int deleteChildren(String tableName, String parentTableName, long parentId) throws SQLException {
       ensureNotFinished();
 
       try(PreparedStatement statement = connection.prepareStatement("DELETE FROM " + tableName + " WHERE " + parentTableName + "_id = ?")) {
@@ -222,14 +187,54 @@ public class Database {
       }
     }
 
-    public void commit() throws SQLException {
-      Database.this.commit(this);
+    private void finishTransaction(boolean commit) throws SQLException {
+      ensureNotFinished();
+
+      if(activeNestedTransactions != 0) {
+        throw new IllegalStateException("attempt at rollback/commit while there are uncommitted nested transactions");
+      }
+
+      endTransaction();
+
+      if(parent == null) {
+        try {
+          if(commit) {
+            connection.commit();
+          }
+          else {
+            connection.rollback();
+          }
+        }
+        finally {
+          try {
+            connection.close();
+          }
+          catch(SQLException e) {
+            System.out.println("[FINE] Database.Transaction.finishTransaction() - exception while closing connection: " + e);
+          }
+        }
+      }
+      else {
+        System.out.println("Parent " + this + " ; parent = " + this.parent);
+        if(commit) {
+          connection.releaseSavepoint(savepoint);
+        }
+        else {
+          connection.rollback(savepoint);
+        }
+
+        parent.activeNestedTransactions--;
+      }
+
       finished = true;
     }
 
-    public void rollback() throws SQLException {
-      Database.this.rollback(this);
-      finished = true;
+    public synchronized void commit() throws SQLException {
+      finishTransaction(true);
+    }
+
+    public synchronized void rollback() throws SQLException {
+      finishTransaction(false);
     }
 
     @Override
