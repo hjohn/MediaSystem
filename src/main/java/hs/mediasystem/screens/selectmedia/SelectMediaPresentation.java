@@ -154,9 +154,9 @@ public class SelectMediaPresentation {
       protected void outro() {
         MediaNode selectedNode = view.getSelectedNode();
 
-        String key = createKeyFromTrail();
-
-        stateCache.putState(key, selectedNode.getId());
+        if(selectedNode != null) {
+          stateCache.putState(createKeyFromTrail(), selectedNode.getId());
+        }
       }
 
       private String createKeyFromTrail() {
