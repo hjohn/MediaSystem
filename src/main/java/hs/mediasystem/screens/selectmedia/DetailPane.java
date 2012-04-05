@@ -156,7 +156,7 @@ public class DetailPane extends GridPane {
           visibleProperty().bind(plot.isNotEqualTo(""));
         }});
         getChildren().add(new Label() {{
-          getStyleClass().add("plot");
+          getStyleClass().addAll("field", "plot");
           textProperty().bind(plot);
           managedProperty().bind(plot.isNotEqualTo(""));
           visibleProperty().bind(plot.isNotEqualTo(""));
@@ -169,7 +169,7 @@ public class DetailPane extends GridPane {
               getStyleClass().add("header");
             }});
             getChildren().add(new Label() {{
-              getStyleClass().add("release-time");
+              getStyleClass().addAll("field", "release-time");
               textProperty().bind(releaseTime);
             }});
             managedProperty().bind(releaseTime.isNotEqualTo(""));
@@ -180,7 +180,7 @@ public class DetailPane extends GridPane {
               getStyleClass().add("header");
             }});
             getChildren().add(new Label() {{
-              getStyleClass().add("runtime");
+              getStyleClass().addAll("field", "runtime");
               textProperty().bind(Bindings.format("%d minutes", runtime));
             }});
             managedProperty().bind(runtime.greaterThan(0.0));
