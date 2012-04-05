@@ -3,12 +3,12 @@ package hs.mediasystem.screens;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.scene.Group;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 
-public class StarRating extends Group {
+public class StarRating extends StackPane {
   private final DoubleProperty rating = new SimpleDoubleProperty(0.0);
   public DoubleProperty ratingProperty() { return rating; }
   public double getRating() { return rating.get(); }
