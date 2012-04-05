@@ -3,14 +3,14 @@
   -fx-spacing: 50;
 }
 
-.button {
+.menu-scroll-box .button {
   -fx-content-display: top;
   -fx-text-fill: color-blue-70;
-  -fx-font: bold 24pt "Arial";
+  -fx-font-size: 24pt;
   -fx-background-color: transparent;
 }
 
-.button:focused {
+.menu-scroll-box .button:focused {
   -fx-background-color: radial-gradient(radius 150%, color-blue-20, color-blue-10, color-blue-20);
   -fx-text-fill: white;
 }

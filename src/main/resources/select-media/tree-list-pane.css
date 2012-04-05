@@ -5,17 +5,20 @@
 }
 
 .title {
-  -fx-font: bold 19pt "Arial";
+  -fx-font-size: 19;
+  -fx-font-weight: bold;
   -fx-wrap-text: true;
 }
 
 .subtitle {
-  -fx-font: 13pt "Arial";
   -fx-label-padding: 0 0 0 10;
 }
 
+.viewed-indicator {
+  -fx-font-size: 20pt;
+}
+
 .extra-info {
-  -fx-font: 12pt "Arial";
   -fx-text-fill: derive(color-blue, -30%);
 }
 
@@ -33,8 +36,11 @@
   -fx-hgap: 5;
 }
 
+.tree-cell {
+  -fx-indent: 0;
+}
+
 .seasons .label {
-  -fx-font: bold 18pt "Arial";
   -fx-text-fill: color-focused-text;
   -fx-label-padding: 5 10 5 10;
 

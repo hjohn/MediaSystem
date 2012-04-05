@@ -1,15 +1,17 @@
 .group-name {
-  -fx-font: bold 16pt "Arial";
+  -fx-font-size: 16pt;
+  -fx-font-weight: bold;
   -fx-wrap-text: true;
 }
 
 .title {
-  -fx-font: bold 24pt "Arial";
+  -fx-text-fill: -c-text-highlight;
+  -fx-font-size: 24pt;
+  -fx-font-weight: bold;
   -fx-wrap-text: true;
 }
 
 .subtitle {
-  -fx-font: 13pt "Arial";
   -fx-label-padding: 0 0 0 10;
   -fx-wrap-text: true;
 }
@@ -19,16 +21,15 @@
 }
 
 .rating {
-  -fx-font: bold 16pt "Arial";
+  -fx-font-weight: bold; 
 }
 
 .genres {
-  -fx-font: bold 14pt "Arial";
+  -fx-font-weight: bold;
   -fx-wrap-text: true;
 }
 
 .plot {
-  -fx-font: 16pt "Arial"; 
   -fx-wrap-text: true;
 }
 
@@ -37,7 +38,12 @@
 }
 
 .header {
-  -fx-font: bold 12pt "Arial";
-  -fx-text-fill: derive(color-blue, -30%);
+  -fx-font-size: 13pt;
+  -fx-font-weight: bold;
+  -fx-text-fill: -c-text-unobtrusive;
   -fx-label-padding: 30 0 0 0;
+}
+
+.field {
+  -fx-text-fill: -c-text-highlight;
 }

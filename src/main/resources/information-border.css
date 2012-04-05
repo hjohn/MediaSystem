@@ -1,7 +1,8 @@
 .elements {
   -fx-background-color: color-content-background;
   -fx-background-radius: 0 0 8 0;
-  -fx-font: bold 12pt "Arial";
+  -fx-font-size: 13pt;
+  -fx-font-weight: bold;
 }
 
 .element {
@@ -19,7 +20,6 @@
 }
 
 .memory .label {
-  -fx-font: bold 12pt "Arial";
   -fx-text-fill: white;
 }
 
@@ -39,7 +39,9 @@
 
 .program-name .center {
   -fx-label-padding: 0 2 0 1;
-  -fx-font: bold italic 12pt "Arial";
+  -fx-font-size: 12pt;
+  -fx-font-weight: bold;
+  -fx-font-style: italic;
   -fx-scale-x: 2.0;
   -fx-scale-y: 2.0;
 }

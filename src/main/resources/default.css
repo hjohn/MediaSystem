@@ -1,13 +1,15 @@
 
 .root {
   -c-main: rgb(173, 216, 230);
+  -c-text-highlight: derive(-c-main, +75%);
+  -c-text-unobtrusive: derive(-c-main, -30%);
   -c-shadow-highlight: derive(-c-main, -50%);
   
   color-main: -c-main;
   
   color-focused-text: derive(color-main, 30%);
 
-  color-content-background: derive(color-blue-70, -80%);
+  color-content-background: derive(color-blue-70, -90%);
 
   color-blue: -c-main;
   color-blue-70: rgba(173, 216, 230, 0.7);
@@ -23,7 +25,9 @@
   color-black-50: rgba(0, 0, 0, 0.50);
   color-black-75: rgba(0, 0, 0, 0.75);
   
-  -fx-font: 14pt "Arial";
+  -fx-font-family: "Arial";
+  -fx-font-size: 16pt;
+  -fx-font-weight: normal;
 }
 
 .scroll-pane {
@@ -32,15 +36,6 @@
 
 .label {
   -fx-text-fill: color-blue;
-}
-
-.title {
-  -fx-font: bold 22pt "Arial";
-  -fx-text-fill: derive(color-blue, +50%);
-}
-
-.subtitle {
-  -fx-font: bold 18pt "Arial";
 }
 
 .debug-border {
@@ -117,7 +112,6 @@
 
 #dialog-main {
   -fx-spacing: 5;
-  -fx-font: bold 18pt "Arial";
 }
 
 #dialog-screen {
@@ -138,6 +132,11 @@
 #dialog .label {
   -fx-padding: 5;
   -fx-text-fill: color-blue;
+}
+
+#dialog .title {
+  -fx-font-size: 24pt; 
+  -fx-font-weight: bold;
 }
 
 .list-cell, .tree-cell, .option-cell {
@@ -191,8 +190,6 @@
   -fx-border-width: 2;
   -fx-border-color: color-blue-20;
   -fx-border-radius: 10;
-
-  -fx-font: bold 14pt "Arial";
 }
 
 .list .header {
@@ -200,7 +197,6 @@
 }
 
 .list .header .label {
-  -fx-font: bold 18pt "Arial";
   -fx-background-color: color-blue-20;
   -fx-background-radius: 8 8 0 0;
   -fx-label-padding: 0 20 0 20;
