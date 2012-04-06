@@ -274,6 +274,7 @@ public class ProgramController {
 
   public void play(MediaItem mediaItem) {
     sceneManager.setPlayerRoot(playerPresentation.getPlayer().getDisplayComponent());
+    playerPresentation.getPlayer().positionProperty().set(0);
     playerPresentation.play(mediaItem.getUri());
 
     currentMediaItem = mediaItem;
