@@ -24,16 +24,16 @@
 }
 
 .axis:top {
-    -fx-border-color: transparent transparent #aaaaaa transparent;
+  -fx-border-color: transparent transparent #aaaaaa transparent;
 }
 .axis:right {
-    -fx-border-color: transparent transparent transparent #aaaaaa;
+  -fx-border-color: transparent transparent transparent #aaaaaa;
 }
 .axis:bottom {
-    -fx-border-color: #aaaaaa transparent transparent transparent;
+  -fx-border-color: #aaaaaa transparent transparent transparent;
 }
 .axis:left {
-    -fx-border-color: transparent #aaaaaa transparent transparent;
+  -fx-border-color: transparent #aaaaaa transparent transparent;
 }
 
 .axis-tick-mark {
