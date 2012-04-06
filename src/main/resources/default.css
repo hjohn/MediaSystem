@@ -112,6 +112,13 @@
 
 #dialog-main {
   -fx-spacing: 5;
+  -fx-font-size: 18pt;
+  -fx-font-weight: bold;
+  
+  -fx-background-color: color-black-75;
+  -fx-background-radius: 20;
+  
+  -fx-padding: 10;
 }
 
 #dialog-screen {
@@ -120,13 +127,6 @@
 
 #dialog-list {
   -fx-spacing: 5;
-}
-
-#dialog-main {
-  -fx-background-color: color-black-75;
-  -fx-background-radius: 20;
-  
-  -fx-padding: 10;
 }
 
 #dialog .label {
