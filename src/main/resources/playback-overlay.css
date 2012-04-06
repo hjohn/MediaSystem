@@ -3,18 +3,20 @@
 }
 
 #video-overlay .video-title {
-  -fx-font: bold 64pt "Arial";
+  -fx-font-size: 64pt;
+  -fx-font-weight: bold;
   -fx-text-fill: white;
 }
 
 #video-overlay .video-subtitle {
-  -fx-font: bold 24pt "Arial";
+  -fx-font-size: 24pt;
+  -fx-font-weight: bold;
   -fx-text-fill: white;
   -fx-padding: 0 0 20 0;
 }
 
 #video-overlay {
-  -fx-font: 24pt "Arial";
+  -fx-font-size: 24pt;
   -fx-text-fill: -c-main;
 }
 
