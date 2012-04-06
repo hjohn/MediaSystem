@@ -273,9 +273,8 @@ public class ProgramController {
   }
 
   public void play(MediaItem mediaItem) {
-    playerPresentation.play(mediaItem.getUri());
-
     sceneManager.setPlayerRoot(playerPresentation.getPlayer().getDisplayComponent());
+    playerPresentation.play(mediaItem.getUri());
 
     currentMediaItem = mediaItem;
 
@@ -292,10 +291,10 @@ public class ProgramController {
   }
 
   public void stop() {
+    playerPresentation.stop();
     sceneManager.disposePlayerRoot();
 
     subtitleDownloadService.cancel();
-    playerPresentation.stop();
 
     while(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
       navigator.back();
