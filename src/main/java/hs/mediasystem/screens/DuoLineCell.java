@@ -22,6 +22,10 @@ public class DuoLineCell extends HBox {
     getStyleClass().add("subtitle");
   }};
 
+  private final Label viewedIndicator = new Label("\u2713") {{
+    getStyleClass().add("viewed-indicator");
+  }};
+
   private final Label extraInfo = new Label() {{
     getStyleClass().add("extra-info");
     setAlignment(Pos.CENTER);
@@ -30,7 +34,7 @@ public class DuoLineCell extends HBox {
 
   private final StarRating starRating = new StarRating(7, 3, 5);
 
-  private final Group collectionMarker = new Group() {{
+  private final Group collectionIndicator = new Group() {{
     getChildren().add(new Path() {{
       getStyleClass().add("group-marker");
       getElements().addAll(
@@ -50,6 +54,7 @@ public class DuoLineCell extends HBox {
     subtitle.managedProperty().bind(subtitle.textProperty().isNotEqualTo(""));
     extraInfo.managedProperty().bind(extraInfo.textProperty().isNotEqualTo(""));
 
+    getChildren().add(viewedIndicator);
     getChildren().add(new HBox() {{
       setFillHeight(false);
       setAlignment(Pos.CENTER_LEFT);
@@ -63,14 +68,17 @@ public class DuoLineCell extends HBox {
       HBox.setHgrow(this, Priority.ALWAYS);
     }});
 
-    getChildren().add(collectionMarker);
+    getChildren().add(collectionIndicator);
 
-    collectionMarker.setVisible(false);
+    setAlignment(Pos.CENTER_LEFT);
+
+    collectionIndicator.setVisible(false);
   }
 
   public StringProperty titleProperty() { return title.textProperty(); }
   public StringProperty subtitleProperty() { return subtitle.textProperty(); }
   public StringProperty extraInfoProperty() { return extraInfo.textProperty(); }
   public DoubleProperty ratingProperty() { return starRating.ratingProperty(); }
-  public BooleanProperty groupProperty() { return collectionMarker.visibleProperty(); }
+  public BooleanProperty groupProperty() { return collectionIndicator.visibleProperty(); }
+  public BooleanProperty viewedProperty() { return viewedIndicator.visibleProperty(); }
 }

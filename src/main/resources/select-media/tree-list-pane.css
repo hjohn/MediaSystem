@@ -20,10 +20,7 @@
 
 .extra-info {
   -fx-text-fill: derive(color-blue, -30%);
-}
-
-.star-rating {
-  -fx-padding: 0 15 5 15;
+  -fx-font-weight: bold;
 }
 
 .group-marker {  /* same as star */
@@ -37,7 +34,7 @@
 }
 
 .tree-cell {
-  -fx-indent: 0;
+  -fx-skin: "hs.mediasystem.FlatTreeCellSkin";
 }
 
 .seasons .label {
@@ -50,8 +47,4 @@
   
   -fx-background-color: derive(color-blue-20, -30%);
   -fx-background-radius: 8 8 0 0;
-}
-
-.tree-disclosure-node {
-  visibility: hidden;
 }
