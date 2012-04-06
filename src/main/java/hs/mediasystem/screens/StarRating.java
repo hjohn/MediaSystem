@@ -24,6 +24,9 @@ public class StarRating extends StackPane {
     HBox stars = createStars(starData);
     HBox disabledStars = createStars(starData);
 
+    stars.setMaxWidth(radius * 10);
+    disabledStars.setMaxWidth(radius * 10);
+
     stars.setClip(rectangle);
     disabledStars.setDisable(true);
 
