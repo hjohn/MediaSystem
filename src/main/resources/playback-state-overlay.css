@@ -5,6 +5,7 @@
 
 .slider .axis {
   -fx-tick-label-fill: -c-main;
+  -fx-tick-label-font: 16pt "Arial";
 }
 
 .slider .thumb {
@@ -41,7 +42,7 @@
 }
 
 .item {
-  -fx-font: 22pt "Arial";
+  -fx-font-size: 22pt;
 }
 
 .content-box {
