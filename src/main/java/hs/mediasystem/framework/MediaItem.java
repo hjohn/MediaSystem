@@ -8,9 +8,11 @@ import java.util.Date;
 import java.util.List;
 
 import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -174,6 +176,16 @@ public class MediaItem {
   public Integer getReleaseYear() { return releaseYear.get(); }
   public ObjectProperty<Integer> releaseYearProperty() { return releaseYear; }
 
+  private final BooleanProperty viewed = new SimpleBooleanProperty() {
+    @Override
+    public boolean get() {
+      queueForEnrichment();
+      return super.get();
+    }
+  };
+  public boolean isViewed() { return viewed.get(); }
+  public BooleanProperty viewedProperty() { return viewed; }
+
   private final IntegerProperty runtime = new SimpleIntegerProperty() {
     @Override
     public int get() {
@@ -183,6 +195,26 @@ public class MediaItem {
   };
   public int getRuntime() { return runtime.get(); }
   public IntegerProperty runtimeProperty() { return runtime; }
+
+  private final IntegerProperty resumePosition = new SimpleIntegerProperty() {
+    @Override
+    public int get() {
+      queueForEnrichment();
+      return super.get();
+    }
+  };
+  public int getResumePosition() { return resumePosition.get(); }
+  public IntegerProperty resumePositionProperty() { return resumePosition; }
+
+  private final DoubleProperty matchAccuracy = new SimpleDoubleProperty() {
+    @Override
+    public double get() {
+      queueForEnrichment();
+      return super.get();
+    }
+  };
+  public double getMatchAccuracy() { return matchAccuracy.get(); }
+  public DoubleProperty matchAccuracyProperty() { return matchAccuracy; }
 
   private final ObjectProperty<String[]> genres = new SimpleObjectProperty<String[]>(new String[0]) {
     @Override
