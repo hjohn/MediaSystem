@@ -27,6 +27,7 @@
 .genres {
   -fx-font-weight: bold;
   -fx-wrap-text: true;
+  -fx-text-fill: -c-text-highlight;
 }
 
 .plot {
