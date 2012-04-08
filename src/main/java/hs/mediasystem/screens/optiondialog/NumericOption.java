@@ -64,5 +64,5 @@ public class NumericOption extends Option {
     }
 
     property.setValue(value);
- }
+  }
 }
