@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -126,7 +127,20 @@ public class ItemsDao {
       transaction.commit();
     }
     catch(SQLException e) {
-      throw new RuntimeException("exception while updating: " + item, e);
+      throw new DatabaseException("exception while updating: " + item, e);
+    }
+  }
+
+  public void changeItemViewedStatus(int id, final boolean viewed) {
+    try(Transaction transaction = database.beginTransaction()) {
+      transaction.update("items", id, new HashMap<String, Object>() {{
+        put("viewed", viewed);
+      }});
+
+      transaction.commit();
+    }
+    catch(SQLException e) {
+      throw new DatabaseException(e);
     }
   }
 
