@@ -16,7 +16,7 @@ public class MovieCellProvider implements CellProvider<MediaNode> {
 
     cell.extraInfoProperty().bind(MediaItemFormatter.releaseYearBinding(item));
     cell.ratingProperty().bind(item.ratingProperty().divide(10));
-    cell.groupProperty().set(!item.isLeaf());
+    cell.collectionSizeProperty().set(item.children().size());
 
     cell.viewedProperty().bind(item.viewedProperty());
 

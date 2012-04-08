@@ -14,19 +14,27 @@
   -fx-label-padding: 0 0 0 10;
 }
 
+.info-block {
+  -fx-font-weight: bold;
+  -fx-alignment: center-right;
+}
+
 .viewed-indicator {
+  -fx-font-size: 20pt;
+  -fx-label-padding: 9 15 9 0;  /* the extra padding for top/bottom makes this the highest element which forces all cells to be the same height */
+}
+
+.collection-text .count {
   -fx-font-size: 20pt;
 }
 
-.extra-info {
-  -fx-text-fill: derive(color-blue, -30%);
+.collection-text {
   -fx-font-weight: bold;
+  -fx-font-size: 12pt;
 }
 
-.group-marker {  /* same as star */
-  -fx-fill: linear-gradient(from 0% 0% to 0% 100%, orange 0%, white 33%, orange 100%);
-  -fx-stroke: yellow;
-  -fx-stroke-width: 1;
+.tree-cell:focused .collection-text {
+  -fx-effect: dropshadow(gaussian, -c-text, 8, 0.2, 0, 0);
 }
 
 .filter {
