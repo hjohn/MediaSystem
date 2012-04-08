@@ -77,6 +77,7 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
               mediaItem.viewedProperty().set(item.isViewed());
               mediaItem.matchAccuracyProperty().set(item.getMatchAccuracy());
               mediaItem.resumePositionProperty().set(item.getResumePosition());
+              mediaItem.setDatabaseId(item.getId());
               mediaItem.setEnriched();
             }
           });

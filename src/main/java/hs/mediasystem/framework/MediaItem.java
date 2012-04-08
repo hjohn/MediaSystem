@@ -30,6 +30,7 @@ public class MediaItem {
   private String language;
   private String tagline;
   private String imdbId;
+  private int databaseId;
 
   private MediaItem(MediaTree mediaTree, MediaItem parent, final LocalInfo<?> localInfo) {
     this.mediaTree = mediaTree;
@@ -122,6 +123,14 @@ public class MediaItem {
 
   public synchronized void setEnriched() {
     this.state = State.ENRICHED;
+  }
+
+  public int getDatabaseId() {
+    return databaseId;
+  }
+
+  public void setDatabaseId(int databaseId) {
+    this.databaseId = databaseId;
   }
 
   @Override
