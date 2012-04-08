@@ -8,7 +8,10 @@
   -c-text-unobtrusive: derive(-c-base, -30%);
   
   -c-shadow-highlight: derive(-c-base, -50%);
-  
+
+  -c-star: yellow;
+  -c-star-disabled: gray;
+
   color-main: -c-base;
   
   color-focused-text: derive(color-main, 30%);
@@ -222,13 +225,13 @@
 }
 
 .star {
-  -fx-fill: linear-gradient(from 0% 0% to 0% 100%, orange 0%, white 33%, orange 100%);
-  -fx-stroke: yellow;
+  -fx-fill: linear-gradient(from 0% 0% to 0% 100%, derive(-c-star, -25%) 0%, derive(-c-star, 75%) 33%, derive(-c-star, -25%) 100%);
+  -fx-stroke: rgba(255, 255, 0, 0.5);
   -fx-stroke-width: 1;
 }
 
 .star:disabled {
-  -fx-fill: rgb(125, 125, 125);
-  -fx-stroke: rgb(125, 125, 125);
+  -fx-fill: linear-gradient(from 0% 0% to 0% 100%, derive(-c-star-disabled, -25%) 0%, derive(-c-star-disabled, 75%) 33%, derive(-c-star-disabled, -25%) 100%);
+  -fx-stroke: -c-star-disabled;
 }
 
