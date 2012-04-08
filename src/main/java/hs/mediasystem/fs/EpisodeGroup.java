@@ -15,6 +15,8 @@ public class EpisodeGroup extends MediaItem {
     super(mediaTree, new LocalInfo<>("MOVIE", items.get(0).getTitle(), items.get(0).getReleaseYear()));
 
     children.addAll(items);
+
+    setEnriched();
   }
 
   @Override
