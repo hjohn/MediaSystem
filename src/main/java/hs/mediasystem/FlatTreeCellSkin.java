@@ -10,7 +10,7 @@ import com.sun.javafx.scene.control.skin.CellSkinBase;
 public class FlatTreeCellSkin extends CellSkinBase<TreeCell<?>, TreeCellBehavior> {
 
   public final double getIndent() {
-    return 0;
+    return 20;
   }
 
   public FlatTreeCellSkin(TreeCell<?> paramTreeCell) {
