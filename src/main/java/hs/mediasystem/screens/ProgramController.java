@@ -1,5 +1,7 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.db.DatabaseException;
+import hs.mediasystem.db.ItemsDao;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.OpenSubtitlesSubtitleProvider;
 import hs.mediasystem.framework.SublightSubtitleProvider;
@@ -62,6 +64,7 @@ public class ProgramController {
   private final SubtitleDownloadService subtitleDownloadService = new SubtitleDownloadService();
   private final SceneManager sceneManager;
   private final PlayerPresentation playerPresentation;
+  private final ItemsDao itemsDao;
 
   private final VBox messagePane = new VBox() {{
     getStylesheets().add("status-messages.css");
@@ -73,12 +76,13 @@ public class ProgramController {
   private final InformationBorder informationBorder = new InformationBorder();
 
   @Inject
-  public ProgramController(Ini ini, final SceneManager sceneManager, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider) {
+  public ProgramController(Ini ini, final SceneManager sceneManager, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider, ItemsDao itemsDao) {
     this.ini = ini;
     this.sceneManager = sceneManager;
     this.playerPresentation = playerPresentation;
     this.mainScreenProvider = mainScreenProvider;
     this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
+    this.itemsDao = itemsDao;
 
     sceneRoot.getChildren().addAll(contentBorderPane, overlayBorderPane);
     scene.setRoot(sceneRoot);
@@ -272,7 +276,7 @@ public class ProgramController {
     return currentMediaItem;
   }
 
-  public void play(MediaItem mediaItem) {
+  public void play(final MediaItem mediaItem) {
     sceneManager.setPlayerRoot(playerPresentation.getPlayer().getDisplayComponent());
     playerPresentation.getPlayer().positionProperty().set(0);
     playerPresentation.play(mediaItem.getUri());
@@ -282,9 +286,45 @@ public class ProgramController {
     final PlaybackOverlayPresentation playbackOverlayPresentation = playbackOverlayPresentationProvider.get();
 
     navigator.navigateTo(new Destination(mediaItem.getTitle()) {
+      private long totalTimeViewed = 0;
+
+      @Override
+      protected void init() {
+        playerPresentation.getPlayer().positionProperty().addListener(new ChangeListener<Number>() {
+          @Override
+          public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number value) {
+            long old = oldValue.longValue();
+            long current = value.longValue();
+
+            if(old < current) {
+              long diff = current - old;
+
+              if(diff < 1000) {
+                totalTimeViewed += diff;
+              }
+            }
+          }
+        });
+      }
+
       @Override
       public void execute() {
         displayOnOverlayStage(playbackOverlayPresentation.getView());
+      }
+
+      @Override
+      protected void outro() {
+        if(totalTimeViewed > playerPresentation.getLength() * 1 / 5) {  // more than 80% viewed?
+          try {
+            System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
+
+            mediaItem.viewedProperty().set(true);
+            itemsDao.changeItemViewedStatus(mediaItem.getDatabaseId(), true);
+          }
+          catch(DatabaseException e) {
+            System.out.println("[WARNING] ProgramController.play(...).new Destination() {...}.outro() - Unable to update viewed status for " + mediaItem + ": " + e);
+          }
+        }
       }
     });
 
@@ -292,16 +332,16 @@ public class ProgramController {
   }
 
   public void stop() {
-    playerPresentation.stop();
-    sceneManager.disposePlayerRoot();
-
-    subtitleDownloadService.cancel();
-
     while(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
       navigator.back();
     }
 
     informationBorder.setVisible(true);
+
+    playerPresentation.stop();
+    sceneManager.disposePlayerRoot();
+
+    subtitleDownloadService.cancel();
   }
 
   public List<SubtitleProvider> getSubtitleProviders() {
