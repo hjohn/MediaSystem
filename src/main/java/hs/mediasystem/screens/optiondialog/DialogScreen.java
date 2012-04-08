@@ -23,7 +23,6 @@ public class DialogScreen extends BorderPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
 
-//  private final List<Option> options;
   private final ObservableList<Node> options;
   private final List<List<Node>> optionStack  = new ArrayList<>();
 
