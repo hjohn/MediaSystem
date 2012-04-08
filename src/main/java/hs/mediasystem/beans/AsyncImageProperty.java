@@ -29,9 +29,7 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
     imageHandle.addListener(new ChangeListener<ImageHandle>() {
       @Override
       public void changed(ObservableValue<? extends ImageHandle> observable, ImageHandle oldValue, ImageHandle value) {
-        synchronized(imageLoadService) {
-          loadImageInBackground(imageHandle.getValue());
-        }
+        loadImageInBackground(imageHandle.getValue());
       }
     });
 
@@ -39,9 +37,11 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
   }
 
   private void loadImageInBackground(ImageHandle imageHandle) {
-    if(imageHandle != null) {
-      imageLoadService.setImageHandle(imageHandle);
-      imageLoadService.restart();
+    synchronized(imageLoadService) {
+      if(imageHandle != null) {
+        imageLoadService.setImageHandle(imageHandle);
+        imageLoadService.restart();
+      }
     }
   }
 
