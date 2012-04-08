@@ -37,6 +37,14 @@
   -fx-effect: dropshadow(gaussian, -c-text, 8, 0.2, 0, 0);
 }
 
+.tree-cell .star {
+  -fx-opacity: 0.6;
+}
+
+.tree-cell:focused .star {
+  -fx-opacity: 1.0;
+}
+
 .filter {
   -fx-hgap: 5;
 }
