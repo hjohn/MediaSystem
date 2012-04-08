@@ -43,18 +43,16 @@ public class YouTubeMainMenuExtension implements MainMenuExtension {
       @Override
       protected void init() {
         presentation = selectMediaPresentationProvider.get();
-        mediaTree = new YouTubeMediaTree();
-        mediaTree.onItemQueued().set(enrichmentHandler);
       }
 
       @Override
       protected void intro() {
         controller.showScreen(presentation.getView());
-      }
-
-      @Override
-      protected void execute() {
-        presentation.setMediaTree(mediaTree);
+        if(mediaTree == null) {
+          mediaTree = new YouTubeMediaTree();
+          mediaTree.onItemQueued().set(enrichmentHandler);
+          presentation.setMediaTree(mediaTree);
+        }
       }
     };
   }

@@ -162,7 +162,8 @@ public class Navigator {
     protected void init() {
     }
 
-    protected abstract void execute();
+    protected void execute() {
+    }
 
     protected void intro() {
     }

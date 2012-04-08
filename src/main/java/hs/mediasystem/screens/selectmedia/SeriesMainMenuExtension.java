@@ -50,18 +50,16 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
       @Override
       protected void init() {
         presentation = selectMediaPresentationProvider.get();
-        mediaTree = new SeriesMediaTree(Paths.get(controller.getIni().getValue("general", "series.path")));
-        mediaTree.onItemQueued().set(enrichmentHandler);
       }
 
       @Override
       protected void intro() {
         controller.showScreen(presentation.getView());
-      }
-
-      @Override
-      protected void execute() {
-        presentation.setMediaTree(mediaTree);
+        if(mediaTree == null) {
+          mediaTree = new SeriesMediaTree(Paths.get(controller.getIni().getValue("general", "series.path")));
+          mediaTree.onItemQueued().set(enrichmentHandler);
+          presentation.setMediaTree(mediaTree);
+        }
       }
     };
   }
