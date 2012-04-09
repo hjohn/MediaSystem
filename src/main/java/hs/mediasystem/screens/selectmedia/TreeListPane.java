@@ -175,7 +175,9 @@ public class TreeListPane extends BorderPane implements ListPane {
 
   private void refilter() {
     MediaNodeTreeItem group = (MediaNodeTreeItem)filter.activeProperty().get().getUserData();
+    treeView.getFocusModel().focus(-1);  // WORKAROUND: If focus index was same as before, even if root was changed, focused item is NOT updated
     treeView.setRoot(group);
+    treeView.getFocusModel().focus(0);
   }
 
   private final class MediaNodeTreeItem extends TreeItem<MediaNode> {
@@ -240,6 +242,8 @@ public class TreeListPane extends BorderPane implements ListPane {
 
   @Override
   public void setSelectedNode(MediaNode mediaNode) {
+    treeView.getFocusModel().focus(-1);  // WORKAROUND: If focus index was same as before, even if root was changed, focused item is NOT updated
+
     if(mediaNode == null) {
       treeView.getFocusModel().focus(0);
     }
