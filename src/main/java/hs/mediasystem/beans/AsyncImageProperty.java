@@ -40,7 +40,12 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
     synchronized(imageLoadService) {
       if(imageHandle != null) {
         imageLoadService.setImageHandle(imageHandle);
-        imageLoadService.restart();
+        try {
+          imageLoadService.restart();
+        }
+        catch(IllegalStateException e) {  // WORKAROUND: If this happens, I donot want the whole chain of events to break down, so this exception is swallowed here
+          System.out.println("[FINE] AsyncImageProperty.loadImageInBackground() - WORKAROUND, swallowing IllegalStateException for now");
+        }
       }
     }
   }
