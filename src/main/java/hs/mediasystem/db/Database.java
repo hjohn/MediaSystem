@@ -215,7 +215,6 @@ public class Database {
         }
       }
       else {
-        System.out.println("Parent " + this + " ; parent = " + this.parent);
         if(commit) {
           connection.releaseSavepoint(savepoint);
         }
