@@ -38,6 +38,8 @@ public class BannerCellProvider implements CellProvider<MediaNode> {
   public Node configureCell(MediaNode mediaNode) {
     final MediaItem item = mediaNode.getMediaItem();
 
+    binder.unbindAll();
+
     // A banner from TVDB is 758 x 140
 
     if(item != null) {

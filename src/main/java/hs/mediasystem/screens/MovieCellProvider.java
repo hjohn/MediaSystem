@@ -13,6 +13,8 @@ public class MovieCellProvider implements CellProvider<MediaNode> {
   public Node configureCell(MediaNode mediaNode) {
     MediaItem item = mediaNode.getMediaItem();
 
+    binder.unbindAll();
+
     binder.bind(cell.titleProperty(), item.titleProperty());
     binder.bind(cell.subtitleProperty(), item.subtitleProperty());
 
