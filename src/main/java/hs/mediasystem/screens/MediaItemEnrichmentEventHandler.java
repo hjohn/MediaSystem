@@ -36,20 +36,8 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
         try {
           @SuppressWarnings("unchecked")
           LocalInfo<Object> localInfo = (LocalInfo<Object>)mediaItem.getLocalInfo();
-          String message = localInfo.getTitle();
 
-          if(message == null) {
-            message = localInfo.getGroupName();
-          }
-
-          if(localInfo.getSeason() != null) {
-            message += " " + localInfo.getSeason() + "x" + localInfo.getEpisode();
-          }
-          else if(localInfo.getEpisode() != null && localInfo.getEpisode() > 1) {
-            message += " " + localInfo.getEpisode();
-          }
-
-          updateMessage(message);
+          updateMessage(mediaItem.getTitle());
 
           Identifier identifier = cachedItemEnricher.identifyItem(localInfo, bypassCache);
 
