@@ -26,6 +26,6 @@ public class MovieDecoder implements Decoder {
 
     Integer episode = sequence == null ? null : Integer.parseInt(sequence);
 
-    return new LocalInfo<>(path.toString(), mediaType, null, title, subtitle, imdbNumber, year, null, episode, null);
+    return new LocalInfo<>(path.toString(), mediaType, null, title, subtitle, imdbNumber, year, null, episode, episode, null);
   }
 }

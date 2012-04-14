@@ -20,7 +20,7 @@ public class SerieScanner implements Scanner<LocalInfo<Object>> {
       try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
         for(Path path : dirStream) {
           if(Files.isDirectory(path) && !path.getFileName().toString().startsWith(".")) {
-            results.add(new LocalInfo<>(path.toString(), "SERIE", null, path.getFileName().toString(), null, null, null, null, null, null));
+            results.add(new LocalInfo<>(path.toString(), "SERIE", null, path.getFileName().toString(), null, null, null, null, null, null, null));
           }
         }
       }

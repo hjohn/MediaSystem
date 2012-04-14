@@ -19,14 +19,16 @@ public class EpisodeDecoder implements Decoder {
 
     Integer season = null;
     Integer episode = null;
+    Integer endEpisode = null;
 
     if(sequence != null) {
-      String[] split = sequence.split(",");
+      String[] split = sequence.split("[-,]");
 
       season = Integer.parseInt(split[0]);
       episode = Integer.parseInt(split[1]);
+      endEpisode = split.length > 2 ? Integer.parseInt(split[2]) : episode;
     }
 
-    return new LocalInfo<>(path.toString(), mediaType, serieName, title, null, null, year, season, episode, null);
+    return new LocalInfo<>(path.toString(), mediaType, serieName, title, null, null, year, season, episode, endEpisode, null);
   }
 }

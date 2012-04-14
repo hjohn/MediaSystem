@@ -10,9 +10,10 @@ public class LocalInfo<T> {
   private final Integer releaseYear;
   private final Integer season;
   private final Integer episode;
+  private final Integer endEpisode;
   private final T userData;
 
-  public LocalInfo(String uri, String mediaType, String groupName, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode, T userData) {
+  public LocalInfo(String uri, String mediaType, String groupName, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode, Integer endEpisode, T userData) {
     this.uri = uri;
     this.mediaType = mediaType;
     this.groupName = groupName;
@@ -22,15 +23,16 @@ public class LocalInfo<T> {
     this.releaseYear = releaseYear;
     this.season = season;
     this.episode = episode;
+    this.endEpisode = endEpisode;
     this.userData = userData;
   }
 
   public LocalInfo(String mediaType, String title, Integer releaseYear) {
-    this(null, mediaType, null, title, null, null, releaseYear, null, null, null);
+    this(null, mediaType, null, title, null, null, releaseYear, null, null, null, null);
   }
 
   public LocalInfo(String mediaType, String title) {
-    this(null, mediaType, null, title, null, null, null, null, null, null);
+    this(null, mediaType, null, title, null, null, null, null, null, null, null);
   }
 
   public String getSurrogateName() {
@@ -75,6 +77,10 @@ public class LocalInfo<T> {
 
   public Integer getEpisode() {
     return episode;
+  }
+
+  public Integer getEndEpisode() {
+    return endEpisode;
   }
 
   @Override
