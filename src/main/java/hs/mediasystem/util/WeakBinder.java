@@ -1,7 +1,9 @@
 package hs.mediasystem.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -11,6 +13,13 @@ import javafx.beans.value.ObservableValue;
 
 public class WeakBinder {
   private final List<Object> hardRefs = new ArrayList<>();
+  private final Map<ObservableValue<?>, WeakInvalidationListener> listeners = new HashMap<>();
+
+  public void unbindAll() {
+    for(ObservableValue<?> observableValue : listeners.keySet()) {
+      observableValue.removeListener(listeners.get(observableValue));
+    }
+  }
 
   public <T> void bind(final Property<T> property, final ObservableValue<? extends T> dest) {
     InvalidationListener invalidationListener = new InvalidationListener() {
@@ -20,7 +29,11 @@ public class WeakBinder {
       }
     };
 
-    dest.addListener(new WeakInvalidationListener(invalidationListener));
+    WeakInvalidationListener weakInvalidationListener = new WeakInvalidationListener(invalidationListener);
+
+    listeners.put(dest, weakInvalidationListener);
+
+    dest.addListener(weakInvalidationListener);
     property.setValue(dest.getValue());
 
     hardRefs.add(dest);
