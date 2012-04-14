@@ -4,18 +4,18 @@ import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.util.Events;
+import hs.mediasystem.util.GridPaneUtil;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 
 public abstract class AbstractDuoPaneSelectMediaView extends StackPane implements SelectMediaView {
@@ -31,9 +31,11 @@ public abstract class AbstractDuoPaneSelectMediaView extends StackPane implement
 
     this.listPane = listPane;
 
-    final GridPane root = new GridPane();
+    final GridPane root = GridPaneUtil.create(new double[] {100}, new double[] {17, 75, 8});
+    final GridPane panelGroup = GridPaneUtil.create(new double[] {50, 50}, new double[] {100});
+    final GridPane stage = GridPaneUtil.create(new double[] {100}, new double[] {90, 10});
 
-    root.getStyleClass().addAll("content-box-grid");
+    panelGroup.getStyleClass().addAll("content-box-grid");
 
     addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
       @Override
@@ -44,32 +46,23 @@ public abstract class AbstractDuoPaneSelectMediaView extends StackPane implement
       }
     });
 
-    root.getColumnConstraints().addAll(
-      new ColumnConstraints() {{
-        setPercentWidth(50);
-      }},
-      new ColumnConstraints() {{
-        setPercentWidth(50);
-      }}
-    );
-
-    root.getRowConstraints().addAll(
-      new RowConstraints() {{
-        setPercentHeight(25);
-      }},
-      new RowConstraints() {{
-        setPercentHeight(75);
-      }}
-    );
-
     detailPane.mediaItemProperty().bind(listPane.mediaItemBinding());
 
-    root.add(detailPane, 0, 1);
-    root.add((Node)listPane, 1, 1);
+    root.add(panelGroup, 0, 1);
+
+    panelGroup.setEffect(new Reflection(5, 0.1, 0.25, 0.0));
+
+    panelGroup.add(detailPane, 0, 0);
+    panelGroup.add((Node)listPane, 1, 0);
+
+    stage.add(new StackPane() {{
+      getStyleClass().add("stage");
+    }}, 0, 1);
 
     backgroundPane.mediaItemProperty().bind(listPane.mediaItemBinding());
 
     getChildren().add(backgroundPane);
+    getChildren().add(stage);
     getChildren().add(root);
   }
 
