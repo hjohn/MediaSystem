@@ -45,15 +45,17 @@ public class MediaItem {
 
       @Override
       protected String computeValue() {
+        String officialTitle = getOfficialTitle();
+
         if(localInfo.getType().equals("EPISODE")) {
-          if(getOfficialTitle() != null && !getOfficialTitle().isEmpty()) {
-            return getOfficialTitle();
+          if(officialTitle != null && !officialTitle.isEmpty()) {
+            return officialTitle;
           }
           else if(localInfo.getTitle() != null && !localInfo.getTitle().isEmpty()) {
             return localInfo.getTitle();
           }
 
-          return localInfo.getGroupName() + " " + localInfo.getSeason() + "x" + localInfo.getEpisode();
+          return localInfo.getGroupName() + " " + localInfo.getSeason() + "x" + localInfo.getEpisode() + (localInfo.getEndEpisode() != localInfo.getEpisode() ? "-" + localInfo.getEndEpisode() : "");
         }
 
         return localInfo.getTitle();
@@ -63,6 +65,7 @@ public class MediaItem {
     releaseYear.set(localInfo.getReleaseYear());
     season.set(localInfo.getSeason());
     episode.set(localInfo.getEpisode());
+    episodeRange.set(localInfo.getEpisode() == null ? null : ("" + localInfo.getEpisode() + (localInfo.getEndEpisode() != localInfo.getEpisode() ? "-" + localInfo.getEndEpisode() : "")));
   }
 
   public MediaItem(MediaTree mediaTree, final LocalInfo<?> localInfo) {
@@ -180,6 +183,10 @@ public class MediaItem {
   private final ObjectProperty<Integer> episode = new SimpleObjectProperty<>();
   public Integer getEpisode() { return episode.get(); }
   public ObjectProperty<Integer> episodeProperty() { return episode; }
+
+  private final StringProperty episodeRange = new SimpleStringProperty();
+  public String getEpisodeRange() { return episodeRange.get(); }
+  public StringProperty episodeRangeProperty() { return episodeRange; }
 
   private final ObjectProperty<Integer> releaseYear = new SimpleObjectProperty<>();
   public Integer getReleaseYear() { return releaseYear.get(); }
