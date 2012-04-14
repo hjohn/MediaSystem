@@ -19,7 +19,7 @@ public class SeasonAndEpisodeCellProvider implements CellProvider<MediaNode> {
 
     binder.bind(cell.titleProperty(), item.titleProperty());
     binder.bind(cell.ratingProperty(), item.ratingProperty().divide(10));
-    binder.bind(cell.extraInfoProperty(), Bindings.when(item.episodeProperty().isNull()).then(new SimpleStringProperty("Special")).otherwise(Bindings.convert(item.episodeProperty())));
+    binder.bind(cell.extraInfoProperty(), Bindings.when(item.episodeRangeProperty().isNull()).then(new SimpleStringProperty("Special")).otherwise(item.episodeRangeProperty()));
     binder.bind(cell.viewedProperty(), item.viewedProperty());
 
 //    cell.titleProperty().bind(item.titleProperty());
