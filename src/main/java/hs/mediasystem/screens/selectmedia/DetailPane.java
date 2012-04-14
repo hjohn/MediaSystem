@@ -16,7 +16,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -96,7 +95,7 @@ public class DetailPane extends GridPane {
         imageProperty().bind(poster);
         setPreserveRatio(true);
         setSmooth(true);
-        setEffect(new DropShadow());
+//        setEffect(new DropShadow());
 //          setEffect(new PerspectiveTransform() {{
 //            setUlx(10.0);
 //            setUly(10.0);

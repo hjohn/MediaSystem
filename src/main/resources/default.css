@@ -16,9 +16,10 @@
   
   color-focused-text: derive(color-main, 30%);
 
-  color-content-background: derive(color-blue-70, -90%);
+  color-content-background: derive(color-blue-80, -90%);
 
   color-blue: -c-base;
+  color-blue-80: rgba(173, 216, 230, 0.8);
   color-blue-70: rgba(173, 216, 230, 0.7);
   color-blue-50: rgba(173, 216, 230, 0.5);
   color-blue-20: rgba(173, 216, 230, 0.2);

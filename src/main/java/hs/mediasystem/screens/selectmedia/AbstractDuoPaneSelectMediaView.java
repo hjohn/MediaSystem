@@ -10,6 +10,10 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.Light;
+import javafx.scene.effect.Lighting;
 import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -17,17 +21,18 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 
 public abstract class AbstractDuoPaneSelectMediaView extends StackPane implements SelectMediaView {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
 
   private final ListPane listPane;
 
-  public AbstractDuoPaneSelectMediaView(ListPane listPane, DetailPane detailPane, BackgroundPane backgroundPane) {
+  public AbstractDuoPaneSelectMediaView(final ListPane listPane, final DetailPane detailPane, BackgroundPane backgroundPane) {
     getStylesheets().add("select-media/duo-pane-select-media-view.css");
 
-    detailPane.getStyleClass().add("content-box");
-    listPane.getStyleClass().add("content-box");
+    detailPane.getStyleClass().add("box-content");
+    listPane.getStyleClass().add("box-content");
 
     this.listPane = listPane;
 
@@ -50,10 +55,32 @@ public abstract class AbstractDuoPaneSelectMediaView extends StackPane implement
 
     root.add(panelGroup, 0, 1);
 
+    detailPane.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.BLACK, 3, 0.0, 0, 0));
+    ((Node)listPane).setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.BLACK, 3, 0.0, 0, 0));
+
     panelGroup.setEffect(new Reflection(5, 0.1, 0.25, 0.0));
 
-    panelGroup.add(detailPane, 0, 0);
-    panelGroup.add((Node)listPane, 1, 0);
+    panelGroup.add(new StackPane() {{
+      getChildren().add(new StackPane() {{
+        getStyleClass().add("box");
+        setEffect(new Lighting(new Light.Distant(-135.0, 30.0, Color.WHITE)) {{
+          setSpecularConstant(1.5);
+          setSurfaceScale(3.0);
+        }});
+      }});
+      getChildren().add(detailPane);
+    }}, 0, 0);
+
+    panelGroup.add(new StackPane() {{
+      getChildren().add(new StackPane() {{
+        getStyleClass().add("box");
+        setEffect(new Lighting(new Light.Distant(-135.0, 30.0, Color.WHITE)) {{
+          setSpecularConstant(1.5);
+          setSurfaceScale(2.0);
+        }});
+      }});
+      getChildren().add((Node)listPane);
+    }}, 1, 0);
 
     stage.add(new StackPane() {{
       getStyleClass().add("stage");

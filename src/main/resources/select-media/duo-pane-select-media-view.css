@@ -4,31 +4,31 @@
   -fx-vgap: 0;
 }
 
-.content-box {
+.box {
   -c-border: color-content-background;
   -c-bg: color-content-background;
   
-  -c-b1: derive(-c-border, +125%);
+  -c-b1: derive(-c-border, +225%);
   -c-b2: derive(-c-border, +85%);
   -c-b3: derive(-c-border, +55%);
-  -c-b4: derive(-c-border, +25%);
-  -c-b5: derive(-c-border, -60%);
 
-  -c-bg1: derive(-c-bg, +35%);
-  -c-bg2: derive(-c-bg, 0%);
-  -c-bg3: derive(-c-bg, -60%);
+  -c-bg1: derive(-c-bg, 5%);
+  -c-bg2: derive(-c-bg, -100%);
+  -c-bg3: derive(-c-bg, -160%);
 
   -fx-border-color: 
-    linear-gradient(to right, -c-b4, -c-b3, -c-b4) linear-gradient(to bottom, -c-b4, -c-b3 25%, -c-b1 50%, -c-b3 75%, -c-b2) linear-gradient(to right, -c-b2, -c-b1, -c-b2) linear-gradient(to bottom, -c-b4, -c-b3 25%, -c-b1 50%, -c-b3 75%, -c-b2),
-    rgba(0, 0, 0, 0.3);
-    
-  -fx-border-radius: 20, 20;
-  -fx-border-width: 3, 1;
-  -fx-border-insets: 0, 0;
+    linear-gradient(to right, -c-b2, -c-b1, -c-b2) linear-gradient(to bottom, -c-b2, -c-b3 25%, -c-b1 50%, -c-b3 75%, -c-b2) linear-gradient(to right, -c-b2, -c-b1, -c-b2) linear-gradient(to bottom, -c-b2, -c-b3 25%, -c-b1 50%, -c-b3 75%, -c-b2)
+  ;
+
+  -fx-border-radius: 25;
+  -fx-border-width: 1.5;
 
   -fx-background-color: linear-gradient(from 25% 0% to 75% 100%, -c-bg3, -c-bg1 28%, -c-bg2 68%, -c-bg3);
-  -fx-background-radius: 17;
-  -fx-background-insets: 3;
+  -fx-background-radius: 24;
+  -fx-background-insets: 1;
+}
+
+.box-content {
   -fx-padding: 30;
   -fx-hgap: 20;
 }
