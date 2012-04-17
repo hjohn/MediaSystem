@@ -267,6 +267,8 @@ public class ProgramController {
   }
 
   public void showScreen(final Node node) {
+    assert node != null;
+
     displayOnMainStage(node);
   }
 
