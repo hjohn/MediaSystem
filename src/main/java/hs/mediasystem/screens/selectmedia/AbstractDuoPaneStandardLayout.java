@@ -1,13 +1,11 @@
 package hs.mediasystem.screens.selectmedia;
 
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
-import hs.mediasystem.screens.SelectMediaView;
-import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.effect.BlurType;
@@ -15,22 +13,14 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Light;
 import javafx.scene.effect.Lighting;
 import javafx.scene.effect.Reflection;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
-public abstract class AbstractDuoPaneSelectMediaView extends StackPane implements SelectMediaView {
-  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
-
+public abstract class AbstractDuoPaneStandardLayout extends StackPane implements StandardLayout {
   private final ListPane listPane;
 
-  public AbstractDuoPaneSelectMediaView(final ListPane listPane, final DetailPane detailPane, BackgroundPane backgroundPane) {
-    getStylesheets().add("select-media/duo-pane-select-media-view.css");
-
+  public AbstractDuoPaneStandardLayout(final ListPane listPane, final DetailPane detailPane) {
     detailPane.getStyleClass().add("box-content");
     listPane.getStyleClass().add("box-content");
 
@@ -38,18 +28,8 @@ public abstract class AbstractDuoPaneSelectMediaView extends StackPane implement
 
     final GridPane root = GridPaneUtil.create(new double[] {100}, new double[] {17, 75, 8});
     final GridPane panelGroup = GridPaneUtil.create(new double[] {50, 50}, new double[] {100});
-    final GridPane stage = GridPaneUtil.create(new double[] {100}, new double[] {90, 10});
 
     panelGroup.getStyleClass().addAll("content-box-grid");
-
-    addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-      @Override
-      public void handle(KeyEvent event) {
-        if(BACK_SPACE.match(event)) {
-          Events.dispatchEvent(onBack, new ActionEvent(AbstractDuoPaneSelectMediaView.this, null), event);
-        }
-      }
-    });
 
     detailPane.mediaItemProperty().bind(listPane.mediaItemBinding());
 
@@ -82,14 +62,6 @@ public abstract class AbstractDuoPaneSelectMediaView extends StackPane implement
       getChildren().add((Node)listPane);
     }}, 1, 0);
 
-    stage.add(new StackPane() {{
-      getStyleClass().add("stage");
-    }}, 0, 1);
-
-    backgroundPane.mediaItemProperty().bind(listPane.mediaItemBinding());
-
-    getChildren().add(backgroundPane);
-    getChildren().add(stage);
     getChildren().add(root);
   }
 
@@ -115,7 +87,5 @@ public abstract class AbstractDuoPaneSelectMediaView extends StackPane implement
 
   @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected() { return listPane.onNodeSelected(); }
   @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect() { return listPane.onNodeAlternateSelect(); }
-
-  private final ObjectProperty<EventHandler<ActionEvent>> onBack = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<ActionEvent>> onBack() { return onBack; }
+  @Override public ObjectBinding<MediaItem> mediaItemBinding() { return listPane.mediaItemBinding(); }
 }

@@ -1,5 +1,7 @@
 package hs.mediasystem.screens;
 
+import java.util.List;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -18,4 +20,8 @@ public interface SelectMediaView {
    * @param mediaNode a node, or <code>null</code> if the default node should be selected
    */
   void setSelectedNode(MediaNode mediaNode);
+
+  List<String> getAvailableLayouts();
+  String getLayout();
+  void setLayout(String layout);
 }

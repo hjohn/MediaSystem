@@ -213,6 +213,6 @@ public class BannerListPane extends BorderPane implements ListPane {
 
   @Override
   public void setSelectedNode(MediaNode mediaNode) {
-    throw new UnsupportedOperationException();
+    //throw new UnsupportedOperationException();
   }
 }

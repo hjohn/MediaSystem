@@ -6,9 +6,9 @@ import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.Navigator;
-import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
+import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.screens.StandardLayout;
 import hs.mediasystem.screens.optiondialog.ActionOption;
 import hs.mediasystem.screens.optiondialog.ListOption;
@@ -35,15 +35,24 @@ import javax.inject.Inject;
 
 public class SelectMediaPresentation {
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
-  private final SelectMediaView view;
   private final Navigator navigator;
   private final StandardLayout layout = new StandardLayout();
   private final StateCache stateCache;
+
+  private SelectMediaView view;
 
   @Inject
   public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final MediaItemEnrichmentEventHandler enrichmentHandler, final StateCache stateCache) {
     this.stateCache = stateCache;
     this.navigator = new Navigator(controller.getNavigator());
+    this.view = view;
+
+    if(this.view != null) {
+      this.view.onBack().set(null);
+      this.view.onNodeSelected().set(null);
+      this.view.onNodeAlternateSelect().set(null);
+    }
+
     this.view = view;
 
     view.onBack().set(new EventHandler<ActionEvent>() {
@@ -61,7 +70,7 @@ public class SelectMediaPresentation {
           controller.play(event.getMediaNode().getMediaItem());
         }
         else {
-          setTreeRoot(event.getMediaNode().getMediaItem()); // TODO Could trigger a new pane altogether
+          setTreeRoot(event.getMediaNode().getMediaItem());
         }
         event.consume();
       }
@@ -107,7 +116,8 @@ public class SelectMediaPresentation {
               protected String computeValue() {
                 return layout.sortOrderProperty().get().getTitle();
               }
-            })
+            }),
+            new ListOption<>("View", null, null, null)
           );
 
           controller.showOptionScreen("Media - Options", options);

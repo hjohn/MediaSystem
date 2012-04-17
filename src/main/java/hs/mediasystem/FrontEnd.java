@@ -9,9 +9,12 @@ import hs.mediasystem.screens.PlaybackOverlayPane;
 import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SelectMediaView;
-import hs.mediasystem.screens.selectmedia.ListSelectMediaView;
+import hs.mediasystem.screens.selectmedia.BannerStandardLayoutExtension;
+import hs.mediasystem.screens.selectmedia.ListStandardLayoutExtension;
 import hs.mediasystem.screens.selectmedia.MoviesMainMenuExtension;
 import hs.mediasystem.screens.selectmedia.SeriesMainMenuExtension;
+import hs.mediasystem.screens.selectmedia.StandardLayoutExtension;
+import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.screens.selectmedia.YouTubeMainMenuExtension;
 import hs.mediasystem.util.DuoWindowSceneManager;
 import hs.mediasystem.util.SceneManager;
@@ -89,7 +92,10 @@ public class FrontEnd extends Application {
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(SeriesMainMenuExtension.class);
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(YouTubeMainMenuExtension.class);
 
-        bind(SelectMediaView.class).to(ListSelectMediaView.class);
+        Multibinder.newSetBinder(binder(), StandardLayoutExtension.class).addBinding().to(ListStandardLayoutExtension.class);
+        Multibinder.newSetBinder(binder(), StandardLayoutExtension.class).addBinding().to(BannerStandardLayoutExtension.class);
+
+        bind(SelectMediaView.class).to(StandardView.class);
         bind(PlaybackOverlayView.class).to(PlaybackOverlayPane.class);
       }
 
