@@ -20,6 +20,7 @@ import hs.mediasystem.util.StringBinding;
 
 import java.util.List;
 
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
@@ -145,19 +146,24 @@ public class SelectMediaPresentation {
     navigator.navigateTo(new Destination(root.getTitle()) {
       @Override
       public void execute() {
-        MediaNode mediaNode = layout.wrap(root);
+        final MediaNode mediaNode = layout.wrap(root);
 
         view.setRoot(mediaNode);
 
-        String key = createKeyFromTrail();
-        String id = stateCache.getState(key);
-        MediaNode nodeToSelect = null;
+        Platform.runLater(new Runnable() {
+          @Override
+          public void run() {
+            String key = createKeyFromTrail();
+            String id = stateCache.getState(key);
+            MediaNode nodeToSelect = null;
 
-        if(id != null) {
-          nodeToSelect = mediaNode.findMediaNode(id);
-        }
+            if(id != null) {
+              nodeToSelect = mediaNode.findMediaNode(id);
+            }
 
-        view.setSelectedNode(nodeToSelect);
+            view.setSelectedNode(nodeToSelect);
+          }
+        });
       }
 
       @Override
