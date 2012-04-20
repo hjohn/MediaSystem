@@ -12,6 +12,7 @@ import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.screens.selectmedia.BannerStandardLayoutExtension;
 import hs.mediasystem.screens.selectmedia.ListStandardLayoutExtension;
 import hs.mediasystem.screens.selectmedia.MoviesMainMenuExtension;
+import hs.mediasystem.screens.selectmedia.NosMainMenuExtension;
 import hs.mediasystem.screens.selectmedia.SeriesMainMenuExtension;
 import hs.mediasystem.screens.selectmedia.StandardLayoutExtension;
 import hs.mediasystem.screens.selectmedia.StandardView;
@@ -91,6 +92,7 @@ public class FrontEnd extends Application {
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(MoviesMainMenuExtension.class);
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(SeriesMainMenuExtension.class);
         Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(YouTubeMainMenuExtension.class);
+        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(NosMainMenuExtension.class);
 
         Multibinder.newSetBinder(binder(), StandardLayoutExtension.class).addBinding().to(ListStandardLayoutExtension.class);
         Multibinder.newSetBinder(binder(), StandardLayoutExtension.class).addBinding().to(BannerStandardLayoutExtension.class);
