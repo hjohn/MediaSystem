@@ -122,14 +122,14 @@ public class StandardView extends StackPane implements SelectMediaView {
 
     MediaRootType rootType;
 
-    if(root.getMediaType().equals("MOVIE_ROOT")) {
-      rootType = MediaRootType.MOVIES;
+    if(root.getMediaType().equals("SERIE")) {
+      rootType = MediaRootType.SERIE_EPISODES;
     }
     else if(root.getMediaType().equals("SERIE_ROOT")) {
       rootType = MediaRootType.SERIES;
     }
     else {
-      rootType = MediaRootType.SERIE_EPISODES;
+      rootType = MediaRootType.MOVIES;
     }
 
     for(StandardLayoutExtension extension : selectMediaExtensions) {

@@ -25,14 +25,14 @@ public class StandardLayout {
   public CellProvider<MediaNode> getCellProvider(MediaItem parent) {
     String mediaType = parent.getMediaType();
 
-    if(mediaType.equals("MOVIE_ROOT")) {
-      return new MovieCellProvider();
+    if(mediaType.equals("SERIE")) {
+      return new SeasonAndEpisodeCellProvider();
     }
     else if(mediaType.equals("SERIE_ROOT")) {
       return new BannerCellProvider();
     }
 
-    return new SeasonAndEpisodeCellProvider();
+    return new MovieCellProvider();
   }
 
   public List<MediaNode> getChildren(MediaNode parentNode) {
