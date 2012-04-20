@@ -94,7 +94,7 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
   }
 
   private static SourceImageHandle createImageHandle(Source<byte[]> source, Item item, String keyPostFix) {
-    String key = item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-" + item.getImdbId() + "-" + keyPostFix;
+    String key = "MediaItemEnrichmentEventHandler:/" + item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-" + item.getImdbId() + "-" + keyPostFix;
 
     return source == null ? null : new SourceImageHandle(source, key);
   }
