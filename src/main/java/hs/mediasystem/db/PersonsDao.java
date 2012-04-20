@@ -37,7 +37,7 @@ public class PersonsDao {
           setName(rs.getString("name"));
           setPhotoURL(rs.getString("photourl"));
           if(getPhotoURL() != null) {
-            setPhoto(new URLImageSource(connectionProvider, getId(), "persons", "photo", rs.getBoolean("hasPhoto") ? null : getPhotoURL()));
+            setPhoto(new DatabaseImageSource(connectionProvider, getId(), "persons", "photo", rs.getBoolean("hasPhoto") ? null : new URLImageSource(getPhotoURL())));
           }
         }};
       }
@@ -64,7 +64,7 @@ public class PersonsDao {
   private void putImagePlaceHolders(Person person) {
     int id = person.getId();
 
-    person.setPhoto(person.getPhotoURL() == null ? null : new URLImageSource(connectionProvider, id, "persons", "photo", person.getPhotoURL()));
+    person.setPhoto(person.getPhotoURL() == null ? null : new DatabaseImageSource(connectionProvider, id, "persons", "photo", new URLImageSource(person.getPhotoURL())));
   }
 
   private static Map<String, Object> createFieldMap(Person person) {

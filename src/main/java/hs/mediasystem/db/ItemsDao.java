@@ -71,13 +71,13 @@ public class ItemsDao {
               setPosterURL(rs.getString("posterurl"));
 
               if(getBackgroundURL() != null) {
-                setBackground(new URLImageSource(connectionProvider, getId(), "items", "background", rs.getBoolean("hasBackground") ? null : getBackgroundURL()));
+                setBackground(new DatabaseImageSource(connectionProvider, getId(), "items", "background", rs.getBoolean("hasBackground") ? null : new URLImageSource(getBackgroundURL())));
               }
               if(getBannerURL() != null) {
-                setBanner(new URLImageSource(connectionProvider, getId(), "items", "banner", rs.getBoolean("hasBanner") ? null : getBannerURL()));
+                setBanner(new DatabaseImageSource(connectionProvider, getId(), "items", "banner", rs.getBoolean("hasBanner") ? null : new URLImageSource((getBannerURL()))));
               }
               if(getPosterURL() != null) {
-                setPoster(new URLImageSource(connectionProvider, getId(), "items", "poster", rs.getBoolean("hasPoster") ? null: getPosterURL()));
+                setPoster(new DatabaseImageSource(connectionProvider, getId(), "items", "poster", rs.getBoolean("hasPoster") ? null: new URLImageSource(getPosterURL())));
               }
 
               String genres = rs.getString("genres");
@@ -163,9 +163,9 @@ public class ItemsDao {
   private void putImagePlaceHolders(Item item) {
     int id = item.getId();
 
-    item.setBackground(item.getBackgroundURL() == null ? null : new URLImageSource(connectionProvider, id, "items", "background", item.getBackgroundURL()));
-    item.setBanner(item.getBannerURL() == null ? null : new URLImageSource(connectionProvider, id, "items", "banner", item.getBannerURL()));
-    item.setPoster(item.getPosterURL() == null ? null : new URLImageSource(connectionProvider, id, "items", "poster", item.getPosterURL()));
+    item.setBackground(item.getBackgroundURL() == null ? null : new DatabaseImageSource(connectionProvider, id, "items", "background", new URLImageSource(item.getBackgroundURL())));
+    item.setBanner(item.getBannerURL() == null ? null : new DatabaseImageSource(connectionProvider, id, "items", "banner", new URLImageSource(item.getBannerURL())));
+    item.setPoster(item.getPosterURL() == null ? null : new DatabaseImageSource(connectionProvider, id, "items", "poster", new URLImageSource(item.getPosterURL())));
   }
 
   public Identifier getQuery(String surrogateName) throws ItemNotFoundException {
