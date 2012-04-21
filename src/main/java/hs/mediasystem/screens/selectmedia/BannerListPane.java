@@ -213,6 +213,12 @@ public class BannerListPane extends BorderPane implements ListPane {
 
   @Override
   public void setSelectedNode(MediaNode mediaNode) {
-    //throw new UnsupportedOperationException();
+    int index = mediaNode.getParent().indexOf(mediaNode);
+
+    if(index == -1) {
+      index = 0;
+    }
+
+    tableView.getFocusModel().focus(index / 2, index % 2 == 0 ? leftColumn : rightColumn);
   }
 }
