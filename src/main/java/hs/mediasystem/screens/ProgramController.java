@@ -316,7 +316,7 @@ public class ProgramController {
 
       @Override
       protected void outro() {
-        if(totalTimeViewed > playerPresentation.getLength() * 1 / 5) {  // more than 80% viewed?
+        if(totalTimeViewed > playerPresentation.getLength() * 4 / 5) {  // more than 80% viewed?
           try {
             System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
 
