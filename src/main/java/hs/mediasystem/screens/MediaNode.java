@@ -32,6 +32,10 @@ public class MediaNode {
     return parent;
   }
 
+  public int indexOf(MediaNode child) {
+    return getChildren().indexOf(child);
+  }
+
   public void setChildren(List<MediaNode> children) {
     for(MediaNode child : children) {
       if(child.parent != null) {
