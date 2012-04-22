@@ -57,7 +57,8 @@ public class ProgramController {
   private final Scene scene = new Scene(new BorderPane(), Color.BLACK);
   private final StackPane sceneRoot = new StackPane();
   private final BorderPane contentBorderPane = new BorderPane();
-  private final BorderPane overlayBorderPane = new BorderPane();
+  private final BorderPane informationBorderPane = new BorderPane();
+  private final BorderPane messageBorderPane = new BorderPane();
   private final Ini ini;
   private final Provider<MainScreen> mainScreenProvider;
   private final Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider;
@@ -84,17 +85,16 @@ public class ProgramController {
     this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
     this.itemsDao = itemsDao;
 
-    sceneRoot.getChildren().addAll(contentBorderPane, overlayBorderPane);
+    sceneRoot.getChildren().addAll(contentBorderPane, informationBorderPane, messageBorderPane);
     scene.setRoot(sceneRoot);
     scene.getStylesheets().add("default.css");
 
     sceneManager.setScene(scene);
 
-    overlayBorderPane.setMouseTransparent(true);
-    overlayBorderPane.setCenter(new BorderPane() {{
-      setTop(informationBorder);
-    }});
-    overlayBorderPane.setRight(new Group(messagePane));
+    informationBorderPane.setMouseTransparent(true);
+    informationBorderPane.setTop(informationBorder);
+    messageBorderPane.setMouseTransparent(true);
+    messageBorderPane.setRight(new Group(messagePane));
 
     navigator.onNavigation().set(new EventHandler<ActionEvent>() {
       @Override
@@ -330,7 +330,7 @@ public class ProgramController {
       }
     });
 
-    informationBorder.setVisible(false);
+//    informationBorder.setVisible(false);
   }
 
   public void stop() {
