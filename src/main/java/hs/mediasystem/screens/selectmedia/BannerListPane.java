@@ -6,6 +6,7 @@ import hs.mediasystem.screens.BannerCellProvider;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.util.Events;
+import javafx.application.Platform;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -219,6 +220,14 @@ public class BannerListPane extends BorderPane implements ListPane {
       index = 0;
     }
 
-    tableView.getFocusModel().focus(index / 2, index % 2 == 0 ? leftColumn : rightColumn);
+    final int finalIndex = index;
+
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+        tableView.getFocusModel().focus(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
+        tableView.scrollTo(finalIndex / 2);
+      }
+    });
   }
 }
