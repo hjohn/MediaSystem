@@ -31,6 +31,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 import javafx.util.Callback;
 
 public class TreeListPane extends BorderPane implements ListPane {
@@ -216,7 +217,7 @@ public class TreeListPane extends BorderPane implements ListPane {
     }
   }
 
-  private static final class MediaItemTreeCell extends TreeCell<MediaNode> {
+  private final class MediaItemTreeCell extends TreeCell<MediaNode> {
     private final CellProvider<MediaNode> provider;
 
     MediaItemTreeCell(CellProvider<MediaNode> provider) {
@@ -228,7 +229,13 @@ public class TreeListPane extends BorderPane implements ListPane {
       super.updateItem(item, empty);
 
       if(!empty) {
-        setGraphic(provider.configureCell(item));
+        Node node = provider.configureCell(item);
+
+        double maxWidth = treeView.getWidth() - 35;
+        ((Region)node).setMaxWidth(maxWidth);  // WORKAROUND for being unable to restrict cells to the width of the view
+        ((Region)node).setPrefWidth(maxWidth);
+
+        setGraphic(node);
       }
     }
   }
