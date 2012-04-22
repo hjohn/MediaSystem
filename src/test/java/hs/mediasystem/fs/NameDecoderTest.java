@@ -61,11 +61,13 @@ public class NameDecoderTest {
       {"game.of.thrones.s01e10.720p.hdtv.x264-orenji.mkv", "game of thrones", null, "720p hdtv x264-orenji", "01,10", null, null, "mkv"},
       {"Greys.Anatomy.S01E09.720p.HDTV.x264-AJP69.mkv", "Greys Anatomy", null, "720p HDTV x264-AJP69", "01,09", null, null, "mkv"},
       {"HEROES - S03 E20 - COLD SNAP 720p DD5.1 x264 MMI.mkv", "HEROES", null, "COLD SNAP 720p DD5.1 x264 MMI", "03,20", null, null, "mkv"},
-      //{"Misfits_of_Science_#10-Grand_Theft_Bunny.imrah[sfcc].mkv", "Misfits of Science", null, null, "#10", null, null, "mkv"},
+      {"Misfits_of_Science_#10-Grand_Theft_Bunny.imrah[sfcc].mkv", "Misfits of Science", null, "Grand Theft Bunny.imrah", "10", null, null, "mkv"},
       {"Monk.S01E01-02.Mr.Monk.and.the.Candidate.720p.WEB-DL.H264.AAC20-myTV.mkv", "Monk", null, "Mr Monk and the Candidate 720p WEB-DL H264 AAC20-myTV", "01,01-02", null, null, "mkv"},
       {"Monk.S03E15.720p.AAC2.0.720p.WEB-DL-TB.mkv", "Monk", null, "720p AAC2 0 720p WEB-DL-TB", "03,15", null, null, "mkv"},
       {"Monty.Python.-2x11-.How.not.to.beseen.avi", "Monty Python", null, "How not to beseen", "2,11", null, null, "avi"},
-      {"Police_Squad!_-_1x05_-_Rendezvous_At_Big_Gulch_(Terror_In_The_Neighborhood).avi", "Police Squad!", null, "Rendezvous At Big Gulch (Terror In The Neighborhood)", "1,05", null, null, "avi"}
+      {"Police_Squad!_-_1x05_-_Rendezvous_At_Big_Gulch_(Terror_In_The_Neighborhood).avi", "Police Squad!", null, "Rendezvous At Big Gulch (Terror In The Neighborhood)", "1,05", null, null, "avi"},
+      {"Babylon 5 [1x04] Infection.avi", "Babylon 5", null, "Infection", "1,04", null, null, "avi"},
+      {"24 [S01 E03].avi", "24", null, null, "01,03", null, null, "avi"}
     });
   }
 
