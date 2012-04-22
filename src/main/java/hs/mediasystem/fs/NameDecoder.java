@@ -18,7 +18,6 @@ public class NameDecoder {
   private static final String DELIMITER = "((?<=%1$s)|(?=%1$s))";
 
   private static final Pattern INFO = Pattern.compile("(" + RELEASE_YEAR + ")?(?: ?(?:" + IMDB + ")?)?.*");
-  private static final Pattern TITLES = Pattern.compile("([^\\(]+)(?: \\((.*)\\))?");
 
   private static final Set<String> KNOWN_DOUBLE_EXTENSIONS = new LinkedHashSet<String>() {{
     add("tar");
@@ -43,7 +42,7 @@ public class NameDecoder {
     add(Pattern.compile("\\[[Ss]" + SEASON + " ?[Ee]" + EPISODE + "\\]"));
 
     // Could not find any Season/Episode combinations, so assume that the number is a Stand-alone sequence number
-    add(Pattern.compile("- " + SEASON + "()"));
+    add(Pattern.compile("- " + SEASON + " ()"));
     add(Pattern.compile("#" + SEASON + "()"));
   }};
 
@@ -64,11 +63,9 @@ public class NameDecoder {
     String[] nameParts = splitNameParts(cleanedInput);
 //    System.out.println("Split result: " + Arrays.toString(nameParts));
 
-    String[] titles = match(TITLES, nameParts[0]);
-
-    if(titles != null) {
-      title = titles[0];
-      alternativeTitle = titles[1];
+    title = nameParts[0];
+    if(!nameParts[5].isEmpty()) {
+      alternativeTitle = nameParts[5];
     }
 
     if(nameParts[1] != null) {
@@ -101,7 +98,7 @@ public class NameDecoder {
   }
 
   private static String[] splitNameParts(String input) {
-    Parts parts = new Parts(input, "[- \\[\\]]");
+    Parts parts = new Parts(input, "[- \\(\\)\\[\\]]");
 
     Group sequence = null;
     String[] sequenceParts = null;
@@ -132,6 +129,7 @@ public class NameDecoder {
 
     Group title = parts.before(sequence);
     Group subtitle = parts.after(sequence);
+
     Group special = parts.all().between("[", "]");
     String specialText = special.toString();
 
@@ -139,8 +137,15 @@ public class NameDecoder {
       special.expand(1).delete();
     }
 
+    Group alternativeTitle = title.copy().between("(", ")");
+    String alternativeTitleText = alternativeTitle.toString();
+
+    if(!alternativeTitle.isEmpty()) {
+      alternativeTitle.expand(1).delete();
+    }
+
     if(subtitle.isEmpty()) {
-      int index = title.indexOf("-");
+      int index = title.indexOf(" ", "-", " ");
 
       if(index >= 0) {
         title.setEndIndex(index);
@@ -153,7 +158,7 @@ public class NameDecoder {
 
 //    System.out.println("FULL: [" + title.getStartIndex() + "-" + (title.getEndIndex() - 1) + "] [" + subtitle.getStartIndex() + "-" + subtitle.getEndIndex() + "]: " + parts);
 
-    return new String[] {title.toString(), season, episode, subtitle.toString(), specialText};
+    return new String[] {title.toString(), season, episode, subtitle.toString(), specialText, alternativeTitleText};
   }
 
   private static String[] splitExtension(String input) {
@@ -439,7 +444,7 @@ public class NameDecoder {
 
       public void setStartIndex(int start) {
         if(start < 0 || start > end) {
-          throw new IllegalArgumentException("start must be between 0 and end");
+          throw new IllegalArgumentException("parameter 'start' must be between 0 and end (" + end + "): " + start);
         }
         this.start = start;
       }
@@ -455,11 +460,16 @@ public class NameDecoder {
         this.end = end;
       }
 
-      public int indexOf(String text) {
-        for(int i = start; i < end; i++) {
-          if(text.equals(parts.get(i))) {
-            return i;
+      public int indexOf(String... text) {
+        outer:
+        for(int i = start; i < end - text.length + 1; i++) {
+          for(int j = i; j < i + text.length; j++) {
+            if(!text[j - i].equals(parts.get(j))) {
+              continue outer;
+            }
           }
+
+          return i;
         }
 
         return -1;
@@ -514,6 +524,10 @@ public class NameDecoder {
         return start == end;
       }
 
+      public Group copy() {
+        return Parts.this.group(start, end);
+      }
+
       private void remove(int start, int end) {
         int length = this.end - this.start;
         int overlap = (end - start) - (start < this.start ? this.start - start : 0) - (end > this.end ? end - this.end : 0);
@@ -523,7 +537,7 @@ public class NameDecoder {
         }
 
         if(start <= this.start) {
-          this.start -= end - start;
+          this.start = overlap > 0 ? start : this.start - (end - start);
         }
         this.end = this.start + length - overlap;
       }

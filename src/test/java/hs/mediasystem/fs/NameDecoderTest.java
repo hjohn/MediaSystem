@@ -37,6 +37,8 @@ public class NameDecoderTest {
   @Parameters
   public static Collection<Object[]> data() {
     return Arrays.asList(new Object[][] {
+      {"A-team, The [2010, 1080p].mkv", "A-team, The", null, null, null, 2010, null, "mkv"},
+      {"Underworld  - 03 - Rise of the Lycans [2009, Action Fantasy Horror Thriller, 1080p].mkv", "Underworld", null, "Rise of the Lycans", "03", 2009, null, "mkv"},
       {"District 9 [2009, Action SF Thriller, 1080p].mkv", "District 9", null, null, null, 2009, null, "mkv"},
       {"Let me in.mkv", "Let me in", null, null, null, null, null, "mkv"},
       {"Ace Ventura - When Nature Calls [1995, 720p].mkv", "Ace Ventura", null, "When Nature Calls", null, 1995, null, "mkv"},
@@ -49,6 +51,7 @@ public class NameDecoderTest {
       //{"James Bond - 04b - Never say never again [1983, 720p].mkv", "James Bond", null, "Never say never again", "04b", 1983, null, "mkv"},
       {"James Bond - 20 - Die Another Day [2002 (246460), Action Adventure Thriller, 720p].tar.gz", "James Bond", null, "Die Another Day", "20", 2002, "246460", "tar.gz"},
       {"Hauru no Ugoku Shiro (Howl's Moving Castle) [2004, Animation Adventure Fantasy Romance].mkv", "Hauru no Ugoku Shiro", "Howl's Moving Castle", null, null, 2004, null, "mkv"},
+      {"Alice (TV mini-series) [2009 (1461312), Fantasy, 720p].mkv", "Alice", "TV mini-series", null, null, 2009, "1461312", "mkv"},
 
       // Butchered names
       {"Birds.Of.Prey.(1x01).Final.Pilot.FTV.ShareReactor.mpg", "Birds Of Prey", null, "Final Pilot FTV ShareReactor", "1,01", null, null, "mpg"},
@@ -67,7 +70,8 @@ public class NameDecoderTest {
       {"Monty.Python.-2x11-.How.not.to.beseen.avi", "Monty Python", null, "How not to beseen", "2,11", null, null, "avi"},
       {"Police_Squad!_-_1x05_-_Rendezvous_At_Big_Gulch_(Terror_In_The_Neighborhood).avi", "Police Squad!", null, "Rendezvous At Big Gulch (Terror In The Neighborhood)", "1,05", null, null, "avi"},
       {"Babylon 5 [1x04] Infection.avi", "Babylon 5", null, "Infection", "1,04", null, null, "avi"},
-      {"24 [S01 E03].avi", "24", null, null, "01,03", null, null, "avi"}
+      {"24 [S01 E03].avi", "24", null, null, "01,03", null, null, "avi"},
+      {"24 - 6x09 - 2-3PM.mkv", "24", null, "2-3PM", "6,09", null, null, "mkv"}
     });
   }
 
