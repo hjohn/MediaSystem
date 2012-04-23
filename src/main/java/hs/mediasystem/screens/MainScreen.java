@@ -13,8 +13,6 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -39,6 +37,10 @@ public class MainScreen extends BorderPane {
   private final List<Timeline> timelines = new ArrayList<>();
   private final List<Timeline> timelines2 = new ArrayList<>();
   private final Random rnd = new Random();
+
+  private final StackPane menuBox;
+
+  private Button lastSelected;
 
   @Inject
   public MainScreen(final ProgramController controller, final Set<MainMenuExtension> mainMenuExtensions) {
@@ -77,7 +79,6 @@ public class MainScreen extends BorderPane {
 
     for(final MainMenuExtension mainMenuExtension : extensions) {
       final Button b = new Button(mainMenuExtension.getTitle()) {{
-        getStyleClass().add("option");
         setGraphic(new ImageView(mainMenuExtension.getImage()));
         setOnAction(new EventHandler<ActionEvent>() {
           @Override
@@ -111,7 +112,7 @@ public class MainScreen extends BorderPane {
       getStyleClass().add("menu-scroll-box-overlay");
     }};
 
-    final StackPane menuBox = new StackPane() {{
+    menuBox = new StackPane() {{
       getChildren().add(new HBox() {{
         getStyleClass().add("menu-scroll-box");
         getChildren().addAll(stackPanes);
@@ -127,8 +128,20 @@ public class MainScreen extends BorderPane {
     for(int i = 0; i < buttons.size(); i++) {
       final Button button = buttons.get(i);
       final StackPane sp = stackPanes.get(i);
+      final int buttonIndex = i;
 
-      button.focusedProperty().addListener(new FocusListener(menuBox, i));
+      button.addEventHandler(FocusEvent.ANY, new EventHandler<FocusEvent>() {
+        @Override
+        public void handle(FocusEvent event) {
+          boolean focusGained = event.getEventType().equals(FocusEvent.FOCUS_GAINED);
+
+          handleButtonFocus(focusGained, buttonIndex);
+
+          if(focusGained) {
+            lastSelected = button;
+          }
+        }
+      });
       sp.minWidthProperty().bind(button.widthProperty());
     }
 
@@ -137,92 +150,86 @@ public class MainScreen extends BorderPane {
 
   @Override
   public void requestFocus() {
-    buttons.get(0).requestFocus();
+    if(lastSelected != null) {
+      lastSelected.requestFocus();
+    }
+    else {
+      buttons.get(0).requestFocus();
+    }
   }
 
-  private final class FocusListener implements ChangeListener<Boolean> {
-    private final StackPane menuBox;
-    private final int buttonIndex;
+  private void handleButtonFocus(final boolean focused, final int buttonIndex) {
+    Button b = buttons.get(buttonIndex);
 
-    FocusListener(StackPane menuBox, int button) {
-      this.menuBox = menuBox;
-      this.buttonIndex = button;
-    }
+    if(focused) {
+      Timeline timeline = new Timeline();
 
-    @Override
-    public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, final Boolean newValue) {
-      Button b = buttons.get(buttonIndex);
+      Point2D buttonCenter = b.localToScene(b.getWidth() / 2, 0);
+      Point2D boxCenter = menuBox.localToScene(menuBox.getLayoutBounds().getWidth() / 2, 0);
+      double distanceToCenter = boxCenter.getX() - buttonCenter.getX();
 
-      if(newValue) {
-        Timeline timeline = new Timeline();
-
-        Point2D buttonCenter = b.localToScene(b.getWidth() / 2, 0);
-        Point2D boxCenter = menuBox.localToScene(menuBox.getLayoutBounds().getWidth() / 2, 0);
-        double distanceToCenter = boxCenter.getX() - buttonCenter.getX();
-
-        timeline.getKeyFrames().addAll(
-          new KeyFrame(new Duration(500),
-            new KeyValue(menuBox.translateXProperty(), distanceToCenter)
-          )
-        );
-
-        timeline.play();
-      }
-
-      final Timeline timeline = timelines.get(buttonIndex);
-      final StackPane sp = stackPanes.get(buttonIndex);
-
-      timeline.stop();
-      timeline.getKeyFrames().clear();
       timeline.getKeyFrames().addAll(
         new KeyFrame(new Duration(500),
-          new KeyValue(b.scaleXProperty(), newValue ? 1.2 : 1.0),
-          new KeyValue(b.scaleYProperty(), newValue ? 1.2 : 1.0)
-        ),
-        new KeyFrame(new Duration(5000), "x",
-          new KeyValue(sp.scaleXProperty(), newValue ? 2.0 : 1.0, Interpolator.EASE_BOTH),
-          new KeyValue(sp.scaleYProperty(), newValue ? 1.5 : 1.0, Interpolator.EASE_BOTH)
-        ),
-        new KeyFrame(new Duration(10000),
-          new KeyValue(sp.scaleXProperty(), newValue ? 1.8 : 1.0, Interpolator.EASE_BOTH),
-          new KeyValue(sp.scaleYProperty(), newValue ? 1.7 : 1.0, Interpolator.EASE_BOTH)
-        ),
-        new KeyFrame(new Duration(15000),
-          new KeyValue(sp.scaleXProperty(), newValue ? 2.2 : 1.0, Interpolator.EASE_BOTH),
-          new KeyValue(sp.scaleYProperty(), newValue ? 1.3 : 1.0, Interpolator.EASE_BOTH)
-        ),
-        new KeyFrame(new Duration(20000), new EventHandler<ActionEvent>() {
-          @Override
-          public void handle(ActionEvent event) {
-            if(newValue) {
-              timeline.playFrom("x");
-            }
-          }
-        },
-          new KeyValue(sp.scaleXProperty(), newValue ? 2.0 : 1.0, Interpolator.EASE_BOTH),
-          new KeyValue(sp.scaleYProperty(), newValue ? 1.5 : 1.0, Interpolator.EASE_BOTH)
+          new KeyValue(menuBox.translateXProperty(), distanceToCenter)
         )
       );
 
       timeline.play();
+    }
 
-      final Timeline timeline2 = timelines2.get(buttonIndex);
+    final Timeline timeline = timelines.get(buttonIndex);
+    final StackPane sp = stackPanes.get(buttonIndex);
 
-      timeline2.stop();
-
-      if(newValue) {
-        timeline2.getKeyFrames().clear();
-        timeline2.getKeyFrames().add(createKeyFrame(sp, buttonIndex));
-        timeline2.onFinishedProperty().set(new EventHandler<ActionEvent>() {
-          @Override
-          public void handle(ActionEvent event) {
-            timeline2.getKeyFrames().clear();
-            timeline2.getKeyFrames().add(createKeyFrame(sp, buttonIndex));
-            timeline2.playFromStart();
+    timeline.stop();
+    timeline.getKeyFrames().clear();
+    timeline.getKeyFrames().addAll(
+      new KeyFrame(new Duration(500),
+        new KeyValue(b.scaleXProperty(), focused ? 1.2 : 1.0),
+        new KeyValue(b.scaleYProperty(), focused ? 1.2 : 1.0)
+      ),
+      new KeyFrame(new Duration(5000), "x",
+        new KeyValue(sp.scaleXProperty(), focused ? 2.0 : 1.0, Interpolator.EASE_BOTH),
+        new KeyValue(sp.scaleYProperty(), focused ? 1.5 : 1.0, Interpolator.EASE_BOTH)
+      ),
+      new KeyFrame(new Duration(10000),
+        new KeyValue(sp.scaleXProperty(), focused ? 1.8 : 1.0, Interpolator.EASE_BOTH),
+        new KeyValue(sp.scaleYProperty(), focused ? 1.7 : 1.0, Interpolator.EASE_BOTH)
+      ),
+      new KeyFrame(new Duration(15000),
+        new KeyValue(sp.scaleXProperty(), focused ? 2.2 : 1.0, Interpolator.EASE_BOTH),
+        new KeyValue(sp.scaleYProperty(), focused ? 1.3 : 1.0, Interpolator.EASE_BOTH)
+      ),
+      new KeyFrame(new Duration(20000), new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+          if(focused) {
+            timeline.playFrom("x");
           }
-        });
-        timeline2.play();
-      }
+        }
+      },
+        new KeyValue(sp.scaleXProperty(), focused ? 2.0 : 1.0, Interpolator.EASE_BOTH),
+        new KeyValue(sp.scaleYProperty(), focused ? 1.5 : 1.0, Interpolator.EASE_BOTH)
+      )
+    );
+
+    timeline.play();
+
+    final Timeline timeline2 = timelines2.get(buttonIndex);
+
+    timeline2.stop();
+
+    if(focused) {
+      timeline2.getKeyFrames().clear();
+      timeline2.getKeyFrames().add(createKeyFrame(sp, buttonIndex));
+      timeline2.onFinishedProperty().set(new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+          timeline2.getKeyFrames().clear();
+          timeline2.getKeyFrames().add(createKeyFrame(sp, buttonIndex));
+          timeline2.playFromStart();
+        }
+      });
+      timeline2.play();
     }
   }
 
