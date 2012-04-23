@@ -10,7 +10,7 @@
   -fx-background-color: transparent;
 }
 
-.menu-scroll-box .button .focused {
+.menu-scroll-box .button.focused {
   -fx-background-color: radial-gradient(radius 150%, color-blue-20, color-blue-10, color-blue-20);
   -fx-text-fill: white;
 }
