@@ -117,8 +117,8 @@ public class SelectMediaPresentation {
               protected String computeValue() {
                 return layout.sortOrderProperty().get().getTitle();
               }
-            }),
-            new ListOption<>("View", null, null, null)
+            })
+           // new ListOption<>("View", null, null, null)
           );
 
           controller.showOptionScreen("Media - Options", options);
