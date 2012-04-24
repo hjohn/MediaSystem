@@ -9,6 +9,7 @@ import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.optiondialog.DialogScreen;
 import hs.mediasystem.screens.optiondialog.Option;
+import hs.mediasystem.util.KeyCombinationGroup;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
@@ -53,6 +54,10 @@ public class ProgramController {
   private static final KeyCombination KEY_CTRL_ALT_S = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN);
   private static final KeyCombination KEY_OPEN_BRACKET = new KeyCodeCombination(KeyCode.OPEN_BRACKET);
   private static final KeyCombination KEY_CLOSE_BRACKET = new KeyCodeCombination(KeyCode.CLOSE_BRACKET);
+  private static final KeyCombination FUNC_JUMP_FORWARD_SMALL = new KeyCombinationGroup(new KeyCodeCombination(KeyCode.RIGHT), new KeyCodeCombination(KeyCode.NUMPAD6));
+  private static final KeyCombination FUNC_JUMP_BACKWARD_SMALL = new KeyCombinationGroup(new KeyCodeCombination(KeyCode.LEFT), new KeyCodeCombination(KeyCode.NUMPAD4));
+  private static final KeyCombination FUNC_JUMP_FORWARD = new KeyCombinationGroup(new KeyCodeCombination(KeyCode.UP), new KeyCodeCombination(KeyCode.NUMPAD8));
+  private static final KeyCombination FUNC_JUMP_BACKWARD = new KeyCombinationGroup(new KeyCodeCombination(KeyCode.DOWN), new KeyCodeCombination(KeyCode.NUMPAD2));
 
   private final Scene scene = new Scene(new BorderPane(), Color.BLACK);
   private final StackPane sceneRoot = new StackPane();
@@ -156,19 +161,19 @@ public class ProgramController {
             playerPresentation.pause();
             event.consume();
           }
-          else if(code == KeyCode.NUMPAD4) {
+          else if(FUNC_JUMP_BACKWARD_SMALL.match(event)) {
             playerPresentation.move(-10 * 1000);
             event.consume();
           }
-          else if(code == KeyCode.NUMPAD6) {
+          else if(FUNC_JUMP_FORWARD_SMALL.match(event)) {
             playerPresentation.move(10 * 1000);
             event.consume();
           }
-          else if(code == KeyCode.NUMPAD2) {
+          else if(FUNC_JUMP_BACKWARD.match(event)) {
             playerPresentation.move(-60 * 1000);
             event.consume();
           }
-          else if(code == KeyCode.NUMPAD8) {
+          else if(FUNC_JUMP_FORWARD.match(event)) {
             playerPresentation.move(60 * 1000);
             event.consume();
           }
