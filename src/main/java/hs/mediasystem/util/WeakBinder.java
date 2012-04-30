@@ -19,6 +19,9 @@ public class WeakBinder {
     for(ObservableValue<?> observableValue : listeners.keySet()) {
       observableValue.removeListener(listeners.get(observableValue));
     }
+
+    hardRefs.clear();
+    listeners.clear();
   }
 
   public <T> void bind(final Property<T> property, final ObservableValue<? extends T> dest) {
