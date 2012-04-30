@@ -7,12 +7,18 @@ import hs.mediasystem.fs.NameDecoder.DecodeResult;
 import java.nio.file.Path;
 
 public class EpisodeDecoder implements Decoder {
+  private final String serieName;
+
+  public EpisodeDecoder(String serieName) {
+    assert serieName != null;
+
+    this.serieName = serieName;
+  }
 
   @Override
   public LocalInfo<?> decode(Path path, String mediaType) {
     DecodeResult result = NameDecoder.decode(path.getFileName().toString());
 
-    String serieName = result.getTitle();
     String sequence = result.getSequence();
     String title = result.getSubtitle();
     Integer year = result.getReleaseYear();

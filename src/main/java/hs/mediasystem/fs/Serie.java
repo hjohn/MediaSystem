@@ -23,7 +23,7 @@ public class Serie extends MediaItem {
   @Override
   public List<? extends MediaItem> children() {
     if(children == null) {
-      List<LocalInfo<Object>> scanResults = new EpisodeScanner(new EpisodeDecoder(), "EPISODE").scan(Paths.get(getLocalInfo().getUri()));
+      List<LocalInfo<Object>> scanResults = new EpisodeScanner(new EpisodeDecoder(getTitle()), "EPISODE").scan(Paths.get(getLocalInfo().getUri()));
 
       children = new ArrayList<>();
 
