@@ -5,6 +5,8 @@ import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.WeakBinder;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
@@ -43,11 +45,15 @@ public class BannerCellProvider implements CellProvider<MediaNode> {
     // A banner from TVDB is 758 x 140
 
     if(item != null) {
-      final AsyncImageProperty asyncImageProperty = new AsyncImageProperty(item.bannerProperty());
+      final AsyncImageProperty asyncImageProperty = new AsyncImageProperty();
+      StringProperty titleProperty = new SimpleStringProperty();
+
+      binder.bind(titleProperty, item.titleProperty());
+      binder.bind(asyncImageProperty.imageHandleProperty(), item.bannerProperty());
 
       title.setMinHeight(fitWidth * 140 / 758);
 
-      binder.bind(title.textProperty(), Bindings.when(asyncImageProperty.isNull()).then(item.titleProperty()).otherwise(""));
+      binder.bind(title.textProperty(), Bindings.when(asyncImageProperty.isNull()).then(titleProperty).otherwise(""));
       binder.bind(title.graphicProperty(), Bindings.when(asyncImageProperty.isNull()).then((ImageView)null).otherwise(new ImageView() {{
         imageProperty().bind(asyncImageProperty);
         setPreserveRatio(true);

@@ -46,7 +46,7 @@ public class BackgroundPane extends ScrollPane {
     }
   };
 
-  private final ObjectProperty<Image> wantedBackground = new AsyncImageProperty(backgroundHandle);
+  private final AsyncImageProperty wantedBackground = new AsyncImageProperty();
 
   private final ObjectProperty<Image> background = new SimpleObjectProperty<>();
   private final ObjectProperty<Image> newBackground = new SimpleObjectProperty<>();
@@ -88,6 +88,8 @@ public class BackgroundPane extends ScrollPane {
         }
       }
     });
+
+    wantedBackground.imageHandleProperty().bind(backgroundHandle);
 
     wantedBackground.addListener(new ChangeListener<Image>() {
       @Override

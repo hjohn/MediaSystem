@@ -36,7 +36,6 @@ import javafx.scene.control.Slider;
 import javafx.scene.effect.Blend;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Reflection;
-import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -62,7 +61,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
   private final MigPane detailsOverlay = new MigPane("fill", "[5%!][20%!][5%!][65%!][5%!]", "[45%!][50%!][5%!]");
 
   private final ObjectBinding<ImageHandle> posterHandle = Bindings.select(mediaItem, "poster");
-  private final ObjectProperty<Image> poster = new AsyncImageProperty(posterHandle);
+  private final AsyncImageProperty poster = new AsyncImageProperty();
 
   private final VBox playbackStateOverlay = new VBox() {{
     getStyleClass().add("content-box");
@@ -87,6 +86,8 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
     getStylesheets().add("playback-state-overlay.css");
 
     setId("playback-overlay");
+
+    poster.imageHandleProperty().bind(posterHandle);
 
     playbackStateOverlay.getChildren().addListener(new ListChangeListener<Node>() {
       @Override

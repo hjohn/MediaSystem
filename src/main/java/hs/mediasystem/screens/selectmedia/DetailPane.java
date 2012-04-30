@@ -16,7 +16,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
@@ -32,7 +31,7 @@ public class DetailPane extends GridPane {
   public ObjectProperty<MediaItem> mediaItemProperty() { return mediaItem; }
 
   private final ObjectBinding<ImageHandle> posterHandle = Bindings.select(mediaItem, "poster");
-  private final ObjectProperty<Image> poster = new AsyncImageProperty(posterHandle);
+  private final AsyncImageProperty poster = new AsyncImageProperty();
 
   private final StringBinding groupName = Bindings.selectString(mediaItem, "groupName");
   private final StringBinding title = Bindings.selectString(mediaItem, "title");
@@ -68,6 +67,8 @@ public class DetailPane extends GridPane {
   };
   public DetailPane() {
     getStylesheets().add("select-media/detail-pane.css");
+
+    poster.imageHandleProperty().bind(posterHandle);
 
     getColumnConstraints().addAll(
       new ColumnConstraints() {{

@@ -2,6 +2,7 @@ package hs.mediasystem.beans;
 
 import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.ImageHandle;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -12,8 +13,9 @@ import javafx.scene.image.Image;
 
 public class AsyncImageProperty extends SimpleObjectProperty<Image> {
   private final ImageLoadService imageLoadService = new ImageLoadService();
+  private final ObjectProperty<ImageHandle> imageHandle = new SimpleObjectProperty<>();
 
-  public AsyncImageProperty(final ObservableValue<ImageHandle> imageHandle) {
+  public AsyncImageProperty() {
     imageLoadService.stateProperty().addListener(new ChangeListener<State>() {
       @Override
       public void changed(ObservableValue<? extends State> observable, State oldValue, State value) {
@@ -32,8 +34,10 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
         loadImageInBackground(imageHandle.getValue());
       }
     });
+  }
 
-    loadImageInBackground(imageHandle.getValue());
+  public ObjectProperty<ImageHandle> imageHandleProperty() {
+    return imageHandle;
   }
 
   private void loadImageInBackground(ImageHandle imageHandle) {
