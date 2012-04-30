@@ -20,4 +20,9 @@ public class BannerStandardLayoutExtension implements StandardLayoutExtension {
   public StandardLayout createLayout() {
     return new BannerStandardLayout();
   }
+
+  @Override
+  public String getTitle() {
+    return "Banner View";
+  }
 }

@@ -10,6 +10,7 @@ public class ListStandardLayoutExtension implements StandardLayoutExtension {
   private static final Set<MediaRootType> SUPPORTED_MEDIA_ROOT_TYPES = Collections.unmodifiableSet(new HashSet<MediaRootType>() {{
     add(MediaRootType.MOVIES);
     add(MediaRootType.SERIE_EPISODES);
+    add(MediaRootType.SERIES);
   }});
 
   @Override
@@ -20,5 +21,10 @@ public class ListStandardLayoutExtension implements StandardLayoutExtension {
   @Override
   public StandardLayout createLayout() {
     return new ListStandardLayout();
+  }
+
+  @Override
+  public String getTitle() {
+    return "List View";
   }
 }
