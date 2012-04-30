@@ -1,8 +1,8 @@
 package hs.mediasystem.screens;
 
-import java.util.List;
-
+import hs.mediasystem.screens.selectmedia.StandardLayoutExtension;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
@@ -21,7 +21,6 @@ public interface SelectMediaView {
    */
   void setSelectedNode(MediaNode mediaNode);
 
-  List<String> getAvailableLayouts();
-  String getLayout();
-  void setLayout(String layout);
+  ObservableList<StandardLayoutExtension> availableLayoutExtensionsList();
+  ObjectProperty<StandardLayoutExtension> layoutExtensionProperty();
 }

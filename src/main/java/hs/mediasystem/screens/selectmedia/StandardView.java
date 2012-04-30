@@ -8,11 +8,12 @@ import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
 
-import java.util.List;
 import java.util.Set;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -42,7 +43,9 @@ public class StandardView extends StackPane implements SelectMediaView {
   private final Set<StandardLayoutExtension> selectMediaExtensions;
   private final BackgroundPane backgroundPane = new BackgroundPane();
 
-  private StandardLayoutExtension layoutExtension;
+  private final ObjectProperty<StandardLayoutExtension> layoutExtension = new SimpleObjectProperty<>();
+
+  private MediaNode currentRoot;
   private StandardLayout layout;
 
   @Inject
@@ -68,32 +71,50 @@ public class StandardView extends StackPane implements SelectMediaView {
 
     getChildren().add(backgroundPane);
     getChildren().add(stage);
+
+    layoutExtension.addListener(new ChangeListener<StandardLayoutExtension>() {
+      @Override
+      public void changed(ObservableValue<? extends StandardLayoutExtension> observableValue, StandardLayoutExtension oldLayoutExtension, StandardLayoutExtension layoutExtension) {
+        MediaNode selectedNode = getSelectedNode();
+
+        if(layout != null) {
+          layout.onNodeSelected().set(null);
+          layout.onNodeAlternateSelect().set(null);
+
+          getChildren().remove(layout);
+        }
+
+        layout = layoutExtension.createLayout();
+        getChildren().add((Node)layout);
+
+        backgroundPane.mediaItemProperty().bind(layout.mediaItemBinding());
+
+        layout.onNodeSelected().set(onNodeSelected.get());
+        layout.onNodeAlternateSelect().set(onNodeAlternateSelect.get());
+
+        layout.setRoot(currentRoot);
+
+        if(selectedNode != null) {
+          setSelectedNode(selectedNode);
+        }
+      }
+    });
   }
 
   @Override
   public void setRoot(MediaNode root) {
-    StandardLayoutExtension layoutExtension = findLayout(root.getMediaItem());
+    determineAvailableLayouts(root.getMediaItem());
+
+    StandardLayoutExtension layoutExtension = availableLayoutExtensions.get(0);
+
+    currentRoot = root;
 
     if(!layoutExtension.equals(this.layoutExtension)) {
-      this.layoutExtension = layoutExtension;
-
-      if(layout != null) {
-        layout.onNodeSelected().set(null);
-        layout.onNodeAlternateSelect().set(null);
-
-        getChildren().remove(layout);
-      }
-
-      layout = layoutExtension.createLayout();
-      getChildren().add((Node)layout);
-
-      backgroundPane.mediaItemProperty().bind(layout.mediaItemBinding());
-
-      layout.onNodeSelected().set(onNodeSelected.get());
-      layout.onNodeAlternateSelect().set(onNodeAlternateSelect.get());
+      this.layoutExtension.set(layoutExtension);
     }
-
-    layout.setRoot(root);
+    else {
+      layout.setRoot(root);
+    }
   }
 
   @Override
@@ -117,7 +138,7 @@ public class StandardView extends StackPane implements SelectMediaView {
 
   private final ObservableList<StandardLayoutExtension> availableLayoutExtensions = FXCollections.observableArrayList();
 
-  private StandardLayoutExtension findLayout(MediaItem root) {
+  private void determineAvailableLayouts(MediaItem root) {
     availableLayoutExtensions.clear();
 
     MediaRootType rootType;
@@ -137,25 +158,15 @@ public class StandardView extends StackPane implements SelectMediaView {
         availableLayoutExtensions.add(extension);
       }
     }
-
-    return availableLayoutExtensions.get(0);
   }
 
   @Override
-  public List<String> getAvailableLayouts() {
-    // TODO Auto-generated method stub
-    return null;
+  public ObservableList<StandardLayoutExtension> availableLayoutExtensionsList() {
+    return availableLayoutExtensions;
   }
 
   @Override
-  public String getLayout() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void setLayout(String layout) {
-    // TODO Auto-generated method stub
-
+  public ObjectProperty<StandardLayoutExtension> layoutExtensionProperty() {
+    return layoutExtension;
   }
 }
