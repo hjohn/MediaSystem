@@ -109,7 +109,7 @@ public class StandardView extends StackPane implements SelectMediaView {
 
     currentRoot = root;
 
-    if(!layoutExtension.equals(this.layoutExtension)) {
+    if(!layoutExtension.equals(this.layoutExtension.get())) {
       this.layoutExtension.set(layoutExtension);
     }
     else {
