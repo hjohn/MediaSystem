@@ -38,7 +38,7 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
     detailPane.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.BLACK, 3, 0.0, 0, 0));
     ((Node)listPane).setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.BLACK, 3, 0.0, 0, 0));
 
-    panelGroup.setEffect(new Reflection(5, 0.1, 0.25, 0.0));
+    panelGroup.setEffect(new Reflection(5, 0.025, 0.25, 0.0));
 
     panelGroup.add(new StackPane() {{
       getChildren().add(new StackPane() {{
