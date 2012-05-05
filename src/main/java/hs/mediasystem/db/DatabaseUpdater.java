@@ -97,8 +97,9 @@ public class DatabaseUpdater {
     try(Connection connection = connectionProvider.get()) {
       DatabaseMetaData dbm = connection.getMetaData();
 
-      try(ResultSet rs = dbm.getTables(null, null, "version", null)) {
+      try(ResultSet rs = dbm.getTables(null, null, "dbinfo", null)) {
         if(!rs.next()) {
+          System.out.println("[FINE] DatabaseUpdater.getDatabaseVersion() - no dbinfo table exists, returning version 0");
           return 0;
         }
       }
