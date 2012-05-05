@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS dbinfo
   CONSTRAINT dbinfo_pk PRIMARY KEY (name)
 );
 
+INSERT INTO dbinfo (name, value) VALUES ('version', 0);
+
 CREATE TABLE IF NOT EXISTS items
 (
   id serial4,
