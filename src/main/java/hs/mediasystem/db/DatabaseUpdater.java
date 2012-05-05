@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -93,14 +94,20 @@ public class DatabaseUpdater {
   }
 
   private int getDatabaseVersion() {
-    int version = 0;
+    try(Connection connection = connectionProvider.get()) {
+      DatabaseMetaData dbm = connection.getMetaData();
 
-    try(Connection connection = connectionProvider.get();
-        PreparedStatement statement = connection.prepareStatement("SELECT value FROM dbinfo WHERE name = 'version'")) {
+      try(ResultSet rs = dbm.getTables(null, null, "version", null)) {
+        if(!rs.next()) {
+          return 0;
+        }
+      }
 
-      try(ResultSet rs = statement.executeQuery()) {
-        if(rs.next()) {
-          version = Integer.parseInt(rs.getString("value"));
+      try(PreparedStatement statement = connection.prepareStatement("SELECT value FROM dbinfo WHERE name = 'version'")) {
+        try(ResultSet rs = statement.executeQuery()) {
+          if(rs.next()) {
+            return Integer.parseInt(rs.getString("value"));
+          }
         }
       }
     }
@@ -108,6 +115,6 @@ public class DatabaseUpdater {
       throw new RuntimeException("unable to get version information from the database", e);
     }
 
-    return version;
+    return 0;
   }
 }
