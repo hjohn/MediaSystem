@@ -28,7 +28,7 @@ public class DatabaseUpdater {
       for(;;) {
         version++;
 
-        try(InputStream sqlStream = getClass().getClassLoader().getResourceAsStream("hs/mediasystem/db/db-v" + version + ".sql")) {
+        try(InputStream sqlStream = getClass().getClassLoader().getResourceAsStream(String.format("hs/mediasystem/db/db-v%04d.sql", version))) {
           if(sqlStream == null) {
             version--;
             break;
@@ -63,7 +63,7 @@ public class DatabaseUpdater {
 
               if(line == null) {
                 if(!sqlStatement.trim().isEmpty()) {
-                  throw new RuntimeException("unexpected EOF in db-v" + version + ".sql: " + sqlStatement);
+                  throw new RuntimeException("unexpected EOF in db script version " + version + ": " + sqlStatement);
                 }
 
                 break statementExecuteLoop;
