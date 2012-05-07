@@ -32,18 +32,18 @@ public class NameDecoder {
   private static final String EPISODE = "([0-9]{1,2}(?:-[0-9]{1,2})?)";
 
   private static final Set<Pattern> SEQUENCE_PATTERNS = new LinkedHashSet<Pattern>() {{
-    add(Pattern.compile(SEASON + "x" + EPISODE));
-    add(Pattern.compile("-" + SEASON + "x" + EPISODE + "-"));
-    add(Pattern.compile("\\(" + SEASON + "x" + EPISODE + "\\)"));
-    add(Pattern.compile("\\[" + SEASON + "x" + EPISODE + "\\]"));
-    add(Pattern.compile("[Ss]" + SEASON + " ?[Ee]" + EPISODE));
-    add(Pattern.compile("-[Ss]" + SEASON + " ?[Ee]" + EPISODE + "-"));
-    add(Pattern.compile("\\([Ss]" + SEASON + " ?[Ee]" + EPISODE + "\\)"));
-    add(Pattern.compile("\\[[Ss]" + SEASON + " ?[Ee]" + EPISODE + "\\]"));
+    add(Pattern.compile("(.*?)" + "-" + SEASON + "x" + EPISODE + "-" + "(.*?)"));
+    add(Pattern.compile("(.*?)" + "\\(" + SEASON + "x" + EPISODE + "\\)" + "(.*?)"));
+    add(Pattern.compile("(.*?)" + "\\[" + SEASON + "x" + EPISODE + "\\]" + "(.*?)"));
+    add(Pattern.compile("(.*?)" + "[Ss]" + SEASON + " ?[Ee]" + EPISODE + "(.*?)"));
+    add(Pattern.compile("(.*?)" + "-[Ss]" + SEASON + " ?[Ee]" + EPISODE + "-" + "(.*?)"));
+    add(Pattern.compile("(.*?)" + "\\([Ss]" + SEASON + " ?[Ee]" + EPISODE + "\\)" + "(.*?)"));
+    add(Pattern.compile("(.*?)" + "\\[[Ss]" + SEASON + " ?[Ee]" + EPISODE + "\\]" + "(.*?)"));
+    add(Pattern.compile("(.*?)" + SEASON + "x" + EPISODE + "(.*?)"));
 
     // Could not find any Season/Episode combinations, so assume that the number is a Stand-alone sequence number
-    add(Pattern.compile("- " + SEASON + " ()"));
-    add(Pattern.compile("#" + SEASON + "()"));
+    add(Pattern.compile("(.*?)" + "- " + SEASON + "()(( [-\\[]|$).*?)"));
+    add(Pattern.compile("(.*?)" + "#" + SEASON + "()" + "(.*?)"));
   }};
 
   public static DecodeResult decode(String input) {
@@ -98,37 +98,24 @@ public class NameDecoder {
   }
 
   private static String[] splitNameParts(String input) {
-    Parts parts = new Parts(input, "[- \\(\\)\\[\\]]");
-
-    Group sequence = null;
-    String[] sequenceParts = null;
+    String[] sequenceParts = decodeAsSequence(input);
     String season = null;
     String episode = null;
-
-    // find sequence
-    groupSizeLoop:
-    for(int groupSize = 5; groupSize > 0; groupSize--) {
-      for(Group group : parts.asGroupsOf(groupSize)) {
-        sequenceParts = decodeAsSequence(group.toString());
-
-        if(sequenceParts != null) {
-          sequence = group;
-          break groupSizeLoop;
-        }
-      }
-    }
+    String leftoverInput = input;
+    int subtitleIndex = input.length();
 
     if(sequenceParts != null) {
-      season = sequenceParts[0];
-      episode = sequenceParts[1];
+      season = sequenceParts[1];
+      episode = sequenceParts[2];
+      leftoverInput = sequenceParts[0] + " " + sequenceParts[3];
+      subtitleIndex = sequenceParts[0].length() + 1;
     }
-    if(sequence == null) {
-      sequence = parts.end();
-    }
-    sequence.delete();
 
-    Group title = parts.before(sequence);
-    Group subtitle = parts.after(sequence);
+    Parts parts = new Parts(leftoverInput, "[- \\(\\)\\[\\]]");
+
+    Group splitter = parts.groupAt(subtitleIndex);
+    Group title = parts.before(splitter);
+    Group subtitle = parts.after(splitter);
 
     Group special = parts.all().between("[", "]");
     String specialText = special.toString();
@@ -294,16 +281,33 @@ public class NameDecoder {
       parts = new ArrayList<>(Arrays.asList(input.split(String.format(DELIMITER, delimiterPattern))));
     }
 
-    public Group before(int index) {
-      return group(0, index);
+    public Group groupAt(int charIndex) {
+      int group = 0;
+      int offset = 0;
+
+      for(String part : parts) {
+        offset += part.length();
+
+        if(charIndex < offset) {
+          return group(group, group + 1);
+        }
+
+        group++;
+      }
+
+      return end();
+    }
+
+    public Group before(int groupIndex) {
+      return group(0, groupIndex);
     }
 
     public Group before(Group otherGroup) {
       return before(otherGroup.start);
     }
 
-    public Group after(int index) {
-      return group(index, parts.size());
+    public Group after(int groupIndex) {
+      return group(groupIndex, parts.size());
     }
 
     public Group after(Group otherGroup) {
