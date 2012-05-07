@@ -41,6 +41,7 @@ public class NameDecoderTest {
       {"Underworld  - 03 - Rise of the Lycans [2009, Action Fantasy Horror Thriller, 1080p].mkv", "Underworld", null, "Rise of the Lycans", "03", 2009, null, "mkv"},
       {"District 9 [2009, Action SF Thriller, 1080p].mkv", "District 9", null, null, null, 2009, null, "mkv"},
       {"Let me in.mkv", "Let me in", null, null, null, null, null, "mkv"},
+      {"Star Wars - 01.mkv", "Star Wars", null, null, "01", null, null, "mkv"},
       {"Ace Ventura - When Nature Calls [1995, 720p].mkv", "Ace Ventura", null, "When Nature Calls", null, 1995, null, "mkv"},
       {"Alice [(1461312), Fantasy, 720p].avi", "Alice", null, null, null, null, "1461312", "avi"},
       {"King's Speech, The [2010, 1080p].mp4", "King's Speech, The", null, null, null, 2010, null, "mp4"},
@@ -52,6 +53,7 @@ public class NameDecoderTest {
       {"James Bond - 20 - Die Another Day [2002 (246460), Action Adventure Thriller, 720p].tar.gz", "James Bond", null, "Die Another Day", "20", 2002, "246460", "tar.gz"},
       {"Hauru no Ugoku Shiro (Howl's Moving Castle) [2004, Animation Adventure Fantasy Romance].mkv", "Hauru no Ugoku Shiro", "Howl's Moving Castle", null, null, 2004, null, "mkv"},
       {"Alice (TV mini-series) [2009 (1461312), Fantasy, 720p].mkv", "Alice", "TV mini-series", null, null, 2009, "1461312", "mkv"},
+      {"Some Title - 33 Rabbits.mkv", "Some Title", null, "33 Rabbits", null, null, null, "mkv"},
 
       // Butchered names
       {"Birds.Of.Prey.(1x01).Final.Pilot.FTV.ShareReactor.mpg", "Birds Of Prey", null, "Final Pilot FTV ShareReactor", "1,01", null, null, "mpg"},
