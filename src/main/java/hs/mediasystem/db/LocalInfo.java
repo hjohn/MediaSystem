@@ -14,8 +14,6 @@ public class LocalInfo<T> {
   private final T userData;
 
   public LocalInfo(String uri, String mediaType, String groupName, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode, Integer endEpisode, T userData) {
-    assert title != null;
-
     this.uri = uri;
     this.mediaType = mediaType;
     this.groupName = groupName;
