@@ -369,8 +369,8 @@ public class ProgramController {
     final Section general = ini.getSection("general");
 
     return new ArrayList<SubtitleProvider>() {{
-      add(new SublightSubtitleProvider(general.get("sublight.client"), general.get("sublight.key")));
       add(new OpenSubtitlesSubtitleProvider("MediaSystem v1"));
+      add(new SublightSubtitleProvider(general.get("sublight.client"), general.get("sublight.key")));
     }};
   }
 
