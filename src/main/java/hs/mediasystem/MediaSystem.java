@@ -2,6 +2,9 @@ package hs.mediasystem;
 
 import javafx.application.Application;
 
+// TODO Collection view, count, list of items, picture of latest/first (or both), stacked pictures
+// TODO When entering series twice in rapid succession, it is possible to make the system fetch details for the same movie/serie twice.  The 2nd result will cause a key violation in the db.
+
 // TODO Add some debug prints to debug movie stop problem
 // TODO Banner view -- change layout to get bigger banners
 // TODO Option screen, re-highlight last used option
