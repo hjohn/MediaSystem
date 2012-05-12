@@ -13,7 +13,7 @@ import javafx.application.Application;
 // TODO Dark colored barely visible information, like time, position, looks cool!
 // TODO Store scroll position
 // TODO Smart highlight of next-to-see episode
-// TODO Mark viewed
+// TODO Mark viewed option
 // TODO ResumePosition. Algorithm: if movie was active for atleast one minute, then store resume position on stop; for viewed, everything upto resume position considered 100% watched
 // TODO Other movie informations, like subtitle/audio delay, selected subtitle/audio track, that are important when resuming movie
 // TODO Make subtitles more persistent by storing them with file, required if you want to show same sub again after resuming
@@ -28,7 +28,7 @@ import javafx.application.Application;
 // TODO For Episodes, in playback screen title should be serie name
 // TODO Feedback about subtitle providers being contacted
 // TODO Often playback detail overlay is not sized correctly when starting a video
-// TODO Disable enrichment for YouTube -- see NOS extension solution
+// TODO Disable enrichment for YouTube -- see NOS extension solution -- update: only important to not store in DB
 
 // New users:
 // TODO Initial settings / Settings screen
@@ -43,7 +43,7 @@ import javafx.application.Application;
 // TODO Rename Filter to TabGroup -- or refactor completely to use RadioButton API
 // TODO Database: Some generalization possible in the DAO's
 // TODO [Playback] Main overlay only visible when asked for (info)
-// TODO Store match quality
+// TODO Store match quality -- occurs in identifyItem, but string returned is stored to DB.  Q: Should match accuracy not actually be associated with identifier?
 // TODO ItemEnrichers really should only return relevant data, not a database Item instance
 // TODO Options Screen: Modal navigation should use own Navigator as well?
 // TODO Make plug-ins of various looks of Select Media
