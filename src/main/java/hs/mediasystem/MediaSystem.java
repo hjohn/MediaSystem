@@ -57,14 +57,13 @@ import javafx.application.Application;
 // TODO [VLCPlayer] Check if playing with normal items and subitems goes correctly --> repeats now (loop)
 // TODO Options Screen: Separators for Dialog Screen
 // TODO [Select Media] Filtering possibilities (Action movies, Recent movies, etc)
-// TODO Actor / Director information in database
 // TODO Show Actor information somewhere
 // TODO Settings screen
 // TODO Subtitle Provider Podnapisi
 
 // Low priority:
 // TODO Some form of remote control support / Lirc support --> EventGhost makes this unnecessary, keyboard control suffices
-// TODO Investigate why VLC sucks at skipping (audio not working for a while) --> no idea, with hardware decoding it is better but it doesn't skip to key frames then
+// TODO Investigate why VLC sucks at skipping (audio not working for a while) --> no idea, with hardware decoding it is better but it doesn't skip to key frames then --> this seems media dependent (or processor dependent), occurs with 2012, but not with Game of Thrones
 
 // JavaFX general issues:
 // - Multiple overlays (volume, subtitle delay) at same time don't align properly still --> hard to fix due to JavaFX problems
@@ -127,43 +126,56 @@ import javafx.application.Application;
 // - CONFIG  : Configuraton information, like user set parameters -- these probably should never be printed unless there's also a higher level being printed nearby
 // - FINE    : Debug code
 
-// Players
-// - DSJ (DirectShow)
+// Video Players that can be integrated with Java
+// ==============================================
+// * DSJ (DirectShow)
 //   - Performance: Good
 //   - Integration: Canvas
 //   - Subtitles: No clue how to select, no clue how to provide my own
 //   - Audiostreams: see subtitles
-//   - Communication: Java front-end for directshow
+//   - Communication: Java, low-level interface
 //   - Problems: Almost impossible to control due to DirectShow architecture, which means no control of internal subtitles or audio streams
-// - GStreamer-java (GStreamer)
+// * GStreamer-java (GStreamer)
 //   - Performance: Suffices on Quad Core Xeon
 //   - Integration: Canvas
 //   - Subtitles: ?
-//   - Communication: Java front-end for gstreamer
-//   - Audiostreams:
+//   - Audiostreams: ?
+//   - Communication: Java, low-level interface
 //   - Stability: Crashes after 5-10 minutes
-// - MPlayer
-//   - Communication: STD in/out
-// - VLCJ (VLC)
-//   - Performance: Good in general, seek performance excellent with new CPU, no audio for a few seconds after seeking
+// * MPlayer
+//   - Performance: Normally excellent, but for some reason a bit flakey on my system atm
+//   - Integration: Create your own window and obtain its window id and provide this to MPlayer
+//   - Subtitles: both internal and external supported
+//   - Audiostreams: works with multiple audio streams and can switch between them
+//   - Communication: STD in/out, high-level interface
+//   - Problems: The communication only accepts one command per frame displayed, which can severely limit the speed at which MPlayer reacts to commands -- care must be taken to only sent the bare minimum of commands and glean the rest of the information as much as possible from its status messages and status line
+// * VLCJ (VLC)
+//   - Performance: Good in general, seek performance excellent with new CPU, no audio for a few seconds after seeking (seems media dependent)
 //   - Integration: Canvas
-//   - Subtitles: 100%
-//   - Communication: Java front-end for libvlc
-//   - Audiostreams: 100%
-// - JavaFX
+//   - Subtitles: both internal and external supported
+//   - Audiostreams: works with multiple audio streams and can switch between them
+//   - Communication: Java, high-level interface
+// * JavaFX
 //   - Performance: ?
 //   - Integration: Good
 //   - Subtitles: ?
 //   - Audiostreams: ?
-//   - Communication: Java object
+//   - Communication: Java, high-level interface
 //   - Problems: Only supports incredibly limited set of formats.  No MKV support means it is a non-starter.
-// - MediaPlayer Classic Home Cinema
+// * MediaPlayer Classic Home Cinema
 //   - Performance: Good
 //   - Integration: Uses its own window which must be in fullscreen mode -- this gives problems as my JavaFX overlay cannot do fullscreen mode properly yet on secondary displays
 //   - Subtitles: Untested, looks like unable to provide external subtitle
 //   - Audiostreams: Untested, but looking good
-//   - Communication: HWND
+//   - Communication: HWND, high-level interface
 //   - Problems: Uses its own window (can use /monitor switch and /fullscreen switch to control it a bit); cannot disable user control
+// * Xuggler (FFMPEG)
+//   - Performance: May be good with properly threaded audio/video pipelines
+//   - Integration: Works with Swing, should be intergratable
+//   - Subtitles: DIY
+//   - Audiostreams: Should support multiple audio streams, the problem is with playback, only Stereo is supported (Xuggler or Java Audio limitation)
+//   - Communication: Java, low-level interface
+//   - Problems: A lot of stuff needs to be done yourself, including creating a frame decoding loop with multiple threads (have working test case); subtitles will need to be decoded yourself; audio looks to be limited to only stereo
 
 // Movies: 222 (alpha)
 // Series(Black Adder): Season 4,2 (alpha)
