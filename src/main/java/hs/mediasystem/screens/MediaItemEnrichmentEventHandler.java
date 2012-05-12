@@ -28,16 +28,17 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
 
   public void enrich(final MediaItem mediaItem, final boolean bypassCache) {
     executorService.execute(mediaItem, new Task<Void>() {
+      {
+        updateProgress(0, 2);
+        updateTitle("Fetching metadata");
+        updateMessage(mediaItem.getTitle());
+      }
+
       @Override
       public Void call() {
-        updateTitle("Fetching metadata");
-        updateProgress(0, 2);
-
         try {
           @SuppressWarnings("unchecked")
           LocalInfo<Object> localInfo = (LocalInfo<Object>)mediaItem.getLocalInfo();
-
-          updateMessage(mediaItem.getTitle());
 
           Identifier identifier = cachedItemEnricher.identifyItem(localInfo, bypassCache);
 
