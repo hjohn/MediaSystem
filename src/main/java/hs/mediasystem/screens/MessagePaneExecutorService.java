@@ -7,7 +7,7 @@ import javax.inject.Singleton;
 
 @Singleton
 public class MessagePaneExecutorService {
-  private final GroupWorker groupService = new GroupWorker(5);
+  private final GroupWorker groupService = new GroupWorker("Fetching metadata", 5);
 
   @Inject
   public MessagePaneExecutorService(ProgramController controller) {

@@ -22,11 +22,13 @@ public class GroupWorker extends Service<Void> {
   private final List<Task<?>> activeTasks = new ArrayList<>();  // Finished, executing and/or waiting tasks
   private final Map<Object, NodeList<KeyedTask>.Node> taskNodeMap = new HashMap<>();  // Quick key based Node lookup
   private final NodeList<KeyedTask> taskQueue = new NodeList<>();  // Tasks waiting, head is most recently added/promoted
+  private final String title;
   private final int maxThreads;
 
   private long startTaskCount;
 
-  public GroupWorker(int maxThreads) {
+  public GroupWorker(String title, int maxThreads) {
+    this.title = title;
     this.maxThreads = maxThreads;
     executor = new ThreadPoolExecutor(maxThreads, maxThreads, 5, TimeUnit.SECONDS, new LifoBlockingDeque<Runnable>(), new ThreadFactory() {
       private int threadNumber;
@@ -78,6 +80,11 @@ public class GroupWorker extends Service<Void> {
   @Override
   protected Task<Void> createTask() {
     return new Task<Void>() {
+      {
+        updateTitle(title + " (0/1)");
+        updateProgress(0, 1);
+      }
+
       @Override
       protected Void call() throws InterruptedException {
         for(;;) {
@@ -89,20 +96,18 @@ public class GroupWorker extends Service<Void> {
                 long total = activeTasks.size();
                 double totalProgress = 0.0;
                 double totalWork = 0.0;
-                String title = "";
                 String message = "";
 
                 for(Task<?> task : activeTasks) {
-                  String m = task.getMessage();
+                  String title = task.getTitle();
                   double p = task.getProgress();
 
-                  if(!task.isDone() && !m.isEmpty()) {
-                    title = task.getTitle();
-                    message += "• " + task.getMessage() + "\n";
+                  if(!task.isDone() && !title.isEmpty()) {
+                    message += "• " + title + "\n";
                   }
 
                   if(p >= 0) {
-                    totalProgress += task.getProgress();
+                    totalProgress += p;
                   }
                   totalWork++;
                 }

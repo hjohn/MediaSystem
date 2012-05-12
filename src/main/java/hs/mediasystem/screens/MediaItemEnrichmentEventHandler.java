@@ -30,8 +30,7 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
     executorService.execute(mediaItem, new Task<Void>() {
       {
         updateProgress(0, 2);
-        updateTitle("Fetching metadata");
-        updateMessage(mediaItem.getTitle());
+        updateTitle(mediaItem.getTitle());
       }
 
       @Override
