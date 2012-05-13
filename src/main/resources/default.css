@@ -137,9 +137,13 @@
   -fx-spacing: 5;
 }
 
-#dialog .label {
+#dialog .option-cell {
   -fx-padding: 5;
-  -fx-text-fill: color-blue;
+}
+
+#dialog .detail {
+  -fx-alignment: center-right;
+  -fx-font-size: 14pt;
 }
 
 #dialog .title {
@@ -183,7 +187,7 @@
 }
 
 #dialog .list-cell:focused {
-  -fx-text-fill: color-white;
+  -fx-text-fill: -c-text-focused;
 }
 
 #dialog .title {
@@ -209,7 +213,7 @@
 .list .header .label {
   -fx-background-color: color-blue-20;
   -fx-background-radius: 8 8 0 0;
-  -fx-label-padding: 0 20 0 20;
+  -fx-label-padding: 5 20 5 20;
 }
 
 .scroll-bar {
