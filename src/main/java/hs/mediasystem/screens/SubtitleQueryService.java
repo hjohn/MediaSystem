@@ -5,6 +5,7 @@ import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.SubtitleProviderException;
 import hs.subtitle.SubtitleDescriptor;
 
+import java.util.Collections;
 import java.util.List;
 
 import javafx.concurrent.Service;
@@ -30,9 +31,21 @@ public class SubtitleQueryService extends Service<List<? extends SubtitleDescrip
     System.out.println("[FINE] SubtitleQueryService.createTask() - provider=" + subtitleProvider + ": " + mediaItem);
 
     return new Task<List<? extends SubtitleDescriptor>>() {
+      {
+        updateMessage("Contacting " + provider.getName() + "...");
+      }
+
       @Override
-      protected List<? extends SubtitleDescriptor> call() throws SubtitleProviderException {
-        return provider.query(mediaItem);
+      protected List<? extends SubtitleDescriptor> call() {
+        try {
+          List<? extends SubtitleDescriptor> list = provider.query(mediaItem);
+          updateMessage("Found " + list.size() + " subtitles at " + provider.getName());
+          return list;
+        }
+        catch(SubtitleProviderException e) {
+          updateMessage("Failed to get subtitles from " + provider.getName() + ": " + e.getMessage());
+          return Collections.emptyList();
+        }
       }
     };
   }
