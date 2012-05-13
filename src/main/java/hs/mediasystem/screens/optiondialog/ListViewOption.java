@@ -60,7 +60,7 @@ public class ListViewOption<T> extends Option {
       public void handle(KeyEvent event) {
         if(event.getCode() == KeyCode.ENTER) {
           if(property != null) {
-            property.set(listView.getSelectionModel().getSelectedItem());
+            property.set(listView.getFocusModel().getFocusedItem());
           }
           event.consume();
         }
