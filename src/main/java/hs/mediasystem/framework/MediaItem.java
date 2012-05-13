@@ -138,7 +138,7 @@ public class MediaItem {
 
   @Override
   public String toString() {
-    return "('" + localInfo.getTitle() + "', MediaItem[subtitle=" + localInfo.getSubtitle() + ", type=" + localInfo.getType() + "])";
+    return "('" + getTitle() + "', MediaItem[subtitle=" + localInfo.getSubtitle() + ", type=" + localInfo.getType() + "])";
   }
 
   public boolean isLeaf() {
