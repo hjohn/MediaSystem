@@ -2,11 +2,13 @@ package hs.mediasystem.screens.optiondialog;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 
 public class Option extends BorderPane {
   private final String description;
 
   protected final Label label = new Label();
+  protected final Label bottomLabel = new Label("");
 
   public Option(String description) {
     this.description = description;
@@ -16,6 +18,15 @@ public class Option extends BorderPane {
 
     setLeft(new Label(description));
     setRight(label);
+    setBottom(new VBox() {{
+      getStyleClass().add("detail");
+      getChildren().add(bottomLabel);
+    }});
+    bottomLabel.managedProperty().bind(bottomLabel.textProperty().isNotEqualTo(""));
+  }
+
+  public Label getBottomLabel() {
+    return bottomLabel;
   }
 
   public String getDescription() {
