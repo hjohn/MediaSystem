@@ -5,7 +5,7 @@ public class SubtitleProviderException extends Exception {
     super();
   }
 
-  public SubtitleProviderException(Throwable cause) {
-    super(cause);
+  public SubtitleProviderException(String message, Throwable cause) {
+    super(message, cause);
   }
 }
