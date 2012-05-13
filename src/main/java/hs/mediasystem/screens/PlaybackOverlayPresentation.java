@@ -85,12 +85,16 @@ public class PlaybackOverlayPresentation {
                     }
                   });
 
-                  add(new ListOption<>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringBinding(subtitleSelector.subtitleProviderProperty()) {
+                  ListOption<SubtitleProvider> provider = new ListOption<>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringBinding(subtitleSelector.subtitleProviderProperty()) {
                     @Override
                     protected String computeValue() {
                       return subtitleSelector.subtitleProviderProperty().get().getName();
                     }
-                  }));
+                  });
+
+                  provider.getBottomLabel().textProperty().bind(subtitleSelector.statusTextProperty());
+
+                  add(provider);
                   add(new ListViewOption<>("Subtitles for Download", selectedSubtitleForDownload, subtitleSelector.getSubtitles(), new StringConverter<SubtitleDescriptor>() {
                     @Override
                     public String toString(SubtitleDescriptor object) {
