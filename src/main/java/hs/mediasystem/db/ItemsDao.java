@@ -36,7 +36,7 @@ public class ItemsDao {
     return connectionProvider.get();
   }
 
-  public Item getItem(final Identifier identifier) throws ItemNotFoundException {
+  public Item loadItem(final Identifier identifier) throws ItemNotFoundException {
     try {
       try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("SELECT id, imdbid, title, subtitle, releasedate, rating, plot, runtime, version, season, episode, language, tagline, viewed, resumeposition, matchaccuracy, genres, backgroundurl, bannerurl, posterurl, background IS NOT NULL AS hasBackground, banner IS NOT NULL AS hasBanner, poster IS NOT NULL AS hasPoster FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
@@ -168,7 +168,7 @@ public class ItemsDao {
     item.setPoster(item.getPosterURL() == null ? null : new DatabaseImageSource(connectionProvider, id, "items", "poster", new URLImageSource(item.getPosterURL())));
   }
 
-  public Identifier getQuery(String surrogateName) throws ItemNotFoundException {
+  public Identifier loadIdentifier(String surrogateName) throws ItemNotFoundException {
     try {
       try(Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement("SELECT * FROM identifiers WHERE surrogatename = ?")) {

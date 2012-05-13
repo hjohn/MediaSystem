@@ -7,15 +7,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * An implementation of a KeyedExecutor backed by a thread pool.
+ * An implementation of an ExecutionQueue backed by a thread pool.
  */
-public class ThreadPoolKeyedExecutor implements KeyedExecutor {
+public class ThreadPoolExecutionQueue implements ExecutionQueue {
   private final ThreadPoolExecutor executor;
-  private final Map<Object, NodeList<QueueItem>.Node> itemNodeMap = new HashMap<>();  // Quick key based Node lookup
-  private final NodeList<QueueItem> queue = new NodeList<>();  // Runnables waiting, head is most recently added/promoted
+  private final Map<Runnable, NodeList<Runnable>.Node> itemNodeMap = new HashMap<>();  // Quick key based Node lookup
+  private final NodeList<Runnable> queue = new NodeList<>();  // Runnables waiting, head is most recently added/promoted
   private final int maxThreads;
 
-  public ThreadPoolKeyedExecutor(int maxThreads) {
+  public ThreadPoolExecutionQueue(int maxThreads) {
     this.maxThreads = maxThreads;
 
     executor = new ThreadPoolExecutor(maxThreads, maxThreads, 5, TimeUnit.SECONDS, new LifoBlockingDeque<Runnable>(), new NamedThreadFactory()) {
@@ -27,35 +27,29 @@ public class ThreadPoolKeyedExecutor implements KeyedExecutor {
   }
 
   @Override
-  public Object submit(Runnable runnable) {
+  public void submit(Runnable runnable) {
     synchronized(queue) {
-      Object key = new Object();
-
-      itemNodeMap.put(key, queue.addHead(new QueueItem(key, runnable)));
+      itemNodeMap.put(runnable, queue.addHead(runnable));
 
       submitRunnablesIfSlotsAvailable();
-
-      return key;
     }
   }
 
   @Override
-  public void promote(Object key) {
+  public void promote(Runnable runnable) {
     synchronized(queue) {
-      QueueItem item = queue.unlink(itemNodeMap.remove(key));
+      Runnable removedRunnable = queue.unlink(itemNodeMap.remove(runnable));
 
-      if(item != null) {
-        itemNodeMap.put(key, queue.addHead(item));
+      if(removedRunnable != null) {
+        submit(removedRunnable);
       }
-
-      submitRunnablesIfSlotsAvailable();
     }
   }
 
   @Override
-  public void cancel(Object key) {
+  public void cancel(Runnable runnable) {
     synchronized(queue) {
-      queue.unlink(itemNodeMap.remove(key));
+      queue.unlink(itemNodeMap.remove(runnable));
     }
   }
 
@@ -78,9 +72,9 @@ public class ThreadPoolKeyedExecutor implements KeyedExecutor {
       int slotsAvailable = maxThreads - executor.getActiveCount() - executor.getQueue().size();
 
       while(slotsAvailable-- > 0 && !itemNodeMap.isEmpty()) {
-        QueueItem item = queue.removeHead();
-        itemNodeMap.remove(item.getKey());
-        executor.execute(item.getRunnable());
+        Runnable runnable = queue.removeHead();
+        itemNodeMap.remove(runnable);
+        executor.execute(runnable);
       }
     }
   }
@@ -93,24 +87,6 @@ public class ThreadPoolKeyedExecutor implements KeyedExecutor {
       Thread thread = new Thread(r, "ThreadPoolKeyedExecutor-thread-" + ++threadNumber);
       thread.setDaemon(true);
       return thread;
-    }
-  }
-
-  private static class QueueItem {
-    private final Object key;
-    private final Runnable runnable;
-
-    public QueueItem(Object key, Runnable runnable) {
-      this.key = key;
-      this.runnable = runnable;
-    }
-
-    public Object getKey() {
-      return key;
-    }
-
-    public Runnable getRunnable() {
-      return runnable;
     }
   }
 }

@@ -85,7 +85,7 @@ public class SelectMediaPresentation {
           new ActionOption("Reload meta data", new Callable<Boolean>() {
             @Override
             public Boolean call() {
-              enrichmentHandler.enrich(mediaItem, true);
+              enrichmentHandler.enrichNoCache(mediaItem, null);
 
               ImageCache.expunge(mediaItem.getBanner());
               ImageCache.expunge(mediaItem.getPoster());

@@ -1,56 +1,41 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.util.ThreadPoolKeyedExecutor;
+import hs.mediasystem.util.ThreadPoolExecutionQueue;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 public class GroupWorker extends Service<Void> {
-  private final ThreadPoolKeyedExecutor executor;
+  private final ThreadPoolExecutionQueue executor;
   private final List<Task<?>> activeTasks = new ArrayList<>();  // Finished, executing and/or waiting tasks
-  private final Map<Object, Object> keyMap = new HashMap<>();
   private final String title;
 
   private long startTaskCount;
 
   public GroupWorker(String title, int maxThreads) {
     this.title = title;
-    this.executor = new ThreadPoolKeyedExecutor(maxThreads);
+    this.executor = new ThreadPoolExecutionQueue(maxThreads);
 
     new ActivityMonitorThread().start();
   }
 
-  public void submit(final Object key, final Task<?> task) {
+  public void submit(final Task<?> task) {
     synchronized(activeTasks) {
       activeTasks.add(task);
-      keyMap.put(key, executor.submit(task));
+      executor.submit(task);
     }
-
-    task.stateProperty().addListener(new ChangeListener<State>() {
-      @Override
-      public void changed(ObservableValue<? extends State> observable, State oldValue, State newValue) {
-        if(newValue == State.FAILED) {
-          System.out.println("[WARN] Worker " + task.getTitle() + " failed with exception: " + task.getException());
-          task.getException().printStackTrace(System.out);
-        }
-      }
-    });
   }
 
-  public void promote(Object key) {
-    executor.promote(keyMap.get(key));
+  public void promote(Runnable runnable) {
+    executor.promote(runnable);
   }
 
-  public void cancel(Object key) {
-    executor.cancel(keyMap.get(key));
+  public void cancel(Runnable runnable) {
+    executor.cancel(runnable);
   }
 
   @Override
@@ -98,7 +83,6 @@ public class GroupWorker extends Service<Void> {
           synchronized(activeTasks) {
             if(executor.getCompletedTaskCount() == executor.getTaskCount()) {
               activeTasks.clear();
-              keyMap.clear();
               startTaskCount = executor.getTaskCount();
               return null;
             }
