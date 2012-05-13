@@ -12,6 +12,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -34,9 +36,14 @@ public class SubtitleSelector {
   public boolean isLoaded() { return loaded.get(); }
   public ReadOnlyBooleanProperty loadedProperty() { return loaded.getReadOnlyProperty(); }
 
+  private final StringProperty statusText = new SimpleStringProperty();
+  public ObservableValue<? extends String> statusTextProperty() { return statusText; }
+
   private final SubtitleQueryService subtitleQueryService = new SubtitleQueryService();
 
   public SubtitleSelector(List<SubtitleProvider> providers) {
+    statusText.bind(subtitleQueryService.messageProperty());
+
     subtitleProviders.addAll(providers);
     subtitleProvider.set(providers.get(0));
 
