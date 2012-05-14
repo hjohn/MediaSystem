@@ -21,7 +21,7 @@ public class NosMediaTree extends AbstractMediaTree {
 
   @Override
   public MediaItem getRoot() {
-    return new MediaItem(this, new LocalInfo<>("NOS_ROOT", "NOS")) {
+    return new MediaItem(this, new LocalInfo<>(URL, "NOS_ROOT", "NOS")) {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {

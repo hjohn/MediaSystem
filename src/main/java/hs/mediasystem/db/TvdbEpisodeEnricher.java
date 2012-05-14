@@ -24,7 +24,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher<Object> {
 
   @Override
   public String identifyItem(final LocalInfo<Object> localInfo) throws IdentifyException {
-    String serieId = itemIdentifier.identifyItem(new LocalInfo<>("SERIE", localInfo.getGroupName()));
+    String serieId = itemIdentifier.identifyItem(new LocalInfo<>("TvdbEpisodeEnricher://" + localInfo.getGroupName(), "SERIE", localInfo.getGroupName()));
 
     // TODO may need some TVDB caching here, as we're doing this query twice for each episode... and TVDB returns whole seasons I think
     Episode episode = findEpisode(serieId, localInfo);

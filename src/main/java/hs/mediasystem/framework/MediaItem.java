@@ -33,6 +33,8 @@ public class MediaItem {
   private int databaseId;
 
   private MediaItem(MediaTree mediaTree, MediaItem parent, final LocalInfo<?> localInfo) {
+    assert localInfo != null;
+
     this.mediaTree = mediaTree;
     this.parent = parent;
     this.localInfo = localInfo;
@@ -159,6 +161,23 @@ public class MediaItem {
       state = State.QUEUED;
     }
   }
+
+  @Override
+  public int hashCode() {
+    return localInfo.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) {
+      return true;
+    }
+    if(obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    return localInfo.equals(((MediaItem)obj).localInfo);
+  }
+
 
   private final StringProperty groupName = new SimpleStringProperty();
   public String getGroupName() { return groupName.get(); }

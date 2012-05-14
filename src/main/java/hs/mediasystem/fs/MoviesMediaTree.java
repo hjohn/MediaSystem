@@ -18,7 +18,7 @@ public class MoviesMediaTree extends AbstractMediaTree {
 
   @Override
   public MediaItem getRoot() {
-    return new MediaItem(this, new LocalInfo<>("MOVIE_ROOT", "Movies")) {
+    return new MediaItem(this, new LocalInfo<>(root.toString(), "MOVIE_ROOT", "Movies")) {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {

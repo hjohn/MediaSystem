@@ -14,6 +14,9 @@ public class LocalInfo<T> {
   private final T userData;
 
   public LocalInfo(String uri, String mediaType, String groupName, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode, Integer endEpisode, T userData) {
+    assert uri != null;
+    assert mediaType != null;
+
     this.uri = uri;
     this.mediaType = mediaType;
     this.groupName = groupName;
@@ -27,12 +30,12 @@ public class LocalInfo<T> {
     this.userData = userData;
   }
 
-  public LocalInfo(String mediaType, String title, Integer releaseYear) {
-    this(null, mediaType, null, title, null, null, releaseYear, null, null, null, null);
+  public LocalInfo(String uri, String mediaType, String title, Integer releaseYear) {
+    this(uri, mediaType, null, title, null, null, releaseYear, null, null, null, null);
   }
 
-  public LocalInfo(String mediaType, String title) {
-    this(null, mediaType, null, title, null, null, null, null, null, null, null);
+  public LocalInfo(String uri, String mediaType, String title) {
+    this(uri, mediaType, null, title, null, null, null, null, null, null, null);
   }
 
   public String getSurrogateName() {
@@ -81,6 +84,22 @@ public class LocalInfo<T> {
 
   public Integer getEndEpisode() {
     return endEpisode;
+  }
+
+  @Override
+  public int hashCode() {
+    return uri.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) {
+      return true;
+    }
+    if(obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    return uri.equals(((LocalInfo<?>)obj).uri);
   }
 
   @Override
