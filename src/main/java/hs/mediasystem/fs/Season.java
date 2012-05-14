@@ -12,7 +12,7 @@ public class Season extends MediaItem {
   private final List<MediaItem> children = new ArrayList<>();
 
   public Season(MediaTree mediaTree, String serieName, int season) {
-    super(mediaTree, new LocalInfo<>(null, "SEASON", serieName, createTitle(season), null, null, null, season, null, null, null));
+    super(mediaTree, new LocalInfo<>("Season://" + serieName + "/" + season, "SEASON", serieName, createTitle(season), null, null, null, season, null, null, null));
   }
 
   private static String createTitle(int season) {
