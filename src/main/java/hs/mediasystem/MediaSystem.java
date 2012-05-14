@@ -3,7 +3,6 @@ package hs.mediasystem;
 import javafx.application.Application;
 
 // TODO Collection view, count, list of items, picture of latest/first (or both), stacked pictures
-// TODO When entering series twice in rapid succession, it is possible to make the system fetch details for the same movie/serie twice.  The 2nd result will cause a key violation in the db.
 
 // TODO Add some debug prints to debug movie stop problem
 // TODO Banner view -- change layout to get bigger banners
@@ -29,7 +28,6 @@ import javafx.application.Application;
 // TODO Detail Pane information should be consistent, that is, if pic is not fully loaded but title is, then show an empty pic as old pic has nothing to do with the title
 // TODO Hotkey for download subtitles
 // TODO For Episodes, in playback screen title should be serie name
-// TODO Feedback about subtitle providers being contacted
 // TODO Often playback detail overlay is not sized correctly when starting a video
 // TODO Disable enrichment for YouTube -- see NOS extension solution -- update: only important to not store in DB
 
@@ -40,8 +38,6 @@ import javafx.application.Application;
 // TODO Consider using built-in database
 
 // Other:
-// TODO Reserve thread(s) for media stored in DB already, so they are fetched immediately
-// TODO Delay showing MessagePane for very fast background processes
 // TODO Presentation should create a string representation of the positioning and sorting information and store this somewhere
 // TODO Rename Filter to TabGroup -- or refactor completely to use RadioButton API
 // TODO Database: Some generalization possible in the DAO's
