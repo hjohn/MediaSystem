@@ -15,7 +15,9 @@ import hs.mediasystem.util.ExecutionQueue;
 import hs.mediasystem.util.ThreadPoolExecutionQueue;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -39,7 +41,7 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
   private final ItemsDao itemsDao;
   private final ExecutionQueue slowExecutionQueue;
   private final ExecutionQueue fastExecutionQueue = new ThreadPoolExecutionQueue(5);
-  private final Map<MediaItem, Task<?>> enrichTasks = new HashMap<>();
+  private final Map<String, EnrichTask> enrichTasks = new HashMap<>();
 
   @Inject
   public MediaItemEnrichmentEventHandler(TypeBasedItemEnricher typeBasedItemEnricher, ItemsDao itemsDao, MessagePaneExecutionQueue executorService) {
@@ -48,44 +50,55 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
     this.slowExecutionQueue = executorService;
   }
 
-  public void enrich(final MediaItem mediaItem) {
-    final CachedEnrichTask task = new CachedEnrichTask(mediaItem);
-
-    task.stateProperty().addListener(new TaskChangeListener(task, mediaItem));
-
-    enrichTasks.put(mediaItem, task);
-    fastExecutionQueue.submit(task);
-  }
-
-  public void enrichNoCache(final MediaItem mediaItem, Identifier identifier) {
-    final TypeBasedEnrichTask task = new TypeBasedEnrichTask(mediaItem, identifier);
-
-    task.stateProperty().addListener(new TaskChangeListener(task, mediaItem));
-
-    enrichTasks.put(mediaItem, task);
-    slowExecutionQueue.submit(task);
-  }
-
   @Override
   public void handle(MediaItemEvent event) {
+    enrichInternal(event.getMediaItem(), false);
+  }
+
+  public void enrich(final MediaItem mediaItem) {
+    enrichInternal(mediaItem, false);
+  }
+
+  public void enrichNoCache(final MediaItem mediaItem) {
+    enrichInternal(mediaItem, true);
+  }
+
+  private void enrichInternal(final MediaItem mediaItem, boolean bypassCache) {
     synchronized(enrichTasks) {
-      MediaItem mediaItem = event.getMediaItem();
-      MediaItem.State state = mediaItem.getState();
+      EnrichTask task = enrichTasks.get(mediaItem.getUri());
 
-      if(state == MediaItem.State.STANDARD) {
-        enrich(mediaItem);
-      }
-      else if(state == MediaItem.State.QUEUED) {
-        Task<?> task = enrichTasks.get(mediaItem);
-
-        if(task != null) {
-          if(task instanceof CachedEnrichTask) {
-            fastExecutionQueue.promote(task);
-          }
-          else {
-            slowExecutionQueue.promote(task);
-          }
+      if(task == null) {
+        if(bypassCache) {
+          submitTask(new TypeBasedEnrichTask(mediaItem), mediaItem.getUri());
         }
+        else {
+          submitTask(new CachedEnrichTask(mediaItem), mediaItem.getUri());
+        }
+      }
+      else {
+        task.addMediaItem(mediaItem);
+
+        if(task instanceof CachedEnrichTask) {
+          fastExecutionQueue.promote(task);
+        }
+        else {
+          slowExecutionQueue.promote(task);
+        }
+      }
+    }
+  }
+
+  private void submitTask(EnrichTask task, String uri) {
+    synchronized(enrichTasks) {
+      task.stateProperty().addListener(new TaskChangeListener(task, uri));
+
+      enrichTasks.put(uri, task);
+
+      if(task instanceof CachedEnrichTask) {
+        fastExecutionQueue.submit(task);
+      }
+      else {
+        slowExecutionQueue.submit(task);
       }
     }
   }
@@ -122,12 +135,12 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
   }
 
   private final class TaskChangeListener implements ChangeListener<State> {
-    private final Task<?> task;
-    private final MediaItem mediaItem;
+    private final EnrichTask task;
+    private final String uri;
 
-    private TaskChangeListener(Task<?> task, MediaItem mediaItem) {
+    private TaskChangeListener(EnrichTask task, String uri) {
       this.task = task;
-      this.mediaItem = mediaItem;
+      this.uri = uri;
     }
 
     @Override
@@ -137,26 +150,61 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
         task.getException().printStackTrace(System.out);
       }
       if(newValue == State.FAILED || newValue == State.CANCELLED || newValue == State.SUCCEEDED) {
-        enrichTasks.remove(mediaItem);
+        synchronized(enrichTasks) {
+          enrichTasks.remove(uri);
+        }
       }
       if(newValue == State.SUCCEEDED) {
-        if(task instanceof CachedEnrichTask && !((CachedEnrichTask)task).getValue()) {
-          enrichNoCache(mediaItem, ((CachedEnrichTask)task).getIdentifier());
+        Item item = task.getValue();
+
+        if(item == null) {
+          if(task instanceof CachedEnrichTask) {
+            submitTask(new TypeBasedEnrichTask((CachedEnrichTask)task), uri);
+          }
+        }
+        else {
+          for(MediaItem mediaItem : task.getMediaItems()) {
+            enrich(mediaItem, item);
+          }
         }
       }
     }
   }
 
-  private final class CachedEnrichTask extends Task<Boolean> {
-    private final MediaItem mediaItem;
+  private abstract class EnrichTask extends Task<Item> {
+    protected final Set<MediaItem> mediaItems;
+    protected final LocalInfo<Object> localInfo;
 
+    public EnrichTask(String title, LocalInfo<Object> localInfo, Set<MediaItem> mediaItems) {
+      this.mediaItems = mediaItems;
+      this.localInfo = localInfo;
+
+      updateTitle(title);
+    }
+
+    @SuppressWarnings("unchecked")
+    public EnrichTask(final MediaItem mediaItem) {
+      this(mediaItem.getTitle(), (LocalInfo<Object>)mediaItem.getLocalInfo(), new HashSet<MediaItem>() {{
+        add(mediaItem);
+      }});
+    }
+
+    public void addMediaItem(MediaItem mediaItem) {
+      mediaItems.add(mediaItem);
+    }
+
+    public Set<MediaItem> getMediaItems() {
+      return mediaItems;
+    }
+  }
+
+  private final class CachedEnrichTask extends EnrichTask {
     private Identifier identifier;
 
-    public CachedEnrichTask(MediaItem mediaItem) {
-      this.mediaItem = mediaItem;
+    public CachedEnrichTask(final MediaItem mediaItem) {
+      super(mediaItem);
 
       updateProgress(0, 2);
-      updateTitle(mediaItem.getTitle());
     }
 
     public Identifier getIdentifier() {
@@ -164,11 +212,8 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
     }
 
     @Override
-    public Boolean call() {
+    public Item call() {
       try {
-        @SuppressWarnings("unchecked")
-        LocalInfo<Object> localInfo = (LocalInfo<Object>)mediaItem.getLocalInfo();
-
         identifier = identifyItem(localInfo);
 
         updateProgress(1, 2);
@@ -176,17 +221,15 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
         Item item = loadItem(identifier);
 
         if(item.getVersion() < ItemsDao.VERSION) {
-          return false;
+          return null;
         }
-
-        enrich(mediaItem, item);
 
         updateProgress(2, 2);
 
-        return true;
+        return item;
       }
       catch(ItemNotFoundException e) {
-        return false;
+        return null;
       }
     }
 
@@ -206,25 +249,25 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
     }
   }
 
-  private final class TypeBasedEnrichTask extends Task<Void> {
-    private final MediaItem mediaItem;
-
+  private final class TypeBasedEnrichTask extends EnrichTask {
     private Identifier identifier;
 
-    public TypeBasedEnrichTask(MediaItem mediaItem, Identifier identifier) {
-      this.mediaItem = mediaItem;
-      this.identifier = identifier;
+    public TypeBasedEnrichTask(MediaItem mediaItem) {
+      super(mediaItem);
 
       updateProgress(0, 5);
       updateTitle(mediaItem.getTitle());
     }
 
-    @Override
-    public Void call() {
-      try {
-        @SuppressWarnings("unchecked")
-        LocalInfo<Object> localInfo = (LocalInfo<Object>)mediaItem.getLocalInfo();
+    public TypeBasedEnrichTask(CachedEnrichTask task) {
+      super(task.getTitle(), task.localInfo, task.mediaItems);
 
+      this.identifier = task.getIdentifier();
+    }
+
+    @Override
+    public Item call() {
+      try {
         if(identifier == null) {
           identifier = typeBasedItemEnricher.identifyItem(localInfo);
 
@@ -258,11 +301,9 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
           itemsDao.storeItem(item);
         }
 
-        enrich(mediaItem, item);
-
         updateProgress(5, 5);
 
-        return null;
+        return item;
       }
       catch(IdentifyException e) {
         throw new RuntimeException(e);
