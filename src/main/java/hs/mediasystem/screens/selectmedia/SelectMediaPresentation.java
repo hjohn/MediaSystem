@@ -11,6 +11,7 @@ import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.screens.StandardLayout;
 import hs.mediasystem.screens.optiondialog.ActionOption;
+import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.util.Callable;
@@ -82,6 +83,12 @@ public class SelectMediaPresentation {
       public void handle(MediaNodeEvent event) {
         final MediaItem mediaItem = event.getMediaNode().getMediaItem();
         List<? extends Option> options = FXCollections.observableArrayList(
+          new BooleanOption("Viewed", mediaItem.viewedProperty(), new StringBinding(mediaItem.viewedProperty()) {
+            @Override
+            protected String computeValue() {
+              return mediaItem.viewedProperty().get() ? "Yes" : "No";
+            }
+          }),
           new ActionOption("Reload meta data", new Callable<Boolean>() {
             @Override
             public Boolean call() {
