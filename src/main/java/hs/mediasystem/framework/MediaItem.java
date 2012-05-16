@@ -162,23 +162,6 @@ public class MediaItem {
     }
   }
 
-  @Override
-  public int hashCode() {
-    return localInfo.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if(this == obj) {
-      return true;
-    }
-    if(obj == null || getClass() != obj.getClass()) {
-      return false;
-    }
-    return localInfo.equals(((MediaItem)obj).localInfo);
-  }
-
-
   private final StringProperty groupName = new SimpleStringProperty();
   public String getGroupName() { return groupName.get(); }
   public StringProperty groupNameProperty() { return groupName; }
