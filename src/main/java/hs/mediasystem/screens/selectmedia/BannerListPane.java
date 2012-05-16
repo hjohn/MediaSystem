@@ -1,7 +1,6 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.framework.CellProvider;
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.BannerCellProvider;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
@@ -88,18 +87,17 @@ public class BannerListPane extends BorderPane implements ListPane {
     rightColumn.setCellValueFactory(new PropertyValueFactory<DuoMediaNode, MediaNode>("right"));
   }};
 
-  private final ObjectBinding<MediaItem> mediaItem = new ObjectBinding<MediaItem>() {
+  private final ObjectBinding<MediaNode> mediaNode = new ObjectBinding<MediaNode>() {
     {
       bind(tableView.getFocusModel().focusedCellProperty());
     }
 
     @Override
-    protected MediaItem computeValue() {
-      MediaNode focusedNode = getFocusedMediaNode();
-      return focusedNode != null ? focusedNode.getMediaItem() : null;
+    protected MediaNode computeValue() {
+      return getFocusedMediaNode();
     }
   };
-  @Override public ObjectBinding<MediaItem> mediaItemBinding() { return mediaItem; }
+  @Override public ObjectBinding<MediaNode> mediaNodeBinding() { return mediaNode; }
 
   public BannerListPane() {
     getStylesheets().add("select-media/banner-list-pane.css");

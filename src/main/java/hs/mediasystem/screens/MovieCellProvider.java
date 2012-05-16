@@ -15,24 +15,19 @@ public class MovieCellProvider implements CellProvider<MediaNode> {
 
     binder.unbindAll();
 
-    binder.bind(cell.titleProperty(), item.titleProperty());
-    binder.bind(cell.subtitleProperty(), item.subtitleProperty());
+    binder.bind(cell.titleProperty(), mediaNode.titleProperty());
+    binder.bind(cell.subtitleProperty(), mediaNode.subtitleProperty());
+    binder.bind(cell.extraInfoProperty(), MediaItemFormatter.releaseYearBinding(mediaNode));
 
-    binder.bind(cell.extraInfoProperty(), MediaItemFormatter.releaseYearBinding(item));
-    binder.bind(cell.ratingProperty(), item.ratingProperty().divide(10));
+    cell.collectionSizeProperty().set(mediaNode.getChildren().size());
 
-    cell.collectionSizeProperty().set(item.children().size());
-
-    binder.bind(cell.viewedProperty(), (item.viewedProperty()));
-
-//    cell.titleProperty().bind(item.titleProperty());
-//    cell.subtitleProperty().bind(item.subtitleProperty());
-//
-//    cell.extraInfoProperty().bind(MediaItemFormatter.releaseYearBinding(item));
-//    cell.ratingProperty().bind(item.ratingProperty().divide(10));
-//    cell.collectionSizeProperty().set(item.children().size());
-//
-//    cell.viewedProperty().bind(item.viewedProperty());
+    if(item != null) {
+      binder.bind(cell.ratingProperty(), item.ratingProperty().divide(10));
+      binder.bind(cell.viewedProperty(), item.viewedProperty());
+    }
+    else {
+      cell.viewedProperty().set(false);
+    }
 
     return cell;
   }

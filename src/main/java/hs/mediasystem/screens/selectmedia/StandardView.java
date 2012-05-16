@@ -87,7 +87,7 @@ public class StandardView extends StackPane implements SelectMediaView {
         layout = layoutExtension.createLayout();
         getChildren().add((Node)layout);
 
-        backgroundPane.mediaItemProperty().bind(layout.mediaItemBinding());
+        backgroundPane.mediaNodeProperty().bind(layout.mediaNodeBinding());
 
         layout.onNodeSelected().set(onNodeSelected.get());
         layout.onNodeAlternateSelect().set(onNodeAlternateSelect.get());

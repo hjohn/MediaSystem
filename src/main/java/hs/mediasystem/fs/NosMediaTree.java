@@ -21,7 +21,7 @@ public class NosMediaTree extends AbstractMediaTree {
 
   @Override
   public MediaItem getRoot() {
-    return new MediaItem(this, new LocalInfo<>(URL, "NOS_ROOT", "NOS")) {
+    return new MediaItem(this, new LocalInfo<>(URL, "NOS_ROOT", "NOS"), false) {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {
@@ -58,7 +58,7 @@ public class NosMediaTree extends AbstractMediaTree {
           Matcher matcher2 = pattern2.matcher(vid.toString());
 
           if(matcher2.find()) {
-            MediaItem mediaItem = new MediaItem(this, new LocalInfo<>(matcher2.group(0), "NOS", null, title, meta, null, null, null, null, null, null));
+            MediaItem mediaItem = new MediaItem(this, new LocalInfo<>(matcher2.group(0), "NOS", null, title, meta, null, null, null, null, null, null), false);
 
             mediaItem.posterProperty().set(new SourceImageHandle(new URLImageSource(thumbUrl), "NosMediaTree:/" + mediaItem.getTitle()));
 

@@ -18,7 +18,7 @@ public class SeriesMediaTree extends AbstractMediaTree {
 
   @Override
   public MediaItem getRoot() {
-    return new MediaItem(this, new LocalInfo<>(root.toString(), "SERIE_ROOT", "Series")) {
+    return new MediaItem(this, new LocalInfo<>(root.toString(), "SERIE_ROOT", "Series"), false) {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {

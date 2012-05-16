@@ -1,6 +1,5 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import javafx.beans.binding.ObjectBinding;
@@ -10,7 +9,7 @@ import javafx.event.EventHandler;
 public interface StandardLayout {
   ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect();
   ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected();
-  ObjectBinding<MediaItem> mediaItemBinding();
+  ObjectBinding<MediaNode> mediaNodeBinding();
 
   void setRoot(MediaNode root);
   MediaNode getSelectedNode();

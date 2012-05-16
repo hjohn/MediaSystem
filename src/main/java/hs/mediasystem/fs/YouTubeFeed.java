@@ -23,7 +23,7 @@ public class YouTubeFeed extends MediaItem {
   private List<MediaItem> children;
 
   public YouTubeFeed(MediaTree mediaTree, LocalInfo<?> localInfo, Feed feed) {
-    super(mediaTree, localInfo);
+    super(mediaTree, localInfo, false);
     this.feed = feed;
   }
 
@@ -46,7 +46,7 @@ public class YouTubeFeed extends MediaItem {
           YouTubeMediaGroup mediaGroup = videoEntry.getMediaGroup();
 
           for(YouTubeMediaContent mediaContent : mediaGroup.getYouTubeContents()) {
-            children.add(new MediaItem(getMediaTree(), new LocalInfo<>(mediaContent.getUrl(), "YOUTUBE", "", videoEntry.getTitle().getPlainText(), null, videoEntry.getMediaGroup().getVideoId(), null, null, null, null, videoEntry)));
+            children.add(new MediaItem(getMediaTree(), new LocalInfo<>(mediaContent.getUrl(), "YOUTUBE", "", videoEntry.getTitle().getPlainText(), null, videoEntry.getMediaGroup().getVideoId(), null, null, null, null, videoEntry), false));
             break;
           }
         }

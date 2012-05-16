@@ -4,9 +4,7 @@ import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.fs.EpisodeComparator;
-import hs.mediasystem.fs.EpisodeGroup;
 import hs.mediasystem.fs.MediaItemComparator;
-import hs.mediasystem.fs.Season;
 import hs.mediasystem.fs.SeasonGrouper;
 import hs.mediasystem.fs.TitleGrouper;
 
@@ -46,7 +44,7 @@ public class StandardLayout {
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
           Collections.sort(group, MediaItemComparator.INSTANCE);
-          MediaNode episodeGroupNode = new MediaNode(this, new EpisodeGroup(parentItem.getMediaTree(), group));
+          MediaNode episodeGroupNode = new MediaNode(this, null, group.get(0).getTitle(), group.get(0).getReleaseYear(), null);
 
           List<MediaNode> nodeChildren = new ArrayList<>();
           for(MediaItem item : group) {
@@ -67,7 +65,9 @@ public class StandardLayout {
 
       for(List<MediaItem> group : groupedItems) {
         MediaItem episodeOne = group.get(0);
-        MediaNode seasonNode = new MediaNode(this, new Season(parentItem.getMediaTree(), parentItem.getTitle(), episodeOne.getSeason() == null ? 0 : episodeOne.getSeason()));
+        int season = episodeOne.getSeason() == null ? 0 : episodeOne.getSeason();
+
+        MediaNode seasonNode = new MediaNode(this, parentItem.getTitle(), createTitle(season), null, season);
 
         Collections.sort(group, EpisodeComparator.INSTANCE);
         List<MediaNode> nodeChildren = new ArrayList<>();
@@ -89,6 +89,10 @@ public class StandardLayout {
     Collections.sort(output, sortOrder.get().getComparator());
 
     return output;
+  }
+
+  private static String createTitle(int season) {
+    return season == 0 ? "Specials" : "Season " + season;
   }
 
   public boolean expandTopLevel(MediaItem root) {

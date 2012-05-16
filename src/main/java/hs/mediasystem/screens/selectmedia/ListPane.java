@@ -1,6 +1,5 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.util.BasicNode;
@@ -11,7 +10,7 @@ import javafx.event.EventHandler;
 public interface ListPane extends BasicNode {
   ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected();
   ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect();
-  ObjectBinding<MediaItem> mediaItemBinding();
+  ObjectBinding<MediaNode> mediaNodeBinding();
 
   void setRoot(MediaNode root);
   MediaNode getSelectedNode();

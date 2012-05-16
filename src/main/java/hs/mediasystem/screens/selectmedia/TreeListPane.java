@@ -1,7 +1,6 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.framework.CellProvider;
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.Filter;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
@@ -48,19 +47,19 @@ public class TreeListPane extends BorderPane implements ListPane {
 
   private final TreeView<MediaNode> treeView = new TreeView<>();
 
-  private final ObjectBinding<MediaItem> mediaItem = new ObjectBinding<MediaItem>() {
+  private final ObjectBinding<MediaNode> mediaNode = new ObjectBinding<MediaNode>() {
     {
       bind(treeView.getFocusModel().focusedItemProperty());
     }
 
     @Override
-    protected MediaItem computeValue() {
+    protected MediaNode computeValue() {
       TreeItem<MediaNode> focusedItem = treeView.getFocusModel().getFocusedItem();
 
-      return focusedItem != null ? focusedItem.getValue().getMediaItem() : null;
+      return focusedItem != null ? focusedItem.getValue() : null;
     }
   };
-  @Override public ObjectBinding<MediaItem> mediaItemBinding() { return mediaItem; }
+  @Override public ObjectBinding<MediaNode> mediaNodeBinding() { return mediaNode; }
 
   private final Filter filter = new Filter() {{
     getStyleClass().add("seasons");
@@ -121,9 +120,9 @@ public class TreeListPane extends BorderPane implements ListPane {
         Label label = (Label)value;
 
         if(oldLabel != null) {
-          oldLabel.setText(((MediaNodeTreeItem)oldValue.getUserData()).getValue().getMediaItem().getShortTitle());
+          oldLabel.setText(((MediaNodeTreeItem)oldValue.getUserData()).getValue().getShortTitle());
         }
-        label.setText(((MediaNodeTreeItem)value.getUserData()).getValue().getMediaItem().getTitle());
+        label.setText(((MediaNodeTreeItem)value.getUserData()).getValue().getTitle());
 
         refilter();
       }
@@ -146,7 +145,7 @@ public class TreeListPane extends BorderPane implements ListPane {
 
     if(root.expandTopLevel()) {
       for(MediaNode node : root.getChildren()) {
-        Label label = new Label(node.getMediaItem().getShortTitle());
+        Label label = new Label(node.getShortTitle());
 
         filter.getChildren().add(label);
         label.setUserData(new MediaNodeTreeItem(node));

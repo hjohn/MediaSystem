@@ -24,7 +24,7 @@ public class YouTubeMediaTree extends AbstractMediaTree {
 
   @Override
   public MediaItem getRoot() {
-    return new MediaItem(this, new LocalInfo<>("http://youtube.com", "YOUTUBE_ROOT", "YouTube")) {
+    return new MediaItem(this, new LocalInfo<>("http://youtube.com", "YOUTUBE_ROOT", "YouTube"), false) {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {

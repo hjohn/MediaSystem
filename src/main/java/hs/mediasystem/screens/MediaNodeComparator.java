@@ -1,7 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.fs.MediaItemComparator;
-
 import java.util.Comparator;
 
 public class MediaNodeComparator implements Comparator<MediaNode> {
@@ -9,6 +7,20 @@ public class MediaNodeComparator implements Comparator<MediaNode> {
 
   @Override
   public int compare(MediaNode o1, MediaNode o2) {
-    return MediaItemComparator.INSTANCE.compare(o1.getMediaItem(), o2.getMediaItem());
+    int result = o1.getTitle().compareTo(o2.getTitle());
+
+    if(result == 0) {
+      result = Integer.compare(o1.getSeason() != null ? o1.getSeason() : Integer.MAX_VALUE, o2.getSeason() != null ? o2.getSeason() : Integer.MAX_VALUE);
+
+      if(result == 0) {
+        result = Integer.compare(o1.getEpisode() != null ? o1.getEpisode() : Integer.MAX_VALUE, o2.getEpisode() != null ? o2.getEpisode() : Integer.MAX_VALUE);
+
+        if(result == 0) {
+          result = o1.getSubtitle().compareTo(o2.getSubtitle());
+        }
+      }
+    }
+
+    return result;
   }
 }

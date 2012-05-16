@@ -70,8 +70,9 @@ public class MediaItem {
     episodeRange.set(localInfo.getEpisode() == null ? null : ("" + localInfo.getEpisode() + (localInfo.getEndEpisode() != localInfo.getEpisode() ? "-" + localInfo.getEndEpisode() : "")));
   }
 
-  public MediaItem(MediaTree mediaTree, final LocalInfo<?> localInfo) {
+  public MediaItem(MediaTree mediaTree, final LocalInfo<?> localInfo, boolean enrichable) {
     this(mediaTree, null, localInfo);
+    state = enrichable ? State.STANDARD : State.ENRICHED;
   }
 
   public MediaItem(MediaItem parent, final LocalInfo<?> localInfo) {
@@ -100,10 +101,6 @@ public class MediaItem {
 
   public void setImdbId(String imdbId) {
     this.imdbId = imdbId;
-  }
-
-  public String getShortTitle() {
-    return getTitle();
   }
 
   public String getLanguage() {

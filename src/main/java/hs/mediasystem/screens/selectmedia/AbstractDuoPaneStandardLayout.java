@@ -1,6 +1,5 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.util.GridPaneUtil;
@@ -31,7 +30,7 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
 
     panelGroup.getStyleClass().addAll("content-box-grid");
 
-    detailPane.mediaItemProperty().bind(listPane.mediaItemBinding());
+    detailPane.mediaNodeProperty().bind(listPane.mediaNodeBinding());
 
     root.add(panelGroup, 0, 1);
 
@@ -87,5 +86,5 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
 
   @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected() { return listPane.onNodeSelected(); }
   @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect() { return listPane.onNodeAlternateSelect(); }
-  @Override public ObjectBinding<MediaItem> mediaItemBinding() { return listPane.mediaItemBinding(); }
+  @Override public ObjectBinding<MediaNode> mediaNodeBinding() { return listPane.mediaNodeBinding(); }
 }

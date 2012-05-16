@@ -12,7 +12,7 @@ public class Serie extends MediaItem {
   private List<MediaItem> children;
 
   public Serie(MediaTree mediaTree, LocalInfo<?> localInfo) {
-    super(mediaTree, localInfo);
+    super(mediaTree, localInfo, true);
   }
 
   @Override
