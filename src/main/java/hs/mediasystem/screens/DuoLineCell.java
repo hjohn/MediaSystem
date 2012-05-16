@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -40,7 +39,7 @@ public class DuoLineCell extends HBox {
 
   private final StarRating starRating = new StarRating(7, 3, 5);
 
-  private final FlowPane collection = new FlowPane() {{
+  private final HBox collection = new HBox() {{
     getStyleClass().add("collection-text");
     setAlignment(Pos.CENTER_RIGHT);
     getChildren().add(new Label() {{
