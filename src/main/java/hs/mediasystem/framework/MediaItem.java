@@ -91,6 +91,18 @@ public class MediaItem {
     return localInfo.getType();
   }
 
+  public String getSurrogateName() {
+    return localInfo.getSurrogateName();
+  }
+
+  public String getCode() {
+    return localInfo.getCode();
+  }
+
+  public Object getUserData() {
+    return localInfo.getUserData();
+  }
+
   public String getUri() {
     return localInfo.getUri();
   }
