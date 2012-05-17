@@ -1,5 +1,6 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.Levenshtein;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ import net.sf.jtmdb.MoviePoster;
 
 import org.json.JSONException;
 
-public class TmdbMovieEnricher implements ItemEnricher<Object> {
+public class TmdbMovieEnricher implements ItemEnricher {
 
   @Override
   public String getProviderCode() {
@@ -29,18 +30,18 @@ public class TmdbMovieEnricher implements ItemEnricher<Object> {
   }
 
   @Override
-  public String identifyItem(LocalInfo<Object> localInfo) throws IdentifyException {
+  public String identifyItem(MediaItem mediaItem) throws IdentifyException {
     synchronized(Movie.class) {
-      String title = localInfo.getTitle();
-      String subtitle = localInfo.getSubtitle();
-      String year = localInfo.getReleaseYear() == null ? null : localInfo.getReleaseYear().toString();
-      int seq = localInfo.getEpisode() == null ? 1 : localInfo.getEpisode();
+      String title = mediaItem.getTitle();
+      String subtitle = mediaItem.getSubtitle();
+      String year = mediaItem.getReleaseYear() == null ? null : mediaItem.getReleaseYear().toString();
+      int seq = mediaItem.getEpisode() == null ? 1 : mediaItem.getEpisode();
 
       try {
         String bestMatchingImdbNumber = null;
 
-        if(localInfo.getCode() != null) {
-          bestMatchingImdbNumber = localInfo.getCode();
+        if(mediaItem.getCode() != null) {
+          bestMatchingImdbNumber = mediaItem.getCode();
         }
 
         if(bestMatchingImdbNumber == null) {
@@ -66,7 +67,7 @@ public class TmdbMovieEnricher implements ItemEnricher<Object> {
             if(seq > 1) {
               searchString += " " + seq;
             }
-            if(subtitle != null && subtitle.length() > 0) {
+            if(subtitle.length() > 0) {
               searchString += " " + subtitle;
             }
 
@@ -103,16 +104,16 @@ public class TmdbMovieEnricher implements ItemEnricher<Object> {
           return bestMatchingImdbNumber;
         }
 
-        throw new IdentifyException(localInfo);
+        throw new IdentifyException(mediaItem);
       }
       catch(IOException | JSONException e) {
-        throw new IdentifyException(localInfo, e);
+        throw new IdentifyException(mediaItem, e);
       }
     }
   }
 
   @Override
-  public Item loadItem(String identifier, LocalInfo<Object> localInfo) throws ItemNotFoundException {
+  public Item loadItem(String identifier, MediaItem mediaItem) throws ItemNotFoundException {
     synchronized(Movie.class) {
       String bestMatchingImdbNumber = identifier;
 

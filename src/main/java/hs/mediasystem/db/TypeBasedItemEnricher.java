@@ -1,35 +1,35 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.framework.MediaItem;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class TypeBasedItemEnricher {
-  private static final Map<String, ItemEnricher<?>> ITEM_ENRICHERS = new HashMap<>();
+  private static final Map<String, ItemEnricher> ITEM_ENRICHERS = new HashMap<>();
 
-  public static void registerEnricher(String type, ItemEnricher<?> itemEnricher) {
+  public static void registerEnricher(String type, ItemEnricher itemEnricher) {
     ITEM_ENRICHERS.put(type, itemEnricher);
   }
 
-  public Identifier identifyItem(LocalInfo<Object> localInfo) throws IdentifyException {
-    @SuppressWarnings("unchecked")
-    ItemEnricher<Object> itemEnricher = (ItemEnricher<Object>)ITEM_ENRICHERS.get(localInfo.getType());
+  public Identifier identifyItem(MediaItem mediaItem) throws IdentifyException {
+    ItemEnricher itemEnricher = ITEM_ENRICHERS.get(mediaItem.getMediaType());
 
     if(itemEnricher != null) {
-      return new Identifier(localInfo.getType(), itemEnricher.getProviderCode(), itemEnricher.identifyItem(localInfo));
+      return new Identifier(mediaItem.getMediaType(), itemEnricher.getProviderCode(), itemEnricher.identifyItem(mediaItem));
     }
 
-    throw new IdentifyException("Could not identify " + localInfo + "; no matching enricher: " + localInfo.getType());
+    throw new IdentifyException("Could not identify " + mediaItem + "; no matching enricher: " + mediaItem.getMediaType());
   }
 
-  public Item loadItem(Identifier identifier, LocalInfo<Object> localInfo) throws ItemNotFoundException {
-    @SuppressWarnings("unchecked")
-    ItemEnricher<Object> itemEnricher = (ItemEnricher<Object>) ITEM_ENRICHERS.get(identifier.getType());
+  public Item loadItem(Identifier identifier, MediaItem mediaItem) throws ItemNotFoundException {
+    ItemEnricher itemEnricher = ITEM_ENRICHERS.get(identifier.getType());
 
     if(itemEnricher == null) {
       throw new RuntimeException("No matching enricher for type: " + identifier.getType());
     }
 
-    Item item = itemEnricher.loadItem(identifier.getProviderId(), localInfo);
+    Item item = itemEnricher.loadItem(identifier.getProviderId(), mediaItem);
 
     item.setIdentifier(identifier);
 

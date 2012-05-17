@@ -5,7 +5,6 @@ import hs.mediasystem.db.IdentifyException;
 import hs.mediasystem.db.Item;
 import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.db.ItemsDao;
-import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.db.Source;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.framework.MediaItem;
@@ -173,18 +172,17 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
 
   private abstract class EnrichTask extends Task<Item> {
     protected final Set<MediaItem> mediaItems;
-    protected final LocalInfo<Object> localInfo;
+    protected final MediaItem mediaItem;
 
-    public EnrichTask(String title, LocalInfo<Object> localInfo, Set<MediaItem> mediaItems) {
+    public EnrichTask(String title, MediaItem mediaItem, Set<MediaItem> mediaItems) {
       this.mediaItems = mediaItems;
-      this.localInfo = localInfo;
+      this.mediaItem = mediaItem;
 
       updateTitle(title);
     }
 
-    @SuppressWarnings("unchecked")
     public EnrichTask(final MediaItem mediaItem) {
-      this(mediaItem.getTitle(), (LocalInfo<Object>)mediaItem.getLocalInfo(), new HashSet<MediaItem>() {{
+      this(mediaItem.getTitle(), mediaItem, new HashSet<MediaItem>() {{
         add(mediaItem);
       }});
     }
@@ -214,7 +212,7 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
     @Override
     public Item call() {
       try {
-        identifier = identifyItem(localInfo);
+        identifier = identifyItem(mediaItem);
 
         updateProgress(1, 2);
 
@@ -233,10 +231,10 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
       }
     }
 
-    public Identifier identifyItem(LocalInfo<Object> localInfo) throws ItemNotFoundException {
-      System.out.println("[FINE] MediaItemEnrichmentEventHandler.CachedEnrichTask.identifyItem() - with surrogatename: " + localInfo.getSurrogateName());
+    public Identifier identifyItem(MediaItem mediaItem) throws ItemNotFoundException {
+      System.out.println("[FINE] MediaItemEnrichmentEventHandler.CachedEnrichTask.identifyItem() - with surrogatename: " + mediaItem.getSurrogateName());
 
-      return itemsDao.loadIdentifier(localInfo.getSurrogateName());
+      return itemsDao.loadIdentifier(mediaItem.getSurrogateName());
     }
 
     public Item loadItem(Identifier identifier) throws ItemNotFoundException {
@@ -260,7 +258,7 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
     }
 
     public TypeBasedEnrichTask(CachedEnrichTask task) {
-      super(task.getTitle(), task.localInfo, task.mediaItems);
+      super(task.getTitle(), task.mediaItem, task.mediaItems);
 
       this.identifier = task.getIdentifier();
     }
@@ -269,16 +267,16 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
     public Item call() {
       try {
         if(identifier == null) {
-          identifier = typeBasedItemEnricher.identifyItem(localInfo);
+          identifier = typeBasedItemEnricher.identifyItem(mediaItem);
 
           updateProgress(1, 5);
 
-          itemsDao.storeAsQuery(localInfo.getSurrogateName(), identifier);
+          itemsDao.storeAsQuery(mediaItem.getSurrogateName(), identifier);
 
           updateProgress(2, 5);
         }
 
-        Item item = typeBasedItemEnricher.loadItem(identifier, localInfo);
+        Item item = typeBasedItemEnricher.loadItem(identifier, mediaItem);
 
         updateProgress(3, 5);
 

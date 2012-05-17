@@ -1,12 +1,14 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.framework.MediaItem;
+
 import java.util.List;
 
 import com.moviejukebox.thetvdb.TheTVDB;
 import com.moviejukebox.thetvdb.model.Actor;
 import com.moviejukebox.thetvdb.model.Series;
 
-public class TvdbSerieEnricher implements ItemEnricher<Object> {
+public class TvdbSerieEnricher implements ItemEnricher {
 
   @Override
   public String getProviderCode() {
@@ -14,10 +16,12 @@ public class TvdbSerieEnricher implements ItemEnricher<Object> {
   }
 
   @Override
-  public String identifyItem(final LocalInfo<Object> localInfo) throws IdentifyException {
-    synchronized(TheTVDB.class) {
-      final String name = localInfo.getTitle();
+  public String identifyItem(final MediaItem mediaItem) throws IdentifyException {
+    return identifyItem(mediaItem.getTitle());
+  }
 
+  public String identifyItem(String name) throws IdentifyException {
+    synchronized(TheTVDB.class) {
       TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 
       List<Series> results = tvDB.searchSeries(name, "en");
@@ -25,7 +29,7 @@ public class TvdbSerieEnricher implements ItemEnricher<Object> {
       System.out.println("TVDB results: " + results);
 
       if(results.isEmpty()) {
-        throw new IdentifyException(localInfo);
+        throw new IdentifyException("Cannot identify Serie with name: " + name);
       }
 
       return results.get(0).getId();
@@ -33,7 +37,7 @@ public class TvdbSerieEnricher implements ItemEnricher<Object> {
   }
 
   @Override
-  public Item loadItem(String identifier, LocalInfo<Object> localInfo) throws ItemNotFoundException {
+  public Item loadItem(String identifier, MediaItem mediaItem) throws ItemNotFoundException {
     synchronized(TheTVDB.class) {
       TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 

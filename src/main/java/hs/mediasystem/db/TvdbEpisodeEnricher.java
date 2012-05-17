@@ -1,5 +1,6 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.Levenshtein;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import javax.inject.Inject;
 import com.moviejukebox.thetvdb.TheTVDB;
 import com.moviejukebox.thetvdb.model.Episode;
 
-public class TvdbEpisodeEnricher implements ItemEnricher<Object> {
+public class TvdbEpisodeEnricher implements ItemEnricher {
   private final TvdbSerieEnricher itemIdentifier;
 
   @Inject
@@ -23,20 +24,20 @@ public class TvdbEpisodeEnricher implements ItemEnricher<Object> {
   }
 
   @Override
-  public String identifyItem(final LocalInfo<Object> localInfo) throws IdentifyException {
-    String serieId = itemIdentifier.identifyItem(new LocalInfo<>("TvdbEpisodeEnricher://" + localInfo.getGroupName(), "SERIE", localInfo.getGroupName()));
+  public String identifyItem(final MediaItem mediaItem) throws IdentifyException {
+    String serieId = itemIdentifier.identifyItem(mediaItem.getGroupName());
 
     // TODO may need some TVDB caching here, as we're doing this query twice for each episode... and TVDB returns whole seasons I think
-    Episode episode = findEpisode(serieId, localInfo);
+    Episode episode = findEpisode(serieId, mediaItem);
 
     return serieId + "," + episode.getSeasonNumber() + "," + episode.getEpisodeNumber();  // TODO better would be episode id -- this is done here for specials, with season 0 and a nonsense episode number
   }
 
   @Override
-  public Item loadItem(String identifier, LocalInfo<Object> localInfo) throws ItemNotFoundException {
+  public Item loadItem(String identifier, MediaItem mediaItem) throws ItemNotFoundException {
     String[] split = identifier.split(",");
 
-    Episode episode = findEpisode(split[0], localInfo);
+    Episode episode = findEpisode(split[0], mediaItem);
 
     Item item = new Item();
 
@@ -86,17 +87,17 @@ public class TvdbEpisodeEnricher implements ItemEnricher<Object> {
     return item;
   }
 
-  private static Episode findEpisode(String serieId, LocalInfo<Object> localInfo) {
+  private static Episode findEpisode(String serieId, MediaItem mediaItem) {
     synchronized(TheTVDB.class) {
       TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 
       Episode episode;
 
-      if(localInfo.getSeason() == null) {
-        episode = selectBestMatchByTitle(tvDB, serieId, localInfo.getTitle());
+      if(mediaItem.getSeason() == null) {
+        episode = selectBestMatchByTitle(tvDB, serieId, mediaItem.getTitle());
       }
       else {
-        episode = tvDB.getEpisode(serieId, localInfo.getSeason(), localInfo.getEpisode(), "en");
+        episode = tvDB.getEpisode(serieId, mediaItem.getSeason(), mediaItem.getEpisode(), "en");
       }
 
       System.out.println("[FINE] TvdbEpisodeProvider: serieId = " + serieId + ": Result: " + episode);

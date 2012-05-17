@@ -1,5 +1,7 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.framework.MediaItem;
+
 import java.util.Date;
 import java.util.List;
 
@@ -7,7 +9,7 @@ import com.google.gdata.data.media.mediarss.MediaThumbnail;
 import com.google.gdata.data.youtube.VideoEntry;
 import com.google.gdata.data.youtube.YouTubeMediaGroup;
 
-public class YouTubeEnricher implements ItemEnricher<VideoEntry> {
+public class YouTubeEnricher implements ItemEnricher {
 
   @Override
   public String getProviderCode() {
@@ -15,15 +17,15 @@ public class YouTubeEnricher implements ItemEnricher<VideoEntry> {
   }
 
   @Override
-  public String identifyItem(LocalInfo<VideoEntry> localInfo) throws IdentifyException {
-    System.out.println(">>> identifyItem " + localInfo.getCode());
-    return localInfo.getCode();
+  public String identifyItem(MediaItem mediaItem) throws IdentifyException {
+    System.out.println(">>> identifyItem " + mediaItem.getCode());
+    return mediaItem.getCode();
   }
 
   @Override
-  public Item loadItem(String identifier, LocalInfo<VideoEntry> localInfo) throws ItemNotFoundException {
+  public Item loadItem(String identifier, MediaItem mediaItem) throws ItemNotFoundException {
     System.out.println(">>> loadItem " + identifier);
-    VideoEntry entry = localInfo.getUserData();
+    VideoEntry entry = (VideoEntry)mediaItem.getUserData();
 
     List<MediaThumbnail> thumbnails = entry.getMediaGroup().getThumbnails();
     MediaThumbnail bestThumbnail = null;
