@@ -2,6 +2,7 @@ package hs.mediasystem.db;
 
 import hs.mediasystem.db.Database.Transaction;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -49,23 +50,25 @@ public class ItemsDao {
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
             return new Item() {{
+              BigDecimal rating = (BigDecimal)rs.getObject("rating");
+
               setIdentifier(identifier);
               setId(rs.getInt("id"));
               setImdbId(rs.getString("imdbid"));
               setTitle(rs.getString("title"));
               setSubtitle(rs.getString("subtitle"));
-              setSeason(rs.getInt("season"));
-              setEpisode(rs.getInt("episode"));
+              setSeason((Integer)rs.getObject("season"));
+              setEpisode((Integer)rs.getObject("episode"));
               setReleaseDate(rs.getDate("releasedate"));
               setPlot(rs.getString("plot"));
-              setRating(rs.getFloat("rating"));
-              setRuntime(rs.getInt("runtime"));
+              setRating(rating == null ? null : rating.floatValue());
+              setRuntime((Integer)rs.getObject("runtime"));
               setVersion(rs.getInt("version"));
               setLanguage(rs.getString("language"));
               setTagline(rs.getString("tagline"));
               setViewed(rs.getBoolean("viewed"));
               setResumePosition(rs.getInt("resumeposition"));
-              setMatchAccuracy(rs.getDouble("matchaccuracy"));
+              setMatchAccuracy((Double)rs.getObject("matchaccuracy"));
               setBackgroundURL(rs.getString("backgroundurl"));
               setBannerURL(rs.getString("bannerurl"));
               setPosterURL(rs.getString("posterurl"));
