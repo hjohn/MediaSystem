@@ -34,7 +34,7 @@ public class DatabaseImageSource implements Source<byte[]> {
   }
 
   @Override
-  public byte[] get() {
+  public synchronized byte[] get() {
     if(source != null && !triedSource) {
       triedSource = true;
 
@@ -73,7 +73,7 @@ public class DatabaseImageSource implements Source<byte[]> {
   }
 
   private void storeImage(byte[] data) {
-    System.out.println("[FINE] URLImageSource.storeImage() - Storing image " + tableName + "." + columnName + "(id=" + id + ")");
+    System.out.println("[FINE] DatabaseImageSource.storeImage() - Storing image " + tableName + "." + columnName + "(id=" + id + ")");
 
     try {
       try(Connection connection = connectionProvider.get();
