@@ -1,6 +1,7 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.media.Media;
 
 import java.util.Comparator;
 import java.util.Date;
@@ -11,8 +12,10 @@ public class ChronologicalMediaItemComparator implements Comparator<MediaItem> {
 
   @Override
   public int compare(MediaItem o1, MediaItem o2) {
-    Date d1 = o1.getReleaseDate() == null ? MIN_DATE : o1.getReleaseDate();
-    Date d2 = o2.getReleaseDate() == null ? MIN_DATE : o2.getReleaseDate();
+    Media m1 = o1.get(Media.class);
+    Media m2 = o2.get(Media.class);
+    Date d1 = m1.getReleaseDate() == null ? MIN_DATE : m1.getReleaseDate();
+    Date d2 = m2.getReleaseDate() == null ? MIN_DATE : m2.getReleaseDate();
 
     int result = d1.compareTo(d2);
 

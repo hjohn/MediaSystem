@@ -27,8 +27,8 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
 
     TvdbSerieEnricher serieEnricher = new TvdbSerieEnricher();
 
-    TypeBasedItemEnricher.registerEnricher("SERIE", serieEnricher);
-    TypeBasedItemEnricher.registerEnricher("EPISODE", new TvdbEpisodeEnricher(serieEnricher));
+    TypeBasedItemEnricher.registerEnricher("Serie", serieEnricher);
+    TypeBasedItemEnricher.registerEnricher("Episode", new TvdbEpisodeEnricher(serieEnricher));
   }
 
   @Override

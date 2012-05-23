@@ -2,6 +2,7 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.media.Movie;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -18,16 +19,18 @@ public class MoviesMediaTree extends AbstractMediaTree {
 
   @Override
   public MediaItem getRoot() {
-    return new MediaItem(this, new LocalInfo<>(root.toString(), "MOVIE_ROOT", "Movies"), false) {
+    return new MediaItem("MOVIE_ROOT", this) {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {
-          List<LocalInfo<Object>> scanResults = new EpisodeScanner(new MovieDecoder(), "MOVIE").scan(root);
+          List<LocalInfo> scanResults = new EpisodeScanner(new MovieDecoder()).scan(root);
 
           children = new ArrayList<>();
 
-          for(LocalInfo<Object> localInfo : scanResults) {
-            children.add(new MediaItem(MoviesMediaTree.this, localInfo, true));
+          for(LocalInfo localInfo : scanResults) {
+            Movie movie = new Movie(localInfo.getTitle(), localInfo.getEpisode(), localInfo.getSubtitle(), localInfo.getReleaseYear(), localInfo.getCode());
+
+            children.add(new MediaItem(MoviesMediaTree.this, localInfo.getUri(), true, movie));
           }
         }
 

@@ -1,10 +1,12 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.beans.AsyncImageProperty;
+import hs.mediasystem.media.Media;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.StarRating;
 import hs.mediasystem.util.ImageHandle;
+import hs.mediasystem.util.MapBindings;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.IntegerBinding;
@@ -30,18 +32,18 @@ public class DetailPane extends GridPane {
   private final ObjectProperty<MediaNode> mediaNode = new SimpleObjectProperty<>();
   public ObjectProperty<MediaNode> mediaNodeProperty() { return mediaNode; }
 
-  private final ObjectBinding<ImageHandle> posterHandle = Bindings.select(mediaNode, "poster");
+  private final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaNode, "mediaItem", "dataMap", Media.class, "image");
   private final AsyncImageProperty poster = new AsyncImageProperty();
 
   private final StringBinding groupName = Bindings.selectString(mediaNode, "groupName");
-  private final StringBinding title = Bindings.selectString(mediaNode, "title");
-  private final StringBinding subtitle = Bindings.selectString(mediaNode, "subtitle");
+  private final StringBinding title = MapBindings.selectString(mediaNode, "mediaItem", "dataMap", Media.class, "title");
+  private final StringBinding subtitle = MapBindings.selectString(mediaNode, "mediaItem", "dataMap", Media.class, "subtitle");
   private final StringBinding releaseTime = MediaItemFormatter.releaseTimeBinding(mediaNode);
-  private final StringBinding plot = Bindings.selectString(mediaNode, "plot");
-  private final DoubleBinding rating = Bindings.selectDouble(mediaNode, "rating");
-  private final IntegerBinding runtime = Bindings.selectInteger(mediaNode, "runtime");
+  private final StringBinding plot = MapBindings.selectString(mediaNode, "mediaItem", "dataMap", Media.class, "description");
+  private final DoubleBinding rating = MapBindings.selectDouble(mediaNode, "mediaItem", "dataMap", Media.class, "rating");
+  private final IntegerBinding runtime = MapBindings.selectInteger(mediaNode, "mediaItem", "dataMap", Media.class, "runtime");
   private final StringBinding genres = new StringBinding() {
-    final ObjectBinding<String[]> selectGenres = Bindings.select(mediaNode, "genres");
+    final ObjectBinding<String[]> selectGenres = MapBindings.select(mediaNode, "mediaItem", "dataMap", Media.class, "genres");
 
     {
       bind(selectGenres);

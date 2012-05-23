@@ -3,6 +3,7 @@ package hs.mediasystem.screens;
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.media.Serie;
 import hs.mediasystem.util.WeakBinder;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
@@ -48,8 +49,10 @@ public class BannerCellProvider implements CellProvider<MediaNode> {
       final AsyncImageProperty asyncImageProperty = new AsyncImageProperty();
       StringProperty titleProperty = new SimpleStringProperty();
 
-      binder.bind(titleProperty, item.titleProperty());
-      binder.bind(asyncImageProperty.imageHandleProperty(), item.bannerProperty());
+      Serie serie = item.get(Serie.class);
+
+      binder.bind(titleProperty, item.getMedia().titleProperty());
+      binder.bind(asyncImageProperty.imageHandleProperty(), serie.bannerProperty());
 
       title.setMinHeight(fitWidth * 140 / 758);
 

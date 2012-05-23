@@ -6,7 +6,9 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.fs.EpisodeComparator;
 import hs.mediasystem.fs.MediaItemComparator;
 import hs.mediasystem.fs.SeasonGrouper;
-import hs.mediasystem.fs.TitleGrouper;
+import hs.mediasystem.fs.MovieGrouper;
+import hs.mediasystem.media.Episode;
+import hs.mediasystem.media.Media;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,14 +25,17 @@ public class StandardLayout {
   public CellProvider<MediaNode> getCellProvider(MediaItem parent) {
     String mediaType = parent.getMediaType();
 
-    if(mediaType.equals("SERIE")) {
-      return new SeasonAndEpisodeCellProvider();
+    if(mediaType.equals("Serie")) {
+      return new EpisodeCellProvider();
     }
     else if(mediaType.equals("SERIE_ROOT")) {
       return new BannerCellProvider();
     }
+    else if(mediaType.equals("MOVIES_ROOT")) {
+      return new MovieCellProvider();
+    }
 
-    return new MovieCellProvider();
+    return new StandardCellProvider();
   }
 
   public List<MediaNode> getChildren(MediaNode parentNode) {
@@ -39,12 +44,13 @@ public class StandardLayout {
     List<MediaNode> output = new ArrayList<>();
 
     if(parentItem.getMediaType().equals("MOVIE_ROOT")) {
-      Collection<List<MediaItem>> groupedItems = Groups.group(children, new TitleGrouper());
+      Collection<List<MediaItem>> groupedItems = Groups.group(children, new MovieGrouper());
 
       for(List<MediaItem> group : groupedItems) {
         if(group.size() > 1) {
           Collections.sort(group, MediaItemComparator.INSTANCE);
-          MediaNode episodeGroupNode = new MediaNode(this, null, group.get(0).getTitle(), group.get(0).getReleaseYear(), null);
+          Media media = group.get(0).get(Media.class);
+          MediaNode episodeGroupNode = new MediaNode(this, null, group.get(0).getTitle(), media.getReleaseYear(), null);
 
           List<MediaNode> nodeChildren = new ArrayList<>();
           for(MediaItem item : group) {
@@ -60,12 +66,12 @@ public class StandardLayout {
         }
       }
     }
-    else if(parentItem.getMediaType().equals("SERIE")) {
+    else if(parentItem.getMediaType().equals("Serie")) {
       Collection<List<MediaItem>> groupedItems = Groups.group(children, new SeasonGrouper());
 
       for(List<MediaItem> group : groupedItems) {
-        MediaItem episodeOne = group.get(0);
-        int season = episodeOne.getSeason() == null ? 0 : episodeOne.getSeason();
+        Episode episode = group.get(0).get(Episode.class);
+        int season = episode.getSeason() == null ? 0 : episode.getSeason();
 
         MediaNode seasonNode = new MediaNode(this, parentItem.getTitle(), createTitle(season), null, season);
 
@@ -96,7 +102,7 @@ public class StandardLayout {
   }
 
   public boolean expandTopLevel(MediaItem root) {
-    return root.getMediaType().equals("SERIE");
+    return root.getMediaType().equals("Serie");
   }
 
   public boolean hasChildren(MediaItem mediaItem) {
@@ -106,7 +112,7 @@ public class StandardLayout {
   public boolean isRoot(MediaItem mediaItem) {
     String mediaType = mediaItem.getMediaType();
 
-    return mediaType.equals("MOVIE_ROOT") || mediaType.equals("SERIE_ROOT") || mediaType.equals("SERIE");
+    return mediaType.equals("MOVIE_ROOT") || mediaType.equals("SERIE_ROOT") || mediaType.equals("Serie");
   }
 
   public MediaNode wrap(MediaItem root) {

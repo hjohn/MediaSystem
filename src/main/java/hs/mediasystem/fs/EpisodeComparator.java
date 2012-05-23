@@ -1,6 +1,7 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.media.Episode;
 
 import java.util.Comparator;
 
@@ -9,10 +10,19 @@ public class EpisodeComparator implements Comparator<MediaItem> {
 
   @Override
   public int compare(MediaItem o1, MediaItem o2) {
-    int result = Integer.compare(o1.getSeason() != null ? o1.getSeason() : Integer.MAX_VALUE, o2.getSeason() != null ? o2.getSeason() : Integer.MAX_VALUE);
+    Episode ep1 = o1.get(Episode.class);
+    Episode ep2 = o2.get(Episode.class);
+
+    int s1 = ep1 == null || ep1.getSeason() == null ? Integer.MAX_VALUE : ep1.getSeason();
+    int s2 = ep2 == null || ep2.getSeason() == null ? Integer.MAX_VALUE : ep2.getSeason();
+
+    int result = Integer.compare(s1, s2);
 
     if(result == 0) {
-      result = Integer.compare(o1.getEpisode() != null ? o1.getEpisode() : Integer.MAX_VALUE, o2.getEpisode() != null ? o2.getEpisode() : Integer.MAX_VALUE);
+      int e1 = ep1 == null || ep1.getEpisode() == null ? Integer.MAX_VALUE : ep1.getEpisode();
+      int e2 = ep2 == null || ep2.getEpisode() == null ? Integer.MAX_VALUE : ep2.getEpisode();
+
+      result = Integer.compare(e1, e2);
 
       if(result == 0) {
         result = o1.getTitle().compareTo(o2.getTitle());

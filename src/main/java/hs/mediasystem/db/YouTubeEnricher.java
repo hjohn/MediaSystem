@@ -18,14 +18,14 @@ public class YouTubeEnricher implements ItemEnricher {
 
   @Override
   public String identifyItem(MediaItem mediaItem) throws IdentifyException {
-    System.out.println(">>> identifyItem " + mediaItem.getCode());
-    return mediaItem.getCode();
+    System.out.println(">>> identifyItem " + mediaItem.get(VideoEntry.class).getId());
+    return mediaItem.get(VideoEntry.class).getId();
   }
 
   @Override
   public Item loadItem(String identifier, MediaItem mediaItem) throws ItemNotFoundException {
     System.out.println(">>> loadItem " + identifier);
-    VideoEntry entry = (VideoEntry)mediaItem.getUserData();
+    VideoEntry entry = mediaItem.get(VideoEntry.class);
 
     List<MediaThumbnail> thumbnails = entry.getMediaGroup().getThumbnails();
     MediaThumbnail bestThumbnail = null;

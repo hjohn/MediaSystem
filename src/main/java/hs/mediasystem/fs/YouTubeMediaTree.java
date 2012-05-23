@@ -1,7 +1,7 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.media.Media;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,14 +24,15 @@ public class YouTubeMediaTree extends AbstractMediaTree {
 
   @Override
   public MediaItem getRoot() {
-    return new MediaItem(this, new LocalInfo<>("http://youtube.com", "YOUTUBE_ROOT", "YouTube"), false) {
+    return new MediaItem("YOUTUBE_ROOT", this) {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {
           children = new ArrayList<>();
 
           for(Feed feed : FEEDS) {
-            children.add(new YouTubeFeed(YouTubeMediaTree.this, new LocalInfo<>(feed.getUrl(), "YOUTUBE_FEED", feed.getName()), feed));
+            Media media = new Media(feed.getName());
+            children.add(new YouTubeFeed(YouTubeMediaTree.this, feed.getUrl(), feed, media));
           }
         }
 

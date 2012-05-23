@@ -25,7 +25,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
 
   @Override
   public String identifyItem(final MediaItem mediaItem) throws IdentifyException {
-    String serieId = itemIdentifier.identifyItem(mediaItem.getGroupName());
+    String serieId = itemIdentifier.identifyItem(mediaItem.get(hs.mediasystem.media.Episode.class).getSerie().getTitle());
 
     // TODO may need some TVDB caching here, as we're doing this query twice for each episode... and TVDB returns whole seasons I think
     Episode episode = findEpisode(serieId, mediaItem);
@@ -91,13 +91,14 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
     synchronized(TheTVDB.class) {
       TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 
+      hs.mediasystem.media.Episode ep = mediaItem.get(hs.mediasystem.media.Episode.class);
       Episode episode;
 
-      if(mediaItem.getSeason() == null) {
+      if(ep.getSeason() == null) {
         episode = selectBestMatchByTitle(tvDB, serieId, mediaItem.getTitle());
       }
       else {
-        episode = tvDB.getEpisode(serieId, mediaItem.getSeason(), mediaItem.getEpisode(), "en");
+        episode = tvDB.getEpisode(serieId, ep.getSeason(), ep.getEpisode(), "en");
       }
 
       System.out.println("[FINE] TvdbEpisodeProvider: serieId = " + serieId + ": Result: " + episode);

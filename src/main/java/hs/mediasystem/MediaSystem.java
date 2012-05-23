@@ -3,6 +3,12 @@ package hs.mediasystem;
 import javafx.application.Application;
 
 // TODO Collection view, count, list of items, picture of latest/first (or both), stacked pictures
+// TODO Key repeat for adjusting subtitle delay (from dialog option) seems not working
+// TODO Get rid of LocalInfo being used in enrichers
+// TODO Make MediaItem a dumb class
+// TODO MediaItemEnrichmentEventHandler: identifier once found may actually refer to existing data, no need to load it then (unless caching unwanted)
+// TODO Sorting: Sorting should probably be string-based or something ... MediaNodeComparator does not take sequence or subtitle into account atm
+// TODO SurrogateNames: Need to be cleaned up and made consistent for the various types
 
 // TODO Add some debug prints to debug movie stop problem
 // TODO Banner view -- change layout to get bigger banners
@@ -15,7 +21,7 @@ import javafx.application.Application;
 // TODO Dark colored barely visible information, like time, position, looks cool!
 // TODO Store scroll position
 // TODO Smart highlight of next-to-see episode
-// TODO Mark viewed option
+// TODO Mark viewed option persisted to db
 // TODO ResumePosition. Algorithm: if movie was active for atleast one minute, then store resume position on stop; for viewed, everything upto resume position considered 100% watched
 // TODO Other movie informations, like subtitle/audio delay, selected subtitle/audio track, that are important when resuming movie
 // TODO Make subtitles more persistent by storing them with file, required if you want to show same sub again after resuming

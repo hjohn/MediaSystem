@@ -18,16 +18,17 @@ public class SeriesMediaTree extends AbstractMediaTree {
 
   @Override
   public MediaItem getRoot() {
-    return new MediaItem(this, new LocalInfo<>(root.toString(), "SERIE_ROOT", "Series"), false) {
+    return new MediaItem("SERIE_ROOT", this) {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {
-          List<LocalInfo<Object>> scanResults = new SerieScanner().scan(root);
+          List<LocalInfo> scanResults = new SerieScanner().scan(root);
 
           children = new ArrayList<>();
 
-          for(LocalInfo<Object> localInfo : scanResults) {
-            children.add(new Serie(SeriesMediaTree.this, localInfo));
+          for(LocalInfo localInfo : scanResults) {
+            hs.mediasystem.media.Serie serie = new hs.mediasystem.media.Serie(localInfo.getTitle());
+            children.add(new Serie(SeriesMediaTree.this, localInfo.getUri(), serie));
           }
         }
 

@@ -21,7 +21,7 @@ public class YouTubeMainMenuExtension implements MainMenuExtension {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
     this.enrichmentHandler = enrichmentHandler;
 
-    TypeBasedItemEnricher.registerEnricher("YOUTUBE", new YouTubeEnricher());
+    TypeBasedItemEnricher.registerEnricher("YouTube", new YouTubeEnricher());
   }
 
   @Override

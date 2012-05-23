@@ -1,9 +1,9 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.YouTubeMediaTree.Feed;
+import hs.mediasystem.media.Media;
 
 import java.io.IOException;
 import java.net.URL;
@@ -22,8 +22,8 @@ public class YouTubeFeed extends MediaItem {
 
   private List<MediaItem> children;
 
-  public YouTubeFeed(MediaTree mediaTree, LocalInfo<?> localInfo, Feed feed) {
-    super(mediaTree, localInfo, false);
+  public YouTubeFeed(MediaTree mediaTree, String uri, Feed feed, Media media) {
+    super(mediaTree, uri, false, media);
     this.feed = feed;
   }
 
@@ -46,7 +46,9 @@ public class YouTubeFeed extends MediaItem {
           YouTubeMediaGroup mediaGroup = videoEntry.getMediaGroup();
 
           for(YouTubeMediaContent mediaContent : mediaGroup.getYouTubeContents()) {
-            children.add(new MediaItem(getMediaTree(), new LocalInfo<>(mediaContent.getUrl(), "YOUTUBE", "", videoEntry.getTitle().getPlainText(), null, videoEntry.getMediaGroup().getVideoId(), null, null, null, null, videoEntry), false));
+            YouTubeVideo youTube = new YouTubeVideo(videoEntry.getTitle().getPlainText());
+
+            children.add(new MediaItem(getMediaTree(), mediaContent.getUrl(), false, youTube, videoEntry));
             break;
           }
         }
@@ -57,5 +59,11 @@ public class YouTubeFeed extends MediaItem {
     }
 
     return children;
+  }
+
+  public static class YouTubeVideo extends Media {
+    public YouTubeVideo(String title) {
+      super(title);
+    }
   }
 }

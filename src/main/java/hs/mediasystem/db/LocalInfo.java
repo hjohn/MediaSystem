@@ -1,8 +1,7 @@
 package hs.mediasystem.db;
 
-public class LocalInfo<T> {
+public class LocalInfo {
   private final String uri;
-  private final String mediaType;
   private final String groupName;
   private final String title;
   private final String subtitle;
@@ -11,14 +10,14 @@ public class LocalInfo<T> {
   private final Integer season;
   private final Integer episode;
   private final Integer endEpisode;
-  private final T userData;
 
-  public LocalInfo(String uri, String mediaType, String groupName, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode, Integer endEpisode, T userData) {
+  public LocalInfo(String uri, String groupName, String title, String subtitle, String code, Integer releaseYear, Integer season, Integer episode, Integer endEpisode) {
     assert uri != null;
-    assert mediaType != null;
+    assert title == null || !title.isEmpty();
+    assert subtitle == null || !subtitle.isEmpty();
+    assert code == null || !code.isEmpty();
 
     this.uri = uri;
-    this.mediaType = mediaType;
     this.groupName = groupName;
     this.title = title;
     this.subtitle = subtitle;
@@ -27,31 +26,18 @@ public class LocalInfo<T> {
     this.season = season;
     this.episode = episode;
     this.endEpisode = endEpisode;
-    this.userData = userData;
   }
 
-  public LocalInfo(String uri, String mediaType, String title, Integer releaseYear) {
-    this(uri, mediaType, null, title, null, null, releaseYear, null, null, null, null);
+  public LocalInfo(String uri, String title, Integer releaseYear) {
+    this(uri, null, title, null, null, releaseYear, null, null, null);
   }
 
-  public LocalInfo(String uri, String mediaType, String title) {
-    this(uri, mediaType, null, title, null, null, null, null, null, null, null);
-  }
-
-  public String getSurrogateName() {
-    return mediaType + "/" + (groupName != null ? groupName.toLowerCase() : "") + "/" + (title != null ? title.toLowerCase() : "") + "/" + (subtitle != null ? subtitle.toLowerCase() : "") + "/" + (season == null ? "" : season) + "/" + (episode == null ? "" : episode) + "/" + (releaseYear == null ? "" : releaseYear);
-  }
-
-  public T getUserData() {
-    return userData;
+  public LocalInfo(String uri, String title) {
+    this(uri, null, title, null, null, null, null, null, null);
   }
 
   public String getUri() {
     return uri;
-  }
-
-  public String getType() {
-    return mediaType;
   }
 
   public String getGroupName() {
@@ -99,11 +85,11 @@ public class LocalInfo<T> {
     if(obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    return uri.equals(((LocalInfo<?>)obj).uri);
+    return uri.equals(((LocalInfo)obj).uri);
   }
 
   @Override
   public String toString() {
-    return "LocalInfo('" + title + "', type=" + mediaType + ", season=" + season + ", ep=" + episode + ", uri=" + uri + ")";
+    return "LocalInfo('" + title + "', season=" + season + ", ep=" + episode + ", uri=" + uri + ")";
   }
 }

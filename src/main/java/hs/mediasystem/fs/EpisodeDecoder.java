@@ -16,7 +16,7 @@ public class EpisodeDecoder implements Decoder {
   }
 
   @Override
-  public LocalInfo<?> decode(Path path, String mediaType) {
+  public LocalInfo decode(Path path) {
     DecodeResult result = NameDecoder.decode(path.getFileName().toString());
 
     String sequence = result.getSequence();
@@ -35,6 +35,6 @@ public class EpisodeDecoder implements Decoder {
       endEpisode = split.length > 2 ? Integer.parseInt(split[2]) : episode;
     }
 
-    return new LocalInfo<>(path.toString(), mediaType, serieName, title, null, null, year, season, episode, endEpisode, null);
+    return new LocalInfo(path.toString(), serieName, title, null, null, year, season, episode, endEpisode);
   }
 }

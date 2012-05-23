@@ -24,7 +24,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
     this.enrichmentHandler = enrichmentHandler;
 
-    TypeBasedItemEnricher.registerEnricher("MOVIE", new TmdbMovieEnricher());
+    TypeBasedItemEnricher.registerEnricher("Movie", new TmdbMovieEnricher());
   }
 
   @Override

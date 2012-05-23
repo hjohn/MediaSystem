@@ -32,16 +32,18 @@ public class TmdbMovieEnricher implements ItemEnricher {
   @Override
   public String identifyItem(MediaItem mediaItem) throws IdentifyException {
     synchronized(Movie.class) {
-      String title = mediaItem.getTitle();
-      String subtitle = mediaItem.getSubtitle();
-      String year = mediaItem.getReleaseYear() == null ? null : mediaItem.getReleaseYear().toString();
-      int seq = mediaItem.getEpisode() == null ? 1 : mediaItem.getEpisode();
+      hs.mediasystem.media.Movie itemMovie = mediaItem.get(hs.mediasystem.media.Movie.class);
+
+      String title = itemMovie.getTitle();
+      String subtitle = itemMovie.getSubtitle();
+      String year = itemMovie.getReleaseYear() == null ? null : itemMovie.getReleaseYear().toString();
+      int seq = itemMovie.getSequence() == null ? 1 : itemMovie.getSequence();
 
       try {
         String bestMatchingImdbNumber = null;
 
-        if(mediaItem.getCode() != null) {
-          bestMatchingImdbNumber = mediaItem.getCode();
+        if(mediaItem.get(hs.mediasystem.media.Movie.class) != null) {
+          bestMatchingImdbNumber = mediaItem.get(hs.mediasystem.media.Movie.class).getImdbNumber();
         }
 
         if(bestMatchingImdbNumber == null) {

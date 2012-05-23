@@ -1,8 +1,8 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.db.URLImageSource;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.media.Media;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class NosMediaTree extends AbstractMediaTree {
 
   @Override
   public MediaItem getRoot() {
-    return new MediaItem(this, new LocalInfo<>(URL, "NOS_ROOT", "NOS"), false) {
+    return new MediaItem("NOS_ROOT", this) {
       @Override
       public List<? extends MediaItem> children() {
         if(children == null) {
@@ -58,9 +58,11 @@ public class NosMediaTree extends AbstractMediaTree {
           Matcher matcher2 = pattern2.matcher(vid.toString());
 
           if(matcher2.find()) {
-            MediaItem mediaItem = new MediaItem(this, new LocalInfo<>(matcher2.group(0), "NOS", null, title, meta, null, null, null, null, null, null), false);
+            Media media = new Media(title, meta, null);
 
-            mediaItem.posterProperty().set(new SourceImageHandle(new URLImageSource(thumbUrl), "NosMediaTree:/" + mediaItem.getTitle()));
+            media.imageProperty().set(new SourceImageHandle(new URLImageSource(thumbUrl), "NosMediaTree:/" + title));
+
+            MediaItem mediaItem = new MediaItem(this, matcher2.group(0), false, media);
 
             list.add(mediaItem);
           }

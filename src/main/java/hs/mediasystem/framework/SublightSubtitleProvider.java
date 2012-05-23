@@ -1,5 +1,7 @@
 package hs.mediasystem.framework;
 
+import hs.mediasystem.media.Episode;
+import hs.mediasystem.media.Media;
 import hs.subtitle.SubtitleDescriptor;
 import hs.subtitle.sublight.SublightSubtitleClient;
 
@@ -14,17 +16,17 @@ public class SublightSubtitleProvider implements SubtitleProvider {
 
   @Override
   public List<SubtitleDescriptor> query(MediaItem mediaItem) {
-    Integer year = mediaItem.getReleaseYear();
+    Media media = mediaItem.get(Media.class);
+    Episode ep = mediaItem.get(Episode.class);
 
-    Short season = mediaItem.getSeason() == null ? null : mediaItem.getSeason().shortValue();
-    Integer episode = mediaItem.getEpisode();
+    String title = ep == null ? media.getTitle() : ep.getSerie().getTitle();
+    Short season = ep == null ? null : ep.getSeason().shortValue();
+    Integer episode = ep == null ? null : ep.getEpisode();
+    Integer year = media.getReleaseYear();
 
-    if(season == null) {
-      episode = null;
-    }
-    System.out.println("[FINE] SublightSubtitleProvider.query() - Looking for subtitles: " + mediaItem.getTitle() + "; " +  year + "; " + season + "; " + episode + "; English");
+    System.out.println("[FINE] SublightSubtitleProvider.query() - Looking for subtitles: " + title + "; " +  year + "; " + season + "; " + episode + "; English");
 
-    return client.getSubtitleList(mediaItem.getTitle(), year, season, episode, "English");
+    return client.getSubtitleList(title, year, season, episode, "English");
   }
 
   @Override

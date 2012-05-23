@@ -10,6 +10,9 @@ import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemEvent;
 import hs.mediasystem.fs.SourceImageHandle;
+import hs.mediasystem.media.Media;
+import hs.mediasystem.media.Movie;
+import hs.mediasystem.media.Serie;
 import hs.mediasystem.util.ExecutionQueue;
 import hs.mediasystem.util.ThreadPoolExecutionQueue;
 
@@ -112,21 +115,33 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
     Platform.runLater(new Runnable() {
       @Override
       public void run() {
-        mediaItem.setImdbId(item.getImdbId());
-        mediaItem.officialTitleProperty().set(item.getTitle());
-        mediaItem.backgroundProperty().set(createImageHandle(item.getBackground(), item, "background"));
-        mediaItem.bannerProperty().set(createImageHandle(item.getBanner(), item, "banner"));
-        mediaItem.posterProperty().set(createImageHandle(item.getPoster(), item, "poster"));
-        mediaItem.plotProperty().set(item.getPlot());
-        mediaItem.ratingProperty().set(item.getRating());
-        mediaItem.releaseDateProperty().set(item.getReleaseDate());
-        mediaItem.genresProperty().set(item.getGenres());
-        mediaItem.setLanguage(item.getLanguage());
-        mediaItem.setTagline(item.getTagline());
-        mediaItem.runtimeProperty().set(item.getRuntime());
+        Media media = mediaItem.get(Media.class);
+        Movie movie = mediaItem.get(Movie.class);
+        Serie serie = mediaItem.get(Serie.class);
+
+        if(mediaItem.getMediaType().equals("Episode")) {
+          media.titleProperty().set(item.getTitle());
+        }
+        media.backgroundProperty().set(createImageHandle(item.getBackground(), item, "background"));
+        media.imageProperty().set(createImageHandle(item.getPoster(), item, "poster"));
+        media.descriptionProperty().set(item.getPlot());
+        media.ratingProperty().set(item.getRating());
+        media.runtimeProperty().set(item.getRuntime());
+        media.genresProperty().set(item.getGenres());
+        media.releaseDateProperty().set(item.getReleaseDate());
+
+        if(serie != null) {
+          serie.bannerProperty().set(createImageHandle(item.getBanner(), item, "banner"));
+        }
+        if(movie != null) {
+          movie.languageProperty().set(item.getLanguage());
+          movie.tagLineProperty().set(item.getTagline());
+          movie.imdbNumberProperty().set(item.getImdbId());
+        }
+
         mediaItem.viewedProperty().set(item.isViewed());
-        mediaItem.matchAccuracyProperty().set(item.getMatchAccuracy());
-        mediaItem.resumePositionProperty().set(item.getResumePosition());
+//        mediaItem.matchAccuracyProperty().set(item.getMatchAccuracy());
+//        mediaItem.resumePositionProperty().set(item.getResumePosition());
         mediaItem.setDatabaseId(item.getId());
         mediaItem.setEnriched();
       }
@@ -232,9 +247,9 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
     }
 
     public Identifier identifyItem(MediaItem mediaItem) throws ItemNotFoundException {
-      System.out.println("[FINE] MediaItemEnrichmentEventHandler.CachedEnrichTask.identifyItem() - with surrogatename: " + mediaItem.getSurrogateName());
+      System.out.println("[FINE] MediaItemEnrichmentEventHandler.CachedEnrichTask.identifyItem() - with key: " + mediaItem.getMedia().getKey());
 
-      return itemsDao.loadIdentifier(mediaItem.getSurrogateName());
+      return itemsDao.loadIdentifier(mediaItem.getMedia().getKey());
     }
 
     public Item loadItem(Identifier identifier) throws ItemNotFoundException {
@@ -271,12 +286,12 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
 
           updateProgress(1, 5);
 
-          itemsDao.storeAsQuery(mediaItem.getSurrogateName(), identifier);
+          itemsDao.storeAsQuery(mediaItem.getMedia().getKey(), identifier);
 
           updateProgress(2, 5);
         }
 
-        Item item = typeBasedItemEnricher.loadItem(identifier, mediaItem);
+        Item item = typeBasedItemEnricher.loadItem(identifier, mediaItem);  // TODO identifier once found may actually refer to existing data, no need to load it then (unless caching unwanted)
 
         updateProgress(3, 5);
 

@@ -1,5 +1,8 @@
 package hs.mediasystem.framework;
 
+import hs.mediasystem.media.Episode;
+import hs.mediasystem.media.Media;
+import hs.mediasystem.media.Movie;
 import hs.subtitle.SubtitleDescriptor;
 import hs.subtitle.opensub.OpenSubtitlesClient;
 
@@ -14,19 +17,20 @@ public class OpenSubtitlesSubtitleProvider implements SubtitleProvider {
 
   @Override
   public List<? extends SubtitleDescriptor> query(MediaItem mediaItem) throws SubtitleProviderException {
-    Integer year = mediaItem.getReleaseYear();
+    Media media = mediaItem.get(Media.class);
+    Movie movie = mediaItem.get(Movie.class);
+    Episode ep = mediaItem.get(Episode.class);
 
-    Integer season = mediaItem.getSeason();
-    Integer episode = mediaItem.getEpisode();
-
-    if(season == null) {
-      episode = null;
-    }
+    String title = ep == null ? media.getTitle() : ep.getSerie().getTitle();
+    Integer season = ep == null ? null : ep.getSeason();
+    Integer episode = ep == null ? null : ep.getEpisode();
+    Integer year = media.getReleaseYear();
+    String imdbNumber = movie == null ? null : movie.getImdbNumber();
 
     System.out.println("[FINE] OpenSubtitlesSubtitleProvider.query() - Looking for subtitles: " + mediaItem.getTitle() + "; " +  year + "; " + season + "; " + episode + "; English");
 
     try {
-      return client.getSubtitleList(mediaItem.getImdbId(), season != null ? mediaItem.getGroupName() : mediaItem.getTitle(), season, episode, "eng");
+      return client.getSubtitleList(imdbNumber, title, season, episode, "eng");
     }
     catch(Exception e) {
       throw new SubtitleProviderException(e.getMessage(), e);

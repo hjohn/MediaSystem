@@ -10,17 +10,17 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SerieScanner implements Scanner<LocalInfo<Object>> {
+public class SerieScanner implements Scanner<LocalInfo> {
 
   @Override
-  public List<LocalInfo<Object>> scan(Path scanPath) {
-    List<LocalInfo<Object>> results = new ArrayList<>();
+  public List<LocalInfo> scan(Path scanPath) {
+    List<LocalInfo> results = new ArrayList<>();
 
     try {
       try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
         for(Path path : dirStream) {
           if(Files.isDirectory(path) && !path.getFileName().toString().startsWith(".")) {
-            results.add(new LocalInfo<>(path.toString(), "SERIE", null, path.getFileName().toString(), null, null, null, null, null, null, null));
+            results.add(new LocalInfo(path.toString(), null, path.getFileName().toString(), null, null, null, null, null, null));
           }
         }
       }

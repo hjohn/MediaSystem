@@ -1,11 +1,12 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.media.Media;
+import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ThreadSafeDateFormat;
 
 import java.text.DateFormat;
 import java.util.Date;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.value.ObservableValue;
@@ -13,37 +14,21 @@ import javafx.beans.value.ObservableValue;
 public class MediaItemFormatter {
   private static final ThreadSafeDateFormat DATE_FORMAT = new ThreadSafeDateFormat(DateFormat.getDateInstance(DateFormat.MEDIUM));
 
-  public static StringBinding releaseTimeBinding(final MediaNode node) {
-    return new StringBinding() {
-      {
-        bind(node.releaseDateProperty(), node.releaseYearProperty());
-      }
-
-      @Override
-      protected String computeValue() {
-        String releaseTime = node.getReleaseDate() == null ? null : DATE_FORMAT.format(node.getReleaseDate());
-
-        if(releaseTime == null) {
-          releaseTime = node.getReleaseYear() == null ? "" : "" + node.getReleaseYear();
-        }
-
-        return releaseTime;
-      }
-    };
-  }
-
   public static StringBinding releaseYearBinding(final MediaNode node) {
     return new StringBinding() {
+      final ObjectBinding<Date> selectReleaseDate = MapBindings.select(node.mediaItemProperty(), "dataMap", Media.class, "releaseDate");
+      final ObjectBinding<Integer> selectReleaseYear = MapBindings.select(node.mediaItemProperty(), "dataMap", Media.class, "releaseYear");
+
       {
-        bind(node.releaseDateProperty(), node.releaseYearProperty());
+        bind(selectReleaseDate, selectReleaseYear);
       }
 
       @Override
       protected String computeValue() {
-        String releaseTime = node.getReleaseDate() == null ? null : String.format("%tY", node.getReleaseDate());
+        String releaseTime = selectReleaseDate.get() == null ? null : String.format("%tY", selectReleaseDate.get());
 
         if(releaseTime == null) {
-          releaseTime = node.getReleaseYear() == null ? "" : "" + node.getReleaseYear();
+          releaseTime = selectReleaseYear.get() == null ? "" : "" + selectReleaseYear.get();
         }
 
         return releaseTime;
@@ -51,10 +36,10 @@ public class MediaItemFormatter {
     };
   }
 
-  public static StringBinding releaseTimeBinding(final ObservableValue<MediaNode> item) {
+  public static StringBinding releaseTimeBinding(final ObservableValue<MediaNode> node) {
     return new StringBinding() {
-      final ObjectBinding<Date> selectReleaseDate = Bindings.select(item, "releaseDate");
-      final ObjectBinding<Integer> selectReleaseYear = Bindings.select(item, "releaseYear");
+      final ObjectBinding<Date> selectReleaseDate = MapBindings.select(node, "mediaItem", "dataMap", Media.class, "releaseDate");
+      final ObjectBinding<Integer> selectReleaseYear = MapBindings.select(node, "mediaItem", "dataMap", Media.class, "releaseYear");
 
       {
         bind(selectReleaseDate, selectReleaseYear);

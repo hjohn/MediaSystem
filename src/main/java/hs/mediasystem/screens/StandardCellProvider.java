@@ -7,7 +7,7 @@ import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.WeakBinder;
 import javafx.scene.Node;
 
-public class MovieCellProvider implements CellProvider<MediaNode> {
+public class StandardCellProvider implements CellProvider<MediaNode> {
   private final DuoLineCell cell = new DuoLineCell();
   private final WeakBinder binder = new WeakBinder();
 

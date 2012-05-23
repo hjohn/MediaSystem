@@ -1,13 +1,14 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.beans.AsyncImageProperty;
+import hs.mediasystem.media.Media;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.util.ImageHandle;
+import hs.mediasystem.util.MapBindings;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -26,25 +27,7 @@ public class BackgroundPane extends ScrollPane {
   private final ObjectProperty<MediaNode> mediaNode = new SimpleObjectProperty<>();
   public ObjectProperty<MediaNode> mediaNodeProperty() { return mediaNode; }
 
-  private final ObjectBinding<ImageHandle> backgroundHandle = new ObjectBinding<ImageHandle>() {
-    private final ObjectBinding<ImageHandle> selectBackground = Bindings.select(mediaNode, "background");
-
-    {
-      bind(selectBackground);
-    }
-
-    @Override
-    protected ImageHandle computeValue() {
-      ImageHandle handle = selectBackground.get();
-      MediaNode node = mediaNode.get();
-
-      if(handle == null && node != null && node.getParent() != null) {
-        handle = node.getParent().getBackground();
-      }
-
-      return handle;
-    }
-  };
+  private final ObjectBinding<ImageHandle> backgroundHandle = MapBindings.select(mediaNode, "mediaItem", "dataMap", Media.class, "background");
 
   private final AsyncImageProperty wantedBackground = new AsyncImageProperty();
 

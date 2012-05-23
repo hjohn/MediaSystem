@@ -1,6 +1,8 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.media.Media;
+import hs.mediasystem.media.Movie;
 
 import java.util.Comparator;
 
@@ -12,14 +14,19 @@ public class MediaItemComparator implements Comparator<MediaItem> {
     int result = o1.getTitle().compareTo(o2.getTitle());
 
     if(result == 0) {
-      result = Integer.compare(o1.getSeason() != null ? o1.getSeason() : Integer.MAX_VALUE, o2.getSeason() != null ? o2.getSeason() : Integer.MAX_VALUE);
+      Movie m1 = o1.get(Movie.class);
+      Movie m2 = o2.get(Movie.class);
+
+      Integer s1 = m1 == null || m1.getSequence() == null ? 0 : m1.getSequence();
+      Integer s2 = m2 == null || m2.getSequence() == null ? 0 : m2.getSequence();
+
+      result = Integer.compare(s1, s2);
 
       if(result == 0) {
-        result = Integer.compare(o1.getEpisode() != null ? o1.getEpisode() : Integer.MAX_VALUE, o2.getEpisode() != null ? o2.getEpisode() : Integer.MAX_VALUE);
+        Media media1 = o1.get(Media.class);
+        Media media2 = o2.get(Media.class);
 
-        if(result == 0) {
-          result = o1.getSubtitle().compareTo(o2.getSubtitle());
-        }
+        result = media1.getSubtitle().compareTo(media2.getSubtitle());
       }
     }
 

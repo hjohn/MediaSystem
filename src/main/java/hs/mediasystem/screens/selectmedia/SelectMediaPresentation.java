@@ -2,6 +2,8 @@ package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
+import hs.mediasystem.media.Media;
+import hs.mediasystem.media.Serie;
 import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
@@ -94,9 +96,14 @@ public class SelectMediaPresentation {
             public Boolean call() {
               enrichmentHandler.enrichNoCache(mediaItem);
 
-              ImageCache.expunge(mediaItem.getBanner());
-              ImageCache.expunge(mediaItem.getPoster());
-              ImageCache.expunge(mediaItem.getBackground());
+              Media media = mediaItem.get(Media.class);
+              Serie serie = mediaItem.get(Serie.class);
+
+              if(serie != null) {
+                ImageCache.expunge(serie.getBanner());
+              }
+              ImageCache.expunge(media.getImage());
+              ImageCache.expunge(media.getBackground());
               return true;
             }
           })
