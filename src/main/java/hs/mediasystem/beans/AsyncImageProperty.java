@@ -25,13 +25,21 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
         if(value == State.FAILED) {
           set(null);
         }
+        if(value == State.SUCCEEDED || value == State.CANCELLED || value == State.FAILED) {
+          ImageHandle handle = imageHandle.get();
+          if(handle != null && !handle.equals(imageLoadService.imageHandle)) {
+            loadImageInBackground(handle);
+          }
+        }
       }
     });
 
     imageHandle.addListener(new ChangeListener<ImageHandle>() {
       @Override
       public void changed(ObservableValue<? extends ImageHandle> observable, ImageHandle oldValue, ImageHandle value) {
-        loadImageInBackground(imageHandle.getValue());
+        if(!imageLoadService.isRunning()) {
+          loadImageInBackground(imageHandle.getValue());
+        }
       }
     });
   }
@@ -44,12 +52,7 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
     synchronized(imageLoadService) {
       if(imageHandle != null) {
         imageLoadService.setImageHandle(imageHandle);
-        try {
-          imageLoadService.restart();
-        }
-        catch(IllegalStateException e) {  // WORKAROUND: If this happens, I donot want the whole chain of events to break down, so this exception is swallowed here
-          System.out.println("[FINE] AsyncImageProperty.loadImageInBackground() - WORKAROUND, swallowing IllegalStateException for now");
-        }
+        imageLoadService.restart();
       }
     }
   }
