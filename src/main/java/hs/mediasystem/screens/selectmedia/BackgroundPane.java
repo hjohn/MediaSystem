@@ -65,7 +65,7 @@ public class BackgroundPane extends ScrollPane {
         backgroundImageView.setOpacity(1.0);
         newBackgroundImageView.setOpacity(0.0);
 
-        if(wantedBackground.get() == null || !wantedBackground.get().equals(background.get())) {
+        if((wantedBackground.get() == null && background.get() != null) || (wantedBackground.get() != null && !wantedBackground.get().equals(background.get()))) {
           newBackground.set(wantedBackground.get());
           timeline.play();
         }
