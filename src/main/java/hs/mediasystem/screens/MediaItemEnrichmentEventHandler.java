@@ -143,7 +143,6 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
 //        mediaItem.matchAccuracyProperty().set(item.getMatchAccuracy());
 //        mediaItem.resumePositionProperty().set(item.getResumePosition());
         mediaItem.setDatabaseId(item.getId());
-        mediaItem.setEnriched();
       }
     });
   }
@@ -159,26 +158,33 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
 
     @Override
     public void changed(ObservableValue<? extends State> observable, State oldValue, State newValue) {
-      if(newValue == State.FAILED) {
-        System.out.println("[WARN] Worker " + task.getTitle() + " failed with exception: " + task.getException());
-        task.getException().printStackTrace(System.out);
-      }
       if(newValue == State.FAILED || newValue == State.CANCELLED || newValue == State.SUCCEEDED) {
-        synchronized(enrichTasks) {
-          enrichTasks.remove(uri);
-        }
-      }
-      if(newValue == State.SUCCEEDED) {
         Item item = task.getValue();
 
-        if(item == null) {
-          if(task instanceof CachedEnrichTask) {
-            submitTask(new TypeBasedEnrichTask((CachedEnrichTask)task), uri);
+        if(newValue == State.FAILED) {
+          System.out.println("[WARN] Worker " + task.getTitle() + " failed with exception: " + task.getException());
+          task.getException().printStackTrace(System.out);
+        }
+
+        if(newValue == State.SUCCEEDED && item != null) {
+          for(MediaItem mediaItem : task.getMediaItems()) {
+            mediaItem.setEnriched();
+            enrich(mediaItem, item);
           }
         }
-        else {
-          for(MediaItem mediaItem : task.getMediaItems()) {
-            enrich(mediaItem, item);
+
+        synchronized(enrichTasks) {
+          /*
+           * The removal of the task must be after the MediaItems have been set to Enriched as otherwise they may trigger another enrich.
+           * The removal (of a CachedEnrichTask) must also be before the new TypeBasedEnrichTask is submitted as otherwise the new task
+           * will be removed too early by this code.
+           */
+          enrichTasks.remove(uri);
+        }
+
+        if(newValue == State.SUCCEEDED && item == null) {
+          if(task instanceof CachedEnrichTask) {
+            submitTask(new TypeBasedEnrichTask((CachedEnrichTask)task), uri);
           }
         }
       }
