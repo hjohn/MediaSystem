@@ -64,4 +64,9 @@ public class YouTubeMediaTree extends AbstractMediaTree implements MediaRoot {
 
     return children;
   }
+
+  @Override
+  public String getRootName() {
+    return "YouTube";
+  }
 }

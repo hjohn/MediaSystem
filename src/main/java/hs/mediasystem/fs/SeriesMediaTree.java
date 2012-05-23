@@ -42,4 +42,9 @@ public class SeriesMediaTree extends AbstractMediaTree implements MediaRoot {
 
     return children;
   }
+
+  @Override
+  public String getRootName() {
+    return "Series";
+  }
 }

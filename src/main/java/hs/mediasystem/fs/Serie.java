@@ -43,4 +43,9 @@ public class Serie extends MediaItem implements MediaRoot {
   public List<? extends MediaItem> getItems() {
     return children();
   }
+
+  @Override
+  public String getRootName() {
+    return getTitle();
+  }
 }
