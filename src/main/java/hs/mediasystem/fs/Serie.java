@@ -2,6 +2,7 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.media.Episode;
 
@@ -9,7 +10,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Serie extends MediaItem {
+public class Serie extends MediaItem implements MediaRoot {
   private List<MediaItem> children;
 
   public Serie(MediaTree mediaTree, String uri, hs.mediasystem.media.Serie serie) {
@@ -36,5 +37,10 @@ public class Serie extends MediaItem {
     }
 
     return children;
+  }
+
+  @Override
+  public List<? extends MediaItem> getItems() {
+    return children();
   }
 }

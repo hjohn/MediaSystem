@@ -2,6 +2,7 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.db.URLImageSource;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.media.Media;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-public class NosMediaTree extends AbstractMediaTree {
+public class NosMediaTree extends AbstractMediaTree implements MediaRoot {
   private static final String URL = "http://tv.nos.nl";
 
   private List<MediaItem> children;
@@ -24,11 +25,7 @@ public class NosMediaTree extends AbstractMediaTree {
     return new MediaItem("NOS_ROOT", this) {
       @Override
       public List<? extends MediaItem> children() {
-        if(children == null) {
-          children = getElements();
-        }
-
-        return children;
+        return getItems();
       }
     };
   }
@@ -74,5 +71,14 @@ public class NosMediaTree extends AbstractMediaTree {
     }
 
     return list;
+  }
+
+  @Override
+  public List<? extends MediaItem> getItems() {
+    if(children == null) {
+      children = getElements();
+    }
+
+    return children;
   }
 }
