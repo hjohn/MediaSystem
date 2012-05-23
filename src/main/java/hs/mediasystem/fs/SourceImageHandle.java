@@ -23,4 +23,9 @@ public class SourceImageHandle implements ImageHandle {
   public String getKey() {
     return key;
   }
+
+  @Override
+  public String toString() {
+    return "SourceImageHandle(" + key + ")";
+  }
 }
