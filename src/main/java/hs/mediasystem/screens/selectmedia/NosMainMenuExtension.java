@@ -1,5 +1,6 @@
 package hs.mediasystem.screens.selectmedia;
 
+import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.fs.NosMediaTree;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
@@ -15,6 +16,8 @@ public class NosMainMenuExtension implements MainMenuExtension {
   @Inject
   public NosMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider) {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
+
+    StandardView.registerLayout(NosMediaTree.class, MediaRootType.MOVIES);
   }
 
   @Override

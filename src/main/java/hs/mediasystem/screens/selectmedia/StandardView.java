@@ -1,6 +1,6 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
@@ -8,6 +8,8 @@ import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javafx.beans.property.ObjectProperty;
@@ -103,7 +105,7 @@ public class StandardView extends StackPane implements SelectMediaView {
 
   @Override
   public void setRoot(MediaNode root) {
-    determineAvailableLayouts(root.getMediaItem());
+    determineAvailableLayouts(root.getMediaRoot());
 
     StandardLayoutExtension layoutExtension = availableLayoutExtensions.get(0);
 
@@ -136,22 +138,18 @@ public class StandardView extends StackPane implements SelectMediaView {
     }
   }
 
+  private static final Map<Class<? extends MediaRoot>, MediaRootType> TYPES = new HashMap<>();
+
+  public static void registerLayout(Class<? extends MediaRoot> cls, MediaRootType type) {
+    TYPES.put(cls, type);
+  }
+
   private final ObservableList<StandardLayoutExtension> availableLayoutExtensions = FXCollections.observableArrayList();
 
-  private void determineAvailableLayouts(MediaItem root) {
+  private void determineAvailableLayouts(MediaRoot root) {
     availableLayoutExtensions.clear();
 
-    MediaRootType rootType;
-
-    if(root.getMediaType().equals("SERIE")) {
-      rootType = MediaRootType.SERIE_EPISODES;
-    }
-    else if(root.getMediaType().equals("SERIE_ROOT")) {
-      rootType = MediaRootType.SERIES;
-    }
-    else {
-      rootType = MediaRootType.MOVIES;
-    }
+    MediaRootType rootType = TYPES.get(root.getClass());
 
     for(StandardLayoutExtension extension : selectMediaExtensions) {
       if(extension.getSupportedMediaRootTypes().contains(rootType)) {

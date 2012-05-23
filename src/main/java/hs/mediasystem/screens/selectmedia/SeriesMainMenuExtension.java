@@ -3,6 +3,8 @@ package hs.mediasystem.screens.selectmedia;
 import hs.mediasystem.db.TvdbEpisodeEnricher;
 import hs.mediasystem.db.TvdbSerieEnricher;
 import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.fs.MediaRootType;
+import hs.mediasystem.fs.Serie;
 import hs.mediasystem.fs.SeriesMediaTree;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
@@ -29,6 +31,8 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
 
     TypeBasedItemEnricher.registerEnricher("Serie", serieEnricher);
     TypeBasedItemEnricher.registerEnricher("Episode", new TvdbEpisodeEnricher(serieEnricher));
+    StandardView.registerLayout(SeriesMediaTree.class, MediaRootType.SERIES);
+    StandardView.registerLayout(Serie.class, MediaRootType.SERIE_EPISODES);
   }
 
   @Override

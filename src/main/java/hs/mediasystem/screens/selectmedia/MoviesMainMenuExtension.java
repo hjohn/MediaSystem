@@ -2,6 +2,7 @@ package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.db.TmdbMovieEnricher;
 import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.fs.MoviesMediaTree;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
@@ -25,6 +26,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
     this.enrichmentHandler = enrichmentHandler;
 
     TypeBasedItemEnricher.registerEnricher("Movie", new TmdbMovieEnricher());
+    StandardView.registerLayout(MoviesMediaTree.class, MediaRootType.MOVIES);
   }
 
   @Override

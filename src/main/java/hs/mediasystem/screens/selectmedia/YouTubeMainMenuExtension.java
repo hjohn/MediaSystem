@@ -2,6 +2,7 @@ package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.db.YouTubeEnricher;
+import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.fs.YouTubeMediaTree;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
@@ -22,6 +23,7 @@ public class YouTubeMainMenuExtension implements MainMenuExtension {
     this.enrichmentHandler = enrichmentHandler;
 
     TypeBasedItemEnricher.registerEnricher("YouTube", new YouTubeEnricher());
+    StandardView.registerLayout(YouTubeMediaTree.class, MediaRootType.MOVIES);
   }
 
   @Override
