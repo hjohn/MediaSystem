@@ -3,6 +3,7 @@ package hs.mediasystem.screens;
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.fs.EpisodeComparator;
 import hs.mediasystem.fs.MediaItemComparator;
 import hs.mediasystem.fs.SeasonGrouper;
@@ -115,7 +116,7 @@ public class StandardLayout {
     return mediaType.equals("MOVIE_ROOT") || mediaType.equals("SERIE_ROOT") || mediaType.equals("Serie");
   }
 
-  public MediaNode wrap(MediaItem root) {
+  public MediaNode createRootNode(MediaRoot root) {
     return new MediaNode(this, root);
   }
 

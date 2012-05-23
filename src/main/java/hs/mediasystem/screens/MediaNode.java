@@ -2,6 +2,7 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.CellProvider;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.media.Episode;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.util.MapBindings;
@@ -79,6 +80,18 @@ public class MediaNode {
     this.isLeaf = false;
   }
 
+  private MediaRoot mediaRoot;
+
+  public MediaNode(StandardLayout layout, MediaRoot mediaRoot) {
+    this(layout, null, mediaRoot.getRootName(), null, null);
+
+    this.mediaRoot = mediaRoot;
+  }
+
+  public MediaRoot getMediaRoot() {
+    return mediaRoot;
+  }
+
   public String getId() {
     return id;
   }
@@ -141,7 +154,7 @@ public class MediaNode {
   }
 
   public boolean expandTopLevel() {
-    return layout.expandTopLevel(mediaItem.get());
+    return mediaRoot != null;
   }
 
   @Override

@@ -1,7 +1,7 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.MediaTree;
+import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.media.Serie;
 import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
@@ -74,7 +74,7 @@ public class SelectMediaPresentation {
           controller.play(event.getMediaNode().getMediaItem());
         }
         else {
-          setTreeRoot(event.getMediaNode().getMediaItem());
+          setTreeRoot((MediaRoot)event.getMediaNode().getMediaItem());
         }
         event.consume();
       }
@@ -149,7 +149,7 @@ public class SelectMediaPresentation {
     layout.sortOrderProperty().addListener(new InvalidationListener() {
       @Override
       public void invalidated(Observable observable) {
-        view.setRoot(layout.wrap(currentRoot));
+        view.setRoot(layout.createRootNode(currentRoot));
       }
     });
   }
@@ -158,14 +158,14 @@ public class SelectMediaPresentation {
     return (Node)view;
   }
 
-  private MediaItem currentRoot;
+  private MediaRoot currentRoot;
 
-  private void setTreeRoot(final MediaItem root) {
+  private void setTreeRoot(final MediaRoot root) {
     currentRoot = root;
-    navigator.navigateTo(new Destination(root.getTitle()) {
+    navigator.navigateTo(new Destination(root.getRootName()) {
       @Override
       public void execute() {
-        final MediaNode mediaNode = layout.wrap(root);
+        final MediaNode mediaNode = layout.createRootNode(root);
 
         view.setRoot(mediaNode);
 
@@ -209,7 +209,7 @@ public class SelectMediaPresentation {
     });
   }
 
-  public void setMediaTree(final MediaTree mediaTree) {
-    setTreeRoot(mediaTree.getRoot());
+  public void setMediaTree(final MediaRoot mediaRoot) {
+    setTreeRoot(mediaRoot);
   }
 }
