@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.framework.CellProvider;
+import hs.mediasystem.framework.ConfigurableCell;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.media.Episode;
@@ -149,7 +149,7 @@ public class MediaNode {
     return isLeaf;
   }
 
-  public CellProvider<MediaNode> getCellProvider() {
+  public ConfigurableCell<MediaNode> getCellProvider() {
     return layout.getCellProvider(mediaItem.get());
   }
 

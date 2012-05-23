@@ -1,6 +1,6 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.framework.CellProvider;
+import hs.mediasystem.framework.ConfigurableCell;
 import hs.mediasystem.screens.Filter;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
@@ -217,10 +217,10 @@ public class TreeListPane extends BorderPane implements ListPane {
   }
 
   private final class MediaItemTreeCell extends TreeCell<MediaNode> {
-    private final CellProvider<MediaNode> provider;
+    private final ConfigurableCell<MediaNode> cell;
 
-    MediaItemTreeCell(CellProvider<MediaNode> provider) {
-      this.provider = provider;
+    MediaItemTreeCell(ConfigurableCell<MediaNode> cell) {
+      this.cell = cell;
     }
 
     @Override
@@ -228,7 +228,8 @@ public class TreeListPane extends BorderPane implements ListPane {
       super.updateItem(item, empty);
 
       if(!empty) {
-        Node node = provider.configureCell(item);
+        cell.configureCell(item);
+        Node node = (Node)cell;
 
         double maxWidth = treeView.getWidth() - 35;
         ((Region)node).setMaxWidth(maxWidth);  // WORKAROUND for being unable to restrict cells to the width of the view

@@ -1,7 +1,7 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.framework.CellProvider;
-import hs.mediasystem.screens.BannerCellProvider;
+import hs.mediasystem.framework.ConfigurableCell;
+import hs.mediasystem.screens.BannerCell;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.util.Events;
@@ -13,6 +13,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -70,14 +71,14 @@ public class BannerListPane extends BorderPane implements ListPane {
         leftColumn.setCellFactory(new Callback<TableColumn<DuoMediaNode, MediaNode>, TableCell<DuoMediaNode, MediaNode>>() {
           @Override
           public TableCell<DuoMediaNode, MediaNode> call(TableColumn<DuoMediaNode, MediaNode> column) {
-            return new MediaNodeTableCell(new BannerCellProvider(bannerWidth));
+            return new MediaNodeTableCell(new BannerCell(bannerWidth));
           }
         });
 
         rightColumn.setCellFactory(new Callback<TableColumn<DuoMediaNode, MediaNode>, TableCell<DuoMediaNode, MediaNode>>() {
           @Override
           public TableCell<DuoMediaNode, MediaNode> call(TableColumn<DuoMediaNode, MediaNode> column) {
-            return new MediaNodeTableCell(new BannerCellProvider(bannerWidth));
+            return new MediaNodeTableCell(new BannerCell(bannerWidth));
           }
         });
       }
@@ -178,10 +179,10 @@ public class BannerListPane extends BorderPane implements ListPane {
   }
 
   private static final class MediaNodeTableCell extends TableCell<DuoMediaNode, MediaNode> {
-    private final CellProvider<MediaNode> provider;
+    private final ConfigurableCell<MediaNode> cell;
 
-    MediaNodeTableCell(CellProvider<MediaNode> provider) {
-      this.provider = provider;
+    MediaNodeTableCell(ConfigurableCell<MediaNode> cell) {
+      this.cell = cell;
     }
 
     @Override
@@ -189,7 +190,9 @@ public class BannerListPane extends BorderPane implements ListPane {
       super.updateItem(mediaNode, empty);
 
       if(!empty) {
-        setGraphic(provider.configureCell(mediaNode));
+        cell.configureCell(mediaNode);
+
+        setGraphic((Node)cell);
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
       }
     }

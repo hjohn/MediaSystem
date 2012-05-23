@@ -1,44 +1,42 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.beans.AsyncImageProperty;
-import hs.mediasystem.framework.CellProvider;
+import hs.mediasystem.framework.ConfigurableCell;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.media.Serie;
 import hs.mediasystem.util.WeakBinder;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-public class BannerCellProvider implements CellProvider<MediaNode> {
-  private final HBox group = new HBox();
-  private final int fitWidth;
+public class BannerCell extends HBox implements ConfigurableCell<MediaNode> {
   private final WeakBinder binder = new WeakBinder();
+  private final int fitWidth;
 
   private final Label title = new Label() {{
     setId("selectItem-listCell-title");
   }};
 
-  public BannerCellProvider(int fitWidth) {
+  public BannerCell(int fitWidth) {
     this.fitWidth = fitWidth;
 
-    group.getChildren().add(new VBox() {{
+    getChildren().add(new VBox() {{
       getChildren().add(title);
       HBox.setHgrow(this, Priority.ALWAYS);
     }});
   }
 
-  public BannerCellProvider() {
+  public BannerCell() {
     this(350);
   }
 
   @Override
-  public Node configureCell(MediaNode mediaNode) {
+  public void configureCell(MediaNode mediaNode) {
     final MediaItem item = mediaNode.getMediaItem();
 
     binder.unbindAll();
@@ -63,7 +61,5 @@ public class BannerCellProvider implements CellProvider<MediaNode> {
         setFitWidth(fitWidth);
       }}));
     }
-
-    return group;
   }
 }

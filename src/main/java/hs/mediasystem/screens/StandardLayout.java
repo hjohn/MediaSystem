@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.framework.CellProvider;
+import hs.mediasystem.framework.ConfigurableCell;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
@@ -23,20 +23,20 @@ import javafx.collections.ObservableList;
 
 public class StandardLayout {
 
-  public CellProvider<MediaNode> getCellProvider(MediaItem parent) {
+  public ConfigurableCell<MediaNode> getCellProvider(MediaItem parent) {
     String mediaType = parent.getMediaType();
 
     if(mediaType.equals("Serie")) {
-      return new EpisodeCellProvider();
+      return new EpisodeCell();
     }
     else if(mediaType.equals("SERIE_ROOT")) {
-      return new BannerCellProvider();
+      return new BannerCell();
     }
     else if(mediaType.equals("MOVIES_ROOT")) {
-      return new MovieCellProvider();
+      return new MovieCell();
     }
 
-    return new StandardCellProvider();
+    return new StandardCell();
   }
 
   public List<MediaNode> getChildren(MediaNode parentNode) {
