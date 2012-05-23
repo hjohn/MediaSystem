@@ -1,12 +1,12 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.framework.ConfigurableCell;
+import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.WeakBinder;
 
-public class MovieCell extends DuoLineCell implements ConfigurableCell<MediaNode> {
+public class MovieCell extends DuoLineCell implements MediaNodeCell {
   private final WeakBinder binder = new WeakBinder();
 
   @Override

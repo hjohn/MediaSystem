@@ -1,6 +1,6 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.framework.ConfigurableCell;
+import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.screens.Filter;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
@@ -217,9 +217,9 @@ public class TreeListPane extends BorderPane implements ListPane {
   }
 
   private final class MediaItemTreeCell extends TreeCell<MediaNode> {
-    private final ConfigurableCell<MediaNode> cell;
+    private final MediaNodeCell cell;
 
-    MediaItemTreeCell(ConfigurableCell<MediaNode> cell) {
+    MediaItemTreeCell(MediaNodeCell cell) {
       this.cell = cell;
     }
 

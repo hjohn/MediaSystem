@@ -1,7 +1,7 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.beans.AsyncImageProperty;
-import hs.mediasystem.framework.ConfigurableCell;
+import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.media.Serie;
 import hs.mediasystem.util.WeakBinder;
@@ -14,7 +14,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-public class BannerCell extends HBox implements ConfigurableCell<MediaNode> {
+public class BannerCell extends HBox implements MediaNodeCell {
   private final WeakBinder binder = new WeakBinder();
   private final int fitWidth;
 

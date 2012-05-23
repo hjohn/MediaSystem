@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.framework.ConfigurableCell;
+import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.media.Episode;
 import hs.mediasystem.media.Media;
@@ -10,7 +10,7 @@ import hs.mediasystem.util.WeakBinder;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 
-public class EpisodeCell extends DuoLineCell implements ConfigurableCell<MediaNode> {
+public class EpisodeCell extends DuoLineCell implements MediaNodeCell {
   private final WeakBinder binder = new WeakBinder();
 
   @Override

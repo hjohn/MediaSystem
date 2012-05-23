@@ -1,6 +1,6 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.framework.ConfigurableCell;
+import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.screens.BannerCell;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
@@ -179,9 +179,9 @@ public class BannerListPane extends BorderPane implements ListPane {
   }
 
   private static final class MediaNodeTableCell extends TableCell<DuoMediaNode, MediaNode> {
-    private final ConfigurableCell<MediaNode> cell;
+    private final MediaNodeCell cell;
 
-    MediaNodeTableCell(ConfigurableCell<MediaNode> cell) {
+    MediaNodeTableCell(MediaNodeCell cell) {
       this.cell = cell;
     }
 
