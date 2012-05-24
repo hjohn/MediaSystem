@@ -1,95 +1,72 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.framework.MediaNodeCell;
+import hs.mediasystem.framework.Grouper;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.fs.EpisodeComparator;
 import hs.mediasystem.fs.MediaItemComparator;
-import hs.mediasystem.fs.SeasonGrouper;
 import hs.mediasystem.fs.MovieGrouper;
+import hs.mediasystem.fs.MoviesMediaTree;
+import hs.mediasystem.fs.SeasonGrouper;
+import hs.mediasystem.fs.Serie;
 import hs.mediasystem.media.Episode;
 import hs.mediasystem.media.Media;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.util.Callback;
 
 public class StandardLayout {
+  private static final Map<Class<? extends MediaRoot>, MediaGroup> MEDIA_GROUPS = new HashMap<>();
 
-  public MediaNodeCell getCellProvider(MediaItem parent) {
-    String mediaType = parent.getMediaType();
+  static {
+    MEDIA_GROUPS.put(MoviesMediaTree.class, new MediaGroup(new MovieGrouper(), MediaItemComparator.INSTANCE, false, false) {
+      @Override
+      public Media createMediaFromFirstItem(MediaItem item) {
+        return new Media(item.getTitle(), null, item.getMedia().getReleaseYear());
+      }
+    });
 
-    if(mediaType.equals("Serie")) {
-      return new EpisodeCell();
-    }
-    else if(mediaType.equals("SERIE_ROOT")) {
-      return new BannerCell();
-    }
-    else if(mediaType.equals("MOVIES_ROOT")) {
-      return new MovieCell();
-    }
+    MEDIA_GROUPS.put(Serie.class, new MediaGroup(new SeasonGrouper(), EpisodeComparator.INSTANCE, true, true) {
+      @Override
+      public Media createMediaFromFirstItem(MediaItem item) {
+        Integer season = item.get(Episode.class).getSeason();
 
-    return new StandardCell();
+        return new Media(season == null || season == 0 ? "Specials" : "Season " + season);
+      }
+
+      @Override
+      public String getShortTitle(MediaItem item) {
+        Integer season = item.get(Episode.class).getSeason();
+
+        return season == null || season == 0 ? "Sp." : "" + season;
+      }
+    });
   }
 
-  public List<MediaNode> getChildren(MediaNode parentNode) {
-    MediaItem parentItem = parentNode.getMediaItem();
-    List<? extends MediaItem> children = parentItem.children();
+  private List<MediaNode> getChildren(MediaRoot mediaRoot) {
+    List<? extends MediaItem> children = mediaRoot.getItems();
     List<MediaNode> output = new ArrayList<>();
 
-    if(parentItem.getMediaType().equals("MOVIE_ROOT")) {
-      Collection<List<MediaItem>> groupedItems = Groups.group(children, new MovieGrouper());
+    MediaGroup mediaGroup = MEDIA_GROUPS.get(mediaRoot.getClass());
 
-      for(List<MediaItem> group : groupedItems) {
-        if(group.size() > 1) {
-          Collections.sort(group, MediaItemComparator.INSTANCE);
-          Media media = group.get(0).get(Media.class);
-          MediaNode episodeGroupNode = new MediaNode(this, null, group.get(0).getTitle(), media.getReleaseYear(), null);
-
-          List<MediaNode> nodeChildren = new ArrayList<>();
-          for(MediaItem item : group) {
-            nodeChildren.add(new MediaNode(this, item));
-          }
-
-          episodeGroupNode.setChildren(nodeChildren);
-
-          output.add(episodeGroupNode);
-        }
-        else {
-          output.add(new MediaNode(this, group.get(0)));
-        }
-      }
-    }
-    else if(parentItem.getMediaType().equals("Serie")) {
-      Collection<List<MediaItem>> groupedItems = Groups.group(children, new SeasonGrouper());
-
-      for(List<MediaItem> group : groupedItems) {
-        Episode episode = group.get(0).get(Episode.class);
-        int season = episode.getSeason() == null ? 0 : episode.getSeason();
-
-        MediaNode seasonNode = new MediaNode(this, parentItem.getTitle(), createTitle(season), null, season);
-
-        Collections.sort(group, EpisodeComparator.INSTANCE);
-        List<MediaNode> nodeChildren = new ArrayList<>();
-
-        for(MediaItem item : group) {
-          nodeChildren.add(new MediaNode(this, item));
-        }
-
-        seasonNode.setChildren(nodeChildren);
-        output.add(seasonNode);
-      }
+    if(mediaGroup != null) {
+      output.addAll(applyGroup(children, mediaGroup));
     }
     else {
       for(MediaItem child : children) {
-        output.add(new MediaNode(this, child));
+        output.add(new MediaNode(child));
       }
     }
 
@@ -98,26 +75,45 @@ public class StandardLayout {
     return output;
   }
 
-  private static String createTitle(int season) {
-    return season == 0 ? "Specials" : "Season " + season;
-  }
+  private List<MediaNode> applyGroup(List<? extends MediaItem> children, MediaGroup mediaGroup) {
+    Collection<List<MediaItem>> groupedItems = Groups.group(children, mediaGroup.getGrouper());
+    List<MediaNode> output = new ArrayList<>();
 
-  public boolean expandTopLevel(MediaItem root) {
-    return root.getMediaType().equals("Serie");
-  }
+    for(List<MediaItem> group : groupedItems) {
+      if(group.size() > 1 || mediaGroup.isAllowedSingleItemGroups()) {
+        Collections.sort(group, mediaGroup.getSortComparator());
 
-  public boolean hasChildren(MediaItem mediaItem) {
-    return !mediaItem.isLeaf();
-  }
+        Media media = mediaGroup.createMediaFromFirstItem(group.get(0));
+        String shortTitle = mediaGroup.getShortTitle(group.get(0));
 
-  public boolean isRoot(MediaItem mediaItem) {
-    String mediaType = mediaItem.getMediaType();
+        MediaNode groupNode = new MediaNode(media.getTitle(), shortTitle, media.getReleaseYear());
 
-    return mediaType.equals("MOVIE_ROOT") || mediaType.equals("SERIE_ROOT") || mediaType.equals("Serie");
+        List<MediaNode> nodeChildren = new ArrayList<>();
+
+        for(MediaItem item : group) {
+          nodeChildren.add(new MediaNode(item));
+        }
+
+        groupNode.setChildren(nodeChildren);
+        output.add(groupNode);
+      }
+      else {
+        output.add(new MediaNode(group.get(0)));
+      }
+    }
+
+    return output;
   }
 
   public MediaNode createRootNode(MediaRoot root) {
-    return new MediaNode(this, root);
+    MediaGroup mediaGroup = MEDIA_GROUPS.get(root.getClass());
+
+    return new MediaNode(root, mediaGroup == null ? false : mediaGroup.showTopLevelExpanded(), new Callback<MediaRoot, List<MediaNode>>() {
+      @Override
+      public List<MediaNode> call(MediaRoot mediaRoot) {
+        return getChildren(mediaRoot);
+      }
+    });
   }
 
   private final ObservableList<GroupSet> groupSets = FXCollections.observableArrayList(new GroupSet("(ungrouped)"), new GroupSet("Decade"), new GroupSet("Genre"));
@@ -140,5 +136,44 @@ public class StandardLayout {
 
   public ObjectProperty<SortOrder> sortOrderProperty() {
     return sortOrder;
+  }
+
+  public static abstract class MediaGroup {
+    private final Grouper<MediaItem> grouper;
+    private final Comparator<MediaItem> sortComparator;
+    private final boolean allowSingleItemGroups;
+    private final boolean showTopLevelExpanded;
+
+    public MediaGroup(Grouper<MediaItem> grouper, Comparator<MediaItem> sortComparator, boolean allowSingleItemGroups, boolean showTopLevelExpanded) {
+      this.grouper = grouper;
+      this.sortComparator = sortComparator;
+      this.allowSingleItemGroups = allowSingleItemGroups;
+      this.showTopLevelExpanded = showTopLevelExpanded;
+    }
+
+    public Comparator<? super MediaItem> getSortComparator() {
+      return sortComparator;
+    }
+
+    public boolean isAllowedSingleItemGroups() {
+      return allowSingleItemGroups;
+    }
+
+    public Grouper<MediaItem> getGrouper() {
+      return grouper;
+    }
+
+    public abstract Media createMediaFromFirstItem(MediaItem item);
+
+    /**
+     * @param item a MediaItem
+     */
+    public String getShortTitle(MediaItem item) {
+      return null;
+    }
+
+    public boolean showTopLevelExpanded() {
+      return showTopLevelExpanded;
+    }
   }
 }

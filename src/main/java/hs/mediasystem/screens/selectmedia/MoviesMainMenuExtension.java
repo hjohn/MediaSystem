@@ -2,10 +2,13 @@ package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.db.TmdbMovieEnricher;
 import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.fs.MoviesMediaTree;
+import hs.mediasystem.media.Movie;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
+import hs.mediasystem.screens.MovieCell;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
 
@@ -27,6 +30,12 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
 
     TypeBasedItemEnricher.registerEnricher("Movie", new TmdbMovieEnricher());
     StandardView.registerLayout(MoviesMediaTree.class, MediaRootType.MOVIES);
+    MediaNodeCellProviderRegistry.register(MediaNodeCellProviderRegistry.HORIZONTAL_CELL, Movie.class, new Provider<MovieCell>() {
+      @Override
+      public MovieCell get() {
+        return new MovieCell();
+      }
+    });
   }
 
   @Override

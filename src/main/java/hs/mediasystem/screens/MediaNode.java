@@ -1,9 +1,7 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.media.Episode;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.util.MapBindings;
 
@@ -15,19 +13,12 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.util.Callback;
 
 public class MediaNode {
-  private final StringProperty groupName = new SimpleStringProperty();
-  public String getGroupName() { return groupName.get(); }
-  public StringProperty groupNameProperty() { return groupName; }
-
   private final StringProperty title = new SimpleStringProperty();
   public String getTitle() { return title.get(); }
   public StringProperty titleProperty() { return title; }
-
-  private final ObjectProperty<Integer> season = new SimpleObjectProperty<>();
-  public Integer getSeason() { return season.get(); }
-  public ObjectProperty<Integer> seasonProperty() { return season; }
 
   private final ObjectProperty<Integer> releaseYear = new SimpleObjectProperty<>();
   public Integer getReleaseYear() { return releaseYear.get(); }
@@ -37,59 +28,64 @@ public class MediaNode {
   public MediaItem getMediaItem() { return mediaItem.get(); }
   public ObjectProperty<MediaItem> mediaItemProperty() { return mediaItem; }
 
-  private final StandardLayout layout;
   private final String id;
   private final String shortTitle;
   private final boolean isLeaf;
 
   private MediaNode parent;
   private List<MediaNode> children;
+  private boolean showTopLevelExpanded;
 
-  public MediaNode(StandardLayout layout, MediaItem mediaItem) {
+  public MediaNode(MediaItem mediaItem) {
     assert mediaItem != null;
 
-    this.layout = layout;
     this.mediaItem.set(mediaItem);
     this.id = mediaItem.getUri() == null ? mediaItem.getMediaType() : mediaItem.getUri();
 
     assert this.id != null;
 
-    this.groupName.bind(MapBindings.selectString(mediaItem.dataMapProperty(), Episode.class, "serie", Media.class, "title"));
     this.title.bind(MapBindings.selectString(mediaItem.dataMapProperty(), Media.class, "title"));
-    ObjectBinding<Integer> seasonBinding = MapBindings.select(mediaItem.dataMapProperty(), Episode.class, "season");
-    this.season.bind(seasonBinding);
     ObjectBinding<Integer> releaseYearBinding = MapBindings.select(mediaItem.dataMapProperty(), Media.class, "releaseYear");
     this.releaseYear.bind(releaseYearBinding);
 
     this.shortTitle = "";
-    this.isLeaf = layout.isRoot(mediaItem) || mediaItem.isLeaf();
+    this.isLeaf = mediaItem instanceof MediaRoot || mediaItem.isLeaf();
+    this.dataType = mediaItem.getMedia().getClass();
+    this.showTopLevelExpanded = false;
   }
 
-  public MediaNode(StandardLayout layout, String groupName, String title, Integer releaseYear, Integer season) {
-    this.layout = layout;
-    this.shortTitle = season == null ? "" : (season == 0 ? "Sp." : "" + season);
+  public MediaNode(String title, String shortTitle, Integer releaseYear) {
+    this.showTopLevelExpanded = false;
+    this.shortTitle = shortTitle == null ? title : shortTitle;
     this.mediaItem.set(null);
 
-    this.groupName.set(groupName);
     this.title.set(title);
     this.releaseYear.set(releaseYear);
-    this.season.set(season);
 
-    this.id = "MediaNode://" + title + "/" + releaseYear + "/" + season;
+    this.id = "MediaNode://" + title + "/" + releaseYear;
 
     this.isLeaf = false;
+    this.dataType = Media.class;
   }
 
   private MediaRoot mediaRoot;
+  private final Class<?> dataType;
+  private Callback<MediaRoot, List<MediaNode>> childrenCallback;
 
-  public MediaNode(StandardLayout layout, MediaRoot mediaRoot) {
-    this(layout, null, mediaRoot.getRootName(), null, null);
+  public MediaNode(MediaRoot mediaRoot, boolean showTopLevelExpanded, Callback<MediaRoot, List<MediaNode>> childrenCallback) {
+    this(mediaRoot.getRootName(), null, null);
 
     this.mediaRoot = mediaRoot;
+    this.showTopLevelExpanded = showTopLevelExpanded;
+    this.childrenCallback = childrenCallback;
   }
 
   public MediaRoot getMediaRoot() {
     return mediaRoot;
+  }
+
+  public Class<?> getDataType() {
+    return dataType;
   }
 
   public String getId() {
@@ -139,22 +135,31 @@ public class MediaNode {
 
   public List<MediaNode> getChildren() {
     if(children == null) {
-      setChildren(layout.getChildren(this));
+      if(mediaRoot == null) {
+        List<MediaNode> emptyList = Collections.emptyList();
+        setChildren(emptyList);
+      }
+      else {
+        setChildren(childrenCallback.call(mediaRoot));
+      }
     }
 
     return Collections.unmodifiableList(children);
   }
 
+  /**
+   * Returns <code>true</code> if this MediaNode is a leaf node.  Leaf nodes are either points that cause an action to be taken
+   * (like playing a media) or that cause navigation to occur to a new display or layout.
+   *
+   * @return <code>true</code> if this MediaNode is a leaf node
+   */
   public boolean isLeaf() {
     return isLeaf;
   }
 
-  public MediaNodeCell getCellProvider() {
-    return layout.getCellProvider(mediaItem.get());
-  }
-
+  // Whether or not the top most level of the tree should be displayed as tabs
   public boolean expandTopLevel() {
-    return mediaRoot != null;
+    return showTopLevelExpanded;
   }
 
   @Override
@@ -175,4 +180,5 @@ public class MediaNode {
 
     return id.equals(other.id);
   }
+
 }
