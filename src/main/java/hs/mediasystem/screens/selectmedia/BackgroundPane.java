@@ -27,7 +27,7 @@ public class BackgroundPane extends ScrollPane {
   private final ObjectProperty<MediaNode> mediaNode = new SimpleObjectProperty<>();
   public ObjectProperty<MediaNode> mediaNodeProperty() { return mediaNode; }
 
-  private final ObjectBinding<ImageHandle> backgroundHandle = MapBindings.select(mediaNode, "mediaItem", "dataMap", Media.class, "background");
+  private final ObjectBinding<ImageHandle> backgroundHandle = MapBindings.select(mediaNode, "dataMap", Media.class, "background");
 
   private final AsyncImageProperty wantedBackground = new AsyncImageProperty();
 

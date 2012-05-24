@@ -123,7 +123,7 @@ public class TreeListPane extends BorderPane implements ListPane {
         if(oldLabel != null) {
           oldLabel.setText(((MediaNodeTreeItem)oldValue.getUserData()).getValue().getShortTitle());
         }
-        label.setText(((MediaNodeTreeItem)value.getUserData()).getValue().getTitle());
+        label.setText(((MediaNodeTreeItem)value.getUserData()).getValue().getMedia().getTitle());
 
         refilter();
       }

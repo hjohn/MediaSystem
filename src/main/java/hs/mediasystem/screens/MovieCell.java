@@ -15,14 +15,14 @@ public class MovieCell extends DuoLineCell implements MediaNodeCell {
 
     binder.unbindAll();
 
-    binder.bind(titleProperty(), mediaNode.titleProperty());
-    binder.bind(subtitleProperty(), MapBindings.selectString(mediaNode.mediaItemProperty(), "dataMap", Media.class, "subtitle"));
+    binder.bind(titleProperty(), MapBindings.selectString(mediaNode.dataMapProperty(), Media.class, "title"));
+    binder.bind(subtitleProperty(), MapBindings.selectString(mediaNode.dataMapProperty(), Media.class, "subtitle"));
     binder.bind(extraInfoProperty(), MediaItemFormatter.releaseYearBinding(mediaNode));
 
     collectionSizeProperty().set(mediaNode.getChildren().size());
 
     if(item != null) {
-      binder.bind(ratingProperty(), MapBindings.selectDouble(mediaNode.mediaItemProperty(), "dataMap", Media.class, "rating").divide(10));
+      binder.bind(ratingProperty(), MapBindings.selectDouble(mediaNode.dataMapProperty(), Media.class, "rating").divide(10));
       binder.bind(viewedProperty(), item.viewedProperty());
     }
     else {

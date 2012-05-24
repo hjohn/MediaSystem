@@ -16,8 +16,8 @@ public class MediaItemFormatter {
 
   public static StringBinding releaseYearBinding(final MediaNode node) {
     return new StringBinding() {
-      final ObjectBinding<Date> selectReleaseDate = MapBindings.select(node.mediaItemProperty(), "dataMap", Media.class, "releaseDate");
-      final ObjectBinding<Integer> selectReleaseYear = MapBindings.select(node.mediaItemProperty(), "dataMap", Media.class, "releaseYear");
+      final ObjectBinding<Date> selectReleaseDate = MapBindings.select(node.dataMapProperty(), Media.class, "releaseDate");
+      final ObjectBinding<Integer> selectReleaseYear = MapBindings.select(node.dataMapProperty(), Media.class, "releaseYear");
 
       {
         bind(selectReleaseDate, selectReleaseYear);
@@ -38,8 +38,8 @@ public class MediaItemFormatter {
 
   public static StringBinding releaseTimeBinding(final ObservableValue<MediaNode> node) {
     return new StringBinding() {
-      final ObjectBinding<Date> selectReleaseDate = MapBindings.select(node, "mediaItem", "dataMap", Media.class, "releaseDate");
-      final ObjectBinding<Integer> selectReleaseYear = MapBindings.select(node, "mediaItem", "dataMap", Media.class, "releaseYear");
+      final ObjectBinding<Date> selectReleaseDate = MapBindings.select(node, "dataMap", Media.class, "releaseDate");
+      final ObjectBinding<Integer> selectReleaseYear = MapBindings.select(node, "dataMap", Media.class, "releaseYear");
 
       {
         bind(selectReleaseDate, selectReleaseYear);

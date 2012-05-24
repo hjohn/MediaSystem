@@ -16,12 +16,12 @@ public class EpisodeCell extends DuoLineCell implements MediaNodeCell {
   @Override
   public void configureCell(MediaNode mediaNode) {
     MediaItem item = mediaNode.getMediaItem();
-    StringBinding episodeRange = MapBindings.selectString(mediaNode.mediaItemProperty(), "dataMap", Episode.class, "episodeRange");
+    StringBinding episodeRange = MapBindings.selectString(mediaNode.dataMapProperty(), Episode.class, "episodeRange");
 
     binder.unbindAll();
 
-    binder.bind(titleProperty(), MapBindings.selectString(mediaNode.mediaItemProperty(), "dataMap", Media.class, "title"));
-    binder.bind(ratingProperty(), MapBindings.selectDouble(mediaNode.mediaItemProperty(), "dataMap", Media.class, "rating").divide(10));
+    binder.bind(titleProperty(), MapBindings.selectString(mediaNode.dataMapProperty(), Media.class, "title"));
+    binder.bind(ratingProperty(), MapBindings.selectDouble(mediaNode.dataMapProperty(), Media.class, "rating").divide(10));
     binder.bind(extraInfoProperty(), Bindings.when(episodeRange.isNull()).then(new SimpleStringProperty("Special")).otherwise(episodeRange));
     binder.bind(viewedProperty(), item.viewedProperty());
 

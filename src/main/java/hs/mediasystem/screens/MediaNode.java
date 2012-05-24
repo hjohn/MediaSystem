@@ -3,30 +3,23 @@ package hs.mediasystem.screens;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.media.Media;
-import hs.mediasystem.util.MapBindings;
 
 import java.util.Collections;
 import java.util.List;
 
-import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 import javafx.util.Callback;
 
 public class MediaNode {
-  private final StringProperty title = new SimpleStringProperty();
-  public String getTitle() { return title.get(); }
-  public StringProperty titleProperty() { return title; }
+  private MediaItem mediaItem;
 
-  private final ObjectProperty<Integer> releaseYear = new SimpleObjectProperty<>();
-  public Integer getReleaseYear() { return releaseYear.get(); }
-  public ObjectProperty<Integer> releaseYearProperty() { return releaseYear; }
+  public MediaItem getMediaItem() { return mediaItem; }
 
-  private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
-  public MediaItem getMediaItem() { return mediaItem.get(); }
-  public ObjectProperty<MediaItem> mediaItemProperty() { return mediaItem; }
+  private final ObjectProperty<ObservableMap<Class<?>, Object>> dataMap;
+  public ObjectProperty<ObservableMap<Class<?>, Object>> dataMapProperty() { return dataMap; }
 
   private final String id;
   private final String shortTitle;
@@ -39,14 +32,11 @@ public class MediaNode {
   public MediaNode(MediaItem mediaItem) {
     assert mediaItem != null;
 
-    this.mediaItem.set(mediaItem);
+    this.dataMap = mediaItem.dataMapProperty();
+    this.mediaItem = mediaItem;
     this.id = mediaItem.getUri() == null ? mediaItem.getMediaType() : mediaItem.getUri();
 
     assert this.id != null;
-
-    this.title.bind(MapBindings.selectString(mediaItem.dataMapProperty(), Media.class, "title"));
-    ObjectBinding<Integer> releaseYearBinding = MapBindings.select(mediaItem.dataMapProperty(), Media.class, "releaseYear");
-    this.releaseYear.bind(releaseYearBinding);
 
     this.shortTitle = "";
     this.isLeaf = mediaItem instanceof MediaRoot || mediaItem.isLeaf();
@@ -55,12 +45,13 @@ public class MediaNode {
   }
 
   public MediaNode(String title, String shortTitle, Integer releaseYear) {
+    ObservableMap<Class<?>, Object> data = FXCollections.observableHashMap();
+    this.dataMap = new SimpleObjectProperty<>(data);
+
+    data.put(Media.class, new Media(title, null, releaseYear));
+
     this.showTopLevelExpanded = false;
     this.shortTitle = shortTitle == null ? title : shortTitle;
-    this.mediaItem.set(null);
-
-    this.title.set(title);
-    this.releaseYear.set(releaseYear);
 
     this.id = "MediaNode://" + title + "/" + releaseYear;
 
@@ -179,6 +170,10 @@ public class MediaNode {
     MediaNode other = (MediaNode) obj;
 
     return id.equals(other.id);
+  }
+
+  public Media getMedia() {
+    return (Media)dataMap.get().get(Media.class);
   }
 
 }
