@@ -1,6 +1,7 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.beans.AsyncImageProperty;
+import hs.mediasystem.media.Episode;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.MediaNode;
@@ -35,7 +36,7 @@ public class DetailPane extends GridPane {
   private final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaNode, "mediaItem", "dataMap", Media.class, "image");
   private final AsyncImageProperty poster = new AsyncImageProperty();
 
-  private final StringBinding groupName = Bindings.selectString(mediaNode, "groupName");
+  private final StringBinding groupName = MapBindings.selectString(mediaNode, "mediaItem", "dataMap", Episode.class, "serie", "dataMap", Media.class, "title");
   private final StringBinding title = MapBindings.selectString(mediaNode, "mediaItem", "dataMap", Media.class, "title");
   private final StringBinding subtitle = MapBindings.selectString(mediaNode, "mediaItem", "dataMap", Media.class, "subtitle");
   private final StringBinding releaseTime = MediaItemFormatter.releaseTimeBinding(mediaNode);
