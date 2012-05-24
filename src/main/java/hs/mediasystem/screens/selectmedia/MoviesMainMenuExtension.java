@@ -2,15 +2,21 @@ package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.db.TmdbMovieEnricher;
 import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
+import hs.mediasystem.fs.MediaItemComparator;
 import hs.mediasystem.fs.MediaRootType;
+import hs.mediasystem.fs.MovieGrouper;
 import hs.mediasystem.fs.MoviesMediaTree;
+import hs.mediasystem.media.Media;
 import hs.mediasystem.media.Movie;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.screens.MovieCell;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
+import hs.mediasystem.screens.StandardLayout;
+import hs.mediasystem.screens.StandardLayout.MediaGroup;
 
 import java.nio.file.Paths;
 
@@ -34,6 +40,13 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
       @Override
       public MovieCell get() {
         return new MovieCell();
+      }
+    });
+
+    StandardLayout.registerMediaGroup(MoviesMediaTree.class, new MediaGroup(new MovieGrouper(), MediaItemComparator.INSTANCE, false, false) {
+      @Override
+      public Media createMediaFromFirstItem(MediaItem item) {
+        return new Media(item.getTitle(), null, item.getMedia().getReleaseYear());
       }
     });
   }

@@ -4,13 +4,6 @@ import hs.mediasystem.framework.Grouper;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.fs.EpisodeComparator;
-import hs.mediasystem.fs.MediaItemComparator;
-import hs.mediasystem.fs.MovieGrouper;
-import hs.mediasystem.fs.MoviesMediaTree;
-import hs.mediasystem.fs.SeasonGrouper;
-import hs.mediasystem.fs.Serie;
-import hs.mediasystem.media.Episode;
 import hs.mediasystem.media.Media;
 
 import java.util.ArrayList;
@@ -30,29 +23,8 @@ import javafx.util.Callback;
 public class StandardLayout {
   private static final Map<Class<? extends MediaRoot>, MediaGroup> MEDIA_GROUPS = new HashMap<>();
 
-  static {
-    MEDIA_GROUPS.put(MoviesMediaTree.class, new MediaGroup(new MovieGrouper(), MediaItemComparator.INSTANCE, false, false) {
-      @Override
-      public Media createMediaFromFirstItem(MediaItem item) {
-        return new Media(item.getTitle(), null, item.getMedia().getReleaseYear());
-      }
-    });
-
-    MEDIA_GROUPS.put(Serie.class, new MediaGroup(new SeasonGrouper(), EpisodeComparator.INSTANCE, true, true) {
-      @Override
-      public Media createMediaFromFirstItem(MediaItem item) {
-        Integer season = item.get(Episode.class).getSeason();
-
-        return new Media(season == null || season == 0 ? "Specials" : "Season " + season);
-      }
-
-      @Override
-      public String getShortTitle(MediaItem item) {
-        Integer season = item.get(Episode.class).getSeason();
-
-        return season == null || season == 0 ? "Sp." : "" + season;
-      }
-    });
+  public static void registerMediaGroup(Class<? extends MediaRoot> mediaRootClass, MediaGroup mediaGroup) {
+    MEDIA_GROUPS.put(mediaRootClass, mediaGroup);
   }
 
   private List<MediaNode> getChildren(MediaRoot mediaRoot) {
