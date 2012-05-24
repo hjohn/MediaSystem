@@ -8,19 +8,14 @@ Features
 * Select video to view from a nicely styled list
 * Groups videos by season and series
 * Downloads meta information about videos from TMDB (www.themoviedb.org) and TVDB (thetvdb.com)
-* Capable of downloading subtitles from Sublight (www.sublight.si)
-
-Coming soon
------------
-* Support for remote control
-* Plug-in system
+* Capable of downloading subtitles from Sublight (www.sublight.si) and OpenSubtitles.org (www.opensubtitles.org)
 
 Requirements
 ------------
 * Java Runtime Environment 1.7+ installed
-* JavaFX 2.0.2+ installed
+* JavaFX 2.1 installed
 * PostgreSQL database installed
-* VLC player 1.2.0+ installed
+* VLC player 2.0+ installed
 
 
 
