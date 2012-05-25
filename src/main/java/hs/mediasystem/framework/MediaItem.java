@@ -1,5 +1,6 @@
 package hs.mediasystem.framework;
 
+import hs.mediasystem.db.MediaId;
 import hs.mediasystem.media.EnrichableDataObject;
 import hs.mediasystem.media.Media;
 
@@ -142,4 +143,14 @@ public class MediaItem {
   };
   public boolean isViewed() { return viewed.get(); }
   public BooleanProperty viewedProperty() { return viewed; }
+
+  private MediaId mediaId;
+
+  public MediaId getMediaId() {
+    return mediaId;
+  }
+
+  public void setMediaId(MediaId mediaId) {
+    this.mediaId = mediaId;
+  }
 }
