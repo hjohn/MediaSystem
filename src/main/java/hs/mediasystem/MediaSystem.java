@@ -4,11 +4,12 @@ import javafx.application.Application;
 
 // TODO Collection view, count, list of items, picture of latest/first (or both), stacked pictures
 // TODO Key repeat for adjusting subtitle delay (from dialog option) seems not working
-// TODO Get rid of LocalInfo being used in enrichers
 // TODO Make MediaItem a dumb class
-// TODO MediaItemEnrichmentEventHandler: identifier once found may actually refer to existing data, no need to load it then (unless caching unwanted)
 // TODO Sorting: Sorting should probably be string-based or something ... MediaNodeComparator does not take sequence or subtitle into account atm
-// TODO SurrogateNames: Need to be cleaned up and made consistent for the various types
+// TODO Items Table: releaseYear present, but never read... delete?
+// TODO Items Table: in java space, rating=float... why not in db then?
+// TODO Castings Table: it is possible that a person is an actor as well as the director of an episode, which causes a pk violation as "role" is not included as part of the key
+// TODO New MediaData with uri and hash is great, but hash collisions can still easily occur when you simply have two copies of the same file
 
 // TODO Add some debug prints to debug movie stop problem
 // TODO Banner view -- change layout to get bigger banners
@@ -48,8 +49,6 @@ import javafx.application.Application;
 // TODO Rename Filter to TabGroup -- or refactor completely to use RadioButton API
 // TODO Database: Some generalization possible in the DAO's
 // TODO [Playback] Main overlay only visible when asked for (info)
-// TODO Store match quality -- occurs in identifyItem, but string returned is stored to DB.  Q: Should match accuracy not actually be associated with identifier?
-// TODO ItemEnrichers really should only return relevant data, not a database Item instance
 // TODO Options Screen: Modal navigation should use own Navigator as well?
 // TODO Make plug-ins of various looks of Select Media
 // TODO Make plug-ins from MediaTrees
@@ -179,11 +178,55 @@ import javafx.application.Application;
 //   - Communication: Java, low-level interface
 //   - Problems: A lot of stuff needs to be done yourself, including creating a frame decoding loop with multiple threads (have working test case); subtitles will need to be decoded yourself; audio looks to be limited to only stereo
 
-// Movies: 222 (alpha)
-// Series(Black Adder): Season 4,2 (alpha)
-// Series: Black Adder (alpha)
-// Movies: 22 (group=genre:action,alpha)
-// Movies: 54 (chrono)
+// Plugins
+// =======
+//
+// MoviesMainMenuExtension
+//   - enrichers
+//   - StandardView
+//
+// HorizontalCellTypeExtension
+//   provides: HorizontalCellType
+//
+// MovieCellProviderExtension
+//   requires: MoviesMainMenuExtension
+//   requires: HorizontalCellTypeExtension
+//   requires: DuoLineCellExtension
+//   provides: MovieCellProvider
+//
+// TreeListPaneExtension
+//   requires: HorizontalCellTypeExtension
+//
+// File recognition
+// ================
+// * store full path, filesize, file creation date, hash
+//
+// Normal Flow:
+// - Matches on Path, Filesize, Creation Date (QUICK MATCH)
+//
+// Filesize and or Creation Date changed (transcoded file):
+// - Matches on Path (QUICK MATCH)
+// - Update Filesize, Creation Date, Hash
+//
+// Moved File with good partial path match (at very least file name must match, perhaps see if it has enough entropy) [optional advanced matcher]:
+// - Matches on Filesize, Creation Date and partial Path match (QUICK MATCH)
+// - Update Path
+//
+// Moved File unable to match without hashing (Hashing is relatively expensive so should be used sparingly):
+// - No match found (or only matches that match on Filesize)
+// - Calculate Hash as we are probably going to want to create a new entry anyway
+// - Check Hash against DB
+// - Found Hash match (LOCAL MATCH)
+// - Update Path, Creation Date (Filesize not needed as this must match already as it is included in Hash)
+//
+// New File:
+// - No match found
+// - Calculate Hash as we are probably going to want to create a new entry anyway
+// - Check Hash against DB
+// - No Hash match, must be new file (NEW ENTRY)
+
+
+
 
 public class MediaSystem {
 
