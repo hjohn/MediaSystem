@@ -12,11 +12,11 @@ public class TypeBasedItemEnricher {
     ITEM_ENRICHERS.put(type, itemEnricher);
   }
 
-  public Identifier identifyItem(MediaItem mediaItem) throws IdentifyException {
+  public EnricherMatch identifyItem(MediaItem mediaItem) throws IdentifyException {
     ItemEnricher itemEnricher = ITEM_ENRICHERS.get(mediaItem.getMediaType());
 
     if(itemEnricher != null) {
-      return new Identifier(mediaItem.getMediaType(), itemEnricher.getProviderCode(), itemEnricher.identifyItem(mediaItem));
+      return itemEnricher.identifyItem(mediaItem);
     }
 
     throw new IdentifyException("Could not identify " + mediaItem + "; no matching enricher: " + mediaItem.getMediaType());

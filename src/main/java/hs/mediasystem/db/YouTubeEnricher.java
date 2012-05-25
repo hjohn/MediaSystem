@@ -1,5 +1,6 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.db.MediaData.MatchType;
 import hs.mediasystem.framework.MediaItem;
 
 import java.util.Date;
@@ -17,9 +18,9 @@ public class YouTubeEnricher implements ItemEnricher {
   }
 
   @Override
-  public String identifyItem(MediaItem mediaItem) throws IdentifyException {
+  public EnricherMatch identifyItem(MediaItem mediaItem) throws IdentifyException {
     System.out.println(">>> identifyItem " + mediaItem.get(VideoEntry.class).getId());
-    return mediaItem.get(VideoEntry.class).getId();
+    return new EnricherMatch(new Identifier(mediaItem.getMediaType(), getProviderCode(), mediaItem.get(VideoEntry.class).getId()), MatchType.ID, 1.0f);
   }
 
   @Override

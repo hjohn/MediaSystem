@@ -1,10 +1,14 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.db.EnricherMatch;
 import hs.mediasystem.db.Identifier;
 import hs.mediasystem.db.IdentifyException;
 import hs.mediasystem.db.Item;
 import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.db.ItemsDao;
+import hs.mediasystem.db.MediaData;
+import hs.mediasystem.db.MediaHash;
+import hs.mediasystem.db.MediaId;
 import hs.mediasystem.db.Source;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.framework.MediaItem;
@@ -16,6 +20,10 @@ import hs.mediasystem.media.Serie;
 import hs.mediasystem.util.ExecutionQueue;
 import hs.mediasystem.util.ThreadPoolExecutionQueue;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -218,7 +226,7 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
   }
 
   private final class CachedEnrichTask extends EnrichTask {
-    private Identifier identifier;
+    private MediaData mediaData;
 
     public CachedEnrichTask(final MediaItem mediaItem) {
       super(mediaItem);
@@ -226,18 +234,18 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
       updateProgress(0, 2);
     }
 
-    public Identifier getIdentifier() {
-      return identifier;
+    public MediaData getMediaData() {
+      return mediaData;
     }
 
     @Override
-    public Item call() {
+    public Item call() throws IOException {
       try {
-        identifier = identifyItem(mediaItem);
+        mediaData = identifyItem(mediaItem);
 
         updateProgress(1, 2);
 
-        Item item = loadItem(identifier);
+        Item item = loadItem(mediaData.getIdentifier());
 
         if(item.getVersion() < ItemsDao.VERSION) {
           return null;
@@ -252,11 +260,28 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
       }
     }
 
-    public Identifier identifyItem(MediaItem mediaItem) throws ItemNotFoundException {
-      System.out.println("[FINE] MediaItemEnrichmentEventHandler.CachedEnrichTask.identifyItem() - with key: " + mediaItem.getMedia().getKey());
+    public MediaData identifyItem(MediaItem mediaItem) throws ItemNotFoundException {
+      MediaData mediaData = itemsDao.getMediaDataByUri(mediaItem.getUri());
 
-      return itemsDao.loadIdentifier(mediaItem.getMedia().getKey());
+      if(mediaData == null) {
+        MediaId mediaId = createMediaId(mediaItem.getUri());
+
+        mediaItem.setMediaId(mediaId);
+        mediaData = itemsDao.getMediaDataByHash(mediaId.getHash());
+
+        if(mediaData == null) {
+          throw new ItemNotFoundException("Unable to get MediaData by uri or hash");
+        }
+
+        mediaData.setUri(mediaItem.getUri());  // replace uri, as it didn't match anymore
+        mediaData.setMediaId(mediaId);  // replace mediaId, even though hash matches, to update the other values just in case
+
+        itemsDao.updateMediaData(mediaData);
+      }
+
+      return mediaData;
     }
+
 
     public Item loadItem(Identifier identifier) throws ItemNotFoundException {
       System.out.println("[FINE] MediaItemEnrichmentEventHandler.CachedEnrichTask.loadItem() - Loading from Cache: " + identifier);
@@ -269,55 +294,70 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
   }
 
   private final class TypeBasedEnrichTask extends EnrichTask {
-    private Identifier identifier;
+    private boolean bypassCache;
+    private MediaData mediaData;
 
     public TypeBasedEnrichTask(MediaItem mediaItem) {
       super(mediaItem);
 
       updateProgress(0, 5);
       updateTitle(mediaItem.getTitle());
+
+      bypassCache = true;
     }
 
     public TypeBasedEnrichTask(CachedEnrichTask task) {
       super(task.getTitle(), task.mediaItem, task.mediaItems);
 
-      this.identifier = task.getIdentifier();
+      this.mediaData = task.getMediaData();
     }
 
     @Override
     public Item call() {
       try {
-        if(identifier == null) {
-          identifier = typeBasedItemEnricher.identifyItem(mediaItem);
+        if(mediaData == null) {
+          EnricherMatch enricherMatch = typeBasedItemEnricher.identifyItem(mediaItem);
 
           updateProgress(1, 5);
 
-          itemsDao.storeAsQuery(mediaItem.getMedia().getKey(), identifier);
+          MediaId mediaId = mediaItem.getMediaId() == null ? createMediaId(mediaItem.getUri()) : mediaItem.getMediaId();
+
+          mediaData = new MediaData();
+
+          mediaData.setIdentifier(enricherMatch.getIdentifier());
+          mediaData.setMediaId(mediaId);
+          mediaData.setUri(mediaItem.getUri());
+          mediaData.setMatchType(enricherMatch.getMatchType());
+          mediaData.setMatchAccuracy(enricherMatch.getMatchAccuracy());
+
+          itemsDao.storeMediaData(mediaData);
 
           updateProgress(2, 5);
         }
 
-        Item item = typeBasedItemEnricher.loadItem(identifier, mediaItem);  // TODO identifier once found may actually refer to existing data, no need to load it then (unless caching unwanted)
-
-        updateProgress(3, 5);
-
         Item oldItem;
 
         try {
-          oldItem = itemsDao.loadItem(identifier);
+          oldItem = itemsDao.loadItem(mediaData.getIdentifier());
         }
         catch(ItemNotFoundException e) {
           oldItem = null;
         }
 
+        updateProgress(3, 5);
+
+        Item item = bypassCache || oldItem == null ? typeBasedItemEnricher.loadItem(mediaData.getIdentifier(), mediaItem) : oldItem;
+
         updateProgress(4, 5);
 
-        if(oldItem != null) {
-          item.setId(oldItem.getId());
-          itemsDao.updateItem(item);
-        }
-        else {
-          itemsDao.storeItem(item);
+        if(!item.equals(oldItem)) {
+          if(oldItem != null) {
+            item.setId(oldItem.getId());
+            itemsDao.updateItem(item);
+          }
+          else {
+            itemsDao.storeItem(item);
+          }
         }
 
         updateProgress(5, 5);
@@ -330,6 +370,23 @@ public class MediaItemEnrichmentEventHandler implements EventHandler<MediaItemEv
       catch(ItemNotFoundException e) {
         throw new RuntimeException(e);
       }
+    }
+  }
+
+  private MediaId createMediaId(String uri) {
+    try {
+      Path path = Paths.get(uri);
+      boolean isDirectory = Files.isDirectory(path);
+
+      return new MediaId(
+        isDirectory ? 0 : Files.size(path),
+        Files.getLastModifiedTime(path).toMillis(),
+        isDirectory ? null : MediaHash.loadMediaHash(path),
+        isDirectory ? null : MediaHash.loadOpenSubtitlesHash(path)
+      );
+    }
+    catch(IOException e) {
+      throw new RuntimeException(e);
     }
   }
 }

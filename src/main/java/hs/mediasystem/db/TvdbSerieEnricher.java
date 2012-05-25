@@ -1,5 +1,6 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.db.MediaData.MatchType;
 import hs.mediasystem.framework.MediaItem;
 
 import java.util.List;
@@ -16,23 +17,19 @@ public class TvdbSerieEnricher implements ItemEnricher {
   }
 
   @Override
-  public String identifyItem(final MediaItem mediaItem) throws IdentifyException {
-    return identifyItem(mediaItem.getTitle());
-  }
-
-  public String identifyItem(String name) throws IdentifyException {
+  public EnricherMatch identifyItem(final MediaItem mediaItem) throws IdentifyException {
     synchronized(TheTVDB.class) {
       TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 
-      List<Series> results = tvDB.searchSeries(name, "en");
+      List<Series> results = tvDB.searchSeries(mediaItem.getTitle(), "en");
 
       System.out.println("TVDB results: " + results);
 
       if(results.isEmpty()) {
-        throw new IdentifyException("Cannot identify Serie with name: " + name);
+        throw new IdentifyException("Cannot identify Serie with name: " + mediaItem.getTitle());
       }
 
-      return results.get(0).getId();
+      return new EnricherMatch(new Identifier("Serie", getProviderCode(), results.get(0).getId()), MatchType.NAME, 1.0f);
     }
   }
 

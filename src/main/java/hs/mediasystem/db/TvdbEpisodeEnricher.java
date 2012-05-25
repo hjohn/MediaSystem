@@ -1,5 +1,6 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.db.MediaData.MatchType;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.Levenshtein;
 
@@ -24,20 +25,30 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
   }
 
   @Override
-  public String identifyItem(final MediaItem mediaItem) throws IdentifyException {
-    String serieId = itemIdentifier.identifyItem(mediaItem.get(hs.mediasystem.media.Episode.class).getSerie().getTitle());
+  public EnricherMatch identifyItem(final MediaItem mediaItem) throws IdentifyException {
+    EnricherMatch serieMatch = itemIdentifier.identifyItem(mediaItem.get(hs.mediasystem.media.Episode.class).getSerie());
 
     // TODO may need some TVDB caching here, as we're doing this query twice for each episode... and TVDB returns whole seasons I think
-    Episode episode = findEpisode(serieId, mediaItem);
+    EpisodeSearchResult result = findEpisode(serieMatch.getIdentifier().getProviderId(), mediaItem);
 
-    return serieId + "," + episode.getSeasonNumber() + "," + episode.getEpisodeNumber();  // TODO better would be episode id -- this is done here for specials, with season 0 and a nonsense episode number
+    if(result == null) {
+      throw new IdentifyException("unable to find episode with serieId " + serieMatch.getIdentifier().getProviderId() + " and " + mediaItem);
+    }
+
+    return new EnricherMatch(new Identifier(mediaItem.getMediaType(), getProviderCode(), serieMatch.getIdentifier().getProviderId() + "," + result.episode.getSeasonNumber() + "," + result.episode.getEpisodeNumber()), result.matchType, result.matchAccuracy);  // TODO better would be episode id -- this is done here for specials, with season 0 and a nonsense episode number
   }
 
   @Override
   public Item loadItem(String identifier, MediaItem mediaItem) throws ItemNotFoundException {
     String[] split = identifier.split(",");
 
-    Episode episode = findEpisode(split[0], mediaItem);
+    EpisodeSearchResult result = findEpisode(split[0], mediaItem);
+
+    if(result == null) {
+      throw new ItemNotFoundException("unable to find episode with serieId " + split[0] + " and " + mediaItem);
+    }
+
+    Episode episode = result.episode;
 
     Item item = new Item();
 
@@ -87,27 +98,29 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
     return item;
   }
 
-  private static Episode findEpisode(String serieId, MediaItem mediaItem) {
+  private static EpisodeSearchResult findEpisode(String serieId, MediaItem mediaItem) {
     synchronized(TheTVDB.class) {
       TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 
       hs.mediasystem.media.Episode ep = mediaItem.get(hs.mediasystem.media.Episode.class);
-      Episode episode;
+      EpisodeSearchResult result;
 
       if(ep.getSeason() == null) {
-        episode = selectBestMatchByTitle(tvDB, serieId, mediaItem.getTitle());
+        result = selectBestMatchByTitle(tvDB, serieId, mediaItem.getTitle());
       }
       else {
-        episode = tvDB.getEpisode(serieId, ep.getSeason(), ep.getEpisode(), "en");
+        Episode episode = tvDB.getEpisode(serieId, ep.getSeason(), ep.getEpisode(), "en");
+
+        result = new EpisodeSearchResult(episode, MatchType.ID, 1.0f);
       }
 
-      System.out.println("[FINE] TvdbEpisodeProvider: serieId = " + serieId + ": Result: " + episode);
+      System.out.println("[FINE] TvdbEpisodeProvider: serieId = " + serieId + ": Result: " + result);
 
-      return episode;
+      return result;
     }
   }
 
-  private static Episode selectBestMatchByTitle(TheTVDB tvDB, String key, String matchString) {
+  private static EpisodeSearchResult selectBestMatchByTitle(TheTVDB tvDB, String key, String matchString) {
     List<Episode> episodes = tvDB.getSeasonEpisodes(key, 0, "en");
     Episode bestMatch = null;
     double bestScore = -1;
@@ -125,6 +138,22 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
       System.out.println("[FINE] TvdbEpisodeEnricher.selectBestMatch() - " + String.format("Match: %5.1f (%4.2f) -- %s", matchScore * 100, matchScore, episode.getEpisodeName()));
     }
 
-    return bestMatch;
+    return bestMatch == null ? null : new EpisodeSearchResult(bestMatch, MatchType.NAME, (float)bestScore);
+  }
+
+  private static class EpisodeSearchResult {
+    private final Episode episode;
+    private final MatchType matchType;
+    private final float matchAccuracy;
+
+    public EpisodeSearchResult(Episode episode, MatchType matchType, float matchAccuracy) {
+      assert episode != null;
+      assert matchType != null;
+      assert matchAccuracy >= 0 && matchAccuracy <= 1.0;
+
+      this.episode = episode;
+      this.matchType = matchType;
+      this.matchAccuracy = matchAccuracy;
+    }
   }
 }

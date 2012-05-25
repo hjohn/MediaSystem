@@ -1,5 +1,6 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.db.MediaData.MatchType;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.Levenshtein;
 
@@ -30,11 +31,11 @@ public class TmdbMovieEnricher implements ItemEnricher {
   }
 
   @Override
-  public String identifyItem(MediaItem mediaItem) throws IdentifyException {
+  public EnricherMatch identifyItem(MediaItem mediaItem) throws IdentifyException {
     synchronized(Movie.class) {
       hs.mediasystem.media.Movie itemMovie = mediaItem.get(hs.mediasystem.media.Movie.class);
 
-      String title = itemMovie.getTitle();
+      String title = itemMovie.getGroupTitle();
       String subtitle = itemMovie.getSubtitle();
       String year = itemMovie.getReleaseYear() == null ? null : itemMovie.getReleaseYear().toString();
       int seq = itemMovie.getSequence() == null ? 1 : itemMovie.getSequence();
@@ -45,6 +46,22 @@ public class TmdbMovieEnricher implements ItemEnricher {
         if(mediaItem.get(hs.mediasystem.media.Movie.class) != null) {
           bestMatchingImdbNumber = mediaItem.get(hs.mediasystem.media.Movie.class).getImdbNumber();
         }
+
+        float matchAccuracy = 1.0f;
+        MatchType matchType = MatchType.ID;
+
+//        if(bestMatchingImdbNumber == null) {
+//          System.out.println(">>> Trying to match on hash: " + Long.toHexString(mediaItem.getMediaId().getOsHash()));
+//          List<Movie> movies = Media.getInfo(Long.toHexString(mediaItem.getMediaId().getOsHash()), mediaItem.getMediaId().getFileLength());
+//
+//          if(movies != null && !movies.isEmpty()) {
+//            System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Found match by Hash for " + mediaItem + ": " + movies.get(0));
+//            System.out.println(">>> Wow MATCH!");
+//
+//            matchType = MatchType.HASH;
+//            bestMatchingImdbNumber = movies.get(0).getImdbID();
+//          }
+//        }
 
         if(bestMatchingImdbNumber == null) {
           TreeSet<Score> scores = new TreeSet<>(new Comparator<Score>() {
@@ -76,10 +93,12 @@ public class TmdbMovieEnricher implements ItemEnricher {
             System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Looking to match: " + searchString);
 
             for(Movie movie : Movie.search(searchString)) {
+              MatchType nameMatchType = MatchType.NAME;
               String movieYear = extractYear(movie.getReleasedDate());
               double score = 0;
 
               if(movieYear.equals(year) && movieYear.length() > 0) {
+                nameMatchType = MatchType.NAME_AND_YEAR;
                 score += 45;
               }
               if(movie.getImdbID() != null) {
@@ -90,20 +109,25 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
               score += matchScore * 40;
 
-              scores.add(new Score(movie, score));
+              scores.add(new Score(movie, nameMatchType, score));
               String name = movie.getName() + (movie.getAlternativeName() != null ? " (" + movie.getAlternativeName() + ")" : "");
               System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - " + String.format("Match: %5.1f (%4.2f) IMDB: %9s YEAR: %tY -- %s", score, matchScore, movie.getImdbID(), movie.getReleasedDate(), name));
             }
 
             if(!scores.isEmpty()) {
-              bestMatchingImdbNumber = scores.first().movie.getImdbID();
-              System.out.println("Best was: " + scores.first());
+              Score bestScore = scores.first();
+
+              bestMatchingImdbNumber = bestScore.movie.getImdbID();
+              matchType = bestScore.matchType;
+              matchAccuracy = (float)(bestScore.score / 100);
+
+              System.out.println("Best was: " + bestScore);
             }
           }
         }
 
         if(bestMatchingImdbNumber != null) {
-          return bestMatchingImdbNumber;
+          return new EnricherMatch(new Identifier(mediaItem.getMediaType(), getProviderCode(), bestMatchingImdbNumber), matchType, matchAccuracy);
         }
 
         throw new IdentifyException(mediaItem);
@@ -191,10 +215,12 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
   private static class Score {
     private final Movie movie;
+    private final MatchType matchType;
     private final double score;
 
-    public Score(Movie movie, double score) {
+    public Score(Movie movie, MatchType matchType, double score) {
       this.movie = movie;
+      this.matchType = matchType;
       this.score = score;
     }
 

@@ -1,6 +1,7 @@
 package hs.mediasystem.db;
 
 import hs.mediasystem.db.Database.Transaction;
+import hs.mediasystem.db.MediaData.MatchType;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -171,47 +172,83 @@ public class ItemsDao {
     item.setPoster(item.getPosterURL() == null ? null : new DatabaseImageSource(connectionProvider, id, "items", "poster", new URLImageSource(item.getPosterURL())));
   }
 
-  public Identifier loadIdentifier(String surrogateName) throws ItemNotFoundException {
+  public MediaData getMediaDataByUri(String uri) {
     try {
       try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("SELECT * FROM identifiers WHERE surrogatename = ?")) {
-        statement.setString(1, surrogateName);
+          PreparedStatement statement = connection.prepareStatement("SELECT * FROM mediadata WHERE uri = ?")) {
+        statement.setString(1, uri);
 
-        System.out.println("[FINE] ItemsDao.getQuery() - Looking for Identifier with name: " + surrogateName);
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
-            return new Identifier(rs.getString("type"), rs.getString("provider"), rs.getString("providerid"));
+            return createMediaDataFromResultSet(rs);
           }
         }
       }
 
-      throw new ItemNotFoundException(surrogateName);
+      return null;
     }
     catch(SQLException e) {
       throw new RuntimeException(e);
     }
   }
 
-  public void storeAsQuery(String surrogateName, Identifier identifier) {
+  public MediaData getMediaDataByHash(byte[] hash) {
     try {
       try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("DELETE FROM identifiers WHERE surrogatename = ?")) {
-        statement.setString(1, surrogateName);
-        statement.executeUpdate();
+          PreparedStatement statement = connection.prepareStatement("SELECT * FROM mediadata WHERE hash = ?")) {
+        statement.setBytes(1, hash);
+
+        try(final ResultSet rs = statement.executeQuery()) {
+          if(rs.next()) {
+            return createMediaDataFromResultSet(rs);
+          }
+        }
       }
 
-      try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("INSERT INTO identifiers (surrogatename, type, provider, providerid) VALUES (?, ?, ?, ?)")) {
-        statement.setString(1, surrogateName);
-        statement.setString(2, identifier.getType());
-        statement.setString(3, identifier.getProvider());
-        statement.setString(4, identifier.getProviderId());
-        statement.execute();
-      }
+      return null;
     }
     catch(SQLException e) {
-      throw new RuntimeException("Exception while trying to store: " + surrogateName, e);
+      throw new RuntimeException(e);
     }
+  }
+
+  public void updateMediaData(MediaData mediaData) {
+    try(Transaction transaction = database.beginTransaction()) {
+      Map<String, Object> parameters = createMediaDataFieldMap(mediaData);
+
+      transaction.update("mediadata", mediaData.getId(), parameters);
+      transaction.commit();
+    }
+    catch(SQLException e) {
+      throw new DatabaseException("exception while updating: " + mediaData, e);
+    }
+  }
+
+  public void storeMediaData(MediaData mediaData) {
+    try(Transaction transaction = database.beginTransaction()) {
+      Map<String, Object> generatedKeys = transaction.insert("mediadata", createMediaDataFieldMap(mediaData));
+
+      mediaData.setId((int)generatedKeys.get("id"));
+      transaction.commit();
+    }
+    catch(SQLException e) {
+      throw new RuntimeException("exception while storing: " + mediaData, e);
+    }
+  }
+
+  private MediaData createMediaDataFromResultSet(ResultSet rs) throws SQLException {
+    MediaData data = new MediaData();
+
+    data.setIdentifier(new Identifier(rs.getString("type"), rs.getString("provider"), rs.getString("providerid")));
+    data.setMediaId(new MediaId(rs.getLong("filelength"), rs.getLong("filetime"), rs.getBytes("hash"), rs.getLong("oshash")));
+    data.setUri(rs.getString("uri"));
+
+    data.setMatchType(MatchType.valueOf(rs.getString("matchtype")));
+    data.setMatchAccuracy(rs.getFloat("matchaccuracy"));
+    data.setResumePosition(rs.getInt("resumeposition"));
+    data.setViewed(rs.getBoolean("viewed"));
+
+    return data;
   }
 
   private static Map<String, Object> createFieldMap(Item item) {
@@ -270,6 +307,28 @@ public class ItemsDao {
     columns.put("role", casting.getRole());
     columns.put("charactername", casting.getCharacterName());
     columns.put("index", casting.getIndex());
+
+    return columns;
+  }
+
+  private static Map<String, Object> createMediaDataFieldMap(MediaData mediaData) {
+    Map<String, Object> columns = new LinkedHashMap<>();
+
+    columns.put("type", mediaData.getIdentifier().getType());
+    columns.put("provider", mediaData.getIdentifier().getProvider());
+    columns.put("providerid", mediaData.getIdentifier().getProviderId());
+
+    columns.put("uri", mediaData.getUri());
+
+    columns.put("hash", mediaData.getMediaId().getHash());
+    columns.put("oshash", mediaData.getMediaId().getOsHash());
+    columns.put("filetime", mediaData.getMediaId().getFileTime());
+    columns.put("filelength", mediaData.getMediaId().getFileLength());
+
+    columns.put("matchtype", mediaData.getMatchType().name());
+    columns.put("matchaccuracy", mediaData.getMatchAccuracy());
+    columns.put("resumeposition", mediaData.getResumePosition());
+    columns.put("viewed", mediaData.isViewed());
 
     return columns;
   }
