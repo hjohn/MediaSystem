@@ -24,7 +24,7 @@ public class Episode extends Media {
   public StringProperty episodeRangeProperty() { return episodeRange; }
 
   public Episode(Serie serie, String episodeName, Integer season, Integer episode, Integer endEpisode) {
-    super(createKey(serie.getTitle(), season, episode, endEpisode, episodeName), episodeName == null ? createTitle(serie, season, episode, endEpisode) : episodeName);
+    super(episodeName == null ? createTitle(serie, season, episode, endEpisode) : episodeName);
 
     assert serie != null;
     assert (season != null && episode != null && endEpisode != null) || episodeName != null;

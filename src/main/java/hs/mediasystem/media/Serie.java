@@ -17,6 +17,6 @@ public class Serie extends Media {
   public ObjectProperty<ImageHandle> bannerProperty() { return banner; }
 
   public Serie(String title) {
-    super(createKey(title), title);
+    super(title);
   }
 }

@@ -39,7 +39,7 @@ public class Movie extends Media {
   public StringProperty groupTitleProperty() { return groupTitle; }
 
   public Movie(String groupTitle, Integer sequence, String subtitle, Integer releaseYear, String imdbNumber) {
-    super(createKey(groupTitle, sequence, subtitle, releaseYear, imdbNumber), createTitle(groupTitle, sequence), subtitle, releaseYear);
+    super(createTitle(groupTitle, sequence), subtitle, releaseYear);
     this.groupTitle.set(groupTitle);
     this.sequence.set(sequence);
     this.imdbNumber.set(imdbNumber);

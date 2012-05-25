@@ -96,60 +96,13 @@ public class Media extends EnrichableDataObject {
   public ImageHandle getImage() { return image.get(); }
   public ObjectProperty<ImageHandle> imageProperty() { return image; }
 
-  private final String key;
-
-  public Media(Key key, String title, String subtitle, Integer releaseYear) {
+  public Media(String title, String subtitle, Integer releaseYear) {
     this.title.set(title == null ? "" : title);
     this.subtitle.set(subtitle == null ? "" : subtitle);
     this.releaseYear.set(releaseYear);
-
-    this.key = key == null ? null : getClass().getSimpleName() + ":" + key;
-  }
-
-  public Media(String title, String subtitle, Integer releaseYear) {
-    this(null, title, subtitle, releaseYear);
-  }
-
-  public Media(Key key, String title) {
-    this(key, title, null, null);
   }
 
   public Media(String title) {
-    this(null, title, null, null);
-  }
-
-  protected static Key createKey(Object... parts) {
-    String key = "";
-
-    for(Object part : parts) {
-      if(part == null) {
-        key += "/";
-      }
-      else if(part instanceof String) {
-        key += "/" + ((String)part).trim().toLowerCase();
-      }
-      else {
-        key += "/" + part;
-      }
-    }
-
-    return new Key(key);
-  }
-
-  public String getKey() {
-    return key;
-  }
-
-  private static class Key {
-    private final String key;
-
-    public Key(String key) {
-      this.key = key;
-    }
-
-    @Override
-    public String toString() {
-      return key;
-    }
+    this(title, null, null);
   }
 }
