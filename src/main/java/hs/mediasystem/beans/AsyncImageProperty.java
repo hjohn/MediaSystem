@@ -30,6 +30,9 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
           if(handle != null && !handle.equals(imageLoadService.imageHandle)) {
             loadImageInBackground(handle);
           }
+          else if(handle == null) {
+            set(null);
+          }
         }
       }
     });
@@ -53,6 +56,9 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
       if(imageHandle != null) {
         imageLoadService.setImageHandle(imageHandle);
         imageLoadService.restart();
+      }
+      else {
+        set(null);
       }
     }
   }
