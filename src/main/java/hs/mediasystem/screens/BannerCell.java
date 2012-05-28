@@ -1,11 +1,14 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.beans.AsyncImageProperty;
-import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.media.Serie;
+import hs.mediasystem.util.ImageHandle;
+import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.WeakBinder;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.Label;
@@ -45,12 +48,12 @@ public class BannerCell extends HBox implements MediaNodeCell {
 
     if(item != null) {
       final AsyncImageProperty asyncImageProperty = new AsyncImageProperty();
-      StringProperty titleProperty = new SimpleStringProperty();
+      final StringProperty titleProperty = new SimpleStringProperty();
 
-      Serie serie = item.get(Serie.class);
+      ObjectBinding<ImageHandle> banner = MapBindings.select(mediaNode.dataMapProperty(), Serie.class, "banner");
 
-      binder.bind(titleProperty, item.getMedia().titleProperty());
-      binder.bind(asyncImageProperty.imageHandleProperty(), serie.bannerProperty());
+      binder.bind(titleProperty, MapBindings.selectString(mediaNode.dataMapProperty(), Serie.class, "title"));
+      binder.bind(asyncImageProperty.imageHandleProperty(), banner);
 
       title.setMinHeight(fitWidth * 140 / 758);
 
