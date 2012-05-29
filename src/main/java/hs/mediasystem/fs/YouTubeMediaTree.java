@@ -1,13 +1,15 @@
 package hs.mediasystem.fs;
 
+import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
+import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.media.Media;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class YouTubeMediaTree extends AbstractMediaTree implements MediaRoot {
+public class YouTubeMediaTree implements MediaTree, MediaRoot {
   private static final List<Feed> FEEDS = new ArrayList<>();
 
   static {
@@ -22,16 +24,6 @@ public class YouTubeMediaTree extends AbstractMediaTree implements MediaRoot {
   }
 
   private List<MediaItem> children;
-
-  @Override
-  public MediaItem getRoot() {
-    return new MediaItem("YOUTUBE_ROOT", this) {
-      @Override
-      public List<? extends MediaItem> children() {
-        return getItems();
-      }
-    };
-  }
 
   public static class Feed {
     private final String name;
@@ -68,5 +60,10 @@ public class YouTubeMediaTree extends AbstractMediaTree implements MediaRoot {
   @Override
   public String getRootName() {
     return "YouTube";
+  }
+
+  @Override
+  public EnrichCache<MediaItem> getEnrichCache() {
+    return null;
   }
 }

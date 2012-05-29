@@ -1,9 +1,13 @@
 package hs.mediasystem.screens.selectmedia;
 
+import hs.mediasystem.db.MediaData;
 import hs.mediasystem.db.TmdbMovieEnricher;
 import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.enrich.EnrichCache;
+import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
+import hs.mediasystem.framework.MovieEnricher;
 import hs.mediasystem.fs.MediaItemComparator;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.fs.MovieGrouper;
@@ -11,7 +15,6 @@ import hs.mediasystem.fs.MoviesMediaTree;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.media.Movie;
 import hs.mediasystem.screens.MainMenuExtension;
-import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.screens.MovieCell;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
@@ -27,14 +30,14 @@ import javax.inject.Provider;
 
 public class MoviesMainMenuExtension implements MainMenuExtension {
   private final Provider<SelectMediaPresentation> selectMediaPresentationProvider;
-  private final MediaItemEnrichmentEventHandler enrichmentHandler;
+  private final EnrichCache<MediaItem> enrichCache;
 
   @Inject
-  public MoviesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, MediaItemEnrichmentEventHandler enrichmentHandler) {
+  public MoviesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, MediaDataEnricher identifierEnricher, EnrichCache<MediaItem> enrichCache, MovieEnricher movieEnricher) {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
-    this.enrichmentHandler = enrichmentHandler;
+    this.enrichCache = enrichCache;
 
-    TypeBasedItemEnricher.registerEnricher("Movie", new TmdbMovieEnricher());
+    TypeBasedItemEnricher.registerEnricher(Movie.class, new TmdbMovieEnricher());
     StandardView.registerLayout(MoviesMediaTree.class, MediaRootType.MOVIES);
     MediaNodeCellProviderRegistry.register(MediaNodeCellProviderRegistry.HORIZONTAL_CELL, Movie.class, new Provider<MovieCell>() {
       @Override
@@ -49,6 +52,9 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
         return new Media(item.getTitle(), null, item.getMedia().getReleaseYear());
       }
     });
+
+    enrichCache.registerEnricher(MediaData.class, identifierEnricher);
+    enrichCache.registerEnricher(Movie.class, movieEnricher);
   }
 
   @Override
@@ -76,8 +82,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
       protected void intro() {
         controller.showScreen(presentation.getView());
         if(mediaTree == null) {
-          mediaTree = new MoviesMediaTree(Paths.get(controller.getIni().getValue("general", "movies.path")));
-          mediaTree.onItemQueued().set(enrichmentHandler);
+          mediaTree = new MoviesMediaTree(enrichCache, Paths.get(controller.getIni().getValue("general", "movies.path")));
           presentation.setMediaTree(mediaTree);
         }
       }

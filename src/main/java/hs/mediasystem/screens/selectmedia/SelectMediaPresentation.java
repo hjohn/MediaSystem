@@ -4,7 +4,6 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.media.Serie;
-import hs.mediasystem.screens.MediaItemEnrichmentEventHandler;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.Navigator;
@@ -46,7 +45,7 @@ public class SelectMediaPresentation {
   private SelectMediaView view;
 
   @Inject
-  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final MediaItemEnrichmentEventHandler enrichmentHandler, final StateCache stateCache) {
+  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final StateCache stateCache) {
     this.stateCache = stateCache;
     this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
@@ -70,11 +69,11 @@ public class SelectMediaPresentation {
     view.onNodeSelected().set(new EventHandler<MediaNodeEvent>() {
       @Override
       public void handle(MediaNodeEvent event) {
-        if(event.getMediaNode().getMediaItem().isLeaf()) {
-          controller.play(event.getMediaNode().getMediaItem());
+        if(event.getMediaNode().getMediaItem() instanceof MediaRoot) {
+          setTreeRoot((MediaRoot)event.getMediaNode().getMediaItem());
         }
         else {
-          setTreeRoot((MediaRoot)event.getMediaNode().getMediaItem());
+          controller.play(event.getMediaNode().getMediaItem());
         }
         event.consume();
       }
@@ -94,7 +93,7 @@ public class SelectMediaPresentation {
           new ActionOption("Reload meta data", new Callable<Boolean>() {
             @Override
             public Boolean call() {
-              enrichmentHandler.enrichNoCache(mediaItem);
+//              enrichmentHandler.enrichNoCache(mediaItem);  FIXME asap
 
               Media media = mediaItem.get(Media.class);
               Serie serie = mediaItem.get(Serie.class);

@@ -14,16 +14,11 @@ public class Serie extends MediaItem implements MediaRoot {
   private List<MediaItem> children;
 
   public Serie(MediaTree mediaTree, String uri, hs.mediasystem.media.Serie serie) {
-    super(mediaTree, uri, true, serie);
+    super(mediaTree, uri, serie);
   }
 
   @Override
-  public boolean isLeaf() {
-    return false;
-  }
-
-  @Override
-  public List<? extends MediaItem> children() {
+  public List<? extends MediaItem> getItems() {
     if(children == null) {
       List<LocalInfo> scanResults = new EpisodeScanner(new EpisodeDecoder(getTitle())).scan(Paths.get(getUri()));
 
@@ -32,16 +27,11 @@ public class Serie extends MediaItem implements MediaRoot {
       for(LocalInfo localInfo : scanResults) {
         Episode episode = new Episode(this, localInfo.getTitle(), localInfo.getSeason(), localInfo.getEpisode(), localInfo.getEndEpisode());
 
-        children.add(new MediaItem(this, localInfo.getUri(), episode));
+        children.add(new MediaItem(getMediaTree(), localInfo.getUri(), episode));
       }
     }
 
     return children;
-  }
-
-  @Override
-  public List<? extends MediaItem> getItems() {
-    return children();
   }
 
   @Override

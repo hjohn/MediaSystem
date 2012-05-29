@@ -1,7 +1,7 @@
 package hs.mediasystem.db;
 
 import hs.mediasystem.db.MediaData.MatchType;
-import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.media.Media;
 import hs.mediasystem.util.Levenshtein;
 
 import java.io.IOException;
@@ -31,9 +31,9 @@ public class TmdbMovieEnricher implements ItemEnricher {
   }
 
   @Override
-  public EnricherMatch identifyItem(MediaItem mediaItem) throws IdentifyException {
+  public EnricherMatch identifyItem(Media media) throws IdentifyException {
     synchronized(Movie.class) {
-      hs.mediasystem.media.Movie itemMovie = mediaItem.get(hs.mediasystem.media.Movie.class);
+      hs.mediasystem.media.Movie itemMovie = (hs.mediasystem.media.Movie)media;
 
       String title = itemMovie.getGroupTitle();
       String subtitle = itemMovie.getSubtitle();
@@ -41,11 +41,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
       int seq = itemMovie.getSequence() == null ? 1 : itemMovie.getSequence();
 
       try {
-        String bestMatchingImdbNumber = null;
-
-        if(mediaItem.get(hs.mediasystem.media.Movie.class) != null) {
-          bestMatchingImdbNumber = mediaItem.get(hs.mediasystem.media.Movie.class).getImdbNumber();
-        }
+        String bestMatchingImdbNumber = itemMovie.getImdbNumber();
 
         float matchAccuracy = 1.0f;
         MatchType matchType = MatchType.ID;
@@ -127,19 +123,19 @@ public class TmdbMovieEnricher implements ItemEnricher {
         }
 
         if(bestMatchingImdbNumber != null) {
-          return new EnricherMatch(new Identifier(mediaItem.getMediaType(), getProviderCode(), bestMatchingImdbNumber), matchType, matchAccuracy);
+          return new EnricherMatch(new Identifier(media.getClass().getSimpleName(), getProviderCode(), bestMatchingImdbNumber), matchType, matchAccuracy);
         }
 
-        throw new IdentifyException(mediaItem);
+        throw new IdentifyException(media);
       }
       catch(IOException | JSONException e) {
-        throw new IdentifyException(mediaItem, e);
+        throw new IdentifyException(media, e);
       }
     }
   }
 
   @Override
-  public Item loadItem(String identifier, MediaItem mediaItem) throws ItemNotFoundException {
+  public Item loadItem(String identifier) throws ItemNotFoundException {
     synchronized(Movie.class) {
       String bestMatchingImdbNumber = identifier;
 

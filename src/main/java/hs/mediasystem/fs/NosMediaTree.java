@@ -1,8 +1,10 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.URLImageSource;
+import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
+import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.media.Media;
 
 import java.io.IOException;
@@ -15,20 +17,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-public class NosMediaTree extends AbstractMediaTree implements MediaRoot {
+public class NosMediaTree implements MediaTree, MediaRoot {
   private static final String URL = "http://tv.nos.nl";
 
   private List<MediaItem> children;
-
-  @Override
-  public MediaItem getRoot() {
-    return new MediaItem("NOS_ROOT", this) {
-      @Override
-      public List<? extends MediaItem> children() {
-        return getItems();
-      }
-    };
-  }
 
   private List<MediaItem> getElements() {
     List<MediaItem> list = new ArrayList<>();
@@ -59,7 +51,7 @@ public class NosMediaTree extends AbstractMediaTree implements MediaRoot {
 
             media.imageProperty().set(new SourceImageHandle(new URLImageSource(thumbUrl), "NosMediaTree:/" + title));
 
-            MediaItem mediaItem = new MediaItem(this, matcher2.group(0), false, media);
+            MediaItem mediaItem = new MediaItem(this, matcher2.group(0), media);
 
             list.add(mediaItem);
           }
@@ -85,5 +77,10 @@ public class NosMediaTree extends AbstractMediaTree implements MediaRoot {
   @Override
   public String getRootName() {
     return "NOS";
+  }
+
+  @Override
+  public EnrichCache<MediaItem> getEnrichCache() {
+    return null;
   }
 }

@@ -11,7 +11,7 @@ public class EnrichableDataObject {
 
   protected void queueForEnrichment() {
     if(mediaItem != null) {
-      mediaItem.queueForEnrichment();
+      mediaItem.queueForEnrichment(getClass());
     }
   }
 }

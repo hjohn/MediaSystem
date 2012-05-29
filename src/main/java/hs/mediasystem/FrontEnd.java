@@ -5,6 +5,7 @@ import hs.mediasystem.db.DatabaseUpdater;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.MainMenuExtension;
+import hs.mediasystem.screens.MessagePaneExecutionQueue;
 import hs.mediasystem.screens.PlaybackOverlayPane;
 import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.ProgramController;
@@ -18,6 +19,7 @@ import hs.mediasystem.screens.selectmedia.StandardLayoutExtension;
 import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.screens.selectmedia.YouTubeMainMenuExtension;
 import hs.mediasystem.util.DuoWindowSceneManager;
+import hs.mediasystem.util.ExecutionQueue;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.StateCache;
 import hs.mediasystem.util.ini.Ini;
@@ -99,6 +101,7 @@ public class FrontEnd extends Application {
 
         bind(SelectMediaView.class).to(StandardView.class);
         bind(PlaybackOverlayView.class).to(PlaybackOverlayPane.class);
+        bind(ExecutionQueue.class).to(MessagePaneExecutionQueue.class);
       }
 
       @Provides

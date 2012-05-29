@@ -1,30 +1,24 @@
 package hs.mediasystem.fs;
 
 import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
+import hs.mediasystem.framework.MediaTree;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SeriesMediaTree extends AbstractMediaTree implements MediaRoot {
+public class SeriesMediaTree implements MediaTree, MediaRoot {
+  private final EnrichCache<MediaItem> enrichCache;
   private final Path root;
 
   private List<MediaItem> children;
 
-  public SeriesMediaTree(Path root) {
+  public SeriesMediaTree(EnrichCache<MediaItem> enrichCache, Path root) {
+    this.enrichCache = enrichCache;
     this.root = root;
-  }
-
-  @Override
-  public MediaItem getRoot() {
-    return new MediaItem("SERIE_ROOT", this) {
-      @Override
-      public List<? extends MediaItem> children() {
-        return getItems();
-      }
-    };
   }
 
   @Override
@@ -46,5 +40,10 @@ public class SeriesMediaTree extends AbstractMediaTree implements MediaRoot {
   @Override
   public String getRootName() {
     return "Series";
+  }
+
+  @Override
+  public EnrichCache<MediaItem> getEnrichCache() {
+    return enrichCache;
   }
 }

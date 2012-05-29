@@ -1,15 +1,15 @@
 package hs.mediasystem.db;
 
-import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.media.Media;
 
 public class IdentifyException extends Exception {
 
-  public IdentifyException(MediaItem mediaItem, Exception cause) {
-    super(mediaItem.toString(), cause);
+  public IdentifyException(Media media, Exception cause) {
+    super(media.toString(), cause);
   }
 
-  public IdentifyException(MediaItem mediaItem) {
-    super(mediaItem.toString());
+  public IdentifyException(Media media) {
+    super(media.toString());
   }
 
   public IdentifyException(String message) {

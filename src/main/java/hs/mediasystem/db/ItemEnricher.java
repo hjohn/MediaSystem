@@ -1,9 +1,9 @@
 package hs.mediasystem.db;
 
-import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.media.Media;
 
 public interface ItemEnricher {
   String getProviderCode();
-  EnricherMatch identifyItem(MediaItem mediaItem) throws IdentifyException;
-  Item loadItem(String identifier, MediaItem mediaItem) throws ItemNotFoundException;
+  EnricherMatch identifyItem(Media media) throws IdentifyException;
+  Item loadItem(String identifier) throws ItemNotFoundException;
 }
