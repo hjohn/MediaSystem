@@ -39,7 +39,7 @@ public class MediaNode {
     assert this.id != null;
 
     this.shortTitle = "";
-    this.isLeaf = mediaItem instanceof MediaRoot || mediaItem.isLeaf();
+    this.isLeaf = true;
     this.dataType = mediaItem.getMedia().getClass();
     this.showTopLevelExpanded = false;
   }
