@@ -19,6 +19,10 @@ public class Episode extends Media {
   public Integer getEpisode() { return episode.get(); }
   public ObjectProperty<Integer> episodeProperty() { return episode; }
 
+  private final ObjectProperty<Integer> endEpisode = new SimpleObjectProperty<>();
+  public Integer getEndEpisode() { return endEpisode.get(); }
+  public ObjectProperty<Integer> endEpisodeProperty() { return endEpisode; }
+
   private final StringProperty episodeRange = new SimpleStringProperty();
   public String getEpisodeRange() { return episodeRange.get(); }
   public StringProperty episodeRangeProperty() { return episodeRange; }
@@ -32,6 +36,7 @@ public class Episode extends Media {
     this.serie.set(serie);
     this.season.set(season);
     this.episode.set(episode);
+    this.endEpisode.set(endEpisode);
     this.episodeRange.set(createEpisodeNumber(episode, endEpisode));
   }
 
