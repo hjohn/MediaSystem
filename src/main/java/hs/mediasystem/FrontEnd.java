@@ -22,6 +22,7 @@ import hs.mediasystem.util.DuoWindowSceneManager;
 import hs.mediasystem.util.ExecutionQueue;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.StateCache;
+import hs.mediasystem.util.TaskExecutor;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
@@ -102,6 +103,7 @@ public class FrontEnd extends Application {
         bind(SelectMediaView.class).to(StandardView.class);
         bind(PlaybackOverlayView.class).to(PlaybackOverlayPane.class);
         bind(ExecutionQueue.class).to(MessagePaneExecutionQueue.class);
+        bind(TaskExecutor.class).to(MessagePaneExecutionQueue.class);
       }
 
       @Provides

@@ -13,13 +13,17 @@ import hs.mediasystem.db.MediaData.MatchType;
 import hs.mediasystem.db.MediaId;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache;
-import hs.mediasystem.enrich.EnrichmentHandler;
 import hs.mediasystem.enrich.EnrichmentState;
 import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.media.Movie;
-import hs.mediasystem.util.ThreadPoolExecutionQueue;
+import hs.mediasystem.util.TaskThreadPoolExecutor;
+
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -54,7 +58,7 @@ public class EnrichmentTest {
   public void before() throws IdentifyException {
     MockitoAnnotations.initMocks(this);
 
-    cache = new EnrichCache<>(new EnrichmentHandler(new ThreadPoolExecutionQueue(1)));
+    cache = new EnrichCache<>(new TaskThreadPoolExecutor(new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>())));
     cache.registerEnricher(MediaData.class, new MediaDataEnricher(itemsDao, typeBasedItemEnricher));
 
     mediaTree = new MediaTree() {

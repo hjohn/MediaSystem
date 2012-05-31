@@ -5,9 +5,8 @@ import hs.mediasystem.db.ItemsDao;
 import hs.mediasystem.db.MediaData;
 import hs.mediasystem.db.Source;
 import hs.mediasystem.db.TypeBasedItemEnricher;
-import hs.mediasystem.enrich.EnrichTaskProvider;
+import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
-import hs.mediasystem.enrich.TaskKey;
 import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.media.Movie;
@@ -39,15 +38,24 @@ public class MovieEnricher implements Enricher<MediaItem, Movie> {
   }
 
   @Override
-  public EnrichTaskProvider<Movie> enrich(MediaItem key, Map<Class<?>, Object> inputParameters) {
-    return new MovieEnrichTaskProvider(new TaskKey(key, Movie.class), (MediaData)inputParameters.get(MediaData.class), (Movie)inputParameters.get(Media.class));
+  public List<EnrichTask<Movie>> enrich(MediaItem key, Map<Class<?>, Object> inputParameters, boolean bypassCache) {
+    List<EnrichTask<Movie>> enrichTasks = new ArrayList<>();
+
+    MovieEnrichTaskProvider enrichTaskProvider = new MovieEnrichTaskProvider(key.getTitle(), (MediaData)inputParameters.get(MediaData.class), (Movie)inputParameters.get(Media.class));
+
+    if(!bypassCache) {
+      enrichTasks.add(enrichTaskProvider.getCachedTask());
+    }
+    enrichTasks.add(enrichTaskProvider.getTask(bypassCache));
+
+    return enrichTasks;
   }
 
   private class MovieEnrichTaskProvider extends AbstractEnrichTaskProvider<Movie> {
     private final Movie currentMovie;
 
-    public MovieEnrichTaskProvider(TaskKey taskKey, MediaData mediaData, Movie movie) {
-      super(itemsDao, typeBasedItemEnricher, taskKey, mediaData);
+    public MovieEnrichTaskProvider(String title, MediaData mediaData, Movie movie) {
+      super(title, itemsDao, typeBasedItemEnricher, mediaData);
       this.currentMovie = movie;
     }
 

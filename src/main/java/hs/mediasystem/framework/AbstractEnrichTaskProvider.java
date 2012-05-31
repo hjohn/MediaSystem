@@ -6,29 +6,26 @@ import hs.mediasystem.db.ItemsDao;
 import hs.mediasystem.db.MediaData;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
-import hs.mediasystem.enrich.EnrichTaskProvider;
-import hs.mediasystem.enrich.TaskKey;
 
-public abstract class AbstractEnrichTaskProvider<T> implements EnrichTaskProvider<T> {
+public abstract class AbstractEnrichTaskProvider<T> {
+  private final String title;
   private final ItemsDao itemsDao;
   private final TypeBasedItemEnricher typeBasedItemEnricher;
-  private final TaskKey taskKey;
   private final MediaData mediaData;
 
-  public AbstractEnrichTaskProvider(ItemsDao itemsDao, TypeBasedItemEnricher typeBasedItemEnricher, TaskKey taskKey, MediaData mediaData) {
+  public AbstractEnrichTaskProvider(String title, ItemsDao itemsDao, TypeBasedItemEnricher typeBasedItemEnricher, MediaData mediaData) {
+    this.title = title;
     this.itemsDao = itemsDao;
     this.typeBasedItemEnricher = typeBasedItemEnricher;
-    this.taskKey = taskKey;
     this.mediaData = mediaData;
   }
 
   public abstract T itemToEnrichType(Item item);
 
-  @Override
   public EnrichTask<T> getCachedTask() {
     return new EnrichTask<T>(true) {
       {
-        updateTitle("Cache:" + taskKey.getKey().getTitle());
+        updateTitle("Cache:" + title);
       }
 
       @Override
@@ -49,11 +46,10 @@ public abstract class AbstractEnrichTaskProvider<T> implements EnrichTaskProvide
     };
   }
 
-  @Override
   public EnrichTask<T> getTask(final boolean bypassCache) {
     return new EnrichTask<T>(false) {
       {
-        updateTitle(taskKey.getKey().getTitle());
+        updateTitle(title);
       }
 
       @Override
@@ -88,15 +84,5 @@ public abstract class AbstractEnrichTaskProvider<T> implements EnrichTaskProvide
         return itemToEnrichType(item);
       }
     };
-  }
-
-  @Override
-  public TaskKey getTaskKey() {
-    return taskKey;
-  }
-
-  @Override
-  public String toString() {
-    return "AbstractEnricher[" + taskKey + "]";
   }
 }

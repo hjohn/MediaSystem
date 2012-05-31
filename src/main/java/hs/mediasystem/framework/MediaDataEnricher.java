@@ -7,7 +7,6 @@ import hs.mediasystem.db.MediaHash;
 import hs.mediasystem.db.MediaId;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
-import hs.mediasystem.enrich.EnrichTaskProvider;
 import hs.mediasystem.enrich.Enricher;
 import hs.mediasystem.enrich.EnrichmentState;
 import hs.mediasystem.enrich.TaskKey;
@@ -43,8 +42,17 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
   }
 
   @Override
-  public EnrichTaskProvider<MediaData> enrich(final MediaItem key, Map<Class<?>, Object> inputParameters) {
-    return new MediaDataEnrichTaskProvider(new TaskKey(key, MediaData.class), key.getUri(), (Media)inputParameters.get(Media.class));
+  public List<EnrichTask<MediaData>> enrich(MediaItem key, Map<Class<?>, Object> inputParameters, boolean bypassCache) {
+    List<EnrichTask<MediaData>> enrichTasks = new ArrayList<>();
+
+    MediaDataEnrichTaskProvider enrichTaskProvider = new MediaDataEnrichTaskProvider(new TaskKey(key, MediaData.class), key.getUri(), (Media)inputParameters.get(Media.class));
+
+    if(!bypassCache) {
+      enrichTasks.add(enrichTaskProvider.getCachedTask());
+    }
+    enrichTasks.add(enrichTaskProvider.getTask());
+
+    return enrichTasks;
   }
 
   private static MediaId createMediaId(String uri) {
@@ -64,7 +72,7 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
     }
   }
 
-  private class MediaDataEnrichTaskProvider implements EnrichTaskProvider<MediaData> {
+  private class MediaDataEnrichTaskProvider {
     private final TaskKey taskKey;
     private final String uri;
     private final Media media;
@@ -75,7 +83,6 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
       this.media = media;
     }
 
-    @Override
     public EnrichTask<MediaData> getCachedTask() {
       return new EnrichTask<MediaData>(true) {
         {
@@ -107,8 +114,7 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
       };
     }
 
-    @Override
-    public EnrichTask<MediaData> getTask(boolean bypassCache) {
+    public EnrichTask<MediaData> getTask() {
       return new EnrichTask<MediaData>(false) {
         {
           updateTitle(taskKey.getKey().getTitle());
@@ -137,16 +143,6 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
           return mediaData;
         }
       };
-    }
-
-    @Override
-    public TaskKey getTaskKey() {
-      return taskKey;
-    }
-
-    @Override
-    public String toString() {
-      return "MediaDataEnricher[" + taskKey + "]";
     }
   }
 }

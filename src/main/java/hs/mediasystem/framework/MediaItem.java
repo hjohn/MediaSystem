@@ -3,6 +3,7 @@ package hs.mediasystem.framework;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.enrich.EnrichmentListener;
 import hs.mediasystem.enrich.EnrichmentState;
+import hs.mediasystem.enrich.WeakEnrichmentListener;
 import hs.mediasystem.media.EnrichableDataObject;
 import hs.mediasystem.media.Media;
 
@@ -37,6 +38,15 @@ public class MediaItem {
   private final MediaTree mediaTree;
   private final String uri;
   private final String mediaType;
+  private final EnrichmentListener listener = new EnrichmentListener() {
+    @Override
+    public void update(EnrichmentState state, Class<?> enrichableClass, Object enrichable) {
+      enrichmentStates.put(enrichableClass, state);
+      if(enrichable != null) {
+        add(enrichable);
+      }
+    }
+  };
 
   private int databaseId;
 
@@ -53,18 +63,10 @@ public class MediaItem {
 
     if(getEnrichCache() != null) {
       for(Object o : data) {
-        getEnrichCache().insert(this, EnrichmentState.UNENRICHED, o.getClass(), o);
+        getEnrichCache().insertIfNotExists(this, EnrichmentState.UNENRICHED, o.getClass(), o);
       }
 
-      getEnrichCache().addListener(this, new EnrichmentListener() {
-        @Override
-        public void update(EnrichmentState state, Class<?> enrichableClass, Object enrichable) {
-          enrichmentStates.put(enrichableClass, state);
-          if(enrichable != null) {
-            add(enrichable);
-          }
-        }
-      });
+      getEnrichCache().addListener(this, new WeakEnrichmentListener(listener));
     }
   }
 
