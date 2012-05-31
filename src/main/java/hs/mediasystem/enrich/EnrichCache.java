@@ -25,24 +25,24 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-public class EnrichCache<K> {
-  private final Comparator<K> taskPriorityComparator = new Comparator<K>() {
+public class EnrichCache {
+  private final Comparator<CacheKey> taskPriorityComparator = new Comparator<CacheKey>() {
     @Override
-    public int compare(K o1, K o2) {
+    public int compare(CacheKey o1, CacheKey o2) {
       return 0;
     }
   };
 
-  private final Map<Class<?>, Enricher<K, ?>> ENRICHERS = new HashMap<>();
+  private final Map<Class<?>, Enricher<?>> ENRICHERS = new HashMap<>();
 
-  private final Map<K, Map<Class<?>, CacheValue>> cache = new WeakHashMap<>();
-  private final Map<K, Set<EnrichmentListener>> enrichmentListeners = new WeakHashMap<>();  // TODO EnrichmentListener refs must be weak
-  private final Map<K, Set<PendingEnrichment<?>>> pendingEnrichmentMap = new WeakHashMap<>();
+  private final Map<CacheKey, Map<Class<?>, CacheValue>> cache = new WeakHashMap<>();
+  private final Map<CacheKey, Set<EnrichmentListener>> enrichmentListeners = new WeakHashMap<>();  // TODO EnrichmentListener refs must be weak
+  private final Map<CacheKey, Set<PendingEnrichment<?>>> pendingEnrichmentMap = new WeakHashMap<>();
 
-  private final OrderedExecutionQueue<K> cacheQueue = new OrderedExecutionQueueExecutor<>(taskPriorityComparator, new TaskThreadPoolExecutor(new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>())));
-  private final OrderedExecutionQueue<K> normalQueue;
+  private final OrderedExecutionQueue<CacheKey> cacheQueue = new OrderedExecutionQueueExecutor<>(taskPriorityComparator, new TaskThreadPoolExecutor(new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>())));
+  private final OrderedExecutionQueue<CacheKey> normalQueue;
 
-  public <T> void registerEnricher(Class<T> cls, Enricher<K, T> enricher) {
+  public <T> void registerEnricher(Class<T> cls, Enricher<T> enricher) {
     ENRICHERS.put(cls, enricher);
   }
 
@@ -51,7 +51,7 @@ public class EnrichCache<K> {
     this.normalQueue = new OrderedExecutionQueueExecutor<>(taskPriorityComparator, normalExecutor);
   }
 
-  public void addListener(K key, EnrichmentListener listener) {
+  public void addListener(CacheKey key, EnrichmentListener listener) {
     synchronized(cache) {
       Set<EnrichmentListener> listeners = enrichmentListeners.get(key);
 
@@ -72,7 +72,7 @@ public class EnrichCache<K> {
     }
   }
 
-  public void removeListener(K key, EnrichmentListener listener) {
+  public void removeListener(CacheKey key, EnrichmentListener listener) {
     synchronized(cache) {
       Set<EnrichmentListener> listeners = enrichmentListeners.get(key);
 
@@ -82,7 +82,7 @@ public class EnrichCache<K> {
     }
   }
 
-  public CacheValue getCacheValue(K key, Class<?> enrichableClass) {
+  public CacheValue getCacheValue(CacheKey key, Class<?> enrichableClass) {
     synchronized(cache) {
       Map<Class<?>, CacheValue> cacheValues = cache.get(key);
 
@@ -94,7 +94,7 @@ public class EnrichCache<K> {
     }
   }
 
-  public CacheValue getDescendantCacheValue(K key, Class<?> enrichableClass) {
+  public CacheValue getDescendantCacheValue(CacheKey key, Class<?> enrichableClass) {
     synchronized(cache) {
       Map<Class<?>, CacheValue> cacheValues = cache.get(key);
 
@@ -112,17 +112,17 @@ public class EnrichCache<K> {
     }
   }
 
-  public <T> void enrich(Class<T> enrichableClass, K key) {
+  public <T> void enrich(CacheKey key, Class<T> enrichableClass) {
     // System.out.println("[FINE] Enrichers.enrich() - " + enrichableClass.getName() + ": " + key);
 
     synchronized(cache) {
       @SuppressWarnings("unchecked")
-      Enricher<K, T> enricher = (Enricher<K, T>)ENRICHERS.get(enrichableClass);
+      Enricher<T> enricher = (Enricher<T>)ENRICHERS.get(enrichableClass);
 
       if(enricher == null) {
         System.out.println("No suitable Enricher for " + enrichableClass);
         new Exception().printStackTrace();
-        insert(key, EnrichmentState.ENRICHMENT_FAILED, enrichableClass, null);
+        insertFailedEnrichment(key, enrichableClass);
       }
       else {
         PendingEnrichment<T> pendingEnrichment = new PendingEnrichment<>(enricher, enrichableClass);
@@ -151,7 +151,7 @@ public class EnrichCache<K> {
         pendingEnrichment.enrichIfConditionsMet(key);
 
         if(pendingEnrichment.getState() == PendingEnrichmentState.BROKEN_DEPENDENCY) {
-          insert(key, EnrichmentState.ENRICHMENT_FAILED, pendingEnrichment.getEnrichableClass(), null);
+          insertFailedEnrichment(key, pendingEnrichment.getEnrichableClass());
         }
         else {
           pendingEnrichments = pendingEnrichmentMap.get(key);  // get Set again as it can be non-null now after calling enrichIfConditionsMet above
@@ -167,15 +167,27 @@ public class EnrichCache<K> {
     }
   }
 
-  public void insertIfNotExists(K key, EnrichmentState state, Class<?> enrichableClass, Object enrichable) {
-    insertInternal(key, state, enrichableClass, enrichable, true);
+  private void insertFailedEnrichment(CacheKey key, Class<?> enrichableClass) {
+    insertInternal(key, EnrichmentState.FAILED, enrichableClass, null, false);
   }
 
-  public void insert(K key, EnrichmentState state, Class<?> enrichableClass, Object enrichable) {
-    insertInternal(key, state, enrichableClass, enrichable, false);
+  @SuppressWarnings("unchecked")
+  public <E> void insertUnenrichedDataIfNotExists(CacheKey key, E enrichable) {
+    if(enrichable == null) {
+      throw new IllegalArgumentException("parameter 'enrichable' cannot be null");
+    }
+    insertInternal(key, EnrichmentState.UNENRICHED, (Class<E>)enrichable.getClass(), enrichable, true);
   }
 
-  private void insertInternal(K key, EnrichmentState state, Class<?> enrichableClass, Object enrichable, boolean onlyIfNotExists) {
+  @SuppressWarnings("unchecked")
+  public <E> void insert(CacheKey key, E enrichable) {
+    if(enrichable == null) {
+      throw new IllegalArgumentException("parameter 'enrichable' cannot be null");
+    }
+    insertInternal(key, EnrichmentState.ENRICHED, (Class<E>)enrichable.getClass(), enrichable, false);
+  }
+
+  private <E> void insertInternal(CacheKey key, EnrichmentState state, Class<E> enrichableClass, E enrichable, boolean onlyIfNotExists) {
     synchronized(cache) {
       Map<Class<?>, CacheValue> cacheValues = cache.get(key);
 
@@ -210,7 +222,7 @@ public class EnrichCache<K> {
             pendingEnrichment.enrichIfConditionsMet(key);
 
             if(pendingEnrichment.getState() == PendingEnrichmentState.BROKEN_DEPENDENCY) {
-              insert(key, EnrichmentState.ENRICHMENT_FAILED, pendingEnrichment.getEnrichableClass(), null);
+              insertFailedEnrichment(key, pendingEnrichment.getEnrichableClass());
 
               pendingEnrichments.remove(pendingEnrichment);
 
@@ -224,7 +236,7 @@ public class EnrichCache<K> {
     }
   }
 
-  public <E> E getFromCache(K key, Class<E> enrichableClass) {
+  public <E> E getFromCache(CacheKey key, Class<E> enrichableClass) {
     synchronized(cache) {
       CacheValue cacheValue = getCacheValue(key, enrichableClass);
 
@@ -248,12 +260,12 @@ public class EnrichCache<K> {
   private enum PendingEnrichmentState {NOT_INITIALIZED, WAITING_FOR_DEPENDENCY, BROKEN_DEPENDENCY, IN_PROGRESS}
 
   private class PendingEnrichment<T> {
-    private final Enricher<K, T> enricher;
-    private final Class<?> enrichableClass;
+    private final Enricher<T> enricher;
+    private final Class<T> enrichableClass;
 
     private PendingEnrichmentState state = PendingEnrichmentState.NOT_INITIALIZED;
 
-    public PendingEnrichment(Enricher<K, T> enricher, Class<T> enrichableClass) {
+    public PendingEnrichment(Enricher<T> enricher, Class<T> enrichableClass) {
       assert enricher != null;
       assert enrichableClass != null;
 
@@ -271,7 +283,7 @@ public class EnrichCache<K> {
      * @param key a key
      * @return <code>true</code> if this PendingEnrich was handled, otherwise <code>false</code>
      */
-    public void enrichIfConditionsMet(final K key) {
+    public void enrichIfConditionsMet(final CacheKey key) {
       synchronized(this) {
         if(state == PendingEnrichmentState.IN_PROGRESS || state == PendingEnrichmentState.BROKEN_DEPENDENCY) {
           throw new IllegalStateException("" + state);
@@ -284,11 +296,11 @@ public class EnrichCache<K> {
 
           if(cacheValue == null) {
             state = PendingEnrichmentState.WAITING_FOR_DEPENDENCY;
-            enrich(parameterType, key);
+            enrich(key, parameterType);
             return;
           }
 
-          if(cacheValue.state == EnrichmentState.ENRICHMENT_FAILED) {
+          if(cacheValue.state == EnrichmentState.FAILED) {
             state = PendingEnrichmentState.BROKEN_DEPENDENCY;
             return;
           }
@@ -302,12 +314,12 @@ public class EnrichCache<K> {
 
         state = PendingEnrichmentState.IN_PROGRESS;
 
-        final Map<Class<?>, Object> finalInputParameters = inputParameters;
+        final Parameters finalInputParameters = new Parameters(inputParameters);
 
         Platform.runLater(new Runnable() {
           @Override
           public void run() {
-            List<EnrichTask<T>> enrichTasks = enricher.enrich(key, finalInputParameters, false);
+            List<EnrichTask<T>> enrichTasks = enricher.enrich(finalInputParameters, false);
 
             for(int i = 0; i < enrichTasks.size(); i++) {
               final EnrichTask<T> enrichTask = enrichTasks.get(i);
@@ -326,17 +338,17 @@ public class EnrichCache<K> {
                     if(state == State.FAILED) {
                       System.out.println("[WARN] EnrichCache: " + state + ": " + key + ": " + enrichTask.getTitle() + ": " + enrichTask.getException());
                       enrichTask.getException().printStackTrace(System.out);
-                      insert(key, EnrichmentState.ENRICHMENT_FAILED, enrichableClass, null);
+                      insertFailedEnrichment(key, enrichableClass);
                     }
 
                     if(state == State.SUCCEEDED) {
                       if(taskResult != null || nextEnrichTask == null) {
                         synchronized(cache) {
                           if(taskResult != null) {
-                            insert(key, EnrichmentState.ENRICHED, enrichableClass, taskResult);
+                            insert(key, taskResult);
                           }
                           else {
-                            insert(key, EnrichmentState.ENRICHMENT_FAILED, enrichableClass, null);
+                            insertFailedEnrichment(key, enrichableClass);
                           }
 
                           Set<PendingEnrichment<?>> set = pendingEnrichmentMap.get(key);
@@ -394,7 +406,6 @@ public class EnrichCache<K> {
         return false;
       }
 
-      @SuppressWarnings("unchecked")
       PendingEnrichment<?> other = (PendingEnrichment<?>)obj;
 
       return enricher.equals(other.enricher);

@@ -12,6 +12,7 @@ import hs.mediasystem.db.MediaData;
 import hs.mediasystem.db.MediaData.MatchType;
 import hs.mediasystem.db.MediaId;
 import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.enrich.CacheKey;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.enrich.EnrichmentState;
 import hs.mediasystem.framework.MediaDataEnricher;
@@ -39,7 +40,8 @@ public class EnrichmentTest {
 
   private MediaTree mediaTree;
   private MediaItem item;
-  private EnrichCache<MediaItem> cache;
+  private CacheKey cacheKey;
+  private EnrichCache cache;
 
   @Mock private ItemsDao itemsDao;
   @Mock private TypeBasedItemEnricher typeBasedItemEnricher;
@@ -58,25 +60,26 @@ public class EnrichmentTest {
   public void before() throws IdentifyException {
     MockitoAnnotations.initMocks(this);
 
-    cache = new EnrichCache<>(new TaskThreadPoolExecutor(new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>())));
+    cache = new EnrichCache(new TaskThreadPoolExecutor(new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>())));
     cache.registerEnricher(MediaData.class, new MediaDataEnricher(itemsDao, typeBasedItemEnricher));
 
     mediaTree = new MediaTree() {
       @Override
-      public EnrichCache<MediaItem> getEnrichCache() {
+      public EnrichCache getEnrichCache() {
         return cache;
       }
     };
 
     Movie movie = new Movie("Alice in Wonderland", null, null, null, null);
     item = new MediaItem(mediaTree, MOVIE_ALICE_URI, movie);
+    cacheKey = new CacheKey(item.getUri());
 
     when(typeBasedItemEnricher.identifyItem(movie)).thenReturn(new EnricherMatch(new Identifier("Movie", "TMDB", "12345"), MatchType.NAME, 0.99f));
   }
 
   @Test
   public void shouldUpdateEnrichableWhenCacheUpdated() {
-    cache.insert(item, EnrichmentState.ENRICHED, MediaId.class, new MediaId(1, 0, null, null));
+    cache.insert(cacheKey, new MediaId(1, 0, null, null));
 
     assertNotNull(item.get(MediaId.class));
   }
@@ -84,7 +87,7 @@ public class EnrichmentTest {
   @Test
   public void shouldImmediatelyFailEnrichmentWhenNoSuitableEnricherExists() {
     assertNull(item.get(Movie.class).getTagLine());  // triggers enrich
-    assertEquals(EnrichmentState.ENRICHMENT_FAILED, item.getEnrichmentState(Movie.class));
+    assertEquals(EnrichmentState.FAILED, item.getEnrichmentState(Movie.class));
   }
 
   @Test(timeout = 5000)
@@ -96,7 +99,7 @@ public class EnrichmentTest {
       }
     });
 
-    sleep(50);
+    sleep(150);
 
     assertNotNull(item.get(MediaData.class));
   }

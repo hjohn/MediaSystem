@@ -12,12 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MoviesMediaTree implements MediaTree, MediaRoot {
-  private final EnrichCache<MediaItem> enrichCache;
+  private final EnrichCache enrichCache;
   private final Path root;
 
   private List<MediaItem> children;
 
-  public MoviesMediaTree(EnrichCache<MediaItem> enrichCache, Path root) {
+  public MoviesMediaTree(EnrichCache enrichCache, Path root) {
     this.enrichCache = enrichCache;
     this.root = root;
   }
@@ -45,7 +45,7 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
   }
 
   @Override
-  public EnrichCache<MediaItem> getEnrichCache() {
+  public EnrichCache getEnrichCache() {
     return enrichCache;
   }
 }

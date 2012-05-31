@@ -80,7 +80,7 @@ public class NosMediaTree implements MediaTree, MediaRoot {
   }
 
   @Override
-  public EnrichCache<MediaItem> getEnrichCache() {
+  public EnrichCache getEnrichCache() {
     return null;
   }
 }

@@ -7,18 +7,19 @@ import hs.mediasystem.db.Source;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
+import hs.mediasystem.enrich.Parameters;
 import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.media.Episode;
 import hs.mediasystem.media.Media;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
-public class EpisodeEnricher implements Enricher<MediaItem, Episode> {
+public class EpisodeEnricher implements Enricher<Episode> {
   private static final List<Class<?>> INPUT_PARAMETERS = new ArrayList<Class<?>>() {{
+    add(TaskTitle.class);
     add(MediaData.class);
     add(Media.class);
   }};
@@ -38,10 +39,10 @@ public class EpisodeEnricher implements Enricher<MediaItem, Episode> {
   }
 
   @Override
-  public List<EnrichTask<Episode>> enrich(MediaItem key, Map<Class<?>, Object> inputParameters, boolean bypassCache) {
+  public List<EnrichTask<Episode>> enrich(Parameters parameters, boolean bypassCache) {
     List<EnrichTask<Episode>> enrichTasks = new ArrayList<>();
 
-    EpisodeEnrichTaskProvider enrichTaskProvider = new EpisodeEnrichTaskProvider(key.getTitle(), (MediaData)inputParameters.get(MediaData.class), (Episode)inputParameters.get(Media.class));
+    EpisodeEnrichTaskProvider enrichTaskProvider = new EpisodeEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(MediaData.class), (Episode)parameters.get(Media.class));
 
     if(!bypassCache) {
       enrichTasks.add(enrichTaskProvider.getCachedTask());

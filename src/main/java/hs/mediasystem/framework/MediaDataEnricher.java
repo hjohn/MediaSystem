@@ -8,6 +8,7 @@ import hs.mediasystem.db.MediaId;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
+import hs.mediasystem.enrich.Parameters;
 import hs.mediasystem.media.Media;
 
 import java.io.IOException;
@@ -16,13 +17,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
-public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
+public class MediaDataEnricher implements Enricher<MediaData> {
   private static final List<Class<?>> INPUT_PARAMETERS = new ArrayList<Class<?>>() {{
+    add(TaskTitle.class);
+    add(MediaItemUri.class);
     add(Media.class);
   }};
 
@@ -41,10 +43,10 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
   }
 
   @Override
-  public List<EnrichTask<MediaData>> enrich(MediaItem key, Map<Class<?>, Object> inputParameters, boolean bypassCache) {
+  public List<EnrichTask<MediaData>> enrich(Parameters parameters, boolean bypassCache) {
     List<EnrichTask<MediaData>> enrichTasks = new ArrayList<>();
 
-    MediaDataEnrichTaskProvider enrichTaskProvider = new MediaDataEnrichTaskProvider(key.getTitle(), key.getUri(), (Media)inputParameters.get(Media.class));
+    MediaDataEnrichTaskProvider enrichTaskProvider = new MediaDataEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.unwrap(MediaItemUri.class), parameters.get(Media.class));
 
     if(!bypassCache) {
       enrichTasks.add(enrichTaskProvider.getCachedTask());

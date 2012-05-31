@@ -63,7 +63,7 @@ public class YouTubeMediaTree implements MediaTree, MediaRoot {
   }
 
   @Override
-  public EnrichCache<MediaItem> getEnrichCache() {
+  public EnrichCache getEnrichCache() {
     return null;
   }
 }

@@ -32,10 +32,10 @@ import javax.inject.Provider;
 
 public class SeriesMainMenuExtension implements MainMenuExtension {
   private final Provider<SelectMediaPresentation> selectMediaPresentationProvider;
-  private final EnrichCache<MediaItem> enrichCache;
+  private final EnrichCache enrichCache;
 
   @Inject
-  public SeriesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, EnrichCache<MediaItem> enrichCache, SerieEnricher serieEnricher, EpisodeEnricher episodeEnricher) {
+  public SeriesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, EnrichCache enrichCache, SerieEnricher serieEnricher, EpisodeEnricher episodeEnricher) {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
     this.enrichCache = enrichCache;
 

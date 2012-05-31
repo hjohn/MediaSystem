@@ -1,5 +1,6 @@
 package hs.mediasystem.framework;
 
+import hs.mediasystem.enrich.CacheKey;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.enrich.EnrichmentListener;
 import hs.mediasystem.enrich.EnrichmentState;
@@ -34,6 +35,7 @@ public class MediaItem {
 
   private final Map<Class<?>, EnrichmentState> enrichmentStates = new HashMap<>();
 
+  private final CacheKey cacheKey;
   private final String id;
   private final MediaTree mediaTree;
   private final String uri;
@@ -54,6 +56,7 @@ public class MediaItem {
     this.id = uri == null ? "hash:/" + super.hashCode() : "uri:/" + uri;
     this.uri = uri;
     this.mediaTree = mediaTree;
+    this.cacheKey = new CacheKey(uri);
 
     for(Object o : data) {
       add(o);
@@ -62,11 +65,14 @@ public class MediaItem {
     this.mediaType = getMedia().getClass().getSimpleName();
 
     if(getEnrichCache() != null) {
+      getEnrichCache().insert(cacheKey, new TaskTitle(getTitle()));
+      getEnrichCache().insert(cacheKey, new MediaItemUri(uri));
+
       for(Object o : data) {
-        getEnrichCache().insertIfNotExists(this, EnrichmentState.UNENRICHED, o.getClass(), o);
+        getEnrichCache().insertUnenrichedDataIfNotExists(cacheKey, o);
       }
 
-      getEnrichCache().addListener(this, new WeakEnrichmentListener(listener));
+      getEnrichCache().addListener(cacheKey, new WeakEnrichmentListener(listener));
     }
   }
 
@@ -91,7 +97,7 @@ public class MediaItem {
     EnrichmentState enrichmentState = enrichmentStates.get(cls);
 
     if(t == null && (enrichmentState == null || enrichmentState == EnrichmentState.UNENRICHED)) {
-      getEnrichCache().enrich(cls, this);
+      getEnrichCache().enrich(cacheKey, cls);
     }
 
     return t;
@@ -129,7 +135,7 @@ public class MediaItem {
     return mediaTree;
   }
 
-  public EnrichCache<MediaItem> getEnrichCache() {
+  public EnrichCache getEnrichCache() {
     return mediaTree.getEnrichCache();
   }
 
@@ -138,7 +144,7 @@ public class MediaItem {
 
     if(getEnrichCache() != null) {
       if(enrichmentState == null || enrichmentState == EnrichmentState.UNENRICHED) {
-        getEnrichCache().enrich(cls, this);
+        getEnrichCache().enrich(cacheKey, cls);
       }
     }
   }
