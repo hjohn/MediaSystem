@@ -49,22 +49,6 @@ public class EnrichCache<K> {
   @Inject
   public EnrichCache(TaskExecutor normalExecutor) {
     this.normalQueue = new OrderedExecutionQueueExecutor<>(taskPriorityComparator, normalExecutor);
-
-    new Thread() {
-      @Override
-      public void run() {
-        for(;;) {
-          try {
-            Thread.sleep(5000);
-            System.out.println("enrichmentlisteners = " + enrichmentListeners.size());
-          }
-          catch(InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-        }
-      }
-    }.start();
   }
 
   public void addListener(K key, EnrichmentListener listener) {
