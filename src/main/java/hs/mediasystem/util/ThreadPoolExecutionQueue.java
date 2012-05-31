@@ -53,6 +53,10 @@ public class ThreadPoolExecutionQueue implements ExecutionQueue {
     }
   }
 
+  public int getSlotsAvailable() {
+    return executor.getMaximumPoolSize() - executor.getActiveCount() - executor.getQueue().size() - itemNodeMap.size();
+  }
+
   public int getActiveCount() {
     return executor.getActiveCount();
   }
