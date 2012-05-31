@@ -7,6 +7,7 @@ import hs.mediasystem.db.Source;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
+import hs.mediasystem.enrich.EnrichmentResult;
 import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.media.Serie;
 
@@ -55,7 +56,7 @@ public class SerieEnricher implements Enricher<MediaItem, Serie> {
     }
 
     @Override
-    public Serie itemToEnrichType(Item item) {
+    public EnrichmentResult<Serie> itemToEnrichType(Item item) {
       Serie serie = new Serie(item.getTitle());
 
       serie.backgroundProperty().set(createImageHandle(item.getBackground(), item, "background"));
@@ -67,7 +68,7 @@ public class SerieEnricher implements Enricher<MediaItem, Serie> {
       serie.genresProperty().set(item.getGenres());
       serie.releaseDateProperty().set(item.getReleaseDate());
 
-      return serie;
+      return new EnrichmentResult<>(serie);
     }
   }
 

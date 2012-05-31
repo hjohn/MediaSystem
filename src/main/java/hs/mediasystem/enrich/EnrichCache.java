@@ -317,7 +317,7 @@ public class EnrichCache<K> {
                 @Override
                 public void changed(ObservableValue<? extends State> observable, State oldState, State state) {
                   if(state == State.FAILED || state == State.CANCELLED || state == State.SUCCEEDED) {
-                    T taskResult = enrichTask.getValue();
+                    EnrichmentResult<T> taskResult = enrichTask.getValue();
 
                     if(state == State.SUCCEEDED || state == State.CANCELLED) {
                       System.out.println("[FINE] EnrichCache: " + state + ": " + key + ": " + enrichTask.getTitle());
@@ -330,10 +330,20 @@ public class EnrichCache<K> {
                     }
 
                     if(state == State.SUCCEEDED) {
-                      if(taskResult != null || nextEnrichTask == null) {
+                      if(taskResult != null && taskResult.getPrimaryResult() == null) {
+                        for(Object o : taskResult.getIntermediateResults()) {
+                          if(o != null) {
+                            insert(key, EnrichmentState.ENRICHED, o.getClass(), o);
+                          }
+                        }
+
+                        taskResult = null;
+                      }
+
+                      if((taskResult != null && taskResult.getPrimaryResult() != null) || nextEnrichTask == null) {
                         synchronized(cache) {
                           if(taskResult != null) {
-                            insert(key, EnrichmentState.ENRICHED, enrichableClass, taskResult);
+                            insert(key, EnrichmentState.ENRICHED, enrichableClass, taskResult.getPrimaryResult());
                           }
                           else {
                             insert(key, EnrichmentState.ENRICHMENT_FAILED, enrichableClass, null);

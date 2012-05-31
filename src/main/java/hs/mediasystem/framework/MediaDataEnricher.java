@@ -8,7 +8,7 @@ import hs.mediasystem.db.MediaId;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
-import hs.mediasystem.enrich.EnrichmentState;
+import hs.mediasystem.enrich.EnrichmentResult;
 import hs.mediasystem.enrich.TaskKey;
 import hs.mediasystem.media.Media;
 
@@ -90,17 +90,16 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
         }
 
         @Override
-        public MediaData call() throws IOException {
+        public EnrichmentResult<MediaData> call() throws IOException {
           MediaData mediaData = itemsDao.getMediaDataByUri(uri);
 
           if(mediaData == null) {
             MediaId mediaId = createMediaId(uri);
 
-            taskKey.getKey().getEnrichCache().insert(taskKey.getKey(), EnrichmentState.ENRICHED, MediaId.class, mediaId);
             mediaData = itemsDao.getMediaDataByHash(mediaId.getHash());
 
             if(mediaData == null) {
-              return null;
+              return new EnrichmentResult<>(null, mediaId);
             }
 
             mediaData.setUri(uri);  // replace uri, as it didn't match anymore
@@ -109,7 +108,7 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
             itemsDao.updateMediaData(mediaData);
           }
 
-          return mediaData;
+          return new EnrichmentResult<>(mediaData);
         }
       };
     }
@@ -121,7 +120,7 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
         }
 
         @Override
-        protected MediaData call() throws Exception {
+        protected EnrichmentResult<MediaData> call() throws Exception {
           EnricherMatch enricherMatch = typeBasedItemEnricher.identifyItem(media);
 
           MediaId mediaId = taskKey.getKey().getEnrichCache().getFromCache(taskKey.getKey(), MediaId.class);
@@ -140,7 +139,7 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
 
           itemsDao.storeMediaData(mediaData);
 
-          return mediaData;
+          return new EnrichmentResult<>(mediaData);
         }
       };
     }

@@ -6,6 +6,7 @@ import hs.mediasystem.db.ItemsDao;
 import hs.mediasystem.db.MediaData;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
+import hs.mediasystem.enrich.EnrichmentResult;
 
 public abstract class AbstractEnrichTaskProvider<T> {
   private final String title;
@@ -20,7 +21,7 @@ public abstract class AbstractEnrichTaskProvider<T> {
     this.mediaData = mediaData;
   }
 
-  public abstract T itemToEnrichType(Item item);
+  public abstract EnrichmentResult<T> itemToEnrichType(Item item);
 
   public EnrichTask<T> getCachedTask() {
     return new EnrichTask<T>(true) {
@@ -29,7 +30,7 @@ public abstract class AbstractEnrichTaskProvider<T> {
       }
 
       @Override
-      protected T call() {
+      protected EnrichmentResult<T> call() {
         try {
           Item item = itemsDao.loadItem(mediaData.getIdentifier());
 
@@ -53,7 +54,7 @@ public abstract class AbstractEnrichTaskProvider<T> {
       }
 
       @Override
-      protected T call() throws Exception {
+      protected EnrichmentResult<T> call() throws Exception {
         Item oldItem;
 
         try {
