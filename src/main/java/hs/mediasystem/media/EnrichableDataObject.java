@@ -2,16 +2,22 @@ package hs.mediasystem.media;
 
 import hs.mediasystem.framework.MediaItem;
 
+import java.lang.ref.WeakReference;
+
 public class EnrichableDataObject {
-  private MediaItem mediaItem;
+  private WeakReference<MediaItem> mediaItem;
 
   public void setMediaItem(MediaItem mediaItem) {
-    this.mediaItem = mediaItem;
+    this.mediaItem = new WeakReference<>(mediaItem);
   }
 
   protected void queueForEnrichment() {
     if(mediaItem != null) {
-      mediaItem.queueForEnrichment(getClass());
+      MediaItem item = mediaItem.get();
+
+      if(item != null) {
+        item.queueForEnrichment(getClass());
+      }
     }
   }
 }
