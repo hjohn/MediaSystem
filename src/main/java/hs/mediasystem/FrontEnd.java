@@ -2,6 +2,8 @@ package hs.mediasystem;
 
 import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.DatabaseUpdater;
+import hs.mediasystem.ext.movie.MoviesMainMenuExtension;
+import hs.mediasystem.ext.serie.SeriesMainMenuExtension;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -12,9 +14,7 @@ import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.screens.selectmedia.BannerStandardLayoutExtension;
 import hs.mediasystem.screens.selectmedia.ListStandardLayoutExtension;
-import hs.mediasystem.screens.selectmedia.MoviesMainMenuExtension;
 import hs.mediasystem.screens.selectmedia.NosMainMenuExtension;
-import hs.mediasystem.screens.selectmedia.SeriesMainMenuExtension;
 import hs.mediasystem.screens.selectmedia.StandardLayoutExtension;
 import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.screens.selectmedia.YouTubeMainMenuExtension;

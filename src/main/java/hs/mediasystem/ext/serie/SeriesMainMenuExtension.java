@@ -1,27 +1,19 @@
-package hs.mediasystem.screens.selectmedia;
+package hs.mediasystem.ext.serie;
 
-import hs.mediasystem.db.TvdbEpisodeEnricher;
-import hs.mediasystem.db.TvdbSerieEnricher;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache;
-import hs.mediasystem.framework.EpisodeEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
-import hs.mediasystem.framework.SerieEnricher;
-import hs.mediasystem.fs.EpisodeComparator;
 import hs.mediasystem.fs.MediaRootType;
-import hs.mediasystem.fs.SeasonGrouper;
-import hs.mediasystem.fs.Serie;
-import hs.mediasystem.fs.SeriesMediaTree;
-import hs.mediasystem.media.Episode;
 import hs.mediasystem.media.Media;
-import hs.mediasystem.screens.BannerCell;
-import hs.mediasystem.screens.EpisodeCell;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.StandardLayout;
 import hs.mediasystem.screens.StandardLayout.MediaGroup;
+import hs.mediasystem.screens.selectmedia.BannerCell;
+import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
+import hs.mediasystem.screens.selectmedia.StandardView;
 
 import java.nio.file.Paths;
 
@@ -41,12 +33,12 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
 
     TvdbSerieEnricher tvdbSerieEnricher = new TvdbSerieEnricher();
 
-    TypeBasedItemEnricher.registerEnricher(hs.mediasystem.media.Serie.class, tvdbSerieEnricher);
+    TypeBasedItemEnricher.registerEnricher(hs.mediasystem.ext.serie.Serie.class, tvdbSerieEnricher);
     TypeBasedItemEnricher.registerEnricher(Episode.class, new TvdbEpisodeEnricher(tvdbSerieEnricher));
 
     StandardView.registerLayout(SeriesMediaTree.class, MediaRootType.SERIES);
-    StandardView.registerLayout(Serie.class, MediaRootType.SERIE_EPISODES);
-    MediaNodeCellProviderRegistry.register(MediaNodeCellProviderRegistry.HORIZONTAL_CELL, hs.mediasystem.media.Serie.class, new Provider<BannerCell>() {
+    StandardView.registerLayout(SerieItem.class, MediaRootType.SERIE_EPISODES);
+    MediaNodeCellProviderRegistry.register(MediaNodeCellProviderRegistry.HORIZONTAL_CELL, hs.mediasystem.ext.serie.Serie.class, new Provider<BannerCell>() {
       @Override
       public BannerCell get() {
         return new BannerCell();
@@ -59,7 +51,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
       }
     });
 
-    StandardLayout.registerMediaGroup(Serie.class, new MediaGroup(new SeasonGrouper(), EpisodeComparator.INSTANCE, true, true) {
+    StandardLayout.registerMediaGroup(SerieItem.class, new MediaGroup(new SeasonGrouper(), EpisodeComparator.INSTANCE, true, true) {
       @Override
       public Media createMediaFromFirstItem(MediaItem item) {
         Integer season = item.get(Episode.class).getSeason();
@@ -75,7 +67,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
       }
     });
 
-    enrichCache.registerEnricher(hs.mediasystem.media.Serie.class, serieEnricher);
+    enrichCache.registerEnricher(hs.mediasystem.ext.serie.Serie.class, serieEnricher);
     enrichCache.registerEnricher(Episode.class, episodeEnricher);
   }
 

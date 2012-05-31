@@ -1,6 +1,6 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.media.Episode;
+import hs.mediasystem.ext.serie.Episode;
 import hs.mediasystem.media.Media;
 import hs.subtitle.SubtitleDescriptor;
 import hs.subtitle.sublight.SublightSubtitleClient;

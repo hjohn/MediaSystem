@@ -1,8 +1,7 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.ext.movie;
 
 import hs.mediasystem.framework.Grouper;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.media.Movie;
 
 public class MovieGrouper implements Grouper<MediaItem> {
 

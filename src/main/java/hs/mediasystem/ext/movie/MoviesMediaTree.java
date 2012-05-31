@@ -1,11 +1,11 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.ext.movie;
 
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.media.Movie;
+import hs.mediasystem.fs.EpisodeScanner;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

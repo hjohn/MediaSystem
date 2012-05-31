@@ -1,10 +1,11 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.ext.serie;
 
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
+import hs.mediasystem.fs.SerieScanner;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -29,8 +30,8 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
       children = new ArrayList<>();
 
       for(LocalInfo localInfo : scanResults) {
-        hs.mediasystem.media.Serie serie = new hs.mediasystem.media.Serie(localInfo.getTitle());
-        children.add(new Serie(SeriesMediaTree.this, localInfo.getUri(), serie));
+        hs.mediasystem.ext.serie.Serie serie = new hs.mediasystem.ext.serie.Serie(localInfo.getTitle());
+        children.add(new SerieItem(SeriesMediaTree.this, localInfo.getUri(), serie));
       }
     }
 

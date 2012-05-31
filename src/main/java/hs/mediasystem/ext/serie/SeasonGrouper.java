@@ -1,8 +1,7 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.ext.serie;
 
 import hs.mediasystem.framework.Grouper;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.media.Episode;
 
 public class SeasonGrouper implements Grouper<MediaItem> {
 

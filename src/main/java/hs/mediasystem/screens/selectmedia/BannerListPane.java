@@ -1,7 +1,6 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.framework.MediaNodeCell;
-import hs.mediasystem.screens.BannerCell;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.util.Events;

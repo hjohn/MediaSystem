@@ -1,8 +1,8 @@
 package hs.mediasystem.fs;
 
+import hs.mediasystem.ext.movie.Movie;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.media.Media;
-import hs.mediasystem.media.Movie;
 
 import java.util.Comparator;
 

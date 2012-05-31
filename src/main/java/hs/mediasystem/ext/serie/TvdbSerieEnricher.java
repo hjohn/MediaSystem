@@ -1,5 +1,13 @@
-package hs.mediasystem.db;
+package hs.mediasystem.ext.serie;
 
+import hs.mediasystem.db.Casting;
+import hs.mediasystem.db.EnricherMatch;
+import hs.mediasystem.db.Identifier;
+import hs.mediasystem.db.IdentifyException;
+import hs.mediasystem.db.Item;
+import hs.mediasystem.db.ItemEnricher;
+import hs.mediasystem.db.ItemNotFoundException;
+import hs.mediasystem.db.Person;
 import hs.mediasystem.db.MediaData.MatchType;
 import hs.mediasystem.media.Media;
 

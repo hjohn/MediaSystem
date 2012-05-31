@@ -1,6 +1,14 @@
-package hs.mediasystem.db;
+package hs.mediasystem.ext.serie;
 
+import hs.mediasystem.db.Casting;
+import hs.mediasystem.db.EnricherMatch;
+import hs.mediasystem.db.Identifier;
+import hs.mediasystem.db.IdentifyException;
+import hs.mediasystem.db.Item;
+import hs.mediasystem.db.ItemEnricher;
+import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.db.MediaData.MatchType;
+import hs.mediasystem.db.Person;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.util.Levenshtein;
 
@@ -26,7 +34,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
 
   @Override
   public EnricherMatch identifyItem(final Media media) throws IdentifyException {
-    hs.mediasystem.media.Episode episode = (hs.mediasystem.media.Episode)media;
+    hs.mediasystem.ext.serie.Episode episode = (hs.mediasystem.ext.serie.Episode)media;
     EnricherMatch serieMatch = itemIdentifier.identifyItem(episode.getSerie().getMedia());
 
     // TODO may need some TVDB caching here, as we're doing this query twice for each episode... and TVDB returns whole seasons I think
@@ -93,7 +101,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
     return item;
   }
 
-  private static EpisodeSearchResult findEpisode(String serieId, hs.mediasystem.media.Episode ep) {
+  private static EpisodeSearchResult findEpisode(String serieId, hs.mediasystem.ext.serie.Episode ep) {
     synchronized(TheTVDB.class) {
       TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
 

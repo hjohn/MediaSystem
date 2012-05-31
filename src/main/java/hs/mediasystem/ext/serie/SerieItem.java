@@ -1,19 +1,20 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.ext.serie;
 
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.media.Episode;
+import hs.mediasystem.fs.EpisodeDecoder;
+import hs.mediasystem.fs.EpisodeScanner;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Serie extends MediaItem implements MediaRoot {
+public class SerieItem extends MediaItem implements MediaRoot {
   private List<MediaItem> children;
 
-  public Serie(MediaTree mediaTree, String uri, hs.mediasystem.media.Serie serie) {
+  public SerieItem(MediaTree mediaTree, String uri, hs.mediasystem.ext.serie.Serie serie) {
     super(mediaTree, uri, serie);
   }
 

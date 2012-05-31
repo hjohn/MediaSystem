@@ -3,7 +3,6 @@ package hs.mediasystem.screens.selectmedia;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.media.Media;
-import hs.mediasystem.media.Serie;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.Navigator;
@@ -96,13 +95,11 @@ public class SelectMediaPresentation {
 //              enrichmentHandler.enrichNoCache(mediaItem);  FIXME asap
 
               Media media = mediaItem.get(Media.class);
-              Serie serie = mediaItem.get(Serie.class);
 
-              if(serie != null) {
-                ImageCache.expunge(serie.getBanner());
-              }
+              ImageCache.expunge(media.getBanner());
               ImageCache.expunge(media.getImage());
               ImageCache.expunge(media.getBackground());
+
               return true;
             }
           })

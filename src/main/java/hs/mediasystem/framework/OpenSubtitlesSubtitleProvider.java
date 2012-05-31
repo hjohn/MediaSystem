@@ -1,8 +1,8 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.media.Episode;
+import hs.mediasystem.ext.movie.Movie;
+import hs.mediasystem.ext.serie.Episode;
 import hs.mediasystem.media.Media;
-import hs.mediasystem.media.Movie;
 import hs.subtitle.SubtitleDescriptor;
 import hs.subtitle.opensub.OpenSubtitlesClient;
 

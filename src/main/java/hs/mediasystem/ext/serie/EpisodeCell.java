@@ -1,9 +1,10 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.ext.serie;
 
 import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.media.Episode;
 import hs.mediasystem.media.Media;
+import hs.mediasystem.screens.DuoLineCell;
+import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.StringBinding;
 import hs.mediasystem.util.WeakBinder;

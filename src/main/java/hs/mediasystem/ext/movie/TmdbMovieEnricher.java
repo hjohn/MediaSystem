@@ -1,5 +1,11 @@
-package hs.mediasystem.db;
+package hs.mediasystem.ext.movie;
 
+import hs.mediasystem.db.EnricherMatch;
+import hs.mediasystem.db.Identifier;
+import hs.mediasystem.db.IdentifyException;
+import hs.mediasystem.db.Item;
+import hs.mediasystem.db.ItemEnricher;
+import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.db.MediaData.MatchType;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.util.Levenshtein;
@@ -33,7 +39,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
   @Override
   public EnricherMatch identifyItem(Media media) throws IdentifyException {
     synchronized(Movie.class) {
-      hs.mediasystem.media.Movie itemMovie = (hs.mediasystem.media.Movie)media;
+      hs.mediasystem.ext.movie.Movie itemMovie = (hs.mediasystem.ext.movie.Movie)media;
 
       String title = itemMovie.getGroupTitle();
       String subtitle = itemMovie.getSubtitle();

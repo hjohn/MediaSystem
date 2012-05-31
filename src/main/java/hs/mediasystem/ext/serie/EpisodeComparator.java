@@ -1,7 +1,6 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.ext.serie;
 
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.media.Episode;
 
 import java.util.Comparator;
 

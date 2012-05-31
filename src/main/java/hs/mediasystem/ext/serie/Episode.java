@@ -1,15 +1,15 @@
-package hs.mediasystem.media;
+package hs.mediasystem.ext.serie;
 
-import hs.mediasystem.fs.Serie;
+import hs.mediasystem.media.Media;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class Episode extends Media {
-  private final ObjectProperty<Serie> serie = new SimpleObjectProperty<>();
-  public Serie getSerie() { return serie.get(); }
-  public ObjectProperty<Serie> serieProperty() { return serie; }
+  private final ObjectProperty<SerieItem> serie = new SimpleObjectProperty<>();
+  public SerieItem getSerie() { return serie.get(); }
+  public ObjectProperty<SerieItem> serieProperty() { return serie; }
 
   private final ObjectProperty<Integer> season = new SimpleObjectProperty<>();
   public Integer getSeason() { return season.get(); }
@@ -27,7 +27,7 @@ public class Episode extends Media {
   public String getEpisodeRange() { return episodeRange.get(); }
   public StringProperty episodeRangeProperty() { return episodeRange; }
 
-  public Episode(Serie serie, String episodeName, Integer season, Integer episode, Integer endEpisode) {
+  public Episode(SerieItem serie, String episodeName, Integer season, Integer episode, Integer endEpisode) {
     super(episodeName == null ? createTitle(serie, season, episode, endEpisode) : episodeName);
 
     assert serie != null;
@@ -40,7 +40,7 @@ public class Episode extends Media {
     this.episodeRange.set(createEpisodeNumber(episode, endEpisode));
   }
 
-  private static String createTitle(Serie serie, Integer season, Integer episode, Integer endEpisode) {
+  private static String createTitle(SerieItem serie, Integer season, Integer episode, Integer endEpisode) {
     return serie.getTitle() + " " + season + "x" + createEpisodeNumber(episode, endEpisode);
   }
 

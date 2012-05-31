@@ -1,7 +1,8 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.ext.movie;
 
 import hs.mediasystem.db.LocalInfo;
 import hs.mediasystem.framework.Decoder;
+import hs.mediasystem.fs.NameDecoder;
 import hs.mediasystem.fs.NameDecoder.DecodeResult;
 
 import java.nio.file.Path;
