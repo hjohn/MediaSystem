@@ -7,7 +7,6 @@ import hs.mediasystem.db.Source;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
-import hs.mediasystem.enrich.EnrichmentResult;
 import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.media.Movie;
@@ -61,7 +60,7 @@ public class MovieEnricher implements Enricher<MediaItem, Movie> {
     }
 
     @Override
-    public EnrichmentResult<Movie> itemToEnrichType(Item item) {
+    public Movie itemToEnrichType(Item item) {
       Movie movie = new Movie(currentMovie.getGroupTitle(), currentMovie.getSequence(), currentMovie.getSubtitle(), item.getReleaseYear(), item.getImdbId());
 
       movie.backgroundProperty().set(createImageHandle(item.getBackground(), item, "background"));
@@ -75,7 +74,7 @@ public class MovieEnricher implements Enricher<MediaItem, Movie> {
       movie.tagLineProperty().set(item.getTagline());
       movie.imdbNumberProperty().set(item.getImdbId());
 
-      return new EnrichmentResult<>(movie);
+      return movie;
     }
   }
 

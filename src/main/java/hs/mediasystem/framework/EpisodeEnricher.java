@@ -7,7 +7,6 @@ import hs.mediasystem.db.Source;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
-import hs.mediasystem.enrich.EnrichmentResult;
 import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.media.Episode;
 import hs.mediasystem.media.Media;
@@ -61,7 +60,7 @@ public class EpisodeEnricher implements Enricher<MediaItem, Episode> {
     }
 
     @Override
-    public EnrichmentResult<Episode> itemToEnrichType(Item item) {
+    public Episode itemToEnrichType(Item item) {
       Episode episode = new Episode(currentEpisode.getSerie(), item.getTitle(), currentEpisode.getSeason(), currentEpisode.getEpisode(), currentEpisode.getEndEpisode());
 
       episode.backgroundProperty().set(createImageHandle(item.getBackground(), item, "background"));
@@ -72,7 +71,7 @@ public class EpisodeEnricher implements Enricher<MediaItem, Episode> {
       episode.genresProperty().set(item.getGenres());
       episode.releaseDateProperty().set(item.getReleaseDate());
 
-      return new EnrichmentResult<>(episode);
+      return episode;
     }
   }
 
