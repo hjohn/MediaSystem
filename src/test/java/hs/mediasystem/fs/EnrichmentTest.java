@@ -18,7 +18,6 @@ import hs.mediasystem.enrich.EnrichmentState;
 import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.media.Movie;
 import hs.mediasystem.util.TaskThreadPoolExecutor;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -70,7 +69,7 @@ public class EnrichmentTest {
       }
     };
 
-    Movie movie = new Movie("Alice in Wonderland", null, null, null, null);
+    TestMovie movie = new TestMovie("Alice in Wonderland", null, null, null, null);
     item = new MediaItem(mediaTree, MOVIE_ALICE_URI, movie);
     cacheKey = new CacheKey(item.getUri());
 
@@ -86,8 +85,8 @@ public class EnrichmentTest {
 
   @Test
   public void shouldImmediatelyFailEnrichmentWhenNoSuitableEnricherExists() {
-    assertNull(item.get(Movie.class).getTagLine());  // triggers enrich
-    assertEquals(EnrichmentState.FAILED, item.getEnrichmentState(Movie.class));
+    assertNull(item.get(TestMovie.class).getTagLine());  // triggers enrich
+    assertEquals(EnrichmentState.FAILED, item.getEnrichmentState(TestMovie.class));
   }
 
   @Test(timeout = 5000)
