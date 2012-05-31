@@ -8,8 +8,6 @@ import hs.mediasystem.db.MediaId;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
-import hs.mediasystem.enrich.EnrichmentState;
-import hs.mediasystem.enrich.TaskKey;
 import hs.mediasystem.media.Media;
 
 import java.io.IOException;
@@ -19,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
@@ -45,7 +44,7 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
   public List<EnrichTask<MediaData>> enrich(MediaItem key, Map<Class<?>, Object> inputParameters, boolean bypassCache) {
     List<EnrichTask<MediaData>> enrichTasks = new ArrayList<>();
 
-    MediaDataEnrichTaskProvider enrichTaskProvider = new MediaDataEnrichTaskProvider(new TaskKey(key, MediaData.class), key.getUri(), (Media)inputParameters.get(Media.class));
+    MediaDataEnrichTaskProvider enrichTaskProvider = new MediaDataEnrichTaskProvider(key.getTitle(), key.getUri(), (Media)inputParameters.get(Media.class));
 
     if(!bypassCache) {
       enrichTasks.add(enrichTaskProvider.getCachedTask());
@@ -79,12 +78,13 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
   }
 
   private class MediaDataEnrichTaskProvider {
-    private final TaskKey taskKey;
+    private final String title;
     private final String uri;
     private final Media media;
+    private final AtomicReference<MediaId> mediaIdRef = new AtomicReference<>();
 
-    private MediaDataEnrichTaskProvider(TaskKey taskKey, String uri, Media media) {
-      this.taskKey = taskKey;
+    private MediaDataEnrichTaskProvider(String title, String uri, Media media) {
+      this.title = title;
       this.uri = uri;
       this.media = media;
     }
@@ -92,7 +92,7 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
     public EnrichTask<MediaData> getCachedTask() {
       return new EnrichTask<MediaData>(true) {
         {
-          updateTitle("Cache:" + taskKey.getKey().getTitle());
+          updateTitle("Cache:" + title);
         }
 
         @Override
@@ -102,7 +102,7 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
           if(mediaData == null) {
             MediaId mediaId = createMediaId(uri);
 
-            taskKey.getKey().getEnrichCache().insert(taskKey.getKey(), EnrichmentState.ENRICHED, MediaId.class, mediaId);
+            mediaIdRef.set(mediaId);
             mediaData = itemsDao.getMediaDataByHash(mediaId.getHash());
 
             if(mediaData == null) {
@@ -123,14 +123,14 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
     public EnrichTask<MediaData> getTask() {
       return new EnrichTask<MediaData>(false) {
         {
-          updateTitle(taskKey.getKey().getTitle());
+          updateTitle(title);
         }
 
         @Override
         protected MediaData call() throws Exception {
           EnricherMatch enricherMatch = typeBasedItemEnricher.identifyItem(media);
 
-          MediaId mediaId = taskKey.getKey().getEnrichCache().getFromCache(taskKey.getKey(), MediaId.class);
+          MediaId mediaId = mediaIdRef.get();
 
           if(mediaId == null) {
             mediaId = createMediaId(uri);
