@@ -36,7 +36,7 @@ public class EnrichCache {
   private final Map<Class<?>, Enricher<?>> ENRICHERS = new HashMap<>();
 
   private final Map<CacheKey, Map<Class<?>, CacheValue>> cache = new WeakHashMap<>();
-  private final Map<CacheKey, Set<EnrichmentListener>> enrichmentListeners = new WeakHashMap<>();  // TODO EnrichmentListener refs must be weak
+  private final Map<CacheKey, Set<EnrichmentListener>> enrichmentListeners = new WeakHashMap<>();
   private final Map<CacheKey, Set<PendingEnrichment<?>>> pendingEnrichmentMap = new WeakHashMap<>();
 
   private final OrderedExecutionQueue<CacheKey> cacheQueue = new OrderedExecutionQueueExecutor<>(taskPriorityComparator, new TaskThreadPoolExecutor(new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>())));
