@@ -25,6 +25,9 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.concurrent.Worker.State;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventDispatchChain;
+import javafx.event.EventDispatcher;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -90,6 +93,25 @@ public class ProgramController {
     this.mainScreenProvider = mainScreenProvider;
     this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
     this.itemsDao = itemsDao;
+
+    final EventDispatcher eventDispatcher = scene.getEventDispatcher();
+
+    scene.setEventDispatcher(new EventDispatcher() {
+      @Override
+      public Event dispatchEvent(Event event, EventDispatchChain tail) {
+        long millis = System.currentTimeMillis();
+
+        Event returnedEvent = eventDispatcher.dispatchEvent(event, tail);
+
+        millis = System.currentTimeMillis() - millis;
+
+        if(millis >= 100) {
+          System.out.println("[WARN] Slow Event Handling: " + millis + " ms for event: " + event);
+        }
+
+        return returnedEvent;
+      }
+    });
 
     sceneRoot.getChildren().addAll(contentBorderPane, informationBorderPane, messageBorderPane);
     scene.setRoot(sceneRoot);
