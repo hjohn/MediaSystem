@@ -86,6 +86,16 @@ public class Media extends EnrichableDataObject {
   public ImageHandle getBackground() { return background.get(); }
   public ObjectProperty<ImageHandle> backgroundProperty() { return background; }
 
+  private final ObjectProperty<ImageHandle> banner = new SimpleObjectProperty<ImageHandle>() {
+    @Override
+    public ImageHandle get() {
+      queueForEnrichment();
+      return super.get();
+    }
+  };
+  public ImageHandle getBanner() { return banner.get(); }
+  public ObjectProperty<ImageHandle> bannerProperty() { return banner; }
+
   private final ObjectProperty<ImageHandle> image = new SimpleObjectProperty<ImageHandle>() {
     @Override
     public ImageHandle get() {
