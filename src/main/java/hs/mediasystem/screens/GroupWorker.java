@@ -1,17 +1,19 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.util.TaskExecutor;
-import hs.mediasystem.util.ThreadPoolExecutionQueue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
 public class GroupWorker extends Service<Void> implements TaskExecutor {
-  private final ThreadPoolExecutionQueue executor;
+  private final ThreadPoolExecutor executor;
   private final List<Task<?>> activeTasks = new ArrayList<>();  // Finished, executing and/or waiting tasks
   private final String title;
 
@@ -19,14 +21,14 @@ public class GroupWorker extends Service<Void> implements TaskExecutor {
 
   public GroupWorker(String title, int maxThreads) {
     this.title = title;
-    this.executor = new ThreadPoolExecutionQueue(maxThreads);
+    this.executor = new ThreadPoolExecutor(maxThreads, maxThreads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
     new ActivityMonitorThread().start();
   }
 
   @Override
   public int getSlotsAvailable() {
-    return executor.getSlotsAvailable();
+    return executor.getMaximumPoolSize() - executor.getActiveCount() - executor.getQueue().size();
   }
 
   @Override
@@ -35,14 +37,6 @@ public class GroupWorker extends Service<Void> implements TaskExecutor {
       activeTasks.add(task);
       executor.submit(task);
     }
-  }
-
-  public void promote(Runnable runnable) {
-    executor.promote(runnable);
-  }
-
-  public void cancel(Runnable runnable) {
-    executor.cancel(runnable);
   }
 
   @Override
