@@ -1,5 +1,6 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.util.TaskExecutor;
 import hs.mediasystem.util.ThreadPoolExecutionQueue;
 
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
-public class GroupWorker extends Service<Void> {
+public class GroupWorker extends Service<Void> implements TaskExecutor {
   private final ThreadPoolExecutionQueue executor;
   private final List<Task<?>> activeTasks = new ArrayList<>();  // Finished, executing and/or waiting tasks
   private final String title;
@@ -23,7 +24,13 @@ public class GroupWorker extends Service<Void> {
     new ActivityMonitorThread().start();
   }
 
-  public void submit(final Task<?> task) {
+  @Override
+  public int getSlotsAvailable() {
+    return executor.getSlotsAvailable();
+  }
+
+  @Override
+  public void submitTask(final Task<?> task) {
     synchronized(activeTasks) {
       activeTasks.add(task);
       executor.submit(task);
