@@ -56,16 +56,22 @@ public class MediaDataEnricher implements Enricher<MediaItem, MediaData> {
   }
 
   private static MediaId createMediaId(String uri) {
+    long millis = System.currentTimeMillis();
+
     try {
       Path path = Paths.get(uri);
       boolean isDirectory = Files.isDirectory(path);
 
-      return new MediaId(
+      MediaId mediaId = new MediaId(
         isDirectory ? 0 : Files.size(path),
         Files.getLastModifiedTime(path).toMillis(),
         isDirectory ? null : MediaHash.loadMediaHash(path),
         isDirectory ? null : MediaHash.loadOpenSubtitlesHash(path)
       );
+
+      System.out.println("[FINE] MediaDataEnricher.createMediaId() - computed MediaId in " + (System.currentTimeMillis() - millis) + " ms for: " + uri);
+
+      return mediaId;
     }
     catch(IOException e) {
       throw new RuntimeException(e);
