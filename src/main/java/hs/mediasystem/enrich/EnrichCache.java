@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.concurrent.Worker.State;
 
 import javax.inject.Inject;
@@ -29,6 +30,13 @@ public class EnrichCache {
   private final Comparator<CacheKey> taskPriorityComparator = new Comparator<CacheKey>() {
     @Override
     public int compare(CacheKey o1, CacheKey o2) {
+      if(o1.getPriority() > o2.getPriority()) {
+        return -1;
+      }
+      else if(o1.getPriority() < o2.getPriority()) {
+        return 1;
+      }
+
       return 0;
     }
   };
@@ -113,15 +121,12 @@ public class EnrichCache {
   }
 
   public <T> void enrich(CacheKey key, Class<T> enrichableClass) {
-    // System.out.println("[FINE] Enrichers.enrich() - " + enrichableClass.getName() + ": " + key);
-
     synchronized(cache) {
       @SuppressWarnings("unchecked")
       Enricher<T> enricher = (Enricher<T>)ENRICHERS.get(enrichableClass);
 
       if(enricher == null) {
         System.out.println("No suitable Enricher for " + enrichableClass);
-        new Exception().printStackTrace();
         insertFailedEnrichment(key, enrichableClass);
       }
       else {
@@ -138,8 +143,22 @@ public class EnrichCache {
         if(pendingEnrichments != null && pendingEnrichments.contains(pendingEnrichment)) {
 
           /*
-           * The Pending Enrichment already exists, just discard.
+           * The Pending Enrichment already exists, promote the associated key (requeueing any tasks that might
+           * use it) and then discard it.
            */
+
+          List<Task<?>> cacheTasks = cacheQueue.removeAll(key);
+          List<Task<?>> normalTasks = normalQueue.removeAll(key);
+
+          key.promote();
+
+          if(cacheTasks != null) {
+            cacheQueue.submitAll(key, cacheTasks);
+          }
+
+          if(normalTasks != null) {
+            normalQueue.submitAll(key, cacheTasks);
+          }
 
           return;
         }
