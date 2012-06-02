@@ -8,6 +8,7 @@ import java.util.Date;
 
 public class ChronologicalMediaItemComparator implements Comparator<MediaItem> {
   public static final Comparator<MediaItem> INSTANCE = new ChronologicalMediaItemComparator();
+
   private static final Date MIN_DATE = new Date(Long.MIN_VALUE);
 
   @Override
@@ -20,7 +21,7 @@ public class ChronologicalMediaItemComparator implements Comparator<MediaItem> {
     int result = d1.compareTo(d2);
 
     if(result == 0) {
-      return MediaItemComparator.INSTANCE.compare(o1, o2);
+      result = m1.getTitle().compareTo(m2.getTitle());
     }
 
     return result;
