@@ -13,6 +13,7 @@ import hs.mediasystem.db.MediaData;
 import hs.mediasystem.db.MediaData.MatchType;
 import hs.mediasystem.db.MediaId;
 import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.enrich.EnrichCache.CacheKey;
 import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemUri;

@@ -1,7 +1,7 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.enrich.CacheKey;
 import hs.mediasystem.enrich.EnrichCache;
+import hs.mediasystem.enrich.EnrichCache.CacheKey;
 import hs.mediasystem.enrich.EnrichmentListener;
 import hs.mediasystem.enrich.EnrichmentState;
 import hs.mediasystem.enrich.WeakEnrichmentListener;
@@ -35,7 +35,6 @@ public class MediaItem {
 
   private final Map<Class<?>, EnrichmentState> enrichmentStates = new HashMap<>();
 
-  private final CacheKey cacheKey;
   private final String id;
   private final MediaTree mediaTree;
   private final String uri;
@@ -50,13 +49,13 @@ public class MediaItem {
     }
   };
 
+  private CacheKey cacheKey;
   private int databaseId;
 
   public MediaItem(MediaTree mediaTree, String uri, Object... data) {
     this.id = uri == null ? "hash:/" + super.hashCode() : "uri:/" + uri;
     this.uri = uri;
     this.mediaTree = mediaTree;
-    this.cacheKey = new CacheKey(uri);
 
     for(Object o : data) {
       add(o);
@@ -65,6 +64,8 @@ public class MediaItem {
     this.mediaType = getMedia().getClass().getSimpleName();
 
     if(getEnrichCache() != null) {
+      this.cacheKey = getEnrichCache().obtainKey(uri);
+
       getEnrichCache().insertImmutable(cacheKey, new TaskTitle(getTitle()));
       getEnrichCache().insertImmutable(cacheKey, new MediaItemUri(uri));
 

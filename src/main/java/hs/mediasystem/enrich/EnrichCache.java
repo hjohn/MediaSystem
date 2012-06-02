@@ -5,6 +5,8 @@ import hs.mediasystem.util.OrderedExecutionQueueExecutor;
 import hs.mediasystem.util.TaskExecutor;
 import hs.mediasystem.util.TaskThreadPoolExecutor;
 
+import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +19,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -45,6 +48,7 @@ public class EnrichCache {
 
   private final Map<Class<?>, Enricher<?>> ENRICHERS = new HashMap<>();
 
+  private final Map<CacheKey, WeakReference<CacheKey>> cacheKeys = new WeakHashMap<>();
   private final Map<CacheKey, Map<Class<?>, CacheValue>> cache = new WeakHashMap<>();
   private final Map<CacheKey, Set<EnrichmentListener>> enrichmentListeners = new WeakHashMap<>();
   private final Map<CacheKey, Set<PendingEnrichment<?>>> pendingEnrichmentMap = new WeakHashMap<>();
@@ -61,7 +65,31 @@ public class EnrichCache {
     this.normalQueue = new OrderedExecutionQueueExecutor<>(taskPriorityComparator, normalExecutor);
   }
 
+  public CacheKey obtainKey(String... keys) {
+    synchronized(cache) {
+      CacheKey newKey = new CacheKey(keys);
+
+      WeakReference<CacheKey> weakRef = cacheKeys.get(newKey);
+
+      if(weakRef != null) {
+        CacheKey strongRefToCacheKey = weakRef.get();
+
+        if(strongRefToCacheKey != null) {
+          return strongRefToCacheKey;
+        }
+      }
+
+      cacheKeys.put(newKey, new WeakReference<>(newKey));
+
+      return newKey;
+    }
+  }
+
   public void addListener(CacheKey key, EnrichmentListener listener) {
+    if(key == null) {
+      throw new IllegalArgumentException("parameter 'key' cannot be null");
+    }
+
     synchronized(cache) {
       Set<EnrichmentListener> listeners = enrichmentListeners.get(key);
 
@@ -76,13 +104,19 @@ public class EnrichCache {
 
       if(cacheValues != null) {
         for(Map.Entry<Class<?>, CacheValue> entry : cacheValues.entrySet()) {
-          listener.update(entry.getValue().state, entry.getKey(), entry.getValue().enrichable);
+          if(entry.getValue().state == EnrichmentState.ENRICHED) {
+            listener.update(entry.getValue().state, entry.getKey(), entry.getValue().enrichable);
+          }
         }
       }
     }
   }
 
   public void removeListener(CacheKey key, EnrichmentListener listener) {
+    if(key == null) {
+      throw new IllegalArgumentException("parameter 'key' cannot be null");
+    }
+
     synchronized(cache) {
       Set<EnrichmentListener> listeners = enrichmentListeners.get(key);
 
@@ -93,6 +127,10 @@ public class EnrichCache {
   }
 
   public CacheValue getCacheValue(CacheKey key, Class<?> enrichableClass) {
+    if(key == null) {
+      throw new IllegalArgumentException("parameter 'key' cannot be null");
+    }
+
     synchronized(cache) {
       Map<Class<?>, CacheValue> cacheValues = cache.get(key);
 
@@ -127,6 +165,10 @@ public class EnrichCache {
   }
 
   private <T> void enrich(CacheKey key, Class<T> enrichableClass, boolean bypassCache) {
+    if(key == null) {
+      throw new IllegalArgumentException("parameter 'key' cannot be null");
+    }
+
     synchronized(cache) {
       @SuppressWarnings("unchecked")
       Enricher<T> enricher = (Enricher<T>)ENRICHERS.get(enrichableClass);
@@ -195,6 +237,10 @@ public class EnrichCache {
   }
 
   public void reload(CacheKey key) {
+    if(key == null) {
+      throw new IllegalArgumentException("parameter 'key' cannot be null");
+    }
+
     synchronized(cache) {
 
       /*
@@ -269,6 +315,10 @@ public class EnrichCache {
   }
 
   private <E> void insertInternal(CacheKey key, EnrichmentState state, Class<E> enrichableClass, E enrichable, boolean onlyIfNotExists) {
+    if(key == null) {
+      throw new IllegalArgumentException("parameter 'key' cannot be null");
+    }
+
     synchronized(cache) {
       Map<Class<?>, CacheValue> cacheValues = cache.get(key);
 
@@ -283,11 +333,13 @@ public class EnrichCache {
 
       cacheValues.put(enrichableClass, new CacheValue(state, enrichable));
 
-      Set<EnrichmentListener> listeners = enrichmentListeners.get(key);
+      if(state != EnrichmentState.IMMUTABLE) {
+        Set<EnrichmentListener> listeners = enrichmentListeners.get(key);
 
-      if(listeners != null) {
-        for(EnrichmentListener listener : new HashSet<>(listeners)) {
-          listener.update(state, enrichableClass, enrichable);
+        if(listeners != null) {
+          for(EnrichmentListener listener : new HashSet<>(listeners)) {
+            listener.update(state, enrichableClass, enrichable);
+          }
         }
       }
 
@@ -318,6 +370,10 @@ public class EnrichCache {
   }
 
   public <E> E getFromCache(CacheKey key, Class<E> enrichableClass) {
+    if(key == null) {
+      throw new IllegalArgumentException("parameter 'key' cannot be null");
+    }
+
     synchronized(cache) {
       CacheValue cacheValue = getCacheValue(key, enrichableClass);
 
@@ -512,6 +568,53 @@ public class EnrichCache {
       PendingEnrichment<?> other = (PendingEnrichment<?>)obj;
 
       return enricher.equals(other.enricher);
+    }
+  }
+
+  public static class CacheKey {
+    private static final AtomicLong PRIORITY = new AtomicLong(0);
+
+    private final String[] keys;
+
+    private long priority;
+
+    CacheKey(String... keys) {
+      assert keys != null && keys.length > 0;
+
+      this.keys = keys.clone();
+      this.priority = PRIORITY.incrementAndGet();
+    }
+
+    public long getPriority() {
+      return priority;
+    }
+
+    public void promote() {
+      this.priority = PRIORITY.incrementAndGet();
+    }
+
+    @Override
+    public int hashCode() {
+      return Arrays.hashCode(keys);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if(this == obj) {
+        return true;
+      }
+      if(obj == null || getClass() != obj.getClass()) {
+        return false;
+      }
+
+      CacheKey other = (CacheKey)obj;
+
+      return Arrays.equals(keys, other.keys);
+    }
+
+    @Override
+    public String toString() {
+      return "CacheKey[" + Arrays.toString(keys) + "; p=" + priority + "]";
     }
   }
 }
