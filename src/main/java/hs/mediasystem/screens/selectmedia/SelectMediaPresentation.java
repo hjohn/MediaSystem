@@ -92,7 +92,7 @@ public class SelectMediaPresentation {
           new ActionOption("Reload meta data", new Callable<Boolean>() {
             @Override
             public Boolean call() {
-//              enrichmentHandler.enrichNoCache(mediaItem);  FIXME asap
+              mediaItem.reloadMetaData();
 
               Media media = mediaItem.get(Media.class);
 
