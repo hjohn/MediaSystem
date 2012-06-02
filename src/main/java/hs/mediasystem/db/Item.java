@@ -10,7 +10,6 @@ public class Item {
   private Identifier identifier;
 
   private String title;
-  private String subtitle;
   private int version;
   private String imdbId;
   private String plot;
@@ -28,10 +27,6 @@ public class Item {
   private String[] genres = new String[] {};
   private String language;
   private String tagline;
-
-  private boolean viewed;
-  private int resumePosition;
-  private double matchAccuracy;
 
   private List<Casting> castings = new ArrayList<>(0);
 
@@ -147,14 +142,6 @@ public class Item {
     this.episode = episode;
   }
 
-  public String getSubtitle() {
-    return subtitle;
-  }
-
-  public void setSubtitle(String subtitle) {
-    this.subtitle = subtitle;
-  }
-
   public String[] getGenres() {
     return genres.clone();
   }
@@ -214,32 +201,8 @@ public class Item {
     return castings;
   }
 
-  public boolean isViewed() {
-    return viewed;
-  }
-
-  public void setViewed(boolean viewed) {
-    this.viewed = viewed;
-  }
-
-  public int getResumePosition() {
-    return resumePosition;
-  }
-
-  public void setResumePosition(int resumePosition) {
-    this.resumePosition = resumePosition;
-  }
-
-  public double getMatchAccuracy() {
-    return matchAccuracy;
-  }
-
-  public void setMatchAccuracy(double matchAccuracy) {
-    this.matchAccuracy = matchAccuracy;
-  }
-
   @Override
   public String toString() {
-    return "('" + title + "', Item[id=" + id + ", subtitle=" + subtitle + ", identifier=" + identifier + "])";
+    return "('" + title + "', Item[id=" + id + ", identifier=" + identifier + "])";
   }
 }

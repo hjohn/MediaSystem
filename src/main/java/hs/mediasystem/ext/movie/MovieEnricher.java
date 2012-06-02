@@ -81,7 +81,7 @@ public class MovieEnricher implements Enricher<Movie> {
   }
 
   private static SourceImageHandle createImageHandle(Source<byte[]> source, Item item, String keyPostFix) {
-    String key = "MovieEnricher:/" + item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getSubtitle() + "-" + item.getImdbId() + "-" + keyPostFix;
+    String key = "MovieEnricher:/" + item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getImdbId() + "-" + keyPostFix;
 
     return source == null ? null : new SourceImageHandle(source, key);
   }
