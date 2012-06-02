@@ -14,7 +14,7 @@ import java.util.List;
 public class SerieItem extends MediaItem implements MediaRoot {
   private List<MediaItem> children;
 
-  public SerieItem(MediaTree mediaTree, String uri, hs.mediasystem.ext.serie.Serie serie) {
+  public SerieItem(MediaTree mediaTree, String uri, SerieBase serie) {
     super(mediaTree, uri, serie);
   }
 
