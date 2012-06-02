@@ -173,6 +173,8 @@ public class EnrichCache {
          * If this unique Enrichment fails immediately, we donot bother adding it to the PENDING_ENRICHMENTS map.
          */
 
+        System.out.println("[FINE] EnrichCache [" + enricher.getClass().getSimpleName() + "->" + enrichableClass.getSimpleName() + "]: TRIGGER: " + key);
+
         pendingEnrichment.enrichIfConditionsMet(key);
 
         if(pendingEnrichment.getState() == PendingEnrichmentState.BROKEN_DEPENDENCY) {
