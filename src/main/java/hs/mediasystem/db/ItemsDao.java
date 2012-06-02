@@ -226,6 +226,8 @@ public class ItemsDao {
 
   public void storeMediaData(MediaData mediaData) {
     try(Transaction transaction = database.beginTransaction()) {
+      transaction.delete("mediadata", "uri = ? or hash = ?", mediaData.getUri(), mediaData.getMediaId().getHash());
+
       Map<String, Object> generatedKeys = transaction.insert("mediadata", createMediaDataFieldMap(mediaData));
 
       mediaData.setId((int)generatedKeys.get("id"));
