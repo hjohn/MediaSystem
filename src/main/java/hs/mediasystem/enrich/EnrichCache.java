@@ -386,7 +386,7 @@ public class EnrichCache {
 
           if(cacheValue == null) {
             state = PendingEnrichmentState.WAITING_FOR_DEPENDENCY;
-            enrich(key, parameterType);
+            enrich(key, parameterType, bypassCache);
             return;
           }
 
