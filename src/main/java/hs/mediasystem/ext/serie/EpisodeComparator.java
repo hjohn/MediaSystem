@@ -12,8 +12,8 @@ public class EpisodeComparator implements Comparator<MediaItem> {
     Episode ep1 = o1.get(Episode.class);
     Episode ep2 = o2.get(Episode.class);
 
-    int s1 = ep1 == null || ep1.getSeason() == null ? Integer.MAX_VALUE : ep1.getSeason();
-    int s2 = ep2 == null || ep2.getSeason() == null ? Integer.MAX_VALUE : ep2.getSeason();
+    int s1 = ep1 == null || ep1.getSeason() == null || ep1.getSeason() == 0 ? Integer.MAX_VALUE : ep1.getSeason();
+    int s2 = ep2 == null || ep2.getSeason() == null || ep2.getSeason() == 0 ? Integer.MAX_VALUE : ep2.getSeason();
 
     int result = Integer.compare(s1, s2);
 
