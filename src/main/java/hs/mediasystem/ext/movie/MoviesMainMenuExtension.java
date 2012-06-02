@@ -8,11 +8,10 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.media.Media;
+import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
-import hs.mediasystem.screens.StandardLayout;
-import hs.mediasystem.screens.StandardLayout.MediaGroup;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
 import hs.mediasystem.screens.selectmedia.StandardView;
 
@@ -41,7 +40,14 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
       }
     });
 
-    StandardLayout.registerMediaGroup(MoviesMediaTree.class, new MediaGroup(new MovieGrouper(), MovieTitleGroupingComparator.INSTANCE, false, false) {
+    SelectMediaPresentation.registerMediaGroup(MoviesMediaTree.class, new DefaultMediaGroup("Alphabetically, grouped by Title", new MovieGrouper(), MovieTitleGroupingComparator.INSTANCE, false, false) {
+      @Override
+      public Media createMediaFromFirstItem(MediaItem item) {
+        return new Media(item.getTitle(), null, item.getMedia().getReleaseYear());
+      }
+    });
+
+    SelectMediaPresentation.registerMediaGroup(MoviesMediaTree.class, new DefaultMediaGroup("Alphabetically", null, MovieTitleGroupingComparator.INSTANCE, false, false) {
       @Override
       public Media createMediaFromFirstItem(MediaItem item) {
         return new Media(item.getTitle(), null, item.getMedia().getReleaseYear());

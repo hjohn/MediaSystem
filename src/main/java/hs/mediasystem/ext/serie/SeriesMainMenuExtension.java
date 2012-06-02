@@ -6,11 +6,10 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.media.Media;
+import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
-import hs.mediasystem.screens.StandardLayout;
-import hs.mediasystem.screens.StandardLayout.MediaGroup;
 import hs.mediasystem.screens.selectmedia.BannerCell;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
 import hs.mediasystem.screens.selectmedia.StandardView;
@@ -51,7 +50,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
       }
     });
 
-    StandardLayout.registerMediaGroup(SerieItem.class, new MediaGroup(new SeasonGrouper(), EpisodeComparator.INSTANCE, true, true) {
+    SelectMediaPresentation.registerMediaGroup(SerieItem.class, new DefaultMediaGroup("Season", new SeasonGrouper(), EpisodeComparator.INSTANCE, true, true) {
       @Override
       public Media createMediaFromFirstItem(MediaItem item) {
         Integer season = item.get(Episode.class).getSeason();
@@ -66,6 +65,8 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
         return season == null || season == 0 ? "Sp." : "" + season;
       }
     });
+
+    SelectMediaPresentation.registerMediaGroup(SeriesMediaTree.class, new DefaultMediaGroup("Alphabetically", null, SerieComparator.INSTANCE, false, false));
 
     enrichCache.registerEnricher(Serie.class, serieEnricher);
     enrichCache.registerEnricher(Episode.class, episodeEnricher);
