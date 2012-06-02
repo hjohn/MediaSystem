@@ -126,17 +126,22 @@ public class MediaDataEnricher implements Enricher<MediaData> {
       return new EnrichTask<MediaData>(false) {
         {
           updateTitle(title);
+          updateProgress(0, 3);
         }
 
         @Override
         protected MediaData call() throws Exception {
           EnricherMatch enricherMatch = typeBasedItemEnricher.identifyItem(media);
 
+          updateProgress(1, 3);
+
           MediaId mediaId = mediaIdRef.get();
 
           if(mediaId == null) {
             mediaId = createMediaId(uri);
           }
+
+          updateProgress(2, 3);
 
           MediaData mediaData = new MediaData();
 
@@ -147,6 +152,8 @@ public class MediaDataEnricher implements Enricher<MediaData> {
           mediaData.setMatchAccuracy(enricherMatch.getMatchAccuracy());
 
           itemsDao.storeMediaData(mediaData);
+
+          updateProgress(3, 3);
 
           return mediaData;
         }

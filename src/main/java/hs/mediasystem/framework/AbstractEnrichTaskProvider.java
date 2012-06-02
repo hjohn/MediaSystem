@@ -50,6 +50,7 @@ public abstract class AbstractEnrichTaskProvider<T> {
     return new EnrichTask<T>(false) {
       {
         updateTitle(title);
+        updateProgress(0, 3);
       }
 
       @Override
@@ -63,11 +64,11 @@ public abstract class AbstractEnrichTaskProvider<T> {
           oldItem = null;
         }
 
-        updateProgress(3, 5);
+        updateProgress(1, 3);
 
         Item item = bypassCache || oldItem == null ? typeBasedItemEnricher.loadItem(mediaData.getIdentifier()) : oldItem;
 
-        updateProgress(4, 5);
+        updateProgress(2, 3);
 
         if(!item.equals(oldItem)) {
           if(oldItem != null) {
@@ -79,7 +80,7 @@ public abstract class AbstractEnrichTaskProvider<T> {
           }
         }
 
-        updateProgress(5, 5);
+        updateProgress(3, 3);
 
         return itemToEnrichType(item);
       }
