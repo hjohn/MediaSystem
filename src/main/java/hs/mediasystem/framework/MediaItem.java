@@ -65,11 +65,11 @@ public class MediaItem {
     this.mediaType = getMedia().getClass().getSimpleName();
 
     if(getEnrichCache() != null) {
-      getEnrichCache().insert(cacheKey, new TaskTitle(getTitle()));
-      getEnrichCache().insert(cacheKey, new MediaItemUri(uri));
+      getEnrichCache().insertImmutable(cacheKey, new TaskTitle(getTitle()));
+      getEnrichCache().insertImmutable(cacheKey, new MediaItemUri(uri));
 
       for(Object o : data) {
-        getEnrichCache().insertUnenrichedDataIfNotExists(cacheKey, o);
+        getEnrichCache().insertImmutableDataIfNotExists(cacheKey, o);
       }
 
       getEnrichCache().addListener(cacheKey, new WeakEnrichmentListener(listener));
@@ -96,7 +96,7 @@ public class MediaItem {
 
     EnrichmentState enrichmentState = enrichmentStates.get(cls);
 
-    if(t == null && (enrichmentState == null || enrichmentState == EnrichmentState.UNENRICHED)) {
+    if(t == null && enrichmentState == null) {
       getEnrichCache().enrich(cacheKey, cls);
     }
 
@@ -139,11 +139,15 @@ public class MediaItem {
     return mediaTree.getEnrichCache();
   }
 
-  public void queueForEnrichment(Class<? extends EnrichableDataObject> cls) {
-    EnrichmentState enrichmentState = enrichmentStates.get(cls);
+  public void reloadMetaData() {
+    getEnrichCache().reload(cacheKey);
+  }
 
+  public void queueForEnrichment(Class<? extends EnrichableDataObject> cls) {
     if(getEnrichCache() != null) {
-      if(enrichmentState == null || enrichmentState == EnrichmentState.UNENRICHED) {
+      EnrichmentState enrichmentState = enrichmentStates.get(cls);
+
+      if(enrichmentState == null || enrichmentState == EnrichmentState.IMMUTABLE) {
         getEnrichCache().enrich(cacheKey, cls);
       }
     }
