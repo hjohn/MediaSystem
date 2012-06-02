@@ -11,12 +11,16 @@ public class EnrichableDataObject {
     this.mediaItem = new WeakReference<>(mediaItem);
   }
 
+  protected Class<? extends EnrichableDataObject> getEnrichClass() {
+    return getClass();
+  }
+
   protected void queueForEnrichment() {
     if(mediaItem != null) {
       MediaItem item = mediaItem.get();
 
       if(item != null) {
-        item.queueForEnrichment(getClass());
+        item.queueForEnrichment(getEnrichClass());
       }
     }
   }

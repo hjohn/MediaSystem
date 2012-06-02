@@ -39,15 +39,15 @@ public class TmdbMovieEnricher implements ItemEnricher {
   @Override
   public EnricherMatch identifyItem(Media media) throws IdentifyException {
     synchronized(Movie.class) {
-      hs.mediasystem.ext.movie.Movie itemMovie = (hs.mediasystem.ext.movie.Movie)media;
+      MovieBase movieBase = (MovieBase)media;
 
-      String title = itemMovie.getGroupTitle();
-      String subtitle = itemMovie.getSubtitle();
-      String year = itemMovie.getReleaseYear() == null ? null : itemMovie.getReleaseYear().toString();
-      int seq = itemMovie.getSequence() == null ? 1 : itemMovie.getSequence();
+      String title = movieBase.getGroupTitle();
+      String subtitle = movieBase.getSubtitle();
+      String year = movieBase.getReleaseYear() == null ? null : movieBase.getReleaseYear().toString();
+      int seq = movieBase.getSequence() == null ? 1 : movieBase.getSequence();
 
       try {
-        String bestMatchingImdbNumber = itemMovie.getImdbNumber();
+        String bestMatchingImdbNumber = movieBase.getImdbNumber();
 
         float matchAccuracy = 1.0f;
         MatchType matchType = MatchType.ID;
@@ -122,8 +122,6 @@ public class TmdbMovieEnricher implements ItemEnricher {
               bestMatchingImdbNumber = bestScore.movie.getImdbID();
               matchType = bestScore.matchType;
               matchAccuracy = (float)(bestScore.score / 100);
-
-              System.out.println("Best was: " + bestScore);
             }
           }
         }
@@ -146,17 +144,15 @@ public class TmdbMovieEnricher implements ItemEnricher {
       String bestMatchingImdbNumber = identifier;
 
       try {
-        System.out.println("best matching imdb number: " + bestMatchingImdbNumber);
+        System.out.println("[FINE] TmdbMovieEnricher.loadItem() - imdb = " + bestMatchingImdbNumber);
+
         final Movie movie = Movie.imdbLookup(bestMatchingImdbNumber);
 
         if(movie == null) {
           throw new ItemNotFoundException("TMDB lookup by IMDB id failed: " + identifier);
         }
 
-        System.out.println("Found movie: " + movie.getName());  // TODO nullpointer here if IMDB is faulty (could be in filename));
-        System.out.println("released date: " + movie.getReleasedDate());
-        System.out.println("runtime: " + movie.getRuntime());
-        System.out.println("type = " + movie.getMovieType() + "; language = " + movie.getLanguage() + "; tagline = " + movie.getTagline() + "; genres: " + movie.getGenres());
+        System.out.println("[FINE] TmdbMovieEnricher.loadItem() - Found: name=" + movie.getName() + "; release date=" + movie.getReleasedDate() + "; runtime=" + movie.getRuntime() + "; type=" + movie.getMovieType() + "; language=" + movie.getLanguage() + "; tagline=" + movie.getTagline() + "; genres=" + movie.getGenres());
 
         final MovieImages images = movie.getImages();
         URL posterURL = null;
@@ -197,11 +193,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
         item.setGenres(genres.toArray(new String[genres.size()]));
 
-        System.out.println(">>> TmdbMovieEnricher: type = " + movie.getMovieType());
-        System.out.println(">>> TmdbMovieEnricher: certification = " + movie.getCertification());
-        System.out.println(">>> TmdbMovieEnricher: votes = " + movie.getVotes());
-        System.out.println(">>> TmdbMovieEnricher: last mod date = " + movie.getLastModifiedAtDate());
-        System.out.println(">>> TmdbMovieEnricher: reduced = " + movie.isReduced());
+        System.out.println(">>> TmdbMovieEnricher: type = " + movie.getMovieType() + "; certification = " + movie.getCertification() + "; votes = " + movie.getVotes() + "; last mod date = " + movie.getLastModifiedAtDate());
 
         for(CastInfo castInfo : movie.getCast()) {
           System.out.println(">>> TmdbMovieEnricher: Cast: id/castid = " + castInfo.getID() + "/" + castInfo.getCastID() + " : " + castInfo.getCharacterName() + " => " + castInfo.getName() + " ; " + castInfo.getJob() + " ; " + castInfo.getJob());

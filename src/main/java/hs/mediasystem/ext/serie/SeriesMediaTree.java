@@ -30,7 +30,7 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
       children = new ArrayList<>();
 
       for(LocalInfo localInfo : scanResults) {
-        hs.mediasystem.ext.serie.Serie serie = new hs.mediasystem.ext.serie.Serie(localInfo.getTitle());
+        SerieBase serie = new SerieBase(localInfo.getTitle());
         children.add(new SerieItem(SeriesMediaTree.this, localInfo.getUri(), serie));
       }
     }

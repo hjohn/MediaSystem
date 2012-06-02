@@ -33,8 +33,8 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
 
     TvdbSerieEnricher tvdbSerieEnricher = new TvdbSerieEnricher();
 
-    TypeBasedItemEnricher.registerEnricher(hs.mediasystem.ext.serie.Serie.class, tvdbSerieEnricher);
-    TypeBasedItemEnricher.registerEnricher(Episode.class, new TvdbEpisodeEnricher(tvdbSerieEnricher));
+    TypeBasedItemEnricher.registerEnricher(SerieBase.class, tvdbSerieEnricher);
+    TypeBasedItemEnricher.registerEnricher(EpisodeBase.class, new TvdbEpisodeEnricher(tvdbSerieEnricher));
 
     StandardView.registerLayout(SeriesMediaTree.class, MediaRootType.SERIES);
     StandardView.registerLayout(SerieItem.class, MediaRootType.SERIE_EPISODES);
@@ -67,7 +67,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
       }
     });
 
-    enrichCache.registerEnricher(hs.mediasystem.ext.serie.Serie.class, serieEnricher);
+    enrichCache.registerEnricher(Serie.class, serieEnricher);
     enrichCache.registerEnricher(Episode.class, episodeEnricher);
   }
 

@@ -33,7 +33,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
     this.enrichCache = enrichCache;
 
-    TypeBasedItemEnricher.registerEnricher(Movie.class, new TmdbMovieEnricher());
+    TypeBasedItemEnricher.registerEnricher(MovieBase.class, new TmdbMovieEnricher());
     StandardView.registerLayout(MoviesMediaTree.class, MediaRootType.MOVIES);
     MediaNodeCellProviderRegistry.register(MediaNodeCellProviderRegistry.HORIZONTAL_CELL, Movie.class, new Provider<MovieCell>() {
       @Override
