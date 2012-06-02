@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -128,10 +129,10 @@ public class Database {
         values.append("?");
       }
 
+      System.out.println("[FINE] Database.Transaction.insert() - Inserting into '" + tableName + "': " + parameters);
+
       try(PreparedStatement statement = connection.prepareStatement("INSERT INTO " + tableName + " (" + fields.toString() + ") VALUES (" + values.toString() + ")", Statement.RETURN_GENERATED_KEYS)) {
         setParameters(parameters, statement);
-
-        System.out.println("[FINE] Database.Transaction.insert() - Inserting into '" + tableName + "': " + parameters);
 
         statement.execute();
 
@@ -164,9 +165,9 @@ public class Database {
         set.append("=?");
       }
 
-      try(PreparedStatement statement = connection.prepareStatement("UPDATE " + tableName + " SET " + set.toString() + " WHERE id = ?")) {
-        System.out.println("[FINE] Database.Transaction.update() - Updating '" + tableName + "' with id: " + id);
+      System.out.println("[FINE] Database.Transaction.update() - Updating id " + id + " in '" + tableName + "': " + parameters);
 
+      try(PreparedStatement statement = connection.prepareStatement("UPDATE " + tableName + " SET " + set.toString() + " WHERE id = ?")) {
         setParameters(parameters, statement);
 
         statement.setLong(parameters.size() + 1, id);
@@ -175,13 +176,29 @@ public class Database {
       }
     }
 
+    public synchronized int delete(String tableName, String whereCondition, Object... parameters) throws SQLException {
+      ensureNotFinished();
+
+      System.out.println("[FINE] Database.Transaction.delete() - Deleting from '" + tableName + "' with condition: '" + whereCondition + "': " + Arrays.toString(parameters));
+
+      try(PreparedStatement statement = connection.prepareStatement("DELETE FROM " + tableName + " WHERE " + whereCondition)) {
+        int parameterIndex = 1;
+
+        for(Object o : parameters) {
+          statement.setObject(parameterIndex++, o);
+        }
+
+        return statement.executeUpdate();
+      }
+    }
+
     public synchronized int deleteChildren(String tableName, String parentTableName, long parentId) throws SQLException {
       ensureNotFinished();
 
+      System.out.println("[FINE] Database.Transaction.deleteChildren() - Deleting '" + tableName + "' Children of '" + parentTableName + "' with id " + parentId);
+
       try(PreparedStatement statement = connection.prepareStatement("DELETE FROM " + tableName + " WHERE " + parentTableName + "_id = ?")) {
         statement.setLong(1, parentId);
-
-        System.out.println("[FINE] Database.Transaction.deleteChildren() - Deleting '" + tableName + "' Children of '" + parentTableName + "' with id " + parentId);
 
         return statement.executeUpdate();
       }
