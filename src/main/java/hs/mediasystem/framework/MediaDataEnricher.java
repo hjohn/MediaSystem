@@ -70,7 +70,7 @@ public class MediaDataEnricher implements Enricher<MediaData> {
         isDirectory ? null : MediaHash.loadOpenSubtitlesHash(path)
       );
 
-      System.out.println("[FINE] MediaDataEnricher.createMediaId() - computed MediaId in " + (System.currentTimeMillis() - millis) + " ms for: " + uri);
+      System.out.println("[FINE] MediaDataEnricher.createMediaId() - computed MediaId in " + (System.currentTimeMillis() - millis) + " ms for: '" + uri + "'");
 
       return mediaId;
     }
