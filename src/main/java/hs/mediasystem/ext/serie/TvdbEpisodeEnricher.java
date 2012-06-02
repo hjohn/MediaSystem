@@ -12,6 +12,7 @@ import hs.mediasystem.db.Person;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.util.Levenshtein;
 
+import java.util.HashSet;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -70,7 +71,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
     System.out.println(">>> Do something with this: first Aired = " + episode.getFirstAired());  // "2002-02-26"
     item.setLanguage(episode.getLanguage());
 
-    for(String director : episode.getDirectors()) {
+    for(String director : new HashSet<>(episode.getDirectors())) {  // Wrap with HashSet removes duplicate names
       Person person = new Person();
 
       person.setName(director);
@@ -84,7 +85,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
       item.getCastings().add(casting);
     }
 
-    for(String guestStar : episode.getGuestStars()) {
+    for(String guestStar : new HashSet<>(episode.getGuestStars())) {  // Wrap with HashSet removes duplicate names
       Person person = new Person();
 
       person.setName(guestStar);
