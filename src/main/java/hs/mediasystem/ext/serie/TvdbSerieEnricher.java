@@ -7,11 +7,13 @@ import hs.mediasystem.db.IdentifyException;
 import hs.mediasystem.db.Item;
 import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.db.ItemNotFoundException;
-import hs.mediasystem.db.Person;
 import hs.mediasystem.db.MediaData.MatchType;
+import hs.mediasystem.db.Person;
 import hs.mediasystem.media.Media;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
 
 import com.moviejukebox.thetvdb.TheTVDB;
 import com.moviejukebox.thetvdb.model.Actor;
@@ -37,7 +39,7 @@ public class TvdbSerieEnricher implements ItemEnricher {
         throw new IdentifyException("Cannot identify Serie with name: " + media.getTitle());
       }
 
-      return new EnricherMatch(new Identifier("Serie", getProviderCode(), results.get(0).getId()), MatchType.NAME, 1.0f);
+      return new EnricherMatch(new Identifier(SerieBase.class.getSimpleName(), getProviderCode(), results.get(0).getId()), MatchType.NAME, 1.0f);
     }
   }
 
@@ -66,7 +68,14 @@ public class TvdbSerieEnricher implements ItemEnricher {
       item.setLanguage(series.getLanguage());
       item.setRuntime(Integer.parseInt(series.getRuntime()));
 
-      List<Actor> actors = tvDB.getActors(identifier);
+      TreeSet<Actor> actors = new TreeSet<>(new Comparator<Actor>() {
+        @Override
+        public int compare(Actor o1, Actor o2) {
+          return o1.getName().compareTo(o2.getName());
+        }
+      });
+
+      actors.addAll(tvDB.getActors(identifier));  // de-duplicates the actors we get from tvdb
 
       for(Actor actor : actors) {
         Person person = new Person();
