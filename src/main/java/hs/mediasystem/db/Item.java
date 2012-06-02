@@ -21,7 +21,6 @@ public class Item {
   private Source<byte[]> banner;
   private Source<byte[]> poster;
   private Float rating;
-  private Integer releaseYear;
   private Date releaseDate;
   private int runtime;
   private Integer season;
@@ -154,14 +153,6 @@ public class Item {
 
   public void setSubtitle(String subtitle) {
     this.subtitle = subtitle;
-  }
-
-  public Integer getReleaseYear() {
-    return releaseYear;
-  }
-
-  public void setReleaseYear(Integer releaseYear) {
-    this.releaseYear = releaseYear;
   }
 
   public String[] getGenres() {

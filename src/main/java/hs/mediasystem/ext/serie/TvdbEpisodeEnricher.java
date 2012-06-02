@@ -60,7 +60,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
     item.setSeason(episode.getSeasonNumber());
     item.setEpisode(episode.getEpisodeNumber());
     if(episode.getRating() != null && !episode.getRating().isEmpty()) {
-      item.setRating(Float.parseFloat(episode.getRating()));
+      item.setRating(Float.valueOf(episode.getRating()));
     }
     item.setPlot(episode.getOverview());
 

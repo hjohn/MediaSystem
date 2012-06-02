@@ -3,7 +3,6 @@ package hs.mediasystem.db;
 import hs.mediasystem.db.Database.Transaction;
 import hs.mediasystem.db.MediaData.MatchType;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -51,8 +50,6 @@ public class ItemsDao {
         try(final ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
             return new Item() {{
-              BigDecimal rating = (BigDecimal)rs.getObject("rating");
-
               setIdentifier(identifier);
               setId(rs.getInt("id"));
               setImdbId(rs.getString("imdbid"));
@@ -62,7 +59,7 @@ public class ItemsDao {
               setEpisode((Integer)rs.getObject("episode"));
               setReleaseDate(rs.getDate("releasedate"));
               setPlot(rs.getString("plot"));
-              setRating(rating == null ? null : rating.floatValue());
+              setRating((Float)rs.getObject("rating"));
               setRuntime((Integer)rs.getObject("runtime"));
               setVersion(rs.getInt("version"));
               setLanguage(rs.getString("language"));

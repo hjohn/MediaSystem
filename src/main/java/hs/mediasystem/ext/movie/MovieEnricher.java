@@ -63,7 +63,7 @@ public class MovieEnricher implements Enricher<Movie> {
 
     @Override
     public Movie itemToEnrichType(Item item) {
-      Movie movie = new Movie(currentMovie.getGroupTitle(), currentMovie.getSequence(), currentMovie.getSubtitle(), item.getReleaseYear(), item.getImdbId());
+      Movie movie = new Movie(currentMovie.getGroupTitle(), currentMovie.getSequence(), currentMovie.getSubtitle(), currentMovie.getReleaseYear(), item.getImdbId());
 
       movie.backgroundProperty().set(createImageHandle(item.getBackground(), item, "background"));
       movie.imageProperty().set(createImageHandle(item.getPoster(), item, "poster"));
