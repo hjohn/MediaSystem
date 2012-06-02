@@ -6,7 +6,6 @@ import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
-import hs.mediasystem.fs.MediaItemComparator;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.media.Media;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -42,7 +41,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
       }
     });
 
-    StandardLayout.registerMediaGroup(MoviesMediaTree.class, new MediaGroup(new MovieGrouper(), MediaItemComparator.INSTANCE, false, false) {
+    StandardLayout.registerMediaGroup(MoviesMediaTree.class, new MediaGroup(new MovieGrouper(), MovieTitleGroupingComparator.INSTANCE, false, false) {
       @Override
       public Media createMediaFromFirstItem(MediaItem item) {
         return new Media(item.getTitle(), null, item.getMedia().getReleaseYear());

@@ -1,13 +1,12 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.ext.movie;
 
-import hs.mediasystem.ext.movie.Movie;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.media.Media;
 
 import java.util.Comparator;
 
-public class MediaItemComparator implements Comparator<MediaItem> {
-  public static final Comparator<MediaItem> INSTANCE = new MediaItemComparator();
+public class MovieTitleGroupingComparator implements Comparator<MediaItem> {
+  public static final Comparator<MediaItem> INSTANCE = new MovieTitleGroupingComparator();
 
   @Override
   public int compare(MediaItem o1, MediaItem o2) {
