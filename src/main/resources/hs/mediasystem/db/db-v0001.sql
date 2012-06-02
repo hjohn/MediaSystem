@@ -1,5 +1,4 @@
-CREATE TABLE dbinfo
-(
+CREATE TABLE dbinfo (
   name varchar(50) NOT NULL,
   value varchar(50) NOT NULL,
   
@@ -8,8 +7,7 @@ CREATE TABLE dbinfo
 
 INSERT INTO dbinfo (name, value) VALUES ('version', 0);
 
-CREATE TABLE items
-(
+CREATE TABLE items (
   id serial4,
   "type" varchar(10) NOT NULL,
   provider varchar(20) NOT NULL,

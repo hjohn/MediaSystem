@@ -2,8 +2,7 @@ ALTER TABLE items ADD COLUMN viewed boolean NOT NULL DEFAULT FALSE;
 ALTER TABLE items ADD COLUMN resumeposition integer NOT NULL DEFAULT 0;
 ALTER TABLE items ADD COLUMN matchaccuracy float;
 
-CREATE TABLE persons
-(
+CREATE TABLE persons (
   id serial4,
   name character varying(250) NOT NULL,
   photourl character varying(1000),
@@ -13,8 +12,7 @@ CREATE TABLE persons
   CONSTRAINT persons_name UNIQUE (name)
 );
 
-CREATE TABLE castings
-(
+CREATE TABLE castings (
   persons_id int4 NOT NULL REFERENCES persons(id) ON DELETE RESTRICT,
   items_id int4 NOT NULL REFERENCES items(id) ON DELETE CASCADE,
   role character varying(50) NOT NULL,

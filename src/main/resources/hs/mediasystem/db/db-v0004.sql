@@ -1,5 +1,4 @@
-CREATE TABLE mediadata
-(
+CREATE TABLE mediadata (
   id serial4,
   
   "type" varchar(10) NOT NULL,
