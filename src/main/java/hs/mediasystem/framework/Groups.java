@@ -3,13 +3,13 @@ package hs.mediasystem.framework;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Groups {
   public static <T> Collection<List<T>> group(List<? extends T> list, Grouper<T> grouper) {
-    Map<Object, List<T>> groups = new HashMap<>();
+    Map<Object, List<T>> groups = new LinkedHashMap<>();
 
     for(T item : list) {
       Object key = grouper.getGroup(item);
