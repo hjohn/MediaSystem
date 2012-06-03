@@ -1,5 +1,6 @@
 package hs.mediasystem.screens.selectmedia;
 
+import hs.mediasystem.db.MediaData;
 import hs.mediasystem.framework.Grouper;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.Media;
@@ -31,6 +32,7 @@ import java.util.Map;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -105,14 +107,24 @@ public class SelectMediaPresentation {
       @Override
       public void handle(MediaNodeEvent event) {
         final MediaItem mediaItem = event.getMediaNode().getMediaItem();
-        List<? extends Option> options = FXCollections.observableArrayList(
-          new BooleanOption("Viewed", mediaItem.viewedProperty(), new StringBinding(mediaItem.viewedProperty()) {
-            @Override
-            protected String computeValue() {
-              return mediaItem.viewedProperty().get() ? "Yes" : "No";
-            }
-          }),
-          new ActionOption("Reload meta data", new Callable<Boolean>() {
+
+        List<Option> options = new ArrayList<>();
+
+        if(mediaItem != null) {
+          MediaData mediaData = mediaItem.get(MediaData.class);
+
+          if(mediaData != null) {
+            final BooleanProperty viewedProperty = mediaData.viewedProperty();
+
+            options.add(new BooleanOption("Viewed", viewedProperty, new StringBinding(viewedProperty) {
+              @Override
+              protected String computeValue() {
+                return viewedProperty.get() ? "Yes" : "No";
+              }
+            }));
+          }
+
+          options.add(new ActionOption("Reload meta data", new Callable<Boolean>() {
             @Override
             public Boolean call() {
               mediaItem.reloadMetaData();
@@ -125,10 +137,11 @@ public class SelectMediaPresentation {
 
               return true;
             }
-          })
-        );
+          }));
 
-        controller.showOptionScreen("Options: " + mediaItem.getTitle(), options);
+          controller.showOptionScreen("Options: " + mediaItem.getTitle(), options);
+        }
+
         event.consume();
       }
     });
