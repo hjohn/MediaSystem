@@ -8,6 +8,7 @@ import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -92,6 +93,33 @@ public class MapBindings {
         Object obj = helper.computeValue();
 
         return obj instanceof Number ? ((Number)obj).doubleValue() : 0;
+      }
+    };
+  }
+
+  public static BooleanBinding selectBoolean(final ObservableValue<?> root, final Object... steps) {
+    return new BooleanBinding() {
+      private final Helper helper;
+
+      {
+        helper = new Helper(this, root, steps);
+      }
+
+      @Override
+      public void dispose() {
+        helper.unregisterListeners();
+      }
+
+      @Override
+      protected void onInvalidating() {
+        helper.unregisterListeners();
+      }
+
+      @Override
+      protected boolean computeValue() {
+        Object obj = helper.computeValue();
+
+        return obj instanceof Boolean ? ((Boolean)obj).booleanValue() : false;
       }
     };
   }
