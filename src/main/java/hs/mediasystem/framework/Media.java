@@ -1,5 +1,6 @@
-package hs.mediasystem.media;
+package hs.mediasystem.framework;
 
+import hs.mediasystem.enrich.DefaultEnrichable;
 import hs.mediasystem.util.ImageHandle;
 
 import java.util.Date;
@@ -13,7 +14,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class Media extends EnrichableDataObject {
+public class Media extends DefaultEnrichable {
   private final StringProperty title = new SimpleStringProperty();
   public String getTitle() { return title.get(); }
   public StringProperty titleProperty() { return title; }

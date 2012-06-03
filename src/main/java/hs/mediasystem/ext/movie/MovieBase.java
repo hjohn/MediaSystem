@@ -1,6 +1,6 @@
 package hs.mediasystem.ext.movie;
 
-import hs.mediasystem.media.EnrichableDataObject;
+import hs.mediasystem.enrich.DefaultEnrichable;
 
 public class MovieBase extends Movie {
 
@@ -9,7 +9,7 @@ public class MovieBase extends Movie {
   }
 
   @Override
-  protected Class<? extends EnrichableDataObject> getEnrichClass() {
+  protected Class<? extends DefaultEnrichable> getEnrichClass() {
     return Movie.class;
   }
 }

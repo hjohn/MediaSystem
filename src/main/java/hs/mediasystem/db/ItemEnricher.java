@@ -1,6 +1,6 @@
 package hs.mediasystem.db;
 
-import hs.mediasystem.media.Media;
+import hs.mediasystem.framework.Media;
 
 public interface ItemEnricher {
   String getProviderCode();

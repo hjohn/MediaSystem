@@ -1,6 +1,6 @@
 package hs.mediasystem.ext.serie;
 
-import hs.mediasystem.media.EnrichableDataObject;
+import hs.mediasystem.enrich.DefaultEnrichable;
 
 public class SerieBase extends Serie {
 
@@ -9,7 +9,7 @@ public class SerieBase extends Serie {
   }
 
   @Override
-  protected Class<? extends EnrichableDataObject> getEnrichClass() {
+  protected Class<? extends DefaultEnrichable> getEnrichClass() {
     return Serie.class;
   }
 }

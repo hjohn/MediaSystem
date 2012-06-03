@@ -2,10 +2,10 @@ package hs.mediasystem.fs;
 
 import hs.mediasystem.db.URLImageSource;
 import hs.mediasystem.enrich.EnrichCache;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.media.Media;
 
 import java.io.IOException;
 import java.util.ArrayList;

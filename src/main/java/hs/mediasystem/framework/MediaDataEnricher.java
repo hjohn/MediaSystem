@@ -9,7 +9,6 @@ import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
 import hs.mediasystem.enrich.Parameters;
-import hs.mediasystem.media.Media;
 
 import java.io.IOException;
 import java.nio.file.Files;

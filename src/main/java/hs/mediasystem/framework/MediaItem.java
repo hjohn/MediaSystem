@@ -2,11 +2,12 @@ package hs.mediasystem.framework;
 
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.enrich.EnrichCache.CacheKey;
+import hs.mediasystem.enrich.EnrichTrigger;
+import hs.mediasystem.enrich.Enrichable;
+import hs.mediasystem.enrich.DefaultEnrichable;
 import hs.mediasystem.enrich.EnrichmentListener;
 import hs.mediasystem.enrich.EnrichmentState;
 import hs.mediasystem.enrich.WeakEnrichmentListener;
-import hs.mediasystem.media.EnrichableDataObject;
-import hs.mediasystem.media.Media;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +19,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
-public class MediaItem {
+public class MediaItem implements EnrichTrigger {
   private final ObservableMap<Class<?>, Object> data = FXCollections.observableHashMap();
   private final ObjectProperty<ObservableMap<Class<?>, Object>> dataMap = new SimpleObjectProperty<>(data);
   public ObjectProperty<ObservableMap<Class<?>, Object>> dataMapProperty() { return dataMap; }
@@ -80,8 +81,8 @@ public class MediaItem {
   private void add(Object o) {
     assert this.id != null;
 
-    if(o instanceof EnrichableDataObject) {
-      ((EnrichableDataObject)o).setMediaItem(this);
+    if(o instanceof Enrichable) {
+      ((Enrichable)o).setEnrichTrigger(this);
     }
 
     Class<? extends Object> cls = o.getClass();
@@ -144,7 +145,8 @@ public class MediaItem {
     getEnrichCache().reload(cacheKey);
   }
 
-  public void queueForEnrichment(Class<? extends EnrichableDataObject> cls) {
+  @Override
+  public void queueForEnrichment(Class<? extends DefaultEnrichable> cls) {
     if(getEnrichCache() != null) {
       EnrichmentState enrichmentState = enrichmentStates.get(cls);
 

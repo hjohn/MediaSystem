@@ -1,9 +1,9 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.beans.AsyncImageProperty;
-import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.enrich.EnrichTrigger;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaNodeCell;
-import hs.mediasystem.media.Media;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
@@ -41,7 +41,7 @@ public class BannerCell extends HBox implements MediaNodeCell {
 
   @Override
   public void configureCell(MediaNode mediaNode) {
-    final MediaItem item = mediaNode.getMediaItem();
+    final EnrichTrigger item = mediaNode.getMediaItem();
 
     binder.unbindAll();
 

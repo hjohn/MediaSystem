@@ -18,7 +18,6 @@ import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemUri;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.media.EnrichableDataObject;
 import hs.mediasystem.util.TaskThreadPoolExecutor;
 
 import java.util.ArrayList;
@@ -188,7 +187,7 @@ public class EnrichmentTest {
     }
   }
 
-  private static class SlowData extends EnrichableDataObject {
+  private static class SlowData extends DefaultEnrichable {
     private final String uri;
 
     public SlowData(String uri) {

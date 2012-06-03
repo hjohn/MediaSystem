@@ -9,9 +9,9 @@ import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
 import hs.mediasystem.enrich.Parameters;
 import hs.mediasystem.framework.AbstractEnrichTaskProvider;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.TaskTitle;
 import hs.mediasystem.fs.SourceImageHandle;
-import hs.mediasystem.media.Media;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,8 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.media.Media;
 
 import java.util.Collections;
 import java.util.List;

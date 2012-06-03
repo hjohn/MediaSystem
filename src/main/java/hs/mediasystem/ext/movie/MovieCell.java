@@ -1,8 +1,8 @@
 package hs.mediasystem.ext.movie;
 
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.media.Media;
 import hs.mediasystem.screens.DuoLineCell;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.MediaNode;

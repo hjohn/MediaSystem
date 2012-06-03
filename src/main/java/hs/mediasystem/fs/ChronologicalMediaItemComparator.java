@@ -1,7 +1,7 @@
 package hs.mediasystem.fs;
 
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.media.Media;
 
 import java.util.Comparator;
 import java.util.Date;

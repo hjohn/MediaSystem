@@ -2,7 +2,7 @@ package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.ext.serie.Episode;
-import hs.mediasystem.media.Media;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.StarRating;

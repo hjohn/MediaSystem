@@ -2,9 +2,9 @@ package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.framework.Grouper;
 import hs.mediasystem.framework.Groups;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.media.Media;
 import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;

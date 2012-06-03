@@ -7,7 +7,7 @@ import hs.mediasystem.db.Item;
 import hs.mediasystem.db.ItemEnricher;
 import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.db.MediaData.MatchType;
-import hs.mediasystem.media.Media;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.util.Levenshtein;
 
 import java.io.IOException;

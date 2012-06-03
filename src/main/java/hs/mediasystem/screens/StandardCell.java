@@ -1,8 +1,8 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.media.Media;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.WeakBinder;
 
