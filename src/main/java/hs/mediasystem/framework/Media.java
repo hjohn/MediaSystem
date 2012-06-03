@@ -1,6 +1,5 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.enrich.DefaultEnrichable;
 import hs.mediasystem.util.ImageHandle;
 
 import java.util.Date;

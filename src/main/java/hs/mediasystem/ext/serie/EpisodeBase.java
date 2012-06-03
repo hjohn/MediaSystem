@@ -1,6 +1,6 @@
 package hs.mediasystem.ext.serie;
 
-import hs.mediasystem.enrich.DefaultEnrichable;
+import hs.mediasystem.framework.DefaultEnrichable;
 
 public class EpisodeBase extends Episode {
 

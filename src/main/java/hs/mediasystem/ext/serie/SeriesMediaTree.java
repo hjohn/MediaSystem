@@ -6,6 +6,7 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.SerieScanner;
+import hs.mediasystem.persist.Persister;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -13,12 +14,14 @@ import java.util.List;
 
 public class SeriesMediaTree implements MediaTree, MediaRoot {
   private final EnrichCache enrichCache;
+  private final Persister persister;
   private final Path root;
 
   private List<MediaItem> children;
 
-  public SeriesMediaTree(EnrichCache enrichCache, Path root) {
+  public SeriesMediaTree(EnrichCache enrichCache, Persister persister, Path root) {
     this.enrichCache = enrichCache;
+    this.persister = persister;
     this.root = root;
   }
 
@@ -46,5 +49,10 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
   @Override
   public EnrichCache getEnrichCache() {
     return enrichCache;
+  }
+
+  @Override
+  public Persister getPersister() {
+    return persister;
   }
 }

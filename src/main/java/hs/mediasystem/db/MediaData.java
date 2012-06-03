@@ -1,6 +1,11 @@
 package hs.mediasystem.db;
 
-public class MediaData {
+import hs.mediasystem.framework.DefaultEnrichable;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
+public class MediaData extends DefaultEnrichable {
+
   /**
    * MatchType enum, in order of certainty
    */
@@ -38,7 +43,6 @@ public class MediaData {
   private MediaId mediaId;
   private Identifier identifier;
 
-  private boolean viewed;
   private int resumePosition;
 
   private MatchType matchType;
@@ -52,12 +56,27 @@ public class MediaData {
     this.uri = uri;
   }
 
+  private final BooleanProperty viewed = new SimpleBooleanProperty() {
+    @Override
+    public boolean get() {
+      queueForEnrichment();
+      return super.get();
+    }
+
+    @Override
+    public void set(boolean b) {
+      super.set(b);
+      queueAsDirty();
+    }
+  };
+  public BooleanProperty viewedProperty() { return viewed; }
+
   public boolean isViewed() {
-    return viewed;
+    return viewed.get();
   }
 
   public void setViewed(boolean viewed) {
-    this.viewed = viewed;
+    this.viewed.set(viewed);
   }
 
   public int getResumePosition() {

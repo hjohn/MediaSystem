@@ -1,6 +1,6 @@
 package hs.mediasystem.ext.movie;
 
-import hs.mediasystem.enrich.DefaultEnrichable;
+import hs.mediasystem.framework.DefaultEnrichable;
 
 public class MovieBase extends Movie {
 

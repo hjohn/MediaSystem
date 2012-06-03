@@ -14,10 +14,12 @@ import hs.mediasystem.db.MediaData.MatchType;
 import hs.mediasystem.db.MediaId;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache.CacheKey;
+import hs.mediasystem.framework.DefaultEnrichable;
 import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemUri;
 import hs.mediasystem.framework.MediaTree;
+import hs.mediasystem.persist.Persister;
 import hs.mediasystem.util.TaskThreadPoolExecutor;
 
 import java.util.ArrayList;
@@ -96,6 +98,11 @@ public class EnrichmentTest {
       @Override
       public EnrichCache getEnrichCache() {
         return cache;
+      }
+
+      @Override
+      public Persister getPersister() {
+        return null;
       }
     };
 

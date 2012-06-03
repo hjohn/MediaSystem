@@ -1,4 +1,4 @@
-package hs.mediasystem.enrich;
+package hs.mediasystem.persist;
 
 public interface PersistTrigger {
   void queueAsDirty(Persistable persistable);

@@ -7,6 +7,8 @@ import hs.mediasystem.enrich.Enrichable;
 import hs.mediasystem.enrich.EnrichmentListener;
 import hs.mediasystem.enrich.EnrichmentState;
 import hs.mediasystem.enrich.WeakEnrichmentListener;
+import hs.mediasystem.persist.PersistTrigger;
+import hs.mediasystem.persist.Persistable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +20,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
-public class MediaItem implements EnrichTrigger {
+public class MediaItem implements EnrichTrigger, PersistTrigger {
   private final ObservableMap<Class<?>, Object> data = FXCollections.observableHashMap();
   private final ObjectProperty<ObservableMap<Class<?>, Object>> dataMap = new SimpleObjectProperty<>(data);
   public ObjectProperty<ObservableMap<Class<?>, Object>> dataMapProperty() { return dataMap; }
@@ -82,6 +84,9 @@ public class MediaItem implements EnrichTrigger {
 
     if(o instanceof Enrichable) {
       ((Enrichable)o).setEnrichTrigger(this);
+    }
+    if(o instanceof Persistable) {
+      ((Persistable)o).setPersistTrigger(this);
     }
 
     Class<? extends Object> cls = o.getClass();
@@ -152,6 +157,13 @@ public class MediaItem implements EnrichTrigger {
       if(enrichmentState == null || enrichmentState == EnrichmentState.IMMUTABLE) {
         getEnrichCache().enrich(cacheKey, cls);
       }
+    }
+  }
+
+  @Override
+  public void queueAsDirty(Persistable persistable) {
+    if(getMediaTree().getPersister() != null) {
+      getMediaTree().getPersister().queueAsDirty(persistable);
     }
   }
 

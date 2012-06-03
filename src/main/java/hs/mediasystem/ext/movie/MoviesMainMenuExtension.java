@@ -8,6 +8,7 @@ import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import hs.mediasystem.fs.MediaRootType;
+import hs.mediasystem.persist.Persister;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
@@ -25,11 +26,13 @@ import javax.inject.Provider;
 public class MoviesMainMenuExtension implements MainMenuExtension {
   private final Provider<SelectMediaPresentation> selectMediaPresentationProvider;
   private final EnrichCache enrichCache;
+  private final Persister persister;
 
   @Inject
-  public MoviesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, MediaDataEnricher identifierEnricher, EnrichCache enrichCache, MovieEnricher movieEnricher) {
+  public MoviesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, MediaDataEnricher identifierEnricher, EnrichCache enrichCache, Persister persister, MovieEnricher movieEnricher) {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
     this.enrichCache = enrichCache;
+    this.persister = persister;
 
     TypeBasedItemEnricher.registerEnricher(MovieBase.class, new TmdbMovieEnricher());
     StandardView.registerLayout(MoviesMediaTree.class, MediaRootType.MOVIES);
@@ -83,7 +86,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
       protected void intro() {
         controller.showScreen(presentation.getView());
         if(mediaTree == null) {
-          mediaTree = new MoviesMediaTree(enrichCache, Paths.get(controller.getIni().getValue("general", "movies.path")));
+          mediaTree = new MoviesMediaTree(enrichCache, persister, Paths.get(controller.getIni().getValue("general", "movies.path")));
           presentation.setMediaTree(mediaTree);
         }
       }

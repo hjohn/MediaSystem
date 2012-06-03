@@ -1,4 +1,9 @@
-package hs.mediasystem.enrich;
+package hs.mediasystem.framework;
+
+import hs.mediasystem.enrich.EnrichTrigger;
+import hs.mediasystem.enrich.Enrichable;
+import hs.mediasystem.persist.PersistTrigger;
+import hs.mediasystem.persist.Persistable;
 
 import java.lang.ref.WeakReference;
 

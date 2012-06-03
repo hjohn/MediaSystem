@@ -5,6 +5,7 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
+import hs.mediasystem.persist.Persister;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +65,11 @@ public class YouTubeMediaTree implements MediaTree, MediaRoot {
 
   @Override
   public EnrichCache getEnrichCache() {
+    return null;
+  }
+
+  @Override
+  public Persister getPersister() {
     return null;
   }
 }

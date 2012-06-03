@@ -6,6 +6,7 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import hs.mediasystem.fs.MediaRootType;
+import hs.mediasystem.persist.Persister;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
@@ -24,11 +25,13 @@ import javax.inject.Provider;
 public class SeriesMainMenuExtension implements MainMenuExtension {
   private final Provider<SelectMediaPresentation> selectMediaPresentationProvider;
   private final EnrichCache enrichCache;
+  private final Persister persister;
 
   @Inject
-  public SeriesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, EnrichCache enrichCache, SerieEnricher serieEnricher, EpisodeEnricher episodeEnricher) {
+  public SeriesMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider, EnrichCache enrichCache, Persister persister, SerieEnricher serieEnricher, EpisodeEnricher episodeEnricher) {
     this.selectMediaPresentationProvider = selectMediaPresentationProvider;
     this.enrichCache = enrichCache;
+    this.persister = persister;
 
     TvdbSerieEnricher tvdbSerieEnricher = new TvdbSerieEnricher();
 
@@ -97,7 +100,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
       protected void intro() {
         controller.showScreen(presentation.getView());
         if(mediaTree == null) {
-          mediaTree = new SeriesMediaTree(enrichCache, Paths.get(controller.getIni().getValue("general", "series.path")));
+          mediaTree = new SeriesMediaTree(enrichCache, persister, Paths.get(controller.getIni().getValue("general", "series.path")));
           presentation.setMediaTree(mediaTree);
         }
       }
