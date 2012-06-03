@@ -1,8 +1,8 @@
 package hs.mediasystem.ext.serie;
 
+import hs.mediasystem.db.MediaData;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaNodeCell;
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.DuoLineCell;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.util.MapBindings;
@@ -16,7 +16,6 @@ public class EpisodeCell extends DuoLineCell implements MediaNodeCell {
 
   @Override
   public void configureCell(MediaNode mediaNode) {
-    MediaItem item = mediaNode.getMediaItem();
     StringBinding episodeRange = MapBindings.selectString(mediaNode.dataMapProperty(), Episode.class, "episodeRange");
 
     binder.unbindAll();
@@ -24,7 +23,7 @@ public class EpisodeCell extends DuoLineCell implements MediaNodeCell {
     binder.bind(titleProperty(), MapBindings.selectString(mediaNode.dataMapProperty(), Media.class, "title"));
     binder.bind(ratingProperty(), MapBindings.selectDouble(mediaNode.dataMapProperty(), Media.class, "rating").divide(10));
     binder.bind(extraInfoProperty(), Bindings.when(episodeRange.isNull()).then(new SimpleStringProperty("Special")).otherwise(episodeRange));
-    binder.bind(viewedProperty(), item.viewedProperty());
+    binder.bind(viewedProperty(), MapBindings.selectBoolean(mediaNode.dataMapProperty(), MediaData.class, "viewed"));
 
     subtitleProperty().set("");
   }

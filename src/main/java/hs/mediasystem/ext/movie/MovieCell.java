@@ -1,8 +1,8 @@
 package hs.mediasystem.ext.movie;
 
+import hs.mediasystem.db.MediaData;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaNodeCell;
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.DuoLineCell;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.MediaNode;
@@ -14,8 +14,6 @@ public class MovieCell extends DuoLineCell implements MediaNodeCell {
 
   @Override
   public void configureCell(MediaNode mediaNode) {
-    MediaItem item = mediaNode.getMediaItem();
-
     binder.unbindAll();
 
     binder.bind(titleProperty(), MapBindings.selectString(mediaNode.dataMapProperty(), Media.class, "title"));
@@ -24,12 +22,7 @@ public class MovieCell extends DuoLineCell implements MediaNodeCell {
 
     collectionSizeProperty().set(mediaNode.getChildren().size());
 
-    if(item != null) {
-      binder.bind(ratingProperty(), MapBindings.selectDouble(mediaNode.dataMapProperty(), Media.class, "rating").divide(10));
-      binder.bind(viewedProperty(), item.viewedProperty());
-    }
-    else {
-      viewedProperty().set(false);
-    }
+    binder.bind(ratingProperty(), MapBindings.selectDouble(mediaNode.dataMapProperty(), Media.class, "rating").divide(10));
+    binder.bind(viewedProperty(), MapBindings.selectBoolean(mediaNode.dataMapProperty(), MediaData.class, "viewed"));
   }
 }
