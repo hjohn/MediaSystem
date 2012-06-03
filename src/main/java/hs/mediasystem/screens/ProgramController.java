@@ -1,7 +1,7 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.db.DatabaseException;
-import hs.mediasystem.db.ItemsDao;
+import hs.mediasystem.db.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.OpenSubtitlesSubtitleProvider;
 import hs.mediasystem.framework.SublightSubtitleProvider;
@@ -73,7 +73,6 @@ public class ProgramController {
   private final SubtitleDownloadService subtitleDownloadService = new SubtitleDownloadService();
   private final SceneManager sceneManager;
   private final PlayerPresentation playerPresentation;
-  private final ItemsDao itemsDao;
 
   private final VBox messagePane = new VBox() {{
     getStylesheets().add("status-messages.css");
@@ -86,13 +85,12 @@ public class ProgramController {
 
   @SuppressWarnings("deprecation")
   @Inject
-  public ProgramController(Ini ini, final SceneManager sceneManager, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider, ItemsDao itemsDao) {
+  public ProgramController(Ini ini, final SceneManager sceneManager, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider) {
     this.ini = ini;
     this.sceneManager = sceneManager;
     this.playerPresentation = playerPresentation;
     this.mainScreenProvider = mainScreenProvider;
     this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
-    this.itemsDao = itemsDao;
 
     final EventDispatcher eventDispatcher = scene.getEventDispatcher();
 
@@ -361,8 +359,11 @@ public class ProgramController {
           try {
             System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
 
-            mediaItem.viewedProperty().set(true);
-            itemsDao.changeItemViewedStatus(mediaItem.getDatabaseId(), true);
+            MediaData mediaData = mediaItem.get(MediaData.class);
+
+            if(mediaData != null) {
+              mediaData.viewedProperty().set(true);
+            }
           }
           catch(DatabaseException e) {
             System.out.println("[WARNING] ProgramController.play(...).new Destination() {...}.outro() - Unable to update viewed status for " + mediaItem + ": " + e);

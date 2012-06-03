@@ -13,9 +13,7 @@ import hs.mediasystem.persist.Persistable;
 import java.util.HashMap;
 import java.util.Map;
 
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
@@ -24,16 +22,6 @@ public class MediaItem implements EnrichTrigger, PersistTrigger {
   private final ObservableMap<Class<?>, Object> data = FXCollections.observableHashMap();
   private final ObjectProperty<ObservableMap<Class<?>, Object>> dataMap = new SimpleObjectProperty<>(data);
   public ObjectProperty<ObservableMap<Class<?>, Object>> dataMapProperty() { return dataMap; }
-
-  private final BooleanProperty viewed = new SimpleBooleanProperty() {
-    @Override
-    public boolean get() {
-      //queueForEnrichment();
-      return super.get();
-    }
-  };
-  public boolean isViewed() { return viewed.get(); }
-  public BooleanProperty viewedProperty() { return viewed; }
 
   private final Map<Class<?>, EnrichmentState> enrichmentStates = new HashMap<>();
 
