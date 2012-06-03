@@ -234,6 +234,7 @@ public class ItemsDao {
   private MediaData createMediaDataFromResultSet(ResultSet rs) throws SQLException {
     MediaData data = new MediaData();
 
+    data.setId(rs.getInt("id"));
     data.setIdentifier(new Identifier(rs.getString("type"), rs.getString("provider"), rs.getString("providerid")));
     data.setMediaId(new MediaId(rs.getLong("filelength"), rs.getLong("filetime"), rs.getBytes("hash"), rs.getLong("oshash")));
     data.setUri(rs.getString("uri"));
