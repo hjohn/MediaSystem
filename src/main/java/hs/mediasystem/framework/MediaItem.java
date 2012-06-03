@@ -4,7 +4,6 @@ import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.enrich.EnrichCache.CacheKey;
 import hs.mediasystem.enrich.EnrichTrigger;
 import hs.mediasystem.enrich.Enrichable;
-import hs.mediasystem.enrich.DefaultEnrichable;
 import hs.mediasystem.enrich.EnrichmentListener;
 import hs.mediasystem.enrich.EnrichmentState;
 import hs.mediasystem.enrich.WeakEnrichmentListener;
@@ -146,7 +145,7 @@ public class MediaItem implements EnrichTrigger {
   }
 
   @Override
-  public void queueForEnrichment(Class<? extends DefaultEnrichable> cls) {
+  public void queueForEnrichment(Class<? extends Enrichable> cls) {
     if(getEnrichCache() != null) {
       EnrichmentState enrichmentState = enrichmentStates.get(cls);
 
