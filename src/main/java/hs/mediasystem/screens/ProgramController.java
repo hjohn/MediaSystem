@@ -1,6 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.db.DatabaseException;
 import hs.mediasystem.db.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.OpenSubtitlesSubtitleProvider;
@@ -355,18 +354,23 @@ public class ProgramController {
 
       @Override
       protected void outro() {
-        if(totalTimeViewed > playerPresentation.getLength() * 4 / 5) {  // more than 80% viewed?
-          try {
-            System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
+        MediaData mediaData = mediaItem.get(MediaData.class);
 
-            MediaData mediaData = mediaItem.get(MediaData.class);
+        if(mediaData != null) {
+          if(totalTimeViewed > 30 * 1000) {
+            long position = playerPresentation.getPosition();
 
-            if(mediaData != null) {
-              mediaData.viewedProperty().set(true);
+            if(position > 30 * 1000) {
+              System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Setting resume position to " + position + " ms: " + mediaItem);
+
+              mediaData.resumePositionProperty().set((int)(position / 1000));
             }
           }
-          catch(DatabaseException e) {
-            System.out.println("[WARNING] ProgramController.play(...).new Destination() {...}.outro() - Unable to update viewed status for " + mediaItem + ": " + e);
+
+          if(totalTimeViewed > playerPresentation.getLength() * 4 / 5) {  // more than 80% viewed?
+            System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
+
+            mediaData.viewedProperty().set(true);
           }
         }
       }
