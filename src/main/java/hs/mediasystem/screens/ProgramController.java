@@ -357,6 +357,14 @@ public class ProgramController {
         MediaData mediaData = mediaItem.get(MediaData.class);
 
         if(mediaData != null) {
+          long timeViewed = totalTimeViewed + mediaData.getResumePosition() * 1000L;
+
+          if(timeViewed > playerPresentation.getLength() * 4 / 5) {  // more than 80% viewed?
+            System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
+
+            mediaData.viewedProperty().set(true);
+          }
+
           if(totalTimeViewed > 30 * 1000) {
             long position = playerPresentation.getPosition();
 
@@ -365,12 +373,6 @@ public class ProgramController {
 
               mediaData.resumePositionProperty().set((int)(position / 1000));
             }
-          }
-
-          if(totalTimeViewed > playerPresentation.getLength() * 4 / 5) {  // more than 80% viewed?
-            System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
-
-            mediaData.viewedProperty().set(true);
           }
         }
       }
