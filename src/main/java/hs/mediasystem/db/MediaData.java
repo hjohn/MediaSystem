@@ -2,7 +2,9 @@ package hs.mediasystem.db;
 
 import hs.mediasystem.framework.DefaultEnrichable;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
 public class MediaData extends DefaultEnrichable {
 
@@ -43,8 +45,6 @@ public class MediaData extends DefaultEnrichable {
   private MediaId mediaId;
   private Identifier identifier;
 
-  private int resumePosition;
-
   private MatchType matchType;
   private float matchAccuracy;
 
@@ -79,12 +79,27 @@ public class MediaData extends DefaultEnrichable {
     this.viewed.set(viewed);
   }
 
+  private final IntegerProperty resumePosition = new SimpleIntegerProperty() {
+    @Override
+    public int get() {
+      queueForEnrichment();
+      return super.get();
+    }
+
+    @Override
+    public void set(int pos) {
+      super.set(pos);
+      queueAsDirty();
+    }
+  };
+  public IntegerProperty resumePositionProperty() { return resumePosition; }
+
   public int getResumePosition() {
-    return resumePosition;
+    return resumePosition.get();
   }
 
   public void setResumePosition(int resumePosition) {
-    this.resumePosition = resumePosition;
+    this.resumePosition.set(resumePosition);
   }
 
   public float getMatchAccuracy() {
