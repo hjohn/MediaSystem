@@ -1,0 +1,66 @@
+.tree-view {
+  -fx-background-color: transparent;
+  -fx-border-color: color-blue-20;
+  -fx-border-width: 1;
+}
+
+.title {
+  -fx-font-size: 19;
+  -fx-font-weight: bold;
+  -fx-wrap-text: true;
+}
+
+.subtitle {
+  -fx-label-padding: 0 0 0 10;
+}
+
+.info-block {
+  -fx-font-weight: bold;
+  -fx-alignment: center-right;
+}
+
+.viewed-indicator {
+  -fx-font-size: 20pt;
+  -fx-label-padding: 9 15 9 0;  /* the extra padding for top/bottom makes this the highest element which forces all cells to be the same height */
+}
+
+.collection-text .count {
+  -fx-font-size: 20pt;
+}
+
+.collection-text {
+  -fx-font-weight: bold;
+  -fx-font-size: 12pt;
+}
+
+.tree-cell:focused .collection-text {
+  -fx-effect: dropshadow(gaussian, -c-text, 8, 0.2, 0, 0);
+}
+
+.tree-cell .star {
+  -fx-opacity: 0.6;
+}
+
+.tree-cell:focused .star {
+  -fx-opacity: 1.0;
+}
+
+.filter {
+  -fx-hgap: 5;
+}
+
+.tree-cell {
+  -fx-skin: "hs.mediasystem.FlatTreeCellSkin";
+}
+
+.seasons .label {
+  -fx-text-fill: color-focused-text;
+  -fx-label-padding: 5 10 5 10;
+
+  -fx-border-color: color-blue-20;
+  -fx-border-width: 1 1 0 1;
+  -fx-border-radius: 8 8 0 0;
+  
+  -fx-background-color: derive(color-blue-20, -30%);
+  -fx-background-radius: 8 8 0 0;
+}

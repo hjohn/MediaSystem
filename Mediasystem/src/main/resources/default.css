@@ -1,0 +1,244 @@
+
+.root {
+  -c-base: rgb(173, 216, 230);
+  
+  -c-text: -c-base;
+  -c-text-highlight: derive(-c-base, +75%);
+  -c-text-focused: derive(-c-base, +75%);
+  -c-text-unobtrusive: derive(-c-base, -30%);
+  
+  -c-shadow-highlight: derive(-c-base, -50%);
+
+  -c-star: yellow;
+  -c-star-disabled: gray;
+
+  color-main: -c-base;
+  
+  color-focused-text: derive(color-main, 30%);
+
+  color-content-background: derive(color-blue-80, -90%);
+
+  color-blue: -c-base;
+  color-blue-80: rgba(173, 216, 230, 0.8);
+  color-blue-70: rgba(173, 216, 230, 0.7);
+  color-blue-50: rgba(173, 216, 230, 0.5);
+  color-blue-20: rgba(173, 216, 230, 0.2);
+  color-blue-10: rgba(173, 216, 230, 0.1);
+  color-orange: rgb(255, 180, 50);
+  color-green: rgb(0, 255, 0);
+  color-yellow: rgb(255, 255, 0);
+  color-red: rgb(255, 0, 0);
+  color-white: rgb(255, 255, 255);
+  
+  color-black-50: rgba(0, 0, 0, 0.50);
+  color-black-75: rgba(0, 0, 0, 0.75);
+  
+  -fx-font-family: "Arial";
+  -fx-font-size: 16pt;
+  -fx-font-weight: normal;
+}
+
+.scroll-pane {
+  -fx-background-color: transparent;
+}
+
+.label {
+  -fx-text-fill: color-blue;
+}
+
+.debug-border {
+  -fx-stroke: red;
+  -fx-stroke-width: 5;
+  -fx-border-color: red;
+  -fx-border-width: 5;
+}
+
+.debug-background {
+  -fx-background-color: red;
+}
+
+
+/*
+ * List & Tree styles
+ */
+
+.list-cell:even, .tree-cell:even, .table-cell:even {
+  -fx-background-color: transparent;
+}
+
+.list-cell:odd, .tree-cell:odd, .table-cell:odd {
+  -fx-background-color: transparent;
+}
+
+.list-cell:focused, .tree-cell:focused {
+  -fx-background-color: rgba(173, 216, 230, 0.3);
+}
+
+/*
+ * Progress bar styles
+ */
+
+.progress-bar {  
+  -fx-background-color: transparent;
+
+  -fx-border-insets: 0, 2;
+  -fx-border-width: 4, 2;
+  -fx-border-radius: 12, 12;
+  -fx-border-color: radial-gradient(center 50% 5%, radius 100%, rgb(255, 255, 255) 0%, rgb(64, 64, 64)),
+                    radial-gradient(center 50% 5%, radius 100%, rgb(32, 32, 32) 0%, rgb(255, 255, 255));
+
+}
+
+.progress-bar .track {
+  -fx-background-color: radial-gradient(focus-angle 90deg, focus-distance 0%, center 50% 0%, radius 75%, black 0%, grey);
+  -fx-background-radius: 10;
+  -fx-background-insets: 0;
+  -fx-effect: innershadow(gaussian, black, 5, 0.0, 0, 0);
+}
+
+.progress-bar .bar {
+  -fx-background-radius: 8;
+  -fx-background-insets: 2;
+  -fx-effect: innershadow(gaussian, black, 3, 0.0, 0, 0);
+}
+
+.blue-bar .progress-bar .bar {
+  -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-blue, 0%) 0%, derive(color-blue, 100%) 30%, white 36%, derive(color-blue, 100%) 42%, derive(color-blue, 0%) 72%, derive(color-blue, -50%)); 
+}
+
+.orange-bar .progress-bar .bar {
+  -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, 0%) 0%, derive(color-orange, 100%) 30%, white 36%, derive(color-orange, 100%) 42%, derive(color-orange, 0%) 72%, derive(color-orange, -50%)); 
+}
+
+.red-bar .progress-bar .bar {
+  -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-red, 0%) 0%, derive(color-red, 100%) 30%, white 36%, derive(color-red, 100%) 42%, derive(color-red, 0%) 72%, derive(color-red, -50%)); 
+}
+
+/*
+ * Dialog styles
+ */
+
+#dialog-main {
+  -fx-spacing: 5;
+  -fx-font-size: 18pt;
+  -fx-font-weight: bold;
+  
+  -fx-background-color: color-black-75;
+  -fx-background-radius: 20;
+  
+  -fx-padding: 10;
+}
+
+#dialog-screen {
+  -fx-background-color: color-black-50;
+}
+
+#dialog-list {
+  -fx-spacing: 5;
+}
+
+#dialog .option-cell {
+  -fx-padding: 5;
+}
+
+#dialog .detail {
+  -fx-alignment: center-right;
+  -fx-font-size: 14pt;
+}
+
+#dialog .title {
+  -fx-font-size: 24pt; 
+  -fx-font-weight: bold;
+}
+
+.list-cell, .tree-cell, .option-cell {
+  -fx-background-color: transparent;
+
+  -fx-border-color: linear-gradient(to right, transparent, color-blue-20 15%, color-blue-20 85%, transparent);
+  -fx-border-width: 1;
+  -fx-border-insets: 1;
+}
+
+.list-cell:empty, .tree-cell:empty {  
+  -fx-border-color: transparent;
+  -fx-border-width: 1;
+  -fx-border-insets: 1;
+}
+
+.list-cell:focused, .tree-cell:focused, .option-cell:focused {
+  -fx-background-insets: 1, 1, 1;
+  -fx-background-color: radial-gradient(center 25% 0%, radius 25%, color-blue 0%, transparent),
+                        radial-gradient(center 75% 100%, radius 25%, color-blue 0%, transparent),
+                        linear-gradient(to right, transparent, color-blue-20 15%, color-blue-20 85%, transparent);
+  
+  -fx-border-width: 1, 1, 1;
+  -fx-border-color: radial-gradient(center 25% 0%, radius 25%, color-blue 0%, transparent),
+                    radial-gradient(center 75% 100%, radius 25%, color-blue 0%, transparent),
+                    linear-gradient(to right, transparent, color-blue-50 15%, color-blue-50 85%, transparent);
+                    
+}
+
+.list-cell:focused .label, .tree-cell:focused .label, .option-cell:focused .label {
+  -fx-text-fill: -c-text-focused;
+}
+
+#dialog .list-cell {
+  -fx-text-fill: color-blue;
+}
+
+#dialog .list-cell:focused {
+  -fx-text-fill: -c-text-focused;
+}
+
+#dialog .title {
+  -fx-alignment: center;
+}
+
+#dialog .list-view {
+  -fx-background-color: transparent;
+  
+  -fx-font-size: 14pt;
+}
+
+.list .list-view {
+  -fx-border-width: 2;
+  -fx-border-color: color-blue-20;
+  -fx-border-radius: 10;
+}
+
+.list .header {
+  -fx-alignment: center;
+}
+
+.list .header .label {
+  -fx-background-color: color-blue-20;
+  -fx-background-radius: 8 8 0 0;
+  -fx-label-padding: 5 20 5 20;
+}
+
+.scroll-bar {
+  -fx-skin: "hs.mediasystem.ScrollBarSkin";
+}
+
+.scroll-bar .track {
+  -fx-fill: derive(color-blue-50, -80%);
+}
+
+.scroll-bar .thumb {
+  -fx-stroke-width: 2;
+  -fx-stroke: derive(color-blue-50, -30%);
+  -fx-stroke-type: inside;
+  -fx-fill: derive(color-blue-50, -60%);  
+}
+
+.star {
+  -fx-fill: linear-gradient(from 0% 0% to 0% 100%, derive(-c-star, -25%) 0%, derive(-c-star, 75%) 33%, derive(-c-star, -25%) 100%);
+  -fx-stroke: rgba(255, 255, 0, 0.5);
+  -fx-stroke-width: 1;
+}
+
+.star:disabled {
+  -fx-fill: linear-gradient(from 0% 0% to 0% 100%, derive(-c-star-disabled, -25%) 0%, derive(-c-star-disabled, 75%) 33%, derive(-c-star-disabled, -25%) 100%);
+  -fx-stroke: -c-star-disabled;
+}
+
