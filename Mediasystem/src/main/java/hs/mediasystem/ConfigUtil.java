@@ -26,6 +26,8 @@ public final class ConfigUtil {
       "com.google.gdata.data.media.mediarss",
       "com.google.gdata.data.youtube",
       "com.google.gdata.util",
+      "com.moviejukebox.thetvdb",
+      "com.moviejukebox.thetvdb.model",
       "hs.mediasystem.db",
       "hs.mediasystem.enrich",
       "hs.mediasystem.framework",

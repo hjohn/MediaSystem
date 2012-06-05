@@ -1,6 +1,4 @@
-package hs.mediasystem.ext.serie;
-
-import hs.mediasystem.framework.DefaultEnrichable;
+package hs.mediasystem.framework;
 
 public class SerieBase extends Serie {
 

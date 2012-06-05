@@ -243,6 +243,7 @@ public class FrontEnd extends Application {
       "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.movie.jar",
       "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.nos.jar",
       "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.shutdown.jar",
+      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.serie.jar",
       "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.youtube.jar"
     };
 

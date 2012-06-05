@@ -1,6 +1,5 @@
-package hs.mediasystem.ext.serie;
+package hs.mediasystem.framework;
 
-import hs.mediasystem.framework.Media;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;

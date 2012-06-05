@@ -9,13 +9,12 @@ import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
 import hs.mediasystem.enrich.Parameters;
 import hs.mediasystem.framework.AbstractEnrichTaskProvider;
+import hs.mediasystem.framework.Serie;
 import hs.mediasystem.framework.TaskTitle;
 import hs.mediasystem.fs.SourceImageHandle;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 public class SerieEnricher implements Enricher<Serie> {
   private static final List<Class<?>> INPUT_PARAMETERS = new ArrayList<Class<?>>() {{
@@ -23,14 +22,8 @@ public class SerieEnricher implements Enricher<Serie> {
     add(MediaData.class);
   }};
 
-  private final ItemsDao itemsDao;
-  private final TypeBasedItemEnricher typeBasedItemEnricher;
-
-  @Inject
-  public SerieEnricher(ItemsDao itemsDao, TypeBasedItemEnricher typeBasedItemEnricher) {
-    this.itemsDao = itemsDao;
-    this.typeBasedItemEnricher = typeBasedItemEnricher;
-  }
+  private volatile ItemsDao itemsDao;
+  private volatile TypeBasedItemEnricher typeBasedItemEnricher;
 
   @Override
   public List<Class<?>> getInputTypes() {

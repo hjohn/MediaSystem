@@ -10,6 +10,7 @@ import hs.mediasystem.db.ItemNotFoundException;
 import hs.mediasystem.db.MediaData.MatchType;
 import hs.mediasystem.db.Person;
 import hs.mediasystem.framework.Media;
+import hs.mediasystem.framework.SerieBase;
 
 import java.util.Comparator;
 import java.util.List;

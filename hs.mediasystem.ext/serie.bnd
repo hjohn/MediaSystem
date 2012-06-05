@@ -1,0 +1,2 @@
+Private-Package: hs.mediasystem.ext.serie
+Bundle-Activator: hs.mediasystem.ext.serie.Activator

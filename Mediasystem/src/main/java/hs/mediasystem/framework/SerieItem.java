@@ -1,9 +1,6 @@
-package hs.mediasystem.ext.serie;
+package hs.mediasystem.framework;
 
 import hs.mediasystem.db.LocalInfo;
-import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.EpisodeDecoder;
 import hs.mediasystem.fs.EpisodeScanner;
 

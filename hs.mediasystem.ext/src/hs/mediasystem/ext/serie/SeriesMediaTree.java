@@ -5,6 +5,8 @@ import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
+import hs.mediasystem.framework.SerieBase;
+import hs.mediasystem.framework.SerieItem;
 import hs.mediasystem.fs.SerieScanner;
 import hs.mediasystem.persist.Persister;
 
