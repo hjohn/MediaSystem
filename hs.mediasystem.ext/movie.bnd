@@ -1,0 +1,2 @@
+Private-Package: hs.mediasystem.ext.movie
+Bundle-Activator: hs.mediasystem.ext.movie.Activator

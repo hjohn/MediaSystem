@@ -5,6 +5,9 @@ import hs.mediasystem.framework.Media;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Singleton;
+
+@Singleton
 public class TypeBasedItemEnricher {
   private static final Map<String, ItemEnricher> ITEM_ENRICHERS = new HashMap<>();
 

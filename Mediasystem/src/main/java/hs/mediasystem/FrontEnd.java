@@ -2,8 +2,14 @@ package hs.mediasystem;
 
 import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.DatabaseUpdater;
+import hs.mediasystem.db.ItemsDao;
+import hs.mediasystem.db.MediaData;
+import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.enrich.EnrichCache;
+import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.Player;
+import hs.mediasystem.persist.Persister;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MessagePaneTaskExecutor;
 import hs.mediasystem.screens.PlaybackOverlayPane;
@@ -183,11 +189,34 @@ public class FrontEnd extends Application {
 
     dm.add(dm.createComponent()
       .setInterface(SelectMediaPresentationProvider.class.getName(), null)
-      .setImplementation(injector.getInstance(SelectMediaPresentationProvider.class)));
+      .setImplementation(injector.getInstance(SelectMediaPresentationProvider.class))
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(EnrichCache.class.getName(), null)
+      .setImplementation(injector.getInstance(EnrichCache.class))
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(Persister.class.getName(), null)
+      .setImplementation(injector.getInstance(Persister.class))
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(ItemsDao.class.getName(), null)
+      .setImplementation(injector.getInstance(ItemsDao.class))
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(TypeBasedItemEnricher.class.getName(), null)
+      .setImplementation(injector.getInstance(TypeBasedItemEnricher.class))
+    );
 
     DatabaseUpdater updater = injector.getInstance(DatabaseUpdater.class);
 
     updater.updateDatabase();
+
+    injector.getInstance(EnrichCache.class).registerEnricher(MediaData.class, injector.getInstance(MediaDataEnricher.class));
 
     ProgramController controller = injector.getInstance(ProgramController.class);
 
@@ -211,6 +240,7 @@ public class FrontEnd extends Application {
     String[] locations = new String[] {
       "file:org.apache.felix.shell-1.5.0-SNAPSHOT.jar",
       "file:org.apache.felix.shell.tui-1.5.0-SNAPSHOT.jar",
+      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.movie.jar",
       "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.nos.jar",
       "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.shutdown.jar"
     };

@@ -1,6 +1,5 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.ext.movie.Movie;
 import hs.mediasystem.ext.serie.Episode;
 import hs.subtitle.SubtitleDescriptor;
 import hs.subtitle.opensub.OpenSubtitlesClient;
@@ -17,14 +16,15 @@ public class OpenSubtitlesSubtitleProvider implements SubtitleProvider {
   @Override
   public List<? extends SubtitleDescriptor> query(MediaItem mediaItem) throws SubtitleProviderException {
     Media media = mediaItem.get(Media.class);
-    Movie movie = mediaItem.get(Movie.class);
+//    Movie movie = mediaItem.get(Movie.class);
     Episode ep = mediaItem.get(Episode.class);
 
     String title = ep == null ? media.getTitle() : ep.getSerie().getTitle();
     Integer season = ep == null ? null : ep.getSeason();
     Integer episode = ep == null ? null : ep.getEpisode();
     Integer year = media.getReleaseYear();
-    String imdbNumber = movie == null ? null : movie.getImdbNumber();
+//    String imdbNumber = movie == null ? null : movie.getImdbNumber();
+    String imdbNumber = null;
 
     System.out.println("[FINE] OpenSubtitlesSubtitleProvider.query() - Looking for subtitles: " + mediaItem.getTitle() + "; " +  year + "; " + season + "; " + episode + "; English");
 
