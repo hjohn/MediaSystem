@@ -1,17 +1,13 @@
 package hs.mediasystem;
 
-import javafx.application.Application;
+// TODO When going to Episode of a Serie, and the correct background is already displayed, there is a momentary switch to a null background only to reload the same background again
+// TODO Add creationtime to mediaId, useful to distinguish hash (but won't work with all versions of Samba)
+// TODO Store scroll position
+
+// TODO Flesh out Persistance framework
 
 // TODO Collection view, count, list of items, picture of latest/first (or both), stacked pictures
-// TODO Key repeat for adjusting subtitle delay (from dialog option) seems not working
-// TODO Make MediaItem a dumb class
-// TODO Sorting: Sorting should probably be string-based or something ... MediaNodeComparator does not take sequence or subtitle into account atm
-// TODO Items Table: releaseYear present, but never read... delete?
-// TODO Items Table: in java space, rating=float... why not in db then?
-// TODO Castings Table: it is possible that a person is an actor as well as the director of an episode, which causes a pk violation as "role" is not included as part of the key
 // TODO New MediaData with uri and hash is great, but hash collisions can still easily occur when you simply have two copies of the same file
-
-// TODO Add some debug prints to debug movie stop problem
 // TODO Banner view -- change layout to get bigger banners
 // TODO Option screen, re-highlight last used option
 // TODO Still don't like volume/position/etc overlays
@@ -20,11 +16,8 @@ import javafx.application.Application;
 // Nice to have soon:
 // TODO When paused, need to see information like position, time of day, etc..
 // TODO Dark colored barely visible information, like time, position, looks cool!
-// TODO Store scroll position
 // TODO Smart highlight of next-to-see episode
-// TODO Mark viewed option persisted to db
-// TODO ResumePosition. Algorithm: if movie was active for atleast one minute, then store resume position on stop; for viewed, everything upto resume position considered 100% watched
-// TODO Other movie informations, like subtitle/audio delay, selected subtitle/audio track, that are important when resuming movie
+// TODO Store other movie informations, like subtitle/audio delay, selected subtitle/audio track, that are important when resuming movie
 // TODO Make subtitles more persistent by storing them with file, required if you want to show same sub again after resuming
 // TODO Store state cache in DB for making stuff like resume position persistent
 // TODO Collections should show something fancy on their detail pane, or at the very least display a proper background
@@ -36,7 +29,6 @@ import javafx.application.Application;
 // TODO Hotkey for download subtitles
 // TODO For Episodes, in playback screen title should be serie name
 // TODO Often playback detail overlay is not sized correctly when starting a video
-// TODO Disable enrichment for YouTube -- see NOS extension solution -- update: only important to not store in DB
 
 // New users:
 // TODO Initial settings / Settings screen
@@ -50,9 +42,6 @@ import javafx.application.Application;
 // TODO Database: Some generalization possible in the DAO's
 // TODO [Playback] Main overlay only visible when asked for (info)
 // TODO Options Screen: Modal navigation should use own Navigator as well?
-// TODO Make plug-ins of various looks of Select Media
-// TODO Make plug-ins from MediaTrees
-// TODO Make plug-ins of subtitle provider
 // TODO Buttons like pause/mute bounce a lot...
 // TODO Too long title causes horizontal scrollbar in select media --> partially solved? Still see it sometimes...
 // TODO [VLCPlayer] Check if playing with normal items and subitems goes correctly --> repeats now (loop)
@@ -61,6 +50,14 @@ import javafx.application.Application;
 // TODO Show Actor information somewhere
 // TODO Settings screen
 // TODO Subtitle Provider Podnapisi
+
+// Plugin related:
+// TODO extension packages: MediaData enricher is general, should not be registered in MovieMainMenuExtension
+// TODO extension packages: remove dependency on Episode in BackgroundPane and DetailPane
+// TODO extension packages: SubtitleProviders rely directly on Movie/Serie classes -- should be done by specific implementations for each time instead
+// TODO Make plug-ins of various looks of Select Media
+// TODO Make plug-ins from MediaTrees
+// TODO Make plug-ins of subtitle provider
 
 // Low priority:
 // TODO Some form of remote control support / Lirc support --> EventGhost makes this unnecessary, keyboard control suffices
@@ -225,12 +222,86 @@ import javafx.application.Application;
 // - Check Hash against DB
 // - No Hash match, must be new file (NEW ENTRY)
 
+import hs.mediasystem.util.Log;
+import hs.mediasystem.util.Log.LinePrinter;
 
+import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 
+import javafx.application.Application;
 
 public class MediaSystem {
-
   public static void main(String[] args) {
+    Log.initialize(new LinePrinter() {
+      private final int methodColumn = 120;
+      private final long startTime = System.currentTimeMillis();
+      private final String pad = String.format("%" + methodColumn + "s", "");
+      private final Map<Level, String> levelMap = new HashMap<Level, String>() {{
+        put(Level.SEVERE, "!");
+        put(Level.WARNING, "?");
+        put(Level.INFO, "*");
+        put(Level.CONFIG, "+");
+        put(Level.FINE, " ");
+        put(Level.FINER, "-");
+        put(Level.FINEST, "=");
+      }};
+
+      @Override
+      public void print(PrintStream printStream, Level level, String text, String method) {
+        StringBuilder builder = new StringBuilder();
+        long sinceStart = System.currentTimeMillis() - startTime;
+        long millis = sinceStart % 1000;
+
+        if(!text.startsWith("\t")) {
+          if(sinceStart < 10000) {
+            builder.append("    ");
+          }
+          else if(sinceStart < 100000) {
+            builder.append("   ");
+          }
+          else if(sinceStart < 1000000) {
+            builder.append("  ");
+          }
+          else {
+            builder.append(" ");
+          }
+
+          builder.append(Long.toString(sinceStart / 1000));
+          builder.append(".");
+          if(millis < 10) {
+            builder.append("00");
+          }
+          else if(millis < 100) {
+            builder.append("0");
+          }
+          builder.append(Long.toString(millis));
+          builder.append(" ");
+          builder.append(translateLevel(level));
+          builder.append("| ");
+        }
+        builder.append(text);
+
+        if(builder.length() < methodColumn) {
+          builder.append(pad.substring(0, methodColumn - builder.length()));
+        }
+//        else {
+//          builder.append("\r\n");
+//          builder.append(pad);
+//        }
+
+        builder.append(method);
+        builder.append("\r\n");
+
+        printStream.print(builder.toString());
+      }
+
+      private String translateLevel(Level level) {
+        return levelMap.get(level);
+      }
+    });
+
     System.setProperty("prism.lcdtext", "false");
 
     Application.launch(FrontEnd.class, args);
