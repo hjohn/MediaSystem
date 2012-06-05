@@ -211,8 +211,8 @@ public class FrontEnd extends Application {
     String[] locations = new String[] {
       "file:org.apache.felix.shell-1.5.0-SNAPSHOT.jar",
       "file:org.apache.felix.shell.tui-1.5.0-SNAPSHOT.jar",
-//      "file:C:/Users/John/workspace/hs.mediasystem.ext/generated/hs.mediasystem.ext.nos.jar",
-      "file:C:/Users/John/workspace/hs.mediasystem.ext/generated/hs.mediasystem.ext.shutdown.jar"
+      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.nos.jar",
+      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.shutdown.jar"
     };
 
     try {
