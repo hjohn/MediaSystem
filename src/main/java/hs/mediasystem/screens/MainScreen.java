@@ -1,5 +1,6 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.PluginTracker;
 import hs.mediasystem.screens.Navigator.Destination;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -43,7 +45,9 @@ public class MainScreen extends BorderPane {
   private Button lastSelected;
 
   @Inject
-  public MainScreen(final ProgramController controller, final Set<MainMenuExtension> mainMenuExtensions) {
+  public MainScreen(final ProgramController controller,
+      //final Iterable<MainMenuExtension> mainMenuExtensions,
+        final PluginTracker<MainMenuExtension> tracker) {
     getStylesheets().add("main-screen.css");
 
     final Set<MainMenuExtension> extensions = new TreeSet<>(new Comparator<MainMenuExtension>() {
@@ -53,7 +57,10 @@ public class MainScreen extends BorderPane {
       }
     });
 
-    extensions.addAll(mainMenuExtensions);
+//    for(MainMenuExtension ext : mainMenuExtensions) {
+//      System.out.println("[FINE] MainScreen.MainScreen() - " + ext);
+//      extensions.add(ext);
+//    }
 
     extensions.add(new MainMenuExtension() {
       @Override
@@ -76,35 +83,123 @@ public class MainScreen extends BorderPane {
         return 1.0;
       }
     });
+    menuBox = new StackPane();
 
-    for(final MainMenuExtension mainMenuExtension : extensions) {
-      final Button b = new Button(mainMenuExtension.getTitle()) {{
-        setGraphic(new ImageView(mainMenuExtension.getImage()));
-        setOnAction(new EventHandler<ActionEvent>() {
+
+    tracker.getPlugins().addListener(new ListChangeListener<MainMenuExtension>() {
+      @Override
+      public void onChanged(ListChangeListener.Change<? extends MainMenuExtension> event) {
+        for(Timeline timeline : timelines) {
+          timeline.stop();
+        }
+        for(Timeline timeline : timelines2) {
+          timeline.stop();
+        }
+
+        timelines.clear();
+        timelines2.clear();
+        stackPanes.clear();
+        buttons.clear();
+
+        final Set<MainMenuExtension> extensions = new TreeSet<>(new Comparator<MainMenuExtension>() {
           @Override
-          public void handle(ActionEvent event) {
-            controller.getNavigator().navigateTo(mainMenuExtension.getDestination(controller));
+          public int compare(MainMenuExtension o1, MainMenuExtension o2) {
+            return Double.compare(o1.order(), o2.order());
           }
         });
-      }};
 
-      timelines.add(new Timeline());
-      timelines2.add(new Timeline());
-      stackPanes.add(new StackPane() {{
-        for(int i = 0; i < 5; i++) {
-          getChildren().add(new Circle(20) {{
-            double angle = 360 / extensions.size() * buttons.size();
+        extensions.addAll(tracker.getPlugins());
 
-            setFill(Color.hsb(rnd.nextDouble() * 180 + angle, 1.0, 0.45, 0.2));
-            setScaleX(5.0);
-            setTranslateX((rnd.nextDouble() - 0.5) * 80);
-            setTranslateY((rnd.nextDouble() - 0.5) * 20 + 10);
+        for(final MainMenuExtension mainMenuExtension : extensions) {
+          final Button b = new Button(mainMenuExtension.getTitle()) {{
+            setGraphic(new ImageView(mainMenuExtension.getImage()));
+            setOnAction(new EventHandler<ActionEvent>() {
+              @Override
+              public void handle(ActionEvent event) {
+                controller.getNavigator().navigateTo(mainMenuExtension.getDestination(controller));
+              }
+            });
+          }};
+
+          timelines.add(new Timeline());
+          timelines2.add(new Timeline());
+          stackPanes.add(new StackPane() {{
+            for(int i = 0; i < 5; i++) {
+              getChildren().add(new Circle(20) {{
+                double angle = 360 / extensions.size() * buttons.size();
+
+                setFill(Color.hsb(rnd.nextDouble() * 180 + angle, 1.0, 0.45, 0.2));
+                setScaleX(5.0);
+                setTranslateX((rnd.nextDouble() - 0.5) * 80);
+                setTranslateY((rnd.nextDouble() - 0.5) * 20 + 10);
+              }});
+            }
+            setEffect(new BoxBlur(10, 10, 3));
           }});
+          buttons.add(b);
         }
-        setEffect(new BoxBlur(10, 10, 3));
-      }});
-      buttons.add(b);
-    }
+
+        for(int i = 0; i < buttons.size(); i++) {
+          final Button button = buttons.get(i);
+          final StackPane sp = stackPanes.get(i);
+          final int buttonIndex = i;
+
+          button.addEventHandler(FocusEvent.ANY, new EventHandler<FocusEvent>() {
+            @Override
+            public void handle(FocusEvent event) {
+              boolean focusGained = event.getEventType().equals(FocusEvent.FOCUS_GAINED);
+
+              handleButtonFocus(focusGained, buttonIndex);
+
+              if(focusGained) {
+                lastSelected = button;
+              }
+            }
+          });
+          sp.minWidthProperty().bind(button.widthProperty());
+        }
+
+        menuBox.getChildren().clear();
+
+        menuBox.getChildren().add(new HBox() {{
+          getStyleClass().add("menu-scroll-box");
+          getChildren().addAll(stackPanes);
+        }});
+        menuBox.getChildren().add(new HBox() {{
+          getStyleClass().add("menu-scroll-box");
+          getChildren().addAll(buttons);
+        }});
+      }
+    });
+
+//    for(final MainMenuExtension mainMenuExtension : extensions) {
+//      final Button b = new Button(mainMenuExtension.getTitle()) {{
+//        setGraphic(new ImageView(mainMenuExtension.getImage()));
+//        setOnAction(new EventHandler<ActionEvent>() {
+//          @Override
+//          public void handle(ActionEvent event) {
+//            controller.getNavigator().navigateTo(mainMenuExtension.getDestination(controller));
+//          }
+//        });
+//      }};
+//
+//      timelines.add(new Timeline());
+//      timelines2.add(new Timeline());
+//      stackPanes.add(new StackPane() {{
+//        for(int i = 0; i < 5; i++) {
+//          getChildren().add(new Circle(20) {{
+//            double angle = 360 / extensions.size() * buttons.size();
+//
+//            setFill(Color.hsb(rnd.nextDouble() * 180 + angle, 1.0, 0.45, 0.2));
+//            setScaleX(5.0);
+//            setTranslateX((rnd.nextDouble() - 0.5) * 80);
+//            setTranslateY((rnd.nextDouble() - 0.5) * 20 + 10);
+//          }});
+//        }
+//        setEffect(new BoxBlur(10, 10, 3));
+//      }});
+//      buttons.add(b);
+//    }
 
     StackPane stackPane = new StackPane();
 
@@ -112,38 +207,7 @@ public class MainScreen extends BorderPane {
       getStyleClass().add("menu-scroll-box-overlay");
     }};
 
-    menuBox = new StackPane() {{
-      getChildren().add(new HBox() {{
-        getStyleClass().add("menu-scroll-box");
-        getChildren().addAll(stackPanes);
-      }});
-      getChildren().add(new HBox() {{
-        getStyleClass().add("menu-scroll-box");
-        getChildren().addAll(buttons);
-      }});
-    }};
-
     stackPane.getChildren().addAll(menuBox, menuBoxOverlay);
-
-    for(int i = 0; i < buttons.size(); i++) {
-      final Button button = buttons.get(i);
-      final StackPane sp = stackPanes.get(i);
-      final int buttonIndex = i;
-
-      button.addEventHandler(FocusEvent.ANY, new EventHandler<FocusEvent>() {
-        @Override
-        public void handle(FocusEvent event) {
-          boolean focusGained = event.getEventType().equals(FocusEvent.FOCUS_GAINED);
-
-          handleButtonFocus(focusGained, buttonIndex);
-
-          if(focusGained) {
-            lastSelected = button;
-          }
-        }
-      });
-      sp.minWidthProperty().bind(button.widthProperty());
-    }
 
     setCenter(stackPane);
   }
@@ -154,11 +218,17 @@ public class MainScreen extends BorderPane {
       lastSelected.requestFocus();
     }
     else {
-      buttons.get(0).requestFocus();
+      if(!buttons.isEmpty()) {
+        buttons.get(0).requestFocus();
+      }
     }
   }
 
   private void handleButtonFocus(final boolean focused, final int buttonIndex) {
+    if(buttonIndex >= buttons.size()) {
+      return;
+    }
+
     Button b = buttons.get(buttonIndex);
 
     if(focused) {

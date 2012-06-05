@@ -2,8 +2,6 @@ package hs.mediasystem;
 
 import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.DatabaseUpdater;
-import hs.mediasystem.ext.movie.MoviesMainMenuExtension;
-import hs.mediasystem.ext.serie.SeriesMainMenuExtension;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -14,10 +12,9 @@ import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.screens.selectmedia.BannerStandardLayoutExtension;
 import hs.mediasystem.screens.selectmedia.ListStandardLayoutExtension;
-import hs.mediasystem.screens.selectmedia.NosMainMenuExtension;
+import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.screens.selectmedia.StandardLayoutExtension;
 import hs.mediasystem.screens.selectmedia.StandardView;
-import hs.mediasystem.screens.selectmedia.YouTubeMainMenuExtension;
 import hs.mediasystem.util.DuoWindowSceneManager;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.StateCache;
@@ -29,18 +26,28 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.ServiceLoader;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
 import net.sf.jtmdb.GeneralSettings;
 
+import org.apache.felix.dm.DependencyManager;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.launch.Framework;
+import org.osgi.framework.launch.FrameworkFactory;
 import org.postgresql.ds.PGConnectionPoolDataSource;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 
 public class FrontEnd extends Application {
@@ -67,7 +74,7 @@ public class FrontEnd extends Application {
   }
 
   @Override
-  public void start(Stage primaryStage) {
+  public void start(Stage primaryStage) throws InterruptedException {
     System.out.println("javafx.runtime.version: " + System.getProperties().get("javafx.runtime.version"));
 
     int screenNumber = Integer.parseInt(INI.getSection("general").getDefault("screen", "0"));
@@ -86,15 +93,20 @@ public class FrontEnd extends Application {
 
     pool = new ConnectionPool(dataSource, 5);
 
+    final Framework framework = createOSGI();
+
+//  dm.add(dm.createComponent().setImplementation(this).add(dm.createServiceDependency().setService(MainMenuExtension.class).setCallbacks("add", "remove")));
+
     Module module = new AbstractModule() {
       private final PlayerPresentation playerPresentation = new PlayerPresentation(player);
+      PluginTracker<MainMenuExtension> mainMenuExtensions = new PluginTracker<>(framework.getBundleContext(), MainMenuExtension.class);
 
       @Override
       protected void configure() {
-        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(MoviesMainMenuExtension.class);
-        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(SeriesMainMenuExtension.class);
-        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(YouTubeMainMenuExtension.class);
-        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(NosMainMenuExtension.class);
+//        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(MoviesMainMenuExtension.class);
+//        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(SeriesMainMenuExtension.class);
+//        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(YouTubeMainMenuExtension.class);
+//        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(NosMainMenuExtension.class);
 
         Multibinder.newSetBinder(binder(), StandardLayoutExtension.class).addBinding().to(ListStandardLayoutExtension.class);
         Multibinder.newSetBinder(binder(), StandardLayoutExtension.class).addBinding().to(BannerStandardLayoutExtension.class);
@@ -102,6 +114,18 @@ public class FrontEnd extends Application {
         bind(SelectMediaView.class).to(StandardView.class);
         bind(PlaybackOverlayView.class).to(PlaybackOverlayPane.class);
         bind(TaskExecutor.class).to(MessagePaneTaskExecutor.class);
+
+
+      //  bind(TypeLiterals.iterable(MainMenuExtension.class)).toProvider(Peaberry.service(MainMenuExtension.class).multiple());
+
+        bind(new TypeLiteral<PluginTracker<MainMenuExtension>>() {}).toProvider(new Provider<PluginTracker<MainMenuExtension>>() {
+          @Override
+          public PluginTracker<MainMenuExtension> get() {
+            return mainMenuExtensions;
+          }
+        });
+
+
       }
 
       @Provides
@@ -125,6 +149,11 @@ public class FrontEnd extends Application {
       }
 
       @Provides
+      public BundleContext providesBundleContext() {
+        return framework.getBundleContext();
+      }
+
+      @Provides
       public Connection providesConnection() {
         try {
           Connection connection = pool.getConnection();
@@ -141,7 +170,20 @@ public class FrontEnd extends Application {
       }
     };
 
-    Injector injector = Guice.createInjector(module);
+
+//    Thread.sleep(2500);
+
+    Injector injector = Guice.createInjector(
+      //Peaberry.osgiModule(framework.getBundleContext()),
+      module);
+
+//    Thread.sleep(2500);
+
+    DependencyManager dm = new DependencyManager(framework.getBundleContext());
+
+    dm.add(dm.createComponent()
+      .setInterface(SelectMediaPresentationProvider.class.getName(), null)
+      .setImplementation(injector.getInstance(SelectMediaPresentationProvider.class)));
 
     DatabaseUpdater updater = injector.getInstance(DatabaseUpdater.class);
 
@@ -150,12 +192,64 @@ public class FrontEnd extends Application {
     ProgramController controller = injector.getInstance(ProgramController.class);
 
     controller.showMainScreen();
+
+    //framework.waitForStop(0);
+    //System.exit(0);
   }
 
   @Override
   public void stop() {
     if(pool != null) {
       pool.close();
+    }
+  }
+
+
+  private static Framework framework = null;
+
+  private static Framework createOSGI() {
+    String[] locations = new String[] {
+      "file:org.apache.felix.shell-1.5.0-SNAPSHOT.jar",
+      "file:org.apache.felix.shell.tui-1.5.0-SNAPSHOT.jar",
+      "file:C:/Users/John/workspace/hs.mediasystem.ext/generated/hs.mediasystem.ext.nos.jar",
+      "file:C:/Users/John/workspace/hs.mediasystem.ext/generated/hs.mediasystem.ext.test.jar",
+      "file:C:/Users/John/workspace/hs.mediasystem.ext/generated/hs.mediasystem.ext.exit.jar"
+    };
+
+    try {
+      Map<String, String> config = ConfigUtil.createConfig();
+      framework = createFramework(config);
+      framework.init();
+      framework.start();
+      installAndStartBundles(locations);
+
+      return framework;
+    }
+    catch(Exception e) {
+      System.err.println("Could not create framework: " + e);
+      e.printStackTrace();
+      System.exit(-1);
+      return null;
+    }
+  }
+
+  private static Framework createFramework(Map<String, String> config) {
+    ServiceLoader<FrameworkFactory> factoryLoader = ServiceLoader.load(FrameworkFactory.class);
+
+    for(FrameworkFactory factory : factoryLoader){
+      return factory.newFramework(config);
+    }
+
+    throw new IllegalStateException("Unable to load FrameworkFactory service.");
+  }
+
+  private static void installAndStartBundles(String... bundleLocations) throws BundleException {
+    BundleContext bundleContext = framework.getBundleContext();
+//    Activator hostActivator = new Activator();
+//    hostActivator.start(bundleContext);
+    for (String location : bundleLocations) {
+      Bundle addition = bundleContext.installBundle(location);
+      addition.start();
     }
   }
 }
