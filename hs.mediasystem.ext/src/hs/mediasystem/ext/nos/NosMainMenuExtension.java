@@ -2,7 +2,6 @@ package hs.mediasystem.ext.nos;
 
 import hs.mediasystem.ext.serie.SerieComparator;
 import hs.mediasystem.fs.MediaRootType;
-import hs.mediasystem.fs.NosMediaTree;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
