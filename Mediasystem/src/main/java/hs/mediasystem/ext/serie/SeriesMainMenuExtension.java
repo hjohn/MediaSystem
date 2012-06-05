@@ -6,6 +6,7 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import hs.mediasystem.fs.MediaRootType;
+import hs.mediasystem.fs.StandardTitleComparator;
 import hs.mediasystem.persist.Persister;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -69,7 +70,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
       }
     });
 
-    SelectMediaPresentation.registerMediaGroup(SeriesMediaTree.class, new DefaultMediaGroup("Alphabetically", null, SerieComparator.INSTANCE, false, false));
+    SelectMediaPresentation.registerMediaGroup(SeriesMediaTree.class, new DefaultMediaGroup("Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
 
     enrichCache.registerEnricher(Serie.class, serieEnricher);
     enrichCache.registerEnricher(Episode.class, episodeEnricher);

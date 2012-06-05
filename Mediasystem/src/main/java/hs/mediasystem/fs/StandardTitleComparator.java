@@ -1,11 +1,11 @@
-package hs.mediasystem.ext.serie;
+package hs.mediasystem.fs;
 
 import hs.mediasystem.framework.MediaItem;
 
 import java.util.Comparator;
 
-public class SerieComparator implements Comparator<MediaItem> {
-  public static final Comparator<MediaItem> INSTANCE = new SerieComparator();
+public class StandardTitleComparator implements Comparator<MediaItem> {
+  public static final Comparator<MediaItem> INSTANCE = new StandardTitleComparator();
 
   @Override
   public int compare(MediaItem o1, MediaItem o2) {

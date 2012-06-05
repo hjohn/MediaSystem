@@ -1,11 +1,12 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.ext.youtube;
 
 import hs.mediasystem.db.URLImageSource;
+import hs.mediasystem.ext.youtube.YouTubeMediaTree.Feed;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.fs.YouTubeMediaTree.Feed;
+import hs.mediasystem.fs.SourceImageHandle;
 
 import java.io.IOException;
 import java.net.URL;

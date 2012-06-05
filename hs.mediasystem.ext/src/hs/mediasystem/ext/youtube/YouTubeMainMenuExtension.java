@@ -1,25 +1,25 @@
-package hs.mediasystem.screens.selectmedia;
+package hs.mediasystem.ext.youtube;
 
 import hs.mediasystem.fs.MediaRootType;
-import hs.mediasystem.fs.YouTubeFeed;
-import hs.mediasystem.fs.YouTubeMediaTree;
+import hs.mediasystem.fs.StandardTitleComparator;
+import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
+import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
+import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
+import hs.mediasystem.screens.selectmedia.StandardView;
 import javafx.scene.image.Image;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-
 public class YouTubeMainMenuExtension implements MainMenuExtension {
-  private final Provider<SelectMediaPresentation> selectMediaPresentationProvider;
+  private volatile SelectMediaPresentationProvider selectMediaPresentationProvider;
 
-  @Inject
-  public YouTubeMainMenuExtension(Provider<SelectMediaPresentation> selectMediaPresentationProvider) {
-    this.selectMediaPresentationProvider = selectMediaPresentationProvider;
-
+  public YouTubeMainMenuExtension() {
     StandardView.registerLayout(YouTubeMediaTree.class, MediaRootType.MOVIES);
     StandardView.registerLayout(YouTubeFeed.class, MediaRootType.MOVIES);
+
+    SelectMediaPresentation.registerMediaGroup(YouTubeMediaTree.class, new DefaultMediaGroup("Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
+    SelectMediaPresentation.registerMediaGroup(YouTubeFeed.class, new DefaultMediaGroup("Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
   }
 
   @Override
@@ -29,7 +29,7 @@ public class YouTubeMainMenuExtension implements MainMenuExtension {
 
   @Override
   public Image getImage() {
-    return new Image("images/video.png");
+    return new Image(getClass().getResourceAsStream("/hs/mediasystem/ext/youtube/youtube.png"));
   }
 
   @Override

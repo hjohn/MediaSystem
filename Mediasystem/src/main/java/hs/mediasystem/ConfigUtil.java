@@ -20,9 +20,14 @@ public final class ConfigUtil {
     final File cachedir = createCacheDir();
 
     String[] packages = new String[] {
+      "com.google.gdata.client.youtube",
+      "com.google.gdata.data",
+      "com.google.gdata.data.extensions",
+      "com.google.gdata.data.media.mediarss",
+      "com.google.gdata.data.youtube",
+      "com.google.gdata.util",
       "hs.mediasystem.db",
       "hs.mediasystem.enrich",
-      "hs.mediasystem.ext.serie",
       "hs.mediasystem.framework",
       "hs.mediasystem.fs",
       "hs.mediasystem.persist",

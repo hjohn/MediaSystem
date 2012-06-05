@@ -1,4 +1,4 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.ext.youtube;
 
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.Media;

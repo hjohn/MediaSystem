@@ -1,0 +1,2 @@
+Private-Package: hs.mediasystem.ext.youtube
+Bundle-Activator: hs.mediasystem.ext.youtube.Activator
