@@ -29,6 +29,16 @@ import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -237,22 +247,29 @@ public class FrontEnd extends Application {
   private static Framework framework = null;
 
   private static Framework createOSGI() {
-    String[] locations = new String[] {
-      "file:org.apache.felix.shell-1.5.0-SNAPSHOT.jar",
-      "file:org.apache.felix.shell.tui-1.5.0-SNAPSHOT.jar",
-      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.movie.jar",
-      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.nos.jar",
-      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.shutdown.jar",
-      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.serie.jar",
-      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.youtube.jar"
-    };
+
+
+
+//    String[] locations = new String[] {
+//      "file:org.apache.felix.shell-1.5.0-SNAPSHOT.jar",
+//      "file:org.apache.felix.shell.tui-1.5.0-SNAPSHOT.jar",
+//      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.movie.jar",
+//      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.nos.jar",
+//      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.shutdown.jar",
+//      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.serie.jar",
+//      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.youtube.jar"
+//    };
 
     try {
       Map<String, String> config = ConfigUtil.createConfig();
       framework = createFramework(config);
       framework.init();
       framework.start();
-      installAndStartBundles(locations);
+
+      monitorBundles(
+        Paths.get("../hs.mediasystem.ext/generated"),
+        Paths.get("local/bundles")
+      );
 
       return framework;
     }
@@ -264,6 +281,62 @@ public class FrontEnd extends Application {
     }
   }
 
+  private static void monitorBundles(final Path... monitorPaths) {
+    new Thread() {
+      {
+        setDaemon(true);
+      }
+
+      @Override
+      public void run() {
+        try {
+          WatchService watchService = FileSystems.getDefault().newWatchService();
+
+          for(Path path : monitorPaths) {
+            try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(path, "*.jar")) {
+              for(Path newPath : dirStream) {
+                installAndStartBundle(newPath);
+              }
+            }
+
+            path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
+          }
+
+          for(;;) {
+            WatchKey key = watchService.take();
+
+            for(WatchEvent<?> event : key.pollEvents()) {
+              Path newPath = (Path)event.context();
+
+              if(newPath.getFileName().toString().endsWith(".jar")) {
+                installAndStartBundle(newPath);
+              }
+            }
+
+            key.reset();
+          }
+        }
+        catch(IOException | InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+
+      private void installAndStartBundle(Path path) {
+        BundleContext bundleContext = framework.getBundleContext();
+
+        try {
+          Bundle bundle = bundleContext.installBundle(path.toUri().toString());
+          bundle.start();
+        }
+        catch(BundleException e) {
+          System.out.println("[WARN] Bundle Hot Deploy Monitor - Exception while installing bundle '" + path.toString() + "': " + e);
+          e.printStackTrace(System.out);
+        }
+      }
+
+    }.start();
+  }
+
   private static Framework createFramework(Map<String, String> config) {
     ServiceLoader<FrameworkFactory> factoryLoader = ServiceLoader.load(FrameworkFactory.class);
 
@@ -272,15 +345,5 @@ public class FrontEnd extends Application {
     }
 
     throw new IllegalStateException("Unable to load FrameworkFactory service.");
-  }
-
-  private static void installAndStartBundles(String... bundleLocations) throws BundleException {
-    BundleContext bundleContext = framework.getBundleContext();
-//    Activator hostActivator = new Activator();
-//    hostActivator.start(bundleContext);
-    for (String location : bundleLocations) {
-      Bundle addition = bundleContext.installBundle(location);
-      addition.start();
-    }
   }
 }
