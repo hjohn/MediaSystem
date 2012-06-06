@@ -287,7 +287,7 @@ public class FrontEnd extends Application {
           bundle.start();
         }
         catch(BundleException e) {
-          System.out.println("[WARN] Bundle Hot Deploy Monitor - Exception while installing bundle '" + path.toString() + "': " + e);
+          System.out.println("[WARN] Bundle Hot Deploy Monitor - Exception while installing bundle '" + path.toUri() + "': " + e);
           e.printStackTrace(System.out);
         }
       }
