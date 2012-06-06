@@ -7,6 +7,8 @@ import hs.mediasystem.framework.MediaItem;
 import java.util.Comparator;
 
 public interface MediaGroup {
+  public enum Constants {MEDIA_ROOT_CLASS}
+
   public String getTitle();
 
   public Comparator<? super MediaItem> getSortComparator();
