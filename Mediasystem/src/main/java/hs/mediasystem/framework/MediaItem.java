@@ -90,7 +90,7 @@ public class MediaItem implements EnrichTrigger, PersistTrigger {
 
     EnrichmentState enrichmentState = enrichmentStates.get(cls);
 
-    if(t == null && enrichmentState == null) {
+    if(t == null && enrichmentState == null && getEnrichCache() != null) {
       getEnrichCache().enrich(cacheKey, cls);
     }
 
