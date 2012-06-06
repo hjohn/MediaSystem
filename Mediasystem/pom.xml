@@ -71,44 +71,6 @@
 			<version>1.9.0</version>
 		</dependency>
 		<dependency>
-      <groupId>google</groupId>
-      <artifactId>gdata-core-1.0</artifactId>
-      <version>1.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/lib/gdata-core-1.0.jar</systemPath>
-    </dependency>
-		<dependency>
-			<groupId>google</groupId>
-			<artifactId>gdata-client-1.0</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/gdata-client-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>google</groupId>
-			<artifactId>gdata-media-1.0</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/gdata-media-1.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>google</groupId>
-			<artifactId>gdata-youtube-2.0</artifactId>
-			<version>2.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/gdata-youtube-2.0.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-			<version>1.4.5-rc1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.collections</groupId>
-			<artifactId>google-collections</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
 			<groupId>com.miglayout</groupId>
 			<artifactId>miglayout-javafx</artifactId>
 			<version>4.2</version>
