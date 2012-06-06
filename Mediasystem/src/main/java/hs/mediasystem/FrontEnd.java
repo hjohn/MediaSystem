@@ -74,6 +74,7 @@ public class FrontEnd extends Application {
   private SceneManager sceneManager;
   private Player player;
   private ConnectionPool pool;
+  private Framework framework;
 
   @Override
   public void init() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
@@ -90,7 +91,7 @@ public class FrontEnd extends Application {
   }
 
   @Override
-  public void start(Stage primaryStage) throws InterruptedException {
+  public void start(Stage primaryStage) throws BundleException {
     System.out.println("javafx.runtime.version: " + System.getProperties().get("javafx.runtime.version"));
 
     int screenNumber = Integer.parseInt(INI.getSection("general").getDefault("screen", "0"));
@@ -109,9 +110,7 @@ public class FrontEnd extends Application {
 
     pool = new ConnectionPool(dataSource, 5);
 
-    final Framework framework = createOSGI();
-
-//  dm.add(dm.createComponent().setImplementation(this).add(dm.createServiceDependency().setService(MainMenuExtension.class).setCallbacks("add", "remove")));
+    framework = createHostedOSGiEnvironment();
 
     Module module = new AbstractModule() {
       private final PlayerPresentation playerPresentation = new PlayerPresentation(player);
@@ -119,11 +118,6 @@ public class FrontEnd extends Application {
 
       @Override
       protected void configure() {
-//        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(MoviesMainMenuExtension.class);
-//        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(SeriesMainMenuExtension.class);
-//        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(YouTubeMainMenuExtension.class);
-//        Multibinder.newSetBinder(binder(), MainMenuExtension.class).addBinding().to(NosMainMenuExtension.class);
-
         Multibinder.newSetBinder(binder(), StandardLayoutExtension.class).addBinding().to(ListStandardLayoutExtension.class);
         Multibinder.newSetBinder(binder(), StandardLayoutExtension.class).addBinding().to(BannerStandardLayoutExtension.class);
 
@@ -131,17 +125,12 @@ public class FrontEnd extends Application {
         bind(PlaybackOverlayView.class).to(PlaybackOverlayPane.class);
         bind(TaskExecutor.class).to(MessagePaneTaskExecutor.class);
 
-
-      //  bind(TypeLiterals.iterable(MainMenuExtension.class)).toProvider(Peaberry.service(MainMenuExtension.class).multiple());
-
         bind(new TypeLiteral<PluginTracker<MainMenuExtension>>() {}).toProvider(new Provider<PluginTracker<MainMenuExtension>>() {
           @Override
           public PluginTracker<MainMenuExtension> get() {
             return mainMenuExtensions;
           }
         });
-
-
       }
 
       @Provides
@@ -186,14 +175,7 @@ public class FrontEnd extends Application {
       }
     };
 
-
-//    Thread.sleep(2500);
-
-    Injector injector = Guice.createInjector(
-      //Peaberry.osgiModule(framework.getBundleContext()),
-      module);
-
-//    Thread.sleep(2500);
+    Injector injector = Guice.createInjector(module);
 
     DependencyManager dm = new DependencyManager(framework.getBundleContext());
 
@@ -231,57 +213,33 @@ public class FrontEnd extends Application {
     ProgramController controller = injector.getInstance(ProgramController.class);
 
     controller.showMainScreen();
-
-    //framework.waitForStop(0);
-    //System.exit(0);
   }
 
   @Override
-  public void stop() {
+  public void stop() throws InterruptedException {
+    if(framework != null) {
+      framework.waitForStop(5000);
+    }
     if(pool != null) {
       pool.close();
     }
   }
 
+  private Framework createHostedOSGiEnvironment() throws BundleException {
+    Map<String, String> config = ConfigUtil.createConfig();
+    Framework framework = createFramework(config);
+    framework.init();
+    framework.start();
 
-  private static Framework framework = null;
+    monitorBundles(
+      Paths.get("local/bundles"),
+      Paths.get("../hs.mediasystem.ext/generated")
+    );
 
-  private static Framework createOSGI() {
-
-
-
-//    String[] locations = new String[] {
-//      "file:org.apache.felix.shell-1.5.0-SNAPSHOT.jar",
-//      "file:org.apache.felix.shell.tui-1.5.0-SNAPSHOT.jar",
-//      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.movie.jar",
-//      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.nos.jar",
-//      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.shutdown.jar",
-//      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.serie.jar",
-//      "file:../hs.mediasystem.ext/generated/hs.mediasystem.ext.youtube.jar"
-//    };
-
-    try {
-      Map<String, String> config = ConfigUtil.createConfig();
-      framework = createFramework(config);
-      framework.init();
-      framework.start();
-
-      monitorBundles(
-        Paths.get("../hs.mediasystem.ext/generated"),
-        Paths.get("local/bundles")
-      );
-
-      return framework;
-    }
-    catch(Exception e) {
-      System.err.println("Could not create framework: " + e);
-      e.printStackTrace();
-      System.exit(-1);
-      return null;
-    }
+    return framework;
   }
 
-  private static void monitorBundles(final Path... monitorPaths) {
+  private void monitorBundles(final Path... monitorPaths) {
     new Thread() {
       {
         setDaemon(true);
