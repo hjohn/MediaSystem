@@ -73,7 +73,7 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
 
             youTube.imageProperty().set(new SourceImageHandle(new URLImageSource(url), "YouTubeMediaTree:/" + videoEntry.getId()));
 
-            children.add(new MediaItem(getMediaTree(), mediaContent.getUrl(), youTube, videoEntry));
+            children.add(new MediaItem(getMediaTree(), mediaContent.getUrl().replaceAll("https://", "http://"), youTube, videoEntry));
             break;
           }
         }
