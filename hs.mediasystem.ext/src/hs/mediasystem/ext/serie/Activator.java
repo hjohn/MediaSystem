@@ -3,9 +3,17 @@ package hs.mediasystem.ext.serie;
 import hs.mediasystem.db.ItemsDao;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache;
+import hs.mediasystem.framework.Episode;
+import hs.mediasystem.framework.Media;
+import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.SerieItem;
 import hs.mediasystem.persist.Persister;
+import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
+import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
+
+import java.util.Hashtable;
 
 import org.apache.felix.dm.DependencyActivatorBase;
 import org.apache.felix.dm.DependencyManager;
@@ -15,6 +23,27 @@ public class Activator extends DependencyActivatorBase {
 
   @Override
   public void init(BundleContext context, DependencyManager manager) throws Exception {
+    manager.add(createComponent()
+      .setInterface(MediaGroup.class.getName(), new Hashtable<String, Object>() {{
+        put(MediaGroup.Constants.MEDIA_ROOT_CLASS.name(), SerieItem.class);
+      }})
+      .setImplementation(new DefaultMediaGroup("Season", new SeasonGrouper(), EpisodeComparator.INSTANCE, true, true) {
+        @Override
+        public Media createMediaFromFirstItem(MediaItem item) {
+          Integer season = item.get(Episode.class).getSeason();
+
+          return new Media(season == null || season == 0 ? "Specials" : "Season " + season);
+        }
+
+        @Override
+        public String getShortTitle(MediaItem item) {
+          Integer season = item.get(Episode.class).getSeason();
+
+          return season == null || season == 0 ? "Sp." : "" + season;
+        }
+      })
+    );
+
     manager.add(createComponent()
       .setInterface(SerieEnricher.class.getName(), null)
       .setImplementation(SerieEnricher.class)

@@ -6,6 +6,8 @@ import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
+import hs.mediasystem.fs.StandardTitleComparator;
+import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
@@ -19,15 +21,15 @@ import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
+import hs.mediasystem.util.PropertyEq;
+import hs.mediasystem.util.ServiceTracker;
 import hs.mediasystem.util.StateCache;
 import hs.mediasystem.util.StringBinding;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -48,31 +50,24 @@ import javafx.util.Callback;
 
 import javax.inject.Inject;
 
+import org.osgi.framework.BundleContext;
+
 public class SelectMediaPresentation {
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
-  private static final Map<Class<? extends MediaRoot>, List<MediaGroup>> MEDIA_GROUPS = new HashMap<>();
-
-  public static void registerMediaGroup(Class<? extends MediaRoot> mediaRootClass, MediaGroup mediaGroup) {
-    List<MediaGroup> mediaGroups = MEDIA_GROUPS.get(mediaRootClass);
-
-    if(mediaGroups == null) {
-      mediaGroups = new ArrayList<>();
-      MEDIA_GROUPS.put(mediaRootClass, mediaGroups);
-    }
-
-    mediaGroups.add(mediaGroup);
-  }
 
   private final Navigator navigator;
   private final StateCache stateCache;
+  private final ServiceTracker<MediaGroup> mediaGroupTracker;
 
   private SelectMediaView view;
 
   @Inject
-  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final StateCache stateCache) {
+  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final StateCache stateCache, BundleContext bundleContext) {
     this.stateCache = stateCache;
     this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
+
+    mediaGroupTracker = new ServiceTracker<>(bundleContext, MediaGroup.class);
 
     if(this.view != null) {
       this.view.onBack().set(null);
@@ -209,7 +204,11 @@ public class SelectMediaPresentation {
       public void execute() {
         currentRoot = root;
 
-        List<MediaGroup> mediaGroups = MEDIA_GROUPS.get(root.getClass());
+        List<MediaGroup> mediaGroups = mediaGroupTracker.getServices(new PropertyEq(MediaGroup.Constants.MEDIA_ROOT_CLASS.name(), root.getClass()));
+
+        if(mediaGroups.isEmpty()) {
+          mediaGroups.add(new DefaultMediaGroup("Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
+        }
 
         availableGroupSetsProperty().setAll(mediaGroups);
         groupSetProperty().set(mediaGroups.get(0));

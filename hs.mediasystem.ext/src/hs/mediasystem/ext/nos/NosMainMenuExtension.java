@@ -1,8 +1,6 @@
 package hs.mediasystem.ext.nos;
 
 import hs.mediasystem.fs.MediaRootType;
-import hs.mediasystem.fs.StandardTitleComparator;
-import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
@@ -16,8 +14,6 @@ public class NosMainMenuExtension implements MainMenuExtension {
 
   public NosMainMenuExtension() {
     StandardView.registerLayout(NosMediaTree.class, MediaRootType.MOVIES);
-
-    SelectMediaPresentation.registerMediaGroup(NosMediaTree.class, new DefaultMediaGroup("Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
   }
 
   @Override

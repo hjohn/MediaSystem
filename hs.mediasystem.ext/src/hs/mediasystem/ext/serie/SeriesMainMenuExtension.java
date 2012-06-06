@@ -4,16 +4,12 @@ import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.Episode;
 import hs.mediasystem.framework.EpisodeBase;
-import hs.mediasystem.framework.Media;
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import hs.mediasystem.framework.Serie;
 import hs.mediasystem.framework.SerieBase;
 import hs.mediasystem.framework.SerieItem;
 import hs.mediasystem.fs.MediaRootType;
-import hs.mediasystem.fs.StandardTitleComparator;
 import hs.mediasystem.persist.Persister;
-import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
@@ -55,25 +51,6 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
         return new EpisodeCell();
       }
     });
-
-    SelectMediaPresentation.registerMediaGroup(SerieItem.class, new DefaultMediaGroup("Season", new SeasonGrouper(), EpisodeComparator.INSTANCE, true, true) {
-      @Override
-      public Media createMediaFromFirstItem(MediaItem item) {
-        Integer season = item.get(Episode.class).getSeason();
-
-        return new Media(season == null || season == 0 ? "Specials" : "Season " + season);
-      }
-
-      @Override
-      public String getShortTitle(MediaItem item) {
-        Integer season = item.get(Episode.class).getSeason();
-
-        return season == null || season == 0 ? "Sp." : "" + season;
-      }
-    });
-
-    SelectMediaPresentation.registerMediaGroup(SeriesMediaTree.class, new DefaultMediaGroup("Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
-
   }
 
   public void init() {

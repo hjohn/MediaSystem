@@ -1,8 +1,6 @@
 package hs.mediasystem.ext.youtube;
 
 import hs.mediasystem.fs.MediaRootType;
-import hs.mediasystem.fs.StandardTitleComparator;
-import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
@@ -17,9 +15,6 @@ public class YouTubeMainMenuExtension implements MainMenuExtension {
   public YouTubeMainMenuExtension() {
     StandardView.registerLayout(YouTubeMediaTree.class, MediaRootType.MOVIES);
     StandardView.registerLayout(YouTubeFeed.class, MediaRootType.MOVIES);
-
-    SelectMediaPresentation.registerMediaGroup(YouTubeMediaTree.class, new DefaultMediaGroup("Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
-    SelectMediaPresentation.registerMediaGroup(YouTubeFeed.class, new DefaultMediaGroup("Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
   }
 
   @Override
