@@ -1,4 +1,4 @@
-package hs.mediasystem.screens.selectmedia;
+package hs.mediasystem.ext.serie;
 
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.enrich.EnrichTrigger;
@@ -20,23 +20,16 @@ import javafx.scene.layout.VBox;
 
 public class BannerCell extends HBox implements MediaNodeCell {
   private final WeakBinder binder = new WeakBinder();
-  private final int fitWidth;
 
   private final Label title = new Label() {{
     setId("selectItem-listCell-title");
   }};
 
-  public BannerCell(int fitWidth) {
-    this.fitWidth = fitWidth;
-
+  public BannerCell() {
     getChildren().add(new VBox() {{
       getChildren().add(title);
       HBox.setHgrow(this, Priority.ALWAYS);
     }});
-  }
-
-  public BannerCell() {
-    this(350);
   }
 
   @Override
@@ -56,13 +49,13 @@ public class BannerCell extends HBox implements MediaNodeCell {
       binder.bind(titleProperty, MapBindings.selectString(mediaNode.dataMapProperty(), Media.class, "title"));
       binder.bind(asyncImageProperty.imageHandleProperty(), banner);
 
-      title.setMinHeight(fitWidth * 140 / 758);
+      title.minHeightProperty().bind(minWidthProperty().multiply(140).divide(758));
 
       binder.bind(title.textProperty(), Bindings.when(asyncImageProperty.isNull()).then(titleProperty).otherwise(""));
       binder.bind(title.graphicProperty(), Bindings.when(asyncImageProperty.isNull()).then((ImageView)null).otherwise(new ImageView() {{
         imageProperty().bind(asyncImageProperty);
         setPreserveRatio(true);
-        setFitWidth(fitWidth);
+        fitWidthProperty().bind(BannerCell.this.minWidthProperty());
       }}));
     }
   }

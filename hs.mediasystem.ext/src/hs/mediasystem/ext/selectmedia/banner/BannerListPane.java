@@ -1,8 +1,10 @@
-package hs.mediasystem.screens.selectmedia;
+package hs.mediasystem.ext.selectmedia.banner;
 
-import hs.mediasystem.framework.MediaNodeCell;
+import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
+import hs.mediasystem.screens.SmartMediaNodeCellProvider;
+import hs.mediasystem.screens.selectmedia.ListPane;
 import hs.mediasystem.util.Events;
 import javafx.application.Platform;
 import javafx.beans.binding.ObjectBinding;
@@ -12,7 +14,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -26,6 +27,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.util.Callback;
 
 public class BannerListPane extends BorderPane implements ListPane {
@@ -70,14 +72,14 @@ public class BannerListPane extends BorderPane implements ListPane {
         leftColumn.setCellFactory(new Callback<TableColumn<DuoMediaNode, MediaNode>, TableCell<DuoMediaNode, MediaNode>>() {
           @Override
           public TableCell<DuoMediaNode, MediaNode> call(TableColumn<DuoMediaNode, MediaNode> column) {
-            return new MediaNodeTableCell(new BannerCell(bannerWidth));
+            return new MediaNodeTableCell(bannerWidth);
           }
         });
 
         rightColumn.setCellFactory(new Callback<TableColumn<DuoMediaNode, MediaNode>, TableCell<DuoMediaNode, MediaNode>>() {
           @Override
           public TableCell<DuoMediaNode, MediaNode> call(TableColumn<DuoMediaNode, MediaNode> column) {
-            return new MediaNodeTableCell(new BannerCell(bannerWidth));
+            return new MediaNodeTableCell(bannerWidth);
           }
         });
       }
@@ -178,10 +180,11 @@ public class BannerListPane extends BorderPane implements ListPane {
   }
 
   private static final class MediaNodeTableCell extends TableCell<DuoMediaNode, MediaNode> {
-    private final MediaNodeCell cell;
+    private final SmartMediaNodeCellProvider provider = new SmartMediaNodeCellProvider(MediaNodeCellProviderRegistry.HORIZONTAL_CELL);
+    private final int bannerWidth;
 
-    MediaNodeTableCell(MediaNodeCell cell) {
-      this.cell = cell;
+    public MediaNodeTableCell(int bannerWidth) {
+      this.bannerWidth = bannerWidth;
     }
 
     @Override
@@ -189,9 +192,12 @@ public class BannerListPane extends BorderPane implements ListPane {
       super.updateItem(mediaNode, empty);
 
       if(!empty) {
-        cell.configureCell(mediaNode);
+        Region node = provider.getConfiguredGraphic(mediaNode);
 
-        setGraphic((Node)cell);
+        node.setMinWidth(bannerWidth);
+        node.setMaxWidth(bannerWidth);
+
+        setGraphic(node);
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
       }
     }

@@ -13,7 +13,6 @@ import hs.mediasystem.persist.Persister;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
-import hs.mediasystem.screens.selectmedia.BannerCell;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.screens.selectmedia.StandardView;

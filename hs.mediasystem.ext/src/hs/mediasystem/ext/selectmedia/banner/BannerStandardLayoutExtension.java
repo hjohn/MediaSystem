@@ -1,6 +1,8 @@
-package hs.mediasystem.screens.selectmedia;
+package hs.mediasystem.ext.selectmedia.banner;
 
 import hs.mediasystem.fs.MediaRootType;
+import hs.mediasystem.screens.selectmedia.StandardLayout;
+import hs.mediasystem.screens.selectmedia.StandardLayoutExtension;
 
 import java.util.Collections;
 import java.util.HashSet;

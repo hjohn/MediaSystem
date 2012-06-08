@@ -20,6 +20,7 @@ public final class ConfigUtil {
     final File cachedir = createCacheDir();
 
     String[] packages = new String[] {
+      "hs.mediasystem.beans",
       "hs.mediasystem.db",
       "hs.mediasystem.enrich",
       "hs.mediasystem.framework",
@@ -36,6 +37,8 @@ public final class ConfigUtil {
       "javafx.beans.property",
       "javafx.beans.value",
       "javafx.collections",
+      "javafx.geometry",
+      "javafx.scene.control.cell",
       "javafx.event",
       "javafx.scene",
       "javafx.scene.control",
