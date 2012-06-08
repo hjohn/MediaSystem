@@ -14,6 +14,7 @@ public class URLImageSource implements Source<byte[]> {
 
   @Override
   public byte[] get() {
+    System.out.println("[FINE] URLImageSource.get() - Downloading '" + url + "'");
     return Downloader.tryReadURL(url);
   }
 }
