@@ -20,12 +20,6 @@ public final class ConfigUtil {
     final File cachedir = createCacheDir();
 
     String[] packages = new String[] {
-      "com.google.gdata.client.youtube",
-      "com.google.gdata.data",
-      "com.google.gdata.data.extensions",
-      "com.google.gdata.data.media.mediarss",
-      "com.google.gdata.data.youtube",
-      "com.google.gdata.util",
       "com.moviejukebox.thetvdb",
       "com.moviejukebox.thetvdb.model",
       "hs.mediasystem.db",
@@ -44,8 +38,6 @@ public final class ConfigUtil {
       "javafx.scene",
       "javafx.scene.image",
       "javax.inject",
-      "net.sf.jtmdb",
-      "org.json",
       "org.jsoup",
       "org.jsoup.nodes",
       "org.jsoup.select",

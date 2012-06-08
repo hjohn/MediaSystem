@@ -47,7 +47,6 @@ import java.util.ServiceLoader;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import net.sf.jtmdb.GeneralSettings;
 
 import org.apache.felix.dm.DependencyManager;
 import org.osgi.framework.Bundle;
@@ -79,10 +78,6 @@ public class FrontEnd extends Application {
   @Override
   public void init() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
     Section section = INI.getSection("general");
-
-    GeneralSettings.setApiKey(section.get("jtmdb.key"));
-    GeneralSettings.setLogEnabled(false);
-    GeneralSettings.setLogStream(System.out);
 
     String factoryClassName = section.getDefault("player.factoryClass", "hs.mediasystem.players.vlc.VLCPlayerFactory");
 
