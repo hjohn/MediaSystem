@@ -6,6 +6,7 @@ import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
+import hs.mediasystem.framework.StateCache;
 import hs.mediasystem.fs.StandardTitleComparator;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MediaGroup;
@@ -23,7 +24,6 @@ import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.PropertyEq;
 import hs.mediasystem.util.ServiceTracker;
-import hs.mediasystem.util.StateCache;
 import hs.mediasystem.util.StringBinding;
 
 import java.util.ArrayList;

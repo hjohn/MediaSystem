@@ -1,4 +1,4 @@
-package hs.mediasystem.util;
+package hs.mediasystem.framework;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
