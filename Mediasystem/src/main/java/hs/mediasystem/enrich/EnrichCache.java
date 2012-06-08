@@ -205,7 +205,7 @@ public class EnrichCache {
           }
 
           if(normalTasks != null) {
-            normalQueue.submitAll(key, cacheTasks);
+            normalQueue.submitAll(key, normalTasks);
           }
 
           return;
