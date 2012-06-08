@@ -2,6 +2,8 @@ package hs.mediasystem.persist;
 
 import hs.mediasystem.db.ItemsDao;
 import hs.mediasystem.db.MediaData;
+import hs.mediasystem.db.Setting;
+import hs.mediasystem.db.SettingsDao;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,10 +22,12 @@ public class Persister {
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
   private final ItemsDao itemsDao;
+  private final SettingsDao settingsDao;
 
   @Inject
-  public Persister(ItemsDao itemsDao) {
+  public Persister(ItemsDao itemsDao, SettingsDao settingsDao) {
     this.itemsDao = itemsDao;
+    this.settingsDao = settingsDao;
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
@@ -50,34 +54,43 @@ public class Persister {
 
   public void queueAsDirty(final Persistable persistable) {
     synchronized(futures) {
-      if(persistable instanceof MediaData) {
-        ScheduledFuture<?> future = futures.get(persistable);
+      ScheduledFuture<?> future = futures.get(persistable);
 
-        if(future != null) {
-          future.cancel(false);
-          futures.remove(persistable);
-        }
+      if(future != null) {
+        future.cancel(false);
+        futures.remove(persistable);
+      }
 
-        Runnable runnable = new Runnable() {
-          @Override
-          public void run() {
+      Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+          try {
             System.out.println("[FINE] Persister - Persisting: " + persistable);
 
-            itemsDao.updateMediaData((MediaData)persistable);
+            if(persistable instanceof MediaData) {
+              itemsDao.updateMediaData((MediaData)persistable);
+            }
+            else if(persistable instanceof Setting) {
+              settingsDao.storeSetting((Setting)persistable);
+            }
 
             synchronized(futures) {
               futures.remove(persistable);
             }
           }
-
-          @Override
-          public String toString() {
-            return "PersistTask[" + persistable + "]";
+          catch(Exception e) {
+            System.out.println("[WARN] Persister - Exception while persisting " + persistable + ": " + e);
+            e.printStackTrace(System.out);
           }
-        };
+        }
 
-        futures.put(persistable, scheduler.schedule(runnable, 3, TimeUnit.SECONDS));
-      }
+        @Override
+        public String toString() {
+          return "PersistTask[" + persistable + "]";
+        }
+      };
+
+      futures.put(persistable, scheduler.schedule(runnable, 3, TimeUnit.SECONDS));
     }
   }
 }

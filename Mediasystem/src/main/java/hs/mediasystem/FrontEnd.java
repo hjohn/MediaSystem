@@ -8,7 +8,6 @@ import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.PlaybackOverlayView;
-import hs.mediasystem.framework.StateCache;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.persist.Persister;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -64,8 +63,6 @@ import com.google.inject.TypeLiteral;
 public class FrontEnd extends Application {
   private static final Ini INI = new Ini(new File("mediasystem.ini"));
 
-  private final StateCache stateCache = new StateCache();
-
   private SceneManager sceneManager;
   private Player player;
   private ConnectionPool pool;
@@ -119,11 +116,6 @@ public class FrontEnd extends Application {
             return mainMenuExtensions;
           }
         });
-      }
-
-      @Provides
-      public StateCache providesStateCache() {
-        return stateCache;
       }
 
       @Provides

@@ -1,12 +1,13 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.db.MediaData;
+import hs.mediasystem.db.Setting.PersistLevel;
 import hs.mediasystem.framework.Grouper;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.framework.StateCache;
+import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.fs.StandardTitleComparator;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MediaGroup;
@@ -56,14 +57,14 @@ public class SelectMediaPresentation {
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
 
   private final Navigator navigator;
-  private final StateCache stateCache;
+  private final SettingsStore settingsStore;
   private final ServiceTracker<MediaGroup> mediaGroupTracker;
 
   private SelectMediaView view;
 
   @Inject
-  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final StateCache stateCache, BundleContext bundleContext) {
-    this.stateCache = stateCache;
+  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final SettingsStore settingsStore, BundleContext bundleContext) {
+    this.settingsStore = settingsStore;
     this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
 
@@ -178,7 +179,7 @@ public class SelectMediaPresentation {
           @Override
           public void run() {
             String key = createKeyFromTrail();
-            String id = stateCache.getState(key);
+            String id = settingsStore.getSetting("MediaSystem:SelectMedia", key);
             MediaNode nodeToSelect = null;
 
             if(id != null) {
@@ -219,7 +220,7 @@ public class SelectMediaPresentation {
         MediaNode selectedNode = view.getSelectedNode();
 
         if(selectedNode != null) {
-          stateCache.putState(createKeyFromTrail(), selectedNode.getId());
+          settingsStore.storeSetting("MediaSystem:SelectMedia", PersistLevel.TEMPORARY, createKeyFromTrail(), selectedNode.getId());
         }
       }
     });
@@ -230,7 +231,7 @@ public class SelectMediaPresentation {
   }
 
   private String createKeyFromTrail() {
-    String key = "";
+    String key = "LastSelected:";
 
     for(Destination destination : navigator.getTrail()) {
       if(!key.isEmpty()) {
