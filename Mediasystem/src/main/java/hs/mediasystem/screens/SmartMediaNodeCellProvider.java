@@ -2,7 +2,7 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
-import javafx.scene.Node;
+import javafx.scene.layout.Region;
 
 public class SmartMediaNodeCellProvider {
   private final String cellType;
@@ -14,7 +14,7 @@ public class SmartMediaNodeCellProvider {
     this.cellType = cellType;
   }
 
-  public Node getConfiguredGraphic(MediaNode node) {
+  public Region getConfiguredGraphic(MediaNode node) {
     Class<?> dataType = node.getDataType();
 
     if(!dataType.equals(currentDataType)) {
@@ -24,6 +24,6 @@ public class SmartMediaNodeCellProvider {
 
     mediaNodeCell.configureCell(node);
 
-    return (Node)mediaNodeCell;
+    return (Region)mediaNodeCell;
   }
 }
