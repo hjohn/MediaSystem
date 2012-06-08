@@ -51,7 +51,7 @@ public class DatabaseImageSource implements Source<byte[]> {
   }
 
   private byte[] getImage() {
-    System.out.println("[FINE] URLImageSource.getImage() - Loading image " + tableName + "." + columnName + "(id=" + id + ")");
+    System.out.println("[FINE] DatabaseImageSource.getImage() - Loading image " + tableName + "." + columnName + "(id=" + id + ")");
 
     try {
       try(Connection connection = connectionProvider.get();
