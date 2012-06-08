@@ -222,11 +222,11 @@ public class TreeListPane extends BorderPane implements ListPane {
     private final SmartMediaNodeCellProvider provider = new SmartMediaNodeCellProvider(MediaNodeCellProviderRegistry.HORIZONTAL_CELL);
 
     @Override
-    protected void updateItem(final MediaNode item, boolean empty) {
-      super.updateItem(item, empty);
+    protected void updateItem(final MediaNode mediaNode, boolean empty) {
+      super.updateItem(mediaNode, empty);
 
       if(!empty) {
-        Node node = provider.getConfiguredGraphic(item);
+        Node node = provider.getConfiguredGraphic(mediaNode);
 
         double maxWidth = treeView.getWidth() - 35;
         ((Region)node).setMaxWidth(maxWidth);  // WORKAROUND for being unable to restrict cells to the width of the view
