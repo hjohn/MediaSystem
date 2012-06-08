@@ -20,8 +20,6 @@ public final class ConfigUtil {
     final File cachedir = createCacheDir();
 
     String[] packages = new String[] {
-      "com.moviejukebox.thetvdb",
-      "com.moviejukebox.thetvdb.model",
       "hs.mediasystem.db",
       "hs.mediasystem.enrich",
       "hs.mediasystem.framework",
@@ -38,6 +36,7 @@ public final class ConfigUtil {
       "javafx.scene",
       "javafx.scene.image",
       "javax.inject",
+      "javax.persistence",
       "org.jsoup",
       "org.jsoup.nodes",
       "org.jsoup.select",
