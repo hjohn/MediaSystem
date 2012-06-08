@@ -16,10 +16,7 @@ import hs.mediasystem.screens.PlaybackOverlayPane;
 import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SelectMediaView;
-import hs.mediasystem.screens.selectmedia.BannerStandardLayoutExtension;
-import hs.mediasystem.screens.selectmedia.ListStandardLayoutExtension;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
-import hs.mediasystem.screens.selectmedia.StandardLayoutExtension;
 import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.util.DuoWindowSceneManager;
 import hs.mediasystem.util.SceneManager;
@@ -63,7 +60,6 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
-import com.google.inject.multibindings.Multibinder;
 
 public class FrontEnd extends Application {
   private static final Ini INI = new Ini(new File("mediasystem.ini"));
@@ -113,9 +109,6 @@ public class FrontEnd extends Application {
 
       @Override
       protected void configure() {
-        Multibinder.newSetBinder(binder(), StandardLayoutExtension.class).addBinding().to(ListStandardLayoutExtension.class);
-        Multibinder.newSetBinder(binder(), StandardLayoutExtension.class).addBinding().to(BannerStandardLayoutExtension.class);
-
         bind(SelectMediaView.class).to(StandardView.class);
         bind(PlaybackOverlayView.class).to(PlaybackOverlayPane.class);
         bind(TaskExecutor.class).to(MessagePaneTaskExecutor.class);

@@ -1,10 +1,11 @@
-package hs.mediasystem.screens.selectmedia;
+package hs.mediasystem.ext.selectmedia.tree;
 
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import hs.mediasystem.screens.Filter;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.SmartMediaNodeCellProvider;
+import hs.mediasystem.screens.selectmedia.ListPane;
 import hs.mediasystem.util.Events;
 
 import java.util.ArrayList;
@@ -295,7 +296,7 @@ public class TreeListPane extends BorderPane implements ListPane {
     }
   }
 
-  private TreeItem<MediaNode> findTreeItem(TreeItem<MediaNode> root, MediaNode mediaNode) {
+  private static TreeItem<MediaNode> findTreeItem(TreeItem<MediaNode> root, MediaNode mediaNode) {
     for(TreeItem<MediaNode> child : root.getChildren()) {
       if(child.getValue().equals(mediaNode)) {
         return child;

@@ -7,10 +7,10 @@ import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
+import hs.mediasystem.util.ServiceTracker;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -30,6 +30,8 @@ import javafx.scene.layout.StackPane;
 
 import javax.inject.Inject;
 
+import org.osgi.framework.BundleContext;
+
 public class StandardView extends StackPane implements SelectMediaView {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
 
@@ -42,7 +44,7 @@ public class StandardView extends StackPane implements SelectMediaView {
   private final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect = new SimpleObjectProperty<>();
   @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect() { return onNodeAlternateSelect; }
 
-  private final Set<StandardLayoutExtension> selectMediaExtensions;
+  private final ServiceTracker<StandardLayoutExtension> standardLayoutExtensionTracker;
   private final BackgroundPane backgroundPane = new BackgroundPane();
 
   private final ObjectProperty<StandardLayoutExtension> layoutExtension = new SimpleObjectProperty<>();
@@ -51,8 +53,8 @@ public class StandardView extends StackPane implements SelectMediaView {
   private StandardLayout layout;
 
   @Inject
-  public StandardView(Set<StandardLayoutExtension> selectMediaExtensions) {
-    this.selectMediaExtensions = selectMediaExtensions;
+  public StandardView(BundleContext bundleContext) {
+    standardLayoutExtensionTracker = new ServiceTracker<>(bundleContext, StandardLayoutExtension.class);
 
     getStylesheets().add("select-media/duo-pane-select-media-view.css");
 
@@ -151,7 +153,7 @@ public class StandardView extends StackPane implements SelectMediaView {
 
     MediaRootType rootType = TYPES.get(root.getClass());
 
-    for(StandardLayoutExtension extension : selectMediaExtensions) {
+    for(StandardLayoutExtension extension : standardLayoutExtensionTracker.getServices()) {
       if(extension.getSupportedMediaRootTypes().contains(rootType)) {
         availableLayoutExtensions.add(extension);
       }
