@@ -3,7 +3,6 @@ package hs.mediasystem.framework;
 import hs.mediasystem.db.Setting;
 import hs.mediasystem.db.Setting.PersistLevel;
 import hs.mediasystem.db.SettingsDao;
-import hs.mediasystem.persist.Persister;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -14,15 +13,17 @@ import javax.inject.Singleton;
 
 @Singleton
 public class SettingsStore {
-  private final Persister persister;
+  private final SettingPersister settingPersister;
 
   private final Map<String, Setting> settings = new HashMap<>();
 
+
   @Inject
-  public SettingsStore(SettingsDao settingsDao, Persister persister) {
-    this.persister = persister;
+  public SettingsStore(SettingsDao settingsDao, SettingPersister settingPersister) {
+    this.settingPersister = settingPersister;
 
     for(Setting setting : settingsDao.getAllSettings()) {
+      setting.setPersistTrigger(settingPersister);
       settings.put(setting.getSystem() + "/" + setting.getKey(), setting);
     }
 
@@ -39,6 +40,7 @@ public class SettingsStore {
 
       setting.setSystem(system);
       setting.setKey(key);
+      setting.setPersistTrigger(settingPersister);
 
       settings.put(settingsKey, setting);
     }
@@ -47,9 +49,7 @@ public class SettingsStore {
     setting.setValue(value);
     setting.setLastUpdated(new Date());
 
-    if(level != PersistLevel.SESSION) {
-      persister.queueAsDirty(setting);
-    }
+    settingPersister.queueAsDirty(setting);
   }
 
   public String getSetting(String system, String key) {

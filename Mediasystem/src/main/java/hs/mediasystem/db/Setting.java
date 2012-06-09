@@ -1,11 +1,13 @@
 package hs.mediasystem.db;
 
-import hs.mediasystem.persist.PersistTrigger;
-import hs.mediasystem.persist.Persistable;
+import hs.mediasystem.framework.DefaultEnrichable;
 
 import java.util.Date;
 
-public class Setting implements Persistable {
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
+public class Setting extends DefaultEnrichable<Setting> {
   public enum PersistLevel {PERMANENT, TEMPORARY, SESSION}
 
   private int id;
@@ -13,7 +15,6 @@ public class Setting implements Persistable {
   private String system;
   private PersistLevel persistLevel;
   private String key;
-  private String value;
 
   private Date lastUpdated;
 
@@ -49,13 +50,16 @@ public class Setting implements Persistable {
     this.key = key;
   }
 
-  public String getValue() {
-    return value;
-  }
-
-  public void setValue(String value) {
-    this.value = value;
-  }
+  private final StringProperty value = new SimpleStringProperty() {
+    @Override
+    public void set(String s) {
+      super.set(s);
+      queueAsDirty();
+    }
+  };
+  public String getValue() { return value.get(); }
+  public void setValue(String value) { this.value.set(value); }
+  public StringProperty valueProperty() { return value; }
 
   public Date getLastUpdated() {
     return lastUpdated;
@@ -63,11 +67,6 @@ public class Setting implements Persistable {
 
   public void setLastUpdated(Date lastUpdated) {
     this.lastUpdated = lastUpdated;
-  }
-
-  @Override
-  public void setPersistTrigger(PersistTrigger persistTrigger) {
-    throw new UnsupportedOperationException();
   }
 
   @Override

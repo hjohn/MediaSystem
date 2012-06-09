@@ -148,7 +148,7 @@ public class SelectMediaPresentation {
         if(KEY_O.match(event)) {
           @SuppressWarnings("unchecked")
           List<? extends Option> options = FXCollections.observableArrayList(
-            new ListOption<>("Group by", groupSetProperty(), availableGroupSetsProperty(), new StringBinding(groupSetProperty()) {
+            new ListOption<>("Sorting/Grouping", groupSetProperty(), availableGroupSetsProperty(), new StringBinding(groupSetProperty()) {
               @Override
               protected String computeValue() {
                 return groupSetProperty().get().getTitle();

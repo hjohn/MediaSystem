@@ -2,14 +2,14 @@ package hs.mediasystem.framework;
 
 import hs.mediasystem.enrich.EnrichTrigger;
 import hs.mediasystem.enrich.Enrichable;
-import hs.mediasystem.persist.PersistTrigger;
+import hs.mediasystem.persist.Persister;
 import hs.mediasystem.persist.Persistable;
 
 import java.lang.ref.WeakReference;
 
-public class DefaultEnrichable implements Enrichable, Persistable {
+public class DefaultEnrichable<P> implements Enrichable, Persistable<P> {
   private WeakReference<EnrichTrigger> enrichTriggerRef;
-  private WeakReference<PersistTrigger> persistTriggerRef;
+  private WeakReference<Persister<P>> persistTriggerRef;
 
   @Override
   public void setEnrichTrigger(EnrichTrigger enrichTrigger) {
@@ -17,12 +17,13 @@ public class DefaultEnrichable implements Enrichable, Persistable {
   }
 
   @Override
-  public void setPersistTrigger(PersistTrigger persistTrigger) {
+  public void setPersistTrigger(Persister<P> persistTrigger) {
     this.persistTriggerRef = new WeakReference<>(persistTrigger);
   }
 
-  protected Class<? extends DefaultEnrichable> getEnrichClass() {
-    return getClass();
+  @SuppressWarnings("unchecked")
+  protected Class<? extends DefaultEnrichable<P>> getEnrichClass() {
+    return (Class<? extends DefaultEnrichable<P>>)getClass();
   }
 
   protected void queueForEnrichment() {
@@ -35,12 +36,13 @@ public class DefaultEnrichable implements Enrichable, Persistable {
     }
   }
 
+  @SuppressWarnings("unchecked")
   protected void queueAsDirty() {
     if(persistTriggerRef != null) {
-      PersistTrigger persistTrigger = persistTriggerRef.get();
+      Persister<P> persistTrigger = persistTriggerRef.get();
 
       if(persistTrigger != null) {
-        persistTrigger.queueAsDirty(this);
+        persistTrigger.queueAsDirty((P)this);
       }
     }
   }

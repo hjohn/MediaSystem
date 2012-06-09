@@ -7,7 +7,7 @@ import hs.mediasystem.enrich.Enrichable;
 import hs.mediasystem.enrich.EnrichmentListener;
 import hs.mediasystem.enrich.EnrichmentState;
 import hs.mediasystem.enrich.WeakEnrichmentListener;
-import hs.mediasystem.persist.PersistTrigger;
+import hs.mediasystem.persist.Persister;
 import hs.mediasystem.persist.Persistable;
 
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
-public class MediaItem implements EnrichTrigger, PersistTrigger {
+public class MediaItem implements EnrichTrigger {
   private final ObservableMap<Class<?>, Object> data = FXCollections.observableHashMap();
   private final ObjectProperty<ObservableMap<Class<?>, Object>> dataMap = new SimpleObjectProperty<>(data);
   public ObjectProperty<ObservableMap<Class<?>, Object>> dataMapProperty() { return dataMap; }
@@ -74,7 +74,11 @@ public class MediaItem implements EnrichTrigger, PersistTrigger {
       ((Enrichable)o).setEnrichTrigger(this);
     }
     if(o instanceof Persistable) {
-      ((Persistable)o).setPersistTrigger(this);
+      @SuppressWarnings("unchecked")
+      Persister<Object> persister = (Persister<Object>)PersisterProvider.getPersister(o.getClass());
+      @SuppressWarnings("unchecked")
+      Persistable<Object> persistable = (Persistable<Object>)o;
+      persistable.setPersistTrigger(persister);
     }
 
     Class<? extends Object> cls = o.getClass();
@@ -149,13 +153,6 @@ public class MediaItem implements EnrichTrigger, PersistTrigger {
   }
 
   @Override
-  public void queueAsDirty(Persistable persistable) {
-    if(getMediaTree().getPersister() != null) {
-      getMediaTree().getPersister().queueAsDirty(persistable);
-    }
-  }
-
-  @Override
   public int hashCode() {
     return id.hashCode();
   }
@@ -179,4 +176,3 @@ public class MediaItem implements EnrichTrigger, PersistTrigger {
     return "MediaItem[" + getMediaType() + ": '" + getMedia().getTitle() + "' uri='" + uri +"']";
   }
 }
-

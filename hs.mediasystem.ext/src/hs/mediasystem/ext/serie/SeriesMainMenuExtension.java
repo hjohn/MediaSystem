@@ -9,7 +9,7 @@ import hs.mediasystem.framework.Serie;
 import hs.mediasystem.framework.SerieBase;
 import hs.mediasystem.framework.SerieItem;
 import hs.mediasystem.fs.MediaRootType;
-import hs.mediasystem.persist.Persister;
+import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
@@ -28,7 +28,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   private volatile SerieEnricher serieEnricher;
   private volatile EpisodeEnricher episodeEnricher;
   private volatile EnrichCache enrichCache;
-  private volatile Persister persister;
+  private volatile PersistQueue persister;
 
   public SeriesMainMenuExtension() {
     TvdbSerieEnricher tvdbSerieEnricher = new TvdbSerieEnricher();

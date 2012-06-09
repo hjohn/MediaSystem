@@ -13,7 +13,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class Media extends DefaultEnrichable {
+public class Media extends DefaultEnrichable<Media> {
   private final StringProperty title = new SimpleStringProperty();
   public String getTitle() { return title.get(); }
   public StringProperty titleProperty() { return title; }

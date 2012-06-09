@@ -7,7 +7,7 @@ public class SerieBase extends Serie {
   }
 
   @Override
-  protected Class<? extends DefaultEnrichable> getEnrichClass() {
+  protected Class<? extends DefaultEnrichable<Media>> getEnrichClass() {
     return Serie.class;
   }
 }

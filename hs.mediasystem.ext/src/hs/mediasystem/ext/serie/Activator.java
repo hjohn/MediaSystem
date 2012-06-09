@@ -7,7 +7,7 @@ import hs.mediasystem.framework.Episode;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SerieItem;
-import hs.mediasystem.persist.Persister;
+import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaGroup;
@@ -90,7 +90,7 @@ public class Activator extends DependencyActivatorBase {
         .setRequired(true)
       )
       .add(createServiceDependency()
-        .setService(Persister.class)
+        .setService(PersistQueue.class)
         .setRequired(true)
       )
     );

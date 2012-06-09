@@ -7,9 +7,11 @@ import hs.mediasystem.db.MediaData;
 import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaDataEnricher;
+import hs.mediasystem.framework.MediaDataPersister;
+import hs.mediasystem.framework.PersisterProvider;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.Player;
-import hs.mediasystem.persist.Persister;
+import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MessagePaneTaskExecutor;
 import hs.mediasystem.screens.PlaybackOverlayPane;
@@ -157,6 +159,8 @@ public class FrontEnd extends Application {
 
     Injector injector = Guice.createInjector(module);
 
+    PersisterProvider.register(MediaData.class, injector.getInstance(MediaDataPersister.class));
+
     DependencyManager dm = new DependencyManager(framework.getBundleContext());
 
     dm.add(dm.createComponent()
@@ -170,8 +174,8 @@ public class FrontEnd extends Application {
     );
 
     dm.add(dm.createComponent()
-      .setInterface(Persister.class.getName(), null)
-      .setImplementation(injector.getInstance(Persister.class))
+      .setInterface(PersistQueue.class.getName(), null)
+      .setImplementation(injector.getInstance(PersistQueue.class))
     );
 
     dm.add(dm.createComponent()

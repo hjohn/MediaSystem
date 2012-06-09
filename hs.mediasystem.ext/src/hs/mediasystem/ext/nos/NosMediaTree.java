@@ -7,7 +7,7 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.SourceImageHandle;
-import hs.mediasystem.persist.Persister;
+import hs.mediasystem.persist.PersistQueue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -87,7 +87,7 @@ public class NosMediaTree implements MediaTree, MediaRoot {
   }
 
   @Override
-  public Persister getPersister() {
+  public PersistQueue getPersister() {
     return null;
   }
 }

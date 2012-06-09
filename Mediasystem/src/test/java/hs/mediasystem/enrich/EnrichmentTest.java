@@ -19,7 +19,7 @@ import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemUri;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.persist.Persister;
+import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.util.TaskThreadPoolExecutor;
 
 import java.util.ArrayList;
@@ -101,7 +101,7 @@ public class EnrichmentTest {
       }
 
       @Override
-      public Persister getPersister() {
+      public PersistQueue getPersister() {
         return null;
       }
     };
@@ -194,7 +194,7 @@ public class EnrichmentTest {
     }
   }
 
-  private static class SlowData extends DefaultEnrichable {
+  private static class SlowData extends DefaultEnrichable<SlowData> {
     private final String uri;
 
     public SlowData(String uri) {

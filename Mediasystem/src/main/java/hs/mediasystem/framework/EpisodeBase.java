@@ -8,7 +8,7 @@ public class EpisodeBase extends Episode {
   }
 
   @Override
-  protected Class<? extends DefaultEnrichable> getEnrichClass() {
+  protected Class<? extends DefaultEnrichable<Media>> getEnrichClass() {
     return Episode.class;
   }
 }

@@ -5,7 +5,7 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.persist.Persister;
+import hs.mediasystem.persist.PersistQueue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +69,7 @@ public class YouTubeMediaTree implements MediaTree, MediaRoot {
   }
 
   @Override
-  public Persister getPersister() {
+  public PersistQueue getPersister() {
     return null;
   }
 }

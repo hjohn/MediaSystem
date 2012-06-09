@@ -6,7 +6,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-public class MediaData extends DefaultEnrichable {
+public class MediaData extends DefaultEnrichable<MediaData> {
 
   /**
    * MatchType enum, in order of certainty

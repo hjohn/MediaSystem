@@ -1,5 +1,5 @@
 package hs.mediasystem.persist;
 
-public interface Persistable {
-  void setPersistTrigger(PersistTrigger persistTrigger);
+public interface Persistable<P> {
+  void setPersistTrigger(Persister<P> persistTrigger);
 }

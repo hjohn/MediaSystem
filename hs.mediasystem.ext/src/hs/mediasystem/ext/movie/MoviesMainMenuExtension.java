@@ -4,7 +4,7 @@ import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import hs.mediasystem.fs.MediaRootType;
-import hs.mediasystem.persist.Persister;
+import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
@@ -25,7 +25,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
   private volatile SelectMediaPresentationProvider selectMediaPresentationProvider;
   private volatile MovieEnricher movieEnricher;
   private volatile EnrichCache enrichCache;
-  private volatile Persister persister;
+  private volatile PersistQueue persister;
 
   public MoviesMainMenuExtension() {
     GeneralSettings.setApiKey(CryptoUtil.decrypt("8AF22323DB8C0F235B38F578B7E09A61DB6F971EED59DE131E4EF70003CE84B483A778EBD28200A031F035F4209B61A4", "-MediaSystem-"));
