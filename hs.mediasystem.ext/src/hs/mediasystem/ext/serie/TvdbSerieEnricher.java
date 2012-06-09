@@ -11,6 +11,7 @@ import hs.mediasystem.db.MediaData.MatchType;
 import hs.mediasystem.db.Person;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.SerieBase;
+import hs.mediasystem.util.CryptoUtil;
 
 import java.util.Comparator;
 import java.util.List;
@@ -21,6 +22,7 @@ import com.moviejukebox.thetvdb.model.Actor;
 import com.moviejukebox.thetvdb.model.Series;
 
 public class TvdbSerieEnricher implements ItemEnricher {
+  static final TheTVDB TVDB = new TheTVDB(CryptoUtil.decrypt("E6A6CF878B4A6200A66E31AED48627CE83A778EBD28200A031F035F4209B61A4", "-MediaSystem-"));
 
   @Override
   public String getProviderCode() {
@@ -30,9 +32,7 @@ public class TvdbSerieEnricher implements ItemEnricher {
   @Override
   public EnricherMatch identifyItem(final Media media) throws IdentifyException {
     synchronized(TheTVDB.class) {
-      TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
-
-      List<Series> results = tvDB.searchSeries(media.getTitle(), "en");
+      List<Series> results = TVDB.searchSeries(media.getTitle(), "en");
 
       System.out.println("TVDB results: " + results);
 
@@ -47,9 +47,7 @@ public class TvdbSerieEnricher implements ItemEnricher {
   @Override
   public Item loadItem(String identifier) throws ItemNotFoundException {
     synchronized(TheTVDB.class) {
-      TheTVDB tvDB = new TheTVDB("587C872C34FF8028");
-
-      final Series series = tvDB.getSeries(identifier, "en");
+      final Series series = TVDB.getSeries(identifier, "en");
 
       if(series == null) {
         throw new ItemNotFoundException(identifier);
@@ -76,7 +74,7 @@ public class TvdbSerieEnricher implements ItemEnricher {
         }
       });
 
-      actors.addAll(tvDB.getActors(identifier));  // de-duplicates the actors we get from tvdb
+      actors.addAll(TVDB.getActors(identifier));  // de-duplicates the actors we get from tvdb
 
       for(Actor actor : actors) {
         Person person = new Person();
