@@ -7,6 +7,8 @@ import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.persist.PersistTask;
 import hs.mediasystem.persist.Persister;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 
 public class SettingPersister implements Persister<Setting> {
@@ -25,6 +27,7 @@ public class SettingPersister implements Persister<Setting> {
       queue.queueAsDirty(setting, new PersistTask() {
         @Override
         public void persist() {
+          setting.setLastUpdated(new Date());
           settingsDao.storeSetting(setting);
         }
       });
