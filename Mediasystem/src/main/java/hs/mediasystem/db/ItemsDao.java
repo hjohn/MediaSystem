@@ -222,7 +222,7 @@ public class ItemsDao {
 
     data.setId(rs.getInt("id"));
     data.setIdentifier(new Identifier(rs.getString("type"), rs.getString("provider"), rs.getString("providerid")));
-    data.setMediaId(new MediaId(rs.getLong("filelength"), rs.getLong("filetime"), rs.getBytes("hash"), rs.getLong("oshash")));
+    data.setMediaId(new MediaId(rs.getLong("filelength"), rs.getLong("filetime"), rs.getLong("filecreatetime"), rs.getBytes("hash"), rs.getLong("oshash")));
     data.setUri(rs.getString("uri"));
 
     data.setMatchType(MatchType.valueOf(rs.getString("matchtype")));
@@ -301,6 +301,7 @@ public class ItemsDao {
     columns.put("hash", mediaData.getMediaId().getHash());
     columns.put("oshash", mediaData.getMediaId().getOsHash());
     columns.put("filetime", mediaData.getMediaId().getFileTime());
+    columns.put("filecreatetime", mediaData.getMediaId().getFileCreateTime());
     columns.put("filelength", mediaData.getMediaId().getFileLength());
 
     columns.put("matchtype", mediaData.getMatchType().name());

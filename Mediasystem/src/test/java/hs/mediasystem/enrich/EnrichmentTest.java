@@ -115,7 +115,7 @@ public class EnrichmentTest {
 
   @Test
   public void shouldUpdateEnrichableWhenCacheUpdated() {
-    cache.insert(cacheKey, new MediaId(1, 0, null, null));
+    cache.insert(cacheKey, new MediaId(1, 0, 0, null, null));
 
     assertNotNull(item.get(MediaId.class));
   }

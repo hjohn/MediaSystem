@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -65,6 +66,7 @@ public class MediaDataEnricher implements Enricher<MediaData> {
       MediaId mediaId = new MediaId(
         isDirectory ? 0 : Files.size(path),
         Files.getLastModifiedTime(path).toMillis(),
+        ((FileTime)Files.getAttribute(path, "creationTime")).toMillis(),
         isDirectory ? null : MediaHash.loadMediaHash(path),
         isDirectory ? null : MediaHash.loadOpenSubtitlesHash(path)
       );
