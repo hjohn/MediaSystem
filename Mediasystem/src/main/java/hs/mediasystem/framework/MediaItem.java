@@ -78,7 +78,7 @@ public class MediaItem implements EnrichTrigger {
       Persister<Object> persister = (Persister<Object>)PersisterProvider.getPersister(o.getClass());
       @SuppressWarnings("unchecked")
       Persistable<Object> persistable = (Persistable<Object>)o;
-      persistable.setPersistTrigger(persister);
+      persistable.setPersister(persister);
     }
 
     Class<? extends Object> cls = o.getClass();

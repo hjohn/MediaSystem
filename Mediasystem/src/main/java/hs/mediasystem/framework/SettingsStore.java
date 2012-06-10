@@ -23,7 +23,7 @@ public class SettingsStore {
     this.settingPersister = settingPersister;
 
     for(Setting setting : settingsDao.getAllSettings()) {
-      setting.setPersistTrigger(settingPersister);
+      setting.setPersister(settingPersister);
       settings.put(setting.getSystem() + "/" + setting.getKey(), setting);
     }
 
@@ -50,7 +50,7 @@ public class SettingsStore {
 
       setting.setSystem(system);
       setting.setKey(key);
-      setting.setPersistTrigger(settingPersister);
+      setting.setPersister(settingPersister);
 
       settings.put(settingsKey, setting);
     }

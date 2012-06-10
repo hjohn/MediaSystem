@@ -17,7 +17,7 @@ public class DefaultEnrichable<P> implements Enrichable, Persistable<P> {
   }
 
   @Override
-  public void setPersistTrigger(Persister<P> persistTrigger) {
+  public void setPersister(Persister<P> persistTrigger) {
     this.persistTriggerRef = new WeakReference<>(persistTrigger);
   }
 
