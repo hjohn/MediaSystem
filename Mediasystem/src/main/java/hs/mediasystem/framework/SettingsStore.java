@@ -4,9 +4,10 @@ import hs.mediasystem.db.Setting;
 import hs.mediasystem.db.Setting.PersistLevel;
 import hs.mediasystem.db.SettingsDao;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import javafx.beans.property.StringProperty;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -16,7 +17,6 @@ public class SettingsStore {
   private final SettingPersister settingPersister;
 
   private final Map<String, Setting> settings = new HashMap<>();
-
 
   @Inject
   public SettingsStore(SettingsDao settingsDao, SettingPersister settingPersister) {
@@ -31,6 +31,16 @@ public class SettingsStore {
   }
 
   public void storeSetting(String system, PersistLevel level, String key, String value) {
+    getValueProperty(system, level, key).set(value);
+  }
+
+  public String getSetting(String system, String key) {
+    Setting setting = settings.get(system + "/" + key);
+
+    return setting == null ? null : setting.getValue();
+  }
+
+  public StringProperty getValueProperty(String system, PersistLevel level, String key) {
     String settingsKey = system + "/" + key;
 
     Setting setting = settings.get(settingsKey);
@@ -46,15 +56,7 @@ public class SettingsStore {
     }
 
     setting.setPersistLevel(level);
-    setting.setValue(value);
-    setting.setLastUpdated(new Date());
 
-    settingPersister.queueAsDirty(setting);
-  }
-
-  public String getSetting(String system, String key) {
-    Setting setting = settings.get(system + "/" + key);
-
-    return setting == null ? null : setting.getValue();
+    return setting.valueProperty();
   }
 }
