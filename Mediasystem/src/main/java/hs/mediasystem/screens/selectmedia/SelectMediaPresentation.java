@@ -7,6 +7,7 @@ import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
+import hs.mediasystem.framework.SettingUpdater;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.fs.StandardTitleComparator;
 import hs.mediasystem.screens.DefaultMediaGroup;
@@ -48,6 +49,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 
 import javax.inject.Inject;
 
@@ -59,6 +61,7 @@ public class SelectMediaPresentation {
   private final Navigator navigator;
   private final SettingsStore settingsStore;
   private final ServiceTracker<MediaGroup> mediaGroupTracker;
+  private final SettingUpdater<MediaGroup> mediaGroupSettingUpdater;
 
   private SelectMediaView view;
 
@@ -178,7 +181,7 @@ public class SelectMediaPresentation {
         Platform.runLater(new Runnable() {
           @Override
           public void run() {
-            String key = createKeyFromTrail();
+            String key = createKeyFromTrail("LastSelected");
             String id = settingsStore.getSetting("MediaSystem:SelectMedia", key);
             MediaNode nodeToSelect = null;
 
@@ -191,6 +194,26 @@ public class SelectMediaPresentation {
         });
       }
     });
+
+    mediaGroupSettingUpdater = new SettingUpdater<>(settingsStore, new StringConverter<MediaGroup>() {
+      @Override
+      public MediaGroup fromString(String title) {
+        for(MediaGroup mediaGroup : availableGroupSetsProperty()) {
+          if(mediaGroup.getTitle().equals(title)) {
+            return mediaGroup;
+          }
+        }
+
+        return null;
+      }
+
+      @Override
+      public String toString(MediaGroup mediaGroup) {
+        return mediaGroup.getTitle();
+      }
+    });
+
+    groupSetProperty().addListener(mediaGroupSettingUpdater);
   }
 
   public Node getView() {
@@ -212,7 +235,12 @@ public class SelectMediaPresentation {
         }
 
         availableGroupSetsProperty().setAll(mediaGroups);
-        groupSetProperty().set(mediaGroups.get(0));
+
+        mediaGroupSettingUpdater.setBackingSetting("MediaSystem:SelectMedia", PersistLevel.PERMANENT, createKeyFromTrail("SortGroup"));
+
+        MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSetsProperty().get(0));
+
+        groupSetProperty().set(selectedMediaGroup);
       }
 
       @Override
@@ -220,7 +248,7 @@ public class SelectMediaPresentation {
         MediaNode selectedNode = view.getSelectedNode();
 
         if(selectedNode != null) {
-          settingsStore.storeSetting("MediaSystem:SelectMedia", PersistLevel.TEMPORARY, createKeyFromTrail(), selectedNode.getId());
+          settingsStore.storeSetting("MediaSystem:SelectMedia", PersistLevel.TEMPORARY, createKeyFromTrail("LastSelected"), selectedNode.getId());
         }
       }
     });
@@ -230,8 +258,8 @@ public class SelectMediaPresentation {
     setTreeRoot(mediaRoot);
   }
 
-  private String createKeyFromTrail() {
-    String key = "LastSelected:";
+  private String createKeyFromTrail(String prefix) {
+    String key = prefix + ":";
 
     for(Destination destination : navigator.getTrail()) {
       if(!key.isEmpty()) {
