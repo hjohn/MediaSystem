@@ -34,21 +34,21 @@ Third Party Dependencies
 
 vlcj, VLC for Java
 ------------------
-by Mark Lee of Caprica Software
-License: GNU GPL, version 3 or later
+by Mark Lee of Caprica Software  
+License: GNU GPL, version 3 or later  
 https://github.com/caprica/vlcj
 
 JTMDB, Java The Movie Database API
 ------------------
-by Savvas Dalkitsis
+by Savvas Dalkitsis  
 https://github.com/savvasdalkitsis/JTMDB
 
 javatvdbapi, The Java TVDB API
 ------------------
-License: GNU GPL, version 3
-http://code.google.com/p/javatvdbapi/
+License: GNU GPL, version 3  
+http://code.google.com/p/javatvdbapi/  
 
 org.json, JSON in Java
 ------------------
-License: Public Domain, "The software shall be used for good, not evil."
+License: Public Domain, "The software shall be used for good, not evil."  
 http://www.json.org/java/index.html, https://github.com/douglascrockford/JSON-java
