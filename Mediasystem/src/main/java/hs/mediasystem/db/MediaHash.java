@@ -23,7 +23,7 @@ public class MediaHash {
   }
 
   /**
-   * Computes SHA-256 hash on the several blocks of 64 kB of the input file.  The blocks are chosen starting
+   * Computes SHA-256 hash on several blocks of 64 kB of the input file.  The blocks are chosen starting
    * with the block at offset 0 and then subsequently every block that is a power of 4 starting with the
    * block at offset 262144, followed by 1 MB, 4 MB, 16 MB, 64 MB, etc..
    *
