@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.db.MediaData;
+import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.OpenSubtitlesSubtitleProvider;
 import hs.mediasystem.framework.SublightSubtitleProvider;

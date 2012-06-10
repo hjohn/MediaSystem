@@ -1,7 +1,7 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.db.MediaData;
-import hs.mediasystem.db.Setting.PersistLevel;
+import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.framework.Grouper;
 import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.Media;

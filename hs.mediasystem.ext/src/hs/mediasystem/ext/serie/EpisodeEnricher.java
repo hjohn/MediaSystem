@@ -1,10 +1,10 @@
 package hs.mediasystem.ext.serie;
 
-import hs.mediasystem.db.Item;
-import hs.mediasystem.db.ItemsDao;
-import hs.mediasystem.db.MediaData;
-import hs.mediasystem.db.Source;
-import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.dao.Item;
+import hs.mediasystem.dao.ItemsDao;
+import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.Source;
+import hs.mediasystem.dao.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
 import hs.mediasystem.enrich.Parameters;

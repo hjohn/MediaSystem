@@ -1,4 +1,4 @@
-package hs.mediasystem.db;
+package hs.mediasystem.dao;
 
 public class MediaId {
   private byte[] hash;

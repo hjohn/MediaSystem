@@ -1,12 +1,12 @@
 package hs.mediasystem.ext.movie;
 
-import hs.mediasystem.db.EnricherMatch;
-import hs.mediasystem.db.Identifier;
-import hs.mediasystem.db.IdentifyException;
-import hs.mediasystem.db.Item;
-import hs.mediasystem.db.ItemEnricher;
-import hs.mediasystem.db.ItemNotFoundException;
-import hs.mediasystem.db.MediaData.MatchType;
+import hs.mediasystem.dao.EnricherMatch;
+import hs.mediasystem.dao.Identifier;
+import hs.mediasystem.dao.IdentifyException;
+import hs.mediasystem.dao.Item;
+import hs.mediasystem.dao.ItemEnricher;
+import hs.mediasystem.dao.ItemNotFoundException;
+import hs.mediasystem.dao.MediaData.MatchType;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.util.Levenshtein;
 

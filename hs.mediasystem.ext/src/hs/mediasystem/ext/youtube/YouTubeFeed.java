@@ -1,6 +1,6 @@
 package hs.mediasystem.ext.youtube;
 
-import hs.mediasystem.db.URLImageSource;
+import hs.mediasystem.dao.URLImageSource;
 import hs.mediasystem.ext.youtube.YouTubeMediaTree.Feed;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;

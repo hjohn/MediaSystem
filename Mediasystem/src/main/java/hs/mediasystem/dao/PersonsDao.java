@@ -1,5 +1,6 @@
-package hs.mediasystem.db;
+package hs.mediasystem.dao;
 
+import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Database.Transaction;
 
 import java.sql.Connection;

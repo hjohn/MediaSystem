@@ -1,4 +1,4 @@
-package hs.mediasystem.db;
+package hs.mediasystem.dao;
 
 import hs.mediasystem.framework.Media;
 

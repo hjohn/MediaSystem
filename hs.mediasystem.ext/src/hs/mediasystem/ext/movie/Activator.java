@@ -1,7 +1,7 @@
 package hs.mediasystem.ext.movie;
 
-import hs.mediasystem.db.ItemsDao;
-import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.dao.ItemsDao;
+import hs.mediasystem.dao.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;

@@ -1,8 +1,8 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.db.Setting;
-import hs.mediasystem.db.Setting.PersistLevel;
-import hs.mediasystem.db.SettingsDao;
+import hs.mediasystem.dao.Setting;
+import hs.mediasystem.dao.SettingsDao;
+import hs.mediasystem.dao.Setting.PersistLevel;
 
 import java.util.HashMap;
 import java.util.Map;

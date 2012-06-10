@@ -1,5 +1,8 @@
-package hs.mediasystem.db;
+package hs.mediasystem.dao;
 
+import hs.mediasystem.db.Column;
+import hs.mediasystem.db.Id;
+import hs.mediasystem.db.Table;
 import hs.mediasystem.framework.DefaultEnrichable;
 
 import java.util.Date;

@@ -1,6 +1,6 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.dao.LocalInfo;
 
 import java.nio.file.Path;
 

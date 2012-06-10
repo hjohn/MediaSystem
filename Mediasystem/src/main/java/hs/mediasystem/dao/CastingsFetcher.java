@@ -1,4 +1,6 @@
-package hs.mediasystem.db;
+package hs.mediasystem.dao;
+
+import hs.mediasystem.db.Fetcher;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

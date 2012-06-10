@@ -1,10 +1,10 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.db.Item;
-import hs.mediasystem.db.ItemNotFoundException;
-import hs.mediasystem.db.ItemsDao;
-import hs.mediasystem.db.MediaData;
-import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.dao.Item;
+import hs.mediasystem.dao.ItemNotFoundException;
+import hs.mediasystem.dao.ItemsDao;
+import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 
 public abstract class AbstractEnrichTaskProvider<T> {

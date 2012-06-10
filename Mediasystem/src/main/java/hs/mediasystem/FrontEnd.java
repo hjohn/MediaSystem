@@ -1,10 +1,10 @@
 package hs.mediasystem;
 
+import hs.mediasystem.dao.ItemsDao;
+import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.TypeBasedItemEnricher;
 import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.DatabaseUpdater;
-import hs.mediasystem.db.ItemsDao;
-import hs.mediasystem.db.MediaData;
-import hs.mediasystem.db.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaDataPersister;

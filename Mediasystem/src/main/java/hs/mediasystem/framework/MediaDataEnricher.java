@@ -1,11 +1,11 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.db.EnricherMatch;
-import hs.mediasystem.db.ItemsDao;
-import hs.mediasystem.db.MediaData;
-import hs.mediasystem.db.MediaHash;
-import hs.mediasystem.db.MediaId;
-import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.dao.EnricherMatch;
+import hs.mediasystem.dao.ItemsDao;
+import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.MediaHash;
+import hs.mediasystem.dao.MediaId;
+import hs.mediasystem.dao.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
 import hs.mediasystem.enrich.Parameters;

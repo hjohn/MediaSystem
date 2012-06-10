@@ -1,4 +1,5 @@
-package hs.mediasystem.db;
+package hs.mediasystem.dao;
+
 
 public class Person {
   private int id;

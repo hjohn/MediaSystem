@@ -1,6 +1,6 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.Source;
+import hs.mediasystem.dao.Source;
 import hs.mediasystem.util.ImageHandle;
 
 public class SourceImageHandle implements ImageHandle {

@@ -1,6 +1,6 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.dao.LocalInfo;
 import hs.mediasystem.fs.EpisodeDecoder;
 import hs.mediasystem.fs.EpisodeScanner;
 

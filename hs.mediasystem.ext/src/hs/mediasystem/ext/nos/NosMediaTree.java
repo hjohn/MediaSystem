@@ -1,6 +1,6 @@
 package hs.mediasystem.ext.nos;
 
-import hs.mediasystem.db.URLImageSource;
+import hs.mediasystem.dao.URLImageSource;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;

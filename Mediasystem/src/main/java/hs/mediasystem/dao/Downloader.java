@@ -1,4 +1,4 @@
-package hs.mediasystem.db;
+package hs.mediasystem.dao;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

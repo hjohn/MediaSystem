@@ -1,7 +1,7 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.db.ItemsDao;
-import hs.mediasystem.db.MediaData;
+import hs.mediasystem.dao.ItemsDao;
+import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.persist.PersistTask;
 import hs.mediasystem.persist.Persister;

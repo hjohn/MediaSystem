@@ -1,6 +1,6 @@
 package hs.mediasystem.fs;
 
-import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.dao.LocalInfo;
 import hs.mediasystem.framework.Decoder;
 import hs.mediasystem.fs.NameDecoder.DecodeResult;
 

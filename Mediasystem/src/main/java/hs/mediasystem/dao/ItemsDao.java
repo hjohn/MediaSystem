@@ -1,7 +1,9 @@
-package hs.mediasystem.db;
+package hs.mediasystem.dao;
 
+import hs.mediasystem.dao.MediaData.MatchType;
+import hs.mediasystem.db.Database;
+import hs.mediasystem.db.DatabaseException;
 import hs.mediasystem.db.Database.Transaction;
-import hs.mediasystem.db.MediaData.MatchType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

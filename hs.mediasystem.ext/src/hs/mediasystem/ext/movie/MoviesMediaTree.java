@@ -1,6 +1,6 @@
 package hs.mediasystem.ext.movie;
 
-import hs.mediasystem.db.LocalInfo;
+import hs.mediasystem.dao.LocalInfo;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;

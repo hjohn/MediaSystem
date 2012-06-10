@@ -1,6 +1,6 @@
 package hs.mediasystem.ext.movie;
 
-import hs.mediasystem.db.MediaData;
+import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.screens.DuoLineCell;

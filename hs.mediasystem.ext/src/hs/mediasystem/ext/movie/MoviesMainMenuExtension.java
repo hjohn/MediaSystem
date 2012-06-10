@@ -1,6 +1,6 @@
 package hs.mediasystem.ext.movie;
 
-import hs.mediasystem.db.TypeBasedItemEnricher;
+import hs.mediasystem.dao.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import hs.mediasystem.fs.MediaRootType;

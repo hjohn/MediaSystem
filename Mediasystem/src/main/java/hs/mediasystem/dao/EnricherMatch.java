@@ -1,6 +1,6 @@
-package hs.mediasystem.db;
+package hs.mediasystem.dao;
 
-import hs.mediasystem.db.MediaData.MatchType;
+import hs.mediasystem.dao.MediaData.MatchType;
 
 public class EnricherMatch {
   private final Identifier identifier;

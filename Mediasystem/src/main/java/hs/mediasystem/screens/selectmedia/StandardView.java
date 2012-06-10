@@ -1,6 +1,6 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.db.Setting.PersistLevel;
+import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.SettingUpdater;
 import hs.mediasystem.framework.SettingsStore;
