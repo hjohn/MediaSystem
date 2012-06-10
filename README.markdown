@@ -13,7 +13,7 @@ Features
 Requirements
 ------------
 * Java Runtime Environment 1.7+ installed
-* JavaFX 2.1 installed
+* JavaFX 2.2 installed
 * PostgreSQL database installed
 * VLC player 2.0+ installed
 
