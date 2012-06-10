@@ -7,22 +7,30 @@ import java.util.Date;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+@Table(name = "settings")
 public class Setting extends DefaultEnrichable<Setting> {
   public enum PersistLevel {PERMANENT, TEMPORARY, SESSION}
 
-  private int id;
+  @Id
+  private Integer id;
 
+  @Column
   private String system;
+
+  @Column
   private PersistLevel persistLevel;
+
+  @Column
   private String key;
 
+  @Column
   private Date lastUpdated;
 
-  public int getId() {
+  public Integer getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 
@@ -56,6 +64,7 @@ public class Setting extends DefaultEnrichable<Setting> {
       queueAsDirty();
     }
   };
+  @Column
   public String getValue() { return value.get(); }
   public void setValue(String value) { this.value.set(value); }
   public StringProperty valueProperty() { return value; }
