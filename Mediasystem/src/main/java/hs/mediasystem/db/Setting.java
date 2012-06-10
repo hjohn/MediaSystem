@@ -71,6 +71,6 @@ public class Setting extends DefaultEnrichable<Setting> {
 
   @Override
   public String toString() {
-    return "Setting[id=" + id + "; system='" + system + "'; persistLevel=" + persistLevel + "; key='" + key + "'; value='" + value +"']";
+    return "Setting[id=" + id + "; system='" + system + "'; persistLevel=" + persistLevel + "; key='" + key + "'; value='" + getValue() +"']";
   }
 }
