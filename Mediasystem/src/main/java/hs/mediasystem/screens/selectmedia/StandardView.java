@@ -12,6 +12,8 @@ import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
 import hs.mediasystem.util.ServiceTracker;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -187,6 +189,13 @@ public class StandardView extends StackPane implements SelectMediaView {
         availableLayoutExtensions.add(extension);
       }
     }
+
+    Collections.sort(availableLayoutExtensions, new Comparator<StandardLayoutExtension>() {
+      @Override
+      public int compare(StandardLayoutExtension o1, StandardLayoutExtension o2) {
+        return o1.getTitle().compareTo(o2.getTitle());
+      }
+    });
   }
 
   @Override

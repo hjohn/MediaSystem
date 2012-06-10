@@ -31,6 +31,7 @@ import hs.mediasystem.util.StringBinding;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javafx.application.Platform;
@@ -234,6 +235,12 @@ public class SelectMediaPresentation {
           mediaGroups.add(new DefaultMediaGroup("Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
         }
 
+        Collections.sort(mediaGroups, new Comparator<MediaGroup>() {
+          @Override
+          public int compare(MediaGroup o1, MediaGroup o2) {
+            return o1.getTitle().compareTo(o2.getTitle());
+          }
+        });
         availableGroupSetsProperty().setAll(mediaGroups);
 
         mediaGroupSettingUpdater.setBackingSetting("MediaSystem:SelectMedia", PersistLevel.PERMANENT, createKeyFromTrail("SortGroup"));
