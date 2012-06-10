@@ -64,11 +64,6 @@
 			<version>1.9.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.miglayout</groupId>
-			<artifactId>miglayout-javafx</artifactId>
-			<version>4.2</version>
-		</dependency>
-		<dependency>
 			<groupId>org.kohsuke.redstone</groupId>
 			<artifactId>redstone</artifactId>
 			<version>1.1.1</version>
