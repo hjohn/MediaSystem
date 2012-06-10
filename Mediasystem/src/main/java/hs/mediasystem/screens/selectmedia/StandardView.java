@@ -1,6 +1,9 @@
 package hs.mediasystem.screens.selectmedia;
 
+import hs.mediasystem.db.Setting.PersistLevel;
 import hs.mediasystem.framework.MediaRoot;
+import hs.mediasystem.framework.SettingUpdater;
+import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
@@ -27,6 +30,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.util.StringConverter;
 
 import javax.inject.Inject;
 
@@ -46,6 +50,7 @@ public class StandardView extends StackPane implements SelectMediaView {
 
   private final ServiceTracker<StandardLayoutExtension> standardLayoutExtensionTracker;
   private final BackgroundPane backgroundPane = new BackgroundPane();
+  private final SettingUpdater<StandardLayoutExtension> settingUpdater;
 
   private final ObjectProperty<StandardLayoutExtension> layoutExtension = new SimpleObjectProperty<>();
 
@@ -53,7 +58,7 @@ public class StandardView extends StackPane implements SelectMediaView {
   private StandardLayout layout;
 
   @Inject
-  public StandardView(BundleContext bundleContext) {
+  public StandardView(SettingsStore settingsStore, BundleContext bundleContext) {
     standardLayoutExtensionTracker = new ServiceTracker<>(bundleContext, StandardLayoutExtension.class);
 
     getStylesheets().add("select-media/duo-pane-select-media-view.css");
@@ -103,13 +108,37 @@ public class StandardView extends StackPane implements SelectMediaView {
         }
       }
     });
+
+    settingUpdater = new SettingUpdater<>(settingsStore, new StringConverter<StandardLayoutExtension>() {
+      @Override
+      public StandardLayoutExtension fromString(String title) {
+        for(StandardLayoutExtension extension : availableLayoutExtensions) {
+          if(extension.getTitle().equals(title)) {
+            return extension;
+          }
+        }
+
+        return null;
+      }
+
+      @Override
+      public String toString(StandardLayoutExtension extension) {
+        return extension.getTitle();
+      }
+    });
+
+    layoutExtension.addListener(settingUpdater);
   }
+
+
 
   @Override
   public void setRoot(MediaNode root) {
     determineAvailableLayouts(root.getMediaRoot());
 
-    StandardLayoutExtension layoutExtension = availableLayoutExtensions.get(0);
+    settingUpdater.setBackingSetting("MediaSystem:SelectMedia", PersistLevel.PERMANENT, "View:" + root.getId());
+
+    StandardLayoutExtension layoutExtension = settingUpdater.getStoredValue(availableLayoutExtensions.get(0));
 
     currentRoot = root;
 
