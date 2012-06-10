@@ -8,7 +8,9 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -68,10 +70,28 @@ public class Database {
       if(value instanceof Date) {
         statement.setTimestamp(parameterIndex++, new Timestamp(((Date)value).getTime()));
       }
+      else if(value instanceof Enum) {
+        statement.setObject(parameterIndex++, ((Enum<?>)value).name());
+      }
       else {
         statement.setObject(parameterIndex++, value);
       }
     }
+  }
+
+  private static final Map<Class<?>, RecordMapper<?>> RECORD_MAPPERS = new HashMap<>();
+
+  private static <T> RecordMapper<T> getRecordMapper(Class<T> cls) {
+    @SuppressWarnings("unchecked")
+    RecordMapper<T> recordMapper = (RecordMapper<T>)RECORD_MAPPERS.get(cls);
+
+    if(recordMapper == null) {
+      recordMapper = new AnnotatedRecordMapper<>(cls);
+
+      RECORD_MAPPERS.put(cls, recordMapper);
+    }
+
+    return recordMapper;
   }
 
   public class Transaction implements AutoCloseable {
@@ -110,6 +130,106 @@ public class Database {
       if(finished) {
         throw new IllegalStateException("transaction already ended");
       }
+    }
+
+    public synchronized <T> List<T> select(Class<T> cls, String whereCondition, Object... parameters) throws SQLException {
+      ensureNotFinished();
+
+      RecordMapper<T> recordMapper = getRecordMapper(cls);
+
+      try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + recordMapper.getTableName() + (whereCondition == null ? "" : " WHERE " + whereCondition))) {
+        int parameterIndex = 1;
+
+        for(Object o : parameters) {
+          statement.setObject(parameterIndex++, o);
+        }
+
+        try(ResultSet rs = statement.executeQuery()) {
+          List<T> records = new ArrayList<>();
+          ResultSetMetaData metaData = rs.getMetaData();
+
+          while(rs.next()) {
+            Map<String, Object> values = new HashMap<>();
+
+            for(int i = 1; i <= metaData.getColumnCount(); i++) {
+              String columnName = metaData.getColumnName(i);
+
+              values.put(columnName, rs.getObject(i));
+            }
+
+            T record = cls.newInstance();
+            recordMapper.applyValues(record, values);
+
+            records.add(record);
+          }
+
+          return records;
+        }
+        catch(IllegalAccessException | InstantiationException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+
+    public synchronized <T> void merge(T obj) throws SQLException {
+      @SuppressWarnings("unchecked")
+      RecordMapper<T> recordMapper = (RecordMapper<T>)getRecordMapper(obj.getClass());
+
+      Map<String, Object> ids = recordMapper.extractIds(obj);
+
+      if(ids.isEmpty()) {
+        insert(obj);
+      }
+      else {
+        update(obj);
+      }
+    }
+
+    public synchronized <T> void insert(T obj) throws SQLException {
+      @SuppressWarnings("unchecked")
+      RecordMapper<T> recordMapper = (RecordMapper<T>)getRecordMapper(obj.getClass());
+
+      Map<String, Object> values = recordMapper.extractValues(obj);
+
+      Map<String, Object> generatedKeys = insert(recordMapper.getTableName(), values);
+
+      recordMapper.setGeneratedKeys(obj, generatedKeys);
+    }
+
+    public synchronized <T> void update(T obj) throws SQLException {
+      @SuppressWarnings("unchecked")
+      RecordMapper<T> recordMapper = (RecordMapper<T>)getRecordMapper(obj.getClass());
+
+      Map<String, Object> ids = recordMapper.extractIds(obj);
+      Map<String, Object> values = recordMapper.extractValues(obj);
+
+      if(ids.isEmpty()) {
+        throw new DatabaseException("Cannot update records that donot exist in the database: " + obj);
+      }
+
+      String whereCondition = "";
+      Object[] parameters = new Object[ids.size()];
+      int parameterIndex = 0;
+
+      for(String id : ids.keySet()) {
+        if(!whereCondition.isEmpty()) {
+          whereCondition += ", ";
+        }
+        whereCondition += id + " = ?";
+        parameters[parameterIndex++] = ids.get(id);
+      }
+
+      update(recordMapper.getTableName(), values, whereCondition, parameters);
+    }
+
+    public synchronized Map<String, Object> merge(String tableName, int id, Map<String, Object> parameters) throws SQLException {
+      if(id == 0) {
+        return insert(tableName, parameters);
+      }
+
+      update(tableName, id, parameters);
+
+      return Collections.emptyMap();
     }
 
     public synchronized Map<String, Object> insert(String tableName, Map<String, Object> parameters) throws SQLException {
@@ -152,11 +272,15 @@ public class Database {
     }
 
     public synchronized int update(String tableName, int id, Map<String, Object> parameters) throws SQLException {
+      return update(tableName, parameters, "id = ?", id);
+    }
+
+    public synchronized int update(String tableName, Map<String, Object> values, String whereCondition, Object... parameters) throws SQLException {
       ensureNotFinished();
 
       StringBuilder set = new StringBuilder();
 
-      for(String key : parameters.keySet()) {
+      for(String key : values.keySet()) {
         if(set.length() > 0) {
           set.append(",");
         }
@@ -165,12 +289,15 @@ public class Database {
         set.append("=?");
       }
 
-      System.out.println("[FINE] Database.Transaction.update() - Updating id " + id + " in '" + tableName + "': " + parameters);
+      System.out.println("[FINE] Database.Transaction.update() - Updating '" + tableName + "' with condition: '" + whereCondition + "': " + Arrays.toString(parameters) + " and values: " + values);
 
-      try(PreparedStatement statement = connection.prepareStatement("UPDATE " + tableName + " SET " + set.toString() + " WHERE id = ?")) {
-        setParameters(parameters, statement);
+      try(PreparedStatement statement = connection.prepareStatement("UPDATE " + tableName + " SET " + set.toString() + " WHERE " + whereCondition)) {
+        setParameters(values, statement);
+        int parameterIndex = values.size() + 1;
 
-        statement.setLong(parameters.size() + 1, id);
+        for(Object o : parameters) {
+          statement.setObject(parameterIndex++, o);
+        }
 
         return statement.executeUpdate();
       }
