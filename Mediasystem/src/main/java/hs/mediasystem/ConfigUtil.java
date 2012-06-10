@@ -21,6 +21,7 @@ public final class ConfigUtil {
 
     String[] packages = new String[] {
       "hs.mediasystem.beans",
+      "hs.mediasystem.dao",
       "hs.mediasystem.db",
       "hs.mediasystem.enrich",
       "hs.mediasystem.framework",
