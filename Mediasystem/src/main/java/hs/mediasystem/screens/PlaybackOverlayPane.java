@@ -1,5 +1,6 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.LinePatternBug.GridPaneUtil;
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
@@ -49,8 +50,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
-import org.tbee.javafx.scene.layout.MigPane;
-
 public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayView {
   private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
   @Override public ObjectProperty<MediaItem> mediaItemProperty() { return mediaItem; }
@@ -60,7 +59,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
 
   private final PlayerBindings playerBindings = new PlayerBindings(player);
 
-  private final MigPane detailsOverlay = new MigPane("fill", "[5%!][20%!][5%!][65%!][5%!]", "[45%!][50%!][5%!]");
+  private final GridPane detailsOverlay = GridPaneUtil.create(new double[] {5, 20, 5, 65, 5}, new double[] {45, 50, 5});
 
   private final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaItem, "dataMap", Media.class, "image");
   private final AsyncImageProperty poster = new AsyncImageProperty();
@@ -111,7 +110,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
           this.setFraction(0.10);
         }});
       }});
-    }}, "cell 1 1, grow, bottom, left");
+    }}, 1, 1);
     detailsOverlay.add(new BorderPane() {{
       setId("video-overlay_info");
       setBottom(new HBox() {{
@@ -164,7 +163,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
           }});
         }});
       }});
-    }}, "cell 3 1, growx, bottom");
+    }}, 3, 1);
 
     getChildren().add(detailsOverlay);
 
