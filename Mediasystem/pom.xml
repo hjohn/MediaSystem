@@ -45,8 +45,8 @@
 			<groupId>javafx</groupId>
 			<artifactId>javafx</artifactId>
 			<scope>system</scope>
-			<systemPath>C:\Program Files (x86)\Oracle\JavaFX 2.1 SDK\rt\lib\jfxrt.jar</systemPath>
-			<version>2.0</version>
+			<systemPath>C:\Program Files (x86)\Oracle\JavaFX 2.2 SDK\rt\lib\jfxrt.jar</systemPath>
+			<version>2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.inject</groupId>

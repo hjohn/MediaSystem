@@ -82,7 +82,6 @@ public class ProgramController {
   private final Navigator navigator = new Navigator();
   private final InformationBorder informationBorder = new InformationBorder();
 
-  @SuppressWarnings("deprecation")
   @Inject
   public ProgramController(Ini ini, final SceneManager sceneManager, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider) {
     this.ini = ini;
@@ -113,7 +112,7 @@ public class ProgramController {
     sceneRoot.getChildren().addAll(contentBorderPane, informationBorderPane, messageBorderPane);
     scene.setRoot(sceneRoot);
     scene.getStylesheets().add("default.css");
-    scene.impl_focusOwnerProperty().addListener(new ChangeListener<Node>() {  // WORKAROUND for lack of Focus information when Stage is not focused
+    scene.focusOwnerProperty().addListener(new ChangeListener<Node>() {  // WORKAROUND for lack of Focus information when Stage is not focused
       @Override
       public void changed(ObservableValue<? extends Node> observable, Node oldValue, Node newValue) {
         if(oldValue != null) {
