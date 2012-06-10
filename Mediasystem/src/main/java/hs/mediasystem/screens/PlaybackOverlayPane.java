@@ -1,12 +1,14 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.beans.AsyncImageProperty;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
 import hs.mediasystem.util.ImageHandle;
+import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;
 import hs.mediasystem.util.SpecialEffects;
 import javafx.animation.Animation.Status;
@@ -60,7 +62,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
 
   private final MigPane detailsOverlay = new MigPane("fill", "[5%!][20%!][5%!][65%!][5%!]", "[45%!][50%!][5%!]");
 
-  private final ObjectBinding<ImageHandle> posterHandle = Bindings.select(mediaItem, "poster");
+  private final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaItem, "dataMap", Media.class, "image");
   private final AsyncImageProperty poster = new AsyncImageProperty();
 
   private final VBox playbackStateOverlay = new VBox() {{
@@ -116,12 +118,12 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
         getChildren().add(new VBox() {{
           HBox.setHgrow(this, Priority.ALWAYS);
           getChildren().add(new Label() {{
-            textProperty().bind(Bindings.selectString(mediaItem, "title"));
+            textProperty().bind(MapBindings.selectString(mediaItem, "dataMap", Media.class, "title"));
             getStyleClass().add("video-title");
             setEffect(SpecialEffects.createNeonEffect(64));
           }});
           getChildren().add(new Label() {{
-            textProperty().bind(Bindings.selectString(mediaItem, "subtitle"));
+            textProperty().bind(MapBindings.selectString(mediaItem, "dataMap", Media.class, "subtitle"));
             getStyleClass().add("video-subtitle");
           }});
           getChildren().add(new GridPane() {{
