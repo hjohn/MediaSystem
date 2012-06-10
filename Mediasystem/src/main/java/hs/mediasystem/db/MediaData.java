@@ -64,8 +64,7 @@ public class MediaData extends DefaultEnrichable<MediaData> {
     }
 
     @Override
-    public void set(boolean b) {
-      super.set(b);
+    protected void invalidated() {
       queueAsDirty();
     }
   };
@@ -87,8 +86,7 @@ public class MediaData extends DefaultEnrichable<MediaData> {
     }
 
     @Override
-    public void set(int pos) {
-      super.set(pos);
+    protected void invalidated() {
       queueAsDirty();
     }
   };
