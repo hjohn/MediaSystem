@@ -377,7 +377,7 @@ public class ProgramController {
       }
     });
 
-//    informationBorder.setVisible(false);
+    informationBorder.setVisible(false);
   }
 
   public void stop() {
