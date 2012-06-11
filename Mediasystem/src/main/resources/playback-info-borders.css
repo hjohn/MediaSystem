@@ -1,0 +1,14 @@
+.label {
+  -fx-font-weight: bold;
+  -fx-font-size: 18pt; 
+  -fx-text-fill: color-blue-20;
+  
+  -fx-padding: 5px;
+  
+  -fx-background-radius: 5;
+  -fx-background-color: rgba(0, 0, 0, 0.3);
+}
+
+.grid {
+  -fx-padding: 10px;
+}

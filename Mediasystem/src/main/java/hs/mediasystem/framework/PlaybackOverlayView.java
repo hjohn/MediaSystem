@@ -6,4 +6,5 @@ import javafx.beans.property.ObjectProperty;
 public interface PlaybackOverlayView {
   ObjectProperty<MediaItem> mediaItemProperty();
   ObjectProperty<Player> playerProperty();
+  void toggleVisibility();
 }

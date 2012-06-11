@@ -33,6 +33,7 @@ import javax.inject.Inject;
 
 public class PlaybackOverlayPresentation {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
+  private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
 
   private final PlaybackOverlayView view;
 
@@ -57,6 +58,9 @@ public class PlaybackOverlayPresentation {
         if(code == KeyCode.J) {
           playerPresentation.nextSubtitle();
           event.consume();
+        }
+        else if(KEY_I.match(event)) {
+          view.toggleVisibility();
         }
         else if(BACK_SPACE.match(event)) {
           event.consume();

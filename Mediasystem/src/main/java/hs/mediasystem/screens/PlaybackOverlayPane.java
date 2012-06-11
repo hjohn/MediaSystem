@@ -64,6 +64,8 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
   private final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaItem, "dataMap", Media.class, "image");
   private final AsyncImageProperty poster = new AsyncImageProperty();
 
+  private final PlaybackInfoBorders borders = new PlaybackInfoBorders();
+
   private final VBox playbackStateOverlay = new VBox() {{
     getStyleClass().add("content-box");
     setVisible(false);
@@ -98,6 +100,9 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
     });
 
     setFocusTraversable(true);
+
+    borders.mediaItemProperty().bind(mediaItem);
+    borders.playerProperty().bind(player);
 
     detailsOverlay.setId("video-overlay");
     detailsOverlay.add(new ScaledImageView() {{
@@ -166,6 +171,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
     }}, 3, 1);
 
     getChildren().add(detailsOverlay);
+    getChildren().add(borders);
 
     getChildren().add(new GridPane() {{
       setHgap(0);
@@ -279,6 +285,11 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
         getStyleClass().add("pause-shape");
       }});
     }});
+  }
+
+  @Override
+  public void toggleVisibility() {
+    borders.setVisible(!borders.isVisible());
   }
 
   private Node createOSDItem(final String title, final StringExpression valueText) {
