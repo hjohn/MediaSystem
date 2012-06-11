@@ -1,6 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.LinePatternBug.GridPaneUtil;
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
@@ -8,6 +7,7 @@ import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
+import hs.mediasystem.util.GridPaneUtil;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;
