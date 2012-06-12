@@ -162,7 +162,11 @@ public class BannerListPane extends BorderPane implements ListPane {
   @Override
   public void requestFocus() {
     tableView.requestFocus();
-    tableView.getFocusModel().focus(0, leftColumn);
+
+    if(!tableView.getItems().isEmpty()) {
+      tableView.getFocusModel().focus(0, leftColumn);
+      tableView.getSelectionModel().select(0, leftColumn);
+    }
   }
 
   private void itemSelected(Event event, MediaNode focusedNode) {
@@ -232,6 +236,7 @@ public class BannerListPane extends BorderPane implements ListPane {
       @Override
       public void run() {
         tableView.getFocusModel().focus(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
+        tableView.getSelectionModel().select(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
         tableView.scrollTo(finalIndex / 2);
       }
     });
