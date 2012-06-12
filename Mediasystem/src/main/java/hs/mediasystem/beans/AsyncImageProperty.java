@@ -2,47 +2,32 @@ package hs.mediasystem.beans;
 
 import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.ImageHandle;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
-import javafx.concurrent.Worker.State;
 import javafx.scene.image.Image;
 
 public class AsyncImageProperty extends SimpleObjectProperty<Image> {
-  private final ImageLoadService imageLoadService = new ImageLoadService();
+  private static final Executor slowExecutor = new ThreadPoolExecutor(0, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+  private static final Executor fastExecutor = new ThreadPoolExecutor(0, 3, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+
   private final ObjectProperty<ImageHandle> imageHandle = new SimpleObjectProperty<>();
 
-  public AsyncImageProperty() {
-    imageLoadService.stateProperty().addListener(new ChangeListener<State>() {
-      @Override
-      public void changed(ObservableValue<? extends State> observable, State oldValue, State value) {
-        if(value == State.SUCCEEDED) {
-          set(imageLoadService.getValue());
-        }
-        if(value == State.FAILED) {
-          set(null);
-        }
-        if(value == State.SUCCEEDED || value == State.CANCELLED || value == State.FAILED) {
-          ImageHandle handle = imageHandle.get();
-          if(handle != null && !handle.equals(imageLoadService.imageHandle)) {
-            loadImageInBackground(handle);
-          }
-          else if(handle == null) {
-            set(null);
-          }
-        }
-      }
-    });
+  private boolean taskQueued;
 
+  public AsyncImageProperty() {
     imageHandle.addListener(new ChangeListener<ImageHandle>() {
       @Override
       public void changed(ObservableValue<? extends ImageHandle> observable, ImageHandle oldValue, ImageHandle value) {
-        if(!imageLoadService.isRunning()) {
-          loadImageInBackground(imageHandle.getValue());
-        }
+        loadImageInBackground(imageHandle.getValue());
       }
     });
   }
@@ -51,35 +36,57 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
     return imageHandle;
   }
 
-  private void loadImageInBackground(ImageHandle imageHandle) {
-    synchronized(imageLoadService) {
-      if(imageHandle != null) {
-        imageLoadService.setImageHandle(imageHandle);
-        imageLoadService.restart();
-      }
-      else {
-        set(null);
-      }
-    }
-  }
+  private void loadImageInBackground(final ImageHandle imageHandle) {
+    synchronized(fastExecutor) {
+      if(!taskQueued) {
+        if(imageHandle != null) {
+          Executor chosenExecutor = imageHandle.isFastSource() ? fastExecutor : slowExecutor;
 
-  private static class ImageLoadService extends Service<Image> {
-    private ImageHandle imageHandle;
+          chosenExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+              try {
+                Image image = null;
 
-    public void setImageHandle(ImageHandle imageHandle) {
-      this.imageHandle = imageHandle;
-    }
+                try {
+                  image = ImageCache.loadImage(imageHandle);
+                }
+                catch(Exception e) {
+                  System.out.println("[WARN] AsyncImageProperty - Exception while loading " + imageHandle + " in background: " + e);
+                }
 
-    @Override
-    protected Task<Image> createTask() {
-      final ImageHandle imageHandle = this.imageHandle;
+                final Image finalImage = image;
 
-      return new Task<Image>() {
-        @Override
-        protected Image call() {
-          return ImageCache.loadImage(imageHandle);
+                Platform.runLater(new Runnable() {
+                  @Override
+                  public void run() {
+                    set(finalImage);
+
+                    ImageHandle handle = AsyncImageProperty.this.imageHandle.get();
+
+                    if(handle != null && !handle.equals(imageHandle)) {
+                      loadImageInBackground(handle);
+                    }
+                    else if(handle == null) {
+                      set(null);
+                    }
+                  }
+                });
+              }
+              finally {
+                synchronized(fastExecutor) {
+                  taskQueued = false;
+                }
+              }
+            }
+          });
+
+          taskQueued = true;
         }
-      };
+        else {
+          set(null);
+        }
+      }
     }
   }
 }

@@ -18,4 +18,9 @@ public class URLImageSource implements Source<byte[]> {
     System.out.println("[FINE] URLImageSource.get() - Downloading '" + url + "'");
     return Downloader.tryReadURL(url);
   }
+
+  @Override
+  public boolean isLocal() {
+    return false;
+  }
 }

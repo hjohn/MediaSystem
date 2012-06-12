@@ -25,6 +25,11 @@ public class SourceImageHandle implements ImageHandle {
   }
 
   @Override
+  public boolean isFastSource() {
+    return source.isLocal();
+  }
+
+  @Override
   public String toString() {
     return "SourceImageHandle(" + key + ")";
   }

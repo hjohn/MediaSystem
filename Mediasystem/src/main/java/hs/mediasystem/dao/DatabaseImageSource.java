@@ -89,4 +89,9 @@ public class DatabaseImageSource implements Source<byte[]> {
       throw new RuntimeException(e);
     }
   }
+
+  @Override
+  public boolean isLocal() {
+    return true;
+  }
 }
