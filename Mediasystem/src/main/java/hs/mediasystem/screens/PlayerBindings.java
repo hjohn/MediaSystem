@@ -88,14 +88,18 @@ public class PlayerBindings {
     formattedAudioTrack = new StringBinding(audioTrack) {
       @Override
       protected String computeValue() {
-        return audioTrack.get().getDescription();
+        AudioTrack value = audioTrack.get();
+
+        return value == null ? "" : value.getDescription();
       }
     };
 
     formattedSubtitle = new StringBinding(subtitle) {
       @Override
       protected String computeValue() {
-        return subtitle.get().getDescription();
+        Subtitle value = subtitle.get();
+
+        return value == null ? "" : value.getDescription();
       }
     };
 
