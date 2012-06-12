@@ -1,14 +1,19 @@
 .label {
   -fx-font-weight: bold;
   -fx-font-size: 18pt; 
+}
+
+.time.label, .position.label {
   -fx-text-fill: color-blue-20;
-  
-  -fx-padding: 5px;
+}
+
+.time.label, .position.label, .osd {
+  -fx-padding: 5;
   
   -fx-background-radius: 5;
   -fx-background-color: rgba(0, 0, 0, 0.3);
 }
 
-.grid {
-  -fx-padding: 10px;
+.osd {
+  -fx-spacing: 7;
 }

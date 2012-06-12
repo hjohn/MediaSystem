@@ -4,9 +4,7 @@ import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.PlaybackOverlayView;
-import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Player;
-import hs.mediasystem.framework.player.Subtitle;
 import hs.mediasystem.util.GridPaneUtil;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
@@ -18,9 +16,7 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.binding.NumberExpression;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -35,7 +31,6 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.Slider;
 import javafx.scene.effect.Blend;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Reflection;
@@ -212,64 +207,6 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
       }
     });
 
-    playerBindings.position.addListener(new ChangeListener<Number>() {
-      @Override
-      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        if(Math.abs(oldValue.longValue() - newValue.longValue()) > 2500) {
-          addOSD(createOSDItem("Position", 0.0, 100.0, playerBindings.position.multiply(100.0).divide(playerBindings.length), playerBindings.formattedPosition));
-        }
-      }
-    });
-
-    playerBindings.volume.addListener(new FirstChangeFilter<>(new ChangeListener<Number>() {
-      @Override
-      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        addOSD(createOSDItem("Volume", 0.0, 100.0, playerBindings.volume, playerBindings.formattedVolume));
-      }
-    }));
-
-    playerBindings.rate.addListener(new FirstChangeFilter<>(new ChangeListener<Number>() {
-      @Override
-      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        addOSD(createOSDItem("Playback Speed", 0.0, 4.0, playerBindings.rate, playerBindings.formattedRate));
-      }
-    }));
-
-    playerBindings.audioDelay.addListener(new FirstChangeFilter<>(new ChangeListener<Number>() {
-      @Override
-      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        addOSD(createOSDItem("Audio Delay", -120.0, 120.0, playerBindings.audioDelay.divide(1000.0), playerBindings.formattedAudioDelay));
-      }
-    }));
-
-    playerBindings.subtitleDelay.addListener(new FirstChangeFilter<>(new ChangeListener<Number>() {
-      @Override
-      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        addOSD(createOSDItem("Subtitle Delay", -120.0, 120.0, playerBindings.subtitleDelay.divide(1000.0), playerBindings.formattedSubtitleDelay));
-      }
-    }));
-
-    playerBindings.brightness.addListener(new FirstChangeFilter<>(new ChangeListener<Number>() {
-      @Override
-      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        addOSD(createOSDItem("Brightness Adjustment", -100.0, 100.0, playerBindings.brightness.subtract(1.0).multiply(100.0), playerBindings.formattedBrightness));
-      }
-    }));
-
-    playerBindings.audioTrack.addListener(new FirstChangeFilter<>(new ChangeListener<AudioTrack>() {
-      @Override
-      public void changed(ObservableValue<? extends AudioTrack> observable, AudioTrack oldValue, AudioTrack value) {
-        addOSD(createOSDItem("Audio Track", playerBindings.formattedAudioTrack));
-      }
-    }));
-
-    playerBindings.subtitle.addListener(new FirstChangeFilter<>(new ChangeListener<Subtitle>() {
-      @Override
-      public void changed(ObservableValue<? extends Subtitle> observable, Subtitle oldValue, Subtitle value) {
-        addOSD(createOSDItem("Subtitle", playerBindings.formattedSubtitle));
-      }
-    }));
-
     registerConditionalOSD(playerBindings.muted, new BorderPane() {{
       getStyleClass().add("content-box");
       setCenter(new Region() {{
@@ -289,44 +226,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
 
   @Override
   public void toggleVisibility() {
-    borders.setVisible(!borders.isVisible());
-  }
-
-  private Node createOSDItem(final String title, final StringExpression valueText) {
-    return new VBox() {{
-      setId(title);
-      getStyleClass().add("item");
-      getChildren().add(new BorderPane() {{
-        setLeft(new Label(title) {{
-          getStyleClass().add("title");
-        }});
-        setRight(new Label() {{
-          getStyleClass().add("value");
-          textProperty().bind(valueText);
-        }});
-      }});
-    }};
-  }
-
-  private Node createOSDItem(final String title, final double min, final double max, final NumberExpression value, final StringExpression valueText) {
-    return new VBox() {{
-      setId(title);
-      getStyleClass().add("item");
-      getChildren().add(new BorderPane() {{
-        setLeft(new Label(title) {{
-          getStyleClass().add("title");
-        }});
-        setRight(new Label() {{
-          getStyleClass().add("value");
-          textProperty().bind(valueText);
-        }});
-      }});
-      getChildren().add(new Slider(min, max * 1.01, 0) {{  // WORKAROUND: 1.01 to work around last label display bug
-        valueProperty().bind(value);
-        setMinorTickCount(4);
-        setMajorTickUnit(max / 4);
-      }});
-    }};
+    borders.setLabelVisible(!borders.isLabelVisible());
   }
 
   public void showOSD() {
@@ -429,7 +329,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
     expansionTimeline.play();
   }
 
-  private static class FirstChangeFilter<T> implements ChangeListener<T> {
+  public static class FirstChangeFilter<T> implements ChangeListener<T> {
     private final ChangeListener<T> changeListener;
 
     private boolean notFirst;
