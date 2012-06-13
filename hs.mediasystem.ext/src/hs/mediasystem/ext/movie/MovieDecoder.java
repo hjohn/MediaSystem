@@ -4,14 +4,16 @@ import hs.mediasystem.dao.LocalInfo;
 import hs.mediasystem.framework.Decoder;
 import hs.mediasystem.fs.NameDecoder;
 import hs.mediasystem.fs.NameDecoder.DecodeResult;
+import hs.mediasystem.fs.NameDecoder.Hint;
 
 import java.nio.file.Path;
 
 public class MovieDecoder implements Decoder {
+  private final NameDecoder nameDecoder = new NameDecoder(Hint.MOVIE);
 
   @Override
   public LocalInfo decode(Path path) {
-    DecodeResult result = NameDecoder.decode(path.getFileName().toString());
+    DecodeResult result = nameDecoder.decode(path.getFileName().toString());
 
     String title = result.getTitle();
     String sequence = result.getSequence();

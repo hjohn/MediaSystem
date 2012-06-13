@@ -3,11 +3,13 @@ package hs.mediasystem.fs;
 import hs.mediasystem.dao.LocalInfo;
 import hs.mediasystem.framework.Decoder;
 import hs.mediasystem.fs.NameDecoder.DecodeResult;
+import hs.mediasystem.fs.NameDecoder.Hint;
 
 import java.nio.file.Path;
 
 public class EpisodeDecoder implements Decoder {
   private final String serieName;
+  private final NameDecoder nameDecoder = new NameDecoder(Hint.EPISODE);
 
   public EpisodeDecoder(String serieName) {
     assert serieName != null;
@@ -17,7 +19,7 @@ public class EpisodeDecoder implements Decoder {
 
   @Override
   public LocalInfo decode(Path path) {
-    DecodeResult result = NameDecoder.decode(path.getFileName().toString());
+    DecodeResult result = nameDecoder.decode(path.getFileName().toString());
 
     String sequence = result.getSequence();
     String title = result.getSubtitle();
@@ -30,7 +32,7 @@ public class EpisodeDecoder implements Decoder {
     if(sequence != null) {
       String[] split = sequence.split("[-,]");
 
-      season = Integer.parseInt(split[0]);
+      season = split[0].isEmpty() ? 1 : Integer.parseInt(split[0]);
       episode = Integer.parseInt(split[1]);
       endEpisode = split.length > 2 ? Integer.parseInt(split[2]) : episode;
     }

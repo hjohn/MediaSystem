@@ -4,6 +4,7 @@ import hs.mediasystem.fs.NameDecoder.Parts.Group;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,7 +32,7 @@ public class NameDecoder {
   private static final String SEASON = "([0-9]{1,2})";
   private static final String EPISODE = "([0-9]{1,2}(?:-[0-9]{1,2})?)";
 
-  private static final Set<Pattern> SEQUENCE_PATTERNS = new LinkedHashSet<Pattern>() {{
+  private static final Set<Pattern> EPISODE_PATTERNS = new LinkedHashSet<Pattern>() {{
     add(Pattern.compile("(.*?)" + "-" + SEASON + "x" + EPISODE + "-" + "(.*?)"));
     add(Pattern.compile("(.*?)" + "\\(" + SEASON + "x" + EPISODE + "\\)" + "(.*?)"));
     add(Pattern.compile("(.*?)" + "\\[" + SEASON + "x" + EPISODE + "\\]" + "(.*?)"));
@@ -41,12 +42,37 @@ public class NameDecoder {
     add(Pattern.compile("(.*?)" + "\\[[Ss]" + SEASON + " ?[Ee]" + EPISODE + "\\]" + "(.*?)"));
     add(Pattern.compile("(.*?)" + SEASON + "x" + EPISODE + "(.*?)"));
 
-    // Could not find any Season/Episode combinations, so assume that the number is a Stand-alone sequence number
-    add(Pattern.compile("(.*?)" + "- " + SEASON + "()(( [-\\[]|$).*?)"));
-    add(Pattern.compile("(.*?)" + "#" + SEASON + "()" + "(.*?)"));
+    add(Pattern.compile("(.*?)" + "([1-3][0-9]|0?[1-9])([1-3][0-9]|0[1-9])" + "(.*?)"));    // matches seasons upto 39, episodes upto 39 when written without space
+
+    add(Pattern.compile("(.*?)" + "()#" + EPISODE + "(.*?)"));  // No Season
   }};
 
-  public static DecodeResult decode(String input) {
+  private static final Set<Pattern> MOVIE_PATTERNS = new LinkedHashSet<Pattern>() {{
+    // Could not find any Season/Episode combinations, so assume that the number is a Stand-alone sequence number
+    add(Pattern.compile("(.*?)" + "- " + SEASON + "()(( [-\\[]|$).*?)"));
+  }};
+
+  private final Set<Hint> hints;
+  private final Set<Pattern> sequencePatternsToCheck = new LinkedHashSet<>();
+
+  public enum Hint {EPISODE, MOVIE}
+
+  public NameDecoder(Hint... hints) {
+    this.hints = new HashSet<>(Arrays.asList(hints));
+
+    if(this.hints.contains(Hint.EPISODE)) {
+      sequencePatternsToCheck.addAll(EPISODE_PATTERNS);
+    }
+    if(this.hints.contains(Hint.MOVIE)) {
+      sequencePatternsToCheck.addAll(MOVIE_PATTERNS);
+    }
+    if(sequencePatternsToCheck.isEmpty()) {
+      sequencePatternsToCheck.addAll(EPISODE_PATTERNS);
+      sequencePatternsToCheck.addAll(MOVIE_PATTERNS);
+    }
+  }
+
+  public DecodeResult decode(String input) {
     String title = null;
     String alternativeTitle = null;
     String subtitle = null;
@@ -97,7 +123,7 @@ public class NameDecoder {
     return new DecodeResult(title, alternativeTitle, subtitle, sequence, code, releaseYear, extension);
   }
 
-  private static String[] splitNameParts(String input) {
+  private String[] splitNameParts(String input) {
     String[] sequenceParts = decodeAsSequence(input);
     String season = null;
     String episode = null;
@@ -148,7 +174,7 @@ public class NameDecoder {
     return new String[] {title.toString(), season, episode, subtitle.toString(), specialText, alternativeTitleText};
   }
 
-  private static String[] splitExtension(String input) {
+  private String[] splitExtension(String input) {
     String[] parts = input.split("\\.");
     int extensionStart = parts.length - 1;
 
@@ -175,8 +201,8 @@ public class NameDecoder {
     return result;
   }
 
-  private static String[] decodeAsSequence(String text) {
-    for(Pattern pattern : SEQUENCE_PATTERNS) {
+  private String[] decodeAsSequence(String text) {
+    for(Pattern pattern : sequencePatternsToCheck) {
       String[] groups = match(pattern, text);
 
       if(groups != null) {
