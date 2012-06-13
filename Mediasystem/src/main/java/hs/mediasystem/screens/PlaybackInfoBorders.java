@@ -134,12 +134,12 @@ public class PlaybackInfoBorders extends StackPane {
       }
     }));
 
-    playerBindings.subtitleDelay.addListener(new ChangeListener<Number>() {
+    playerBindings.subtitleDelay.addListener(new FirstChangeFilter<>(new ChangeListener<Number>() {
       @Override
       public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
         showOSD(subtitleDelay);
       }
-    });
+    }));
 
     playerBindings.brightness.addListener(new FirstChangeFilter<>(new ChangeListener<Number>() {
       @Override
