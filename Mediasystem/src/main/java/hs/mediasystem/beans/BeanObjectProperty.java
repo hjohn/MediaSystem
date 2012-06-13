@@ -9,8 +9,7 @@ public final class BeanObjectProperty<T> extends SimpleObjectProperty<T> {
     accessor = new BeanAccessor<>(bean, propertyName);
   }
 
-  @Override
-  public void fireValueChangedEvent() {
+  public void update() {
     synchronized(accessor) {
       super.set(accessor.read());
     }

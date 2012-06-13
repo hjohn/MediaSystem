@@ -96,7 +96,7 @@ public class VLCPlayer implements Player {
         System.out.println("[FINE] VLCPlayer: Event[mediaParsedChanged]: " + parsed);
         if(parsed == 1) {
           updateSubtitles();
-          audioTrack.fireValueChangedEvent();
+          audioTrack.update();
         }
       }
 
@@ -244,13 +244,13 @@ public class VLCPlayer implements Player {
   @Override
   public void play(String uri) {
     position.update(0);
-    audioDelay.fireValueChangedEvent();
-    audioTrack.fireValueChangedEvent();
-    brightness.fireValueChangedEvent();
-    rate.fireValueChangedEvent();
-    subtitle.fireValueChangedEvent();
-    subtitleDelay.fireValueChangedEvent();
-    volume.fireValueChangedEvent();
+    audioDelay.update();
+    audioTrack.update();
+    brightness.update();
+    rate.update();
+    subtitle.update();
+    subtitleDelay.update();
+    volume.update();
 
     mediaPlayer.setRepeat(true);
     mediaPlayer.setPlaySubItems(true);

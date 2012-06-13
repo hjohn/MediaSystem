@@ -15,8 +15,7 @@ public final class BeanFloatProperty extends SimpleFloatProperty {
     this.accessor = accessor;
   }
 
-  @Override
-  public void fireValueChangedEvent() {
+  public void update() {
     synchronized(accessor) {
       super.set(accessor.read());
     }

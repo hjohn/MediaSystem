@@ -15,8 +15,7 @@ public final class BeanIntegerProperty extends SimpleIntegerProperty {
     this.accessor = accessor;
   }
 
-  @Override
-  public void fireValueChangedEvent() {
+  public void update() {
     synchronized(accessor) {
       super.set(accessor.read());
     }
