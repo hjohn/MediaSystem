@@ -16,18 +16,29 @@ public final class BeanFloatProperty extends SimpleFloatProperty {
   }
 
   @Override
-  public float get() {
-    if(!initialized) {
-      initialized = true;
+  public void fireValueChangedEvent() {
+    synchronized(accessor) {
       super.set(accessor.read());
     }
+  }
 
-    return super.get();
+  @Override
+  public float get() {
+    synchronized(accessor) {
+      if(!initialized) {
+        initialized = true;
+        super.set(accessor.read());
+      }
+
+      return super.get();
+    }
   }
 
   @Override
   public void set(float value) {
-    super.set(value);
-    accessor.write(value);
+    synchronized(accessor) {
+      super.set(value);
+      accessor.write(value);
+    }
   }
 }

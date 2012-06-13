@@ -16,18 +16,29 @@ public final class BeanIntegerProperty extends SimpleIntegerProperty {
   }
 
   @Override
-  public int get() {
-    if(!initialized) {
-      initialized = true;
+  public void fireValueChangedEvent() {
+    synchronized(accessor) {
       super.set(accessor.read());
     }
+  }
 
-    return super.get();
+  @Override
+  public int get() {
+    synchronized(accessor) {
+      if(!initialized) {
+        initialized = true;
+        super.set(accessor.read());
+      }
+
+      return super.get();
+    }
   }
 
   @Override
   public void set(int value) {
-    super.set(value);
-    accessor.write(value);
+    synchronized(accessor) {
+      super.set(value);
+      accessor.write(value);
+    }
   }
 }
