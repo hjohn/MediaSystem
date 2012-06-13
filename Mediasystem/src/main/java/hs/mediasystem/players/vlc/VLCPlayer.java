@@ -96,7 +96,7 @@ public class VLCPlayer implements Player {
         System.out.println("[FINE] VLCPlayer: Event[mediaParsedChanged]: " + parsed);
         if(parsed == 1) {
           updateSubtitles();
-          audioTrack.update();
+          audioTrack.fireValueChangedEvent();
         }
       }
 
@@ -244,6 +244,14 @@ public class VLCPlayer implements Player {
   @Override
   public void play(String uri) {
     position.update(0);
+    audioDelay.fireValueChangedEvent();
+    audioTrack.fireValueChangedEvent();
+    brightness.fireValueChangedEvent();
+    rate.fireValueChangedEvent();
+    subtitle.fireValueChangedEvent();
+    subtitleDelay.fireValueChangedEvent();
+    volume.fireValueChangedEvent();
+
     mediaPlayer.setRepeat(true);
     mediaPlayer.setPlaySubItems(true);
     mediaPlayer.playMedia(uri);
@@ -293,22 +301,22 @@ public class VLCPlayer implements Player {
   @Override public void setPosition(long position) { this.position.set(position); }
   @Override public LongProperty positionProperty() { return position; }
 
-  private final IntegerProperty volume;
+  private final BeanIntegerProperty volume;
   @Override public int getVolume() { return volume.get(); }
   @Override public void setVolume(int volume) { this.volume.set(volume); }
   @Override public IntegerProperty volumeProperty() { return volume; }
 
-  private final IntegerProperty audioDelay;
+  private final BeanIntegerProperty audioDelay;
   @Override public int getAudioDelay() { return audioDelay.get(); }
   @Override public void setAudioDelay(int audioDelay) { this.audioDelay.set(audioDelay); }
   @Override public IntegerProperty audioDelayProperty() { return audioDelay; }
 
-  private final FloatProperty rate;
+  private final BeanFloatProperty rate;
   @Override public float getRate() { return rate.get(); }
   @Override public void setRate(float rate) { this.rate.set(rate); }
   @Override public FloatProperty rateProperty() { return rate; }
 
-  private final FloatProperty brightness;
+  private final BeanFloatProperty brightness;
   @Override public float getBrightness() { return brightness.get(); }
   @Override public void setBrightness(float brightness) { this.brightness.set(brightness); }
   @Override public FloatProperty brightnessProperty() { return brightness; }
@@ -323,7 +331,7 @@ public class VLCPlayer implements Player {
   @Override public void setAudioTrack(AudioTrack audioTrack) { this.audioTrack.set(audioTrack); }
   @Override public ObjectProperty<AudioTrack> audioTrackProperty() { return audioTrack; }
 
-  private final IntegerProperty subtitleDelay;
+  private final BeanIntegerProperty subtitleDelay;
   @Override public int getSubtitleDelay() { return subtitleDelay.get(); }
   @Override public void setSubtitleDelay(int subtitleDelay) { this.subtitleDelay.set(subtitleDelay); }
   @Override public IntegerProperty subtitleDelayProperty() { return subtitleDelay; }
