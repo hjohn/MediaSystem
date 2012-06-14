@@ -80,15 +80,16 @@ public class ProgramController {
   }};
 
   private final Navigator navigator = new Navigator();
-  private final InformationBorder informationBorder = new InformationBorder();
+  private final InformationBorder informationBorder;
 
   @Inject
-  public ProgramController(Ini ini, final SceneManager sceneManager, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider) {
+  public ProgramController(Ini ini, final SceneManager sceneManager, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider, InformationBorder informationBorder) {
     this.ini = ini;
     this.sceneManager = sceneManager;
     this.playerPresentation = playerPresentation;
     this.mainScreenProvider = mainScreenProvider;
     this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
+    this.informationBorder = informationBorder;
 
     final EventDispatcher eventDispatcher = scene.getEventDispatcher();
 
@@ -146,7 +147,7 @@ public class ProgramController {
           builder.append(dest.getDescription());
         }
 
-        informationBorder.breadCrumbProperty().set(builder.toString());
+        ProgramController.this.informationBorder.breadCrumbProperty().set(builder.toString());
       }
     });
 

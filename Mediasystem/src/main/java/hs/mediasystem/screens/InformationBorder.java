@@ -1,7 +1,12 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.db.Database;
+import hs.mediasystem.db.Database.Transaction;
 import hs.mediasystem.util.SizeFormatter;
 import hs.mediasystem.util.SpecialEffects;
+
+import java.sql.SQLException;
+
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -18,6 +23,8 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+
+import javax.inject.Inject;
 
 public class InformationBorder extends HBox {
   private final HBox programName = new HBox() {{
@@ -43,6 +50,15 @@ public class InformationBorder extends HBox {
     getChildren().add(clock);
   }};
 
+  private final Label databaseSize = new Label() {{
+    getStyleClass().add("database-size");
+  }};
+
+  private final HBox databaseSizeElement = new HBox() {{
+    getStyleClass().add("element");
+    getChildren().add(databaseSize);
+  }};
+
   private final Label breadCrumb = new Label() {{
     getStyleClass().add("bread-crumb");
   }};
@@ -65,20 +81,23 @@ public class InformationBorder extends HBox {
 
     memText.setBlendMode(BlendMode.DIFFERENCE);
 
-    memoryBar.setWidth(250);
+    memoryBar.setWidth(150);
     memoryBar.heightProperty().bind(memText.heightProperty());
   }};
 
-  public InformationBorder() {
+  @Inject
+  public InformationBorder(final Database database) {
     getStylesheets().add("information-border.css");
 
     getChildren().add(new HBox() {{
       getStyleClass().add("elements");
-      getChildren().addAll(programName, clockElement, gc, breadCrumbElement);
+      getChildren().addAll(programName, clockElement, databaseSizeElement, gc, breadCrumbElement);
     }});
 
     Timeline updater = new Timeline(
       new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
+        private int databaseSizeUpdateCounter = 0;
+
         @Override
         public void handle(ActionEvent event) {
           clock.setText(String.format("%1$tA, %1$te %1$tB %1$tY  %1$tR", System.currentTimeMillis()));
@@ -102,6 +121,18 @@ public class InformationBorder extends HBox {
           ));
 
           memText.setText(SizeFormatter.BYTES_THREE_SIGNIFICANT.format(usedMemory) + "/" + SizeFormatter.BYTES_THREE_SIGNIFICANT.format(totalMemory));
+
+          if(databaseSizeUpdateCounter-- == 0) {
+            try(Transaction transaction = database.beginTransaction()) {
+              databaseSize.setText(SizeFormatter.BYTES_THREE_SIGNIFICANT.format(transaction.getDatabaseSize()));
+              databaseSizeUpdateCounter = 60;
+            }
+            catch(SQLException e) {
+              e.printStackTrace();
+              databaseSize.setText("-");
+              databaseSizeUpdateCounter = 600;
+            }
+          }
         }
       })
     );
