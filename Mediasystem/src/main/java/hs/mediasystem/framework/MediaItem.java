@@ -25,7 +25,6 @@ public class MediaItem implements EnrichTrigger {
 
   private final Map<Class<?>, EnrichmentState> enrichmentStates = new HashMap<>();
 
-  private final String id;
   private final MediaTree mediaTree;
   private final String uri;
   private final String mediaType;
@@ -43,7 +42,8 @@ public class MediaItem implements EnrichTrigger {
   private int databaseId;
 
   public MediaItem(MediaTree mediaTree, String uri, Object... data) {
-    this.id = uri == null ? "hash:/" + super.hashCode() : "uri:/" + uri;
+    assert uri != null;
+
     this.uri = uri;
     this.mediaTree = mediaTree;
 
@@ -68,8 +68,6 @@ public class MediaItem implements EnrichTrigger {
   }
 
   private void add(Object o) {
-    assert this.id != null;
-
     if(o instanceof Enrichable) {
       ((Enrichable)o).setEnrichTrigger(this);
     }
@@ -117,6 +115,10 @@ public class MediaItem implements EnrichTrigger {
     return mediaType;
   }
 
+  public String getId() {
+    return uri;
+  }
+
   public String getUri() {
     return uri;
   }
@@ -154,7 +156,7 @@ public class MediaItem implements EnrichTrigger {
 
   @Override
   public int hashCode() {
-    return id.hashCode();
+    return uri.hashCode();
   }
 
   @Override
@@ -168,7 +170,7 @@ public class MediaItem implements EnrichTrigger {
 
     MediaItem other = (MediaItem)obj;
 
-    return id.equals(other.id);
+    return uri.equals(other.uri);
   }
 
   @Override
