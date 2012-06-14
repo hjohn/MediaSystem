@@ -5,14 +5,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-import hs.mediasystem.dao.EnricherMatch;
 import hs.mediasystem.dao.Identifier;
+import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.dao.IdentifyException;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.dao.MediaId;
 import hs.mediasystem.dao.TypeBasedItemEnricher;
-import hs.mediasystem.dao.MediaData.MatchType;
 import hs.mediasystem.enrich.EnrichCache.CacheKey;
 import hs.mediasystem.framework.DefaultEnrichable;
 import hs.mediasystem.framework.MediaDataEnricher;
@@ -110,7 +109,7 @@ public class EnrichmentTest {
     item = new MediaItem(mediaTree, MOVIE_ALICE_URI, movie);
     cacheKey = new CacheKey(item.getUri());
 
-    when(typeBasedItemEnricher.identifyItem(movie)).thenReturn(new EnricherMatch(new Identifier("Movie", "TMDB", "12345"), MatchType.NAME, 0.99f));
+    when(typeBasedItemEnricher.identifyItem(movie)).thenReturn(new Identifier("Movie", "TMDB", "12345", MatchType.NAME, 0.99f));
   }
 
   @Test

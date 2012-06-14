@@ -1,14 +1,13 @@
 package hs.mediasystem.ext.serie;
 
 import hs.mediasystem.dao.Casting;
-import hs.mediasystem.dao.EnricherMatch;
 import hs.mediasystem.dao.Identifier;
+import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.dao.IdentifyException;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemEnricher;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
-import hs.mediasystem.dao.MediaData.MatchType;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.SerieBase;
 import hs.mediasystem.util.CryptoUtil;
@@ -30,7 +29,7 @@ public class TvdbSerieEnricher implements ItemEnricher {
   }
 
   @Override
-  public EnricherMatch identifyItem(final Media media) throws IdentifyException {
+  public Identifier identifyItem(final Media media) throws IdentifyException {
     synchronized(TheTVDB.class) {
       List<Series> results = TVDB.searchSeries(media.getTitle(), "en");
 
@@ -40,7 +39,7 @@ public class TvdbSerieEnricher implements ItemEnricher {
         throw new IdentifyException("Cannot identify Serie with name: " + media.getTitle());
       }
 
-      return new EnricherMatch(new Identifier(SerieBase.class.getSimpleName(), getProviderCode(), results.get(0).getId()), MatchType.NAME, 1.0f);
+      return new Identifier(SerieBase.class.getSimpleName(), getProviderCode(), results.get(0).getId(), MatchType.NAME, 1.0f);
     }
   }
 

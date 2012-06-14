@@ -1,14 +1,13 @@
 package hs.mediasystem.ext.serie;
 
 import hs.mediasystem.dao.Casting;
-import hs.mediasystem.dao.EnricherMatch;
 import hs.mediasystem.dao.Identifier;
+import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.dao.IdentifyException;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemEnricher;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
-import hs.mediasystem.dao.MediaData.MatchType;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.util.Levenshtein;
 
@@ -34,18 +33,18 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
   }
 
   @Override
-  public EnricherMatch identifyItem(final Media media) throws IdentifyException {
+  public Identifier identifyItem(final Media media) throws IdentifyException {
     hs.mediasystem.framework.Episode episode = (hs.mediasystem.framework.Episode)media;
-    EnricherMatch serieMatch = itemIdentifier.identifyItem(episode.getSerie().getMedia());
+    Identifier serieMatch = itemIdentifier.identifyItem(episode.getSerie().getMedia());
 
     // TODO may need some TVDB caching here, as we're doing this query twice for each episode... and TVDB returns whole seasons I think
-    EpisodeSearchResult result = findEpisode(serieMatch.getIdentifier().getProviderId(), episode);
+    EpisodeSearchResult result = findEpisode(serieMatch.getProviderId(), episode);
 
     if(result == null) {
-      throw new IdentifyException("unable to find episode with serieId " + serieMatch.getIdentifier().getProviderId() + " and " + episode);
+      throw new IdentifyException("unable to find episode with serieId " + serieMatch.getProviderId() + " and " + episode);
     }
 
-    return new EnricherMatch(new Identifier(media.getClass().getSimpleName(), getProviderCode(), serieMatch.getIdentifier().getProviderId() + "," + result.episode.getId()), result.matchType, result.matchAccuracy);  // TODO better would be episode id -- this is done here for specials, with season 0 and a nonsense episode number
+    return new Identifier(media.getClass().getSimpleName(), getProviderCode(), serieMatch.getProviderId() + "," + result.episode.getId(), result.matchType, result.matchAccuracy);  // TODO better would be episode id -- this is done here for specials, with season 0 and a nonsense episode number
   }
 
   @Override

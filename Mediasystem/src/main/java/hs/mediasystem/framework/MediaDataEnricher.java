@@ -1,6 +1,7 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.dao.EnricherMatch;
+import hs.mediasystem.dao.Identifier;
+import hs.mediasystem.dao.IdentifyException;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.dao.MediaHash;
@@ -16,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -46,12 +48,12 @@ public class MediaDataEnricher implements Enricher<MediaData> {
   public List<EnrichTask<MediaData>> enrich(Parameters parameters, boolean bypassCache) {
     List<EnrichTask<MediaData>> enrichTasks = new ArrayList<>();
 
-    MediaDataEnrichTaskProvider enrichTaskProvider = new MediaDataEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.unwrap(MediaItemUri.class), parameters.get(Media.class));
+    final AtomicReference<MediaId> mediaIdRef = new AtomicReference<>();
 
     if(!bypassCache) {
-      enrichTasks.add(enrichTaskProvider.getCachedTask());
+      enrichTasks.add(createCachedTask(parameters.unwrap(TaskTitle.class), parameters.unwrap(MediaItemUri.class), mediaIdRef));
     }
-    enrichTasks.add(enrichTaskProvider.getTask());
+    enrichTasks.add(createTask(parameters.unwrap(TaskTitle.class), parameters.unwrap(MediaItemUri.class), parameters.get(Media.class), mediaIdRef));
 
     return enrichTasks;
   }
@@ -80,85 +82,87 @@ public class MediaDataEnricher implements Enricher<MediaData> {
     }
   }
 
-  private class MediaDataEnrichTaskProvider {
-    private final String title;
-    private final String uri;
-    private final Media media;
-    private final AtomicReference<MediaId> mediaIdRef = new AtomicReference<>();
+  public EnrichTask<MediaData> createCachedTask(final String title, final String uri, final AtomicReference<MediaId> mediaIdRef) {
+    return new EnrichTask<MediaData>(true) {
+      {
+        updateTitle("Cache:" + title);
+      }
 
-    private MediaDataEnrichTaskProvider(String title, String uri, Media media) {
-      this.title = title;
-      this.uri = uri;
-      this.media = media;
-    }
+      @Override
+      public MediaData call() throws IOException {
+        MediaData mediaData = itemsDao.getMediaDataByUri(uri);
 
-    public EnrichTask<MediaData> getCachedTask() {
-      return new EnrichTask<MediaData>(true) {
-        {
-          updateTitle("Cache:" + title);
-        }
+        if(mediaData == null) {
+          MediaId mediaId = createMediaId(uri);
 
-        @Override
-        public MediaData call() throws IOException {
-          MediaData mediaData = itemsDao.getMediaDataByUri(uri);
+          mediaIdRef.set(mediaId);
+          mediaData = itemsDao.getMediaDataByHash(mediaId.getHash());
 
           if(mediaData == null) {
-            MediaId mediaId = createMediaId(uri);
-
-            mediaIdRef.set(mediaId);
-            mediaData = itemsDao.getMediaDataByHash(mediaId.getHash());
-
-            if(mediaData == null) {
-              return null;
-            }
-
-            mediaData.setUri(uri);  // replace uri, as it didn't match anymore
-            mediaData.setMediaId(mediaId);  // replace mediaId, even though hash matches, to update the other values just in case
-
-            itemsDao.updateMediaData(mediaData);
+            return null;
           }
 
-          return mediaData;
-        }
-      };
-    }
+          mediaData.setUri(uri);  // replace uri, as it didn't match anymore
+          mediaData.setMediaId(mediaId);  // replace mediaId, even though hash matches, to update the other values just in case
 
-    public EnrichTask<MediaData> getTask() {
-      return new EnrichTask<MediaData>(false) {
-        {
-          updateTitle(title);
-          updateProgress(0, 3);
+          itemsDao.updateMediaData(mediaData);
         }
 
-        @Override
-        protected MediaData call() throws Exception {
-          EnricherMatch enricherMatch = typeBasedItemEnricher.identifyItem(media);
+        /*
+         * It's possible this MediaData does not contain an Identifier (negative caching), check last updated
+         * and if more than a week old, return null.
+         */
 
-          updateProgress(1, 3);
-
-          MediaId mediaId = mediaIdRef.get();
-
-          if(mediaId == null) {
-            mediaId = createMediaId(uri);
-          }
-
-          updateProgress(2, 3);
-
-          MediaData mediaData = new MediaData();
-
-          mediaData.setIdentifier(enricherMatch.getIdentifier());
-          mediaData.setMediaId(mediaId);
-          mediaData.setUri(uri);
-          mediaData.setMatchType(enricherMatch.getMatchType());
-          mediaData.setMatchAccuracy(enricherMatch.getMatchAccuracy());
-
-          itemsDao.storeMediaData(mediaData);
-
-          updateProgress(3, 3);
-
-          return mediaData;
+        if(mediaData.getIdentifier() == null && mediaData.getLastUpdated().getTime() < System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000) {
+          return null;
         }
-      };
-    }
+
+        return mediaData;
+      }
+    };
+  }
+
+  public EnrichTask<MediaData> createTask(final String title, final String uri, final Media media, final AtomicReference<MediaId> mediaIdRef) {
+    return new EnrichTask<MediaData>(false) {
+      {
+        updateTitle(title);
+        updateProgress(0, 3);
+      }
+
+      @Override
+      protected MediaData call() throws Exception {
+        Identifier identifier;
+
+        try {
+          identifier = typeBasedItemEnricher.identifyItem(media);
+        }
+        catch(IdentifyException e) {
+          identifier = null;
+        }
+
+        updateProgress(1, 3);
+
+        MediaId mediaId = mediaIdRef.get();
+
+        if(mediaId == null) {
+          mediaId = createMediaId(uri);
+        }
+
+        updateProgress(2, 3);
+
+        MediaData mediaData = new MediaData();
+
+        mediaData.setIdentifier(identifier);
+        mediaData.setMediaId(mediaId);
+        mediaData.setUri(uri);
+        mediaData.setLastUpdated(new Date());
+
+        itemsDao.storeMediaData(mediaData);
+
+        updateProgress(3, 3);
+
+        return mediaData;
+      }
+    };
   }
 }

@@ -9,6 +9,7 @@ import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
 import hs.mediasystem.enrich.Parameters;
 import hs.mediasystem.framework.AbstractEnrichTaskProvider;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.Serie;
 import hs.mediasystem.framework.TaskTitle;
 import hs.mediasystem.fs.SourceImageHandle;
@@ -20,6 +21,7 @@ public class SerieEnricher implements Enricher<Serie> {
   private static final List<Class<?>> INPUT_PARAMETERS = new ArrayList<Class<?>>() {{
     add(TaskTitle.class);
     add(MediaData.class);
+    add(Media.class);
   }};
 
   private volatile ItemsDao itemsDao;
@@ -34,7 +36,7 @@ public class SerieEnricher implements Enricher<Serie> {
   public List<EnrichTask<Serie>> enrich(Parameters parameters, boolean bypassCache) {
     List<EnrichTask<Serie>> enrichTasks = new ArrayList<>();
 
-    SerieEnrichTaskProvider enrichTaskProvider = new SerieEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(MediaData.class));
+    SerieEnrichTaskProvider enrichTaskProvider = new SerieEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(MediaData.class), (Serie)parameters.get(Media.class));
 
     if(!bypassCache) {
       enrichTasks.add(enrichTaskProvider.getCachedTask());
@@ -45,13 +47,16 @@ public class SerieEnricher implements Enricher<Serie> {
   }
 
   private class SerieEnrichTaskProvider extends AbstractEnrichTaskProvider<Serie> {
-    public SerieEnrichTaskProvider(String title, MediaData mediaData) {
+    private final Serie currentSerie;
+
+    public SerieEnrichTaskProvider(String title, MediaData mediaData, Serie currentSerie) {
       super(title, itemsDao, typeBasedItemEnricher, mediaData);
+      this.currentSerie = currentSerie;
     }
 
     @Override
     public Serie itemToEnrichType(Item item) {
-      Serie serie = new Serie(item.getTitle());
+      Serie serie = new Serie(currentSerie.getTitle());
 
       serie.backgroundProperty().set(createImageHandle(item.getBackground(), item, "background"));
       serie.bannerProperty().set(createImageHandle(item.getBanner(), item, "banner"));

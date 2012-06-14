@@ -1,12 +1,11 @@
 package hs.mediasystem.ext.movie;
 
-import hs.mediasystem.dao.EnricherMatch;
 import hs.mediasystem.dao.Identifier;
+import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.dao.IdentifyException;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemEnricher;
 import hs.mediasystem.dao.ItemNotFoundException;
-import hs.mediasystem.dao.MediaData.MatchType;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.util.Levenshtein;
 
@@ -37,7 +36,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
   }
 
   @Override
-  public EnricherMatch identifyItem(Media media) throws IdentifyException {
+  public Identifier identifyItem(Media media) throws IdentifyException {
     synchronized(Movie.class) {
       MovieBase movieBase = (MovieBase)media;
 
@@ -127,7 +126,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
         }
 
         if(bestMatchingImdbNumber != null) {
-          return new EnricherMatch(new Identifier(media.getClass().getSimpleName(), getProviderCode(), bestMatchingImdbNumber), matchType, matchAccuracy);
+          return new Identifier(media.getClass().getSimpleName(), getProviderCode(), bestMatchingImdbNumber, matchType, matchAccuracy);
         }
 
         throw new IdentifyException(media);

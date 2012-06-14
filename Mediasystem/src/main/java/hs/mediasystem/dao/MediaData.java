@@ -1,5 +1,7 @@
 package hs.mediasystem.dao;
 
+import java.util.Date;
+
 import hs.mediasystem.framework.DefaultEnrichable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -7,46 +9,13 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
 public class MediaData extends DefaultEnrichable<MediaData> {
-
-  /**
-   * MatchType enum, in order of certainty
-   */
-  public enum MatchType {
-    /**
-     * Matched manually by user
-     */
-    MANUAL,
-
-    /**
-     * Matched directly by a provider specific id (like an imdbid parsed from file name)
-     */
-    ID,
-
-    /**
-     * Matched by a hash calculated over the content of a file
-     */
-    HASH,
-
-    /**
-     * Matched on name and release year
-     */
-    NAME_AND_YEAR,
-
-    /**
-     * Matched on name only
-     */
-    NAME
-  }
-
   private int id;
+  private Date lastUpdated;
 
   private String uri;
 
   private MediaId mediaId;
   private Identifier identifier;
-
-  private MatchType matchType;
-  private float matchAccuracy;
 
   public String getUri() {
     return uri;
@@ -100,14 +69,6 @@ public class MediaData extends DefaultEnrichable<MediaData> {
     this.resumePosition.set(resumePosition);
   }
 
-  public float getMatchAccuracy() {
-    return matchAccuracy;
-  }
-
-  public void setMatchAccuracy(float matchAccuracy) {
-    this.matchAccuracy = matchAccuracy;
-  }
-
   public int getId() {
     return id;
   }
@@ -132,11 +93,11 @@ public class MediaData extends DefaultEnrichable<MediaData> {
     this.mediaId = mediaId;
   }
 
-  public MatchType getMatchType() {
-    return matchType;
+  public Date getLastUpdated() {
+    return lastUpdated;
   }
 
-  public void setMatchType(MatchType matchType) {
-    this.matchType = matchType;
+  public void setLastUpdated(Date lastUpdated) {
+    this.lastUpdated = lastUpdated;
   }
 }

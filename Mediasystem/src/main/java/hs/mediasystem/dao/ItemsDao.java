@@ -1,9 +1,9 @@
 package hs.mediasystem.dao;
 
-import hs.mediasystem.dao.MediaData.MatchType;
+import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.db.Database;
-import hs.mediasystem.db.DatabaseException;
 import hs.mediasystem.db.Database.Transaction;
+import hs.mediasystem.db.DatabaseException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -223,12 +223,14 @@ public class ItemsDao {
     MediaData data = new MediaData();
 
     data.setId(rs.getInt("id"));
-    data.setIdentifier(new Identifier(rs.getString("type"), rs.getString("provider"), rs.getString("providerid")));
+    data.setLastUpdated(rs.getDate("lastupdated"));
+
+    if(rs.getString("type") != null) {
+      data.setIdentifier(new Identifier(rs.getString("type"), rs.getString("provider"), rs.getString("providerid"), MatchType.valueOf(rs.getString("matchtype")), rs.getFloat("matchaccuracy")));
+    }
     data.setMediaId(new MediaId(rs.getLong("filelength"), rs.getLong("filetime"), rs.getLong("filecreatetime"), rs.getBytes("hash"), rs.getLong("oshash")));
     data.setUri(rs.getString("uri"));
 
-    data.setMatchType(MatchType.valueOf(rs.getString("matchtype")));
-    data.setMatchAccuracy(rs.getFloat("matchaccuracy"));
     data.setResumePosition(rs.getInt("resumeposition"));
     data.setViewed(rs.getBoolean("viewed"));
 
@@ -294,9 +296,15 @@ public class ItemsDao {
   private static Map<String, Object> createMediaDataFieldMap(MediaData mediaData) {
     Map<String, Object> columns = new LinkedHashMap<>();
 
-    columns.put("type", mediaData.getIdentifier().getType());
-    columns.put("provider", mediaData.getIdentifier().getProvider());
-    columns.put("providerid", mediaData.getIdentifier().getProviderId());
+    columns.put("lastupdated", mediaData.getLastUpdated());
+
+    if(mediaData.getIdentifier() != null) {
+      columns.put("type", mediaData.getIdentifier().getType());
+      columns.put("provider", mediaData.getIdentifier().getProvider());
+      columns.put("providerid", mediaData.getIdentifier().getProviderId());
+      columns.put("matchtype", mediaData.getIdentifier().getMatchType().name());
+      columns.put("matchaccuracy", mediaData.getIdentifier().getMatchAccuracy());
+    }
 
     columns.put("uri", mediaData.getUri());
 
@@ -306,8 +314,6 @@ public class ItemsDao {
     columns.put("filecreatetime", mediaData.getMediaId().getFileCreateTime());
     columns.put("filelength", mediaData.getMediaId().getFileLength());
 
-    columns.put("matchtype", mediaData.getMatchType().name());
-    columns.put("matchaccuracy", mediaData.getMatchAccuracy());
     columns.put("resumeposition", mediaData.getResumePosition());
     columns.put("viewed", mediaData.isViewed());
 

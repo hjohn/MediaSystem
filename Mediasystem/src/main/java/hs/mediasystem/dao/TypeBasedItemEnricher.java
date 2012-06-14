@@ -15,7 +15,7 @@ public class TypeBasedItemEnricher {
     ITEM_ENRICHERS.put(type.getSimpleName(), itemEnricher);
   }
 
-  public EnricherMatch identifyItem(Media media) throws IdentifyException {
+  public Identifier identifyItem(Media media) throws IdentifyException {
     ItemEnricher itemEnricher = ITEM_ENRICHERS.get(media.getClass().getSimpleName());
 
     if(itemEnricher != null) {
