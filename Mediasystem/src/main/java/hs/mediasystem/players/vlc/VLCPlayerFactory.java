@@ -1,7 +1,7 @@
 package hs.mediasystem.players.vlc;
 
-import hs.mediasystem.PlayerFactory;
 import hs.mediasystem.framework.player.Player;
+import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 

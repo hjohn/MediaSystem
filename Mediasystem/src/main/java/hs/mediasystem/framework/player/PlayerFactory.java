@@ -1,6 +1,5 @@
-package hs.mediasystem;
+package hs.mediasystem.framework.player;
 
-import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.util.ini.Ini;
 
 public interface PlayerFactory {

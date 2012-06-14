@@ -1,7 +1,7 @@
 package hs.mediasystem.players.mplayer;
 
-import hs.mediasystem.PlayerFactory;
 import hs.mediasystem.framework.player.Player;
+import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.util.ini.Ini;
 
 import java.nio.file.Path;
