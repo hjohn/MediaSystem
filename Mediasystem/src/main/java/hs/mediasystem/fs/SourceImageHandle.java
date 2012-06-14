@@ -31,6 +31,6 @@ public class SourceImageHandle implements ImageHandle {
 
   @Override
   public String toString() {
-    return "SourceImageHandle(" + key + ")";
+    return "SourceImageHandle(" + key + "; fast=" + source.isLocal() + ")";
   }
 }
