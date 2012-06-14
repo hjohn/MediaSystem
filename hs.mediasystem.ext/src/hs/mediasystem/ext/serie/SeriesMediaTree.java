@@ -57,4 +57,9 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
   public PersistQueue getPersister() {
     return persister;
   }
+
+  @Override
+  public String getId() {
+    return "serieRoot";
+  }
 }

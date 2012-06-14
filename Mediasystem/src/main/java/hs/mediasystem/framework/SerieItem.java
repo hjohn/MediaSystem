@@ -36,4 +36,9 @@ public class SerieItem extends MediaItem implements MediaRoot {
   public String getRootName() {
     return getTitle();
   }
+
+  @Override
+  public String getId() {
+    return "serie[" + getTitle() + "]";
+  }
 }

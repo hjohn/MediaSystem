@@ -72,4 +72,9 @@ public class YouTubeMediaTree implements MediaTree, MediaRoot {
   public PersistQueue getPersister() {
     return null;
   }
+
+  @Override
+  public String getId() {
+    return "youtubeRoot";
+  }
 }

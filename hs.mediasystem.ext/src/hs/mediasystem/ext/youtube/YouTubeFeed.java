@@ -91,4 +91,9 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
       super(title);
     }
   }
+
+  @Override
+  public String getId() {
+    return "youtubeFeed[" + feed.getName() + "]";
+  }
 }

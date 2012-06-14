@@ -90,4 +90,9 @@ public class NosMediaTree implements MediaTree, MediaRoot {
   public PersistQueue getPersister() {
     return null;
   }
+
+  @Override
+  public String getId() {
+    return "nosRoot";
+  }
 }
