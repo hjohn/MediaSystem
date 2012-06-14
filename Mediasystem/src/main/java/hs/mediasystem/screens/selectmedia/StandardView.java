@@ -113,9 +113,9 @@ public class StandardView extends StackPane implements SelectMediaView {
 
     settingUpdater = new SettingUpdater<>(settingsStore, new StringConverter<StandardLayoutExtension>() {
       @Override
-      public StandardLayoutExtension fromString(String title) {
+      public StandardLayoutExtension fromString(String id) {
         for(StandardLayoutExtension extension : availableLayoutExtensions) {
-          if(extension.getTitle().equals(title)) {
+          if(extension.getId().equals(id)) {
             return extension;
           }
         }
@@ -125,7 +125,7 @@ public class StandardView extends StackPane implements SelectMediaView {
 
       @Override
       public String toString(StandardLayoutExtension extension) {
-        return extension.getTitle();
+        return extension.getId();
       }
     });
 
