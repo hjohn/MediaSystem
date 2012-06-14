@@ -1,4 +1,4 @@
-package hs.mediasystem.players.vlc;
+package hs.mediasystem.ext.player.vlc;
 
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.PlayerFactory;

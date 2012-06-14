@@ -10,7 +10,6 @@ import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaDataPersister;
 import hs.mediasystem.framework.PersisterProvider;
 import hs.mediasystem.framework.PlaybackOverlayView;
-import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -51,6 +50,7 @@ import org.apache.felix.dm.DependencyManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.postgresql.ds.PGConnectionPoolDataSource;
@@ -67,19 +67,8 @@ public class FrontEnd extends Application {
   private static final Ini INI = new Ini(new File("mediasystem.ini"));
 
   private SceneManager sceneManager;
-  private Player player;
   private ConnectionPool pool;
   private Framework framework;
-
-  @Override
-  public void init() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-    Section section = INI.getSection("general");
-
-    String factoryClassName = section.getDefault("player.factoryClass", "hs.mediasystem.players.vlc.VLCPlayerFactory");
-
-    PlayerFactory playerFactory = (PlayerFactory)Class.forName(factoryClassName).newInstance();
-    player = playerFactory.create(INI);
-  }
 
   @Override
   public void start(Stage primaryStage) throws BundleException {
@@ -104,7 +93,7 @@ public class FrontEnd extends Application {
     framework = createHostedOSGiEnvironment();
 
     Module module = new AbstractModule() {
-      private final PlayerPresentation playerPresentation = new PlayerPresentation(player);
+      private PlayerPresentation playerPresentation;
       PluginTracker<MainMenuExtension> mainMenuExtensions = new PluginTracker<>(framework.getBundleContext(), MainMenuExtension.class);
 
       @Override
@@ -123,6 +112,13 @@ public class FrontEnd extends Application {
 
       @Provides
       public PlayerPresentation providesPlayerPresentation() {
+        if(playerPresentation == null) {
+          ServiceReference<PlayerFactory> serviceReference = framework.getBundleContext().getServiceReference(PlayerFactory.class);
+          PlayerFactory factory = framework.getBundleContext().getService(serviceReference);
+
+          playerPresentation = new PlayerPresentation(factory.create(INI));
+        }
+
         return playerPresentation;
       }
 

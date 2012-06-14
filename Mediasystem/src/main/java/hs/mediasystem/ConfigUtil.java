@@ -27,6 +27,7 @@ public final class ConfigUtil {
       "hs.mediasystem.framework",
       "hs.mediasystem.fs",
       "hs.mediasystem.persist",
+      "hs.mediasystem.framework.player",
       "hs.mediasystem.screens",
       "hs.mediasystem.screens.selectmedia",
       "hs.mediasystem.screens",
@@ -52,7 +53,7 @@ public final class ConfigUtil {
       "org.jsoup",
       "org.jsoup.nodes",
       "org.jsoup.select",
-      "org.apache.felix.dm"
+      "org.apache.felix.dm",
     };
 
     String packageString = "";

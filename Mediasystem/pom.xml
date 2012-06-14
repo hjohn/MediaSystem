@@ -35,13 +35,6 @@
 			<systemPath>${basedir}/lib/sublight-ws.jar</systemPath>
 		</dependency>
 		<dependency>
-			<groupId>vlcj</groupId>
-			<artifactId>vlcj-core</artifactId>
-			<version>2.0.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/vlcj-2.0.0.jar</systemPath>
-		</dependency>
-		<dependency>
 			<groupId>javafx</groupId>
 			<artifactId>javafx</artifactId>
 			<scope>system</scope>
@@ -67,11 +60,6 @@
 			<groupId>org.kohsuke.redstone</groupId>
 			<artifactId>redstone</artifactId>
 			<version>1.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>net.java.dev.jna</groupId>
-			<artifactId>jna</artifactId>
-			<version>3.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jsoup</groupId>

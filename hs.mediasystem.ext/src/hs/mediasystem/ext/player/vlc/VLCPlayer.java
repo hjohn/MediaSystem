@@ -1,4 +1,4 @@
-package hs.mediasystem.players.vlc;
+package hs.mediasystem.ext.player.vlc;
 
 import hs.mediasystem.beans.Accessor;
 import hs.mediasystem.beans.BeanAccessor;
