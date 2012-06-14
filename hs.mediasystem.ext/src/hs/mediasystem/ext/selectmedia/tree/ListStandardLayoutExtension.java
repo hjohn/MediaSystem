@@ -29,4 +29,9 @@ public class ListStandardLayoutExtension implements StandardLayoutExtension {
   public String getTitle() {
     return "List View";
   }
+
+  @Override
+  public String getId() {
+    return "listView";
+  }
 }
