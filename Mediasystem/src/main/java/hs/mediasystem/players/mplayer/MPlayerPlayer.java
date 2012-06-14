@@ -2,6 +2,7 @@ package hs.mediasystem.players.mplayer;
 
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Player;
+import hs.mediasystem.framework.player.PlayerEvent;
 import hs.mediasystem.framework.player.Subtitle;
 
 import java.awt.Color;
@@ -28,6 +29,7 @@ import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 
 public class MPlayerPlayer implements Player {
   private static final Pattern GET_PROPERTY_PATTERN = Pattern.compile("ANS_[a-zA-Z_]+=(.*)");
@@ -430,6 +432,11 @@ public class MPlayerPlayer implements Player {
 
   @Override
   public Component getDisplayComponent() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public ObjectProperty<EventHandler<PlayerEvent>> onPlayerEvent() {
     throw new UnsupportedOperationException();
   }
 }

@@ -9,7 +9,10 @@ import hs.mediasystem.beans.BeanObjectProperty;
 import hs.mediasystem.beans.UpdatableLongProperty;
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Player;
+import hs.mediasystem.framework.player.PlayerEvent;
+import hs.mediasystem.framework.player.PlayerEvent.Type;
 import hs.mediasystem.framework.player.Subtitle;
+import hs.mediasystem.util.Events;
 
 import java.awt.Canvas;
 import java.awt.Component;
@@ -25,8 +28,10 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
@@ -81,11 +86,12 @@ public class VLCPlayer implements Player {
 
       @Override
       public void mediaMetaChanged(MediaPlayer mediaPlayer, int metaType) {
-        System.out.println("[FINE] VLCPlayer: Event[mediaMetaChanged]: " + metaType);
+        // 12 = NowPlaying(?), 13 = Publisher(?), 15 = ArtworkURL(?)
       }
 
       @Override
-      public void mediaStateChanged(MediaPlayer mediaPlayer, int newState) {  // 1 = loaded(?), 3 = playing, 4 = paused
+      public void mediaStateChanged(MediaPlayer mediaPlayer, int newState) {
+        // IDLE/CLOSE=0, OPENING=1, BUFFERING=2, PLAYING=3, PAUSED=4, STOPPING=5, ENDED=6, ERROR=7
         System.out.println("[FINE] VLCPlayer: Event[mediaStateChanged]: " + newState);
 
         pausedProperty.update(newState == 4);
@@ -114,20 +120,22 @@ public class VLCPlayer implements Player {
 
       @Override
       public void finished(MediaPlayer mediaPlayer) {
-        int index = mediaPlayer.subItemIndex();
-        System.out.println(index);
-
-        List<String> subItems = mediaPlayer.subItems();
-
-        if(index < subItems.size()) {
-          System.out.println("Finished: " + subItems.get(index));
-        }
-
-        if(ignoreFinish.get() == 0) {  // TODO Fix/Remove this code
-          // finishedNotifier.notifyListeners("FINISH");
+        if(ignoreFinish.get() == 0) {
           System.out.println("VLCPlayer: Finished");
+          Events.dispatchEvent(onPlayerEvent, new PlayerEvent(Type.FINISHED), null);
         }
         else {
+          int index = mediaPlayer.subItemIndex();
+
+          List<String> subItems = mediaPlayer.subItems();
+
+          if(index>= 0 && index < subItems.size()) {
+            System.out.println("Finished: " + subItems.get(index));
+          }
+          else {
+            index = 0;
+          }
+
           ignoreFinish.decrementAndGet();
           System.out.println("VLCPlayer: Adding more media");
           mediaPlayer.playMedia(subItems.get(index));
@@ -138,8 +146,7 @@ public class VLCPlayer implements Player {
     length = new UpdatableLongProperty();
     position = new UpdatableLongProperty() {
       @Override
-      public void set(long v) {
-        long value = v < 1 ? 1 : v;  // WORKAROUND: VLC bug with MKV files (it doesn't like skipping to 0)
+      public void set(long value) {
         mediaPlayer.setTime(value);
         super.set(value);
       }
@@ -345,4 +352,7 @@ public class VLCPlayer implements Player {
   @Override public boolean isPaused() { return pausedProperty.get(); }
   @Override public void setPaused(boolean paused) { pausedProperty.set(paused); }
   @Override public BooleanProperty pausedProperty() { return pausedProperty; }
+
+  private final ObjectProperty<EventHandler<PlayerEvent>> onPlayerEvent = new SimpleObjectProperty<>();
+  @Override public ObjectProperty<EventHandler<PlayerEvent>> onPlayerEvent() { return onPlayerEvent; }
 }

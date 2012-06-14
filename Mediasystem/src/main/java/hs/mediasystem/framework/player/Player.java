@@ -10,6 +10,7 @@ import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 
 public interface Player {
 
@@ -116,4 +117,6 @@ public interface Player {
   ObservableList<AudioTrack> getAudioTracks();
 
   Component getDisplayComponent();
+
+  ObjectProperty<EventHandler<PlayerEvent>> onPlayerEvent();
 }

@@ -5,6 +5,8 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.OpenSubtitlesSubtitleProvider;
 import hs.mediasystem.framework.SublightSubtitleProvider;
 import hs.mediasystem.framework.SubtitleProvider;
+import hs.mediasystem.framework.player.PlayerEvent;
+import hs.mediasystem.framework.player.PlayerEvent.Type;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.optiondialog.DialogScreen;
 import hs.mediasystem.screens.optiondialog.Option;
@@ -316,11 +318,24 @@ public class ProgramController {
     return currentMediaItem;
   }
 
-  public void play(final MediaItem mediaItem) {
+  public synchronized void play(final MediaItem mediaItem) {
     sceneManager.setPlayerRoot(playerPresentation.getPlayer().getDisplayComponent());
+    playerPresentation.getPlayer().onPlayerEvent().set(new EventHandler<PlayerEvent>() {
+      @Override
+      public void handle(PlayerEvent event) {
+        if(event.getType() == Type.FINISHED) {
+          Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+              stop();
+            }
+          });
+          event.consume();
+        }
+      }
+    });
     playerPresentation.getPlayer().positionProperty().set(0);
     playerPresentation.play(mediaItem.getUri());
-
     currentMediaItem = mediaItem;
 
     final PlaybackOverlayPresentation playbackOverlayPresentation = playbackOverlayPresentationProvider.get();
@@ -381,7 +396,9 @@ public class ProgramController {
     informationBorder.setVisible(false);
   }
 
-  public void stop() {
+  public synchronized void stop() {
+    playerPresentation.getPlayer().onPlayerEvent().set(null);
+
     while(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
       navigator.back();
     }
