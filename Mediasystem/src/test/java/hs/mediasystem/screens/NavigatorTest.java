@@ -96,7 +96,7 @@ public class NavigatorTest {
     private final Deque<String> trip;
 
     public TestDestination(Deque<String> trip, String description) {
-      super(description);
+      super("id", description);
       this.trip = trip;
     }
 

@@ -224,7 +224,7 @@ public class SelectMediaPresentation {
   private MediaRoot currentRoot;
 
   private void setTreeRoot(final MediaRoot root) {
-    navigator.navigateTo(new Destination(root.getRootName()) {
+    navigator.navigateTo(new Destination(root.getId(), root.getRootName()) {
       @Override
       public void execute() {
         currentRoot = root;
@@ -232,7 +232,7 @@ public class SelectMediaPresentation {
         List<MediaGroup> mediaGroups = mediaGroupTracker.getServices(new PropertyEq(MediaGroup.Constants.MEDIA_ROOT_CLASS.name(), root.getClass()));
 
         if(mediaGroups.isEmpty()) {
-          mediaGroups.add(new DefaultMediaGroup("Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
+          mediaGroups.add(new DefaultMediaGroup("alpha", "Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
         }
 
         Collections.sort(mediaGroups, new Comparator<MediaGroup>() {

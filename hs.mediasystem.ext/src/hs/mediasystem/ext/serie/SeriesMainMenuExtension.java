@@ -69,7 +69,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
 
   @Override
   public Destination getDestination(final ProgramController controller) {
-    return new Destination(getTitle()) {
+    return new Destination("serie", getTitle()) {
       private SelectMediaPresentation presentation;
       private SeriesMediaTree mediaTree;
 

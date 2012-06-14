@@ -28,7 +28,7 @@ public class NosMainMenuExtension implements MainMenuExtension {
 
   @Override
   public Destination getDestination(final ProgramController controller) {
-    return new Destination(getTitle()) {
+    return new Destination("nos", getTitle()) {
       private SelectMediaPresentation presentation;
       private NosMediaTree mediaTree;
 

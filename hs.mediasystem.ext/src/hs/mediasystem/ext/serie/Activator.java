@@ -27,7 +27,7 @@ public class Activator extends DependencyActivatorBase {
       .setInterface(MediaGroup.class.getName(), new Hashtable<String, Object>() {{
         put(MediaGroup.Constants.MEDIA_ROOT_CLASS.name(), SerieItem.class);
       }})
-      .setImplementation(new DefaultMediaGroup("Season", new SeasonGrouper(), EpisodeComparator.INSTANCE, true, true) {
+      .setImplementation(new DefaultMediaGroup("episodeNumber-group-season", "Season", new SeasonGrouper(), EpisodeComparator.INSTANCE, true, true) {
         @Override
         public Media createMediaFromFirstItem(MediaItem item) {
           Integer season = item.get(Episode.class).getSeason();

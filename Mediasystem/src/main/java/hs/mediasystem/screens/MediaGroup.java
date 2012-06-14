@@ -9,15 +9,16 @@ import java.util.Comparator;
 public interface MediaGroup {
   public enum Constants {MEDIA_ROOT_CLASS}
 
-  public String getTitle();
+  String getId();
+  String getTitle();
 
-  public Comparator<? super MediaItem> getSortComparator();
-  public Grouper<MediaItem> getGrouper();
+  Comparator<? super MediaItem> getSortComparator();
+  Grouper<MediaItem> getGrouper();
 
-  public Media createMediaFromFirstItem(MediaItem item);
+  Media createMediaFromFirstItem(MediaItem item);
 
-  public String getShortTitle(MediaItem item);
+  String getShortTitle(MediaItem item);
 
-  public boolean isAllowedSingleItemGroups();
-  public boolean showTopLevelExpanded();
+  boolean isAllowedSingleItemGroups();
+  boolean showTopLevelExpanded();
 }

@@ -25,7 +25,7 @@ public class Activator extends DependencyActivatorBase {
       .setInterface(MediaGroup.class.getName(), new Hashtable<String, Object>() {{
         put(MediaGroup.Constants.MEDIA_ROOT_CLASS.name(), MoviesMediaTree.class);
       }})
-      .setImplementation(new DefaultMediaGroup("Alphabetically, grouped by Title", new MovieGrouper(), MovieTitleGroupingComparator.INSTANCE, false, false) {
+      .setImplementation(new DefaultMediaGroup("alpha-group-title", "Alphabetically, grouped by Title", new MovieGrouper(), MovieTitleGroupingComparator.INSTANCE, false, false) {
         @Override
         public Media createMediaFromFirstItem(MediaItem item) {
           return new Media(item.getTitle(), null, item.getMedia().getReleaseYear());
@@ -37,7 +37,7 @@ public class Activator extends DependencyActivatorBase {
       .setInterface(MediaGroup.class.getName(), new Hashtable<String, Object>() {{
         put(MediaGroup.Constants.MEDIA_ROOT_CLASS.name(), MoviesMediaTree.class);
       }})
-      .setImplementation(new DefaultMediaGroup("Alphabetically", null, MovieTitleGroupingComparator.INSTANCE, false, false))
+      .setImplementation(new DefaultMediaGroup("alpha", "Alphabetically", null, MovieTitleGroupingComparator.INSTANCE, false, false))
     );
 
     manager.add(createComponent()

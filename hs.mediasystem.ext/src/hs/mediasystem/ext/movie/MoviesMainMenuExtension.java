@@ -58,7 +58,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
 
   @Override
   public Destination getDestination(final ProgramController controller) {
-    return new Destination(getTitle()) {
+    return new Destination("movie", getTitle()) {
       private SelectMediaPresentation presentation;
       private MoviesMediaTree mediaTree;
 

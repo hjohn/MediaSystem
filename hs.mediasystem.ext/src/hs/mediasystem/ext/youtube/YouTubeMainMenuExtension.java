@@ -29,7 +29,7 @@ public class YouTubeMainMenuExtension implements MainMenuExtension {
 
   @Override
   public Destination getDestination(final ProgramController controller) {
-    return new Destination(getTitle()) {
+    return new Destination("youtube", getTitle()) {
       private SelectMediaPresentation presentation;
       private YouTubeMediaTree mediaTree;
 

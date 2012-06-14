@@ -289,7 +289,7 @@ public class ProgramController {
   }
 
   public void showMainScreen() {
-    navigator.navigateTo(new Destination("Home") {
+    navigator.navigateTo(new Destination("home", "Home") {
       private MainScreen mainScreen;
 
       @Override
@@ -325,7 +325,7 @@ public class ProgramController {
 
     final PlaybackOverlayPresentation playbackOverlayPresentation = playbackOverlayPresentationProvider.get();
 
-    navigator.navigateTo(new Destination(mediaItem.getTitle()) {
+    navigator.navigateTo(new Destination("playback", mediaItem.getTitle()) {
       private long totalTimeViewed = 0;
 
       @Override
@@ -426,7 +426,7 @@ public class ProgramController {
   }
 
   public void showOptionScreen(final String title, final List<? extends Option> options) {
-    navigator.navigateToModal(new Destination(title) {
+    navigator.navigateToModal(new Destination("optionDialog", title) {
       private DialogScreen dialogScreen;
 
       @Override

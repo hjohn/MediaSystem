@@ -7,18 +7,25 @@ import hs.mediasystem.framework.MediaItem;
 import java.util.Comparator;
 
 public class DefaultMediaGroup implements MediaGroup {
+  private final String id;
   private final String title;
   private final Grouper<MediaItem> grouper;
   private final Comparator<MediaItem> sortComparator;
   private final boolean allowSingleItemGroups;
   private final boolean showTopLevelExpanded;
 
-  public DefaultMediaGroup(String title, Grouper<MediaItem> grouper, Comparator<MediaItem> sortComparator, boolean allowSingleItemGroups, boolean showTopLevelExpanded) {
+  public DefaultMediaGroup(String id, String title, Grouper<MediaItem> grouper, Comparator<MediaItem> sortComparator, boolean allowSingleItemGroups, boolean showTopLevelExpanded) {
+    this.id = id;
     this.title = title;
     this.grouper = grouper;
     this.sortComparator = sortComparator;
     this.allowSingleItemGroups = allowSingleItemGroups;
     this.showTopLevelExpanded = showTopLevelExpanded;
+  }
+
+  @Override
+  public String getId() {
+    return id;
   }
 
   @Override

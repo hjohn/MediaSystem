@@ -116,6 +116,7 @@ public class Navigator {
   public ObjectProperty<EventHandler<ActionEvent>> onNavigation() { return onNavigation; }
 
   public abstract static class Destination {
+    private final String id;
     private final String description;
 
     private Navigator childNavigator;
@@ -125,8 +126,13 @@ public class Navigator {
     private boolean modal;
     private boolean initialised;
 
-    public Destination(String description) {
+    public Destination(String id, String description) {
+      this.id = id;
       this.description = description;
+    }
+
+    public String getId() {
+      return id;
     }
 
     public String getDescription() {
