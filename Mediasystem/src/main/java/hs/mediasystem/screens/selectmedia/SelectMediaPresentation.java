@@ -198,9 +198,9 @@ public class SelectMediaPresentation {
 
     mediaGroupSettingUpdater = new SettingUpdater<>(settingsStore, new StringConverter<MediaGroup>() {
       @Override
-      public MediaGroup fromString(String title) {
+      public MediaGroup fromString(String id) {
         for(MediaGroup mediaGroup : availableGroupSetsProperty()) {
-          if(mediaGroup.getTitle().equals(title)) {
+          if(mediaGroup.getId().equals(id)) {
             return mediaGroup;
           }
         }
@@ -210,7 +210,7 @@ public class SelectMediaPresentation {
 
       @Override
       public String toString(MediaGroup mediaGroup) {
-        return mediaGroup.getTitle();
+        return mediaGroup.getId();
       }
     });
 
@@ -266,16 +266,16 @@ public class SelectMediaPresentation {
   }
 
   private String createKeyFromTrail(String prefix) {
-    String key = prefix + ":";
+    String key = "";
 
     for(Destination destination : navigator.getTrail()) {
       if(!key.isEmpty()) {
-        key += ";";
+        key += "/";
       }
-      key += destination.getDescription();
+      key += destination.getId();
     }
 
-    return key;
+    return prefix + ":" + key;
   }
 
   private List<MediaNode> getChildren(MediaRoot mediaRoot) {
@@ -304,7 +304,7 @@ public class SelectMediaPresentation {
           Media media = mediaGroup.createMediaFromFirstItem(group.get(0));
           String shortTitle = mediaGroup.getShortTitle(group.get(0));
 
-          MediaNode groupNode = new MediaNode(media.getTitle(), shortTitle, media.getReleaseYear());
+          MediaNode groupNode = new MediaNode(mediaGroup.getId() + "[" + media.getTitle() + "]", media.getTitle(), shortTitle, media.getReleaseYear());
 
           List<MediaNode> nodeChildren = new ArrayList<>();
 
