@@ -16,8 +16,13 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.image.Image;
 
 public class AsyncImageProperty extends SimpleObjectProperty<Image> {
-  private static final Executor slowExecutor = new ThreadPoolExecutor(0, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-  private static final Executor fastExecutor = new ThreadPoolExecutor(0, 3, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+  private static final ThreadPoolExecutor slowExecutor = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+  private static final ThreadPoolExecutor fastExecutor = new ThreadPoolExecutor(3, 3, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+
+  static {
+    slowExecutor.allowCoreThreadTimeOut(true);
+    fastExecutor.allowCoreThreadTimeOut(true);
+  }
 
   private final ObjectProperty<ImageHandle> imageHandle = new SimpleObjectProperty<>();
 
