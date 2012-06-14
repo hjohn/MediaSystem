@@ -15,6 +15,8 @@ public class DefaultMediaGroup implements MediaGroup {
   private final boolean showTopLevelExpanded;
 
   public DefaultMediaGroup(String id, String title, Grouper<MediaItem> grouper, Comparator<MediaItem> sortComparator, boolean allowSingleItemGroups, boolean showTopLevelExpanded) {
+    assert id != null && !id.contains("/") && !id.contains(":");
+
     this.id = id;
     this.title = title;
     this.grouper = grouper;

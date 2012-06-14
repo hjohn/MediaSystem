@@ -127,6 +127,8 @@ public class Navigator {
     private boolean initialised;
 
     public Destination(String id, String description) {
+      assert id != null && !id.contains("/") && !id.contains(":");
+
       this.id = id;
       this.description = description;
     }
