@@ -24,7 +24,7 @@ public class DatabaseImageSource implements Source<byte[]> {
    * @param id unique id that identifies a row in the given table
    * @param tableName the name of the table which contains the image
    * @param columnName the name of the column containing the raw image data
-   * @param url a URL where the image can be fetched from, or <code>null</code> if the image should be fetched only from the database
+   * @param source a source where the image can be fetched from, or <code>null</code> if the image should be fetched only from the database
    */
   public DatabaseImageSource(Provider<Connection> connectionProvider, int id, String tableName, String columnName, Source<byte[]> source) {
     this.connectionProvider = connectionProvider;
@@ -34,9 +34,13 @@ public class DatabaseImageSource implements Source<byte[]> {
     this.columnName = columnName;
   }
 
+  private boolean isStoredInDatabase() {
+    return source == null || triedSource;
+  }
+
   @Override
   public synchronized byte[] get() {
-    if(source != null && !triedSource) {
+    if(!isStoredInDatabase()) {
       triedSource = true;
 
       byte[] imageData = source.get();
@@ -92,6 +96,6 @@ public class DatabaseImageSource implements Source<byte[]> {
 
   @Override
   public boolean isLocal() {
-    return true;
+    return isStoredInDatabase();
   }
 }
