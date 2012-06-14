@@ -132,6 +132,19 @@ public class Database {
       }
     }
 
+    public synchronized long getDatabaseSize() throws SQLException {
+      ensureNotFinished();
+
+      try(PreparedStatement statement = connection.prepareStatement("SELECT pg_database_size('mediasystem')");
+          ResultSet rs = statement.executeQuery()) {
+        if(rs.next()) {
+          return rs.getLong(1);
+        }
+
+        throw new SQLException("unable to get database size");
+      }
+    }
+
     public synchronized <T> List<T> select(Class<T> cls, String whereCondition, Object... parameters) throws SQLException {
       ensureNotFinished();
 
