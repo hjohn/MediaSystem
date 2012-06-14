@@ -54,7 +54,9 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
             YouTubeVideo youTube = new YouTubeVideo(videoEntry.getTitle().getPlainText());
 
             youTube.descriptionProperty().set(mediaGroup.getDescription().getPlainTextContent());
-            youTube.ratingProperty().set(videoEntry.getRating().getAverage() * 2);
+            if(videoEntry.getRating() != null) {
+              youTube.ratingProperty().set(videoEntry.getRating().getAverage() * 2);
+            }
             youTube.releaseDateProperty().set(new Date(videoEntry.getPublished().getValue()));
             youTube.runtimeProperty().set(mediaGroup.getYouTubeContents().get(0).getDuration() / 60);
 
