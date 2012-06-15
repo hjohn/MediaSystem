@@ -13,6 +13,7 @@ public interface StandardLayout {
   ObjectBinding<MediaNode> mediaNodeBinding();
 
   void setRoot(MediaNode root);
+  MediaNode getRoot();
   ReadOnlyObjectProperty<MediaNode> focusedNodeProperty();
 
   MediaNode getSelectedNode();

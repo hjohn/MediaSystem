@@ -71,6 +71,11 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
   }
 
   @Override
+  public MediaNode getRoot() {
+    return listPane.getRoot();
+  }
+
+  @Override
   public void setRoot(final MediaNode root) {
     listPane.setRoot(root);
   }
