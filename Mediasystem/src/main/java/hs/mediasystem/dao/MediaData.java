@@ -33,9 +33,9 @@ public class MediaData extends DefaultEnrichable<MediaData> {
     }
 
     @Override
-    public void set(boolean b) {
-      super.set(b);
+    protected void invalidated() {
       queueAsDirty();
+      get();
     }
   };
   public BooleanProperty viewedProperty() { return viewed; }
@@ -56,9 +56,9 @@ public class MediaData extends DefaultEnrichable<MediaData> {
     }
 
     @Override
-    public void set(int v) {
-      super.set(v);
+    protected void invalidated() {
       queueAsDirty();
+      get();
     }
   };
   public IntegerProperty resumePositionProperty() { return resumePosition; }
