@@ -176,11 +176,6 @@ public class BannerListPane extends BorderPane implements ListPane {
   @Override
   public void requestFocus() {
     tableView.requestFocus();
-
-    if(!tableView.getItems().isEmpty()) {
-      tableView.getFocusModel().focus(0, leftColumn);
-      tableView.getSelectionModel().select(0, leftColumn);
-    }
   }
 
   private void itemSelected(Event event, MediaNode focusedNode) {
