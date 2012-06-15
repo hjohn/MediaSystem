@@ -178,4 +178,8 @@ public class MediaNode {
     return (Media)dataMap.get().get(Media.class);
   }
 
+  @Override
+  public String toString() {
+    return "MediaNode[id='" + id + "']";
+  }
 }
