@@ -138,7 +138,9 @@ public class TreeListPane extends BorderPane implements ListPane {
     treeView.getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<MediaNode>>() {
       @Override
       public void changed(ObservableValue<? extends TreeItem<MediaNode>> observable, TreeItem<MediaNode> old, TreeItem<MediaNode> current) {
-        focusedNode.set(current.getValue());
+        if(current != null) {
+          focusedNode.set(current.getValue());
+        }
       }
     });
 
