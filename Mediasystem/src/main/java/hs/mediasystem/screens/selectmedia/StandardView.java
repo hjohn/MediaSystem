@@ -7,7 +7,6 @@ import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
-import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
 import hs.mediasystem.util.ServiceTracker;
@@ -18,6 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -49,6 +50,9 @@ public class StandardView extends StackPane implements SelectMediaView {
 
   private final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect = new SimpleObjectProperty<>();
   @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect() { return onNodeAlternateSelect; }
+
+  private final ReadOnlyObjectWrapper<MediaNode> focusedNode = new ReadOnlyObjectWrapper<>();
+  @Override public ReadOnlyObjectProperty<MediaNode> focusedNodeProperty() { return focusedNode.getReadOnlyProperty(); }
 
   private final ServiceTracker<StandardLayoutExtension> standardLayoutExtensionTracker;
   private final BackgroundPane backgroundPane = new BackgroundPane();
@@ -91,6 +95,7 @@ public class StandardView extends StackPane implements SelectMediaView {
         if(layout != null) {
           layout.onNodeSelected().set(null);
           layout.onNodeAlternateSelect().set(null);
+          focusedNode.unbind();
 
           getChildren().remove(layout);
         }
@@ -102,6 +107,7 @@ public class StandardView extends StackPane implements SelectMediaView {
 
         layout.onNodeSelected().set(onNodeSelected.get());
         layout.onNodeAlternateSelect().set(onNodeAlternateSelect.get());
+        focusedNode.bind(layout.focusedNodeProperty());
 
         layout.setRoot(currentRoot);
 

@@ -5,6 +5,7 @@ import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.util.BasicNode;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.EventHandler;
 
 public interface ListPane extends BasicNode {
@@ -13,6 +14,8 @@ public interface ListPane extends BasicNode {
   ObjectBinding<MediaNode> mediaNodeBinding();
 
   void setRoot(MediaNode root);
+  ReadOnlyObjectProperty<MediaNode> focusedNodeProperty();
+
   MediaNode getSelectedNode();
   void setSelectedNode(MediaNode mediaNode);
 }

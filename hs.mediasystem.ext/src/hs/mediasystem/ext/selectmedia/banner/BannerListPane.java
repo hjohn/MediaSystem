@@ -7,8 +7,12 @@ import hs.mediasystem.screens.SmartMediaNodeCellProvider;
 import hs.mediasystem.screens.selectmedia.ListPane;
 import hs.mediasystem.util.Events;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -42,6 +46,9 @@ public class BannerListPane extends BorderPane implements ListPane {
 
   private final ObjectProperty<EventHandler<MediaNodeEvent>> onItemAlternateSelect = new SimpleObjectProperty<>();
   @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect() { return onItemAlternateSelect; }
+
+  private final ReadOnlyObjectWrapper<MediaNode> focusedNode = new ReadOnlyObjectWrapper<>();
+  @Override public ReadOnlyObjectProperty<MediaNode> focusedNodeProperty() { return focusedNode.getReadOnlyProperty(); }
 
   private final TableView<DuoMediaNode> tableView = new TableView<DuoMediaNode>() {{
     getColumns().add(leftColumn);
@@ -87,6 +94,13 @@ public class BannerListPane extends BorderPane implements ListPane {
 
     leftColumn.setCellValueFactory(new PropertyValueFactory<DuoMediaNode, MediaNode>("left"));
     rightColumn.setCellValueFactory(new PropertyValueFactory<DuoMediaNode, MediaNode>("right"));
+
+    tableView.getFocusModel().focusedCellProperty().addListener(new InvalidationListener() {
+      @Override
+      public void invalidated(Observable observable) {
+        focusedNode.set(getFocusedMediaNode());
+      }
+    });
   }};
 
   private final ObjectBinding<MediaNode> mediaNode = new ObjectBinding<MediaNode>() {

@@ -4,6 +4,7 @@ import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.EventHandler;
 
 public interface StandardLayout {
@@ -12,6 +13,8 @@ public interface StandardLayout {
   ObjectBinding<MediaNode> mediaNodeBinding();
 
   void setRoot(MediaNode root);
+  ReadOnlyObjectProperty<MediaNode> focusedNodeProperty();
+
   MediaNode getSelectedNode();
 
   /**

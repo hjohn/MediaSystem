@@ -5,6 +5,7 @@ import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.util.GridPaneUtil;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.effect.BlurType;
@@ -87,4 +88,5 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
   @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected() { return listPane.onNodeSelected(); }
   @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect() { return listPane.onNodeAlternateSelect(); }
   @Override public ObjectBinding<MediaNode> mediaNodeBinding() { return listPane.mediaNodeBinding(); }
+  @Override public ReadOnlyObjectProperty<MediaNode> focusedNodeProperty() { return listPane.focusedNodeProperty(); }
 }

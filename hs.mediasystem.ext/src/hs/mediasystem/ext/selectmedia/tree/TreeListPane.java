@@ -14,6 +14,8 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -46,6 +48,9 @@ public class TreeListPane extends BorderPane implements ListPane {
 
   private final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect = new SimpleObjectProperty<>();
   @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect() { return onNodeAlternateSelect; }
+
+  private final ReadOnlyObjectWrapper<MediaNode> focusedNode = new ReadOnlyObjectWrapper<>();
+  @Override public ReadOnlyObjectProperty<MediaNode> focusedNodeProperty() { return focusedNode.getReadOnlyProperty(); }
 
   private final TreeView<MediaNode> treeView = new TreeView<>();
 
@@ -127,6 +132,13 @@ public class TreeListPane extends BorderPane implements ListPane {
         label.setText(((MediaNodeTreeItem)value.getUserData()).getValue().getMedia().getTitle());
 
         refilter();
+      }
+    });
+
+    treeView.getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<MediaNode>>() {
+      @Override
+      public void changed(ObservableValue<? extends TreeItem<MediaNode>> observable, TreeItem<MediaNode> old, TreeItem<MediaNode> current) {
+        focusedNode.set(current.getValue());
       }
     });
 
