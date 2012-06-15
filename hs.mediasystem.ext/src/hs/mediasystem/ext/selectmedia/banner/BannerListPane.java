@@ -94,13 +94,6 @@ public class BannerListPane extends BorderPane implements ListPane {
 
     leftColumn.setCellValueFactory(new PropertyValueFactory<DuoMediaNode, MediaNode>("left"));
     rightColumn.setCellValueFactory(new PropertyValueFactory<DuoMediaNode, MediaNode>("right"));
-
-    tableView.getFocusModel().focusedCellProperty().addListener(new InvalidationListener() {
-      @Override
-      public void invalidated(Observable observable) {
-        focusedNode.set(getFocusedMediaNode());
-      }
-    });
   }};
 
   private final ObjectBinding<MediaNode> mediaNode = new ObjectBinding<MediaNode>() {
@@ -149,6 +142,13 @@ public class BannerListPane extends BorderPane implements ListPane {
             Events.dispatchEvent(onItemAlternateSelect, new MediaNodeEvent(focusedNode), event);
           }
         }
+      }
+    });
+
+    tableView.getFocusModel().focusedCellProperty().addListener(new InvalidationListener() {
+      @Override
+      public void invalidated(Observable observable) {
+        focusedNode.set(getFocusedMediaNode());
       }
     });
 
