@@ -90,9 +90,13 @@ public class StandardView extends StackPane implements SelectMediaView {
     layoutExtension.addListener(new ChangeListener<StandardLayoutExtension>() {
       @Override
       public void changed(ObservableValue<? extends StandardLayoutExtension> observableValue, StandardLayoutExtension oldLayoutExtension, StandardLayoutExtension layoutExtension) {
-        MediaNode selectedNode = getSelectedNode();
+        MediaNode selectedNode = null;
 
         if(layout != null) {
+          if(currentRoot.equals(layout.getRoot())) {
+            selectedNode = layout.getSelectedNode();  // it only makes sense to re-select the focused node if the root did not change
+          }
+
           layout.onNodeSelected().set(null);
           layout.onNodeAlternateSelect().set(null);
           focusedNode.unbind();
@@ -137,8 +141,6 @@ public class StandardView extends StackPane implements SelectMediaView {
 
     layoutExtension.addListener(settingUpdater);
   }
-
-
 
   @Override
   public void setRoot(MediaNode root) {
