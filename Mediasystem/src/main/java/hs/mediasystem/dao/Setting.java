@@ -63,7 +63,8 @@ public class Setting extends DefaultEnrichable<Setting> {
 
   private final StringProperty value = new SimpleStringProperty() {
     @Override
-    protected void invalidated() {
+    public void set(String s) {
+      super.set(s);
       queueAsDirty();
     }
   };
