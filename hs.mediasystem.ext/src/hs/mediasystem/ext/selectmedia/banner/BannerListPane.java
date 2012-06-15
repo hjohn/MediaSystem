@@ -155,8 +155,17 @@ public class BannerListPane extends BorderPane implements ListPane {
     setCenter(tableView);
   }
 
+  private MediaNode root;
+
+  @Override
+  public MediaNode getRoot() {
+    return root;
+  }
+
   @Override
   public void setRoot(final MediaNode root) {
+    this.root = root;
+
     tableView.getItems().clear();
     DuoMediaNode duoMediaNode = null;
 

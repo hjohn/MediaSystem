@@ -148,8 +148,17 @@ public class TreeListPane extends BorderPane implements ListPane {
     setCenter(treeView);
   }
 
+  private MediaNode root;
+
+  @Override
+  public MediaNode getRoot() {
+    return root;
+  }
+
   @Override
   public void setRoot(final MediaNode root) {
+    this.root = root;
+
     treeView.setCellFactory(new Callback<TreeView<MediaNode>, TreeCell<MediaNode>>() {
       @Override
       public TreeCell<MediaNode> call(TreeView<MediaNode> param) {
@@ -166,8 +175,6 @@ public class TreeListPane extends BorderPane implements ListPane {
         filter.getChildren().add(label);
         label.setUserData(new MediaNodeTreeItem(node));
       }
-
-      filter.activeProperty().set(filter.getChildren().get(0));
     }
     else {
       treeView.setRoot(new MediaNodeTreeItem(root, false));
@@ -263,6 +270,9 @@ public class TreeListPane extends BorderPane implements ListPane {
     treeView.getFocusModel().focus(-1);  // WORKAROUND: If focus index was same as before, even if root was changed, focused item is NOT updated
 
     if(mediaNode == null) {
+      if(!filter.getChildren().isEmpty()) {
+        filter.activeProperty().set(filter.getChildren().get(0));
+      }
       treeView.getFocusModel().focus(0);
     }
     else {

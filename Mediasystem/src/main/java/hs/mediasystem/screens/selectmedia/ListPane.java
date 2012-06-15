@@ -13,6 +13,7 @@ public interface ListPane extends BasicNode {
   ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect();
   ObjectBinding<MediaNode> mediaNodeBinding();
 
+  MediaNode getRoot();
   void setRoot(MediaNode root);
   ReadOnlyObjectProperty<MediaNode> focusedNodeProperty();
 
