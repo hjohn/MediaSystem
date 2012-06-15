@@ -17,7 +17,6 @@ import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.Navigator;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
-import hs.mediasystem.screens.SelectMediaView;
 import hs.mediasystem.screens.optiondialog.ActionOption;
 import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.ListOption;
@@ -40,6 +39,8 @@ import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -60,7 +61,6 @@ public class SelectMediaPresentation {
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
 
   private final Navigator navigator;
-  private final SettingsStore settingsStore;
   private final ServiceTracker<MediaGroup> mediaGroupTracker;
   private final SettingUpdater<MediaGroup> mediaGroupSettingUpdater;
 
@@ -68,7 +68,6 @@ public class SelectMediaPresentation {
 
   @Inject
   public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final SettingsStore settingsStore, BundleContext bundleContext) {
-    this.settingsStore = settingsStore;
     this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
 
@@ -215,6 +214,15 @@ public class SelectMediaPresentation {
     });
 
     groupSetProperty().addListener(mediaGroupSettingUpdater);
+
+    view.focusedNodeProperty().addListener(new ChangeListener<MediaNode>() {
+      @Override
+      public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
+        if(current != null) {
+          settingsStore.storeSetting("MediaSystem:SelectMedia", PersistLevel.TEMPORARY, createKeyFromTrail("LastSelected"), current.getId());
+        }
+      }
+    });
   }
 
   public Node getView() {
@@ -248,15 +256,6 @@ public class SelectMediaPresentation {
         MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSetsProperty().get(0));
 
         groupSetProperty().set(selectedMediaGroup);
-      }
-
-      @Override
-      protected void outro() {
-        MediaNode selectedNode = view.getSelectedNode();
-
-        if(selectedNode != null) {
-          settingsStore.storeSetting("MediaSystem:SelectMedia", PersistLevel.TEMPORARY, createKeyFromTrail("LastSelected"), selectedNode.getId());
-        }
       }
     });
   }

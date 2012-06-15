@@ -1,7 +1,9 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.screens.selectmedia.StandardLayoutExtension;
+import hs.mediasystem.screens.MediaNode;
+import hs.mediasystem.screens.MediaNodeEvent;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -12,6 +14,8 @@ public interface SelectMediaView {
   ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected();
 
   void setRoot(MediaNode root);
+  ReadOnlyObjectProperty<MediaNode> focusedNodeProperty();
+
   MediaNode getSelectedNode();
 
   /**
