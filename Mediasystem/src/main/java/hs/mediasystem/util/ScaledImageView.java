@@ -2,28 +2,26 @@ package hs.mediasystem.util;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.geometry.HPos;
 import javafx.geometry.Pos;
-import javafx.scene.control.ScrollPane;
+import javafx.geometry.VPos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 
-public class ScaledImageView extends ScrollPane {
-  private final BorderPane borderPane = new BorderPane();
+public class ScaledImageView extends Region {
   private final ImageView imageView = new ImageView();
 
   public ScaledImageView() {
-    imageView.fitWidthProperty().bind(widthProperty());
-    imageView.fitHeightProperty().bind(heightProperty());
-    imageView.setPreserveRatio(true);
+    getChildren().add(imageView);
+  }
 
-    borderPane.prefWidthProperty().bind(widthProperty());
-    borderPane.prefHeightProperty().bind(heightProperty());
-    borderPane.setCenter(imageView);
-
-    setContent(borderPane);
-    setHbarPolicy(ScrollBarPolicy.NEVER);
-    setVbarPolicy(ScrollBarPolicy.NEVER);
+  @Override
+  protected void layoutChildren() {
+    imageView.setFitWidth(getWidth());
+    imageView.setFitHeight(getHeight());
+    layoutInArea(imageView, 0, 0, getWidth(), getHeight(), 0, HPos.CENTER, VPos.CENTER);
   }
 
   public final void setAlignment(Pos pos) {
@@ -50,16 +48,16 @@ public class ScaledImageView extends ScrollPane {
     return imageView.preserveRatioProperty();
   }
 
-  public final void setImage(Image arg0) {
-    imageView.setImage(arg0);
+  public final void setImage(Image image) {
+    imageView.setImage(image);
   }
 
-  public final void setPreserveRatio(boolean arg0) {
-    imageView.setPreserveRatio(arg0);
+  public final void setPreserveRatio(boolean preserveRatio) {
+    imageView.setPreserveRatio(preserveRatio);
   }
 
-  public final void setSmooth(boolean arg0) {
-    imageView.setSmooth(arg0);
+  public final void setSmooth(boolean preserveRatio) {
+    imageView.setSmooth(preserveRatio);
   }
 
   public final BooleanProperty smoothProperty() {
