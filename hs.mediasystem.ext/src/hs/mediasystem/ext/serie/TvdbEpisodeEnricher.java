@@ -103,7 +103,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
 
   private static EpisodeSearchResult findEpisode(String serieId, hs.mediasystem.framework.Episode ep) {
     synchronized(TheTVDB.class) {
-      EpisodeSearchResult result;
+      EpisodeSearchResult result = null;
 
       if(ep.getSeason() == null) {
         result = selectBestMatchByTitle(TvdbSerieEnricher.TVDB, serieId, ep.getTitle());
@@ -111,7 +111,9 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
       else {
         Episode episode = TvdbSerieEnricher.TVDB.getEpisode(serieId, ep.getSeason(), ep.getEpisode(), "en");
 
-        result = new EpisodeSearchResult(episode, MatchType.ID, 1.0f);
+        if(episode != null) {
+          result = new EpisodeSearchResult(episode, MatchType.ID, 1.0f);
+        }
       }
 
       System.out.println("[FINE] TvdbEpisodeProvider: serieId = " + serieId + ": Result: " + result);
