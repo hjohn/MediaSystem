@@ -8,18 +8,16 @@ import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.StarRating;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
+import hs.mediasystem.util.ScaledImageView;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.FlowPane;
@@ -88,35 +86,10 @@ public class DetailPane extends GridPane {
       }}
     );
 
-    add(new ScrollPane() {{
-      final ReadOnlyDoubleProperty widthProperty = widthProperty();
-      final ReadOnlyDoubleProperty heightProperty = heightProperty();
-
-      setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-      setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-
-      setContent(new ImageView() {{
-        imageProperty().bind(poster);
-        setPreserveRatio(true);
-        setSmooth(true);
-//        setEffect(new DropShadow());
-//          setEffect(new PerspectiveTransform() {{
-//            setUlx(10.0);
-//            setUly(10.0);
-//            setUrx(310.0);
-//            setUry(40.0);
-//            setLrx(310.0);
-//            setLry(60.0);
-//            setLlx(10.0);
-//            setLly(90.0);
-//            setEffect(new Reflection() {{
-//              setFraction(0.10);
-//            }});
-//          }});
-
-        fitWidthProperty().bind(widthProperty);
-        fitHeightProperty().bind(heightProperty);
-      }});
+    add(new ScaledImageView() {{
+      imageProperty().bind(poster);
+      setPreserveRatio(true);
+      setSmooth(true);
     }}, 0, 0);
     add(new BorderPane() {{
       setTop(new VBox() {{
