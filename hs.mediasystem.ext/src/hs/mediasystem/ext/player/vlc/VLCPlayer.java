@@ -259,7 +259,7 @@ public class VLCPlayer implements Player {
     subtitleDelay.update();
     volume.update();
 
-    mediaPlayer.setRepeat(true);
+    mediaPlayer.setRepeat(false);
     mediaPlayer.setPlaySubItems(true);
     mediaPlayer.playMedia(uri);
 
