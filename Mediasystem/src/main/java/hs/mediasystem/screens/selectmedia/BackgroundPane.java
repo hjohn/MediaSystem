@@ -6,6 +6,7 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
+import hs.mediasystem.util.ScaledImageView;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -13,19 +14,18 @@ import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Group;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
-public class BackgroundPane extends ScrollPane {
+public class BackgroundPane extends StackPane {
+  private static final Duration SETTLE_DURATION = Duration.millis(200);
+
   private final ObjectProperty<MediaNode> mediaNode = new SimpleObjectProperty<>();
   public ObjectProperty<MediaNode> mediaNodeProperty() { return mediaNode; }
 
@@ -38,24 +38,45 @@ public class BackgroundPane extends ScrollPane {
   private final ObjectProperty<Image> background = new SimpleObjectProperty<>();
   private final ObjectProperty<Image> newBackground = new SimpleObjectProperty<>();
 
-  private final ImageView backgroundImageView = new ImageView() {{
+  private final ScaledImageView backgroundImageView = new ScaledImageView() {{
     imageProperty().bind(background);
     setPreserveRatio(true);
     setSmooth(true);
   }};
 
-  private final ImageView newBackgroundImageView = new ImageView() {{
+  private final ScaledImageView newBackgroundImageView = new ScaledImageView() {{
     imageProperty().bind(newBackground);
     setPreserveRatio(true);
     setSmooth(true);
   }};
+
+  private final EventHandler<ActionEvent> beforeBackgroundChange = new EventHandler<ActionEvent>() {
+    @Override
+    public void handle(ActionEvent event) {
+
+      /*
+       * Check if background really has changed during the SETTLE_DURATION, if not, cancel the animation.
+       */
+
+      if(isBackgroundChanged()) {
+        newBackground.set(wantedBackground.get());
+      }
+      else {
+        timeline.stop();
+      }
+    }
+  };
 
   private final Timeline timeline = new Timeline(
     new KeyFrame(Duration.ZERO,
       new KeyValue(backgroundImageView.opacityProperty(), 1.0),
       new KeyValue(newBackgroundImageView.opacityProperty(), 0.0)
     ),
-    new KeyFrame(new Duration(4000),
+    new KeyFrame(SETTLE_DURATION, beforeBackgroundChange,
+      new KeyValue(backgroundImageView.opacityProperty(), 1.0),
+      new KeyValue(newBackgroundImageView.opacityProperty(), 0.0)
+    ),
+    new KeyFrame(Duration.millis(4000),
       new KeyValue(backgroundImageView.opacityProperty(), 0.0),
       new KeyValue(newBackgroundImageView.opacityProperty(), 1.0)
     )
@@ -69,8 +90,7 @@ public class BackgroundPane extends ScrollPane {
         backgroundImageView.setOpacity(1.0);
         newBackgroundImageView.setOpacity(0.0);
 
-        if((wantedBackground.get() == null && background.get() != null) || (wantedBackground.get() != null && !wantedBackground.get().equals(background.get()))) {
-          newBackground.set(wantedBackground.get());
+        if(isBackgroundChanged()) {
           timeline.play();
         }
       }
@@ -81,26 +101,25 @@ public class BackgroundPane extends ScrollPane {
     wantedBackground.addListener(new ChangeListener<Image>() {
       @Override
       public void changed(ObservableValue<? extends Image> observable, Image oldValue, Image newValue) {
+
+        /*
+         * If the background should change and we are not currently in the change process, then start a new animation.  If we are
+         * in the early stages of an animation, restart it to allow the background to 'settle'.
+         */
+
         if(timeline.getStatus() == Animation.Status.STOPPED) {
-          newBackground.set(wantedBackground.get());
           timeline.play();
+        }
+        else if(timeline.getCurrentTime().lessThan(SETTLE_DURATION)) {
+          timeline.playFromStart();
         }
       }
     });
 
-    final ReadOnlyDoubleProperty widthProperty = widthProperty();
-    final ReadOnlyDoubleProperty heightProperty = heightProperty();
+    getChildren().addAll(backgroundImageView, newBackgroundImageView);
+  }
 
-    setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-    setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-
-    setContent(new Group() {{
-      getChildren().addAll(backgroundImageView, newBackgroundImageView);
-
-      backgroundImageView.fitWidthProperty().bind(widthProperty);
-      backgroundImageView.fitHeightProperty().bind(heightProperty);
-      newBackgroundImageView.fitWidthProperty().bind(widthProperty);
-      newBackgroundImageView.fitHeightProperty().bind(heightProperty);
-    }});
+  private boolean isBackgroundChanged() {
+    return (wantedBackground.get() == null && background.get() != null) || (wantedBackground.get() != null && !wantedBackground.get().equals(background.get()));
   }
 }
