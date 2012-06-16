@@ -42,55 +42,49 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
   }
 
   private void loadImageInBackground(final ImageHandle imageHandle) {
+    set(null);
+
     synchronized(fastExecutor) {
-      if(!taskQueued) {
-        if(imageHandle != null) {
-          Executor chosenExecutor = imageHandle.isFastSource() ? fastExecutor : slowExecutor;
+      if(!taskQueued && imageHandle != null) {
+        Executor chosenExecutor = imageHandle.isFastSource() ? fastExecutor : slowExecutor;
 
-          chosenExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
+        chosenExecutor.execute(new Runnable() {
+          @Override
+          public void run() {
+            try {
+              Image image = null;
+
               try {
-                Image image = null;
-
-                try {
-                  image = ImageCache.loadImage(imageHandle);
-                }
-                catch(Exception e) {
-                  System.out.println("[WARN] AsyncImageProperty - Exception while loading " + imageHandle + " in background: " + e);
-                }
-
-                final Image finalImage = image;
-
-                Platform.runLater(new Runnable() {
-                  @Override
-                  public void run() {
-                    set(finalImage);
-
-                    ImageHandle handle = AsyncImageProperty.this.imageHandle.get();
-
-                    if(handle != null && !handle.equals(imageHandle)) {
-                      loadImageInBackground(handle);
-                    }
-                    else if(handle == null) {
-                      set(null);
-                    }
-                  }
-                });
+                image = ImageCache.loadImage(imageHandle);
               }
-              finally {
-                synchronized(fastExecutor) {
-                  taskQueued = false;
+              catch(Exception e) {
+                System.out.println("[WARN] AsyncImageProperty - Exception while loading " + imageHandle + " in background: " + e);
+              }
+
+              final Image finalImage = image;
+
+              Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                  set(finalImage);
+
+                  ImageHandle handle = AsyncImageProperty.this.imageHandle.get();
+
+                  if(handle == null || !handle.equals(imageHandle)) {
+                    loadImageInBackground(handle);
+                  }
                 }
+              });
+            }
+            finally {
+              synchronized(fastExecutor) {
+                taskQueued = false;
               }
             }
-          });
+          }
+        });
 
-          taskQueued = true;
-        }
-        else {
-          set(null);
-        }
+        taskQueued = true;
       }
     }
   }
