@@ -4,7 +4,7 @@
 }
 
 .time.label, .position.label {
-  -fx-text-fill: color-blue-30;
+  -fx-text-fill: color-blue-40;
 }
 
 .time.label, .position.label, .osd {
