@@ -102,6 +102,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
     detailsOverlay.setId("video-overlay");
     detailsOverlay.add(new ScaledImageView() {{
       imageProperty().bind(poster);
+      setPreserveRatio(true);
       setAlignment(Pos.BOTTOM_RIGHT);
       getStyleClass().add("poster");
       setEffect(new Blend() {{
