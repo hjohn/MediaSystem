@@ -2,16 +2,14 @@ package hs.mediasystem.util;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.geometry.HPos;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
 public class ScaledImageView extends Region {
   private final ImageView imageView = new ImageView();
+  private Pos alignment = Pos.TOP_LEFT;
 
   public ScaledImageView() {
     getChildren().add(imageView);
@@ -21,11 +19,12 @@ public class ScaledImageView extends Region {
   protected void layoutChildren() {
     imageView.setFitWidth(getWidth());
     imageView.setFitHeight(getHeight());
-    layoutInArea(imageView, 0, 0, getWidth(), getHeight(), 0, HPos.CENTER, VPos.CENTER);
+    layoutInArea(imageView, 0, 0, getWidth(), getHeight(), 0, alignment.getHpos(), alignment.getVpos());
   }
 
   public final void setAlignment(Pos pos) {
-    BorderPane.setAlignment(imageView, pos);
+    this.alignment = pos;
+    this.requestLayout();
   }
 
   public final Image getImage() {
