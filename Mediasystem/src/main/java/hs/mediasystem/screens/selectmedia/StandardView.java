@@ -80,11 +80,11 @@ public class StandardView extends StackPane implements SelectMediaView {
 
     GridPane stage = GridPaneUtil.create(new double[] {100}, new double[] {90, 10});
 
+    stage.add(backgroundPane, 0, 0);
     stage.add(new StackPane() {{
       getStyleClass().add("stage");
     }}, 0, 1);
 
-    getChildren().add(backgroundPane);
     getChildren().add(stage);
 
     layoutExtension.addListener(new ChangeListener<StandardLayoutExtension>() {
