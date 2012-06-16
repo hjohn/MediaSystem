@@ -308,11 +308,11 @@ public class TreeListPane extends BorderPane implements ListPane {
 
       if(root != null) {
         final int index = treeView.getRow(root);
+        treeView.getFocusModel().focus(index);
 
         Platform.runLater(new Runnable() {
           @Override
           public void run() {
-            treeView.getFocusModel().focus(index);
             treeView.scrollTo(index);
           }
         });

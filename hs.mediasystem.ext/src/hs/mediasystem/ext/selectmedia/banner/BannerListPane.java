@@ -250,11 +250,12 @@ public class BannerListPane extends BorderPane implements ListPane {
 
     final int finalIndex = index;
 
+    tableView.getFocusModel().focus(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
+    tableView.getSelectionModel().select(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
+
     Platform.runLater(new Runnable() {
       @Override
       public void run() {
-        tableView.getFocusModel().focus(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
-        tableView.getSelectionModel().select(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
         tableView.scrollTo(finalIndex / 2);
       }
     });
