@@ -20,7 +20,7 @@ import javafx.scene.paint.Color;
 public abstract class AbstractDuoPaneStandardLayout extends StackPane implements StandardLayout {
   private final ListPane listPane;
 
-  public AbstractDuoPaneStandardLayout(final ListPane listPane, final DetailPane detailPane) {
+  public AbstractDuoPaneStandardLayout(final ListPane listPane, final StandardDetailPane detailPane) {
     detailPane.getStyleClass().add("box-content");
     listPane.getStyleClass().add("box-content");
 

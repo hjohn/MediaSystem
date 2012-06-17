@@ -27,7 +27,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 
-public class DetailPane extends GridPane {
+public class StandardDetailPane extends GridPane {
   private final ObjectProperty<MediaNode> mediaNode = new SimpleObjectProperty<>();
   public ObjectProperty<MediaNode> mediaNodeProperty() { return mediaNode; }
 
@@ -66,7 +66,7 @@ public class DetailPane extends GridPane {
       return genreText;
     }
   };
-  public DetailPane() {
+  public StandardDetailPane() {
     getStylesheets().add("select-media/detail-pane.css");
 
     poster.imageHandleProperty().bind(posterHandle);
