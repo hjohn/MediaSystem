@@ -27,9 +27,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 
-public class StandardDetailPane extends GridPane {
+public class StandardDetailPane extends GridPane implements DetailPane {
   private final ObjectProperty<MediaNode> mediaNode = new SimpleObjectProperty<>();
-  public ObjectProperty<MediaNode> mediaNodeProperty() { return mediaNode; }
+  @Override public ObjectProperty<MediaNode> mediaNodeProperty() { return mediaNode; }
 
   private final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaNode, "dataMap", Media.class, "image");
   private final AsyncImageProperty poster = new AsyncImageProperty();

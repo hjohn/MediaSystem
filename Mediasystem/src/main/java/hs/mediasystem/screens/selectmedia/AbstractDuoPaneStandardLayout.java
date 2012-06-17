@@ -20,7 +20,7 @@ import javafx.scene.paint.Color;
 public abstract class AbstractDuoPaneStandardLayout extends StackPane implements StandardLayout {
   private final ListPane listPane;
 
-  public AbstractDuoPaneStandardLayout(final ListPane listPane, final StandardDetailPane detailPane) {
+  public AbstractDuoPaneStandardLayout(final ListPane listPane, final DetailPane detailPane) {
     detailPane.getStyleClass().add("box-content");
     listPane.getStyleClass().add("box-content");
 
@@ -35,7 +35,7 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
 
     root.add(panelGroup, 0, 1);
 
-    detailPane.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.BLACK, 3, 0.0, 0, 0));
+    ((Node)detailPane).setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.BLACK, 3, 0.0, 0, 0));
     ((Node)listPane).setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.BLACK, 3, 0.0, 0, 0));
 
     panelGroup.setEffect(new Reflection(5, 0.025, 0.25, 0.0));
@@ -48,7 +48,7 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
           setSurfaceScale(3.0);
         }});
       }});
-      getChildren().add(detailPane);
+      getChildren().add((Node)detailPane);
     }}, 0, 0);
 
     panelGroup.add(new StackPane() {{
