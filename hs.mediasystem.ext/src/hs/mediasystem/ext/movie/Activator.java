@@ -42,6 +42,7 @@ public class Activator extends DependencyActivatorBase {
           if(media instanceof Movie) {
             Movie movie = (Movie)media;
 
+            criteria.put(SubtitleCriteriaProvider.YEAR, movie.getReleaseYear());
             criteria.put(SubtitleCriteriaProvider.IMDB_ID, movie.getImdbNumber());
           }
 
