@@ -23,6 +23,12 @@ public class ServiceTracker<S> {
     return serviceReferences == null ? new ServiceReference[0] : serviceReferences;
   }
 
+  public S getService(PropertyEq... filters) {
+    List<S> services = getServices(filters);
+
+    return services.isEmpty() ? null : services.get(0);
+  }
+
   public List<S> getServices(PropertyEq... filters) {
     List<S> services = new ArrayList<>();
 
