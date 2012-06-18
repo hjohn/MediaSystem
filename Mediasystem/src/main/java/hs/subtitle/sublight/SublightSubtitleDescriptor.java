@@ -76,7 +76,7 @@ public class SublightSubtitleDescriptor implements SubtitleDescriptor {
   }
 
   @Override
-  public byte[] fetch() throws IOException {
+  public byte[] getSubtitleRawData() throws IOException {
     byte[] archive = source.getZipArchive(subtitle);
 
     // the zip archive will contain exactly one subtitle

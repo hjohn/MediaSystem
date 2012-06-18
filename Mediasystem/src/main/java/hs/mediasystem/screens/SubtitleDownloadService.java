@@ -31,7 +31,7 @@ public class SubtitleDownloadService extends Service<Path> {
         updateTitle("Fetching subtitle");
         updateMessage("Downloading " + descriptor.getName() + "...");
 
-        byte[] buffer = descriptor.fetch();
+        byte[] buffer = descriptor.getSubtitleRawData();
         updateProgress(60, 100);
 
         Path path = Paths.get("tempsubtitle" + ++counter + ".srt");

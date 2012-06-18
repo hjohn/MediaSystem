@@ -118,7 +118,7 @@ public class OpenSubtitlesSubtitleDescriptor implements SubtitleDescriptor {
   }
 
   @Override
-  public byte[] fetch() throws IOException {
+  public byte[] getSubtitleRawData() throws IOException {
     URL resource = new URL(getProperty(Property.SubDownloadLink));
 
     try(DataInputStream stream = new DataInputStream(new GZIPInputStream(resource.openStream()))) {

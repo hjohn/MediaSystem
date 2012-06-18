@@ -6,5 +6,5 @@ public interface SubtitleDescriptor {
   String getName();
   String getLanguageName();
   String getType();
-  byte[] fetch() throws IOException;
+  byte[] getSubtitleRawData() throws IOException;
 }
