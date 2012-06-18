@@ -11,6 +11,7 @@ import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaGroup;
+import hs.mediasystem.screens.selectmedia.DetailPane;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 
 import java.util.Hashtable;
@@ -23,6 +24,13 @@ public class Activator extends DependencyActivatorBase {
 
   @Override
   public void init(BundleContext context, DependencyManager manager) throws Exception {
+    manager.add(createComponent()
+      .setInterface(DetailPane.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", Episode.class);
+      }})
+      .setImplementation(EpisodeDetailPane.class)
+    );
+
     manager.add(createComponent()
       .setInterface(MediaGroup.class.getName(), new Hashtable<String, Object>() {{
         put(MediaGroup.Constants.MEDIA_ROOT_CLASS.name(), SerieItem.class);
