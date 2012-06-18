@@ -7,7 +7,7 @@ import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.dao.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 
-public abstract class AbstractEnrichTaskProvider<T> {
+public abstract class AbstractEnrichTaskProvider<T extends Media> {
   private final String title;
   private final ItemsDao itemsDao;
   private final TypeBasedItemEnricher typeBasedItemEnricher;
@@ -54,7 +54,7 @@ public abstract class AbstractEnrichTaskProvider<T> {
     return new EnrichTask<T>(false) {
       {
         updateTitle(title);
-        updateProgress(0, 3);
+        updateProgress(0, 4);
       }
 
       @Override
@@ -72,11 +72,11 @@ public abstract class AbstractEnrichTaskProvider<T> {
           oldItem = null;
         }
 
-        updateProgress(1, 3);
+        updateProgress(1, 4);
 
         Item item = bypassCache || oldItem == null ? typeBasedItemEnricher.loadItem(mediaData.getIdentifier()) : oldItem;
 
-        updateProgress(2, 3);
+        updateProgress(2, 4);
 
         if(!item.equals(oldItem)) {
           if(oldItem != null) {
@@ -88,9 +88,15 @@ public abstract class AbstractEnrichTaskProvider<T> {
           }
         }
 
-        updateProgress(3, 3);
+        updateProgress(3, 4);
 
-        return itemToEnrichType(item);
+        T enrichType = itemToEnrichType(item);
+
+        enrichType.castingsProperty().get().addAll(item.getCastings());
+
+        updateProgress(4, 4);
+
+        return enrichType;
       }
     };
   }

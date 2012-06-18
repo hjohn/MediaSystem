@@ -1,5 +1,6 @@
 package hs.mediasystem.framework;
 
+import hs.mediasystem.dao.Casting;
 import hs.mediasystem.util.ImageHandle;
 
 import java.util.Date;
@@ -12,6 +13,8 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class Media extends DefaultEnrichable<Media> {
   private final StringProperty title = new SimpleStringProperty();
@@ -115,4 +118,14 @@ public class Media extends DefaultEnrichable<Media> {
   public Media(String title) {
     this(title, null, null);
   }
+
+  private final ObservableList<Casting> castingsList = FXCollections.observableArrayList();
+  private final ObjectProperty<ObservableList<Casting>> castings = new SimpleObjectProperty<ObservableList<Casting>>(castingsList) {
+    @Override
+    public ObservableList<Casting> get() {
+      queueForEnrichment();
+      return super.get();
+    }
+  };
+  public ObjectProperty<ObservableList<Casting>> castingsProperty() { return castings; }
 }

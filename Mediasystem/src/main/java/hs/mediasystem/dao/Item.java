@@ -30,7 +30,7 @@ public class Item {
   private String language;
   private String tagline;
 
-  private List<Casting> castings = new ArrayList<>(0);
+  private List<Casting> castings;
 
   public Identifier getIdentifier() {
     return identifier;
@@ -198,7 +198,12 @@ public class Item {
 
   public List<Casting> getCastings() {
     if(castings == null) {
-      castings = Database.fetch(this, CastingsFetcher.class);
+      if(id > 0) {
+        castings = Database.fetch(this, CastingsFetcher.class);
+      }
+      else {
+        castings = new ArrayList<>();
+      }
     }
     return castings;
   }
