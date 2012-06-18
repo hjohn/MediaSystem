@@ -8,10 +8,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.osgi.framework.BundleContext;
+
 public class BannerStandardLayoutExtension implements StandardLayoutExtension {
   private static final Set<MediaRootType> SUPPORTED_MEDIA_ROOT_TYPES = Collections.unmodifiableSet(new HashSet<MediaRootType>() {{
     add(MediaRootType.SERIES);
   }});
+
+  private volatile BundleContext bundleContext;
 
   @Override
   public Set<MediaRootType> getSupportedMediaRootTypes() {
@@ -20,7 +24,7 @@ public class BannerStandardLayoutExtension implements StandardLayoutExtension {
 
   @Override
   public StandardLayout createLayout() {
-    return new BannerStandardLayout();
+    return new BannerStandardLayout(bundleContext);
   }
 
   @Override

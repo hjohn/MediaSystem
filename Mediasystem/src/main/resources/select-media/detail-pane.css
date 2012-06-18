@@ -1,3 +1,7 @@
+.content-grid {
+  -fx-hgap: 20;
+}
+
 .group-name {
   -fx-font-size: 16pt;
   -fx-font-weight: bold;
