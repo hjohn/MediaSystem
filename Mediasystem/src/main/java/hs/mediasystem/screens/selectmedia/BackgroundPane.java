@@ -1,7 +1,6 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.beans.AsyncImageProperty;
-import hs.mediasystem.framework.Episode;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.util.ImageHandle;
@@ -11,7 +10,6 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -29,9 +27,7 @@ public class BackgroundPane extends StackPane {
   private final ObjectProperty<MediaNode> mediaNode = new SimpleObjectProperty<>();
   public ObjectProperty<MediaNode> mediaNodeProperty() { return mediaNode; }
 
-  private final ObjectBinding<ImageHandle> nodeBackgroundHandle = MapBindings.select(mediaNode, "dataMap", Media.class, "background");
-  private final ObjectBinding<ImageHandle> parentBackgroundHandle = MapBindings.select(mediaNode, "dataMap", Episode.class, "serie", "dataMap", Media.class, "background");
-  private final ObjectBinding<ImageHandle> backgroundHandle = Bindings.when(nodeBackgroundHandle.isNull()).then(parentBackgroundHandle).otherwise(nodeBackgroundHandle);
+  private final ObjectBinding<ImageHandle> backgroundHandle = MapBindings.select(mediaNode, "dataMap", Media.class, "background");
 
   private final AsyncImageProperty wantedBackground = new AsyncImageProperty();
 
