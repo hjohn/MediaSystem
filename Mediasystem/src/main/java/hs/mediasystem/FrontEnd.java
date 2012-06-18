@@ -6,6 +6,7 @@ import hs.mediasystem.dao.TypeBasedItemEnricher;
 import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.DatabaseUpdater;
 import hs.mediasystem.enrich.EnrichCache;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaDataPersister;
 import hs.mediasystem.framework.PersisterProvider;
@@ -17,8 +18,10 @@ import hs.mediasystem.screens.MessagePaneTaskExecutor;
 import hs.mediasystem.screens.PlaybackOverlayPane;
 import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.ProgramController;
+import hs.mediasystem.screens.selectmedia.DetailPane;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.screens.selectmedia.SelectMediaView;
+import hs.mediasystem.screens.selectmedia.StandardDetailPane;
 import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.util.DuoWindowSceneManager;
 import hs.mediasystem.util.SceneManager;
@@ -40,6 +43,7 @@ import java.nio.file.WatchService;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.ServiceLoader;
 
@@ -159,6 +163,13 @@ public class FrontEnd extends Application {
     PersisterProvider.register(MediaData.class, injector.getInstance(MediaDataPersister.class));
 
     DependencyManager dm = new DependencyManager(framework.getBundleContext());
+
+    dm.add(dm.createComponent()
+      .setInterface(DetailPane.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", Media.class);
+      }})
+      .setImplementation(StandardDetailPane.class)
+    );
 
     dm.add(dm.createComponent()
       .setInterface(SelectMediaPresentationProvider.class.getName(), null)
