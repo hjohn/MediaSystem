@@ -1,6 +1,5 @@
 package hs.mediasystem.ext.serie;
 
-import hs.mediasystem.framework.Episode;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.screens.selectmedia.StandardDetailPane;
 import hs.mediasystem.util.MapBindings;

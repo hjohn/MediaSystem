@@ -34,7 +34,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
 
   @Override
   public Identifier identifyItem(final Media media) throws IdentifyException {
-    hs.mediasystem.framework.Episode episode = (hs.mediasystem.framework.Episode)media;
+    hs.mediasystem.ext.serie.Episode episode = (hs.mediasystem.ext.serie.Episode)media;
     Identifier serieMatch = itemIdentifier.identifyItem(episode.getSerie().getMedia());
 
     // TODO may need some TVDB caching here, as we're doing this query twice for each episode... and TVDB returns whole seasons I think
@@ -101,7 +101,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
     return item;
   }
 
-  private static EpisodeSearchResult findEpisode(String serieId, hs.mediasystem.framework.Episode ep) {
+  private static EpisodeSearchResult findEpisode(String serieId, hs.mediasystem.ext.serie.Episode ep) {
     synchronized(TheTVDB.class) {
       EpisodeSearchResult result = null;
 

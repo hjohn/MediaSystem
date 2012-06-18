@@ -9,7 +9,6 @@ import hs.mediasystem.dao.ItemEnricher;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
 import hs.mediasystem.framework.Media;
-import hs.mediasystem.framework.SerieBase;
 import hs.mediasystem.util.CryptoUtil;
 
 import java.util.Comparator;

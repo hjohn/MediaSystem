@@ -1,5 +1,6 @@
-package hs.mediasystem.framework;
+package hs.mediasystem.ext.serie;
 
+import hs.mediasystem.framework.Media;
 
 public class Serie extends Media {
 

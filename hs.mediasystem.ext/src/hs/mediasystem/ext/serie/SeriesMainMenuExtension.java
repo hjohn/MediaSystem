@@ -2,12 +2,7 @@ package hs.mediasystem.ext.serie;
 
 import hs.mediasystem.dao.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache;
-import hs.mediasystem.framework.Episode;
-import hs.mediasystem.framework.EpisodeBase;
 import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
-import hs.mediasystem.framework.Serie;
-import hs.mediasystem.framework.SerieBase;
-import hs.mediasystem.framework.SerieItem;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
