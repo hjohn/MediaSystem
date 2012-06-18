@@ -1,0 +1,2 @@
+Private-Package: hs.mediasystem.ext.media.nos
+Bundle-Activator: hs.mediasystem.ext.media.nos.Activator

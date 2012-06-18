@@ -1,0 +1,5 @@
+Private-Package: hs.mediasystem.ext.media.youtube
+Bundle-Activator: hs.mediasystem.ext.media.youtube.Activator
+Include-Resource: lib/gdata-client-1.0.jar, lib/gdata-core-1.0.jar, lib/gdata-media-1.0.jar, lib/gdata-youtube-2.0.jar, lib/google-collections-1.0.jar, lib/activation-1.1.1.jar, lib/mail-1.4.5.jar
+Bundle-ClassPath: ., gdata-client-1.0.jar, gdata-core-1.0.jar, gdata-media-1.0.jar, gdata-youtube-2.0.jar, google-collections-1.0.jar, activation-1.1.1.jar, mail-1.4.5.jar
+Import-Package: !com.sun.mirror.*, !sun.security.*, *

@@ -1,0 +1,5 @@
+Private-Package: hs.mediasystem.ext.media.movie,\
+	net.sf.jtmdb
+Bundle-Activator: hs.mediasystem.ext.media.movie.Activator
+Include-Resource: lib/json-20090211.jar
+Bundle-ClassPath: ., json-20090211.jar
