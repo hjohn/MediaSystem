@@ -13,6 +13,7 @@ import hs.mediasystem.framework.Episode;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.TaskTitle;
 import hs.mediasystem.fs.SourceImageHandle;
+import hs.mediasystem.util.ImageHandle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +59,9 @@ public class EpisodeEnricher implements Enricher<Episode> {
     public Episode itemToEnrichType(Item item) {
       Episode episode = new Episode(currentEpisode.getSerie(), item.getTitle(), currentEpisode.getSeason(), currentEpisode.getEpisode(), currentEpisode.getEndEpisode());
 
-      episode.backgroundProperty().set(createImageHandle(item.getBackground(), item, "background"));
+      ImageHandle backgroundHandle = createImageHandle(item.getBackground(), item, "background");
+
+      episode.backgroundProperty().set(backgroundHandle == null ? currentEpisode.getSerie().getMedia().getBackground() : backgroundHandle);
       episode.imageProperty().set(createImageHandle(item.getPoster(), item, "poster"));
       episode.descriptionProperty().set(item.getPlot());
       episode.ratingProperty().set(item.getRating());
