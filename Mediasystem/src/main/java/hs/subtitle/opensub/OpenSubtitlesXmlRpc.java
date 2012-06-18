@@ -1,10 +1,10 @@
 package hs.subtitle.opensub;
 
 import static java.util.Collections.singleton;
-import hs.subtitle.ByteBufferOutputStream;
 import hs.subtitle.opensub.OpenSubtitlesSubtitleDescriptor.Property;
 
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -313,12 +313,13 @@ public class OpenSubtitlesXmlRpc {
   }
 
   protected static String encodeData(byte[] data) {
-    try(DeflaterInputStream compressedDataStream = new DeflaterInputStream(new ByteArrayInputStream(data));
-      ByteBufferOutputStream buffer = new ByteBufferOutputStream(data.length)) {
-      buffer.transferFully(compressedDataStream);
+    try(DataInputStream stream = new DataInputStream(new DeflaterInputStream(new ByteArrayInputStream(data)))) {
+      byte[] buffer = new byte[data.length];
+
+      stream.readFully(buffer);
 
       // base64 encode
-      return new String(Base64.encode(buffer.getByteArray()));
+      return new String(Base64.encode(buffer));
     }
     catch(IOException e) {
       throw new RuntimeException(e);

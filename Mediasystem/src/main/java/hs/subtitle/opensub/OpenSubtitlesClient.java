@@ -1,11 +1,9 @@
 package hs.subtitle.opensub;
 
-import hs.subtitle.SearchResult;
 import hs.subtitle.SubtitleDescriptor;
 import hs.subtitle.Timer;
 import hs.subtitle.opensub.OpenSubtitlesXmlRpc.Query;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -15,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import redstone.xmlrpc.XmlRpcException;
 import redstone.xmlrpc.XmlRpcFault;
 
 /**
@@ -26,35 +23,6 @@ public class OpenSubtitlesClient {
 
   public OpenSubtitlesClient(String userAgent) {
     this.xmlrpc = new OpenSubtitlesXmlRpc(userAgent);
-  }
-
-  public List<SearchResult> search(String query) throws XmlRpcFault {
-    // require login
-    login();
-
-    try {
-      // search for movies / series
-      List<Movie> resultSet = xmlrpc.searchMoviesOnIMDB(query);
-      return Arrays.asList(resultSet.toArray(new SearchResult[resultSet.size()]));
-    }
-    catch(ClassCastException e) {
-      // unexpected xmlrpc responses (e.g. error messages instead of results) will trigger this
-      throw new XmlRpcException("Illegal XMLRPC response on searchMoviesOnIMDB", e);
-    }
-  }
-
-  public List<SubtitleDescriptor> getSubtitleList(SearchResult searchResult, String languageName) throws XmlRpcFault {
-    // singleton array with or empty array
-    int imdbid = ((Movie)searchResult).getImdbId();
-    String[] languageFilter = languageName != null ? new String[] {getSubLanguageID(languageName)} : new String[0];
-
-    // require login
-    login();
-
-    // get subtitle list
-    SubtitleDescriptor[] subtitles = xmlrpc.searchSubtitles(imdbid, languageFilter).toArray(new SubtitleDescriptor[0]);
-
-    return Arrays.asList(subtitles);
   }
 
   public List<? extends SubtitleDescriptor> getSubtitleList(String imdbId, String name, Integer season, Integer episode, String languageName) throws XmlRpcFault {

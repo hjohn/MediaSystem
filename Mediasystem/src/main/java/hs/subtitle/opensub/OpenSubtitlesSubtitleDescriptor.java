@@ -2,13 +2,11 @@
 package hs.subtitle.opensub;
 
 
-import hs.subtitle.ByteBufferOutputStream;
 import hs.subtitle.SubtitleDescriptor;
 
+import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -120,16 +118,15 @@ public class OpenSubtitlesSubtitleDescriptor implements SubtitleDescriptor {
   }
 
   @Override
-  public ByteBuffer fetch() throws IOException {
+  public byte[] fetch() throws IOException {
     URL resource = new URL(getProperty(Property.SubDownloadLink));
 
-    try(InputStream stream = new GZIPInputStream(resource.openStream());
-        ByteBufferOutputStream buffer = new ByteBufferOutputStream(getLength())) {
+    try(DataInputStream stream = new DataInputStream(new GZIPInputStream(resource.openStream()))) {
+      byte[] data = new byte[getLength()];
 
-      // read all
-      buffer.transferFully(stream);
+      stream.readFully(data);
 
-      return buffer.getByteBuffer();
+      return data;
     }
   }
 

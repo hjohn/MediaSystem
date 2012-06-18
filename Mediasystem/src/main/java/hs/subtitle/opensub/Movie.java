@@ -1,8 +1,7 @@
 package hs.subtitle.opensub;
 
-import hs.subtitle.SearchResult;
-
-public class Movie extends SearchResult {
+public class Movie {
+  private String name;
   private int year;
   private int imdbId;
 
@@ -11,7 +10,7 @@ public class Movie extends SearchResult {
   }
 
   public Movie(String name, int year, int imdbId) {
-    super(name);
+    this.name = name;
     this.year = year;
     this.imdbId = imdbId;
   }

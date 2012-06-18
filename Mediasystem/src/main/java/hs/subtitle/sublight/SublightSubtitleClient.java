@@ -1,6 +1,5 @@
 package hs.subtitle.sublight;
 
-import hs.subtitle.SearchResult;
 import hs.subtitle.SubtitleDescriptor;
 import hs.subtitle.Timer;
 
@@ -16,14 +15,12 @@ import javax.xml.ws.Holder;
 import javax.xml.ws.WebServiceException;
 
 import net.sublight.webservice.ArrayOfGenre;
-import net.sublight.webservice.ArrayOfIMDB;
 import net.sublight.webservice.ArrayOfRelease;
 import net.sublight.webservice.ArrayOfString;
 import net.sublight.webservice.ArrayOfSubtitle;
 import net.sublight.webservice.ArrayOfSubtitleLanguage;
 import net.sublight.webservice.ClientInfo;
 import net.sublight.webservice.Genre;
-import net.sublight.webservice.IMDB;
 import net.sublight.webservice.Release;
 import net.sublight.webservice.Sublight;
 import net.sublight.webservice.SublightSoap;
@@ -41,45 +38,6 @@ public class SublightSubtitleClient {
   public SublightSubtitleClient(String clientIdentity, String apikey) {
     clientInfo.setClientId(clientIdentity);
     clientInfo.setApiKey(apikey);
-  }
-
-  public List<SearchResult> search(String query) {
-    // require login
-    login();
-
-    Holder<ArrayOfIMDB> response = new Holder<>();
-    Holder<String> error = new Holder<>();
-
-    webservice.findIMDB(query, null, null, response, error);
-
-    // abort if something went wrong
-    checkError(error);
-
-    List<SearchResult> results = new ArrayList<>();
-
-    if(response.value != null) {
-      for(IMDB imdb : response.value.getIMDB()) {
-        // remove classifier (e.g. tt0436992 -> 0436992)
-        int id = Integer.parseInt(imdb.getId().substring(2));
-
-        results.add(new MovieDescriptor(imdb.getTitle(), imdb.getYear(), id));
-      }
-    }
-
-    return results;
-  }
-
-  public List<SubtitleDescriptor> getSubtitleList(SearchResult searchResult, String languageName) {
-    MovieDescriptor movie = (MovieDescriptor)searchResult;
-
-    List<SubtitleDescriptor> subtitles = new ArrayList<>();
-
-    // retrieve subtitles by name and year
-    for(Subtitle subtitle : getSubtitleList(null, movie.getName(), movie.getYear(), null, null, languageName)) {
-      subtitles.add(new SublightSubtitleDescriptor(subtitle, this));
-    }
-
-    return subtitles;
   }
 
   public List<SubtitleDescriptor> getSubtitleList(String name, Integer year, Short season, Integer episode, String languageName) {

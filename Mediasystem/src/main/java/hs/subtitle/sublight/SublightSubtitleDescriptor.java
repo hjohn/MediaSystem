@@ -1,11 +1,10 @@
 package hs.subtitle.sublight;
 
-import hs.subtitle.ByteBufferOutputStream;
 import hs.subtitle.SubtitleDescriptor;
 
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -77,7 +76,7 @@ public class SublightSubtitleDescriptor implements SubtitleDescriptor {
   }
 
   @Override
-  public ByteBuffer fetch() throws IOException {
+  public byte[] fetch() throws IOException {
     byte[] archive = source.getZipArchive(subtitle);
 
     // the zip archive will contain exactly one subtitle
@@ -85,12 +84,12 @@ public class SublightSubtitleDescriptor implements SubtitleDescriptor {
       // move to subtitle entry
       ZipEntry entry = stream.getNextEntry();
 
-      try(ByteBufferOutputStream buffer = new ByteBufferOutputStream((int) entry.getSize())) {
-        // read subtitle data
-        buffer.transferFully(stream);
+      try(DataInputStream dis = new DataInputStream(stream)) {
+        byte[] data = new byte[(int)entry.getSize()];
 
-        // return plain subtitle data
-        return buffer.getByteBuffer();
+        dis.readFully(data);
+
+        return data;
       }
     }
   }

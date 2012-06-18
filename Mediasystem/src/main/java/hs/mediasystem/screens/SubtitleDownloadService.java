@@ -2,9 +2,9 @@ package hs.mediasystem.screens;
 
 import hs.subtitle.SubtitleDescriptor;
 
+import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -31,13 +31,13 @@ public class SubtitleDownloadService extends Service<Path> {
         updateTitle("Fetching subtitle");
         updateMessage("Downloading " + descriptor.getName() + "...");
 
-        ByteBuffer buffer = descriptor.fetch();
+        byte[] buffer = descriptor.fetch();
         updateProgress(60, 100);
 
         Path path = Paths.get("tempsubtitle" + ++counter + ".srt");
 
-        try(FileOutputStream os = new FileOutputStream(path.toFile())) {
-          os.getChannel().write(buffer);
+        try(DataOutputStream os = new DataOutputStream(new FileOutputStream(path.toFile()))) {
+          os.write(buffer);
           updateProgress(90, 100);
         }
 
