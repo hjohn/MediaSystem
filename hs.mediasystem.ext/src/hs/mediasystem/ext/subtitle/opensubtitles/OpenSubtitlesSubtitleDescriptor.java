@@ -102,6 +102,24 @@ public class OpenSubtitlesSubtitleDescriptor implements SubtitleDescriptor {
     return getProperty(Property.SubFormat);
   }
 
+  @Override
+  public MatchType getMatchType() {
+    String matchedBy = getProperty(Property.MatchedBy);
+
+    if(matchedBy != null) {
+      if(matchedBy.equalsIgnoreCase("moviehash")) {
+        return MatchType.HASH;
+      }
+      if(matchedBy.equalsIgnoreCase("imdbid")) {
+        return MatchType.ID;
+      }
+      if(matchedBy.equalsIgnoreCase("fulltext")) {
+        return MatchType.NAME;
+      }
+    }
+
+    return MatchType.UNKNOWN;
+  }
 
   public int getLength() {
     return Integer.parseInt(getProperty(Property.SubSize));
@@ -150,5 +168,4 @@ public class OpenSubtitlesSubtitleDescriptor implements SubtitleDescriptor {
   public String toString() {
     return String.format("%s [%s]", getName(), getLanguageName());
   }
-
 }

@@ -76,6 +76,12 @@ public class SublightSubtitleDescriptor implements SubtitleDescriptor {
   }
 
   @Override
+  public MatchType getMatchType() {
+    return MatchType.NAME;
+  }
+
+
+  @Override
   public byte[] getSubtitleRawData() throws IOException {
     byte[] archive = source.getZipArchive(subtitle);
 
