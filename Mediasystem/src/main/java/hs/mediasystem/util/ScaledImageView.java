@@ -2,6 +2,7 @@ package hs.mediasystem.util;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Pos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -9,7 +10,11 @@ import javafx.scene.layout.Region;
 
 public class ScaledImageView extends Region {
   private final ImageView imageView = new ImageView();
-  private Pos alignment = Pos.TOP_LEFT;
+
+  private final ObjectProperty<Pos> alignment = new SimpleObjectProperty<>(Pos.TOP_LEFT);
+  public ObjectProperty<Pos> alignmentProperty() { return alignment; }
+  public final Pos getAlignment() { return this.alignment.get(); }
+  public final void setAlignment(Pos pos) { this.alignment.set(pos); }
 
   public ScaledImageView() {
     getChildren().add(imageView);
@@ -19,13 +24,9 @@ public class ScaledImageView extends Region {
   protected void layoutChildren() {
     imageView.setFitWidth(getWidth());
     imageView.setFitHeight(getHeight());
-    layoutInArea(imageView, 0, 0, getWidth(), getHeight(), 0, alignment.getHpos(), alignment.getVpos());
+    layoutInArea(imageView, 0, 0, getWidth(), getHeight(), 0, alignment.get().getHpos(), alignment.get().getVpos());
   }
 
-  public final void setAlignment(Pos pos) {
-    this.alignment = pos;
-    this.requestLayout();
-  }
 
   public final Image getImage() {
     return imageView.getImage();
