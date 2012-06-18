@@ -1,14 +1,13 @@
 package hs.mediasystem.ext.subtitle.sublight;
 
-import hs.mediasystem.framework.Episode;
-import hs.mediasystem.framework.Media;
-import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.SubtitleProviderException;
 import hs.mediasystem.util.CryptoUtil;
 import hs.subtitle.SubtitleDescriptor;
 
 import java.util.List;
+import java.util.Map;
 
 public class SublightSubtitleProvider implements SubtitleProvider {
   private final SublightSubtitleClient client;
@@ -21,19 +20,17 @@ public class SublightSubtitleProvider implements SubtitleProvider {
   }
 
   @Override
-  public List<SubtitleDescriptor> query(MediaItem mediaItem) throws SubtitleProviderException {
-    Media media = mediaItem.get(Media.class);
-    Episode ep = mediaItem.get(Episode.class);
-
-    String title = ep == null ? media.getTitle() : ep.getSerie().getTitle();
-    Short season = ep == null ? null : ep.getSeason().shortValue();
-    Integer episode = ep == null ? null : ep.getEpisode();
-    Integer year = media.getReleaseYear();
-
-    System.out.println("[FINE] SublightSubtitleProvider.query() - Looking for subtitles: " + title + "; " +  year + "; " + season + "; " + episode + "; English");
+  public List<SubtitleDescriptor> query(Map<String, Object> criteria) throws SubtitleProviderException {
+    System.out.println("[FINE] SublightSubtitleProvider.query() - Looking for subtitles: " + criteria);
 
     try {
-      return client.getSubtitleList(title, year, season, episode, "English");
+      return client.getSubtitleList(
+        (String)criteria.get(SubtitleCriteriaProvider.TITLE),
+        (Integer)criteria.get(SubtitleCriteriaProvider.YEAR),
+        (Integer)criteria.get(SubtitleCriteriaProvider.SEASON),
+        (Integer)criteria.get(SubtitleCriteriaProvider.EPISODE),
+        "English"
+      );
     }
     catch(RuntimeException e) {
       throw new SubtitleProviderException(e.getMessage(), e);

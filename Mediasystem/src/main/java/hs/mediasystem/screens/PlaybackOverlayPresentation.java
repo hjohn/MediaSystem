@@ -2,6 +2,7 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.PlaybackOverlayView;
+import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.optiondialog.ListOption;
@@ -52,6 +53,7 @@ public class PlaybackOverlayPresentation {
     final PlayerBindings playerBindings = new PlayerBindings(view.playerProperty());
 
     final ServiceTracker<SubtitleProvider> subtitleProviderTracker = new ServiceTracker<>(bundleContext, SubtitleProvider.class);
+    final ServiceTracker<SubtitleCriteriaProvider> subtitleCriteriaProviderTracker = new ServiceTracker<>(bundleContext, SubtitleCriteriaProvider.class);
 
     view.mediaItemProperty().set(mediaItem);
     view.playerProperty().set(player);
@@ -85,13 +87,14 @@ public class PlaybackOverlayPresentation {
               public List<Option> call() {
                 return new ArrayList<Option>() {{
                   final SubtitleSelector subtitleSelector = new SubtitleSelector(subtitleProviderTracker.getServices(new PropertyEq("mediatype", "movie")));
+                  final SubtitleCriteriaProvider subtitleCriteriaProvider = subtitleCriteriaProviderTracker.getService(new PropertyEq("mediasystem.class", mediaItem.getMedia().getClass()));
 
-                  subtitleSelector.query(mediaItem);
+                  subtitleSelector.query(subtitleCriteriaProvider.getCriteria(mediaItem));
 
                   subtitleSelector.subtitleProviderProperty().addListener(new ChangeListener<SubtitleProvider>() {
                     @Override
                     public void changed(ObservableValue<? extends SubtitleProvider> observableValue, SubtitleProvider oldValue, SubtitleProvider newValue) {
-                      subtitleSelector.query(mediaItem);
+                      subtitleSelector.query(subtitleCriteriaProvider.getCriteria(mediaItem));
                     }
                   });
 
@@ -107,8 +110,8 @@ public class PlaybackOverlayPresentation {
                   add(provider);
                   add(new ListViewOption<>("Subtitles for Download", selectedSubtitleForDownload, subtitleSelector.getSubtitles(), new StringConverter<SubtitleDescriptor>() {
                     @Override
-                    public String toString(SubtitleDescriptor object) {
-                      return object.getName() + " (" + object.getLanguageName() + ") [" + object.getType() + "]";
+                    public String toString(SubtitleDescriptor descriptor) {
+                      return descriptor.getMatchType().name() + ": " + descriptor.getName() + " (" + descriptor.getLanguageName() + ") [" + descriptor.getType() + "]";
                     }
                   }));
                 }};

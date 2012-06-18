@@ -40,11 +40,11 @@ public class SublightSubtitleClient {
     clientInfo.setApiKey(apikey);
   }
 
-  public List<SubtitleDescriptor> getSubtitleList(String name, Integer year, Short season, Integer episode, String languageName) {
+  public List<SubtitleDescriptor> getSubtitleList(String name, Integer year, Integer season, Integer episode, String languageName) {
     List<SubtitleDescriptor> subtitles = new ArrayList<>();
 
     // retrieve subtitles by name and year
-    for(Subtitle subtitle : getSubtitleList(null, name, year, season, episode, languageName)) {
+    for(Subtitle subtitle : getSubtitleList(null, name, year, season == null ? null : season.shortValue(), episode, languageName)) {
       subtitles.add(new SublightSubtitleDescriptor(subtitle, this));
     }
 

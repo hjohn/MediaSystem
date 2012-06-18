@@ -26,7 +26,7 @@ public class OpenSubtitlesClient {
     this.xmlrpc = new OpenSubtitlesXmlRpc(userAgent);
   }
 
-  public List<? extends SubtitleDescriptor> getAllSubtitleLists(String imdbId, String name, Integer season, Integer episode, String movieHash, Long fileLength, String languageName) throws XmlRpcFault {
+  public List<? extends SubtitleDescriptor> getAllSubtitleLists(String imdbId, String name, Integer season, Integer episode, Long movieHash, Long fileLength, String languageName) throws XmlRpcFault {
     String searchImdbId = imdbId;
 
     if(imdbId != null && imdbId.startsWith("tt")) {
@@ -39,7 +39,7 @@ public class OpenSubtitlesClient {
     List<OpenSubtitlesSubtitleDescriptor> foundSubtitles = new ArrayList<>();
 
     if(movieHash != null && fileLength != null) {
-      foundSubtitles.addAll(xmlrpc.searchSubtitles(new Query(null, null, null, null, movieHash, fileLength, languageName)));
+      foundSubtitles.addAll(xmlrpc.searchSubtitles(new Query(null, null, null, null, String.format("%016x", movieHash), fileLength, languageName)));
     }
     if(searchImdbId != null) {
       foundSubtitles.addAll(xmlrpc.searchSubtitles(new Query(searchImdbId, null, null, null, null, null, languageName)));

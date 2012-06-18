@@ -1,12 +1,12 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.subtitle.SubtitleDescriptor;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -66,11 +66,11 @@ public class SubtitleSelector {
     });
   }
 
-  public void query(MediaItem mediaItem) {
+  public void query(Map<String, Object> criteria) {
     loaded.set(false);
     subtitles.clear();
 
-    subtitleQueryService.setMediaItem(mediaItem);
+    subtitleQueryService.setCriteria(criteria);
     subtitleQueryService.setSubtitleProvider(subtitleProvider.get());
     subtitleQueryService.restart();
   }

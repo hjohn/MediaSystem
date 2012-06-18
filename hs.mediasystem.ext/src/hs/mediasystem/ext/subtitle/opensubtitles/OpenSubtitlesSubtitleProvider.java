@@ -1,13 +1,12 @@
 package hs.mediasystem.ext.subtitle.opensubtitles;
 
-import hs.mediasystem.framework.Episode;
-import hs.mediasystem.framework.Media;
-import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.SubtitleProviderException;
 import hs.subtitle.SubtitleDescriptor;
 
 import java.util.List;
+import java.util.Map;
 
 public class OpenSubtitlesSubtitleProvider implements SubtitleProvider {
   private final OpenSubtitlesClient client;
@@ -17,22 +16,19 @@ public class OpenSubtitlesSubtitleProvider implements SubtitleProvider {
   }
 
   @Override
-  public List<? extends SubtitleDescriptor> query(MediaItem mediaItem) throws SubtitleProviderException {
-    Media media = mediaItem.get(Media.class);
-//    Movie movie = mediaItem.get(Movie.class);
-    Episode ep = mediaItem.get(Episode.class);
-
-    String title = ep == null ? media.getTitle() : ep.getSerie().getTitle();
-    Integer season = ep == null ? null : ep.getSeason();
-    Integer episode = ep == null ? null : ep.getEpisode();
-    Integer year = media.getReleaseYear();
-//    String imdbNumber = movie == null ? null : movie.getImdbNumber();
-    String imdbNumber = null;
-
-    System.out.println("[FINE] OpenSubtitlesSubtitleProvider.query() - Looking for subtitles: " + mediaItem.getTitle() + "; " +  year + "; " + season + "; " + episode + "; English");
+  public List<? extends SubtitleDescriptor> query(Map<String, Object> criteria) throws SubtitleProviderException {
+    System.out.println("[FINE] OpenSubtitlesSubtitleProvider.query() - Looking for subtitles: " + criteria);
 
     try {
-      return client.getSubtitleList(imdbNumber, title, season, episode, "eng");
+      return client.getAllSubtitleLists(
+        (String)criteria.get(SubtitleCriteriaProvider.IMDB_ID),
+        (String)criteria.get(SubtitleCriteriaProvider.TITLE),
+        (Integer)criteria.get(SubtitleCriteriaProvider.SEASON),
+        (Integer)criteria.get(SubtitleCriteriaProvider.EPISODE),
+        (Long)criteria.get(SubtitleCriteriaProvider.OPEN_SUBTITLES_HASH),
+        (Long)criteria.get(SubtitleCriteriaProvider.FILE_LENGTH),
+        "eng"
+      );
     }
     catch(Exception e) {
       throw new SubtitleProviderException(e.getMessage(), e);
