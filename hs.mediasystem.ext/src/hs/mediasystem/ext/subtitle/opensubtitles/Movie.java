@@ -1,4 +1,4 @@
-package hs.subtitle.opensub;
+package hs.mediasystem.ext.subtitle.opensubtitles;
 
 public class Movie {
   private String name;

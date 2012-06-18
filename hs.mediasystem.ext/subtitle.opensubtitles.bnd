@@ -1,0 +1,4 @@
+Private-Package: hs.mediasystem.ext.subtitle.opensubtitles
+Bundle-Activator: hs.mediasystem.ext.subtitle.opensubtitles.Activator
+Include-Resource: lib/redstone-1.1.1.jar
+Bundle-ClassPath: ., redstone-1.1.1.jar

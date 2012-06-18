@@ -1,4 +1,4 @@
-package hs.subtitle.sublight;
+package hs.mediasystem.ext.subtitle.sublight;
 
 import hs.subtitle.SubtitleDescriptor;
 

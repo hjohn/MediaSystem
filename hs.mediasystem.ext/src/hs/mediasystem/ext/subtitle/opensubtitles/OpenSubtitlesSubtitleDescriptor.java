@@ -1,5 +1,5 @@
 
-package hs.subtitle.opensub;
+package hs.mediasystem.ext.subtitle.opensubtitles;
 
 
 import hs.subtitle.SubtitleDescriptor;

@@ -2,9 +2,6 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.OpenSubtitlesSubtitleProvider;
-import hs.mediasystem.framework.SublightSubtitleProvider;
-import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.PlayerEvent;
 import hs.mediasystem.framework.player.PlayerEvent.Type;
 import hs.mediasystem.screens.Navigator.Destination;
@@ -13,9 +10,7 @@ import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.util.KeyCombinationGroup;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.ini.Ini;
-import hs.mediasystem.util.ini.Section;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javafx.application.Platform;
@@ -409,15 +404,6 @@ public class ProgramController {
     sceneManager.disposePlayerRoot();
 
     subtitleDownloadService.cancel();
-  }
-
-  public List<SubtitleProvider> getSubtitleProviders() {
-    final Section general = ini.getSection("general");
-
-    return new ArrayList<SubtitleProvider>() {{
-      add(new OpenSubtitlesSubtitleProvider("MediaSystem v1"));
-      add(new SublightSubtitleProvider(general.get("sublight.client"), general.get("sublight.key")));
-    }};
   }
 
   public SubtitleDownloadService getSubtitleDownloadService() {

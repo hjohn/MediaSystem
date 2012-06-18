@@ -10,6 +10,8 @@ import hs.mediasystem.screens.optiondialog.NumericOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.SubOption;
 import hs.mediasystem.util.Callable;
+import hs.mediasystem.util.PropertyEq;
+import hs.mediasystem.util.ServiceTracker;
 import hs.mediasystem.util.StringBinding;
 import hs.mediasystem.util.StringConverter;
 import hs.subtitle.SubtitleDescriptor;
@@ -31,6 +33,8 @@ import javafx.scene.input.KeyEvent;
 
 import javax.inject.Inject;
 
+import org.osgi.framework.BundleContext;
+
 public class PlaybackOverlayPresentation {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
   private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
@@ -40,12 +44,14 @@ public class PlaybackOverlayPresentation {
   private final ObjectProperty<SubtitleDescriptor> selectedSubtitleForDownload = new SimpleObjectProperty<>();
 
   @Inject
-  public PlaybackOverlayPresentation(final ProgramController controller, final PlayerPresentation playerPresentation, final PlaybackOverlayView view) {
+  public PlaybackOverlayPresentation(BundleContext bundleContext, final ProgramController controller, final PlayerPresentation playerPresentation, final PlaybackOverlayView view) {
     this.view = view;
 
     final Player player = playerPresentation.getPlayer();
     final MediaItem mediaItem = controller.getCurrentMediaItem();
     final PlayerBindings playerBindings = new PlayerBindings(view.playerProperty());
+
+    final ServiceTracker<SubtitleProvider> subtitleProviderTracker = new ServiceTracker<>(bundleContext, SubtitleProvider.class);
 
     view.mediaItemProperty().set(mediaItem);
     view.playerProperty().set(player);
@@ -78,7 +84,7 @@ public class PlaybackOverlayPresentation {
               @Override
               public List<Option> call() {
                 return new ArrayList<Option>() {{
-                  final SubtitleSelector subtitleSelector = new SubtitleSelector(controller.getSubtitleProviders());
+                  final SubtitleSelector subtitleSelector = new SubtitleSelector(subtitleProviderTracker.getServices(new PropertyEq("mediatype", "movie")));
 
                   subtitleSelector.query(mediaItem);
 

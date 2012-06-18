@@ -1,15 +1,19 @@
-package hs.mediasystem.framework;
+package hs.mediasystem.ext.subtitle.opensubtitles;
 
+import hs.mediasystem.framework.Episode;
+import hs.mediasystem.framework.Media;
+import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.SubtitleProvider;
+import hs.mediasystem.framework.SubtitleProviderException;
 import hs.subtitle.SubtitleDescriptor;
-import hs.subtitle.opensub.OpenSubtitlesClient;
 
 import java.util.List;
 
 public class OpenSubtitlesSubtitleProvider implements SubtitleProvider {
   private final OpenSubtitlesClient client;
 
-  public OpenSubtitlesSubtitleProvider(String clientIdentity) {
-    client = new OpenSubtitlesClient(clientIdentity);
+  public OpenSubtitlesSubtitleProvider() {
+    client = new OpenSubtitlesClient("MediaSystem v1");
   }
 
   @Override

@@ -1,8 +1,8 @@
-package hs.subtitle.opensub;
+package hs.mediasystem.ext.subtitle.opensubtitles;
 
+import hs.mediasystem.ext.subtitle.opensubtitles.OpenSubtitlesXmlRpc.Query;
 import hs.subtitle.SubtitleDescriptor;
 import hs.subtitle.Timer;
-import hs.subtitle.opensub.OpenSubtitlesXmlRpc.Query;
 
 import java.util.HashMap;
 import java.util.List;

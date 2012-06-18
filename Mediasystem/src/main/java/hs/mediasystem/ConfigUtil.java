@@ -20,6 +20,7 @@ public final class ConfigUtil {
     final File cachedir = createCacheDir();
 
     String[] packages = new String[] {
+      "com.sun.xml.internal.ws.api.message",  // sublight
       "hs.mediasystem.beans",
       "hs.mediasystem.dao",
       "hs.mediasystem.db",
@@ -33,6 +34,7 @@ public final class ConfigUtil {
       "hs.mediasystem.screens",
       "hs.mediasystem.util",
       "hs.mediasystem.util.ini",
+      "hs.subtitle",
       "javafx.application",
       "javafx.beans",
       "javafx.beans.binding",
@@ -50,6 +52,8 @@ public final class ConfigUtil {
       "javafx.util",
       "javax.inject",
       "javax.persistence",
+      "javax.servlet",
+      "javax.servlet.http",
       "org.jsoup",
       "org.jsoup.nodes",
       "org.jsoup.select",
@@ -69,6 +73,8 @@ public final class ConfigUtil {
     Map<String, String> configMap = new HashMap<>();
     // Tells the framework to export the extension package, making it accessible
     // for the other shape bundels
+
+    configMap.put(Constants.FRAMEWORK_BOOTDELEGATION, "com.sun.xml.internal.ws.*");
     configMap.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA,
       //            "org.apache.felix.example.extenderbased.host.extension; version=1.0.0");
       packageString);

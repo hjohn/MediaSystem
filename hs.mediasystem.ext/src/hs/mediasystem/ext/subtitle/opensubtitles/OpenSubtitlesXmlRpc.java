@@ -1,7 +1,7 @@
-package hs.subtitle.opensub;
+package hs.mediasystem.ext.subtitle.opensubtitles;
 
 import static java.util.Collections.singleton;
-import hs.subtitle.opensub.OpenSubtitlesSubtitleDescriptor.Property;
+import hs.mediasystem.ext.subtitle.opensubtitles.OpenSubtitlesSubtitleDescriptor.Property;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -303,7 +303,7 @@ public class OpenSubtitlesXmlRpc {
     }
   }
 
-  protected URL getXmlRpcUrl() {
+  protected static URL getXmlRpcUrl() {
     try {
       return new URL("http://api.opensubtitles.org/xml-rpc");
     }
@@ -318,7 +318,6 @@ public class OpenSubtitlesXmlRpc {
 
       stream.readFully(buffer);
 
-      // base64 encode
       return new String(Base64.encode(buffer));
     }
     catch(IOException e) {

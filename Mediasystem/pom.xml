@@ -28,13 +28,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>sublight-ws</groupId>
-			<artifactId>sublight-ws</artifactId>
-			<version>0.0.1</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/sublight-ws.jar</systemPath>
-		</dependency>
-		<dependency>
 			<groupId>javafx</groupId>
 			<artifactId>javafx</artifactId>
 			<scope>system</scope>
@@ -55,11 +48,6 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>1.9.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.kohsuke.redstone</groupId>
-			<artifactId>redstone</artifactId>
-			<version>1.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jsoup</groupId>
