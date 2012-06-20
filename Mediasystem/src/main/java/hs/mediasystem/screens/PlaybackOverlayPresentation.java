@@ -11,6 +11,7 @@ import hs.mediasystem.screens.optiondialog.NumericOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.SubOption;
 import hs.mediasystem.util.Callable;
+import hs.mediasystem.util.PropertyClassEq;
 import hs.mediasystem.util.PropertyEq;
 import hs.mediasystem.util.ServiceTracker;
 import hs.mediasystem.util.StringBinding;
@@ -87,7 +88,7 @@ public class PlaybackOverlayPresentation {
               public List<Option> call() {
                 return new ArrayList<Option>() {{
                   final SubtitleSelector subtitleSelector = new SubtitleSelector(subtitleProviderTracker.getServices(new PropertyEq("mediatype", "movie")));
-                  final SubtitleCriteriaProvider subtitleCriteriaProvider = subtitleCriteriaProviderTracker.getService(new PropertyEq("mediasystem.class", mediaItem.getMedia().getClass()));
+                  final SubtitleCriteriaProvider subtitleCriteriaProvider = subtitleCriteriaProviderTracker.getService(new PropertyClassEq("mediasystem.class", mediaItem.getMedia().getClass()));
 
                   subtitleSelector.query(subtitleCriteriaProvider.getCriteria(mediaItem));
 
