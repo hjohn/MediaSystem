@@ -297,7 +297,6 @@ public class StandardDetailPane extends StackPane implements DetailPane {
             ScaledImageView imageView = new ScaledImageView(new Label("?"));
 
             Label label = new Label();
-            Label characterNameLabel = new Label();
 
             AsyncImageProperty photo = new AsyncImageProperty();
 
@@ -317,13 +316,16 @@ public class StandardDetailPane extends StackPane implements DetailPane {
             label.setMinWidth(100);
             label.setMaxWidth(100);
 
-            characterNameLabel.getStyleClass().add("cast-character-name");
-            characterNameLabel.setText("as " + formattedCharacterName(casting.getCharacterName(), 40));
-            characterNameLabel.setMinWidth(100);
-            characterNameLabel.setMaxWidth(100);
-
             getChildren().addAll(imageView, label);
+
             if(casting.getCharacterName() != null && !casting.getCharacterName().trim().isEmpty()) {
+              Label characterNameLabel = new Label();
+
+              characterNameLabel.getStyleClass().add("cast-character-name");
+              characterNameLabel.setText("as " + formattedCharacterName(casting.getCharacterName(), 40));
+              characterNameLabel.setMinWidth(100);
+              characterNameLabel.setMaxWidth(100);
+
               getChildren().add(characterNameLabel);
             }
           }});
