@@ -2,7 +2,7 @@ package hs.mediasystem.util;
 
 import org.osgi.framework.ServiceReference;
 
-public class PropertyEq {
+public class PropertyEq implements PropertyMatcher {
   private final String name;
   private final Object match;
 
@@ -11,6 +11,7 @@ public class PropertyEq {
     this.match = match;
   }
 
+  @Override
   public boolean match(ServiceReference<?> ref) {
     Object value = ref.getProperty(name);
 

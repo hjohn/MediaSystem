@@ -23,13 +23,13 @@ public class ServiceTracker<S> {
     return serviceReferences == null ? new ServiceReference[0] : serviceReferences;
   }
 
-  public S getService(PropertyEq... filters) {
+  public S getService(PropertyMatcher... filters) {
     List<S> services = getServices(filters);
 
     return services.isEmpty() ? null : services.get(0);
   }
 
-  public List<S> getServices(PropertyEq... filters) {
+  public List<S> getServices(PropertyMatcher... filters) {
     List<S> services = new ArrayList<>();
 
     ServiceReference<S>[] serviceReferences = tracker.getServiceReferences();
@@ -37,7 +37,7 @@ public class ServiceTracker<S> {
     if(serviceReferences != null) {
       nextRef:
       for(ServiceReference<S> ref : serviceReferences) {
-        for(PropertyEq filter : filters) {
+        for(PropertyMatcher filter : filters) {
           if(!filter.match(ref)) {
             continue nextRef;
           }
