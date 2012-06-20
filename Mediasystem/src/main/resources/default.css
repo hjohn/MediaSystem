@@ -6,8 +6,12 @@
   -c-text-highlight: derive(-c-base, +75%);
   -c-text-focused: derive(-c-base, +75%);
   -c-text-unobtrusive: derive(-c-base, -30%);
+  -c-text-watermark: rgba(173, 216, 230, 0.1);
   
   -c-shadow-highlight: derive(-c-base, -50%);
+  
+  -c-border-highlight: -c-text-highlight;
+  -c-fill-dark: derive(-c-base, -75%);
 
   -c-star: yellow;
   -c-star-disabled: gray;
