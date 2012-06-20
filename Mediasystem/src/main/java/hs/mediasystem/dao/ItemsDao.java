@@ -133,14 +133,14 @@ public class ItemsDao {
     for(Casting casting : item.getCastings()) {
       Person person = personsDao.findByName(casting.getPerson().getName());
 
-      if(person == null) {
-        person = casting.getPerson();
-        personsDao.store(person);
-      }
-      else {
-        casting.setPerson(person);
+      if(person != null) {
+        casting.getPerson().setId(person.getId());
+        if(casting.getPerson().getPhotoURL() == null) {
+          casting.getPerson().setPhotoURL(person.getPhotoURL());
+        }
       }
 
+      personsDao.merge(casting.getPerson());
       transaction.insert("castings", createCastingsFieldMap(casting));
     }
   }
