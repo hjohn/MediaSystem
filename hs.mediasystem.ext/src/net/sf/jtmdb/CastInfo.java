@@ -51,6 +51,8 @@ public class CastInfo implements Serializable {
 	 * The department of the job of the cast.
 	 */
 	private String department;
+
+	private int order;
 	/**
 	 * The json string that created this CastInfo object.
 	 */
@@ -79,7 +81,7 @@ public class CastInfo implements Serializable {
 	 *            The json string that created this CastInfo object.
 	 */
 	public CastInfo(URL url, String name, String characterName, String job,
-			int ID, int castID, URL thumb, String department, String jsonOrigin) {
+			int ID, int castID, URL thumb, String department, int order, String jsonOrigin) {
 		Log.log("Creating CastInfo object with url: "
 				+ ((url == null) ? "NULL" : url.toString())
 				+ ",character name: " + characterName + ", job: " + job
@@ -96,6 +98,7 @@ public class CastInfo implements Serializable {
 		setCastID(castID);
 		setThumb(thumb);
 		setDepartment(department);
+		setOrder(order);
 	}
 
 	@Override
@@ -300,4 +303,11 @@ public class CastInfo implements Serializable {
 		return department;
 	}
 
+	public int getOrder() {
+    return order;
+  }
+
+	public void setOrder(int order) {
+    this.order = order;
+  }
 }

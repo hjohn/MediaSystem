@@ -1902,10 +1902,11 @@ public class Movie implements Serializable {
             String castJob = castObject.getString("job");
             int castID = castObject.getInt("cast_id");
             int personID = castObject.getInt("id");
+            int order = castObject.getInt("order");
             String castDept = castObject.getString("department");
             CastInfo castInfo = new CastInfo(castUrl, castName,
               castCharacter, castJob, personID, castID,
-              castThumb, castDept, castObject.toString());
+              castThumb, castDept, order, castObject.toString());
             getCast().add(castInfo);
           }
         }
