@@ -122,6 +122,10 @@ public class Database {
       assert (this.parent != null && this.savepoint != null) || (this.parent == null && this.savepoint == null);
     }
 
+    public Provider<Connection> getConnectionProvider() {
+      return connectionProvider;
+    }
+
     public Connection getConnection() {
       return connection;
     }
@@ -143,6 +147,47 @@ public class Database {
 
         throw new SQLException("unable to get database size");
       }
+    }
+
+    public Object[] selectUnique(String fields, String tableName, String whereCondition, Object... parameters) throws SQLException {
+      List<Object[]> result = select(fields, tableName, whereCondition, parameters);
+
+      return result.isEmpty() ? null : result.get(0);
+    }
+
+    public List<Object[]> select(String fields, String tableName, String whereCondition, Object... parameters) throws SQLException {
+      ensureNotFinished();
+
+      try(PreparedStatement statement = connection.prepareStatement("SELECT " + fields + " FROM " + tableName + (whereCondition == null ? "" : " WHERE " + whereCondition))) {
+        int parameterIndex = 1;
+
+        for(Object o : parameters) {
+          statement.setObject(parameterIndex++, o);
+        }
+
+        try(ResultSet rs = statement.executeQuery()) {
+          List<Object[]> records = new ArrayList<>();
+          ResultSetMetaData metaData = rs.getMetaData();
+
+          while(rs.next()) {
+            Object[] values = new Object[metaData.getColumnCount()];
+
+            for(int i = 1; i <= metaData.getColumnCount(); i++) {
+              values[i - 1] = rs.getObject(i);
+            }
+
+            records.add(values);
+          }
+
+          return records;
+        }
+      }
+    }
+
+    public <T> T selectUnique(Class<T> cls, String whereCondition, Object... parameters) throws SQLException {
+      List<T> result = select(cls, whereCondition, parameters);
+
+      return result.isEmpty() ? null : result.get(0);
     }
 
     public synchronized <T> List<T> select(Class<T> cls, String whereCondition, Object... parameters) throws SQLException {
