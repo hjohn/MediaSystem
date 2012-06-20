@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <?xml-stylesheet type='text/xsl' href='http://www.osgi.org/www/obr2html.xsl'?>
 
-<repository lastmodified='20120608102854.430' name='Local Repository'>
+<repository lastmodified='20120620234128.394' name='Local Repository'>
   <resource id='biz.aQute.bnd/1.51.1' presentationname='bnd' symbolicname='biz.aQute.bnd' uri='biz.aQute.bnd/biz.aQute.bnd-1.51.1.jar' version='1.51.1'>
     <description>
       A utility and plugin to wrap, build, print, or otherwise manipulate
@@ -331,6 +331,223 @@
     </require>
     <require extend='false' filter='(&amp;(package=org.xml.sax.helpers)(version&gt;=0.0.0))' multiple='false' name='package' optional='false'>
       Import package org.xml.sax.helpers ;version=0.0.0
+    </require>
+  </resource>
+  <resource id='jackson-core-lgpl/1.9.7' presentationname='Jackson JSON processor' symbolicname='jackson-core-lgpl' uri='jackson-core-lgpl/jackson-core-lgpl-1.9.7.jar' version='1.9.7'>
+    <size>
+      233971
+    </size>
+    <license>
+      http://www.gnu.org/licenses/lgpl-2.1.html
+    </license>
+    <capability name='bundle'>
+      <p n='manifestversion' v='2'/>
+      <p n='presentationname' v='Jackson JSON processor'/>
+      <p n='symbolicname' v='jackson-core-lgpl'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.format'/>
+      <p n='uses' v='org.codehaus.jackson.io,org.codehaus.jackson'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.io'/>
+      <p n='uses' v='org.codehaus.jackson.util,org.codehaus.jackson'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.sym'/>
+      <p n='uses' v='org.codehaus.jackson.util'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.util'/>
+      <p n='uses' v='org.codehaus.jackson.io,org.codehaus.jackson.impl,org.codehaus.jackson'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.annotate'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.impl'/>
+      <p n='uses' v='org.codehaus.jackson.format,org.codehaus.jackson.io,org.codehaus.jackson.sym,org.codehaus.jackson.util,org.codehaus.jackson'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson'/>
+      <p n='uses' v='org.codehaus.jackson.format,org.codehaus.jackson.sym,org.codehaus.jackson.annotate,org.codehaus.jackson.impl,org.codehaus.jackson.type,org.codehaus.jackson.io,org.codehaus.jackson.util'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.type'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.annotate)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.annotate ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.format)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.format ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.impl)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.impl ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.io)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.io ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.sym)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.sym ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.type)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.type ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.util)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.util ;version=1.9.7
+    </require>
+    <require extend='false' filter='(|(ee=J2SE-1.5)(ee=JavaSE-1.6))' multiple='false' name='ee' optional='false'>
+      Execution Environment (|(ee=J2SE-1.5)(ee=JavaSE-1.6))
+    </require>
+  </resource>
+  <resource id='jackson-mapper-lgpl/1.9.7' presentationname='Data mapper for Jackson JSON processor' symbolicname='jackson-mapper-lgpl' uri='jackson-mapper-lgpl/jackson-mapper-lgpl-1.9.7.jar' version='1.9.7'>
+    <size>
+      785722
+    </size>
+    <license>
+      http://www.gnu.org/licenses/lgpl-2.1.html
+    </license>
+    <capability name='bundle'>
+      <p n='manifestversion' v='2'/>
+      <p n='presentationname' v='Data mapper for Jackson JSON processor'/>
+      <p n='symbolicname' v='jackson-mapper-lgpl'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.schema'/>
+      <p n='uses' v='org.codehaus.jackson.node,org.codehaus.jackson.map,org.codehaus.jackson.annotate,org.codehaus.jackson'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.deser.impl'/>
+      <p n='uses' v='org.codehaus.jackson.map.type,org.codehaus.jackson.type,org.codehaus.jackson.map.deser,org.codehaus.jackson.map,org.codehaus.jackson.util,org.codehaus.jackson.map.introspect,org.codehaus.jackson.map.deser.std,org.codehaus.jackson.map.util,org.codehaus.jackson'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.exc'/>
+      <p n='uses' v='org.codehaus.jackson.map,org.codehaus.jackson'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.annotate'/>
+      <p n='uses' v='org.codehaus.jackson.map,org.codehaus.jackson.annotate'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.ser.impl'/>
+      <p n='uses' v='org.codehaus.jackson.io,org.codehaus.jackson.map,org.codehaus.jackson.map.ser.std,org.codehaus.jackson,org.codehaus.jackson.map.ser,org.codehaus.jackson.type'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.ser.std'/>
+      <p n='uses' v='org.codehaus.jackson.schema,org.codehaus.jackson.map.annotate,org.codehaus.jackson.map.ser.impl,org.codehaus.jackson.map.type,org.codehaus.jackson.type,org.codehaus.jackson.io,org.codehaus.jackson.node,org.codehaus.jackson.map,org.codehaus.jackson.util,org.codehaus.jackson.map.introspect,org.codehaus.jackson.map.util,org.codehaus.jackson,org.codehaus.jackson.map.ser'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.type'/>
+      <p n='uses' v='org.codehaus.jackson.map,org.codehaus.jackson.map.util,org.codehaus.jackson,org.codehaus.jackson.type'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.module'/>
+      <p n='uses' v='org.codehaus.jackson.map.deser,org.codehaus.jackson.map,org.codehaus.jackson.map.type,org.codehaus.jackson,org.codehaus.jackson.type'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.node'/>
+      <p n='uses' v='org.codehaus.jackson.io,org.codehaus.jackson.map,org.codehaus.jackson.util,org.codehaus.jackson.impl,org.codehaus.jackson'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map'/>
+      <p n='uses' v='org.codehaus.jackson.format,org.codehaus.jackson.schema,org.codehaus.jackson.map.annotate,org.codehaus.jackson.annotate,org.codehaus.jackson.map.type,org.codehaus.jackson.type,org.codehaus.jackson.io,org.codehaus.jackson.node,org.codehaus.jackson.map.deser,org.codehaus.jackson.util,org.codehaus.jackson.map.introspect,org.codehaus.jackson.map.jsontype,org.codehaus.jackson.map.util,org.codehaus.jackson,org.codehaus.jackson.map.ser,org.codehaus.jackson.map.jsontype.impl'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.deser'/>
+      <p n='uses' v='org.codehaus.jackson.map.exc,org.codehaus.jackson.map.deser.impl,org.codehaus.jackson.map.annotate,org.codehaus.jackson.annotate,org.codehaus.jackson.map.type,org.codehaus.jackson.type,org.codehaus.jackson.io,org.codehaus.jackson.node,org.codehaus.jackson.map,org.codehaus.jackson.util,org.codehaus.jackson.map.introspect,org.codehaus.jackson.map.jsontype,org.codehaus.jackson.map.util,org.codehaus.jackson,org.codehaus.jackson.map.deser.std'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.introspect'/>
+      <p n='uses' v='org.codehaus.jackson.map.annotate,org.codehaus.jackson.map.ser.std,org.codehaus.jackson.annotate,org.codehaus.jackson.map.type,org.codehaus.jackson.type,org.codehaus.jackson.map,org.codehaus.jackson.map.jsontype,org.codehaus.jackson.map.util,org.codehaus.jackson.map.jsontype.impl'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.jsontype'/>
+      <p n='uses' v='org.codehaus.jackson.map,org.codehaus.jackson.annotate,org.codehaus.jackson.map.introspect,org.codehaus.jackson.type'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.util'/>
+      <p n='uses' v='org.codehaus.jackson.io,org.codehaus.jackson.map,org.codehaus.jackson.map.type,org.codehaus.jackson.map.introspect,org.codehaus.jackson,org.codehaus.jackson.type'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.deser.std'/>
+      <p n='uses' v='org.codehaus.jackson.map.deser.impl,org.codehaus.jackson.map.annotate,org.codehaus.jackson.map.type,org.codehaus.jackson.type,org.codehaus.jackson.io,org.codehaus.jackson.node,org.codehaus.jackson.map,org.codehaus.jackson.map.deser,org.codehaus.jackson.util,org.codehaus.jackson.map.introspect,org.codehaus.jackson,org.codehaus.jackson.map.util'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.jsontype.impl'/>
+      <p n='uses' v='org.codehaus.jackson.annotate,org.codehaus.jackson.map.type,org.codehaus.jackson.type,org.codehaus.jackson.map,org.codehaus.jackson.util,org.codehaus.jackson.map.introspect,org.codehaus.jackson.map.jsontype,org.codehaus.jackson,org.codehaus.jackson.map.util'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <capability name='package'>
+      <p n='package' v='org.codehaus.jackson.map.ser'/>
+      <p n='uses' v='org.codehaus.jackson.map.annotate,org.codehaus.jackson.node,org.codehaus.jackson.map,org.codehaus.jackson.map.introspect,org.codehaus.jackson.map.jsontype,org.codehaus.jackson.map.util,org.codehaus.jackson.schema,org.codehaus.jackson.map.ser.std,org.codehaus.jackson.map.ser.impl,org.codehaus.jackson.map.type,org.codehaus.jackson.type,org.codehaus.jackson.io,org.codehaus.jackson.util,org.codehaus.jackson'/>
+      <p n='version' t='version' v='1.9.7'/>
+    </capability>
+    <require extend='false' filter='(&amp;(package=javax.xml.datatype)(version&gt;=0.0.0))' multiple='false' name='package' optional='false'>
+      Import package javax.xml.datatype
+    </require>
+    <require extend='false' filter='(&amp;(package=javax.xml.namespace)(version&gt;=0.0.0))' multiple='false' name='package' optional='false'>
+      Import package javax.xml.namespace
+    </require>
+    <require extend='false' filter='(&amp;(package=javax.xml.parsers)(version&gt;=0.0.0))' multiple='false' name='package' optional='false'>
+      Import package javax.xml.parsers
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.annotate)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.annotate ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.format)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.format ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.impl)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.impl ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.io)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.io ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.type)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.type ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.codehaus.jackson.util)(version&gt;=1.9.7))' multiple='false' name='package' optional='false'>
+      Import package org.codehaus.jackson.util ;version=1.9.7
+    </require>
+    <require extend='false' filter='(&amp;(package=org.w3c.dom)(version&gt;=0.0.0))' multiple='false' name='package' optional='false'>
+      Import package org.w3c.dom
+    </require>
+    <require extend='false' filter='(&amp;(package=org.xml.sax)(version&gt;=0.0.0))' multiple='false' name='package' optional='false'>
+      Import package org.xml.sax
+    </require>
+    <require extend='false' filter='(|(ee=J2SE-1.5)(ee=JavaSE-1.6))' multiple='false' name='ee' optional='false'>
+      Execution Environment (|(ee=J2SE-1.5)(ee=JavaSE-1.6))
     </require>
   </resource>
   <resource id='org.osgi.impl.bundle.bindex/2.2.0' presentationname='org.osgi.impl.bundle.bindex' symbolicname='org.osgi.impl.bundle.bindex' uri='org.osgi.impl.bundle.bindex/org.osgi.impl.bundle.bindex-2.2.0.jar' version='2.2.0'>
