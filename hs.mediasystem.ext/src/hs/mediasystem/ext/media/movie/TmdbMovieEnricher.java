@@ -1,11 +1,13 @@
 package hs.mediasystem.ext.media.movie;
 
+import hs.mediasystem.dao.Casting;
 import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.dao.IdentifyException;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemEnricher;
 import hs.mediasystem.dao.ItemNotFoundException;
+import hs.mediasystem.dao.Person;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.util.Levenshtein;
 
@@ -44,10 +46,9 @@ public class TmdbMovieEnricher implements ItemEnricher {
       String subtitle = movieBase.getSubtitle();
       String year = movieBase.getReleaseYear() == null ? null : movieBase.getReleaseYear().toString();
       int seq = movieBase.getSequence() == null ? 1 : movieBase.getSequence();
+      int tmdbMovieId = -1;
 
       try {
-        String bestMatchingImdbNumber = movieBase.getImdbNumber();
-
         float matchAccuracy = 1.0f;
         MatchType matchType = MatchType.ID;
 
@@ -64,7 +65,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
 //          }
 //        }
 
-        if(bestMatchingImdbNumber == null) {
+        if(movieBase.getImdbNumber() == null) {
           TreeSet<Score> scores = new TreeSet<>(new Comparator<Score>() {
             @Override
             public int compare(Score o1, Score o2) {
@@ -118,15 +119,22 @@ public class TmdbMovieEnricher implements ItemEnricher {
             if(!scores.isEmpty()) {
               Score bestScore = scores.first();
 
-              bestMatchingImdbNumber = bestScore.movie.getImdbID();
+              tmdbMovieId = bestScore.movie.getID();
               matchType = bestScore.matchType;
               matchAccuracy = (float)(bestScore.score / 100);
             }
           }
         }
+        else {
+          final Movie movie = Movie.imdbLookup(movieBase.getImdbNumber());
 
-        if(bestMatchingImdbNumber != null) {
-          return new Identifier(media.getClass().getSimpleName(), getProviderCode(), bestMatchingImdbNumber, matchType, matchAccuracy);
+          if(movie != null) {
+            tmdbMovieId = movie.getID();
+          }
+        }
+
+        if(tmdbMovieId != -1) {
+          return new Identifier(media.getClass().getSimpleName(), getProviderCode(), Integer.toString(tmdbMovieId), matchType, matchAccuracy);
         }
 
         throw new IdentifyException(media);
@@ -140,15 +148,13 @@ public class TmdbMovieEnricher implements ItemEnricher {
   @Override
   public Item loadItem(String identifier) throws ItemNotFoundException {
     synchronized(Movie.class) {
-      String bestMatchingImdbNumber = identifier;
-
       try {
-        System.out.println("[FINE] TmdbMovieEnricher.loadItem() - imdb = " + bestMatchingImdbNumber);
+        System.out.println("[FINE] TmdbMovieEnricher.loadItem() - tmdb.id = " + identifier);
 
-        final Movie movie = Movie.imdbLookup(bestMatchingImdbNumber);
+        final Movie movie = Movie.getInfo(Integer.parseInt(identifier));
 
         if(movie == null) {
-          throw new ItemNotFoundException("TMDB lookup by IMDB id failed: " + identifier);
+          throw new ItemNotFoundException("TMDB lookup by tmdb.id failed: " + identifier);
         }
 
         System.out.println("[FINE] TmdbMovieEnricher.loadItem() - Found: name=" + movie.getName() + "; release date=" + movie.getReleasedDate() + "; runtime=" + movie.getRuntime() + "; type=" + movie.getMovieType() + "; language=" + movie.getLanguage() + "; tagline=" + movie.getTagline() + "; genres=" + movie.getGenres());
@@ -192,10 +198,35 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
         item.setGenres(genres.toArray(new String[genres.size()]));
 
-        System.out.println(">>> TmdbMovieEnricher: type = " + movie.getMovieType() + "; certification = " + movie.getCertification() + "; votes = " + movie.getVotes() + "; last mod date = " + movie.getLastModifiedAtDate());
+        System.out.println(">>> TmdbMovieEnricher: type = " + movie.getMovieType() + "; certification = " + movie.getCertification() + "; votes = " + movie.getVotes() + "; last mod date = " + movie.getLastModifiedAtDate() + "; isReduced=" + movie.isReduced());
 
         for(CastInfo castInfo : movie.getCast()) {
           System.out.println(">>> TmdbMovieEnricher: Cast: id/castid = " + castInfo.getID() + "/" + castInfo.getCastID() + " : " + castInfo.getCharacterName() + " => " + castInfo.getName() + " ; " + castInfo.getJob() + " ; " + castInfo.getJob());
+          net.sf.jtmdb.Person personInfo = net.sf.jtmdb.Person.getInfo(castInfo.getID());
+
+          Person person = new Person();
+
+          person.setName(castInfo.getName());
+          if(personInfo.getProfile() != null) {
+            URL largestImageUrl = personInfo.getProfile().getLargestImage();
+
+            if(largestImageUrl != null) {
+              person.setPhotoURL(largestImageUrl.toExternalForm());
+            }
+          }
+          person.setBiography(personInfo.getBiography());
+          person.setBirthPlace(personInfo.getBirthPlace());
+          person.setBirthDate(personInfo.getBirthday());
+
+          Casting casting = new Casting();
+
+          casting.setItem(item);
+          casting.setPerson(person);
+          casting.setRole(castInfo.getJob());
+          casting.setCharacterName(castInfo.getCharacterName());
+          casting.setIndex(castInfo.getOrder());
+
+          item.getCastings().add(casting);
         }
 
         return item;
