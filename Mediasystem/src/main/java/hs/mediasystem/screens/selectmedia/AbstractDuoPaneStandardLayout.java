@@ -75,23 +75,25 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
 
       @Override
       public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
-        DetailPane detailPane = null;
-        Class<?> cls = current.getDataType();
-
-        while(detailPane == null) {
-          detailPane = detailPaneTracker.getService(new PropertyEq("mediasystem.class", cls));
-          cls = cls.getSuperclass();
-        }
-
         if(currentDetailPane != null) {
           detailPaneContainer.getChildren().clear();
           currentDetailPane.mediaNodeProperty().unbind();
         }
 
-        detailPane.mediaNodeProperty().bind(listPane.mediaNodeBinding());
-        detailPaneContainer.getChildren().add((Node)detailPane);
+        if(current != null) {
+          DetailPane detailPane = null;
+          Class<?> cls = current.getDataType();
 
-        currentDetailPane = detailPane;
+          while(detailPane == null) {
+            detailPane = detailPaneTracker.getService(new PropertyEq("mediasystem.class", cls));
+            cls = cls.getSuperclass();
+          }
+
+          detailPane.mediaNodeProperty().bind(listPane.mediaNodeBinding());
+          detailPaneContainer.getChildren().add((Node)detailPane);
+
+          currentDetailPane = detailPane;
+        }
       }
     });
   }
