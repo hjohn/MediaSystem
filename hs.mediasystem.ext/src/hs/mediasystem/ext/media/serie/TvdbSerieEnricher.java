@@ -84,7 +84,7 @@ public class TvdbSerieEnricher implements ItemEnricher {
 
         casting.setItem(item);
         casting.setPerson(person);
-        casting.setRole("actor");
+        casting.setRole("Actor");
         casting.setCharacterName(actor.getRole());
         casting.setIndex(actor.getSortOrder());
 

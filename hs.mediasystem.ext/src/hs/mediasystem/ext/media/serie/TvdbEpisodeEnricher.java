@@ -79,7 +79,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
 
       casting.setItem(item);
       casting.setPerson(person);
-      casting.setRole("director");
+      casting.setRole("Director");
 
       item.getCastings().add(casting);
     }
@@ -93,7 +93,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
 
       casting.setItem(item);
       casting.setPerson(person);
-      casting.setRole("actor");
+      casting.setRole("Actor");
 
       item.getCastings().add(casting);
     }

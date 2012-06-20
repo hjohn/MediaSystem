@@ -292,7 +292,7 @@ public class StandardDetailPane extends StackPane implements DetailPane {
       double space = parent.getWidth() - castingSize;
 
       for(final Casting casting : castings) {
-        if(casting.getRole().equals("actor")) {
+        if(casting.getRole().equals("Actor")) {
           parent.getChildren().add(new VBox() {{
             ScaledImageView imageView = new ScaledImageView(new Label("?"));
 
