@@ -38,17 +38,12 @@ by Mark Lee of Caprica Software
 License: GNU GPL, version 3 or later  
 https://github.com/caprica/vlcj
 
-JTMDB, Java The Movie Database API
-------------------
-by Savvas Dalkitsis  
-https://github.com/savvasdalkitsis/JTMDB
-
 javatvdbapi, The Java TVDB API
 ------------------
 License: GNU GPL, version 3  
-http://code.google.com/p/javatvdbapi/  
+http://code.google.com/p/javatvdbapi/
 
-org.json, JSON in Java
+themoviedbapi, The MovieDB API
 ------------------
-License: Public Domain, "The software shall be used for good, not evil."  
-http://www.json.org/java/index.html, https://github.com/douglascrockford/JSON-java
+License: GNU GPL, version 3
+http://code.google.com/p/themoviedbapi/  

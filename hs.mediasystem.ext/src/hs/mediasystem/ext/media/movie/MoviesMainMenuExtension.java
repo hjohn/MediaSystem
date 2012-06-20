@@ -11,15 +11,12 @@ import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.screens.selectmedia.StandardView;
-import hs.mediasystem.util.CryptoUtil;
 
 import java.nio.file.Paths;
 
 import javafx.scene.image.Image;
 
 import javax.inject.Provider;
-
-import net.sf.jtmdb.GeneralSettings;
 
 public class MoviesMainMenuExtension implements MainMenuExtension {
   private volatile SelectMediaPresentationProvider selectMediaPresentationProvider;
@@ -28,10 +25,6 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
   private volatile PersistQueue persister;
 
   public MoviesMainMenuExtension() {
-    GeneralSettings.setApiKey(CryptoUtil.decrypt("8AF22323DB8C0F235B38F578B7E09A61DB6F971EED59DE131E4EF70003CE84B483A778EBD28200A031F035F4209B61A4", "-MediaSystem-"));
-    GeneralSettings.setLogEnabled(false);
-    GeneralSettings.setLogStream(System.out);
-
     TypeBasedItemEnricher.registerEnricher(MovieBase.class, new TmdbMovieEnricher());
     StandardView.registerLayout(MoviesMediaTree.class, MediaRootType.MOVIES);
     MediaNodeCellProviderRegistry.register(MediaNodeCellProviderRegistry.HORIZONTAL_CELL, Movie.class, new Provider<MovieCell>() {

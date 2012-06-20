@@ -9,10 +9,12 @@ import hs.mediasystem.dao.ItemEnricher;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
 import hs.mediasystem.framework.Media;
+import hs.mediasystem.util.CryptoUtil;
 import hs.mediasystem.util.Levenshtein;
+import hs.mediasystem.util.ThreadSafeDateFormat;
 
-import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -21,16 +23,23 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TreeSet;
 
-import net.sf.jtmdb.CastInfo;
-import net.sf.jtmdb.Genre;
-import net.sf.jtmdb.Movie;
-import net.sf.jtmdb.MovieBackdrop;
-import net.sf.jtmdb.MovieImages;
-import net.sf.jtmdb.MoviePoster;
-
-import org.json.JSONException;
+import com.moviejukebox.themoviedb.MovieDbException;
+import com.moviejukebox.themoviedb.TheMovieDb;
+import com.moviejukebox.themoviedb.model.Genre;
+import com.moviejukebox.themoviedb.model.MovieDb;
 
 public class TmdbMovieEnricher implements ItemEnricher {
+  private static final TheMovieDb TMDB;
+  private static final ThreadSafeDateFormat DATE_FORMAT = new ThreadSafeDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+
+  static {
+    try {
+      TMDB = new TheMovieDb(CryptoUtil.decrypt("8AF22323DB8C0F235B38F578B7E09A61DB6F971EED59DE131E4EF70003CE84B483A778EBD28200A031F035F4209B61A4", "-MediaSystem-"));
+    }
+    catch(MovieDbException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   @Override
   public String getProviderCode() {
@@ -39,7 +48,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
   @Override
   public Identifier identifyItem(Media media) throws IdentifyException {
-    synchronized(Movie.class) {
+    synchronized(TheMovieDb.class) {
       MovieBase movieBase = (MovieBase)media;
 
       String title = movieBase.getGroupTitle();
@@ -51,19 +60,6 @@ public class TmdbMovieEnricher implements ItemEnricher {
       try {
         float matchAccuracy = 1.0f;
         MatchType matchType = MatchType.ID;
-
-//        if(bestMatchingImdbNumber == null) {
-//          System.out.println(">>> Trying to match on hash: " + Long.toHexString(mediaItem.getMediaId().getOsHash()));
-//          List<Movie> movies = Media.getInfo(Long.toHexString(mediaItem.getMediaId().getOsHash()), mediaItem.getMediaId().getFileLength());
-//
-//          if(movies != null && !movies.isEmpty()) {
-//            System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Found match by Hash for " + mediaItem + ": " + movies.get(0));
-//            System.out.println(">>> Wow MATCH!");
-//
-//            matchType = MatchType.HASH;
-//            bestMatchingImdbNumber = movies.get(0).getImdbID();
-//          }
-//        }
 
         if(movieBase.getImdbNumber() == null) {
           TreeSet<Score> scores = new TreeSet<>(new Comparator<Score>() {
@@ -94,9 +90,9 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
             System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Looking to match: " + searchString);
 
-            for(Movie movie : Movie.search(searchString)) {
+            for(MovieDb movie : TMDB.searchMovie(searchString, "en", false)) {
               MatchType nameMatchType = MatchType.NAME;
-              String movieYear = extractYear(movie.getReleasedDate());
+              String movieYear = extractYear(DATE_FORMAT.parseOrNull(movie.getReleaseDate()));
               double score = 0;
 
               if(movieYear.equals(year) && movieYear.length() > 0) {
@@ -107,29 +103,29 @@ public class TmdbMovieEnricher implements ItemEnricher {
                 score += 15;
               }
 
-              double matchScore = Levenshtein.compare(movie.getName().toLowerCase(), searchString.toLowerCase());
+              double matchScore = Levenshtein.compare(movie.getTitle().toLowerCase(), searchString.toLowerCase());
 
               score += matchScore * 40;
 
               scores.add(new Score(movie, nameMatchType, score));
-              String name = movie.getName() + (movie.getAlternativeName() != null ? " (" + movie.getAlternativeName() + ")" : "");
-              System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - " + String.format("Match: %5.1f (%4.2f) IMDB: %9s YEAR: %tY -- %s", score, matchScore, movie.getImdbID(), movie.getReleasedDate(), name));
+              String name = movie.getTitle() + (movie.getOriginalTitle() != null ? " (" + movie.getOriginalTitle() + ")" : "");
+              System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - " + String.format("Match: %5.1f (%4.2f) IMDB: %9s YEAR: %s -- %s", score, matchScore, movie.getImdbID(), movie.getReleaseDate(), name));
             }
 
             if(!scores.isEmpty()) {
               Score bestScore = scores.first();
 
-              tmdbMovieId = bestScore.movie.getID();
+              tmdbMovieId = bestScore.movie.getId();
               matchType = bestScore.matchType;
               matchAccuracy = (float)(bestScore.score / 100);
             }
           }
         }
         else {
-          final Movie movie = Movie.imdbLookup(movieBase.getImdbNumber());
+          final MovieDb movie = TMDB.getMovieInfoImdb(movieBase.getImdbNumber(), "en");
 
           if(movie != null) {
-            tmdbMovieId = movie.getID();
+            tmdbMovieId = movie.getId();
           }
         }
 
@@ -139,7 +135,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
         throw new IdentifyException(media);
       }
-      catch(IOException | JSONException e) {
+      catch(MovieDbException e) {
         throw new IdentifyException(media, e);
       }
     }
@@ -151,40 +147,29 @@ public class TmdbMovieEnricher implements ItemEnricher {
       try {
         System.out.println("[FINE] TmdbMovieEnricher.loadItem() - tmdb.id = " + identifier);
 
-        final Movie movie = Movie.getInfo(Integer.parseInt(identifier));
+        int tmdbId = Integer.parseInt(identifier);
+
+        MovieDb movie = TMDB.getMovieInfo(tmdbId, "en");
 
         if(movie == null) {
           throw new ItemNotFoundException("TMDB lookup by tmdb.id failed: " + identifier);
         }
 
-        System.out.println("[FINE] TmdbMovieEnricher.loadItem() - Found: name=" + movie.getName() + "; release date=" + movie.getReleasedDate() + "; runtime=" + movie.getRuntime() + "; type=" + movie.getMovieType() + "; language=" + movie.getLanguage() + "; tagline=" + movie.getTagline() + "; genres=" + movie.getGenres());
+        System.out.println("[FINE] TmdbMovieEnricher.loadItem() - Found: name=" + movie.getTitle() + "; release date=" + movie.getReleaseDate() + "; runtime=" + movie.getRuntime() + "; popularity=" + movie.getPopularity() + "; language=" + movie.getSpokenLanguages() + "; tagline=" + movie.getTagline() + "; genres=" + movie.getGenres());
 
-        final MovieImages images = movie.getImages();
-        URL posterURL = null;
-        URL backgroundURL = null;
-
-        if(images.posters.size() > 0) {
-          MoviePoster poster = images.posters.iterator().next();
-
-          posterURL = poster.getLargestImage();
-        }
-
-        if(images.backdrops.size() > 0) {
-          MovieBackdrop background = images.backdrops.iterator().next();
-
-          backgroundURL = background.getLargestImage();
-        }
+        URL posterURL = TMDB.createImageUrl(movie.getPosterPath(), "original");
+        URL backgroundURL = TMDB.createImageUrl(movie.getBackdropPath(), "original");
 
         Item item = new Item();
 
         item.setImdbId(movie.getImdbID());
-        item.setTitle(movie.getName());
+        item.setTitle(movie.getTitle());
         item.setPlot(movie.getOverview());
-        item.setRating((float)movie.getRating());
-        item.setReleaseDate(movie.getReleasedDate());
+        item.setRating(movie.getVoteAverage());
+        item.setReleaseDate(DATE_FORMAT.parseOrNull(movie.getReleaseDate()));
         item.setRuntime(movie.getRuntime());
         item.setTagline(movie.getTagline());
-        item.setLanguage(movie.getLanguage());
+        item.setLanguage(movie.getSpokenLanguages().get(0).getName());
 
         item.setBackgroundURL(backgroundURL == null ? null : backgroundURL.toExternalForm());
         item.setBannerURL(null);
@@ -198,51 +183,61 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
         item.setGenres(genres.toArray(new String[genres.size()]));
 
-        System.out.println(">>> TmdbMovieEnricher: type = " + movie.getMovieType() + "; certification = " + movie.getCertification() + "; votes = " + movie.getVotes() + "; last mod date = " + movie.getLastModifiedAtDate() + "; isReduced=" + movie.isReduced());
+        TreeSet<com.moviejukebox.themoviedb.model.Person> movieCasts = new TreeSet<>(new Comparator<com.moviejukebox.themoviedb.model.Person>() {
+          @Override
+          public int compare(com.moviejukebox.themoviedb.model.Person o1, com.moviejukebox.themoviedb.model.Person o2) {
+            int result = o1.getName().compareTo(o2.getName());
 
-        for(CastInfo castInfo : movie.getCast()) {
-          System.out.println(">>> TmdbMovieEnricher: Cast: id/castid = " + castInfo.getID() + "/" + castInfo.getCastID() + " : " + castInfo.getCharacterName() + " => " + castInfo.getName() + " ; " + castInfo.getJob() + " ; " + castInfo.getJob());
-          net.sf.jtmdb.Person personInfo = net.sf.jtmdb.Person.getInfo(castInfo.getID());
+            if(result == 0) {
+              result = o1.getJob().compareTo(o2.getJob());
+            }
 
+            return result;
+          }
+        });
+
+        movieCasts.addAll(TMDB.getMovieCasts(tmdbId));  // eliminates duplicates
+
+        for(com.moviejukebox.themoviedb.model.Person tmdbPerson : movieCasts) {
           Person person = new Person();
 
-          person.setName(castInfo.getName());
-          if(personInfo.getProfile() != null) {
-            URL largestImageUrl = personInfo.getProfile().getLargestImage();
+          person.setName(tmdbPerson.getName());
+          if(tmdbPerson.getProfilePath() != null) {
+            URL largestImageUrl = TMDB.createImageUrl(tmdbPerson.getProfilePath(), "original");
 
             if(largestImageUrl != null) {
               person.setPhotoURL(largestImageUrl.toExternalForm());
             }
           }
-          person.setBiography(personInfo.getBiography());
-          person.setBirthPlace(personInfo.getBirthPlace());
-          person.setBirthDate(personInfo.getBirthday());
+          //person.setBiography(tmdbPerson.getBiography());
+          //person.setBirthPlace(tmdbPerson.getBirthplace());
+          //person.setBirthDate(personInfo.getBirthday());
 
           Casting casting = new Casting();
 
           casting.setItem(item);
           casting.setPerson(person);
-          casting.setRole(castInfo.getJob());
-          casting.setCharacterName(castInfo.getCharacterName());
-          casting.setIndex(castInfo.getOrder());
+          casting.setRole(tmdbPerson.getJob().equals("actor") ? "Actor" : tmdbPerson.getJob());
+          casting.setCharacterName(tmdbPerson.getCharacter());
+          casting.setIndex(tmdbPerson.getOrder());
 
           item.getCastings().add(casting);
         }
 
         return item;
       }
-      catch(IOException | JSONException e) {
+      catch(MovieDbException e) {
         throw new ItemNotFoundException(identifier, e);
       }
     }
   }
 
   private static class Score {
-    private final Movie movie;
+    private final MovieDb movie;
     private final MatchType matchType;
     private final double score;
 
-    public Score(Movie movie, MatchType matchType, double score) {
+    public Score(MovieDb movie, MatchType matchType, double score) {
       this.movie = movie;
       this.matchType = matchType;
       this.score = score;
@@ -250,7 +245,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
     @Override
     public String toString() {
-      return String.format("Score[%10.2f, " + movie.getImdbID() + " : " + movie.getName() + " : " + movie.getReleasedDate() + "]", score);
+      return String.format("Score[%10.2f, " + movie.getImdbID() + " : " + movie.getTitle() + " : " + movie.getReleaseDate() + "]", score);
     }
   }
 
