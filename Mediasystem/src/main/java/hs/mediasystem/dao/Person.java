@@ -1,18 +1,28 @@
 package hs.mediasystem.dao;
 
+import hs.mediasystem.db.Column;
+import hs.mediasystem.db.Id;
+import hs.mediasystem.db.Table;
 
+@Table(name = "persons")
 public class Person {
-  private int id;
+  @Id
+  private Integer id;
 
+  @Column
   private String name;
+
+  @Column
   private String photoURL;
+
+  @Column
   private Source<byte[]> photo;
 
-  public int getId() {
+  public Integer getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 
@@ -39,5 +49,4 @@ public class Person {
   public void setPhoto(Source<byte[]> photo) {
     this.photo = photo;
   }
-
 }
