@@ -226,6 +226,8 @@ public class FrontEnd extends Application {
     monitorBundles(
       Paths.get("local/bundles"),
       Paths.get("../cnf/repo/com.springsource.org.apache.log4j"),
+      Paths.get("../cnf/repo/jackson-core-lgpl"),
+      Paths.get("../cnf/repo/jackson-mapper-lgpl"),
       Paths.get("../hs.mediasystem.ext/generated")
     );
 
