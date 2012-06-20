@@ -1,7 +1,9 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.beans.AsyncImageProperty;
+import hs.mediasystem.dao.Casting;
 import hs.mediasystem.framework.Media;
+import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.StarRating;
@@ -21,6 +23,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
@@ -33,6 +37,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 
 public class StandardDetailPane extends StackPane implements DetailPane {
@@ -73,7 +78,9 @@ public class StandardDetailPane extends StackPane implements DetailPane {
 
       return genreText;
     }
-  };
+  };
+
+  protected final ObjectBinding<ObservableList<Casting>> castings = MapBindings.select(mediaNode, "dataMap", Media.class, "castings");
   public StandardDetailPane() {
     getStylesheets().add("select-media/detail-pane.css");
     getStyleClass().add("detail-pane");
@@ -93,8 +100,6 @@ public class StandardDetailPane extends StackPane implements DetailPane {
     });
   }
 
-
-
   protected Node createContent() {
     BorderPane borderPane = new BorderPane();
 
@@ -104,6 +109,7 @@ public class StandardDetailPane extends StackPane implements DetailPane {
 
     borderPane.setTop(createTitleBlock());
     borderPane.setCenter(grid);
+    borderPane.setBottom(createTitledBlock("CAST", createCastingsRow(), null));
 
     Node image = createImage(Pos.BOTTOM_CENTER);
 
@@ -205,8 +211,6 @@ public class StandardDetailPane extends StackPane implements DetailPane {
       getChildren().add(createGroupNameField());
       getChildren().add(createTitleField());
       getChildren().add(createSubtitleField());
-      getChildren().add(createRating());
-      getChildren().add(createGenresField());
     }};
   }
 
@@ -219,6 +223,8 @@ public class StandardDetailPane extends StackPane implements DetailPane {
 
   protected Pane createInfoBlock() {
     return new VBox() {{
+      getChildren().add(createRating());
+      getChildren().add(createGenresField());
       getChildren().add(createPlotBlock());
       getChildren().add(createMiscelaneousFieldsBlock());
     }};
@@ -245,5 +251,117 @@ public class StandardDetailPane extends StackPane implements DetailPane {
         visibleProperty().bind(visibleCondition);
       }
     }};
+  }
+
+  protected Pane createCastingsRow() {
+    final TilePane tilePane = new TilePane();
+
+    tilePane.getStyleClass().add("castings-row");
+
+    castings.addListener(new ChangeListener<ObservableList<Casting>>() {
+      private final ListChangeListener<Casting> listChangeListener = new ListChangeListener<Casting>() {
+        @Override
+        public void onChanged(ListChangeListener.Change<? extends Casting> c) {
+          createCastingChildren(tilePane, c.getList());
+        }
+      };
+
+      @Override
+      public void changed(ObservableValue<? extends ObservableList<Casting>> observable, ObservableList<Casting> old, ObservableList<Casting> current) {
+        if(old != null) {
+          old.removeListener(listChangeListener);
+        }
+
+        if(current != null) {
+          createCastingChildren(tilePane, current);
+
+          current.addListener(listChangeListener);
+        }
+      }
+    });
+
+    return tilePane;
+  }
+
+  protected void createCastingChildren(TilePane parent, ObservableList<? extends Casting> castings) {
+    parent.getChildren().clear();
+
+    double castingSize = 100 + parent.getHgap();
+
+    if(castings != null) {
+      double space = parent.getWidth() - castingSize;
+
+      for(final Casting casting : castings) {
+        if(casting.getRole().equals("actor")) {
+          parent.getChildren().add(new VBox() {{
+            ScaledImageView imageView = new ScaledImageView(new Label("?"));
+
+            Label label = new Label();
+            Label characterNameLabel = new Label();
+
+            AsyncImageProperty photo = new AsyncImageProperty();
+
+            if(casting.getPerson().getPhoto() != null) {
+              photo.imageHandleProperty().set(new SourceImageHandle(casting.getPerson().getPhoto(), "StandardDetailPane://" + casting.getPerson().getName()));
+            }
+
+            imageView.getStyleClass().add("cast-photo");
+            imageView.imageProperty().bind(photo);
+            imageView.setSmooth(true);
+            imageView.setPreserveRatio(true);
+            imageView.setMinHeight(122);
+            imageView.setAlignment(Pos.CENTER);
+
+            label.getStyleClass().add("cast-name");
+            label.setText(casting.getPerson().getName());
+            label.setMinWidth(100);
+            label.setMaxWidth(100);
+
+            characterNameLabel.getStyleClass().add("cast-character-name");
+            characterNameLabel.setText("as " + formattedCharacterName(casting.getCharacterName(), 40));
+            characterNameLabel.setMinWidth(100);
+            characterNameLabel.setMaxWidth(100);
+
+            getChildren().addAll(imageView, label);
+            if(casting.getCharacterName() != null && !casting.getCharacterName().trim().isEmpty()) {
+              getChildren().add(characterNameLabel);
+            }
+          }});
+
+          space -= castingSize;
+
+          if(space < 0) {
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  private String formattedCharacterName(String rawCharacterName, int cutOffLength) {
+    String characterName = rawCharacterName.replaceAll(" / ", "|");
+    int more = 0;
+
+    for(;;) {
+      int index = characterName.lastIndexOf('|');
+
+      if(index == -1) {
+        return characterName;
+      }
+
+      if(index > cutOffLength) { // too long, cut it off
+        characterName = characterName.substring(0, index).trim();
+        more++;
+      }
+      else {
+        if(more == 0) {
+          characterName = characterName.substring(0, index).trim() + " & " + characterName.substring(index + 1).trim();
+        }
+        else {
+          characterName = characterName.substring(0, index).trim() + " (" + (more + 1) + "\u00a0more)";
+        }
+        return characterName.replaceAll(" *\\| *", ", ");
+      }
+    }
   }
 }

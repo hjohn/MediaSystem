@@ -35,7 +35,44 @@
 }
 
 .plot {
+  -fx-alignment: top-left;
   -fx-wrap-text: true;
+}
+
+.castings-row {
+  -fx-border-color: linear-gradient(to right, -c-base, -c-fill-dark 50%, -c-fill-dark 90%, rgba(0, 0, 0, 0));
+  -fx-border-width: 1 0 0 0;
+  
+  -fx-padding: 10 0 0 0;
+  -fx-hgap: 5;
+}
+
+.cast-photo .image-view {
+  -fx-border-color: -c-border-highlight;
+  -fx-border-size: 1;
+}
+
+.cast-photo .place-holder {
+  -fx-font-size: 90pt;
+  -fx-font-weight: bold;
+  -fx-text-fill: -c-text-watermark;
+}
+
+.cast-name {
+  -fx-padding: 3 0 0 0;
+  -fx-alignment: center;
+  -fx-text-alignment: center;
+  -fx-font-weight: bold;
+  -fx-font-size: 11pt;
+  -fx-wrap-text: true;
+}
+
+.cast-character-name {
+  -fx-alignment: center;
+  -fx-text-alignment: center;
+  -fx-font-size: 11pt;
+  -fx-wrap-text: true;
+  -fx-text-fill: -c-text-highlight;
 }
 
 .fields {
@@ -46,7 +83,7 @@
   -fx-font-size: 13pt;
   -fx-font-weight: bold;
   -fx-text-fill: -c-text-unobtrusive;
-  -fx-label-padding: 30 0 0 0;
+  -fx-label-padding: 20 0 0 0;
 }
 
 .field {
