@@ -37,7 +37,9 @@ public class CastingsFetcher implements Fetcher<Item, Casting> {
           person.setId(rs.getInt("id"));
           person.setName(rs.getString("name"));
           person.setPhotoURL(rs.getString("photourl"));
-          person.setPhoto(new DatabaseImageSource(connectionProvider, person.getId(), "persons", "photo", rs.getBoolean("hasPhoto") ? null : new URLImageSource(person.getPhotoURL())));
+          if(person.getPhotoURL() != null) {
+            person.setPhoto(new DatabaseImageSource(connectionProvider, person.getId(), "persons", "photo", rs.getBoolean("hasPhoto") ? null : new URLImageSource(person.getPhotoURL())));
+          }
 
           Casting casting = new Casting();
 
