@@ -46,8 +46,10 @@ public class Activator extends DependencyActivatorBase {
             criteria.put(SubtitleCriteriaProvider.IMDB_ID, movie.getImdbNumber());
           }
 
-          criteria.put(SubtitleCriteriaProvider.OPEN_SUBTITLES_HASH, mediaData.getMediaId().getOsHash());
-          criteria.put(SubtitleCriteriaProvider.FILE_LENGTH, mediaData.getMediaId().getFileLength());
+          if(mediaData != null) {
+            criteria.put(SubtitleCriteriaProvider.OPEN_SUBTITLES_HASH, mediaData.getMediaId().getOsHash());
+            criteria.put(SubtitleCriteriaProvider.FILE_LENGTH, mediaData.getMediaId().getFileLength());
+          }
 
           return criteria;
         }
