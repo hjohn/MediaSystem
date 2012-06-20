@@ -31,7 +31,7 @@ public class ItemsDao {
     this.connectionProvider = connectionProvider;
     this.personsDao = personsDao;
 
-    Database.registerFetcher(new CastingsFetcher(connectionProvider));
+    Database.registerFetcher(new CastingsFetcher(database));
   }
 
   private Connection getConnection() {
@@ -41,7 +41,7 @@ public class ItemsDao {
   public Item loadItem(final Identifier identifier) throws ItemNotFoundException {
     try {
       try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("SELECT id, imdbid, title, releasedate, rating, plot, runtime, version, season, episode, language, tagline, genres, backgroundurl, bannerurl, posterurl, background IS NOT NULL AS hasBackground, banner IS NOT NULL AS hasBanner, poster IS NOT NULL AS hasPoster FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
+          PreparedStatement statement = connection.prepareStatement("SELECT id, imdbid, title, releasedate, rating, plot, runtime, version, season, episode, language, tagline, genres, backgroundurl, bannerurl, posterurl, EXISTS(SELECT url FROM images WHERE url = backgroundurl) AS hasBackground, EXISTS(SELECT url FROM images WHERE url = bannerurl) AS hasBanner, EXISTS(SELECT url FROM images WHERE url = posterurl) AS hasPoster FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
         statement.setString(1, identifier.getType());
         statement.setString(2, identifier.getProvider());
         statement.setString(3, identifier.getProviderId());
@@ -69,13 +69,13 @@ public class ItemsDao {
               setPosterURL(rs.getString("posterurl"));
 
               if(getBackgroundURL() != null) {
-                setBackground(new DatabaseImageSource(connectionProvider, getId(), "items", "background", rs.getBoolean("hasBackground") ? null : new URLImageSource(getBackgroundURL())));
+                setBackground(new DatabaseImageSource(connectionProvider, getBackgroundURL(), rs.getBoolean("hasBackground") ? null : new URLImageSource(getBackgroundURL())));
               }
               if(getBannerURL() != null) {
-                setBanner(new DatabaseImageSource(connectionProvider, getId(), "items", "banner", rs.getBoolean("hasBanner") ? null : new URLImageSource((getBannerURL()))));
+                setBanner(new DatabaseImageSource(connectionProvider, getBannerURL(), rs.getBoolean("hasBanner") ? null : new URLImageSource((getBannerURL()))));
               }
               if(getPosterURL() != null) {
-                setPoster(new DatabaseImageSource(connectionProvider, getId(), "items", "poster", rs.getBoolean("hasPoster") ? null: new URLImageSource(getPosterURL())));
+                setPoster(new DatabaseImageSource(connectionProvider, getPosterURL(), rs.getBoolean("hasPoster") ? null: new URLImageSource(getPosterURL())));
               }
 
               String genres = rs.getString("genres");
@@ -146,11 +146,9 @@ public class ItemsDao {
   }
 
   private void putImagePlaceHolders(Item item) {
-    int id = item.getId();
-
-    item.setBackground(item.getBackgroundURL() == null ? null : new DatabaseImageSource(connectionProvider, id, "items", "background", new URLImageSource(item.getBackgroundURL())));
-    item.setBanner(item.getBannerURL() == null ? null : new DatabaseImageSource(connectionProvider, id, "items", "banner", new URLImageSource(item.getBannerURL())));
-    item.setPoster(item.getPosterURL() == null ? null : new DatabaseImageSource(connectionProvider, id, "items", "poster", new URLImageSource(item.getPosterURL())));
+    item.setBackground(item.getBackgroundURL() == null ? null : new DatabaseImageSource(connectionProvider, item.getBackgroundURL(), new URLImageSource(item.getBackgroundURL())));
+    item.setBanner(item.getBannerURL() == null ? null : new DatabaseImageSource(connectionProvider, item.getBannerURL(), new URLImageSource(item.getBannerURL())));
+    item.setPoster(item.getPosterURL() == null ? null : new DatabaseImageSource(connectionProvider, item.getPosterURL(), new URLImageSource(item.getPosterURL())));
   }
 
   public MediaData getMediaDataByUri(String uri) {
@@ -269,10 +267,6 @@ public class ItemsDao {
     columns.put("backgroundurl", item.getBackgroundURL());
     columns.put("bannerurl", item.getBannerURL());
     columns.put("posterurl", item.getPosterURL());
-
-    columns.put("background", item.getBackground() == null ? null : item.getBackground().get());
-    columns.put("banner", item.getBanner() == null ? null : item.getBanner().get());
-    columns.put("poster", item.getPoster() == null ? null : item.getPoster().get());
 
     columns.put("type", item.getIdentifier().getType());
     columns.put("provider", item.getIdentifier().getProvider());

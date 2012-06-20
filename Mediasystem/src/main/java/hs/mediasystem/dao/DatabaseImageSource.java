@@ -10,10 +10,8 @@ import javax.inject.Provider;
 
 public class DatabaseImageSource implements Source<byte[]> {
   private final Provider<Connection> connectionProvider;
-  private final int id;
+  private final String url;
   private final Source<byte[]> source;
-  private final String tableName;
-  private final String columnName;
 
   private boolean triedSource;
 
@@ -21,17 +19,15 @@ public class DatabaseImageSource implements Source<byte[]> {
    * Constructs a new instance of this class.
    *
    * @param connectionProvider a {@link Connection} {@link Provider}
-   * @param id unique id that identifies a row in the given table
-   * @param tableName the name of the table which contains the image
-   * @param columnName the name of the column containing the raw image data
    * @param source a source where the image can be fetched from, or <code>null</code> if the image should be fetched only from the database
    */
-  public DatabaseImageSource(Provider<Connection> connectionProvider, int id, String tableName, String columnName, Source<byte[]> source) {
+  public DatabaseImageSource(Provider<Connection> connectionProvider, String url, Source<byte[]> source) {
+    assert connectionProvider != null;
+    assert url != null;
+
     this.connectionProvider = connectionProvider;
-    this.id = id;
+    this.url = url;
     this.source = source;
-    this.tableName = tableName;
-    this.columnName = columnName;
   }
 
   private boolean isStoredInDatabase() {
@@ -56,16 +52,16 @@ public class DatabaseImageSource implements Source<byte[]> {
   }
 
   private byte[] getImage() {
-    System.out.println("[FINE] DatabaseImageSource.getImage() - Loading image " + tableName + "." + columnName + "(id=" + id + ")");
+    System.out.println("[FINE] DatabaseImageSource.getImage() - Loading image '" + url + "'");
 
     try {
       try(Connection connection = connectionProvider.get();
-          PreparedStatement statement = connection.prepareStatement("SELECT " + columnName + " FROM " + tableName + " WHERE id = ?")) {
-        statement.setInt(1, id);
+          PreparedStatement statement = connection.prepareStatement("SELECT image FROM images WHERE url = ?")) {
+        statement.setString(1, url);
 
         try(ResultSet rs = statement.executeQuery()) {
           if(rs.next()) {
-            return rs.getBytes(columnName);
+            return rs.getBytes("image");
           }
         }
       }
@@ -78,13 +74,13 @@ public class DatabaseImageSource implements Source<byte[]> {
   }
 
   private void storeImage(byte[] data) {
-    System.out.println("[FINE] DatabaseImageSource.storeImage() - Storing image " + tableName + "." + columnName + "(id=" + id + ")");
+    System.out.println("[FINE] DatabaseImageSource.storeImage() - Storing image '" + url + "'");
 
     try {
       try(Connection connection = connectionProvider.get();
-          PreparedStatement statement = connection.prepareStatement("UPDATE " + tableName + " SET " + columnName + "=? WHERE id = ?")) {
-        statement.setObject(1, data);
-        statement.setInt(2, id);
+          PreparedStatement statement = connection.prepareStatement("INSERT INTO images (url, image) VALUES (?, ?)")) {
+        statement.setString(1, url);
+        statement.setObject(2, data);
 
         statement.execute();
       }

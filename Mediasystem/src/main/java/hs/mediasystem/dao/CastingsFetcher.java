@@ -1,21 +1,19 @@
 package hs.mediasystem.dao;
 
+import hs.mediasystem.db.Database;
+import hs.mediasystem.db.Database.Transaction;
 import hs.mediasystem.db.Fetcher;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import javax.inject.Provider;
-
 public class CastingsFetcher implements Fetcher<Item, Casting> {
-  private final Provider<Connection> connectionProvider;
+  private final Database database;
 
-  public CastingsFetcher(Provider<Connection> connectionProvider) {
-    this.connectionProvider = connectionProvider;
+  public CastingsFetcher(Database database) {
+    this.database = database;
   }
 
   @Override
@@ -24,33 +22,34 @@ public class CastingsFetcher implements Fetcher<Item, Casting> {
       return new ArrayList<>(0);
     }
 
-    try(Connection connection = connectionProvider.get();
-        PreparedStatement statement = connection.prepareStatement("SELECT role, charactername, index, p.id, p.name, p.photourl, p.photo IS NOT NULL AS hasPhoto FROM castings c INNER JOIN persons p ON p.id = c.persons_id WHERE items_id = ? ORDER BY index")) {
-      statement.setInt(1, item.getId());
-
+    try(Transaction transaction = database.beginTransaction()) {
+      List<Object[]> results = transaction.select("role, charactername, index, p.id, p.name, p.biography, p.birthplace, p.birthdate, p.photourl", "castings c INNER JOIN persons p ON p.id = c.persons_id", "items_id = ?", item.getId());
       List<Casting> castings = new ArrayList<>();
 
-      try(ResultSet rs = statement.executeQuery()) {
-        while(rs.next()) {
-          Person person = new Person();
+      for(Object[] result : results) {
+        Person person = new Person();
 
-          person.setId(rs.getInt("id"));
-          person.setName(rs.getString("name"));
-          person.setPhotoURL(rs.getString("photourl"));
-          if(person.getPhotoURL() != null) {
-            person.setPhoto(new DatabaseImageSource(connectionProvider, person.getId(), "persons", "photo", rs.getBoolean("hasPhoto") ? null : new URLImageSource(person.getPhotoURL())));
-          }
+        person.setId((Integer)result[3]);
+        person.setName((String)result[4]);
+        person.setBiography((String)result[5]);
+        person.setBirthPlace((String)result[6]);
+        person.setBirthDate((Date)result[7]);
+        person.setPhotoURL((String)result[8]);
+        if(person.getPhotoURL() != null) {
+          Object[] urlResult = transaction.selectUnique("url", "images", "url = ?", person.getPhotoURL());
 
-          Casting casting = new Casting();
-
-          casting.setItem(item);
-          casting.setPerson(person);
-          casting.setCharacterName(rs.getString("charactername"));
-          casting.setIndex(rs.getInt("index"));
-          casting.setRole(rs.getString("role"));
-
-          castings.add(casting);
+          person.setPhoto(new DatabaseImageSource(transaction.getConnectionProvider(), person.getPhotoURL(), urlResult != null ? null : new URLImageSource(person.getPhotoURL())));
         }
+
+        Casting casting = new Casting();
+
+        casting.setItem(item);
+        casting.setPerson(person);
+        casting.setCharacterName((String)result[1]);
+        casting.setIndex((Integer)result[2]);
+        casting.setRole((String)result[0]);
+
+        castings.add(casting);
       }
 
       return castings;

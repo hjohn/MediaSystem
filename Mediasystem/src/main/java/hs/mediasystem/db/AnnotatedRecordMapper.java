@@ -1,8 +1,12 @@
 package hs.mediasystem.db;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +14,8 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   private final Map<Accessor, String> ids = new HashMap<>();
   private final Map<Accessor, String> columns = new HashMap<>();
   private final String tableName;
+
+  private MethodHandle afterLoad;
 
   public AnnotatedRecordMapper(Class<T> cls) {
     Table table = cls.getAnnotation(Table.class);
@@ -34,6 +40,13 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
           columns.put(new FieldAccessor(field), columnName);
         }
       }
+    }
+
+    try {
+      afterLoad = MethodHandles.lookup().findVirtual(cls, "afterLoad", MethodType.methodType(void.class));
+    }
+    catch(NoSuchMethodException | IllegalAccessException e) {
+      // ignore and continue
     }
 
     try {
@@ -105,7 +118,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   }
 
   @Override
-  public void applyValues(T object, Map<String, Object> map) {
+  public void applyValues(T object, Map<String, Object> map) throws SQLException {
     for(Accessor accessor : columns.keySet()) {
       String fieldName = columns.get(accessor);
 
@@ -119,6 +132,18 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
 
       if(map.containsKey(fieldName)) {
         accessor.set(object, convertValue(accessor, map.get(fieldName)));
+      }
+    }
+
+    if(afterLoad != null) {
+      try {
+        afterLoad.invoke(object);
+      }
+      catch(SQLException e) {
+        throw e;
+      }
+      catch(Throwable e) {
+        throw new RuntimeException(e);
       }
     }
   }

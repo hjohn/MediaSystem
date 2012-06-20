@@ -4,8 +4,6 @@ import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Database.Transaction;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -24,24 +22,8 @@ public class PersonsDao {
   }
 
   public Person findByName(String name) {
-    try(Connection connection = connectionProvider.get();
-        PreparedStatement statement = connection.prepareStatement("SELECT id, name, photourl, photo IS NOT NULL AS hasPhoto FROM persons WHERE name = ?")) {
-      statement.setString(1, name);
-
-      try(ResultSet rs = statement.executeQuery()) {
-        if(!rs.next()) {
-          return null;
-        }
-
-        return new Person() {{
-          setId(rs.getInt("id"));
-          setName(rs.getString("name"));
-          setPhotoURL(rs.getString("photourl"));
-          if(getPhotoURL() != null) {
-            setPhoto(new DatabaseImageSource(connectionProvider, getId(), "persons", "photo", rs.getBoolean("hasPhoto") ? null : new URLImageSource(getPhotoURL())));
-          }
-        }};
-      }
+    try(Transaction transaction = database.beginTransaction()) {
+      return transaction.selectUnique(Person.class, "name = ?", name);
     }
     catch(SQLException e) {
       throw new RuntimeException(e);
@@ -76,15 +58,16 @@ public class PersonsDao {
   }
 
   private void putImagePlaceHolders(Person person) {
-    int id = person.getId();
-
-    person.setPhoto(person.getPhotoURL() == null ? null : new DatabaseImageSource(connectionProvider, id, "persons", "photo", new URLImageSource(person.getPhotoURL())));
+    person.setPhoto(person.getPhotoURL() == null ? null : new DatabaseImageSource(connectionProvider, person.getPhotoURL(), new URLImageSource(person.getPhotoURL())));
   }
 
   private static Map<String, Object> createFieldMap(Person person) {
     Map<String, Object> columns = new LinkedHashMap<>();
 
     columns.put("name", person.getName());
+    columns.put("biography", person.getBiography());
+    columns.put("birthplace", person.getBirthPlace());
+    columns.put("birthdate", person.getBirthDate());
     columns.put("photourl", person.getPhotoURL());
     columns.put("photo", person.getPhoto() == null ? null : person.getPhoto().get());
 
