@@ -18,4 +18,17 @@ public class ThreadSafeDateFormat {
   public synchronized Date parse(String date) throws ParseException {
     return dateFormat.parse(date);
   }
+
+  public synchronized Date parseOrNull(String date) {
+    if(date == null) {
+      return null;
+    }
+
+    try {
+      return dateFormat.parse(date);
+    }
+    catch(ParseException e) {
+      return null;
+    }
+  }
 }
