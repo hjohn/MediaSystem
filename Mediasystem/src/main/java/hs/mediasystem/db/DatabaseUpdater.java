@@ -76,6 +76,9 @@ public class DatabaseUpdater {
               System.out.println("[FINE] " + sqlStatement);
               statement.execute();
             }
+            catch(SQLException e) {
+              throw new DatabaseUpdateException("exception while executing update script at line " + reader.getLineNumber() + ": " + sqlStatement, e);
+            }
           }
         }
 
