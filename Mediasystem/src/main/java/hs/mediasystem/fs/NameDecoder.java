@@ -30,7 +30,7 @@ public class NameDecoder {
   }};
 
   private static final String SEASON = "([0-9]{1,2})";
-  private static final String EPISODE = "([0-9]{1,2}(?:-[0-9]{1,2})?)";
+  private static final String EPISODE = "([0-9]{1,2})(?:-[Ee]?([0-9]{1,2}))?";
 
   private static final Set<Pattern> EPISODE_PATTERNS = new LinkedHashSet<Pattern>() {{
     add(Pattern.compile("(.*?)" + "-" + SEASON + "x" + EPISODE + "-" + "(.*?)"));
@@ -42,14 +42,14 @@ public class NameDecoder {
     add(Pattern.compile("(.*?)" + "\\[[Ss]" + SEASON + " ?[Ee]" + EPISODE + "\\]" + "(.*?)"));
     add(Pattern.compile("(.*?)" + SEASON + "x" + EPISODE + "(.*?)"));
 
-    add(Pattern.compile("(.*?)" + "([1-3][0-9]|0?[1-9])([1-3][0-9]|0[1-9])" + "(.*?)"));    // matches seasons upto 39, episodes upto 39 when written without space
+    add(Pattern.compile("(.*?)" + "([1-3][0-9]|0?[1-9])([1-3][0-9]|0[1-9])()" + "(.*?)"));    // matches seasons upto 39, episodes upto 39 when written without space
 
     add(Pattern.compile("(.*?)" + "()#" + EPISODE + "(.*?)"));  // No Season
   }};
 
   private static final Set<Pattern> MOVIE_PATTERNS = new LinkedHashSet<Pattern>() {{
     // Could not find any Season/Episode combinations, so assume that the number is a Stand-alone sequence number
-    add(Pattern.compile("(.*?)" + "- " + SEASON + "()(( [-\\[]|$).*?)"));
+    add(Pattern.compile("(.*?)" + "- " + SEASON + "()()(( [-\\[]|$).*?)"));
   }};
 
   private final Set<Hint> hints;
@@ -127,13 +127,15 @@ public class NameDecoder {
     String[] sequenceParts = decodeAsSequence(input);
     String season = null;
     String episode = null;
+    String episodeEnd = null;
     String leftoverInput = input;
     int subtitleIndex = input.length();
 
     if(sequenceParts != null) {
       season = sequenceParts[1];
       episode = sequenceParts[2];
-      leftoverInput = sequenceParts[0] + " " + sequenceParts[3];
+      episodeEnd = sequenceParts[3];
+      leftoverInput = sequenceParts[0] + " " + sequenceParts[4];
       subtitleIndex = sequenceParts[0].length() + 1;
     }
 
@@ -171,7 +173,7 @@ public class NameDecoder {
 
 //    System.out.println("FULL: [" + title.getStartIndex() + "-" + (title.getEndIndex() - 1) + "] [" + subtitle.getStartIndex() + "-" + subtitle.getEndIndex() + "]: " + parts);
 
-    return new String[] {title.toString(), season, episode, subtitle.toString(), specialText, alternativeTitleText};
+    return new String[] {title.toString(), season, episode + (episodeEnd == null || episodeEnd.isEmpty() ? "" : "-" + episodeEnd), subtitle.toString(), specialText, alternativeTitleText};
   }
 
   private String[] splitExtension(String input) {

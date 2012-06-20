@@ -82,7 +82,9 @@ public class NameDecoderTest {
       {hintsEpisode, "24 - 6x09 - 2-3PM.mkv", "24", null, "2-3PM", "6,09", null, null, "mkv"},
 
       {hintsEpisode, "ttscc208-dot.mkv", "ttscc", null, "dot", "2,08", null, null, "mkv"},
-      {hintsEpisode, "terminator.the.sarah.connor.chronicles.215.desert.cantos-sitv.mkv", "terminator the sarah connor chronicles", null, "desert cantos-sitv", "2,15", null, null, "mkv"}
+      {hintsEpisode, "terminator.the.sarah.connor.chronicles.215.desert.cantos-sitv.mkv", "terminator the sarah connor chronicles", null, "desert cantos-sitv", "2,15", null, null, "mkv"},
+
+      {hintsEpisode, "Stargate.Universe.S01E01-E03.Air.Extended.720p.Bluray.DTS.x264-DiRTY.mkv", "Stargate Universe", null, "Air Extended 720p Bluray DTS x264-DiRTY", "01,01-03", null, null, "mkv"}
     });
   }
 
