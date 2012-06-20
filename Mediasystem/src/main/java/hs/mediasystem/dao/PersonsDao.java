@@ -62,6 +62,19 @@ public class PersonsDao {
     }
   }
 
+  public void merge(Person person) {
+    try(Transaction transaction = database.beginTransaction()) {
+      transaction.merge(person);
+
+      putImagePlaceHolders(person);
+
+      transaction.commit();
+    }
+    catch(SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   private void putImagePlaceHolders(Person person) {
     int id = person.getId();
 
