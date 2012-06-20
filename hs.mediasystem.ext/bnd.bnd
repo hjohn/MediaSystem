@@ -1,2 +1,4 @@
 -sub: *.bnd
--buildpath: com.springsource.org.apache.log4j
+-buildpath: com.springsource.org.apache.log4j,\
+	jackson-core-lgpl,\
+	jackson-mapper-lgpl
