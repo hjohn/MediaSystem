@@ -52,18 +52,17 @@ public class NameDecoder {
     add(Pattern.compile("(.*?)" + "- " + SEASON + "()()(( [-\\[]|$).*?)"));
   }};
 
-  private final Set<Hint> hints;
   private final Set<Pattern> sequencePatternsToCheck = new LinkedHashSet<>();
 
   public enum Hint {EPISODE, MOVIE}
 
   public NameDecoder(Hint... hints) {
-    this.hints = new HashSet<>(Arrays.asList(hints));
+    Set<Hint> hintSet = new HashSet<>(Arrays.asList(hints));
 
-    if(this.hints.contains(Hint.EPISODE)) {
+    if(hintSet.contains(Hint.EPISODE)) {
       sequencePatternsToCheck.addAll(EPISODE_PATTERNS);
     }
-    if(this.hints.contains(Hint.MOVIE)) {
+    if(hintSet.contains(Hint.MOVIE)) {
       sequencePatternsToCheck.addAll(MOVIE_PATTERNS);
     }
     if(sequencePatternsToCheck.isEmpty()) {

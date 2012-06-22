@@ -10,7 +10,7 @@ import java.sql.SQLException;
 
 import javax.inject.Provider;
 
-public class DatabaseUrlSource implements Source<byte[]> {
+public final class DatabaseUrlSource implements Source<byte[]> {
   private static final WeakValueMap<String, DatabaseUrlSource> INSTANCES = new WeakValueMap<>();
 
   private final Database database;

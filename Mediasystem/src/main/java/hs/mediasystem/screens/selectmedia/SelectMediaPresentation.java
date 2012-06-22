@@ -73,14 +73,6 @@ public class SelectMediaPresentation {
 
     mediaGroupTracker = new ServiceTracker<>(bundleContext, MediaGroup.class);
 
-    if(this.view != null) {
-      this.view.onBack().set(null);
-      this.view.onNodeSelected().set(null);
-      this.view.onNodeAlternateSelect().set(null);
-    }
-
-    this.view = view;
-
     view.onBack().set(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {

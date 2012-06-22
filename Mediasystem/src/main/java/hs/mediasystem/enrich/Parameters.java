@@ -20,6 +20,6 @@ public class Parameters {
   }
 
   public interface WrappedValue<V> {
-    public V get();
+    V get();
   }
 }
