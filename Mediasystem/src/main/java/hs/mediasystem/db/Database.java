@@ -47,18 +47,18 @@ public class Database {
     this.connectionProvider = connectionProvider;
   }
 
-  private static final ThreadLocal<Transaction> currentTransaction = new ThreadLocal<>();
+  private static final ThreadLocal<Transaction> CURRENT_TRANSACTION = new ThreadLocal<>();
 
-  public synchronized Transaction beginTransaction() throws SQLException {
-    Transaction transaction = new Transaction(currentTransaction.get());
+  public Transaction beginTransaction() throws SQLException {
+    Transaction transaction = new Transaction(CURRENT_TRANSACTION.get());
 
-    currentTransaction.set(transaction);
+    CURRENT_TRANSACTION.set(transaction);
 
     return transaction;
   }
 
-  synchronized void endTransaction() {
-    currentTransaction.set(currentTransaction.get().parent);
+  void endTransaction() {
+    CURRENT_TRANSACTION.set(CURRENT_TRANSACTION.get().parent);
   }
 
   private static void setParameters(Map<String, Object> columns, PreparedStatement statement) throws SQLException {
@@ -149,13 +149,13 @@ public class Database {
       }
     }
 
-    public Object[] selectUnique(String fields, String tableName, String whereCondition, Object... parameters) throws SQLException {
-      List<Object[]> result = select(fields, tableName, whereCondition, parameters);
+    public Record selectUnique(String fields, String tableName, String whereCondition, Object... parameters) throws SQLException {
+      List<Record> result = select(fields, tableName, whereCondition, parameters);
 
       return result.isEmpty() ? null : result.get(0);
     }
 
-    public List<Object[]> select(String fields, String tableName, String whereCondition, Object... parameters) throws SQLException {
+    public List<Record> select(String fields, String tableName, String whereCondition, Object... parameters) throws SQLException {
       ensureNotFinished();
 
       try(PreparedStatement statement = connection.prepareStatement("SELECT " + fields + " FROM " + tableName + (whereCondition == null ? "" : " WHERE " + whereCondition))) {
@@ -166,8 +166,14 @@ public class Database {
         }
 
         try(ResultSet rs = statement.executeQuery()) {
-          List<Object[]> records = new ArrayList<>();
+          List<Record> records = new ArrayList<>();
           ResultSetMetaData metaData = rs.getMetaData();
+
+          Map<String, Integer> fieldMapping = new HashMap<>();
+
+          for(int i = 0; i < metaData.getColumnCount(); i++) {
+            fieldMapping.put(metaData.getColumnName(i + 1), i);
+          }
 
           while(rs.next()) {
             Object[] values = new Object[metaData.getColumnCount()];
@@ -176,7 +182,7 @@ public class Database {
               values[i - 1] = rs.getObject(i);
             }
 
-            records.add(values);
+            records.add(new Record(values, fieldMapping));
           }
 
           return records;
@@ -217,6 +223,7 @@ public class Database {
 
             T record = cls.newInstance();
             recordMapper.applyValues(record, values);
+            recordMapper.invokeAfterLoadStore(record, Database.this);
 
             records.add(record);
           }
@@ -252,6 +259,7 @@ public class Database {
       Map<String, Object> generatedKeys = insert(recordMapper.getTableName(), values);
 
       recordMapper.setGeneratedKeys(obj, generatedKeys);
+      recordMapper.invokeAfterLoadStore(obj, Database.this);
     }
 
     public synchronized <T> void update(T obj) throws SQLException {
@@ -278,6 +286,8 @@ public class Database {
       }
 
       update(recordMapper.getTableName(), values, whereCondition, parameters);
+
+      recordMapper.invokeAfterLoadStore(obj, Database.this);
     }
 
     public synchronized Map<String, Object> merge(String tableName, int id, Map<String, Object> parameters) throws SQLException {

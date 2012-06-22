@@ -1,74 +1,54 @@
 package hs.mediasystem;
 
-// TODO When going to Episode of a Serie, and the correct background is already displayed, there is a momentary switch to a null background only to reload the same background again
-// TODO Add creationtime to mediaId, useful to distinguish hash (but won't work with all versions of Samba)
+// TODO when loading data of an actor who's image we already got, this happens:
+//606.799 ?| AsyncImageProperty - Exception while loading SourceImageHandle(StandardDetailPane://Jim Carrey; fast=true) in background: java.lang.RuntimeException: org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint "images_url"                         -- hs.mediasystem.beans.AsyncImageProperty$2.run(AsyncImageProperty.java:61)
+//606.799  |   Detail: Key (url)=(http://cf2.imgobject.com/t/p/original/csFVs03jZKC7RLfiaM3nGjj32L1.jpg) already exists.                         -- hs.mediasystem.beans.AsyncImageProperty$2.run(AsyncImageProperty.java:61)
+
+
+// TODO Many image loading delay
+
+// TODO Movie Collections should show something fancy on their detail pane, or at the very least display a proper background (Collection view, count, list of items, picture of latest/first (or both), stacked pictures)
+// TODO Eliminate MediaRootType
+// TODO Order subtitle providers
+
 // TODO Store scroll position
 
-// TODO Flesh out Persistance framework
-
-// TODO Collection view, count, list of items, picture of latest/first (or both), stacked pictures
-// TODO New MediaData with uri and hash is great, but hash collisions can still easily occur when you simply have two copies of the same file
-// TODO Banner view -- change layout to get bigger banners
+// TODO Banner view -- change layout to get bigger banners -> DEPENDS ON: provider specific detail panes
 // TODO Option screen, re-highlight last used option
-// TODO Still don't like volume/position/etc overlays
-// TODO Consider HtmlView for DetailPane (makes reflow possible, stars and images might be tough)
 
 // Nice to have soon:
-// TODO When paused, need to see information like position, time of day, etc..
-// TODO Dark colored barely visible information, like time, position, looks cool!
-// TODO Smart highlight of next-to-see episode
+// TODO Smart highlight of next-to-see episode --> hard to do because Viewed information is only present after enriching... also, the current system should already remember the last item selected and highlight that again, just press down once..
 // TODO Store other movie informations, like subtitle/audio delay, selected subtitle/audio track, that are important when resuming movie
-// TODO Make subtitles more persistent by storing them with file, required if you want to show same sub again after resuming
-// TODO Store state cache in DB for making stuff like resume position persistent
-// TODO Collections should show something fancy on their detail pane, or at the very least display a proper background
-// TODO Delay position update call to native player --> key-repeat jumping is very slow because player is updated synchronously
-// TODO For Serie Episodes, in detail pane, episode and season number should be displayed somewhere
+// TODO Make subtitles more persistent by storing them with file (or simply in db?) required if you want to show same sub again after resuming
+// TODO Resume functionality; will need to decide if we want ResumePosition in MediaData or put it in SettingsStore (which is loaded at start...)
 
 // Easy stuff:
-// TODO Detail Pane information should be consistent, that is, if pic is not fully loaded but title is, then show an empty pic as old pic has nothing to do with the title
 // TODO Hotkey for download subtitles
-// TODO For Episodes, in playback screen title should be serie name
-// TODO Often playback detail overlay is not sized correctly when starting a video
 
 // New users:
-// TODO Initial settings / Settings screen
-// TODO Warning if database is not available --> fuck that, database is required
-// TODO Detect JavaFX
-// TODO Consider using built-in database
+// TODO Initial settings / Settings screen (configure db)
+// TODO Warning if database is not available --> but database is required --> Consider using built-in database
+// TODO Detect JavaFX, error dialog if not found
 
 // Other:
-// TODO Presentation should create a string representation of the positioning and sorting information and store this somewhere
 // TODO Rename Filter to TabGroup -- or refactor completely to use RadioButton API
-// TODO Database: Some generalization possible in the DAO's
-// TODO [Playback] Main overlay only visible when asked for (info)
-// TODO Options Screen: Modal navigation should use own Navigator as well?
-// TODO Buttons like pause/mute bounce a lot...
-// TODO Too long title causes horizontal scrollbar in select media --> partially solved? Still see it sometimes...
-// TODO [VLCPlayer] Check if playing with normal items and subitems goes correctly --> repeats now (loop)
-// TODO Options Screen: Separators for Dialog Screen
-// TODO [Select Media] Filtering possibilities (Action movies, Recent movies, etc)
-// TODO Show Actor information somewhere
 // TODO Settings screen
 // TODO Subtitle Provider Podnapisi
-
-// Plugin related:
-// TODO extension packages: MediaData enricher is general, should not be registered in MovieMainMenuExtension
-// TODO extension packages: remove dependency on Episode in BackgroundPane and DetailPane
-// TODO extension packages: SubtitleProviders rely directly on Movie/Serie classes -- should be done by specific implementations for each time instead
-// TODO Make plug-ins of various looks of Select Media
-// TODO Make plug-ins from MediaTrees
-// TODO Make plug-ins of subtitle provider
+// TODO [Option Dialog] Modal navigation should use own Navigator as well?
+// TODO [Option Dialog] Separators for Dialog Screen
+// TODO [Select Media] Filtering possibilities (Action movies, Recent movies, etc)
+// TODO [PlaybackOverlay] For Episodes, in playback screen title should be serie name
 
 // Low priority:
 // TODO Some form of remote control support / Lirc support --> EventGhost makes this unnecessary, keyboard control suffices
 // TODO Investigate why VLC sucks at skipping (audio not working for a while) --> no idea, with hardware decoding it is better but it doesn't skip to key frames then --> this seems media dependent (or processor dependent), occurs with 2012, but not with Game of Thrones
 
-// JavaFX general issues:
-// - Multiple overlays (volume, subtitle delay) at same time don't align properly still --> hard to fix due to JavaFX problems
+// Considerations:
+// - New MediaData with uri and hash is great, but hash collisions can still easily occur when you simply have two copies of the same file
 
 // JavaFX 2.2 issues:
 // - Option screen navigation is not showing focus properly, bug in JFX 2.2
-// - MediaSystem logo is garbled.  Cause is -fx-scale properties in CSS, bug in JFX 2.2
+// - Empty screen problem.... --> refresh bug it seems, JFX2.2
 
 // VLC issues:
 // - Subtitle list in Video Options should be updated more frequently, especially after downloading a sub (may require Player to notify of changes) --> No indication from VLC when a subtitle actually was fully loaded, so this is not possible
@@ -93,7 +73,7 @@ package hs.mediasystem;
 // 'i'               = video: info (display OSD)  --> Info
 //
 // 'j'               = video: next subtitle       --> Teletext
-// 't'               = video: sub title menu      --> Teletext
+// 't'               = video: sub title menu      --> Teletext (long press)
 // 'x'               = video: subtitle -0.1       --> Clear
 // 'z'               = video: subtitle +0.1       --> Enter
 //
@@ -236,6 +216,7 @@ public class MediaSystem {
   public static void main(String[] args) {
     Log.initialize(new LinePrinter() {
       private final int methodColumn = 120;
+      private final int methodTabStop = 24;
       private final long startTime = System.currentTimeMillis();
       private final String pad = String.format("%" + methodColumn + "s", "");
       private final Map<Level, String> levelMap = new HashMap<Level, String>() {{
@@ -249,12 +230,26 @@ public class MediaSystem {
       }};
 
       @Override
-      public void print(PrintStream printStream, Level level, String text, String method) {
+      public void print(PrintStream printStream, Level level, String textParm, String method) {
+        if(method.startsWith(" -- uk.co.caprica.vlcj.binding.Info.<init>")) {
+          return;
+        }
+
+        String text = textParm;
+
         StringBuilder builder = new StringBuilder();
         long sinceStart = System.currentTimeMillis() - startTime;
         long millis = sinceStart % 1000;
 
-        if(!text.startsWith("\t")) {
+        boolean stackTrace = method.startsWith(" -- java.lang.Throwable$WrappedPrintStream.println(Throwable.");
+        boolean stackTraceHeader = stackTrace && !text.startsWith("Caused by:") && !text.startsWith("\t");
+
+        if(stackTraceHeader) {
+          text = "\r\n" + text;
+          stackTrace = false;
+        }
+
+        if(!stackTrace) {
           if(sinceStart < 10000) {
             builder.append("    ");
           }
@@ -286,12 +281,13 @@ public class MediaSystem {
         if(builder.length() < methodColumn) {
           builder.append(pad.substring(0, methodColumn - builder.length()));
         }
-//        else {
-//          builder.append("\r\n");
-//          builder.append(pad);
-//        }
+        else {
+          builder.append(pad.substring(0, methodTabStop - builder.length() % methodTabStop));
+        }
 
-        builder.append(method);
+        if(!stackTrace && !stackTraceHeader) {
+          builder.append(method);
+        }
         builder.append("\r\n");
 
         printStream.print(builder.toString());
@@ -302,7 +298,9 @@ public class MediaSystem {
       }
     });
 
+//    System.setProperty("prism.verbose", "true");
     System.setProperty("prism.lcdtext", "false");
+//    System.setProperty("prism.dirtyopts", "false");
 
     Application.launch(FrontEnd.class, args);
   }

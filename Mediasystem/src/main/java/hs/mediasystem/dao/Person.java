@@ -1,7 +1,7 @@
 package hs.mediasystem.dao;
 
 import hs.mediasystem.db.Column;
-import hs.mediasystem.db.Database.Transaction;
+import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
 
@@ -30,12 +30,8 @@ public class Person {
 
   private Source<byte[]> photo;
 
-  public void afterLoad(Transaction transaction) throws SQLException {
-    if(getPhotoURL() != null) {
-      Object[] result = transaction.selectUnique("url", "images", "url = ?", getPhotoURL());
-
-      setPhoto(new DatabaseImageSource(transaction.getConnectionProvider(), getPhotoURL(), result != null ? null : new URLImageSource(getPhotoURL())));
-    }
+  public void afterLoadStore(Database database) throws SQLException {
+    setPhoto(DatabaseUrlSource.create(database, getPhotoURL()));
   }
 
   public Integer getId() {

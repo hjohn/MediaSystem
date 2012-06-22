@@ -15,7 +15,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   private final Map<Accessor, String> columns = new HashMap<>();
   private final String tableName;
 
-  private MethodHandle afterLoad;
+  private MethodHandle afterLoadStore;
 
   public AnnotatedRecordMapper(Class<T> cls) {
     Table table = cls.getAnnotation(Table.class);
@@ -43,7 +43,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     }
 
     try {
-      afterLoad = MethodHandles.lookup().findVirtual(cls, "afterLoad", MethodType.methodType(void.class));
+      afterLoadStore = MethodHandles.lookup().findVirtual(cls, "afterLoadStore", MethodType.methodType(void.class, Database.class));
     }
     catch(NoSuchMethodException | IllegalAccessException e) {
       // ignore and continue
@@ -134,10 +134,13 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
         accessor.set(object, convertValue(accessor, map.get(fieldName)));
       }
     }
+  }
 
-    if(afterLoad != null) {
+  @Override
+  public void invokeAfterLoadStore(T object, Database database) throws SQLException {
+    if(afterLoadStore != null) {
       try {
-        afterLoad.invoke(object);
+        afterLoadStore.invoke(object, database);
       }
       catch(SQLException e) {
         throw e;

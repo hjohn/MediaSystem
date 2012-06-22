@@ -4,6 +4,7 @@ import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Database.Transaction;
 import hs.mediasystem.db.DatabaseException;
+import hs.mediasystem.db.Record;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -40,48 +41,42 @@ public class ItemsDao {
 
   public Item loadItem(final Identifier identifier) throws ItemNotFoundException {
     try {
-      try(Connection connection = getConnection();
-          PreparedStatement statement = connection.prepareStatement("SELECT id, imdbid, title, releasedate, rating, plot, runtime, version, season, episode, language, tagline, genres, backgroundurl, bannerurl, posterurl, EXISTS(SELECT url FROM images WHERE url = backgroundurl) AS hasBackground, EXISTS(SELECT url FROM images WHERE url = bannerurl) AS hasBanner, EXISTS(SELECT url FROM images WHERE url = posterurl) AS hasPoster FROM items WHERE type = ? AND provider = ? AND providerid = ?")) {
-        statement.setString(1, identifier.getType());
-        statement.setString(2, identifier.getProvider());
-        statement.setString(3, identifier.getProviderId());
+      try(Transaction transaction = database.beginTransaction()) {
+        final Record record = transaction.selectUnique(
+          "id, imdbid, title, releasedate, rating, plot, runtime, version, season, episode, language, tagline, genres, backgroundurl, bannerurl, posterurl",
+          "items",
+          "type = ? AND provider = ? AND providerid = ?",
+          identifier.getType(), identifier.getProvider(), identifier.getProviderId()
+        );
 
         System.out.println("[FINE] ItemsDao.getItem() - Selecting Item with type/provider/providerid = " + identifier.getType() + "/" + identifier.getProvider() + "/" + identifier.getProviderId());
 
-        try(final ResultSet rs = statement.executeQuery()) {
-          if(rs.next()) {
-            return new Item() {{
-              setIdentifier(identifier);
-              setId(rs.getInt("id"));
-              setImdbId(rs.getString("imdbid"));
-              setTitle(rs.getString("title"));
-              setSeason((Integer)rs.getObject("season"));
-              setEpisode((Integer)rs.getObject("episode"));
-              setReleaseDate(rs.getDate("releasedate"));
-              setPlot(rs.getString("plot"));
-              setRating((Float)rs.getObject("rating"));
-              setRuntime((Integer)rs.getObject("runtime"));
-              setVersion(rs.getInt("version"));
-              setLanguage(rs.getString("language"));
-              setTagline(rs.getString("tagline"));
-              setBackgroundURL(rs.getString("backgroundurl"));
-              setBannerURL(rs.getString("bannerurl"));
-              setPosterURL(rs.getString("posterurl"));
+        if(record != null) {
+          return new Item() {{
+            setIdentifier(identifier);
+            setId(record.getInteger("id"));
+            setImdbId(record.getString("imdbid"));
+            setTitle(record.getString("title"));
+            setSeason(record.getInteger("season"));
+            setEpisode(record.getInteger("episode"));
+            setReleaseDate(record.getDate("releasedate"));
+            setPlot(record.getString("plot"));
+            setRating(record.getFloat("rating"));
+            setRuntime(record.getInteger("runtime"));
+            setVersion(record.getInteger("version"));
+            setLanguage(record.getString("language"));
+            setTagline(record.getString("tagline"));
+            setBackgroundURL(record.getString("backgroundurl"));
+            setBannerURL(record.getString("bannerurl"));
+            setPosterURL(record.getString("posterurl"));
 
-              if(getBackgroundURL() != null) {
-                setBackground(new DatabaseImageSource(connectionProvider, getBackgroundURL(), rs.getBoolean("hasBackground") ? null : new URLImageSource(getBackgroundURL())));
-              }
-              if(getBannerURL() != null) {
-                setBanner(new DatabaseImageSource(connectionProvider, getBannerURL(), rs.getBoolean("hasBanner") ? null : new URLImageSource((getBannerURL()))));
-              }
-              if(getPosterURL() != null) {
-                setPoster(new DatabaseImageSource(connectionProvider, getPosterURL(), rs.getBoolean("hasPoster") ? null: new URLImageSource(getPosterURL())));
-              }
+            setBackground(DatabaseUrlSource.create(database, getBackgroundURL()));
+            setBanner(DatabaseUrlSource.create(database, getBannerURL()));
+            setPoster(DatabaseUrlSource.create(database, getPosterURL()));
 
-              String genres = rs.getString("genres");
-              setGenres(genres == null ? new String[] {} : genres.split(","));
-            }};
-          }
+            String genres = record.getString("genres");
+            setGenres(genres == null ? new String[] {} : genres.split(","));
+          }};
         }
 
         throw new ItemNotFoundException(identifier);
@@ -140,15 +135,15 @@ public class ItemsDao {
         }
       }
 
-      personsDao.merge(casting.getPerson());
+      transaction.merge(casting.getPerson());
       transaction.insert("castings", createCastingsFieldMap(casting));
     }
   }
 
-  private void putImagePlaceHolders(Item item) {
-    item.setBackground(item.getBackgroundURL() == null ? null : new DatabaseImageSource(connectionProvider, item.getBackgroundURL(), new URLImageSource(item.getBackgroundURL())));
-    item.setBanner(item.getBannerURL() == null ? null : new DatabaseImageSource(connectionProvider, item.getBannerURL(), new URLImageSource(item.getBannerURL())));
-    item.setPoster(item.getPosterURL() == null ? null : new DatabaseImageSource(connectionProvider, item.getPosterURL(), new URLImageSource(item.getPosterURL())));
+  private void putImagePlaceHolders(Item item) throws SQLException {
+    item.setBackground(DatabaseUrlSource.create(database, item.getBackgroundURL()));
+    item.setBanner(DatabaseUrlSource.create(database, item.getBannerURL()));
+    item.setPoster(DatabaseUrlSource.create(database, item.getPosterURL()));
   }
 
   public MediaData getMediaDataByUri(String uri) {
