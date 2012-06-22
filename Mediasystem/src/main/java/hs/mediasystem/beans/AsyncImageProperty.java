@@ -59,6 +59,7 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
               }
               catch(Exception e) {
                 System.out.println("[WARN] AsyncImageProperty - Exception while loading " + imageHandle + " in background: " + e);
+                e.printStackTrace(System.out);
               }
 
               final Image finalImage = image;
