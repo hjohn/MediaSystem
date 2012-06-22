@@ -1,6 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.PluginTracker;
 import hs.mediasystem.screens.Navigator.Destination;
 
 import java.util.ArrayList;

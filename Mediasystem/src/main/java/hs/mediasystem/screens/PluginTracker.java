@@ -1,4 +1,4 @@
-package hs.mediasystem;
+package hs.mediasystem.screens;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
