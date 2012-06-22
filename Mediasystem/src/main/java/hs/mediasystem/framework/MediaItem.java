@@ -39,7 +39,6 @@ public class MediaItem implements EnrichTrigger {
   };
 
   private CacheKey cacheKey;
-  private int databaseId;
 
   public MediaItem(MediaTree mediaTree, String uri, Object... data) {
     assert uri != null;
@@ -121,14 +120,6 @@ public class MediaItem implements EnrichTrigger {
 
   public String getUri() {
     return uri;
-  }
-
-  public int getDatabaseId() {
-    return databaseId;
-  }
-
-  public void setDatabaseId(int databaseId) {
-    this.databaseId = databaseId;
   }
 
   public MediaTree getMediaTree() {
