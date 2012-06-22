@@ -1,4 +1,4 @@
 Private-Package: hs.mediasystem.ext.media.movie
 Bundle-Activator: hs.mediasystem.ext.media.movie.Activator
-Include-Resource: lib/json-20090211.jar, lib/themoviedbapi-3.2-SNAPSHOT-r164.jar, lib/commons-codec-1.6.jar, lib/commons-lang3-3.1.jar
-Bundle-ClassPath: ., json-20090211.jar, themoviedbapi-3.2-SNAPSHOT-r164.jar, commons-codec-1.6.jar, commons-lang3-3.1.jar
+Include-Resource: lib/themoviedbapi-3.2-SNAPSHOT-r164.jar, lib/commons-codec-1.6.jar, lib/commons-lang3-3.1.jar
+Bundle-ClassPath: ., themoviedbapi-3.2-SNAPSHOT-r164.jar, commons-codec-1.6.jar, commons-lang3-3.1.jar
