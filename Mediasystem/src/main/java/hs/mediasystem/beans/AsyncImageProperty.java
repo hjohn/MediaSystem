@@ -16,12 +16,12 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.image.Image;
 
 public class AsyncImageProperty extends SimpleObjectProperty<Image> {
-  private static final ThreadPoolExecutor slowExecutor = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-  private static final ThreadPoolExecutor fastExecutor = new ThreadPoolExecutor(3, 3, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+  private static final ThreadPoolExecutor SLOW_EXECUTOR = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+  private static final ThreadPoolExecutor FAST_EXECUTOR = new ThreadPoolExecutor(3, 3, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
   static {
-    slowExecutor.allowCoreThreadTimeOut(true);
-    fastExecutor.allowCoreThreadTimeOut(true);
+    SLOW_EXECUTOR.allowCoreThreadTimeOut(true);
+    FAST_EXECUTOR.allowCoreThreadTimeOut(true);
   }
 
   private final ObjectProperty<ImageHandle> imageHandle = new SimpleObjectProperty<>();
@@ -44,9 +44,9 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
   private void loadImageInBackground(final ImageHandle imageHandle) {
     set(null);
 
-    synchronized(fastExecutor) {
+    synchronized(FAST_EXECUTOR) {
       if(!taskQueued && imageHandle != null) {
-        Executor chosenExecutor = imageHandle.isFastSource() ? fastExecutor : slowExecutor;
+        Executor chosenExecutor = imageHandle.isFastSource() ? FAST_EXECUTOR : SLOW_EXECUTOR;
 
         chosenExecutor.execute(new Runnable() {
           @Override
@@ -78,7 +78,7 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
               });
             }
             finally {
-              synchronized(fastExecutor) {
+              synchronized(FAST_EXECUTOR) {
                 taskQueued = false;
               }
             }
