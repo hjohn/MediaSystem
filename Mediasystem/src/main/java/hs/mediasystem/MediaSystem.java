@@ -1,10 +1,5 @@
 package hs.mediasystem;
 
-// TODO when loading data of an actor who's image we already got, this happens:
-//606.799 ?| AsyncImageProperty - Exception while loading SourceImageHandle(StandardDetailPane://Jim Carrey; fast=true) in background: java.lang.RuntimeException: org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint "images_url"                         -- hs.mediasystem.beans.AsyncImageProperty$2.run(AsyncImageProperty.java:61)
-//606.799  |   Detail: Key (url)=(http://cf2.imgobject.com/t/p/original/csFVs03jZKC7RLfiaM3nGjj32L1.jpg) already exists.                         -- hs.mediasystem.beans.AsyncImageProperty$2.run(AsyncImageProperty.java:61)
-
-
 // TODO Many image loading delay
 
 // TODO Movie Collections should show something fancy on their detail pane, or at the very least display a proper background (Collection view, count, list of items, picture of latest/first (or both), stacked pictures)
