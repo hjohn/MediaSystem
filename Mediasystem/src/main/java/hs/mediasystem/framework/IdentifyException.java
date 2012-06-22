@@ -1,6 +1,5 @@
-package hs.mediasystem.dao;
+package hs.mediasystem.framework;
 
-import hs.mediasystem.framework.Media;
 
 public class IdentifyException extends Exception {
 

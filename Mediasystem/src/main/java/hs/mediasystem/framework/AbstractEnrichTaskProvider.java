@@ -5,7 +5,6 @@ import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
-import hs.mediasystem.dao.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichTask;
 
 import java.util.ArrayList;

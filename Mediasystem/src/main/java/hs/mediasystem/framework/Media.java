@@ -1,6 +1,7 @@
 package hs.mediasystem.framework;
 
 import hs.mediasystem.dao.Casting;
+import hs.mediasystem.enrich.DefaultEnrichable;
 import hs.mediasystem.util.ImageHandle;
 
 import java.util.Date;

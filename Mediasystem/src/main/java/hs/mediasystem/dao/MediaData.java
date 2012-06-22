@@ -2,7 +2,7 @@ package hs.mediasystem.dao;
 
 import java.util.Date;
 
-import hs.mediasystem.framework.DefaultEnrichable;
+import hs.mediasystem.enrich.DefaultEnrichable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;

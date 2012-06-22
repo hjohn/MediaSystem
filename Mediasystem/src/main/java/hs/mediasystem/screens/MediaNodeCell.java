@@ -1,6 +1,5 @@
-package hs.mediasystem.framework;
+package hs.mediasystem.screens;
 
-import hs.mediasystem.screens.MediaNode;
 
 public interface MediaNodeCell {
   void configureCell(MediaNode node);

@@ -1,11 +1,11 @@
 package hs.mediasystem.ext.media.movie;
 
-import hs.mediasystem.dao.TypeBasedItemEnricher;
 import hs.mediasystem.enrich.EnrichCache;
-import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
+import hs.mediasystem.framework.TypeBasedItemEnricher;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
+import hs.mediasystem.screens.MediaNodeCellProviderRegistry;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;

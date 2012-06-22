@@ -2,10 +2,10 @@ package hs.mediasystem.ext.media.movie;
 
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.framework.Media;
-import hs.mediasystem.framework.MediaNodeCell;
 import hs.mediasystem.screens.DuoLineCell;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.MediaNode;
+import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.WeakBinder;
 

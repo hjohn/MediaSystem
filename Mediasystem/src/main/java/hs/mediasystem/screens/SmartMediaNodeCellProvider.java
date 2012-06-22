@@ -1,7 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.framework.MediaNodeCell;
-import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import javafx.scene.layout.Region;
 
 public class SmartMediaNodeCellProvider {

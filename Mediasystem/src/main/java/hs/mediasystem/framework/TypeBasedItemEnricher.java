@@ -1,6 +1,8 @@
-package hs.mediasystem.dao;
+package hs.mediasystem.framework;
 
-import hs.mediasystem.framework.Media;
+import hs.mediasystem.dao.Identifier;
+import hs.mediasystem.dao.Item;
+import hs.mediasystem.dao.ItemNotFoundException;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,8 +1,8 @@
 package hs.mediasystem.ext.selectmedia.tree;
 
-import hs.mediasystem.framework.MediaNodeCellProviderRegistry;
 import hs.mediasystem.screens.Filter;
 import hs.mediasystem.screens.MediaNode;
+import hs.mediasystem.screens.MediaNodeCellProviderRegistry;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.SmartMediaNodeCellProvider;
 import hs.mediasystem.screens.selectmedia.ListPane;

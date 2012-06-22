@@ -1,6 +1,6 @@
-package hs.mediasystem.framework;
+package hs.mediasystem.screens;
 
-import hs.mediasystem.screens.StandardCell;
+import hs.mediasystem.framework.Media;
 
 import java.util.HashMap;
 import java.util.Map;

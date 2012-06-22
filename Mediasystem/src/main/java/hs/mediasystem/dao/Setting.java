@@ -3,7 +3,7 @@ package hs.mediasystem.dao;
 import hs.mediasystem.db.Column;
 import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
-import hs.mediasystem.framework.DefaultEnrichable;
+import hs.mediasystem.enrich.DefaultEnrichable;
 
 import java.util.Date;
 

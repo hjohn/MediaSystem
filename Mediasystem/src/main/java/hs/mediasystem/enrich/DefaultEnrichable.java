@@ -1,7 +1,5 @@
-package hs.mediasystem.framework;
+package hs.mediasystem.enrich;
 
-import hs.mediasystem.enrich.EnrichTrigger;
-import hs.mediasystem.enrich.Enrichable;
 import hs.mediasystem.persist.Persister;
 import hs.mediasystem.persist.Persistable;
 
