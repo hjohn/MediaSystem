@@ -1,6 +1,8 @@
 package hs.mediasystem.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.osgi.framework.BundleContext;
@@ -27,6 +29,14 @@ public class ServiceTracker<S> {
     List<S> services = getServices(filters);
 
     return services.isEmpty() ? null : services.get(0);
+  }
+
+  public List<S> getServices(Comparator<S> order, PropertyMatcher... filters) {
+    List<S> services = getServices(filters);
+
+    Collections.sort(services, order);
+
+    return services;
   }
 
   public List<S> getServices(PropertyMatcher... filters) {
