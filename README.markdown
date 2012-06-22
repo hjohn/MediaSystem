@@ -45,5 +45,5 @@ http://code.google.com/p/javatvdbapi/
 
 themoviedbapi, The MovieDB API
 ------------------
-License: GNU GPL, version 3
+License: GNU GPL, version 3  
 http://code.google.com/p/themoviedbapi/  
