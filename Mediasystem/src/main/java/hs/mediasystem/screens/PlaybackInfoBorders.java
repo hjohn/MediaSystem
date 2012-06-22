@@ -4,7 +4,6 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
-import hs.mediasystem.screens.PlaybackOverlayPane.FirstChangeFilter;
 import hs.mediasystem.util.GridPaneUtil;
 import hs.mediasystem.util.RangeBar;
 import hs.mediasystem.util.StringBinding;
@@ -231,5 +230,24 @@ public class PlaybackInfoBorders extends StackPane {
   public void setLabelVisible(boolean visible) {
     timeLabel.setVisible(visible);
     positionLabel.setVisible(visible);
+  }
+
+  public static class FirstChangeFilter<T> implements ChangeListener<T> {
+    private final ChangeListener<T> changeListener;
+
+    private boolean notFirst;
+
+    public FirstChangeFilter(ChangeListener<T> changeListener) {
+      this.changeListener = changeListener;
+    }
+
+    @Override
+    public void changed(ObservableValue<? extends T> observable, T oldValue, T value) {
+      if(notFirst) {
+        changeListener.changed(observable, oldValue, value);
+      }
+
+      notFirst = true;
+    }
   }
 }

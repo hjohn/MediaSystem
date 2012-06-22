@@ -329,23 +329,4 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
 
     expansionTimeline.play();
   }
-
-  public static class FirstChangeFilter<T> implements ChangeListener<T> {
-    private final ChangeListener<T> changeListener;
-
-    private boolean notFirst;
-
-    public FirstChangeFilter(ChangeListener<T> changeListener) {
-      this.changeListener = changeListener;
-    }
-
-    @Override
-    public void changed(ObservableValue<? extends T> observable, T oldValue, T value) {
-      if(notFirst) {
-        changeListener.changed(observable, oldValue, value);
-      }
-
-      notFirst = true;
-    }
-  }
 }
