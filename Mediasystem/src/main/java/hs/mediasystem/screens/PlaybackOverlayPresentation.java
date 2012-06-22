@@ -19,6 +19,7 @@ import hs.mediasystem.util.StringConverter;
 import hs.subtitle.SubtitleDescriptor;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javafx.beans.property.ObjectProperty;
@@ -40,6 +41,13 @@ import org.osgi.framework.BundleContext;
 public class PlaybackOverlayPresentation {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
   private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
+
+  private static final Comparator<SubtitleProvider> SUBTITLE_PROVIDER_COMPARATOR = new Comparator<SubtitleProvider>() {
+    @Override
+    public int compare(SubtitleProvider o1, SubtitleProvider o2) {
+      return o1.getName().compareTo(o2.getName());
+    }
+  };
 
   private final PlaybackOverlayView view;
 
@@ -87,7 +95,7 @@ public class PlaybackOverlayPresentation {
               @Override
               public List<Option> call() {
                 return new ArrayList<Option>() {{
-                  final SubtitleSelector subtitleSelector = new SubtitleSelector(subtitleProviderTracker.getServices(new PropertyEq("mediatype", "movie")));
+                  final SubtitleSelector subtitleSelector = new SubtitleSelector(subtitleProviderTracker.getServices(SUBTITLE_PROVIDER_COMPARATOR, new PropertyEq("mediatype", "movie")));
                   final SubtitleCriteriaProvider subtitleCriteriaProvider = subtitleCriteriaProviderTracker.getService(new PropertyClassEq("mediasystem.class", mediaItem.getMedia().getClass()));
 
                   subtitleSelector.query(subtitleCriteriaProvider.getCriteria(mediaItem));
