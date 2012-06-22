@@ -53,10 +53,10 @@ public class ScaledImageView extends Region {
     layoutInArea(imageView, insets.getLeft(), insets.getTop(), getWidth() - insetsWidth, getHeight() - insetsHeight, 0, alignment.get().getHpos(), alignment.get().getVpos());
     Bounds bounds = imageView.getLayoutBounds();
 
-    effectRegion.setMinWidth(bounds.getWidth() + insetsWidth);
-    effectRegion.setMinHeight(bounds.getHeight() + insetsHeight);
-    effectRegion.setMaxWidth(bounds.getWidth() + insetsWidth);
-    effectRegion.setMaxHeight(bounds.getHeight() + insetsHeight);
+    effectRegion.setMinWidth(Math.round(bounds.getWidth()) + insetsWidth);
+    effectRegion.setMinHeight(Math.round(bounds.getHeight()) + insetsHeight);
+    effectRegion.setMaxWidth(effectRegion.getMinWidth());
+    effectRegion.setMaxHeight(effectRegion.getMinHeight());
 
     layoutInArea(effectRegion,  0, 0, getWidth(), getHeight(), 0, alignment.get().getHpos(), alignment.get().getVpos());
   }
