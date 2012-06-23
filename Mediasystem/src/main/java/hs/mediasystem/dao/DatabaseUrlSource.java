@@ -43,7 +43,7 @@ public final class DatabaseUrlSource implements Source<byte[]> {
     }
   }
 
-  private DatabaseUrlSource(Database database, String url) throws SQLException {
+  private DatabaseUrlSource(Database database, String url) {
     assert database != null;
     assert url != null;
 
@@ -90,9 +90,6 @@ public final class DatabaseUrlSource implements Source<byte[]> {
 
       return null;
     }
-    catch(SQLException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   private void storeData(byte[] data) {
@@ -101,9 +98,6 @@ public final class DatabaseUrlSource implements Source<byte[]> {
     try(Transaction transaction = database.beginTransaction()) {
       transaction.insert(new Image(url, data));
       transaction.commit();
-    }
-    catch(SQLException e) {
-      throw new RuntimeException(e);
     }
   }
 

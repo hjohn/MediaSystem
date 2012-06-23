@@ -49,7 +49,7 @@ public class Database {
 
   private static final ThreadLocal<Transaction> CURRENT_TRANSACTION = new ThreadLocal<>();
 
-  public Transaction beginTransaction() throws SQLException {
+  public Transaction beginTransaction() throws DatabaseException {
     Transaction transaction = new Transaction(CURRENT_TRANSACTION.get());
 
     CURRENT_TRANSACTION.set(transaction);
@@ -102,20 +102,25 @@ public class Database {
     private int activeNestedTransactions;
     private boolean finished;
 
-    Transaction(Transaction parent) throws SQLException {
+    Transaction(Transaction parent) throws DatabaseException {
       this.parent = parent;
 
-      if(parent == null) {
-        this.connection = connectionProvider.get();
-        this.savepoint = null;
+      try {
+        if(parent == null) {
+          this.connection = connectionProvider.get();
+          this.savepoint = null;
 
-        connection.setAutoCommit(false);
+          connection.setAutoCommit(false);
+        }
+        else {
+          this.connection = parent.getConnection();
+          this.savepoint = connection.setSavepoint();
+
+          parent.activeNestedTransactions++;
+        }
       }
-      else {
-        this.connection = parent.getConnection();
-        this.savepoint = connection.setSavepoint();
-
-        parent.activeNestedTransactions++;
+      catch(SQLException e) {
+        throw new DatabaseException(e);
       }
 
       assert this.connection != null;
@@ -136,7 +141,7 @@ public class Database {
       }
     }
 
-    public synchronized long getDatabaseSize() throws SQLException {
+    public synchronized long getDatabaseSize() throws DatabaseException {
       ensureNotFinished();
 
       try(PreparedStatement statement = connection.prepareStatement("SELECT pg_database_size('mediasystem')");
@@ -145,17 +150,20 @@ public class Database {
           return rs.getLong(1);
         }
 
-        throw new SQLException("unable to get database size");
+        throw new DatabaseException("unable to get database size");
+      }
+      catch(SQLException e) {
+        throw new DatabaseException(e);
       }
     }
 
-    public Record selectUnique(String fields, String tableName, String whereCondition, Object... parameters) throws SQLException {
+    public Record selectUnique(String fields, String tableName, String whereCondition, Object... parameters) throws DatabaseException {
       List<Record> result = select(fields, tableName, whereCondition, parameters);
 
       return result.isEmpty() ? null : result.get(0);
     }
 
-    public List<Record> select(String fields, String tableName, String whereCondition, Object... parameters) throws SQLException {
+    public List<Record> select(String fields, String tableName, String whereCondition, Object... parameters) throws DatabaseException {
       ensureNotFinished();
 
       try(PreparedStatement statement = connection.prepareStatement("SELECT " + fields + " FROM " + tableName + (whereCondition == null ? "" : " WHERE " + whereCondition))) {
@@ -188,15 +196,18 @@ public class Database {
           return records;
         }
       }
+      catch(SQLException e) {
+        throw new DatabaseException(e);
+      }
     }
 
-    public <T> T selectUnique(Class<T> cls, String whereCondition, Object... parameters) throws SQLException {
+    public <T> T selectUnique(Class<T> cls, String whereCondition, Object... parameters) throws DatabaseException {
       List<T> result = select(cls, whereCondition, parameters);
 
       return result.isEmpty() ? null : result.get(0);
     }
 
-    public synchronized <T> List<T> select(Class<T> cls, String whereCondition, Object... parameters) throws SQLException {
+    public synchronized <T> List<T> select(Class<T> cls, String whereCondition, Object... parameters) throws DatabaseException {
       ensureNotFinished();
 
       RecordMapper<T> recordMapper = getRecordMapper(cls);
@@ -234,9 +245,12 @@ public class Database {
           throw new RuntimeException(e);
         }
       }
+      catch(SQLException e) {
+        throw new DatabaseException(e);
+      }
     }
 
-    public synchronized <T> void merge(T obj) throws SQLException {
+    public synchronized <T> void merge(T obj) throws DatabaseException {
       @SuppressWarnings("unchecked")
       RecordMapper<T> recordMapper = (RecordMapper<T>)getRecordMapper(obj.getClass());
 
@@ -250,7 +264,7 @@ public class Database {
       }
     }
 
-    public synchronized <T> void insert(T obj) throws SQLException {
+    public synchronized <T> void insert(T obj) throws DatabaseException {
       @SuppressWarnings("unchecked")
       RecordMapper<T> recordMapper = (RecordMapper<T>)getRecordMapper(obj.getClass());
 
@@ -262,7 +276,7 @@ public class Database {
       recordMapper.invokeAfterLoadStore(obj, Database.this);
     }
 
-    public synchronized <T> void update(T obj) throws SQLException {
+    public synchronized <T> void update(T obj) throws DatabaseException {
       @SuppressWarnings("unchecked")
       RecordMapper<T> recordMapper = (RecordMapper<T>)getRecordMapper(obj.getClass());
 
@@ -290,7 +304,7 @@ public class Database {
       recordMapper.invokeAfterLoadStore(obj, Database.this);
     }
 
-    public synchronized Map<String, Object> merge(String tableName, int id, Map<String, Object> parameters) throws SQLException {
+    public synchronized Map<String, Object> merge(String tableName, int id, Map<String, Object> parameters) throws DatabaseException {
       if(id == 0) {
         return insert(tableName, parameters);
       }
@@ -300,7 +314,7 @@ public class Database {
       return Collections.emptyMap();
     }
 
-    public synchronized Map<String, Object> insert(String tableName, Map<String, Object> parameters) throws SQLException {
+    public synchronized Map<String, Object> insert(String tableName, Map<String, Object> parameters) throws DatabaseException {
       ensureNotFinished();
 
       StringBuilder fields = new StringBuilder();
@@ -335,15 +349,18 @@ public class Database {
           }
         }
       }
+      catch(SQLException e) {
+        throw new DatabaseException(e);
+      }
 
       return generatedKeys;
     }
 
-    public synchronized int update(String tableName, int id, Map<String, Object> parameters) throws SQLException {
+    public synchronized int update(String tableName, int id, Map<String, Object> parameters) throws DatabaseException {
       return update(tableName, parameters, "id = ?", id);
     }
 
-    public synchronized int update(String tableName, Map<String, Object> values, String whereCondition, Object... parameters) throws SQLException {
+    public synchronized int update(String tableName, Map<String, Object> values, String whereCondition, Object... parameters) throws DatabaseException {
       ensureNotFinished();
 
       StringBuilder set = new StringBuilder();
@@ -369,9 +386,12 @@ public class Database {
 
         return statement.executeUpdate();
       }
+      catch(SQLException e) {
+        throw new DatabaseException(e);
+      }
     }
 
-    public synchronized int delete(String tableName, String whereCondition, Object... parameters) throws SQLException {
+    public synchronized int delete(String tableName, String whereCondition, Object... parameters) throws DatabaseException {
       ensureNotFinished();
 
       System.out.println("[FINE] Database.Transaction.delete() - Deleting from '" + tableName + "' with condition: '" + whereCondition + "': " + Arrays.toString(parameters));
@@ -385,9 +405,12 @@ public class Database {
 
         return statement.executeUpdate();
       }
+      catch(SQLException e) {
+        throw new DatabaseException(e);
+      }
     }
 
-    public synchronized int deleteChildren(String tableName, String parentTableName, long parentId) throws SQLException {
+    public synchronized int deleteChildren(String tableName, String parentTableName, long parentId) throws DatabaseException {
       ensureNotFinished();
 
       System.out.println("[FINE] Database.Transaction.deleteChildren() - Deleting '" + tableName + "' Children of '" + parentTableName + "' with id " + parentId);
@@ -397,9 +420,12 @@ public class Database {
 
         return statement.executeUpdate();
       }
+      catch(SQLException e) {
+        throw new DatabaseException(e);
+      }
     }
 
-    private void finishTransaction(boolean commit) throws SQLException {
+    private void finishTransaction(boolean commit) throws DatabaseException {
       ensureNotFinished();
 
       if(activeNestedTransactions != 0) {
@@ -408,55 +434,62 @@ public class Database {
 
       endTransaction();
 
-      if(parent == null) {
-        try {
-          if(commit) {
-            connection.commit();
-          }
-          else {
-            connection.rollback();
-          }
-        }
-        finally {
+      try {
+        if(parent == null) {
           try {
-            connection.close();
+            if(commit) {
+              connection.commit();
+            }
+            else {
+              connection.rollback();
+            }
           }
           catch(SQLException e) {
-            System.out.println("[FINE] Database.Transaction.finishTransaction() - exception while closing connection: " + e);
+            throw new DatabaseException(e);
+          }
+          finally {
+            try {
+              connection.close();
+            }
+            catch(SQLException e) {
+              System.out.println("[FINE] Database.Transaction.finishTransaction() - exception while closing connection: " + e);
+            }
+          }
+        }
+        else {
+          try {
+            if(commit) {
+              connection.releaseSavepoint(savepoint);
+            }
+            else {
+              connection.rollback(savepoint);
+            }
+          }
+          catch(SQLException e) {
+            throw new DatabaseException(e);
+          }
+          finally {
+            parent.activeNestedTransactions--;
           }
         }
       }
-      else {
-        if(commit) {
-          connection.releaseSavepoint(savepoint);
-        }
-        else {
-          connection.rollback(savepoint);
-        }
-
-        parent.activeNestedTransactions--;
+      finally {
+        finished = true;
       }
-
-      finished = true;
     }
 
-    public synchronized void commit() throws SQLException {
+    public synchronized void commit() throws DatabaseException {
       finishTransaction(true);
     }
 
-    public synchronized void rollback() throws SQLException {
+    public synchronized void rollback() throws DatabaseException {
       finishTransaction(false);
     }
 
     @Override
     public void close() {
-      try {
-        if(!finished) {
-          rollback();
-        }
-      }
-      catch(SQLException e) {
-        e.printStackTrace();
+      if(!finished) {
+        rollback();
       }
     }
   }

@@ -2,10 +2,8 @@ package hs.mediasystem.dao;
 
 import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Database.Transaction;
-import hs.mediasystem.db.DatabaseException;
 import hs.mediasystem.db.Record;
 
-import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,17 +23,11 @@ public class MediaDataDao {
     try(Transaction transaction = database.beginTransaction()) {
       return createFromRecord(transaction.selectUnique("*", "mediadata", "uri = ?", uri));
     }
-    catch(SQLException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public MediaData getMediaDataByHash(byte[] hash) {
     try(Transaction transaction = database.beginTransaction()) {
       return createFromRecord(transaction.selectUnique("*", "mediadata", "hash = ?", hash));
-    }
-    catch(SQLException e) {
-      throw new RuntimeException(e);
     }
   }
 
@@ -45,9 +37,6 @@ public class MediaDataDao {
 
       transaction.update("mediadata", mediaData.getId(), parameters);
       transaction.commit();
-    }
-    catch(SQLException e) {
-      throw new DatabaseException("exception while updating: " + mediaData, e);
     }
   }
 
@@ -59,9 +48,6 @@ public class MediaDataDao {
 
       mediaData.setId((int)generatedKeys.get("id"));
       transaction.commit();
-    }
-    catch(SQLException e) {
-      throw new RuntimeException("exception while storing: " + mediaData, e);
     }
   }
 

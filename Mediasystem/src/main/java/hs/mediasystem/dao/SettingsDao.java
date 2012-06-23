@@ -3,7 +3,6 @@ package hs.mediasystem.dao;
 import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Database.Transaction;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -22,18 +21,12 @@ public class SettingsDao {
     try(Transaction transaction = database.beginTransaction()) {
       return transaction.select(Setting.class, null);
     }
-    catch(SQLException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public void storeSetting(Setting setting) {
     try(Transaction transaction = database.beginTransaction()) {
       transaction.merge(setting);
       transaction.commit();
-    }
-    catch(SQLException e) {
-      throw new RuntimeException("exception while storing: " + setting, e);
     }
   }
 }

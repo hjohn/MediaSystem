@@ -113,7 +113,7 @@ public class ItemsDao {
     }
   }
 
-  private void storeCastings(Item item, Transaction transaction) throws SQLException {
+  private void storeCastings(Item item, Transaction transaction) {
     for(Casting casting : item.getCastings()) {
       Person person = personsDao.findByName(casting.getPerson().getName());
 

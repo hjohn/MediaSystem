@@ -2,11 +2,9 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Database.Transaction;
+import hs.mediasystem.db.DatabaseException;
 import hs.mediasystem.util.SizeFormatter;
 import hs.mediasystem.util.SpecialEffects;
-
-import java.sql.SQLException;
-
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -127,7 +125,7 @@ public class InformationBorder extends HBox {
               databaseSize.setText(SizeFormatter.BYTES_THREE_SIGNIFICANT.format(transaction.getDatabaseSize()));
               databaseSizeUpdateCounter = 60;
             }
-            catch(SQLException e) {
+            catch(DatabaseException e) {
               e.printStackTrace();
               databaseSize.setText("-");
               databaseSizeUpdateCounter = 600;

@@ -6,7 +6,6 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -118,7 +117,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   }
 
   @Override
-  public void applyValues(T object, Map<String, Object> map) throws SQLException {
+  public void applyValues(T object, Map<String, Object> map) {
     for(Accessor accessor : columns.keySet()) {
       String fieldName = columns.get(accessor);
 
@@ -137,12 +136,12 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   }
 
   @Override
-  public void invokeAfterLoadStore(T object, Database database) throws SQLException {
+  public void invokeAfterLoadStore(T object, Database database) throws DatabaseException {
     if(afterLoadStore != null) {
       try {
         afterLoadStore.invoke(object, database);
       }
-      catch(SQLException e) {
+      catch(DatabaseException e) {
         throw e;
       }
       catch(Throwable e) {

@@ -88,7 +88,7 @@ public class DatabaseTest {
   }
 
   @Test(expected = IllegalStateException.class)
-  public void shouldNotAllowCommitAfterRollback() throws SQLException {
+  public void shouldNotAllowCommitAfterRollback() {
     try(Transaction transaction = database.beginTransaction()) {
       transaction.rollback();
       transaction.commit();
@@ -96,7 +96,7 @@ public class DatabaseTest {
   }
 
   @Test(expected = IllegalStateException.class)
-  public void shouldNotAllowRollbackAfterCommit() throws SQLException {
+  public void shouldNotAllowRollbackAfterCommit() {
     try(Transaction transaction = database.beginTransaction()) {
       transaction.commit();
       transaction.rollback();
@@ -120,7 +120,7 @@ public class DatabaseTest {
   }
 
   @Test(expected = IllegalStateException.class)
-  public void shouldNotAllowUncommitedNestedTransactions() throws SQLException {
+  public void shouldNotAllowUncommitedNestedTransactions() {
     try(Transaction transaction = database.beginTransaction()) {
       try(Transaction nestedTransaction = database.beginTransaction()) {
         transaction.commit();
