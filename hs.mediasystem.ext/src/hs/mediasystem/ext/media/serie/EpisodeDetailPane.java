@@ -7,6 +7,7 @@ import javafx.beans.binding.StringBinding;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 
 public class EpisodeDetailPane extends StandardDetailPane {
   protected final StringBinding season = MapBindings.selectInteger(mediaNodeProperty(), "dataMap", Episode.class, "season").asString();
@@ -20,8 +21,16 @@ public class EpisodeDetailPane extends StandardDetailPane {
 
   @Override
   protected Pane createInfoBlock() {
-    Pane infoBlock = super.createInfoBlock();
+    return new VBox() {{
+      getChildren().add(createRating());
+      getChildren().add(createGenresField());
+      getChildren().add(createSeasonEpisodeBlock());
+      getChildren().add(createPlotBlock());
+      getChildren().add(createMiscelaneousFieldsBlock());
+    }};
+  }
 
+  protected Pane createSeasonEpisodeBlock() {
     final Label seasonLabel = new Label() {{
       getStyleClass().addAll("field", "season");
       setMaxWidth(10000);
@@ -34,12 +43,10 @@ public class EpisodeDetailPane extends StandardDetailPane {
       textProperty().bind(episode);
     }};
 
-    infoBlock.getChildren().add(0, new FlowPane() {{
+    return new FlowPane() {{
       getStyleClass().add("fields");
       getChildren().add(createTitledBlock("SEASON", seasonLabel, null));
       getChildren().add(createTitledBlock("EPISODE", episodeLabel, null));
-    }});
-
-    return infoBlock;
+    }};
   }
 }
