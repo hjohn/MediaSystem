@@ -295,7 +295,8 @@ public class SelectMediaPresentation {
           Media media = mediaGroup.createMediaFromFirstItem(group.get(0));
           String shortTitle = mediaGroup.getShortTitle(group.get(0));
 
-          MediaNode groupNode = new MediaNode(mediaGroup.getId() + "[" + media.getTitle() + "]", media.getTitle(), shortTitle, media.getReleaseYear());
+          Media groupMedia = new Media(media.getTitle());
+          MediaNode groupNode = new MediaNode(mediaGroup.getId() + "[" + media.getTitle() + "]", groupMedia, shortTitle);
 
           List<MediaNode> nodeChildren = new ArrayList<>();
 

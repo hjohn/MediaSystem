@@ -42,7 +42,7 @@ public class MediaNode {
     this.showTopLevelExpanded = false;
   }
 
-  public MediaNode(String id, String title, String shortTitle, Integer releaseYear) {
+  public MediaNode(String id, Media media, String shortTitle) {
     assert id != null;
     assert !id.contains("/");
     assert !id.contains(":");
@@ -50,12 +50,11 @@ public class MediaNode {
     ObservableMap<Class<?>, Object> data = FXCollections.observableHashMap();
     this.dataMap = new SimpleObjectProperty<>(data);
 
-    data.put(Media.class, new Media(title, null, releaseYear));
+    data.put(Media.class, media);
 
     this.id = id;
     this.showTopLevelExpanded = false;
-    this.shortTitle = shortTitle == null ? title : shortTitle;
-
+    this.shortTitle = shortTitle == null ? media.getTitle() : shortTitle;
 
     this.isLeaf = false;
     this.dataType = Media.class;
@@ -66,7 +65,7 @@ public class MediaNode {
   private Callback<MediaRoot, List<MediaNode>> childrenCallback;
 
   public MediaNode(MediaRoot mediaRoot, boolean showTopLevelExpanded, Callback<MediaRoot, List<MediaNode>> childrenCallback) {
-    this(mediaRoot.getId(), mediaRoot.getRootName(), null, null);
+    this(mediaRoot.getId(), new Media(mediaRoot.getRootName()), null);
 
     this.mediaRoot = mediaRoot;
     this.showTopLevelExpanded = showTopLevelExpanded;
