@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -90,6 +91,7 @@ public class MediaDataEnricher implements Enricher<MediaData> {
 
           mediaData.setUri(uri);  // replace uri, as it didn't match anymore
           mediaData.setMediaId(mediaId);  // replace mediaId, even though hash matches, to update the other values just in case
+          mediaData.setLastUpdated(new Date());
 
           mediaDataDao.storeMediaData(mediaData);
         }
