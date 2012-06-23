@@ -157,7 +157,7 @@ public class DatabaseTest {
     verify(connection).prepareStatement("UPDATE items SET childcount=?,changetime=? WHERE id = ?");
     verify(statement).setObject(1, 2);
     verify(statement).setTimestamp(2, new Timestamp(DATE.getTime()));
-    verify(statement).setLong(3, 15);
+    verify(statement).setObject(3, 15);
   }
 
   @Test
