@@ -1,21 +1,22 @@
 package hs.mediasystem.dao;
 
+import hs.mediasystem.enrich.DefaultEnrichable;
+
 import java.util.Date;
 
-import hs.mediasystem.enrich.DefaultEnrichable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
 public class MediaData extends DefaultEnrichable<MediaData> {
-  private int id;
+  private Integer id;
+
   private Date lastUpdated;
 
   private String uri;
 
   private MediaId mediaId;
-  private Identifier identifier;
 
   public String getUri() {
     return uri;
@@ -26,11 +27,11 @@ public class MediaData extends DefaultEnrichable<MediaData> {
   }
 
   private final BooleanProperty viewed = new SimpleBooleanProperty() {
-    @Override
-    public boolean get() {
-      queueForEnrichment();
-      return super.get();
-    }
+//    @Override
+//    public boolean get() {
+//      queueForEnrichment();
+//      return super.get();
+//    }
 
     @Override
     protected void invalidated() {
@@ -49,11 +50,11 @@ public class MediaData extends DefaultEnrichable<MediaData> {
   }
 
   private final IntegerProperty resumePosition = new SimpleIntegerProperty() {
-    @Override
-    public int get() {
-      queueForEnrichment();
-      return super.get();
-    }
+//    @Override
+//    public int get() {
+//      queueForEnrichment();
+//      return super.get();
+//    }
 
     @Override
     protected void invalidated() {
@@ -71,20 +72,12 @@ public class MediaData extends DefaultEnrichable<MediaData> {
     this.resumePosition.set(resumePosition);
   }
 
-  public int getId() {
+  public Integer getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(Integer id) {
     this.id = id;
-  }
-
-  public Identifier getIdentifier() {
-    return identifier;
-  }
-
-  public void setIdentifier(Identifier identifier) {
-    this.identifier = identifier;
   }
 
   public MediaId getMediaId() {

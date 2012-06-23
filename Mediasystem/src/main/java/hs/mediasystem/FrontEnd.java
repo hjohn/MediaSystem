@@ -1,10 +1,12 @@
 package hs.mediasystem;
 
+import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.DatabaseUpdater;
 import hs.mediasystem.enrich.EnrichCache;
+import hs.mediasystem.framework.IdentifierEnricher;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaDataPersister;
@@ -202,6 +204,7 @@ public class FrontEnd extends Application {
     updater.updateDatabase();
 
     injector.getInstance(EnrichCache.class).registerEnricher(MediaData.class, injector.getInstance(MediaDataEnricher.class));
+    injector.getInstance(EnrichCache.class).registerEnricher(Identifier.class, injector.getInstance(IdentifierEnricher.class));
 
     ProgramController controller = injector.getInstance(ProgramController.class);
 

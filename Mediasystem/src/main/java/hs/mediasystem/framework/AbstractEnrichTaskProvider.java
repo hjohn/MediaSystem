@@ -1,10 +1,10 @@
 package hs.mediasystem.framework;
 
 import hs.mediasystem.dao.Casting;
+import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.ItemsDao;
-import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.enrich.EnrichTask;
 
 import java.util.ArrayList;
@@ -16,13 +16,13 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
   private final String title;
   private final ItemsDao itemsDao;
   private final TypeBasedItemEnricher typeBasedItemEnricher;
-  private final MediaData mediaData;
+  private final Identifier identifier;
 
-  public AbstractEnrichTaskProvider(String title, ItemsDao itemsDao, TypeBasedItemEnricher typeBasedItemEnricher, MediaData mediaData) {
+  public AbstractEnrichTaskProvider(String title, ItemsDao itemsDao, TypeBasedItemEnricher typeBasedItemEnricher, Identifier identifier) {
     this.title = title;
     this.itemsDao = itemsDao;
     this.typeBasedItemEnricher = typeBasedItemEnricher;
-    this.mediaData = mediaData;
+    this.identifier = identifier;
   }
 
   public abstract T itemToEnrichType(Item item);
@@ -36,11 +36,7 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
       @Override
       protected T call() {
         try {
-          if(mediaData.getIdentifier() == null) {
-            return null;
-          }
-
-          Item item = itemsDao.loadItem(mediaData.getIdentifier());
+          Item item = itemsDao.loadItem(identifier);
 
           if(item.getVersion() < ItemsDao.VERSION) {
             return null;
@@ -68,14 +64,10 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
 
       @Override
       protected T call() throws Exception {
-        if(mediaData.getIdentifier() == null) {
-          return null;
-        }
-
         Item oldItem;
 
         try {
-          oldItem = itemsDao.loadItem(mediaData.getIdentifier());
+          oldItem = itemsDao.loadItem(identifier);
         }
         catch(ItemNotFoundException e) {
           oldItem = null;
@@ -83,7 +75,7 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
 
         updateProgress(1, 4);
 
-        Item item = bypassCache || oldItem == null ? typeBasedItemEnricher.loadItem(mediaData.getIdentifier()) : oldItem;
+        Item item = bypassCache || oldItem == null ? typeBasedItemEnricher.loadItem(identifier) : oldItem;
 
         updateProgress(2, 4);
 

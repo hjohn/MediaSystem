@@ -28,10 +28,10 @@ public class TypeBasedItemEnricher {
   }
 
   public Item loadItem(Identifier identifier) throws ItemNotFoundException {
-    ItemEnricher itemEnricher = ITEM_ENRICHERS.get(identifier.getType());
+    ItemEnricher itemEnricher = ITEM_ENRICHERS.get(identifier.getMediaType());
 
     if(itemEnricher == null) {
-      throw new RuntimeException("No matching enricher for type: " + identifier.getType());
+      throw new RuntimeException("No matching enricher for type: " + identifier.getMediaType());
     }
 
     Item item = itemEnricher.loadItem(identifier.getProviderId());

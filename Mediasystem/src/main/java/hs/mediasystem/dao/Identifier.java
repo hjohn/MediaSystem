@@ -1,5 +1,12 @@
 package hs.mediasystem.dao;
 
+import hs.mediasystem.db.Column;
+import hs.mediasystem.db.Id;
+import hs.mediasystem.db.Table;
+
+import java.util.Date;
+
+@Table(name = "identifiers")
 public class Identifier {
   /**
    * MatchType enum, in order of certainty
@@ -31,12 +38,29 @@ public class Identifier {
     NAME
   }
 
-  private final String mediaType;
-  private final String provider;
-  private final String providerId;
+  @Id
+  private Integer id;
 
+  @Column
+  private String mediaType;
+
+  @Column
+  private String provider;
+
+  @Column
+  private String providerId;
+
+  @Column
   private MatchType matchType;
+
+  @Column
   private float matchAccuracy;
+
+  @Column(name = "mediadata_id")
+  private Integer mediaDataId;
+
+  @Column
+  private Date lastUpdated;
 
   public Identifier(String mediaType, String provider, String providerId, MatchType matchType, float matchAccuracy) {
     assert mediaType != null;
@@ -52,7 +76,18 @@ public class Identifier {
     this.matchAccuracy = matchAccuracy;
   }
 
-  public String getType() {
+  public Identifier() {
+  }
+
+  public Integer getId() {
+    return id;
+  }
+
+  public void setId(Integer id) {
+    this.id = id;
+  }
+
+  public String getMediaType() {
     return mediaType;
   }
 
@@ -70,6 +105,22 @@ public class Identifier {
 
   public float getMatchAccuracy() {
     return matchAccuracy;
+  }
+
+  public Integer getMediaDataId() {
+    return mediaDataId;
+  }
+
+  public void setMediaDataId(Integer mediaDataId) {
+    this.mediaDataId = mediaDataId;
+  }
+
+  public Date getLastUpdated() {
+    return lastUpdated;
+  }
+
+  public void setLastUpdated(Date lastUpdated) {
+    this.lastUpdated = lastUpdated;
   }
 
   @Override

@@ -1,7 +1,7 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.MediaDataDao;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.persist.PersistTask;
 import hs.mediasystem.persist.Persister;
@@ -9,12 +9,12 @@ import hs.mediasystem.persist.Persister;
 import javax.inject.Inject;
 
 public class MediaDataPersister implements Persister<MediaData> {
-  private final ItemsDao itemsDao;
+  private final MediaDataDao mediaDataDao;
   private final PersistQueue queue;
 
   @Inject
-  public MediaDataPersister(ItemsDao itemsDao, PersistQueue queue) {
-    this.itemsDao = itemsDao;
+  public MediaDataPersister(MediaDataDao mediaDataDao, PersistQueue queue) {
+    this.mediaDataDao = mediaDataDao;
     this.queue = queue;
   }
 
@@ -23,7 +23,7 @@ public class MediaDataPersister implements Persister<MediaData> {
     queue.queueAsDirty(mediaData, new PersistTask() {
       @Override
       public void persist() {
-        itemsDao.updateMediaData(mediaData);
+        mediaDataDao.updateMediaData(mediaData);
       }
     });
   }

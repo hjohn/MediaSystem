@@ -1,8 +1,8 @@
 package hs.mediasystem.ext.media.movie;
 
+import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemsDao;
-import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.dao.Source;
 import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
@@ -19,7 +19,7 @@ import java.util.List;
 public class MovieEnricher implements Enricher<Movie> {
   private static final List<Class<?>> INPUT_PARAMETERS = new ArrayList<Class<?>>() {{
     add(TaskTitle.class);
-    add(MediaData.class);
+    add(Identifier.class);
     add(Media.class);
   }};
 
@@ -35,7 +35,7 @@ public class MovieEnricher implements Enricher<Movie> {
   public List<EnrichTask<Movie>> enrich(Parameters parameters, boolean bypassCache) {
     List<EnrichTask<Movie>> enrichTasks = new ArrayList<>();
 
-    MovieEnrichTaskProvider enrichTaskProvider = new MovieEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(MediaData.class), (Movie)parameters.get(Media.class));
+    MovieEnrichTaskProvider enrichTaskProvider = new MovieEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(Identifier.class), (Movie)parameters.get(Media.class));
 
     if(!bypassCache) {
       enrichTasks.add(enrichTaskProvider.getCachedTask());
@@ -48,8 +48,8 @@ public class MovieEnricher implements Enricher<Movie> {
   private class MovieEnrichTaskProvider extends AbstractEnrichTaskProvider<Movie> {
     private final Movie currentMovie;
 
-    public MovieEnrichTaskProvider(String title, MediaData mediaData, Movie movie) {
-      super(title, itemsDao, typeBasedItemEnricher, mediaData);
+    public MovieEnrichTaskProvider(String title, Identifier identifier, Movie movie) {
+      super(title, itemsDao, typeBasedItemEnricher, identifier);
       this.currentMovie = movie;
     }
 

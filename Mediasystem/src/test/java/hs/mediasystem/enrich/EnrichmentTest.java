@@ -4,19 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-import hs.mediasystem.dao.Identifier;
-import hs.mediasystem.dao.Identifier.MatchType;
-import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.MediaDataDao;
 import hs.mediasystem.dao.MediaId;
 import hs.mediasystem.enrich.EnrichCache.CacheKey;
-import hs.mediasystem.framework.IdentifyException;
 import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemUri;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.framework.TypeBasedItemEnricher;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.util.TaskThreadPoolExecutor;
 
@@ -45,8 +40,7 @@ public class EnrichmentTest {
   private EnrichCache cache;
   private List<SlowData> slowDataObjects;
 
-  @Mock private ItemsDao itemsDao;
-  @Mock private TypeBasedItemEnricher typeBasedItemEnricher;
+  @Mock private MediaDataDao mediaDataDao;
 
   @BeforeClass
   public static void beforeClass() {
@@ -59,13 +53,13 @@ public class EnrichmentTest {
   }
 
   @Before
-  public void before() throws IdentifyException {
+  public void before() {
     MockitoAnnotations.initMocks(this);
 
     slowDataObjects = new ArrayList<>();
 
     cache = new EnrichCache(new TaskThreadPoolExecutor(new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>())));
-    cache.registerEnricher(MediaData.class, new MediaDataEnricher(itemsDao, typeBasedItemEnricher));
+    cache.registerEnricher(MediaData.class, new MediaDataEnricher(mediaDataDao));
     cache.registerEnricher(SlowData.class, new Enricher<SlowData>() {
       @Override
       public List<EnrichTask<SlowData>> enrich(final Parameters parameters, boolean bypassCache) {
@@ -107,8 +101,6 @@ public class EnrichmentTest {
     TestMovie movie = new TestMovie("Alice in Wonderland", null, null, null, null);
     item = new MediaItem(mediaTree, MOVIE_ALICE_URI, movie);
     cacheKey = new CacheKey(item.getUri());
-
-    when(typeBasedItemEnricher.identifyItem(movie)).thenReturn(new Identifier("Movie", "TMDB", "12345", MatchType.NAME, 0.99f));
   }
 
   @Test
@@ -125,7 +117,7 @@ public class EnrichmentTest {
   }
 
   @Test(timeout = 5000)
-  public void shouldEnrichMediaDataWhenRequested() {
+  public void shouldEnrichIdentifierWhenRequested() {
     Platform.runLater(new Runnable() {
       @Override
       public void run() {

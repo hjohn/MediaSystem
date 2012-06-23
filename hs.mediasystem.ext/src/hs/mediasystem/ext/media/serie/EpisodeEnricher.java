@@ -1,8 +1,8 @@
 package hs.mediasystem.ext.media.serie;
 
+import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemsDao;
-import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.dao.Source;
 import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
@@ -20,7 +20,7 @@ import java.util.List;
 public class EpisodeEnricher implements Enricher<Episode> {
   private static final List<Class<?>> INPUT_PARAMETERS = new ArrayList<Class<?>>() {{
     add(TaskTitle.class);
-    add(MediaData.class);
+    add(Identifier.class);
     add(Media.class);
   }};
 
@@ -36,7 +36,7 @@ public class EpisodeEnricher implements Enricher<Episode> {
   public List<EnrichTask<Episode>> enrich(Parameters parameters, boolean bypassCache) {
     List<EnrichTask<Episode>> enrichTasks = new ArrayList<>();
 
-    EpisodeEnrichTaskProvider enrichTaskProvider = new EpisodeEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(MediaData.class), (Episode)parameters.get(Media.class));
+    EpisodeEnrichTaskProvider enrichTaskProvider = new EpisodeEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(Identifier.class), (Episode)parameters.get(Media.class));
 
     if(!bypassCache) {
       enrichTasks.add(enrichTaskProvider.getCachedTask());
@@ -49,8 +49,8 @@ public class EpisodeEnricher implements Enricher<Episode> {
   private class EpisodeEnrichTaskProvider extends AbstractEnrichTaskProvider<Episode> {
     private final Episode currentEpisode;
 
-    public EpisodeEnrichTaskProvider(String title, MediaData mediaData, Episode currentEpisode) {
-      super(title, itemsDao, typeBasedItemEnricher, mediaData);
+    public EpisodeEnrichTaskProvider(String title, Identifier identifier, Episode currentEpisode) {
+      super(title, itemsDao, typeBasedItemEnricher, identifier);
       this.currentEpisode = currentEpisode;
     }
 
