@@ -53,7 +53,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
       String title = movieBase.getGroupTitle();
       String subtitle = movieBase.getSubtitle();
-      String year = movieBase.getReleaseYear() == null ? null : movieBase.getReleaseYear().toString();
+      Integer year = movieBase.getReleaseYear();
       int seq = movieBase.getSequence() == null ? 1 : movieBase.getSequence();
       int tmdbMovieId = -1;
 
@@ -88,24 +88,26 @@ public class TmdbMovieEnricher implements ItemEnricher {
               searchString += " " + subtitle;
             }
 
-            System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Looking to match: " + searchString);
+            System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Looking to match: " + searchString + "; year = " + year);
 
             for(MovieDb movie : TMDB.searchMovie(searchString, "en", false)) {
               MatchType nameMatchType = MatchType.NAME;
-              String movieYear = extractYear(DATE_FORMAT.parseOrNull(movie.getReleaseDate()));
+              Integer movieYear = extractYear(DATE_FORMAT.parseOrNull(movie.getReleaseDate()));
               double score = 0;
 
-              if(movieYear.equals(year) && movieYear.length() > 0) {
-                nameMatchType = MatchType.NAME_AND_YEAR;
-                score += 45;
-              }
-              if(movie.getImdbID() != null) {
-                score += 15;
+              if(year != null && movieYear != null) {
+                if(year.equals(movieYear)) {
+                  nameMatchType = MatchType.NAME_AND_YEAR;
+                  score += 45;
+                }
+                else if(Math.abs(year - movieYear) == 1) {
+                  score += 5;
+                }
               }
 
               double matchScore = Levenshtein.compare(movie.getTitle().toLowerCase(), searchString.toLowerCase());
 
-              score += matchScore * 40;
+              score += matchScore * 55;
 
               scores.add(new Score(movie, nameMatchType, score));
               String name = movie.getTitle() + (movie.getOriginalTitle() != null ? " (" + movie.getOriginalTitle() + ")" : "");
@@ -249,13 +251,13 @@ public class TmdbMovieEnricher implements ItemEnricher {
     }
   }
 
-  private static String extractYear(Date date) {
+  private static Integer extractYear(Date date) {
     if(date == null) {
-      return "";
+      return null;
     }
 
     GregorianCalendar gc = new GregorianCalendar();
     gc.setTime(date);
-    return "" + gc.get(Calendar.YEAR);
+    return gc.get(Calendar.YEAR);
   }
 }
