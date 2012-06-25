@@ -54,7 +54,7 @@ public class Identifier {
   private MatchType matchType;
 
   @Column
-  private float matchAccuracy;
+  private Float matchAccuracy;
 
   @Column(name = "mediadata_id")
   private Integer mediaDataId;
@@ -103,7 +103,7 @@ public class Identifier {
     return matchType;
   }
 
-  public float getMatchAccuracy() {
+  public Float getMatchAccuracy() {
     return matchAccuracy;
   }
 

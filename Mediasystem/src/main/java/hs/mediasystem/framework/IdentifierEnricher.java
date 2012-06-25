@@ -82,7 +82,14 @@ public class IdentifierEnricher implements Enricher<Identifier> {
       @Override
       protected Identifier call() throws Exception {
         try {
-          Identifier identifier = typeBasedItemEnricher.identifyItem(media);
+          Identifier identifier = null;
+
+          try {
+            identifier = typeBasedItemEnricher.identifyItem(media);
+          }
+          catch(IdentifyException e) {
+            identifier = new Identifier();
+          }
 
           updateProgress(1, 2);
 
@@ -97,10 +104,7 @@ public class IdentifierEnricher implements Enricher<Identifier> {
 
           identifierDao.storeIdentifier(identifier);
 
-          return identifier;
-        }
-        catch(IdentifyException e) {
-          return null;
+          return identifier.getMediaType() == null ? null : identifier;
         }
         finally {
           updateProgress(2, 2);

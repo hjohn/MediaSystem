@@ -13,7 +13,7 @@ CREATE TABLE identifiers (
   
   CONSTRAINT identifiers_pk PRIMARY KEY (id),
   CONSTRAINT identifiers_mediadata_id UNIQUE (mediadata_id),
-  CONSTRAINT identifiers_check_cache CHECK (mediatype IS NULL AND provider IS NULL AND providerid IS NULL AND matchtype IS NULL AND matchaccuracy IS NULL OR mediatype IS NOT NULL AND provider IS NOT NULL AND providerid IS NOT NULL AND matchtype IS NOT NULL AND matchaccuracy IS NOT NULL)
+  CONSTRAINT identifiers_check_cache CHECK ((mediatype IS NULL AND provider IS NULL AND providerid IS NULL AND matchtype IS NULL AND matchaccuracy IS NULL) OR (mediatype IS NOT NULL AND provider IS NOT NULL AND providerid IS NOT NULL AND matchtype IS NOT NULL AND matchaccuracy IS NOT NULL))
 );
 
 ALTER TABLE mediadata DROP CONSTRAINT mediadata_check_identifier;
