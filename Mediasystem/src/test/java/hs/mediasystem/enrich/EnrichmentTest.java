@@ -60,6 +60,87 @@ public class EnrichmentTest {
 
     cache = new EnrichCache(new TaskThreadPoolExecutor(new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>())));
     cache.registerEnricher(MediaData.class, new MediaDataEnricher(mediaDataDao));
+    cache.registerEnricher(ExtraMediaData.class, new Enricher<ExtraMediaData>() {
+      @Override
+      public List<EnrichTask<ExtraMediaData>> enrich(final Parameters parameters, boolean bypassCache) {
+        return new ArrayList<EnrichTask<ExtraMediaData>>() {{
+          add(new EnrichTask<ExtraMediaData>(true) {
+            @Override
+            protected ExtraMediaData call() throws Exception {
+              return null;
+            }
+          });
+          add(new EnrichTask<ExtraMediaData>(true) {
+            @Override
+            protected ExtraMediaData call() throws Exception {
+              return null;
+            }
+          });
+          add(new EnrichTask<ExtraMediaData>(false) {
+            @Override
+            protected ExtraMediaData call() throws Exception {
+              return new ExtraMediaData();
+            }
+          });
+        }};
+      }
+
+      @Override
+      public List<Class<?>> getInputTypes() {
+        return new ArrayList<Class<?>>() {{
+          add(MediaData.class);
+        }};
+      }
+    });
+
+    cache.registerEnricher(FailMediaData.class, new Enricher<FailMediaData>() {
+      @Override
+      public List<EnrichTask<FailMediaData>> enrich(final Parameters parameters, boolean bypassCache) {
+        return new ArrayList<EnrichTask<FailMediaData>>() {{
+          add(new EnrichTask<FailMediaData>(true) {
+            @Override
+            protected FailMediaData call() throws Exception {
+              return null;
+            }
+          });
+          add(new EnrichTask<FailMediaData>(true) {
+            @Override
+            protected FailMediaData call() throws Exception {
+              throw new RuntimeException("failed");
+            }
+          });
+        }};
+      }
+
+      @Override
+      public List<Class<?>> getInputTypes() {
+        return new ArrayList<Class<?>>() {{
+          add(MediaData.class);
+        }};
+      }
+    });
+
+    cache.registerEnricher(ExtraFailMediaData.class, new Enricher<ExtraFailMediaData>() {
+      @Override
+      public List<EnrichTask<ExtraFailMediaData>> enrich(final Parameters parameters, boolean bypassCache) {
+        return new ArrayList<EnrichTask<ExtraFailMediaData>>() {{
+          add(new EnrichTask<ExtraFailMediaData>(true) {
+            @Override
+            protected ExtraFailMediaData call() throws Exception {
+              return new ExtraFailMediaData();
+            }
+          });
+        }};
+      }
+
+      @Override
+      public List<Class<?>> getInputTypes() {
+        return new ArrayList<Class<?>>() {{
+          add(FailMediaData.class);
+        }};
+      }
+    });
+
     cache.registerEnricher(SlowData.class, new Enricher<SlowData>() {
       @Override
       public List<EnrichTask<SlowData>> enrich(final Parameters parameters, boolean bypassCache) {
@@ -107,6 +188,8 @@ public class EnrichmentTest {
   public void shouldUpdateEnrichableWhenCacheUpdated() {
     cache.insert(cacheKey, new MediaId(1, 0, 0, null, null));
 
+    sleep(150);
+
     assertNotNull(item.get(MediaId.class));
   }
 
@@ -114,6 +197,35 @@ public class EnrichmentTest {
   public void shouldImmediatelyFailEnrichmentWhenNoSuitableEnricherExists() {
     assertNull(item.get(TestMovie.class).getTagLine());  // triggers enrich
     assertEquals(EnrichmentState.FAILED, item.getEnrichmentState(TestMovie.class));
+  }
+
+  @Test
+  public void shouldEnrichDependenciesFirst() {
+    assertNull(item.get(ExtraMediaData.class));
+
+    sleep(150);
+
+    assertNotNull(item.get(MediaData.class));  // dependency now present
+    assertNotNull(item.get(ExtraMediaData.class));
+  }
+
+  @Test
+  public void shouldFailOnEnrichException() {
+    assertNull(item.get(FailMediaData.class));
+
+    sleep(150);
+
+    assertEquals(EnrichmentState.FAILED, item.getEnrichmentState(FailMediaData.class));  // fails due to exception
+  }
+
+  @Test
+  public void shouldFailOnDependencyEnrichException() {
+    assertNull(item.get(ExtraFailMediaData.class));
+
+    sleep(150);
+
+    assertEquals(EnrichmentState.FAILED, item.getEnrichmentState(FailMediaData.class));  // dependency failed
+    assertEquals(EnrichmentState.FAILED, item.getEnrichmentState(ExtraFailMediaData.class));  // so this failed too
   }
 
   @Test(timeout = 5000)
@@ -200,5 +312,14 @@ public class EnrichmentTest {
     public boolean equals(Object obj) {
       return uri.equals(((SlowData)obj).uri);
     }
+  }
+
+  private static class ExtraMediaData {
+  }
+
+  private static class FailMediaData {
+  }
+
+  private static class ExtraFailMediaData {
   }
 }

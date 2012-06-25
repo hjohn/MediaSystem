@@ -7,12 +7,13 @@ import hs.mediasystem.enrich.Enrichable;
 import hs.mediasystem.enrich.EnrichmentListener;
 import hs.mediasystem.enrich.EnrichmentState;
 import hs.mediasystem.enrich.WeakEnrichmentListener;
-import hs.mediasystem.persist.Persister;
 import hs.mediasystem.persist.Persistable;
+import hs.mediasystem.persist.Persister;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -30,10 +31,15 @@ public class MediaItem implements EnrichTrigger {
   private final String mediaType;
   private final EnrichmentListener listener = new EnrichmentListener() {
     @Override
-    public void update(EnrichmentState state, Class<?> enrichableClass, Object enrichable) {
+    public void update(EnrichmentState state, Class<?> enrichableClass, final Object enrichable) {
       enrichmentStates.put(enrichableClass, state);
       if(enrichable != null) {
-        add(enrichable);
+        Platform.runLater(new Runnable() {
+          @Override
+          public void run() {
+            add(enrichable);
+          }
+        });
       }
     }
   };
