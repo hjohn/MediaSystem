@@ -36,6 +36,10 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
       @Override
       protected T call() {
         try {
+          if(identifier.getMediaType() == null) {
+            return null;
+          }
+
           Item item = itemsDao.loadItem(identifier);
 
           if(item.getVersion() < ItemsDao.VERSION) {
@@ -64,6 +68,10 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
 
       @Override
       protected T call() throws Exception {
+        if(identifier.getMediaType() == null) {
+          return null;
+        }
+
         Item oldItem;
 
         try {

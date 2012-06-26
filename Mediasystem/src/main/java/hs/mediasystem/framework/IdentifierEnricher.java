@@ -104,7 +104,7 @@ public class IdentifierEnricher implements Enricher<Identifier> {
 
           identifierDao.storeIdentifier(identifier);
 
-          return identifier.getMediaType() == null ? null : identifier;
+          return identifier;
         }
         finally {
           updateProgress(2, 2);
