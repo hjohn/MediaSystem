@@ -173,7 +173,7 @@
   -fx-border-insets: 1;
 }
 
-.list-cell:focused, .tree-cell:focused, .option-cell:focused {
+.list-cell:focused, .tree-cell:focused, .option-cell.focused {
   -fx-background-insets: 1, 1, 1;
   -fx-background-color: radial-gradient(center 25% 0%, radius 25%, color-blue 0%, transparent),
                         radial-gradient(center 75% 100%, radius 25%, color-blue 0%, transparent),
@@ -186,7 +186,7 @@
                     
 }
 
-.list-cell:focused .label, .tree-cell:focused .label, .option-cell:focused .label {
+.list-cell:focused .label, .tree-cell:focused .label, .option-cell.focused .label {
   -fx-text-fill: -c-text-focused;
 }
 
