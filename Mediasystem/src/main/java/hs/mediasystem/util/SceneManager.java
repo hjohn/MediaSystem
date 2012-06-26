@@ -11,4 +11,7 @@ public interface SceneManager {
 
   int getScreenNumber();
   void setScreenNumber(int screenNumber);
+
+  void displayDialog(DialogStage stage);
+  void displaySynchronousDialog(DialogStage stage);
 }
