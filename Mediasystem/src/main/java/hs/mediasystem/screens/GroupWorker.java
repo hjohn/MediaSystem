@@ -1,6 +1,7 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.util.TaskExecutor;
+import hs.subtitle.DefaultThreadFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class GroupWorker extends Service<Void> implements TaskExecutor {
   public GroupWorker(String title, int maxThreads) {
     this.title = title;
     this.executor = new ThreadPoolExecutor(maxThreads, maxThreads, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    this.executor.setThreadFactory(new DefaultThreadFactory("GroupWorker", Thread.NORM_PRIORITY - 2, true));
 
     new ActivityMonitorThread().start();
   }

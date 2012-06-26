@@ -1,5 +1,7 @@
 package hs.mediasystem.util;
 
+import hs.subtitle.DefaultThreadFactory;
+
 import java.util.concurrent.ThreadPoolExecutor;
 
 import javafx.concurrent.Task;
@@ -9,6 +11,7 @@ public class TaskThreadPoolExecutor implements TaskExecutor {
 
   public TaskThreadPoolExecutor(ThreadPoolExecutor executor) {
     this.executor = executor;
+    this.executor.setThreadFactory(new DefaultThreadFactory("TaskThreadPoolExecutor", Thread.NORM_PRIORITY - 2, true));
   }
 
   @Override
