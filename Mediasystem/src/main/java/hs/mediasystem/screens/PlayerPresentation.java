@@ -13,8 +13,8 @@ public class PlayerPresentation {
     this.player = player;
   }
 
-  public void play(String uri) {
-    player.play(uri);
+  public void play(String uri, long positionMillis) {
+    player.play(uri, positionMillis);
   }
 
   public void stop() {

@@ -13,6 +13,9 @@ import hs.mediasystem.util.ini.Ini;
 
 import java.util.List;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -41,6 +44,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
+import javafx.util.Duration;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -269,8 +273,14 @@ public class ProgramController {
   }
 
   private void displayOnStage(final Node node, Color background) {
-    contentBorderPane.setCenter(node);
+    Timeline timeline = new Timeline(
+      new KeyFrame(Duration.ZERO, new KeyValue(scene.getRoot().opacityProperty(), 0.0)),
+      new KeyFrame(Duration.seconds(1), new KeyValue(scene.getRoot().opacityProperty(), 1.0))
+    );
 
+    timeline.play();
+
+    contentBorderPane.setCenter(node);
     scene.setFill(background);
 
     Platform.runLater(new Runnable() {
@@ -314,6 +324,34 @@ public class ProgramController {
   }
 
   public synchronized void play(final MediaItem mediaItem) {
+    int resumePosition = 0;
+
+    if(mediaItem.isCachable()) {
+      final ResumeDialog resumeDialog = new ResumeDialog(mediaItem);
+
+      sceneManager.displaySynchronousDialog(resumeDialog);
+
+      if(resumeDialog.wasCancelled()) {
+        return;
+      }
+
+      resumePosition = resumeDialog.getResumePosition();
+    }
+
+    final int finalResumePosition = resumePosition;
+
+    Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), new KeyValue(scene.getRoot().opacityProperty(), 0.0)));
+
+    timeline.setOnFinished(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        startPlay(mediaItem, finalResumePosition * 1000L);
+      }
+    });
+    timeline.play();
+  }
+
+  private void startPlay(final MediaItem mediaItem, long positionMillis) {
     sceneManager.setPlayerRoot(playerPresentation.getPlayer().getDisplayComponent());
     playerPresentation.getPlayer().onPlayerEvent().set(new EventHandler<PlayerEvent>() {
       @Override
@@ -330,7 +368,7 @@ public class ProgramController {
       }
     });
     playerPresentation.getPlayer().positionProperty().set(0);
-    playerPresentation.play(mediaItem.getUri());
+    playerPresentation.play(mediaItem.getUri(), positionMillis);
     currentMediaItem = mediaItem;
 
     final PlaybackOverlayPresentation playbackOverlayPresentation = playbackOverlayPresentationProvider.get();
@@ -428,24 +466,25 @@ public class ProgramController {
     });
   }
 
-  public void showOptionScreen(final String title, final List<? extends Option> options) {
+  public void showDialog(final String title, final Node dialog) {
     navigator.navigateToModal(new Destination("optionDialog", title) {
-      private DialogScreen dialogScreen;
 
       @Override
       public void execute() {
-        dialogScreen = new DialogScreen(title, options);
+        sceneRoot.getChildren().add(dialog);
 
-        sceneRoot.getChildren().add(dialogScreen);
-
-        dialogScreen.requestFocus();
+        dialog.requestFocus();
       }
 
       @Override
       public void outro() {
-        sceneRoot.getChildren().remove(dialogScreen);
+        sceneRoot.getChildren().remove(dialog);
       }
     });
+  }
+
+  public void showOptionScreen(final String title, final List<? extends Option> options) {
+    showDialog(title, new DialogScreen(title, options));
   }
 
   private static Node createMessage(final Worker<?> worker) {

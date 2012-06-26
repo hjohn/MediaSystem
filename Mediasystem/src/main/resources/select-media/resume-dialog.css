@@ -1,0 +1,23 @@
+
+.resume-dialog {
+  -fx-border-width: 2;
+  -fx-border-color: -c-border-dialog;
+  -fx-border-radius: 20;
+  -fx-border-insets: 10;
+  
+  -fx-background-color: -c-bg-transparent;
+  -fx-background-radius: 30;
+
+  -fx-padding: 20;
+}
+
+.resume-dialog .button {
+  -fx-text-fill: color-blue-70;
+  -fx-font-size: 24pt;
+  -fx-background-color: transparent;
+}
+
+.resume-dialog .button:focused {
+  -fx-background-color: radial-gradient(radius 150%, color-blue-20, color-blue-10, color-blue-20);
+  -fx-text-fill: white;
+}

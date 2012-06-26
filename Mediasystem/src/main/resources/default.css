@@ -11,10 +11,13 @@
   -c-shadow-highlight: derive(-c-base, -50%);
   
   -c-border-highlight: -c-text-highlight;
+  -c-border-dialog: -c-text-highlight;
   -c-fill-dark: derive(-c-base, -75%);
 
   -c-star: yellow;
   -c-star-disabled: gray;
+  
+  -c-bg-transparent: rgba(0, 0, 0, 0.66);
 
   color-main: -c-base;
   

@@ -14,7 +14,7 @@ import javafx.event.EventHandler;
 
 public interface Player {
 
-  void play(String uri);
+  void play(String uri, long positionInMillis);
 
   void stop();
 

@@ -183,7 +183,7 @@ public class MPlayerPlayer implements Player {
   }
 
   @Override
-  public void play(String uri) {
+  public void play(String uri, long positionMillis) {
     sendCommand("loadfile \"" + uri.replaceAll("\\\\", "\\\\\\\\") + "\"");
   }
 

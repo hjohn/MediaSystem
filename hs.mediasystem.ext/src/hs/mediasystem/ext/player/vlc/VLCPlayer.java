@@ -49,7 +49,7 @@ public class VLCPlayer implements Player {
     arguments.add("--input-fast-seek");
     arguments.add("--no-video-title-show");
     arguments.add("--network-caching");
-    arguments.add("5000");
+    arguments.add("3000");
 
     MediaPlayerFactory factory = new MediaPlayerFactory(arguments);
     mediaPlayer = factory.newEmbeddedMediaPlayer();
@@ -249,7 +249,7 @@ public class VLCPlayer implements Player {
   private static final List<AudioTrack> NO_AUDIO_TRACKS = new ArrayList<>();
 
   @Override
-  public void play(String uri) {
+  public void play(String uri, long positionInMillis) {
     position.update(0);
     audioDelay.update();
     audioTrack.update();
@@ -259,9 +259,15 @@ public class VLCPlayer implements Player {
     subtitleDelay.update();
     volume.update();
 
+    List<String> arguments = new ArrayList<>();
+
+    if(positionInMillis > 0) {
+      arguments.add("start-time=" + positionInMillis / 1000);
+    }
+
     mediaPlayer.setRepeat(false);
     mediaPlayer.setPlaySubItems(true);
-    mediaPlayer.playMedia(uri);
+    mediaPlayer.playMedia(uri, arguments.toArray(new String[arguments.size()]));
 
     System.out.println("[FINE] Playing: " + uri);
   }

@@ -136,6 +136,10 @@ public class MediaItem implements EnrichTrigger {
     return mediaTree.getEnrichCache();
   }
 
+  public boolean isCachable() {
+    return getEnrichCache() != null;
+  }
+
   public void reloadMetaData() {
     getEnrichCache().reload(cacheKey);
   }
