@@ -407,21 +407,25 @@ public class ProgramController {
         if(mediaData != null) {
           long timeViewed = totalTimeViewed + mediaData.getResumePosition() * 1000L;
 
-          if(timeViewed > playerPresentation.getLength() * 4 / 5) {  // more than 80% viewed?
+          if(timeViewed >= playerPresentation.getLength() * 9 / 10) {  // 90% viewed?
             System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
 
             mediaData.viewedProperty().set(true);
           }
 
+          long resumePosition = 0;
+
           if(totalTimeViewed > 30 * 1000) {
             long position = playerPresentation.getPosition();
 
-            if(position > 30 * 1000) {
+            if(position > 30 * 1000 && position < playerPresentation.getLength() * 9 / 10) {
               System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Setting resume position to " + position + " ms: " + mediaItem);
 
-              mediaData.resumePositionProperty().set((int)(position / 1000));
+              resumePosition = position;
             }
           }
+
+          mediaData.resumePositionProperty().set((int)(resumePosition / 1000));
         }
       }
     });
