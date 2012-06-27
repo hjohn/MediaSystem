@@ -9,6 +9,7 @@ import hs.mediasystem.screens.optiondialog.DialogScreen;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.util.KeyCombinationGroup;
 import hs.mediasystem.util.SceneManager;
+import hs.mediasystem.util.annotation.Nullable;
 import hs.mediasystem.util.ini.Ini;
 
 import java.util.List;
@@ -84,7 +85,7 @@ public class ProgramController {
   private final InformationBorder informationBorder;
 
   @Inject
-  public ProgramController(Ini ini, final SceneManager sceneManager, final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider, InformationBorder informationBorder) {
+  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider, InformationBorder informationBorder) {
     this.ini = ini;
     this.sceneManager = sceneManager;
     this.playerPresentation = playerPresentation;
@@ -177,61 +178,63 @@ public class ProgramController {
             stop();
             event.consume();
           }
-          else if(code == KeyCode.SPACE) {
-            playerPresentation.pause();
-            event.consume();
-          }
-          else if(FUNC_JUMP_BACKWARD_SMALL.match(event)) {
-            playerPresentation.move(-10 * 1000);
-            event.consume();
-          }
-          else if(FUNC_JUMP_FORWARD_SMALL.match(event)) {
-            playerPresentation.move(10 * 1000);
-            event.consume();
-          }
-          else if(FUNC_JUMP_BACKWARD.match(event)) {
-            playerPresentation.move(-60 * 1000);
-            event.consume();
-          }
-          else if(FUNC_JUMP_FORWARD.match(event)) {
-            playerPresentation.move(60 * 1000);
-            event.consume();
-          }
-          else if(code == KeyCode.M) {
-            playerPresentation.mute();
-            event.consume();
-          }
-          else if(code == KeyCode.DIGIT9) {
-            playerPresentation.changeVolume(-5);
-            event.consume();
-          }
-          else if(code == KeyCode.DIGIT0) {
-            playerPresentation.changeVolume(5);
-            event.consume();
-          }
-          else if(code == KeyCode.DIGIT1) {
-            playerPresentation.changeBrightness(-0.05f);
-            event.consume();
-          }
-          else if(code == KeyCode.DIGIT2) {
-            playerPresentation.changeBrightness(0.05f);
-            event.consume();
-          }
-          else if(code == KeyCode.Z) {
-            playerPresentation.changeSubtitleDelay(-100);
-            event.consume();
-          }
-          else if(code == KeyCode.X) {
-            playerPresentation.changeSubtitleDelay(100);
-            event.consume();
-          }
-          else if(KEY_OPEN_BRACKET.match(event)) {
-            playerPresentation.changeRate(-0.1f);
-            event.consume();
-          }
-          else if(KEY_CLOSE_BRACKET.match(event)) {
-            playerPresentation.changeRate(0.1f);
-            event.consume();
+          if(playerPresentation != null) {
+            if(code == KeyCode.SPACE) {
+              playerPresentation.pause();
+              event.consume();
+            }
+            else if(FUNC_JUMP_BACKWARD_SMALL.match(event)) {
+              playerPresentation.move(-10 * 1000);
+              event.consume();
+            }
+            else if(FUNC_JUMP_FORWARD_SMALL.match(event)) {
+              playerPresentation.move(10 * 1000);
+              event.consume();
+            }
+            else if(FUNC_JUMP_BACKWARD.match(event)) {
+              playerPresentation.move(-60 * 1000);
+              event.consume();
+            }
+            else if(FUNC_JUMP_FORWARD.match(event)) {
+              playerPresentation.move(60 * 1000);
+              event.consume();
+            }
+            else if(code == KeyCode.M) {
+              playerPresentation.mute();
+              event.consume();
+            }
+            else if(code == KeyCode.DIGIT9) {
+              playerPresentation.changeVolume(-5);
+              event.consume();
+            }
+            else if(code == KeyCode.DIGIT0) {
+              playerPresentation.changeVolume(5);
+              event.consume();
+            }
+            else if(code == KeyCode.DIGIT1) {
+              playerPresentation.changeBrightness(-0.05f);
+              event.consume();
+            }
+            else if(code == KeyCode.DIGIT2) {
+              playerPresentation.changeBrightness(0.05f);
+              event.consume();
+            }
+            else if(code == KeyCode.Z) {
+              playerPresentation.changeSubtitleDelay(-100);
+              event.consume();
+            }
+            else if(code == KeyCode.X) {
+              playerPresentation.changeSubtitleDelay(100);
+              event.consume();
+            }
+            else if(KEY_OPEN_BRACKET.match(event)) {
+              playerPresentation.changeRate(-0.1f);
+              event.consume();
+            }
+            else if(KEY_CLOSE_BRACKET.match(event)) {
+              playerPresentation.changeRate(0.1f);
+              event.consume();
+            }
           }
         }
       }
@@ -249,7 +252,7 @@ public class ProgramController {
     subtitleDownloadService.stateProperty().addListener(new ChangeListener<State>() {
       @Override
       public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
-        if(newValue == State.SUCCEEDED) {
+        if(newValue == State.SUCCEEDED && playerPresentation != null) {
           playerPresentation.showSubtitle(subtitleDownloadService.getValue());
         }
       }
@@ -324,6 +327,11 @@ public class ProgramController {
   }
 
   public synchronized void play(final MediaItem mediaItem) {
+    if(playerPresentation == null) {
+      sceneManager.displayDialog(new InformationDialog("No video player was configured.\nUnable to play the selected item."));
+      return;
+    }
+
     int resumePosition = 0;
 
     if(mediaItem.isCachable()) {

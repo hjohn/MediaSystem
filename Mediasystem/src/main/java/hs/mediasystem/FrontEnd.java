@@ -123,7 +123,13 @@ public class FrontEnd extends Application {
           ServiceReference<PlayerFactory> serviceReference = framework.getBundleContext().getServiceReference(PlayerFactory.class);
           PlayerFactory factory = framework.getBundleContext().getService(serviceReference);
 
-          playerPresentation = new PlayerPresentation(factory.create(INI));
+          try {
+            playerPresentation = new PlayerPresentation(factory.create(INI));
+          }
+          catch(Exception e) {
+            System.out.println("[SEVERE] Could not configure a Video Player!");
+            System.out.println("[SEVERE] " + e.getMessage());
+          }
         }
 
         return playerPresentation;
