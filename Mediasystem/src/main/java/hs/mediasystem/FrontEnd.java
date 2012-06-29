@@ -1,5 +1,6 @@
 package hs.mediasystem;
 
+import hs.mediasystem.beans.BeanUtils;
 import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
@@ -34,6 +35,11 @@ import hs.mediasystem.util.ini.Section;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -53,6 +59,8 @@ import java.util.ServiceLoader;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+import javax.sql.ConnectionPoolDataSource;
+
 import org.apache.felix.dm.DependencyManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -60,7 +68,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
-import org.postgresql.ds.PGConnectionPoolDataSource;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -85,15 +92,7 @@ public class FrontEnd extends Application {
 
     sceneManager = new DuoWindowSceneManager("MediaSystem", screenNumber);
 
-    PGConnectionPoolDataSource dataSource = new PGConnectionPoolDataSource();
-
-    Section db = INI.getSection("database");
-
-    dataSource.setServerName(db.getDefault("host", "127.0.0.1"));
-    dataSource.setPortNumber(Integer.parseInt(db.getDefault("port", "5432")));
-    dataSource.setDatabaseName(db.getDefault("name", "mediasystem"));
-    dataSource.setPassword(db.get("password"));
-    dataSource.setUser(db.get("user"));
+    ConnectionPoolDataSource dataSource = configureDataSource(INI.getSection("database"));
 
     pool = new ConnectionPool(dataSource, 5);
 
@@ -169,6 +168,10 @@ public class FrontEnd extends Application {
 
     Injector injector = Guice.createInjector(module);
 
+    DatabaseUpdater updater = injector.getInstance(DatabaseUpdater.class);
+
+    updater.updateDatabase();
+
     PersisterProvider.register(MediaData.class, injector.getInstance(MediaDataPersister.class));
 
     DependencyManager dm = new DependencyManager(framework.getBundleContext());
@@ -204,10 +207,6 @@ public class FrontEnd extends Application {
       .setInterface(TypeBasedItemEnricher.class.getName(), null)
       .setImplementation(injector.getInstance(TypeBasedItemEnricher.class))
     );
-
-    DatabaseUpdater updater = injector.getInstance(DatabaseUpdater.class);
-
-    updater.updateDatabase();
 
     injector.getInstance(EnrichCache.class).registerEnricher(MediaData.class, injector.getInstance(MediaDataEnricher.class));
     injector.getInstance(EnrichCache.class).registerEnricher(Identifier.class, injector.getInstance(IdentifierEnricher.class));
@@ -308,5 +307,43 @@ public class FrontEnd extends Application {
     }
 
     throw new IllegalStateException("Unable to load FrameworkFactory service.");
+  }
+
+  private ConnectionPoolDataSource configureDataSource(Section section)  {
+    try {
+      String dataSourceClassName = section.get("dataSourceClass");
+      Class<?> dataSourceClass = Class.forName(dataSourceClassName);
+      Lookup lookup = MethodHandles.lookup();
+
+      MethodHandle constructor = lookup.findConstructor(dataSourceClass, MethodType.methodType(void.class));
+
+      @SuppressWarnings("cast")
+      ConnectionPoolDataSource dataSource = (ConnectionPoolDataSource)constructor.invoke();
+
+      for(String key : section) {
+        if(!key.equals("dataSourceClass")) {
+          Method setter = BeanUtils.getSetter(dataSourceClass, key);
+          String value = section.get(key);
+          Object parameter = value;
+          Class<?> argumentType = setter.getParameterTypes()[0];
+
+          if(argumentType == Integer.class || argumentType == int.class) {
+            parameter = Integer.parseInt(value);
+          }
+
+          try {
+            setter.invoke(dataSource, parameter);
+          }
+          catch(IllegalArgumentException e) {
+            throw new IllegalArgumentException("expected: " + argumentType, e);
+          }
+        }
+      }
+
+      return dataSource;
+    }
+    catch(Throwable t) {
+      throw new RuntimeException(t);
+    }
   }
 }
