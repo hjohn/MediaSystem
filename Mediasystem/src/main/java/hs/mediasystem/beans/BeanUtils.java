@@ -34,4 +34,21 @@ public class BeanUtils {
       throw new RuntimeException(e);
     }
   }
+
+  public static Method getSetter(Class<?> cls, String propertyName) {
+    try {
+      String methodName = "set" + capitalize(propertyName);
+
+      for(Method method : cls.getMethods()) {
+        if(method.getName().equals(methodName) && method.getParameterTypes().length == 1) {
+          return method;
+        }
+      }
+
+      throw new NoSuchMethodException(methodName);
+    }
+    catch(NoSuchMethodException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }
