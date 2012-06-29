@@ -126,7 +126,6 @@ public class InformationBorder extends HBox {
               databaseSizeUpdateCounter = 60;
             }
             catch(DatabaseException e) {
-              e.printStackTrace();
               databaseSize.setText("-");
               databaseSizeUpdateCounter = 600;
             }
