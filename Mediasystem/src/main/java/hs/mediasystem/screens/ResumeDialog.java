@@ -3,12 +3,12 @@ package hs.mediasystem.screens;
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.DialogStage;
+import hs.mediasystem.util.SceneUtil;
 import hs.mediasystem.util.SizeFormatter;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.input.KeyCode;
@@ -43,13 +43,12 @@ public class ResumeDialog extends DialogStage {
   public ResumeDialog(MediaItem mediaItem) {
     this.mediaItem = mediaItem;
 
-    root.getStylesheets().add("default.css");
+    setScene(SceneUtil.createScene(root));
+
     root.getStylesheets().add("select-media/resume-dialog.css");
     root.getStyleClass().add("resume-dialog");
     root.getChildren().add(new ProgressIndicator());
     root.setFillWidth(true);
-
-    setScene(new Scene(root));
 
     getScene().setFill(Color.TRANSPARENT);
     getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {

@@ -9,6 +9,7 @@ import hs.mediasystem.screens.optiondialog.DialogScreen;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.util.KeyCombinationGroup;
 import hs.mediasystem.util.SceneManager;
+import hs.mediasystem.util.SceneUtil;
 import hs.mediasystem.util.annotation.Nullable;
 import hs.mediasystem.util.ini.Ini;
 
@@ -25,9 +26,6 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.concurrent.Worker.State;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventDispatchChain;
-import javafx.event.EventDispatcher;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -63,7 +61,7 @@ public class ProgramController {
   private static final KeyCombination FUNC_JUMP_FORWARD = new KeyCombinationGroup(new KeyCodeCombination(KeyCode.UP), new KeyCodeCombination(KeyCode.NUMPAD8));
   private static final KeyCombination FUNC_JUMP_BACKWARD = new KeyCombinationGroup(new KeyCodeCombination(KeyCode.DOWN), new KeyCodeCombination(KeyCode.NUMPAD2));
 
-  private final Scene scene = new Scene(new BorderPane(), Color.BLACK);
+  private final Scene scene;
   private final StackPane sceneRoot = new StackPane();
   private final BorderPane contentBorderPane = new BorderPane();
   private final BorderPane informationBorderPane = new BorderPane();
@@ -92,42 +90,9 @@ public class ProgramController {
     this.mainScreenProvider = mainScreenProvider;
     this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
     this.informationBorder = informationBorder;
-
-    final EventDispatcher eventDispatcher = scene.getEventDispatcher();
-
-    scene.setEventDispatcher(new EventDispatcher() {
-      @Override
-      public Event dispatchEvent(Event event, EventDispatchChain tail) {
-        long millis = System.currentTimeMillis();
-
-        Event returnedEvent = eventDispatcher.dispatchEvent(event, tail);
-
-        millis = System.currentTimeMillis() - millis;
-
-        if(millis >= 100) {
-          System.out.println("[WARN] Slow Event Handling: " + millis + " ms for event: " + event);
-        }
-
-        return returnedEvent;
-      }
-    });
+    this.scene = SceneUtil.createScene(sceneRoot);
 
     sceneRoot.getChildren().addAll(contentBorderPane, informationBorderPane, messageBorderPane);
-    scene.setRoot(sceneRoot);
-    scene.getStylesheets().add("default.css");
-    scene.focusOwnerProperty().addListener(new ChangeListener<Node>() {  // WORKAROUND for lack of Focus information when Stage is not focused
-      @Override
-      public void changed(ObservableValue<? extends Node> observable, Node oldValue, Node newValue) {
-        if(oldValue != null) {
-          oldValue.getStyleClass().remove("focused");
-          oldValue.fireEvent(new FocusEvent(false));
-        }
-        if(newValue != null) {
-          newValue.getStyleClass().add("focused");
-          newValue.fireEvent(new FocusEvent(true));
-        }
-      }
-    });
 
     sceneManager.setScene(scene);
 
@@ -421,9 +386,8 @@ public class ProgramController {
             mediaData.viewedProperty().set(true);
           }
 
-          long resumePosition = 0;
-
           if(totalTimeViewed > 30 * 1000) {
+            long resumePosition = 0;
             long position = playerPresentation.getPosition();
 
             if(position > 30 * 1000 && position < playerPresentation.getLength() * 9 / 10) {
@@ -431,9 +395,9 @@ public class ProgramController {
 
               resumePosition = position;
             }
-          }
 
-          mediaData.resumePositionProperty().set((int)(resumePosition / 1000));
+            mediaData.resumePositionProperty().set((int)(resumePosition / 1000));
+          }
         }
       }
     });

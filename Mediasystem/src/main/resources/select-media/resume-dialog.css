@@ -17,7 +17,7 @@
   -fx-background-color: transparent;
 }
 
-.resume-dialog .button:focused {
+.resume-dialog .button.focused {
   -fx-background-color: radial-gradient(radius 150%, color-blue-20, color-blue-10, color-blue-20);
   -fx-text-fill: white;
 }
