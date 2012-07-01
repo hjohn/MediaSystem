@@ -29,12 +29,17 @@ import com.moviejukebox.themoviedb.model.Genre;
 import com.moviejukebox.themoviedb.model.MovieDb;
 
 public class TmdbMovieEnricher implements ItemEnricher {
-  private static final TheMovieDb TMDB;
   private static final ThreadSafeDateFormat DATE_FORMAT = new ThreadSafeDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
 
-  static {
+  private TheMovieDb TMDB2;
+
+  private TheMovieDb getTMDB() {
     try {
-      TMDB = new TheMovieDb(CryptoUtil.decrypt("8AF22323DB8C0F235B38F578B7E09A61DB6F971EED59DE131E4EF70003CE84B483A778EBD28200A031F035F4209B61A4", "-MediaSystem-"));
+      if(TMDB2 == null) {
+        TMDB2 = new TheMovieDb(CryptoUtil.decrypt("8AF22323DB8C0F235B38F578B7E09A61DB6F971EED59DE131E4EF70003CE84B483A778EBD28200A031F035F4209B61A4", "-MediaSystem-"));
+      }
+
+      return TMDB2;
     }
     catch(MovieDbException e) {
       throw new RuntimeException(e);
@@ -90,7 +95,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
             System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Looking to match: " + searchString + "; year = " + year);
 
-            for(MovieDb movie : TMDB.searchMovie(searchString, "en", false)) {
+            for(MovieDb movie : getTMDB().searchMovie(searchString, "en", false)) {
               MatchType nameMatchType = MatchType.NAME;
               Integer movieYear = extractYear(DATE_FORMAT.parseOrNull(movie.getReleaseDate()));
               double score = 0;
@@ -124,7 +129,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
           }
         }
         else {
-          final MovieDb movie = TMDB.getMovieInfoImdb(movieBase.getImdbNumber(), "en");
+          final MovieDb movie = getTMDB().getMovieInfoImdb(movieBase.getImdbNumber(), "en");
 
           if(movie != null) {
             tmdbMovieId = movie.getId();
@@ -151,7 +156,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
         int tmdbId = Integer.parseInt(identifier);
 
-        MovieDb movie = TMDB.getMovieInfo(tmdbId, "en");
+        MovieDb movie = getTMDB().getMovieInfo(tmdbId, "en");
 
         if(movie == null) {
           throw new ItemNotFoundException("TMDB lookup by tmdb.id failed: " + identifier);
@@ -159,8 +164,8 @@ public class TmdbMovieEnricher implements ItemEnricher {
 
         System.out.println("[FINE] TmdbMovieEnricher.loadItem() - Found: name=" + movie.getTitle() + "; release date=" + movie.getReleaseDate() + "; runtime=" + movie.getRuntime() + "; popularity=" + movie.getPopularity() + "; language=" + movie.getSpokenLanguages() + "; tagline=" + movie.getTagline() + "; genres=" + movie.getGenres());
 
-        URL posterURL = TMDB.createImageUrl(movie.getPosterPath(), "original");
-        URL backgroundURL = TMDB.createImageUrl(movie.getBackdropPath(), "original");
+        URL posterURL = getTMDB().createImageUrl(movie.getPosterPath(), "original");
+        URL backgroundURL = getTMDB().createImageUrl(movie.getBackdropPath(), "original");
 
         Item item = new Item();
 
@@ -198,14 +203,14 @@ public class TmdbMovieEnricher implements ItemEnricher {
           }
         });
 
-        movieCasts.addAll(TMDB.getMovieCasts(tmdbId));  // eliminates duplicates
+        movieCasts.addAll(getTMDB().getMovieCasts(tmdbId));  // eliminates duplicates
 
         for(com.moviejukebox.themoviedb.model.Person tmdbPerson : movieCasts) {
           Person person = new Person();
 
           person.setName(tmdbPerson.getName());
           if(tmdbPerson.getProfilePath() != null) {
-            URL largestImageUrl = TMDB.createImageUrl(tmdbPerson.getProfilePath(), "original");
+            URL largestImageUrl = getTMDB().createImageUrl(tmdbPerson.getProfilePath(), "original");
 
             if(largestImageUrl != null) {
               person.setPhotoURL(largestImageUrl.toExternalForm());
