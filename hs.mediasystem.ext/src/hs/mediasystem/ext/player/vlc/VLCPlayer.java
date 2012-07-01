@@ -46,10 +46,16 @@ public class VLCPlayer implements Player {
   public VLCPlayer(String... args) {
     List<String> arguments = new ArrayList<>(Arrays.asList(args));
 
+    arguments.add("--no-plugins-cache");
+    arguments.add("--no-snapshot-preview");
     arguments.add("--input-fast-seek");
     arguments.add("--no-video-title-show");
     arguments.add("--network-caching");
     arguments.add("3000");
+    arguments.add("--quiet");
+    arguments.add("--quiet-synchro");
+    arguments.add("--intf");
+    arguments.add("dummy");
 
     MediaPlayerFactory factory = new MediaPlayerFactory(arguments);
     mediaPlayer = factory.newEmbeddedMediaPlayer();
@@ -116,6 +122,12 @@ public class VLCPlayer implements Player {
         for(TrackDescription desc : mediaPlayer.getTitleDescriptions()) {
           System.out.println(i++ + " : " + desc.description());
         }
+      }
+
+      @Override
+      public void videoOutput(MediaPlayer mediaPlayer, int newCount) {
+        System.out.println("VLCPlayer: videoOutput");
+        mediaPlayer.setVolume(mediaPlayer.getVolume());
       }
 
       @Override
