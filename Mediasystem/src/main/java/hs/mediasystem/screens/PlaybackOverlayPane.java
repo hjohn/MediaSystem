@@ -14,7 +14,6 @@ import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
@@ -24,13 +23,11 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.effect.Blend;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Reflection;
@@ -125,42 +122,6 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
           getChildren().add(new Label() {{
             textProperty().bind(MapBindings.selectString(mediaItem, "dataMap", Media.class, "subtitle"));
             getStyleClass().add("video-subtitle");
-          }});
-          getChildren().add(new GridPane() {{
-//              setSpacing(20);
-            setHgap(20);
-            getColumnConstraints().addAll(
-              new ColumnConstraints(),
-              new ColumnConstraints() {{
-                setPercentWidth(60.0);   // this is not working as I want it.
-                setHalignment(HPos.RIGHT);
-              }},
-              new ColumnConstraints() {{
-                setPercentWidth(20.0);
-              }},
-              new ColumnConstraints()
-            );
-            setId("video-overlay_info_bar");
-            add(new Label() {{
-              textProperty().bind(playerBindings.formattedPosition);
-            }}, 0, 0);
-            add(new ProgressBar(0) {{
-              getStyleClass().add("orange-bar");
-              progressProperty().bind(Bindings.divide(Bindings.add(playerBindings.position, 0.0), playerBindings.length));
-              setMaxWidth(100000);
-              HBox.setHgrow(this, Priority.ALWAYS);
-            }}, 1, 0, 2, 1);
-            add(new Label() {{
-              textProperty().bind(playerBindings.formattedLength);
-            }}, 3, 0);
-            add(new Label("-"), 1, 1);
-            add(new ProgressBar(0) {{
-              getStyleClass().add("red-bar");
-              progressProperty().bind(playerBindings.volume);
-              setMaxWidth(100000);
-              HBox.setHgrow(this, Priority.ALWAYS);
-            }}, 2, 1);
-            add(new Label("+"), 3, 1);
           }});
         }});
       }});
