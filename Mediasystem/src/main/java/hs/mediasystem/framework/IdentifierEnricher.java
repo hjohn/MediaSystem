@@ -18,9 +18,12 @@ public class IdentifierEnricher implements Enricher<Identifier> {
   private final IdentifierDao identifierDao;
   private final ItemEnricher itemEnricher;
 
+  private final Class<? extends Media> mediaClass;
+
   public IdentifierEnricher(IdentifierDao identifierDao, ItemEnricher itemEnricher, final Class<? extends Media> mediaClass) {
     this.identifierDao = identifierDao;
     this.itemEnricher = itemEnricher;
+    this.mediaClass = mediaClass;
 
     inputParameters = new ArrayList<Class<?>>() {{
       add(TaskTitle.class);
@@ -41,7 +44,7 @@ public class IdentifierEnricher implements Enricher<Identifier> {
     if(!bypassCache) {
       enrichTasks.add(createCachedTask(parameters.unwrap(TaskTitle.class), parameters.get(MediaData.class)));
     }
-    enrichTasks.add(createTask(parameters.unwrap(TaskTitle.class), parameters.get(MediaData.class), parameters.get(Media.class)));
+    enrichTasks.add(createTask(parameters.unwrap(TaskTitle.class), parameters.get(MediaData.class), parameters.get(mediaClass)));
 
     return enrichTasks;
   }
