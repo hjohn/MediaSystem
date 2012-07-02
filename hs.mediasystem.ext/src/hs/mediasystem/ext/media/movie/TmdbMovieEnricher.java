@@ -31,24 +31,19 @@ import com.moviejukebox.themoviedb.model.MovieDb;
 public class TmdbMovieEnricher implements ItemEnricher {
   private static final ThreadSafeDateFormat DATE_FORMAT = new ThreadSafeDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
 
-  private TheMovieDb TMDB2;
+  private TheMovieDb TMDB;
 
   private TheMovieDb getTMDB() {
     try {
-      if(TMDB2 == null) {
-        TMDB2 = new TheMovieDb(CryptoUtil.decrypt("8AF22323DB8C0F235B38F578B7E09A61DB6F971EED59DE131E4EF70003CE84B483A778EBD28200A031F035F4209B61A4", "-MediaSystem-"));
+      if(TMDB == null) {
+        TMDB = new TheMovieDb(CryptoUtil.decrypt("8AF22323DB8C0F235B38F578B7E09A61DB6F971EED59DE131E4EF70003CE84B483A778EBD28200A031F035F4209B61A4", "-MediaSystem-"));
       }
 
-      return TMDB2;
+      return TMDB;
     }
     catch(MovieDbException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  @Override
-  public String getProviderCode() {
-    return "TMDB";
   }
 
   @Override
@@ -137,7 +132,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
         }
 
         if(tmdbMovieId != -1) {
-          return new Identifier(media.getClass().getSimpleName(), getProviderCode(), Integer.toString(tmdbMovieId), matchType, matchAccuracy);
+          return new Identifier(media.getClass().getSimpleName(), "TMDB", Integer.toString(tmdbMovieId), matchType, matchAccuracy);
         }
 
         throw new IdentifyException(media);

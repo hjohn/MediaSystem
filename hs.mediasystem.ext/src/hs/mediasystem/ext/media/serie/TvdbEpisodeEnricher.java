@@ -28,11 +28,6 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
   }
 
   @Override
-  public String getProviderCode() {
-    return "TVDB";
-  }
-
-  @Override
   public Identifier identifyItem(final Media media) throws IdentifyException {
     hs.mediasystem.ext.media.serie.Episode episode = (hs.mediasystem.ext.media.serie.Episode)media;
     Identifier serieMatch = itemIdentifier.identifyItem(episode.getSerie().getMedia());
@@ -44,7 +39,7 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
       throw new IdentifyException("unable to find episode with serieId " + serieMatch.getProviderId() + " and " + episode);
     }
 
-    return new Identifier(media.getClass().getSimpleName(), getProviderCode(), serieMatch.getProviderId() + "," + result.episode.getId(), result.matchType, result.matchAccuracy);  // TODO better would be episode id -- this is done here for specials, with season 0 and a nonsense episode number
+    return new Identifier(media.getClass().getSimpleName(), "TVDB", serieMatch.getProviderId() + "," + result.episode.getId(), result.matchType, result.matchAccuracy);  // TODO better would be episode id -- this is done here for specials, with season 0 and a nonsense episode number
   }
 
   @Override

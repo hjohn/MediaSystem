@@ -23,11 +23,6 @@ public class TvdbSerieEnricher implements ItemEnricher {
   static final TheTVDB TVDB = new TheTVDB(CryptoUtil.decrypt("E6A6CF878B4A6200A66E31AED48627CE83A778EBD28200A031F035F4209B61A4", "-MediaSystem-"));
 
   @Override
-  public String getProviderCode() {
-    return "TVDB";
-  }
-
-  @Override
   public Identifier identifyItem(final Media media) throws IdentifyException {
     synchronized(TheTVDB.class) {
       List<Series> results = TVDB.searchSeries(media.getTitle(), "en");
@@ -38,7 +33,7 @@ public class TvdbSerieEnricher implements ItemEnricher {
         throw new IdentifyException("Cannot identify Serie with name: " + media.getTitle());
       }
 
-      return new Identifier(SerieBase.class.getSimpleName(), getProviderCode(), results.get(0).getId(), MatchType.NAME, 1.0f);
+      return new Identifier(SerieBase.class.getSimpleName(), "TVDB", results.get(0).getId(), MatchType.NAME, 1.0f);
     }
   }
 
