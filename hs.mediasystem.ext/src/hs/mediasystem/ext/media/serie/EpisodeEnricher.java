@@ -8,9 +8,8 @@ import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
 import hs.mediasystem.enrich.Parameters;
 import hs.mediasystem.framework.AbstractEnrichTaskProvider;
-import hs.mediasystem.framework.Media;
+import hs.mediasystem.framework.ItemEnricher;
 import hs.mediasystem.framework.TaskTitle;
-import hs.mediasystem.framework.TypeBasedItemEnricher;
 import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.util.ImageHandle;
 
@@ -18,14 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EpisodeEnricher implements Enricher<Episode> {
+  private static final ItemEnricher ITEM_ENRICHER = new TvdbEpisodeEnricher(new TvdbSerieEnricher());
   private static final List<Class<?>> INPUT_PARAMETERS = new ArrayList<Class<?>>() {{
+    add(EpisodeBase.class);
     add(TaskTitle.class);
     add(Identifier.class);
-    add(Media.class);
   }};
 
   private volatile ItemsDao itemsDao;
-  private volatile TypeBasedItemEnricher typeBasedItemEnricher;
 
   @Override
   public List<Class<?>> getInputTypes() {
@@ -36,7 +35,7 @@ public class EpisodeEnricher implements Enricher<Episode> {
   public List<EnrichTask<Episode>> enrich(Parameters parameters, boolean bypassCache) {
     List<EnrichTask<Episode>> enrichTasks = new ArrayList<>();
 
-    EpisodeEnrichTaskProvider enrichTaskProvider = new EpisodeEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(Identifier.class), (Episode)parameters.get(Media.class));
+    EpisodeEnrichTaskProvider enrichTaskProvider = new EpisodeEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(Identifier.class), parameters.get(EpisodeBase.class));
 
     if(!bypassCache) {
       enrichTasks.add(enrichTaskProvider.getCachedTask());
@@ -50,7 +49,7 @@ public class EpisodeEnricher implements Enricher<Episode> {
     private final Episode currentEpisode;
 
     public EpisodeEnrichTaskProvider(String title, Identifier identifier, Episode currentEpisode) {
-      super(title, itemsDao, typeBasedItemEnricher, identifier);
+      super(title, itemsDao, ITEM_ENRICHER, identifier);
       this.currentEpisode = currentEpisode;
     }
 

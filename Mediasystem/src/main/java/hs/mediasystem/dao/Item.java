@@ -32,6 +32,10 @@ public class Item {
 
   private List<Casting> castings;
 
+  public Item(Identifier identifier) {
+    this.identifier = identifier;
+  }
+
   public Identifier getIdentifier() {
     return identifier;
   }

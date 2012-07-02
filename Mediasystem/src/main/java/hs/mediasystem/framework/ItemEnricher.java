@@ -7,5 +7,5 @@ import hs.mediasystem.dao.ItemNotFoundException;
 public interface ItemEnricher {
   String getProviderCode();
   Identifier identifyItem(Media media) throws IdentifyException;
-  Item loadItem(String identifier) throws ItemNotFoundException;
+  Item loadItem(Identifier identifier) throws ItemNotFoundException;
 }

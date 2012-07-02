@@ -1,19 +1,18 @@
 package hs.mediasystem;
 
 import hs.mediasystem.beans.BeanUtils;
-import hs.mediasystem.dao.Identifier;
+import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.DatabaseUpdater;
+import hs.mediasystem.db.SimpleConnectionPoolDataSource;
 import hs.mediasystem.enrich.EnrichCache;
-import hs.mediasystem.framework.IdentifierEnricher;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaDataPersister;
 import hs.mediasystem.framework.PersisterProvider;
 import hs.mediasystem.framework.PlaybackOverlayView;
-import hs.mediasystem.framework.TypeBasedItemEnricher;
 import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -54,6 +53,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Properties;
 import java.util.ServiceLoader;
 
 import javafx.application.Application;
@@ -204,12 +204,11 @@ public class FrontEnd extends Application {
     );
 
     dm.add(dm.createComponent()
-      .setInterface(TypeBasedItemEnricher.class.getName(), null)
-      .setImplementation(injector.getInstance(TypeBasedItemEnricher.class))
+      .setInterface(IdentifierDao.class.getName(), null)
+      .setImplementation(injector.getInstance(IdentifierDao.class))
     );
 
     injector.getInstance(EnrichCache.class).registerEnricher(MediaData.class, injector.getInstance(MediaDataEnricher.class));
-    injector.getInstance(EnrichCache.class).registerEnricher(Identifier.class, injector.getInstance(IdentifierEnricher.class));
 
     ProgramController controller = injector.getInstance(ProgramController.class);
 
@@ -310,6 +309,25 @@ public class FrontEnd extends Application {
   }
 
   private ConnectionPoolDataSource configureDataSource(Section section)  {
+    try {
+      Class.forName(section.get("driverClass"));
+      Properties properties = new Properties();
+
+      for(String key : section) {
+        if(!key.equals("driverClass") && !key.equals("url")) {
+          properties.put(key, section.get(key));
+        }
+      }
+
+      return new SimpleConnectionPoolDataSource(section.get("url"), properties);
+    }
+    catch(ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @SuppressWarnings("unused")
+  private ConnectionPoolDataSource configureDataSourceAdvanced(Section section)  {
     try {
       String dataSourceClassName = section.get("dataSourceClass");
       Class<?> dataSourceClass = Class.forName(dataSourceClassName);

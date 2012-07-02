@@ -8,23 +8,22 @@ import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
 import hs.mediasystem.enrich.Parameters;
 import hs.mediasystem.framework.AbstractEnrichTaskProvider;
-import hs.mediasystem.framework.Media;
+import hs.mediasystem.framework.ItemEnricher;
 import hs.mediasystem.framework.TaskTitle;
-import hs.mediasystem.framework.TypeBasedItemEnricher;
 import hs.mediasystem.fs.SourceImageHandle;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SerieEnricher implements Enricher<Serie> {
+  private static final ItemEnricher ITEM_ENRICHER = new TvdbSerieEnricher();
   private static final List<Class<?>> INPUT_PARAMETERS = new ArrayList<Class<?>>() {{
+    add(SerieBase.class);
     add(TaskTitle.class);
     add(Identifier.class);
-    add(Media.class);
   }};
 
   private volatile ItemsDao itemsDao;
-  private volatile TypeBasedItemEnricher typeBasedItemEnricher;
 
   @Override
   public List<Class<?>> getInputTypes() {
@@ -35,7 +34,7 @@ public class SerieEnricher implements Enricher<Serie> {
   public List<EnrichTask<Serie>> enrich(Parameters parameters, boolean bypassCache) {
     List<EnrichTask<Serie>> enrichTasks = new ArrayList<>();
 
-    SerieEnrichTaskProvider enrichTaskProvider = new SerieEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(Identifier.class), (Serie)parameters.get(Media.class));
+    SerieEnrichTaskProvider enrichTaskProvider = new SerieEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(Identifier.class), parameters.get(SerieBase.class));
 
     if(!bypassCache) {
       enrichTasks.add(enrichTaskProvider.getCachedTask());
@@ -49,7 +48,7 @@ public class SerieEnricher implements Enricher<Serie> {
     private final Serie currentSerie;
 
     public SerieEnrichTaskProvider(String title, Identifier identifier, Serie currentSerie) {
-      super(title, itemsDao, typeBasedItemEnricher, identifier);
+      super(title, itemsDao, ITEM_ENRICHER, identifier);
       this.currentSerie = currentSerie;
     }
 

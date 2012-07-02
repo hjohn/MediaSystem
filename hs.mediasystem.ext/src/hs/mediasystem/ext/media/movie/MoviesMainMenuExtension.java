@@ -1,7 +1,9 @@
 package hs.mediasystem.ext.media.movie;
 
+import hs.mediasystem.dao.Identifier;
+import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.enrich.EnrichCache;
-import hs.mediasystem.framework.TypeBasedItemEnricher;
+import hs.mediasystem.framework.IdentifierEnricher;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -23,9 +25,9 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
   private volatile MovieEnricher movieEnricher;
   private volatile EnrichCache enrichCache;
   private volatile PersistQueue persister;
+  private volatile IdentifierDao identifierDao;
 
   public MoviesMainMenuExtension() {
-    TypeBasedItemEnricher.registerEnricher(MovieBase.class, new TmdbMovieEnricher());
     StandardView.registerLayout(MoviesMediaTree.class, MediaRootType.MOVIES);
     MediaNodeCellProviderRegistry.register(MediaNodeCellProviderRegistry.HORIZONTAL_CELL, Movie.class, new Provider<MovieCell>() {
       @Override
@@ -36,6 +38,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
   }
 
   public void init() {
+    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, new TmdbMovieEnricher(), MovieBase.class));
     enrichCache.registerEnricher(Movie.class, movieEnricher);
   }
 

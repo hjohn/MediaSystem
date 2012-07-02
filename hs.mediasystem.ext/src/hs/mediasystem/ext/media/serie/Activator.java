@@ -1,12 +1,12 @@
 package hs.mediasystem.ext.media.serie;
 
+import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
-import hs.mediasystem.framework.TypeBasedItemEnricher;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -91,10 +91,6 @@ public class Activator extends DependencyActivatorBase {
         .setService(ItemsDao.class)
         .setRequired(true)
       )
-      .add(createServiceDependency()
-        .setService(TypeBasedItemEnricher.class)
-        .setRequired(true)
-      )
     );
 
     manager.add(createComponent()
@@ -102,10 +98,6 @@ public class Activator extends DependencyActivatorBase {
       .setImplementation(EpisodeEnricher.class)
       .add(createServiceDependency()
         .setService(ItemsDao.class)
-        .setRequired(true)
-      )
-      .add(createServiceDependency()
-        .setService(TypeBasedItemEnricher.class)
         .setRequired(true)
       )
     );
@@ -131,6 +123,10 @@ public class Activator extends DependencyActivatorBase {
       )
       .add(createServiceDependency()
         .setService(PersistQueue.class)
+        .setRequired(true)
+      )
+      .add(createServiceDependency()
+        .setService(IdentifierDao.class)
         .setRequired(true)
       )
     );

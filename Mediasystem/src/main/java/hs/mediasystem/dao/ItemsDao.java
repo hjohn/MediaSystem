@@ -41,8 +41,7 @@ public class ItemsDao {
         System.out.println("[FINE] ItemsDao.getItem() - Selecting Item with type/provider/providerid = " + identifier.getMediaType() + "/" + identifier.getProvider() + "/" + identifier.getProviderId());
 
         if(record != null) {
-          return new Item() {{
-            setIdentifier(identifier);
+          return new Item(identifier) {{
             setId(record.getInteger("id"));
             setImdbId(record.getString("imdbid"));
             setTitle(record.getString("title"));

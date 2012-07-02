@@ -8,23 +8,22 @@ import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
 import hs.mediasystem.enrich.Parameters;
 import hs.mediasystem.framework.AbstractEnrichTaskProvider;
-import hs.mediasystem.framework.Media;
+import hs.mediasystem.framework.ItemEnricher;
 import hs.mediasystem.framework.TaskTitle;
-import hs.mediasystem.framework.TypeBasedItemEnricher;
 import hs.mediasystem.fs.SourceImageHandle;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MovieEnricher implements Enricher<Movie> {
+  private static final ItemEnricher ITEM_ENRICHER = new TmdbMovieEnricher();
   private static final List<Class<?>> INPUT_PARAMETERS = new ArrayList<Class<?>>() {{
+    add(MovieBase.class);
     add(TaskTitle.class);
     add(Identifier.class);
-    add(Media.class);
   }};
 
   private volatile ItemsDao itemsDao;
-  private volatile TypeBasedItemEnricher typeBasedItemEnricher;
 
   @Override
   public List<Class<?>> getInputTypes() {
@@ -35,7 +34,7 @@ public class MovieEnricher implements Enricher<Movie> {
   public List<EnrichTask<Movie>> enrich(Parameters parameters, boolean bypassCache) {
     List<EnrichTask<Movie>> enrichTasks = new ArrayList<>();
 
-    MovieEnrichTaskProvider enrichTaskProvider = new MovieEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(Identifier.class), (Movie)parameters.get(Media.class));
+    MovieEnrichTaskProvider enrichTaskProvider = new MovieEnrichTaskProvider(parameters.unwrap(TaskTitle.class), parameters.get(Identifier.class), parameters.get(MovieBase.class));
 
     if(!bypassCache) {
       enrichTasks.add(enrichTaskProvider.getCachedTask());
@@ -49,7 +48,7 @@ public class MovieEnricher implements Enricher<Movie> {
     private final Movie currentMovie;
 
     public MovieEnrichTaskProvider(String title, Identifier identifier, Movie movie) {
-      super(title, itemsDao, typeBasedItemEnricher, identifier);
+      super(title, itemsDao, ITEM_ENRICHER, identifier);
       this.currentMovie = movie;
     }
 

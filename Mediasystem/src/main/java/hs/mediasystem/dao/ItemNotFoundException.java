@@ -7,8 +7,8 @@ public class ItemNotFoundException extends Exception {
     super(identifier.toString());
   }
 
-  public ItemNotFoundException(String identifier, Exception cause) {
-    super(identifier, cause);
+  public ItemNotFoundException(Identifier identifier, Exception cause) {
+    super(identifier.toString(), cause);
   }
 
   public ItemNotFoundException(String message) {

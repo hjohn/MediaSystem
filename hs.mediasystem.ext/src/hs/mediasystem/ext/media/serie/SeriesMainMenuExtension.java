@@ -1,7 +1,9 @@
 package hs.mediasystem.ext.media.serie;
 
+import hs.mediasystem.dao.Identifier;
+import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.enrich.EnrichCache;
-import hs.mediasystem.framework.TypeBasedItemEnricher;
+import hs.mediasystem.framework.IdentifierEnricher;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -24,13 +26,9 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   private volatile EpisodeEnricher episodeEnricher;
   private volatile EnrichCache enrichCache;
   private volatile PersistQueue persister;
+  private volatile IdentifierDao identifierDao;
 
   public SeriesMainMenuExtension() {
-    TvdbSerieEnricher tvdbSerieEnricher = new TvdbSerieEnricher();
-
-    TypeBasedItemEnricher.registerEnricher(SerieBase.class, tvdbSerieEnricher);
-    TypeBasedItemEnricher.registerEnricher(EpisodeBase.class, new TvdbEpisodeEnricher(tvdbSerieEnricher));
-
     StandardView.registerLayout(SeriesMediaTree.class, MediaRootType.SERIES);
     StandardView.registerLayout(SerieItem.class, MediaRootType.SERIE_EPISODES);
     MediaNodeCellProviderRegistry.register(MediaNodeCellProviderRegistry.HORIZONTAL_CELL, Serie.class, new Provider<BannerCell>() {
@@ -48,6 +46,10 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   }
 
   public void init() {
+    TvdbSerieEnricher tvdbSerieEnricher = new TvdbSerieEnricher();
+
+    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, tvdbSerieEnricher, SerieBase.class));
+    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, new TvdbEpisodeEnricher(tvdbSerieEnricher), EpisodeBase.class));
     enrichCache.registerEnricher(Serie.class, serieEnricher);
     enrichCache.registerEnricher(Episode.class, episodeEnricher);
   }

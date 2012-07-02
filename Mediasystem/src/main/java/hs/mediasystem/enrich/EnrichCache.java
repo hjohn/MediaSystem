@@ -8,6 +8,7 @@ import hs.mediasystem.util.UniqueArrayList;
 import hs.mediasystem.util.UniqueList;
 import hs.mediasystem.util.WeakValueMap;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +44,7 @@ public class EnrichCache {
     }
   };
 
-  private final Map<Class<?>, Enricher<?>> ENRICHERS = new HashMap<>();
+  private final Map<Class<?>, List<Enricher<?>>> enricherMap = new HashMap<>();
 
   private final WeakValueMap<String, CacheKey> cacheKeys = new WeakValueMap<>();
   private final Map<CacheKey, Map<Class<?>, CacheValue>> cache = new WeakHashMap<>();
@@ -53,8 +54,16 @@ public class EnrichCache {
   private final OrderedExecutionQueue<CacheKey> cacheQueue = new OrderedExecutionQueueExecutor<>(taskPriorityComparator, new TaskThreadPoolExecutor(new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>())));
   private final OrderedExecutionQueue<CacheKey> normalQueue;
 
-  public <T> void registerEnricher(Class<T> cls, Enricher<T> enricher) {
-    ENRICHERS.put(cls, enricher);
+  public synchronized <T> void registerEnricher(Class<T> cls, Enricher<T> enricher) {
+    List<Enricher<?>> list = enricherMap.get(cls);
+
+    if(list == null) {
+      list = new ArrayList<>();
+
+      enricherMap.put(cls, list);
+    }
+
+    list.add(enricher);
   }
 
   @Inject
@@ -162,74 +171,91 @@ public class EnrichCache {
     if(key == null) {
       throw new IllegalArgumentException("parameter 'key' cannot be null");
     }
+    if(enrichableClass == null) {
+      throw new IllegalArgumentException("parameter 'enrichableClass' cannot be null");
+    }
 
     synchronized(cache) {
-      PendingEnrichment<T> pendingEnrichment = createPendingEnrichment(key, enrichableClass, bypassCache);
 
-      if(pendingEnrichment == null) {
-        System.out.println("[FINE] EnrichCache: No suitable Enricher for " + enrichableClass);
-        insertFailedEnrichment(key, enrichableClass);
-      }
-      else {
+      /*
+       * First check if this Enrichment is not already pending.  Although the system has no problem handling
+       * multiple the same Pending Enrichments (as after the first one is being processed the others only
+       * result in a promotion) it can be wasteful to have many of these queued up.
+       */
 
-        /*
-         * First check if this Enrichment is not already pending.  Although the system has no problem handling
-         * multiple the same Pending Enrichments (as after the first one is being processed the others only
-         * result in a promotion) it can be wasteful to have many of these queued up.
-         */
+      UniqueList<PendingEnrichment<?>> queuedPendingEnrichments = pendingEnrichmentMap.get(key);
 
-        UniqueList<PendingEnrichment<?>> pendingEnrichments = pendingEnrichmentMap.get(key);
+      if(queuedPendingEnrichments != null) {
+        for(PendingEnrichment<?> pendingEnrichment : queuedPendingEnrichments) {
+          if(enrichableClass.equals(pendingEnrichment.enrichableClass)) {
 
-        if(pendingEnrichments != null && pendingEnrichments.contains(pendingEnrichment)) {
+            /*
+             * The Pending Enrichment already exists, just discard it and promote the associated key (requeueing
+             * any tasks that might use it).
+             */
 
-          /*
-           * The Pending Enrichment already exists, just discard it and promote the associated key (requeueing
-           * any tasks that might use it).
-           */
+            List<Task<?>> cacheTasks = cacheQueue.removeAll(key);
+            List<Task<?>> normalTasks = normalQueue.removeAll(key);
 
-          List<Task<?>> cacheTasks = cacheQueue.removeAll(key);
-          List<Task<?>> normalTasks = normalQueue.removeAll(key);
+            key.promote();
 
-          key.promote();
+            if(cacheTasks != null) {
+              cacheQueue.submitAll(key, cacheTasks);
+            }
 
-          if(cacheTasks != null) {
-            cacheQueue.submitAll(key, cacheTasks);
+            if(normalTasks != null) {
+              normalQueue.submitAll(key, normalTasks);
+            }
+
+            return;
           }
-
-          if(normalTasks != null) {
-            normalQueue.submitAll(key, normalTasks);
-          }
-
-          return;
-        }
-
-        UniqueList<PendingEnrichment<?>> dependencies = pendingEnrichment.initialize();
-
-        if(dependencies != null) {
-          System.out.println("[FINE] EnrichCache [" + pendingEnrichment.enricher.getClass().getSimpleName() + "->" + enrichableClass.getSimpleName() + "]: TRIGGER: " + key);
-
-          if(pendingEnrichments == null) {
-            pendingEnrichments = new UniqueArrayList<>();
-            pendingEnrichmentMap.put(pendingEnrichment.key, pendingEnrichments);
-          }
-
-          pendingEnrichments.add(pendingEnrichment);
-          pendingEnrichments.removeAll(dependencies);  // required so any pre-existing dependencies are positioned AFTER this pending enrichment (and so are processed before it)
-          pendingEnrichments.addAll(dependencies);
-          queueNext(key);
-        }
-        else {
-          System.out.println("[FINE] EnrichCache [" + pendingEnrichment.enricher.getClass().getSimpleName() + "->" + enrichableClass.getSimpleName() + "]: TRIGGER_FAILED: " + key);
         }
       }
+
+      List<PendingEnrichment<?>> pendingEnrichments = createPendingEnrichments(key, enrichableClass, bypassCache);
+
+      if(pendingEnrichments != null) {
+        for(PendingEnrichment<?> pendingEnrichment : pendingEnrichments) {
+          UniqueList<PendingEnrichment<?>> dependencies = pendingEnrichment.initialize();
+
+          if(dependencies != null) {
+            System.out.println("[FINE] EnrichCache [" + pendingEnrichment.enricher.getClass().getSimpleName() + "->" + enrichableClass.getSimpleName() + "]: TRIGGER: " + key);
+
+            if(queuedPendingEnrichments == null) {
+              queuedPendingEnrichments = new UniqueArrayList<>();
+              pendingEnrichmentMap.put(key, queuedPendingEnrichments);
+            }
+
+            queuedPendingEnrichments.add(pendingEnrichment);
+            queuedPendingEnrichments.removeAll(dependencies);  // required so any pre-existing dependencies are positioned AFTER this pending enrichment (and so are processed before it)
+            queuedPendingEnrichments.addAll(dependencies);
+            queueNext(key);
+
+            return;
+          }
+        }
+      }
+
+      System.out.println("[WARN] EnrichCache [" + enrichableClass.getSimpleName() + "]: TRIGGER_FAILED: " + key + " (no suitable enricher, pendingEnrichments = " + pendingEnrichments + ")");
+      insertFailedEnrichment(key, enrichableClass);
     }
   }
 
-  private <T> PendingEnrichment<T> createPendingEnrichment(CacheKey key, Class<T> enrichableClass, boolean bypassCache) {
-    @SuppressWarnings("unchecked")
-    Enricher<T> enricher = (Enricher<T>)ENRICHERS.get(enrichableClass);
+  @SuppressWarnings("unchecked")
+  private <T> List<PendingEnrichment<?>> createPendingEnrichments(CacheKey key, Class<T> enrichableClass, boolean bypassCache) {
+    List<Enricher<?>> enrichers = enricherMap.get(enrichableClass);
 
-    return enricher == null ? null : new PendingEnrichment<>(key, enricher, enrichableClass, bypassCache);
+    if(enrichers == null) {
+      return null;
+    }
+
+    List<PendingEnrichment<?>> pendingEnrichments = new ArrayList<>();
+
+    for(Enricher<?> enricher : enrichers) {
+      pendingEnrichments.add(new PendingEnrichment<>(key, (Enricher<T>)enricher, enrichableClass, bypassCache));
+    }
+
+    return pendingEnrichments;
   }
 
   public void reload(CacheKey key) {
@@ -516,23 +542,29 @@ public class EnrichCache {
 
         UniqueList<PendingEnrichment<?>> list = new UniqueArrayList<>();
 
+        nextInputType:
         for(Class<?> parameterType : enricher.getInputTypes()) {
           CacheValue cacheValue = getDescendantCacheValue(key, parameterType);
 
           if(cacheValue == null) {
-            PendingEnrichment<?> pendingEnrichment = createPendingEnrichment(key, parameterType, bypassCache);
-            UniqueList<PendingEnrichment<?>> childDependencies = pendingEnrichment.initialize();
+            List<PendingEnrichment<?>> pendingEnrichments = createPendingEnrichments(key, parameterType, bypassCache);
 
-            if(childDependencies == null) {
-              insertFailedEnrichment(key, enrichableClass);
-              return null;
+            if(pendingEnrichments != null) {
+              for(PendingEnrichment<?> pendingEnrichment : pendingEnrichments) {
+                UniqueList<PendingEnrichment<?>> childDependencies = pendingEnrichment.initialize();
+
+                if(childDependencies != null) {
+                  list.add(pendingEnrichment);
+                  list.addAll(childDependencies);
+                  continue nextInputType;
+                }
+              }
             }
 
-            list.add(pendingEnrichment);
-            list.addAll(childDependencies);
+            insertFailedEnrichment(key, parameterType);
+            return null;
           }
           else if(cacheValue.state == EnrichmentState.FAILED) {
-            insertFailedEnrichment(key, enrichableClass);
             return null;
           }
         }
@@ -586,22 +618,8 @@ public class EnrichCache {
     }
 
     @Override
-    public int hashCode() {
-      return enricher.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if(this == obj) {
-        return true;
-      }
-      if(obj == null || getClass() != obj.getClass()) {
-        return false;
-      }
-
-      PendingEnrichment<?> other = (PendingEnrichment<?>)obj;
-
-      return enricher.equals(other.enricher);
+    public String toString() {
+      return "PendingEnrichment[" + enricher.getClass() + "]";
     }
   }
 

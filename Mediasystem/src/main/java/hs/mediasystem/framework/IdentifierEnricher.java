@@ -12,27 +12,26 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.inject.Inject;
-
 public class IdentifierEnricher implements Enricher<Identifier> {
-  private static final List<Class<?>> INPUT_PARAMETERS = new ArrayList<Class<?>>() {{
-    add(TaskTitle.class);
-    add(MediaData.class);
-    add(Media.class);
-  }};
+  private final List<Class<?>> inputParameters;
 
   private final IdentifierDao identifierDao;
-  private final TypeBasedItemEnricher typeBasedItemEnricher;
+  private final ItemEnricher itemEnricher;
 
-  @Inject
-  public IdentifierEnricher(IdentifierDao identifierDao, TypeBasedItemEnricher typeBasedItemEnricher) {
+  public IdentifierEnricher(IdentifierDao identifierDao, ItemEnricher itemEnricher, final Class<? extends Media> mediaClass) {
     this.identifierDao = identifierDao;
-    this.typeBasedItemEnricher = typeBasedItemEnricher;
+    this.itemEnricher = itemEnricher;
+
+    inputParameters = new ArrayList<Class<?>>() {{
+      add(TaskTitle.class);
+      add(MediaData.class);
+      add(mediaClass);
+    }};
   }
 
   @Override
   public List<Class<?>> getInputTypes() {
-    return INPUT_PARAMETERS;
+    return inputParameters;
   }
 
   @Override
@@ -85,7 +84,7 @@ public class IdentifierEnricher implements Enricher<Identifier> {
           Identifier identifier = null;
 
           try {
-            identifier = typeBasedItemEnricher.identifyItem(media);
+            identifier = itemEnricher.identifyItem(media);
           }
           catch(IdentifyException e) {
             identifier = new Identifier();

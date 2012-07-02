@@ -48,12 +48,12 @@ public class TvdbEpisodeEnricher implements ItemEnricher {
   }
 
   @Override
-  public Item loadItem(String identifier) throws ItemNotFoundException {
-    String[] split = identifier.split(",");
+  public Item loadItem(Identifier identifier) throws ItemNotFoundException {
+    String[] split = identifier.getProviderId().split(",");
 
     Episode episode = getEpisodeById(split[1]);
 
-    Item item = new Item();
+    Item item = new Item(identifier);
 
     item.setTitle(episode.getEpisodeName());
     item.setSeason(episode.getSeasonNumber());

@@ -149,12 +149,12 @@ public class TmdbMovieEnricher implements ItemEnricher {
   }
 
   @Override
-  public Item loadItem(String identifier) throws ItemNotFoundException {
+  public Item loadItem(Identifier identifier) throws ItemNotFoundException {
     synchronized(Movie.class) {
       try {
         System.out.println("[FINE] TmdbMovieEnricher.loadItem() - tmdb.id = " + identifier);
 
-        int tmdbId = Integer.parseInt(identifier);
+        int tmdbId = Integer.parseInt(identifier.getProviderId());
 
         MovieDb movie = getTMDB().getMovieInfo(tmdbId, "en");
 
@@ -167,7 +167,7 @@ public class TmdbMovieEnricher implements ItemEnricher {
         URL posterURL = getTMDB().createImageUrl(movie.getPosterPath(), "original");
         URL backgroundURL = getTMDB().createImageUrl(movie.getBackdropPath(), "original");
 
-        Item item = new Item();
+        Item item = new Item(identifier);
 
         item.setImdbId(movie.getImdbID());
         item.setTitle(movie.getTitle());

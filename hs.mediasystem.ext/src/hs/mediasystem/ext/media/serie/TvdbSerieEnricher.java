@@ -43,15 +43,15 @@ public class TvdbSerieEnricher implements ItemEnricher {
   }
 
   @Override
-  public Item loadItem(String identifier) throws ItemNotFoundException {
+  public Item loadItem(Identifier identifier) throws ItemNotFoundException {
     synchronized(TheTVDB.class) {
-      final Series series = TVDB.getSeries(identifier, "en");
+      final Series series = TVDB.getSeries(identifier.getProviderId(), "en");
 
       if(series == null) {
         throw new ItemNotFoundException(identifier);
       }
 
-      Item item = new Item();
+      Item item = new Item(identifier);
 
       item.setTitle(series.getSeriesName());
       item.setRating(Float.valueOf(series.getRating()));
@@ -72,7 +72,7 @@ public class TvdbSerieEnricher implements ItemEnricher {
         }
       });
 
-      actors.addAll(TVDB.getActors(identifier));  // de-duplicates the actors we get from tvdb
+      actors.addAll(TVDB.getActors(identifier.getProviderId()));  // de-duplicates the actors we get from tvdb
 
       for(Actor actor : actors) {
         Person person = new Person();
