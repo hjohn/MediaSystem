@@ -8,7 +8,6 @@ import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
 import hs.mediasystem.enrich.Parameters;
 import hs.mediasystem.framework.AbstractEnrichTaskProvider;
-import hs.mediasystem.framework.ItemEnricher;
 import hs.mediasystem.framework.TaskTitle;
 import hs.mediasystem.fs.SourceImageHandle;
 
@@ -16,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MovieEnricher implements Enricher<Movie> {
-  private static final ItemEnricher ITEM_ENRICHER = new TmdbMovieEnricher();
+  private static final TmdbMovieEnricher ENRICHER = new TmdbMovieEnricher();
   private static final List<Class<?>> INPUT_PARAMETERS = new ArrayList<Class<?>>() {{
     add(MovieBase.class);
     add(TaskTitle.class);
@@ -48,7 +47,7 @@ public class MovieEnricher implements Enricher<Movie> {
     private final Movie currentMovie;
 
     public MovieEnrichTaskProvider(String title, Identifier identifier, Movie movie) {
-      super(title, itemsDao, ITEM_ENRICHER, identifier);
+      super(title, itemsDao, ENRICHER, identifier);
       this.currentMovie = movie;
     }
 

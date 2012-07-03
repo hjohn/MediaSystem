@@ -46,10 +46,8 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   }
 
   public void init() {
-    TvdbSerieEnricher tvdbSerieEnricher = new TvdbSerieEnricher();
-
-    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, tvdbSerieEnricher, SerieBase.class));
-    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, new TvdbEpisodeEnricher(tvdbSerieEnricher), EpisodeBase.class));
+    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, Activator.TVDB_SERIE_ENRICHER, SerieBase.class));
+    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, Activator.TVDB_EPISODE_ENRICHER, EpisodeBase.class));
     enrichCache.registerEnricher(Serie.class, serieEnricher);
     enrichCache.registerEnricher(Episode.class, episodeEnricher);
   }

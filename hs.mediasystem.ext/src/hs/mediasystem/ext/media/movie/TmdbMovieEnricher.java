@@ -7,8 +7,9 @@ import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
 import hs.mediasystem.framework.IdentifyException;
-import hs.mediasystem.framework.ItemEnricher;
 import hs.mediasystem.framework.Media;
+import hs.mediasystem.framework.MediaIdentifier;
+import hs.mediasystem.framework.MediaLoader;
 import hs.mediasystem.util.CryptoUtil;
 import hs.mediasystem.util.Levenshtein;
 import hs.mediasystem.util.ThreadSafeDateFormat;
@@ -28,7 +29,7 @@ import com.moviejukebox.themoviedb.TheMovieDb;
 import com.moviejukebox.themoviedb.model.Genre;
 import com.moviejukebox.themoviedb.model.MovieDb;
 
-public class TmdbMovieEnricher implements ItemEnricher {
+public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
   private static final ThreadSafeDateFormat DATE_FORMAT = new ThreadSafeDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
 
   private TheMovieDb TMDB;

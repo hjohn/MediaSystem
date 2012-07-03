@@ -7,8 +7,9 @@ import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
 import hs.mediasystem.framework.IdentifyException;
-import hs.mediasystem.framework.ItemEnricher;
 import hs.mediasystem.framework.Media;
+import hs.mediasystem.framework.MediaIdentifier;
+import hs.mediasystem.framework.MediaLoader;
 import hs.mediasystem.util.CryptoUtil;
 
 import java.util.Comparator;
@@ -19,7 +20,7 @@ import com.moviejukebox.thetvdb.TheTVDB;
 import com.moviejukebox.thetvdb.model.Actor;
 import com.moviejukebox.thetvdb.model.Series;
 
-public class TvdbSerieEnricher implements ItemEnricher {
+public class TvdbSerieEnricher implements MediaIdentifier, MediaLoader {
   static final TheTVDB TVDB = new TheTVDB(CryptoUtil.decrypt("E6A6CF878B4A6200A66E31AED48627CE83A778EBD28200A031F035F4209B61A4", "-MediaSystem-"));
 
   @Override

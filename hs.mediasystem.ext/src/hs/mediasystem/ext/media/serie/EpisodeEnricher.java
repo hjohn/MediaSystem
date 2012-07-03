@@ -8,7 +8,7 @@ import hs.mediasystem.enrich.EnrichTask;
 import hs.mediasystem.enrich.Enricher;
 import hs.mediasystem.enrich.Parameters;
 import hs.mediasystem.framework.AbstractEnrichTaskProvider;
-import hs.mediasystem.framework.ItemEnricher;
+import hs.mediasystem.framework.MediaLoader;
 import hs.mediasystem.framework.TaskTitle;
 import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.util.ImageHandle;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EpisodeEnricher implements Enricher<Episode> {
-  private static final ItemEnricher ITEM_ENRICHER = new TvdbEpisodeEnricher(new TvdbSerieEnricher());
+  private static final MediaLoader ITEM_ENRICHER = new TvdbEpisodeEnricher(new TvdbSerieEnricher());
   private static final List<Class<?>> INPUT_PARAMETERS = new ArrayList<Class<?>>() {{
     add(EpisodeBase.class);
     add(TaskTitle.class);

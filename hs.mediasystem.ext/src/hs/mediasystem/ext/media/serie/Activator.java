@@ -23,6 +23,8 @@ import org.apache.felix.dm.DependencyManager;
 import org.osgi.framework.BundleContext;
 
 public class Activator extends DependencyActivatorBase {
+  static final TvdbSerieEnricher TVDB_SERIE_ENRICHER = new TvdbSerieEnricher();
+  static final TvdbEpisodeEnricher TVDB_EPISODE_ENRICHER = new TvdbEpisodeEnricher(TVDB_SERIE_ENRICHER);
 
   @Override
   public void init(BundleContext context, DependencyManager manager) throws Exception {

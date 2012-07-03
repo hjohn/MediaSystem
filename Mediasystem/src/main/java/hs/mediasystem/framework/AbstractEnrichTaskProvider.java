@@ -15,13 +15,13 @@ import java.util.List;
 public abstract class AbstractEnrichTaskProvider<T extends Media> {
   private final String title;
   private final ItemsDao itemsDao;
-  private final ItemEnricher itemEnricher;
+  private final MediaLoader mediaLoader;
   private final Identifier identifier;
 
-  public AbstractEnrichTaskProvider(String title, ItemsDao itemsDao, ItemEnricher itemEnricher, Identifier identifier) {
+  public AbstractEnrichTaskProvider(String title, ItemsDao itemsDao, MediaLoader itemEnricher, Identifier identifier) {
     this.title = title;
     this.itemsDao = itemsDao;
-    this.itemEnricher = itemEnricher;
+    this.mediaLoader = itemEnricher;
     this.identifier = identifier;
   }
 
@@ -83,7 +83,7 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
 
         updateProgress(1, 4);
 
-        Item item = bypassCache || oldItem == null ? itemEnricher.loadItem(identifier) : oldItem;
+        Item item = bypassCache || oldItem == null ? mediaLoader.loadItem(identifier) : oldItem;
 
         updateProgress(2, 4);
 

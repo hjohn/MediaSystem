@@ -7,8 +7,9 @@ import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
 import hs.mediasystem.framework.IdentifyException;
-import hs.mediasystem.framework.ItemEnricher;
 import hs.mediasystem.framework.Media;
+import hs.mediasystem.framework.MediaIdentifier;
+import hs.mediasystem.framework.MediaLoader;
 import hs.mediasystem.util.Levenshtein;
 
 import java.util.HashSet;
@@ -19,7 +20,7 @@ import javax.inject.Inject;
 import com.moviejukebox.thetvdb.TheTVDB;
 import com.moviejukebox.thetvdb.model.Episode;
 
-public class TvdbEpisodeEnricher implements ItemEnricher {
+public class TvdbEpisodeEnricher implements MediaIdentifier, MediaLoader {
   private final TvdbSerieEnricher itemIdentifier;
 
   @Inject

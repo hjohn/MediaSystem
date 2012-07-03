@@ -16,13 +16,13 @@ public class IdentifierEnricher implements Enricher<Identifier> {
   private final List<Class<?>> inputParameters;
 
   private final IdentifierDao identifierDao;
-  private final ItemEnricher itemEnricher;
+  private final MediaIdentifier itemEnricher;
 
   private final Class<? extends Media> mediaClass;
 
-  public IdentifierEnricher(IdentifierDao identifierDao, ItemEnricher itemEnricher, final Class<? extends Media> mediaClass) {
+  public IdentifierEnricher(IdentifierDao identifierDao, MediaIdentifier mediaIdentifier, final Class<? extends Media> mediaClass) {
     this.identifierDao = identifierDao;
-    this.itemEnricher = itemEnricher;
+    this.itemEnricher = mediaIdentifier;
     this.mediaClass = mediaClass;
 
     inputParameters = new ArrayList<Class<?>>() {{

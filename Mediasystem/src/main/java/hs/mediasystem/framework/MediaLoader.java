@@ -4,7 +4,6 @@ import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 
-public interface ItemEnricher {
-  Identifier identifyItem(Media media) throws IdentifyException;
+public interface MediaLoader {
   Item loadItem(Identifier identifier) throws ItemNotFoundException;
 }
