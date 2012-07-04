@@ -16,11 +16,14 @@ import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
+import hs.mediasystem.screens.MediaNodeCell;
+import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.MessagePaneTaskExecutor;
 import hs.mediasystem.screens.PlaybackOverlayPane;
 import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.PluginTracker;
 import hs.mediasystem.screens.ProgramController;
+import hs.mediasystem.screens.StandardCell;
 import hs.mediasystem.screens.selectmedia.DetailPane;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.screens.selectmedia.SelectMediaView;
@@ -206,6 +209,19 @@ public class FrontEnd extends Application {
     dm.add(dm.createComponent()
       .setInterface(IdentifierDao.class.getName(), null)
       .setImplementation(injector.getInstance(IdentifierDao.class))
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(MediaNodeCellProvider.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", Media.class);
+        put("type", MediaNodeCellProvider.Type.HORIZONTAL);
+      }})
+      .setImplementation(new MediaNodeCellProvider() {
+        @Override
+        public MediaNodeCell get() {
+          return new StandardCell();
+        }
+      })
     );
 
     injector.getInstance(EnrichCache.class).registerEnricher(MediaData.class, injector.getInstance(MediaDataEnricher.class));

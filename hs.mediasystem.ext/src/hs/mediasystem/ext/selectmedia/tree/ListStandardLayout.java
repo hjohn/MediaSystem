@@ -7,6 +7,6 @@ import org.osgi.framework.BundleContext;
 public class ListStandardLayout extends AbstractDuoPaneStandardLayout {
 
   public ListStandardLayout(BundleContext bundleContext) {
-    super(bundleContext, new TreeListPane());
+    super(bundleContext, new TreeListPane(bundleContext));
   }
 }

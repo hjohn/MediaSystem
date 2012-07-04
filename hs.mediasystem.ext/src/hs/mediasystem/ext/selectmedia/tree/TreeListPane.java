@@ -2,11 +2,12 @@ package hs.mediasystem.ext.selectmedia.tree;
 
 import hs.mediasystem.screens.Filter;
 import hs.mediasystem.screens.MediaNode;
-import hs.mediasystem.screens.MediaNodeCellProviderRegistry;
+import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.MediaNodeEvent;
-import hs.mediasystem.screens.SmartMediaNodeCellProvider;
+import hs.mediasystem.screens.ServiceMediaNodeCellProvider;
 import hs.mediasystem.screens.selectmedia.ListPane;
 import hs.mediasystem.util.Events;
+import hs.mediasystem.util.ServiceTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.util.Callback;
+
+import org.osgi.framework.BundleContext;
 
 public class TreeListPane extends BorderPane implements ListPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
@@ -72,8 +75,12 @@ public class TreeListPane extends BorderPane implements ListPane {
     getStyleClass().add("seasons");
   }};
 
-  public TreeListPane() {
+  private final ServiceTracker<MediaNodeCellProvider> mediaNodeCellProviderTracker;
+
+  public TreeListPane(BundleContext bundleContext) {
     getStylesheets().add("select-media/tree-list-pane.css");
+
+    mediaNodeCellProviderTracker = MediaNodeCellProvider.Type.HORIZONTAL.createTracker(bundleContext);
 
     treeView.setEditable(false);
     treeView.setShowRoot(false);
@@ -240,7 +247,7 @@ public class TreeListPane extends BorderPane implements ListPane {
   }
 
   private final class MediaItemTreeCell extends TreeCell<MediaNode> {
-    private final SmartMediaNodeCellProvider provider = new SmartMediaNodeCellProvider(MediaNodeCellProviderRegistry.HORIZONTAL_CELL);
+    private final ServiceMediaNodeCellProvider provider = new ServiceMediaNodeCellProvider(mediaNodeCellProviderTracker);
 
     @Override
     protected void updateItem(final MediaNode mediaNode, boolean empty) {

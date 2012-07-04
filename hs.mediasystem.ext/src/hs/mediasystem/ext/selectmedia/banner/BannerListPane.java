@@ -1,11 +1,12 @@
 package hs.mediasystem.ext.selectmedia.banner;
 
 import hs.mediasystem.screens.MediaNode;
-import hs.mediasystem.screens.MediaNodeCellProviderRegistry;
+import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.MediaNodeEvent;
-import hs.mediasystem.screens.SmartMediaNodeCellProvider;
+import hs.mediasystem.screens.ServiceMediaNodeCellProvider;
 import hs.mediasystem.screens.selectmedia.ListPane;
 import hs.mediasystem.util.Events;
+import hs.mediasystem.util.ServiceTracker;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -33,6 +34,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.util.Callback;
+
+import org.osgi.framework.BundleContext;
 
 public class BannerListPane extends BorderPane implements ListPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
@@ -108,8 +111,12 @@ public class BannerListPane extends BorderPane implements ListPane {
   };
   @Override public ObjectBinding<MediaNode> mediaNodeBinding() { return mediaNode; }
 
-  public BannerListPane() {
+  private final ServiceTracker<MediaNodeCellProvider> mediaNodeCellProviderTracker;
+
+  public BannerListPane(BundleContext bundleContext) {
     getStylesheets().add("select-media/banner-list-pane.css");
+
+    mediaNodeCellProviderTracker = MediaNodeCellProvider.Type.HORIZONTAL.createTracker(bundleContext);
 
     tableView.setEditable(false);
 
@@ -201,8 +208,8 @@ public class BannerListPane extends BorderPane implements ListPane {
     return null;
   }
 
-  private static final class MediaNodeTableCell extends TableCell<DuoMediaNode, MediaNode> {
-    private final SmartMediaNodeCellProvider provider = new SmartMediaNodeCellProvider(MediaNodeCellProviderRegistry.HORIZONTAL_CELL);
+  private final class MediaNodeTableCell extends TableCell<DuoMediaNode, MediaNode> {
+    private final ServiceMediaNodeCellProvider provider = new ServiceMediaNodeCellProvider(mediaNodeCellProviderTracker);
     private final int bannerWidth;
 
     public MediaNodeTableCell(int bannerWidth) {

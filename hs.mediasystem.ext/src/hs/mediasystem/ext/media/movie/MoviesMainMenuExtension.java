@@ -7,7 +7,6 @@ import hs.mediasystem.framework.IdentifierEnricher;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
-import hs.mediasystem.screens.MediaNodeCellProviderRegistry;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
@@ -18,8 +17,6 @@ import java.nio.file.Paths;
 
 import javafx.scene.image.Image;
 
-import javax.inject.Provider;
-
 public class MoviesMainMenuExtension implements MainMenuExtension {
   private volatile SelectMediaPresentationProvider selectMediaPresentationProvider;
   private volatile MovieEnricher movieEnricher;
@@ -29,12 +26,6 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
 
   public MoviesMainMenuExtension() {
     StandardView.registerLayout(MoviesMediaTree.class, MediaRootType.MOVIES);
-    MediaNodeCellProviderRegistry.register(MediaNodeCellProviderRegistry.HORIZONTAL_CELL, Movie.class, new Provider<MovieCell>() {
-      @Override
-      public MovieCell get() {
-        return new MovieCell();
-      }
-    });
   }
 
   public void init() {

@@ -11,6 +11,8 @@ import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaGroup;
+import hs.mediasystem.screens.MediaNodeCell;
+import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.selectmedia.DetailPane;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 
@@ -28,6 +30,32 @@ public class Activator extends DependencyActivatorBase {
 
   @Override
   public void init(BundleContext context, DependencyManager manager) throws Exception {
+    manager.add(createComponent()
+      .setInterface(MediaNodeCellProvider.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", Serie.class);
+        put("type", MediaNodeCellProvider.Type.HORIZONTAL);
+      }})
+      .setImplementation(new MediaNodeCellProvider() {
+        @Override
+        public MediaNodeCell get() {
+          return new BannerCell();
+        }
+      })
+    );
+
+    manager.add(createComponent()
+      .setInterface(MediaNodeCellProvider.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", Episode.class);
+        put("type", MediaNodeCellProvider.Type.HORIZONTAL);
+      }})
+      .setImplementation(new MediaNodeCellProvider() {
+        @Override
+        public MediaNodeCell get() {
+          return new EpisodeCell();
+        }
+      })
+    );
+
     manager.add(createComponent()
       .setInterface(SubtitleCriteriaProvider.class.getName(), new Hashtable<String, Object>() {{
         put("mediasystem.class", Episode.class);

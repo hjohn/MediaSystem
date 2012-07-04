@@ -7,7 +7,6 @@ import hs.mediasystem.framework.IdentifierEnricher;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
-import hs.mediasystem.screens.MediaNodeCellProviderRegistry;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
@@ -17,8 +16,6 @@ import hs.mediasystem.screens.selectmedia.StandardView;
 import java.nio.file.Paths;
 
 import javafx.scene.image.Image;
-
-import javax.inject.Provider;
 
 public class SeriesMainMenuExtension implements MainMenuExtension {
   private volatile SelectMediaPresentationProvider selectMediaPresentationProvider;
@@ -31,18 +28,6 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   public SeriesMainMenuExtension() {
     StandardView.registerLayout(SeriesMediaTree.class, MediaRootType.SERIES);
     StandardView.registerLayout(SerieItem.class, MediaRootType.SERIE_EPISODES);
-    MediaNodeCellProviderRegistry.register(MediaNodeCellProviderRegistry.HORIZONTAL_CELL, Serie.class, new Provider<BannerCell>() {
-      @Override
-      public BannerCell get() {
-        return new BannerCell();
-      }
-    });
-    MediaNodeCellProviderRegistry.register(MediaNodeCellProviderRegistry.HORIZONTAL_CELL, Episode.class, new Provider<EpisodeCell>() {
-      @Override
-      public EpisodeCell get() {
-        return new EpisodeCell();
-      }
-    });
   }
 
   public void init() {

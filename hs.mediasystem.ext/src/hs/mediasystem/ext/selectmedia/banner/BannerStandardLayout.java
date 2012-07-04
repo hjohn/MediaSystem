@@ -7,6 +7,6 @@ import org.osgi.framework.BundleContext;
 public class BannerStandardLayout extends AbstractDuoPaneStandardLayout {
 
   public BannerStandardLayout(BundleContext bundleContext) {
-    super(bundleContext, new BannerListPane());
+    super(bundleContext, new BannerListPane(bundleContext));
   }
 }
