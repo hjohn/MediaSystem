@@ -1,33 +1,34 @@
 package hs.mediasystem;
 
-// TODO Many image loading delay
+// TODO Viewed state toggling after reload metadata doesn't register --> because cannot make a MapBinding to writable property --> possible easy solution, close dialog after selecting reload meta data -- on the other hand, MediaData.class may not need to be removed from cache at all (since it is local information, not meta-data)
 
 // TODO Movie Collections should show something fancy on their detail pane, or at the very least display a proper background (Collection view, count, list of items, picture of latest/first (or both), stacked pictures)
-// TODO Eliminate MediaRootType
-// TODO Order subtitle providers
 
-// TODO Store scroll position
+// TODO Store scroll position (requires hacking skin)
 
 // TODO Banner view -- change layout to get bigger banners -> DEPENDS ON: provider specific detail panes
 // TODO Option screen, re-highlight last used option
 
 // Nice to have soon:
-// TODO Smart highlight of next-to-see episode --> hard to do because Viewed information is only present after enriching... also, the current system should already remember the last item selected and highlight that again, just press down once..
-// TODO Store other movie informations, like subtitle/audio delay, selected subtitle/audio track, that are important when resuming movie
-// TODO Make subtitles more persistent by storing them with file (or simply in db?) required if you want to show same sub again after resuming
-// TODO Resume functionality; will need to decide if we want ResumePosition in MediaData or put it in SettingsStore (which is loaded at start...)
-
-// Easy stuff:
-// TODO Hotkey for download subtitles
+// TODO Smart highlight of next-to-see episode --> hard to do because Viewed information is only present after enriching... also, the current system should already remember the last item selected and highlight that again, just press down once.. --> so why not remember last viewed as setting as well? :)
 
 // New users:
-// TODO Initial settings / Settings screen (configure db)
-// TODO Warning if database is not available --> but database is required --> Consider using built-in database
+// TODO Initial settings / Settings screen (configure db) --> means start should be possible without DB
+// TODO Consider using built-in database --> H2 looks like its best, but it is nowhere near PostgreSQL compatible (lacks transactional DDL) --> SQLite has transactional DDL it looks like
 // TODO Detect JavaFX, error dialog if not found
+
+// Big stuff:
+// TODO Add Information Pane (big version of Detail Pane)
+// TODO Movie gallery layout ext (cover flow)
+// TODO Linking of Actors between different movies, so one can see where else a certain actor played
+// TODO Settings screen, to get rid of most of the ini stuff, most importantly path locations
+// TODO Resume functionality
+//      - Make subtitles more persistent by storing them with file (or simply in db?) required if you want to show same sub again after resuming
+//      - Add extra fields to MediaData, like subtitle/audio delay, selected subtitle/audio track, that are important when resuming movie
+//      - Actually setting all player parameters to correct positions
 
 // Other:
 // TODO Rename Filter to TabGroup -- or refactor completely to use RadioButton API
-// TODO Settings screen
 // TODO Subtitle Provider Podnapisi
 // TODO [Option Dialog] Modal navigation should use own Navigator as well?
 // TODO [Option Dialog] Separators for Dialog Screen
@@ -36,17 +37,21 @@ package hs.mediasystem;
 
 // Low priority:
 // TODO Some form of remote control support / Lirc support --> EventGhost makes this unnecessary, keyboard control suffices
-// TODO Investigate why VLC sucks at skipping (audio not working for a while) --> no idea, with hardware decoding it is better but it doesn't skip to key frames then --> this seems media dependent (or processor dependent), occurs with 2012, but not with Game of Thrones
 
 // Considerations:
 // - New MediaData with uri and hash is great, but hash collisions can still easily occur when you simply have two copies of the same file
 
 // JavaFX 2.2 issues:
-// - Option screen navigation is not showing focus properly, bug in JFX 2.2
 // - Empty screen problem.... --> refresh bug it seems, JFX2.2
+// - StackPane with Messages does not appear --> bug in JFX2.2
+// - Enrich is triggered for every item upto the current position... WTF! --> JFX problem, TreeView accessing all cells during scrollTo()
 
 // VLC issues:
 // - Subtitle list in Video Options should be updated more frequently, especially after downloading a sub (may require Player to notify of changes) --> No indication from VLC when a subtitle actually was fully loaded, so this is not possible
+// - Investigate why VLC sucks at skipping (audio not working for a while) --> no idea, with hardware decoding it is better but it doesn't skip to key frames then --> this seems media dependent (or processor dependent), occurs with 2012, but not with Game of Thrones --> VLC bug
+
+// General Annoyances:
+// - Creating a new Stage and displaying it when app does not have focus causing Windows to flash the taskbar button (does this too for switching between transparent and non-transparent stage... perhaps transparent performance is acceptable now...?)
 
 // -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
 
@@ -209,6 +214,8 @@ import javafx.application.Application;
 
 public class MediaSystem {
   public static void main(String[] args) {
+    ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
+
     Log.initialize(new LinePrinter() {
       private final int methodColumn = 120;
       private final int methodTabStop = 24;
@@ -234,7 +241,6 @@ public class MediaSystem {
 
         StringBuilder builder = new StringBuilder();
         long sinceStart = System.currentTimeMillis() - startTime;
-        long millis = sinceStart % 1000;
 
         boolean stackTrace = method.startsWith(" -- java.lang.Throwable$WrappedPrintStream.println(Throwable.");
         boolean stackTraceHeader = stackTrace && !text.startsWith("Caused by:") && !text.startsWith("\t");
@@ -245,31 +251,7 @@ public class MediaSystem {
         }
 
         if(!stackTrace) {
-          if(sinceStart < 10000) {
-            builder.append("    ");
-          }
-          else if(sinceStart < 100000) {
-            builder.append("   ");
-          }
-          else if(sinceStart < 1000000) {
-            builder.append("  ");
-          }
-          else {
-            builder.append(" ");
-          }
-
-          builder.append(Long.toString(sinceStart / 1000));
-          builder.append(".");
-          if(millis < 10) {
-            builder.append("00");
-          }
-          else if(millis < 100) {
-            builder.append("0");
-          }
-          builder.append(Long.toString(millis));
-          builder.append(" ");
-          builder.append(translateLevel(level));
-          builder.append("| ");
+          builder.append(String.format("%9.3f %s\u2502 ", ((double)sinceStart) / 1000, translateLevel(level)));
         }
         builder.append(text);
 
