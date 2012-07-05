@@ -3,15 +3,16 @@ package hs.mediasystem.util;
 import java.io.ByteArrayInputStream;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.NavigableMap;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import javafx.scene.image.Image;
 
 public class ImageCache {
   private static final ReferenceQueue<Image> REFERENCE_QUEUE = new ReferenceQueue<>();
-  private static final NavigableMap<String, SoftReference<Image>> CACHE = new TreeMap<>();
+  private static final SortedMap<String, SoftReference<Image>> CACHE = Collections.synchronizedSortedMap(new TreeMap<String, SoftReference<Image>>());
 
   public static Image loadImage(ImageHandle handle) {
     cleanReferenceQueue();
@@ -56,6 +57,7 @@ public class ImageCache {
     int size = CACHE.size();
     int counter = 0;
 
+
     for(;;) {
       ImageSoftReference ref = (ImageSoftReference)REFERENCE_QUEUE.poll();
 
@@ -80,14 +82,16 @@ public class ImageCache {
     if(handle != null) {
       String keyToRemove = handle.getKey();
 
-      for(Iterator<String> iterator = CACHE.tailMap(keyToRemove).keySet().iterator(); iterator.hasNext();) {
-        String key = iterator.next();
+      synchronized(CACHE) {
+        for(Iterator<String> iterator = CACHE.tailMap(keyToRemove).keySet().iterator(); iterator.hasNext();) {
+          String key = iterator.next();
 
-        if(!key.startsWith(keyToRemove)) {
-          break;
+          if(!key.startsWith(keyToRemove)) {
+            break;
+          }
+
+          iterator.remove();
         }
-
-        iterator.remove();
       }
     }
   }
