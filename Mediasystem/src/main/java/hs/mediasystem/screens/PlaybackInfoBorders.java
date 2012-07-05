@@ -53,7 +53,7 @@ public class PlaybackInfoBorders extends StackPane {
     getStyleClass().add("position");
     GridPane.setHalignment(this, HPos.LEFT);
     GridPane.setValignment(this, VPos.BOTTOM);
-    textProperty().bind(Bindings.concat(playerBindings.formattedPosition, "/", playerBindings.formattedLength));
+    textProperty().bind(Bindings.concat(playerBindings.formattedPosition, " / ", playerBindings.formattedLength));
   }};
 
   private final Label timeLabel = new Label() {{
