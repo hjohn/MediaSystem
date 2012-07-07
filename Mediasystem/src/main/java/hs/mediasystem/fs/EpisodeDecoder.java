@@ -33,7 +33,7 @@ public class EpisodeDecoder implements Decoder {
       String[] split = sequence.split("[-,]");
 
       season = split[0].isEmpty() ? 1 : Integer.parseInt(split[0]);
-      episode = Integer.parseInt(split[1]);
+      episode = split.length > 1 ? Integer.parseInt(split[1]) : 0;
       endEpisode = split.length > 2 ? Integer.parseInt(split[2]) : episode;
     }
 
