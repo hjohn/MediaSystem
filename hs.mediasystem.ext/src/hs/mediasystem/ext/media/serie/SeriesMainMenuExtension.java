@@ -48,8 +48,8 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   }
 
   @Override
-  public Destination getDestination(final ProgramController controller) {
-    return new Destination("serie", getTitle()) {
+  public void select(final ProgramController controller) {
+    controller.getNavigator().navigateTo(new Destination("serie", getTitle()) {
       private SelectMediaPresentation presentation;
       private SeriesMediaTree mediaTree;
 
@@ -66,7 +66,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
           presentation.setMediaTree(mediaTree);
         }
       }
-    };
+    });
   }
 
   @Override

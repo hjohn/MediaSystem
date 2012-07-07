@@ -1,9 +1,8 @@
 package hs.mediasystem.ext.shutdown;
 
-import javafx.scene.image.Image;
 import hs.mediasystem.screens.MainMenuExtension;
-import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
+import javafx.scene.image.Image;
 
 public class ShutdownMainMenuExtension implements MainMenuExtension {
 
@@ -23,8 +22,7 @@ public class ShutdownMainMenuExtension implements MainMenuExtension {
   }
 
   @Override
-  public Destination getDestination(ProgramController controller) {
-    return null;
+  public void select(ProgramController controller) {
   }
 
 }

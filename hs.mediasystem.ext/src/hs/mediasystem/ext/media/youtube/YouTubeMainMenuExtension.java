@@ -28,8 +28,8 @@ public class YouTubeMainMenuExtension implements MainMenuExtension {
   }
 
   @Override
-  public Destination getDestination(final ProgramController controller) {
-    return new Destination("youtube", getTitle()) {
+  public void select(final ProgramController controller) {
+    controller.getNavigator().navigateTo(new Destination("youtube", getTitle()) {
       private SelectMediaPresentation presentation;
       private YouTubeMediaTree mediaTree;
 
@@ -46,7 +46,7 @@ public class YouTubeMainMenuExtension implements MainMenuExtension {
           presentation.setMediaTree(mediaTree);
         }
       }
-    };
+    });
   }
 
   @Override

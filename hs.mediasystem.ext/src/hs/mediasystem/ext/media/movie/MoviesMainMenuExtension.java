@@ -44,8 +44,8 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
   }
 
   @Override
-  public Destination getDestination(final ProgramController controller) {
-    return new Destination("movie", getTitle()) {
+  public void select(final ProgramController controller) {
+    controller.getNavigator().navigateTo(new Destination("movie", getTitle()) {
       private SelectMediaPresentation presentation;
       private MoviesMediaTree mediaTree;
 
@@ -62,7 +62,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
           presentation.setMediaTree(mediaTree);
         }
       }
-    };
+    });
   }
 
   @Override

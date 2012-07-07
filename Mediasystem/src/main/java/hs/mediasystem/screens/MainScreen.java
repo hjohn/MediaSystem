@@ -1,7 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.screens.Navigator.Destination;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -73,8 +71,7 @@ public class MainScreen extends BorderPane {
       }
 
       @Override
-      public Destination getDestination(ProgramController controller) {
-        return null;
+      public void select(ProgramController controller) {
       }
 
       @Override
@@ -115,7 +112,7 @@ public class MainScreen extends BorderPane {
             setOnAction(new EventHandler<ActionEvent>() {
               @Override
               public void handle(ActionEvent event) {
-                controller.getNavigator().navigateTo(mainMenuExtension.getDestination(controller));
+                mainMenuExtension.select(controller);
               }
             });
           }};

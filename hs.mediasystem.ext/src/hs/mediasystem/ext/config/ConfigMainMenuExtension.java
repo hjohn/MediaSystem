@@ -2,7 +2,6 @@ package hs.mediasystem.ext.config;
 
 import hs.mediasystem.screens.ConfigurationOption;
 import hs.mediasystem.screens.MainMenuExtension;
-import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.util.ServiceTracker;
@@ -39,14 +38,8 @@ public class ConfigMainMenuExtension implements MainMenuExtension {
   }
 
   @Override
-  public Destination getDestination(final ProgramController controller) {
-    return new Destination("configuration", getTitle()) {
-
-      @Override
-      protected void intro() {
-        controller.showOptionScreen(getTitle(), createOptionsWithParentId(null));
-      }
-    };
+  public void select(final ProgramController controller) {
+    controller.showOptionScreen(getTitle(), createOptionsWithParentId(null));
   }
 
   private List<Option> createOptionsWithParentId(String parentId) {

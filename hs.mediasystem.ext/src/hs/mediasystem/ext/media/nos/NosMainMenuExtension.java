@@ -27,8 +27,8 @@ public class NosMainMenuExtension implements MainMenuExtension {
   }
 
   @Override
-  public Destination getDestination(final ProgramController controller) {
-    return new Destination("nos", getTitle()) {
+  public void select(final ProgramController controller) {
+    controller.getNavigator().navigateTo(new Destination("nos", getTitle()) {
       private SelectMediaPresentation presentation;
       private NosMediaTree mediaTree;
 
@@ -45,7 +45,7 @@ public class NosMainMenuExtension implements MainMenuExtension {
           presentation.setMediaTree(mediaTree);
         }
       }
-    };
+    });
   }
 
   @Override
