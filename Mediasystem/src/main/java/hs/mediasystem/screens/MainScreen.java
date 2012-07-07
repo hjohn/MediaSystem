@@ -19,7 +19,6 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.effect.BoxBlur;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -42,45 +41,10 @@ public class MainScreen extends BorderPane {
   private Button lastSelected;
 
   @Inject
-  public MainScreen(final ProgramController controller,
-      //final Iterable<MainMenuExtension> mainMenuExtensions,
-        final PluginTracker<MainMenuExtension> tracker) {
+  public MainScreen(final ProgramController controller, final PluginTracker<MainMenuExtension> tracker) {
     getStylesheets().add("main-screen.css");
 
-    final Set<MainMenuExtension> extensions = new TreeSet<>(new Comparator<MainMenuExtension>() {
-      @Override
-      public int compare(MainMenuExtension o1, MainMenuExtension o2) {
-        return Double.compare(o1.order(), o2.order());
-      }
-    });
-
-//    for(MainMenuExtension ext : mainMenuExtensions) {
-//      System.out.println("[FINE] MainScreen.MainScreen() - " + ext);
-//      extensions.add(ext);
-//    }
-
-    extensions.add(new MainMenuExtension() {
-      @Override
-      public String getTitle() {
-        return "Exit";
-      }
-
-      @Override
-      public Image getImage() {
-        return new Image("images/logout.png");
-      }
-
-      @Override
-      public void select(ProgramController controller) {
-      }
-
-      @Override
-      public double order() {
-        return 1.0;
-      }
-    });
     menuBox = new StackPane();
-
 
     tracker.getPlugins().addListener(new ListChangeListener<MainMenuExtension>() {
       @Override
@@ -167,35 +131,6 @@ public class MainScreen extends BorderPane {
         }});
       }
     });
-
-//    for(final MainMenuExtension mainMenuExtension : extensions) {
-//      final Button b = new Button(mainMenuExtension.getTitle()) {{
-//        setGraphic(new ImageView(mainMenuExtension.getImage()));
-//        setOnAction(new EventHandler<ActionEvent>() {
-//          @Override
-//          public void handle(ActionEvent event) {
-//            controller.getNavigator().navigateTo(mainMenuExtension.getDestination(controller));
-//          }
-//        });
-//      }};
-//
-//      timelines.add(new Timeline());
-//      timelines2.add(new Timeline());
-//      stackPanes.add(new StackPane() {{
-//        for(int i = 0; i < 5; i++) {
-//          getChildren().add(new Circle(20) {{
-//            double angle = 360 / extensions.size() * buttons.size();
-//
-//            setFill(Color.hsb(rnd.nextDouble() * 180 + angle, 1.0, 0.45, 0.2));
-//            setScaleX(5.0);
-//            setTranslateX((rnd.nextDouble() - 0.5) * 80);
-//            setTranslateY((rnd.nextDouble() - 0.5) * 20 + 10);
-//          }});
-//        }
-//        setEffect(new BoxBlur(10, 10, 3));
-//      }});
-//      buttons.add(b);
-//    }
 
     StackPane stackPane = new StackPane();
 
