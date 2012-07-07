@@ -1,0 +1,3 @@
+
+Private-Package: hs.mediasystem.ext.config
+Bundle-Activator: hs.mediasystem.ext.config.Activator
