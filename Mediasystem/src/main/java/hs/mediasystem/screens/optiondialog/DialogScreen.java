@@ -129,6 +129,10 @@ public class DialogScreen extends BorderPane {
 
   @Override
   public void requestFocus() {
-    ((Pane)lookup("#dialog-list")).getChildren().get(0).requestFocus();
+    Pane pane = (Pane)lookup("#dialog-list");
+
+    if(!pane.getChildren().isEmpty()) {
+      pane.getChildren().get(0).requestFocus();
+    }
   }
 }
