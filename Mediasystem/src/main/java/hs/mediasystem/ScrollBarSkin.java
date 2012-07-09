@@ -11,19 +11,13 @@ import javafx.scene.shape.Rectangle;
 
 public class ScrollBarSkin implements Skin<ScrollBar> {
 
-  private final ScrollBar scrollBar;
+  private ScrollBar scrollBar;
+  private Group group;
 
-  public ScrollBarSkin(ScrollBar scrollBar) {
+  public ScrollBarSkin(final ScrollBar scrollBar) {
     this.scrollBar = scrollBar;
-  }
 
-  @Override
-  public void dispose() {
-  }
-
-  @Override
-  public Node getNode() {
-    return new Group() {{
+    this.group = new Group() {{
       getChildren().add(new Rectangle() {{
         getStyleClass().add("track");
         if(scrollBar.getOrientation() == Orientation.HORIZONTAL) {
@@ -53,6 +47,17 @@ public class ScrollBarSkin implements Skin<ScrollBar> {
         }
       }});
     }};
+  }
+
+  @Override
+  public void dispose() {
+    scrollBar = null;
+    group = null;
+  }
+
+  @Override
+  public Node getNode() {
+    return group;
   }
 
   @Override
