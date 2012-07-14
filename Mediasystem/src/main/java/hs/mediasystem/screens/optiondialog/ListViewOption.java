@@ -18,8 +18,10 @@ import javafx.util.Callback;
 public class ListViewOption<T> extends Option {
   private static final KeyCombination UP = new KeyCodeCombination(KeyCode.UP);
   private static final KeyCombination DOWN = new KeyCodeCombination(KeyCode.DOWN);
+  private static final KeyCombination LEFT = new KeyCodeCombination(KeyCode.LEFT);
+  private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
 
-  private final ListView<T> listView = new ListView<>();
+  protected final ListView<T> listView = new ListView<>();
 
   public ListViewOption(final String description, final ObjectProperty<T> property, ObservableList<T> items, final StringConverter<T> stringConverter) {
     super(description);
@@ -38,7 +40,10 @@ public class ListViewOption<T> extends Option {
       getChildren().add(listView);
     }});
 
-    listView.setItems(items);
+    if(items != null) {
+      listView.setItems(items);
+    }
+
     listView.setCellFactory(new Callback<ListView<T>, ListCell<T>>() {
       @Override
       public ListCell<T> call(ListView<T> param) {
@@ -52,6 +57,20 @@ public class ListViewOption<T> extends Option {
             }
           }
         };
+      }
+    });
+
+    listView.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {  // WORKAROUND this should be in setOnKeyPressed, but ListView does its own thing with left/right
+      @Override
+      public void handle(KeyEvent event) {
+        if(LEFT.match(event)) {
+          left();
+          event.consume();
+        }
+        else if(RIGHT.match(event)) {
+          right();
+          event.consume();
+        }
       }
     });
 
@@ -74,15 +93,28 @@ public class ListViewOption<T> extends Option {
             Event.fireEvent(listView.getParent(), event);
           }
         }
+//        else if(LEFT.match(event)) {
+//          left();
+//          event.consume();
+//        }
+//        else if(RIGHT.match(event)) {
+//          right();
+//          event.consume();
+//        }
       }
     });
+  }
+
+  protected ListViewOption(final String description, final ObjectProperty<T> property, final StringConverter<T> stringConverter) {
+    this(description, property, null, stringConverter);
   }
 
   @Override
   public void requestFocus() {
     listView.requestFocus();
-    if(listView.getFocusModel().getFocusedIndex() == -1) {
-      listView.getFocusModel().focusNext();
+
+    if(listView.getSelectionModel().getSelectedIndex() == -1 && !listView.getItems().isEmpty()) {
+      listView.getSelectionModel().select(0);
     }
   }
 }
