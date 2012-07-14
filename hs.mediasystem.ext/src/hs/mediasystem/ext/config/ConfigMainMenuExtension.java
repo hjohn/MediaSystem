@@ -4,6 +4,8 @@ import hs.mediasystem.screens.ConfigurationOption;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.optiondialog.Option;
+import hs.mediasystem.screens.optiondialog.SubOption;
+import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ServiceTracker;
 
 import java.util.ArrayList;
@@ -56,8 +58,19 @@ public class ConfigMainMenuExtension implements MainMenuExtension {
 
     List<Option> options = new ArrayList<>();
 
-    for(ConfigurationOption option : foundConfigOptions) {
-      options.add(option.createOption());
+    for(final ConfigurationOption configOption : foundConfigOptions) {
+      Option option = configOption.createOption();
+
+      if(option == null) {
+        option = new SubOption(configOption.getTitle(), new Callable<List<Option>>() {
+          @Override
+          public List<Option> call() {
+            return createOptionsWithParentId(configOption.getId());
+          }
+        });
+      }
+
+      options.add(option);
     }
 
     return options;

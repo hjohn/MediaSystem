@@ -49,6 +49,7 @@ public final class ConfigUtil {
       "javafx.scene.image",
       "javafx.scene.input",
       "javafx.scene.layout",
+      "javafx.stage",
       "javafx.util",
       "javax.inject",
       "javax.persistence",
