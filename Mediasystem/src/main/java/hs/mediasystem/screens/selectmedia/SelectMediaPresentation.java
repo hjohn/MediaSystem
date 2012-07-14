@@ -115,9 +115,9 @@ public class SelectMediaPresentation {
             }));
           }
 
-          options.add(new ActionOption("Reload meta data", new Callable<Boolean>() {
+          options.add(new ActionOption("Reload meta data", new Callable<Void>() {
             @Override
-            public Boolean call() {
+            public Void call() {
               mediaItem.reloadMetaData();
 
               Media media = mediaItem.get(Media.class);
@@ -126,7 +126,7 @@ public class SelectMediaPresentation {
               ImageCache.expunge(media.getImage());
               ImageCache.expunge(media.getBackground());
 
-              return true;
+              return null;
             }
           }));
 
