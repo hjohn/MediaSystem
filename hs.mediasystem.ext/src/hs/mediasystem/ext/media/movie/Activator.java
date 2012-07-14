@@ -8,17 +8,16 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.persist.PersistQueue;
-import hs.mediasystem.screens.ConfigurationOption;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
-import hs.mediasystem.screens.optiondialog.PathSelectOption;
+import hs.mediasystem.screens.Setting;
 import hs.mediasystem.screens.optiondialog.Option;
+import hs.mediasystem.screens.optiondialog.PathSelectOption;
 import hs.mediasystem.screens.optiondialog.SubOption;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
-import hs.mediasystem.util.Callable;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -29,6 +28,8 @@ import java.util.Map;
 
 import javafx.beans.property.SimpleObjectProperty;
 
+import javax.inject.Provider;
+
 import org.apache.felix.dm.DependencyActivatorBase;
 import org.apache.felix.dm.DependencyManager;
 import org.osgi.framework.BundleContext;
@@ -38,8 +39,8 @@ public class Activator extends DependencyActivatorBase {
   @Override
   public void init(BundleContext context, DependencyManager manager) throws Exception {
     manager.add(createComponent()
-      .setInterface(ConfigurationOption.class.getName(), null)
-      .setImplementation(new ConfigurationOption() {
+      .setInterface(Setting.class.getName(), null)
+      .setImplementation(new Setting() {
         @Override
         public double order() {
           return 0;
@@ -68,8 +69,8 @@ public class Activator extends DependencyActivatorBase {
     );
 
     manager.add(createComponent()
-      .setInterface(ConfigurationOption.class.getName(), null)
-      .setImplementation(new ConfigurationOption() {
+      .setInterface(Setting.class.getName(), null)
+      .setImplementation(new Setting() {
         @Override
         public double order() {
           return 0;
@@ -92,14 +93,14 @@ public class Activator extends DependencyActivatorBase {
 
         @Override
         public Option createOption() {
-          return new SubOption(getTitle(), new Callable<List<Option>>() {
+          return new SubOption(getTitle(), new Provider<List<Option>>() {
             @Override
-            public List<Option> call() {
+            public List<Option> get() {
               List<Option> options = new ArrayList<>();
 
-              options.add(new SubOption("Add folder", new Callable<List<Option>>() {
+              options.add(new SubOption("Add folder", new Provider<List<Option>>() {
                 @Override
-                public List<Option> call() {
+                public List<Option> get() {
                   List<Option> options = new ArrayList<>();
 
                   options.add(new PathSelectOption("Select folder", new SimpleObjectProperty<Path>(), PathSelectOption.ONLY_DIRECTORIES_FILTER));

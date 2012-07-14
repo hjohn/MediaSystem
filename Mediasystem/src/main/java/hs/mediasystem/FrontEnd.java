@@ -15,7 +15,7 @@ import hs.mediasystem.framework.PersisterProvider;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.persist.PersistQueue;
-import hs.mediasystem.screens.ConfigurationOption;
+import hs.mediasystem.screens.Setting;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
@@ -235,8 +235,8 @@ public class FrontEnd extends Application {
     );
 
     dm.add(dm.createComponent()
-      .setInterface(ConfigurationOption.class.getName(), null)
-      .setImplementation(new ConfigurationOption() {
+      .setInterface(Setting.class.getName(), null)
+      .setImplementation(new Setting() {
         @Override
         public String getId() {
           return "information-bar.debug-mem";

@@ -2,7 +2,7 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.screens.optiondialog.Option;
 
-public interface ConfigurationOption {
+public interface Setting {
   String getId();
   String getTitle();
   String getParentId();

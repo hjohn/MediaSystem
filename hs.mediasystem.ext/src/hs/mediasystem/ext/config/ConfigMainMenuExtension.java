@@ -1,11 +1,10 @@
 package hs.mediasystem.ext.config;
 
-import hs.mediasystem.screens.ConfigurationOption;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.ProgramController;
+import hs.mediasystem.screens.Setting;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.SubOption;
-import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ServiceTracker;
 
 import java.util.ArrayList;
@@ -13,15 +12,17 @@ import java.util.List;
 
 import javafx.scene.image.Image;
 
+import javax.inject.Provider;
+
 import org.osgi.framework.BundleContext;
 
 public class ConfigMainMenuExtension implements MainMenuExtension {
   private volatile BundleContext bundleContext;
 
-  private ServiceTracker<ConfigurationOption> configurationOptionTracker;
+  private ServiceTracker<Setting> configurationOptionTracker;
 
   public void init() {
-    configurationOptionTracker = new ServiceTracker<>(bundleContext, ConfigurationOption.class);
+    configurationOptionTracker = new ServiceTracker<>(bundleContext, Setting.class);
   }
 
   @Override
@@ -45,10 +46,10 @@ public class ConfigMainMenuExtension implements MainMenuExtension {
   }
 
   private List<Option> createOptionsWithParentId(String parentId) {
-    List<ConfigurationOption> configOptions = configurationOptionTracker.getServices();
-    List<ConfigurationOption> foundConfigOptions = new ArrayList<>();
+    List<Setting> configOptions = configurationOptionTracker.getServices();
+    List<Setting> foundConfigOptions = new ArrayList<>();
 
-    for(ConfigurationOption option : configOptions) {
+    for(Setting option : configOptions) {
       if((parentId == null && option.getParentId() == null) || (parentId != null && parentId.equals(option.getParentId()))) {
         foundConfigOptions.add(option);
       }
@@ -58,13 +59,13 @@ public class ConfigMainMenuExtension implements MainMenuExtension {
 
     List<Option> options = new ArrayList<>();
 
-    for(final ConfigurationOption configOption : foundConfigOptions) {
+    for(final Setting configOption : foundConfigOptions) {
       Option option = configOption.createOption();
 
       if(option == null) {
-        option = new SubOption(configOption.getTitle(), new Callable<List<Option>>() {
+        option = new SubOption(configOption.getTitle(), new Provider<List<Option>>() {
           @Override
-          public List<Option> call() {
+          public List<Option> get() {
             return createOptionsWithParentId(configOption.getId());
           }
         });

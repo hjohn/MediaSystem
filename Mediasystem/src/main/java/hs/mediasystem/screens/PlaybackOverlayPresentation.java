@@ -10,7 +10,6 @@ import hs.mediasystem.screens.optiondialog.ListViewOption;
 import hs.mediasystem.screens.optiondialog.NumericOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.SubOption;
-import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.PropertyClassEq;
 import hs.mediasystem.util.PropertyEq;
 import hs.mediasystem.util.ServiceTracker;
@@ -35,6 +34,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.osgi.framework.BundleContext;
 
@@ -91,9 +91,9 @@ public class PlaybackOverlayPresentation {
             new NumericOption(player.audioDelayProperty(), "Audio Delay", 100, -1200000, 1200000, playerBindings.formattedAudioDelay),
             new NumericOption(player.subtitleDelayProperty(), "Subtitle Delay", 100, -1200000, 1200000, playerBindings.formattedSubtitleDelay),
             new NumericOption(player.brightnessProperty(), "Brightness Adjustment", 0.01, 0, 2, playerBindings.formattedBrightness),
-            new SubOption("Download subtitle...", new Callable<List<Option>>() {
+            new SubOption("Download subtitle...", new Provider<List<Option>>() {
               @Override
-              public List<Option> call() {
+              public List<Option> get() {
                 return new ArrayList<Option>() {{
                   final SubtitleSelector subtitleSelector = new SubtitleSelector(subtitleProviderTracker.getServices(SUBTITLE_PROVIDER_COMPARATOR, new PropertyEq("mediatype", "movie")));
                   final SubtitleCriteriaProvider subtitleCriteriaProvider = subtitleCriteriaProviderTracker.getService(new PropertyClassEq("mediasystem.class", mediaItem.getMedia().getClass()));
