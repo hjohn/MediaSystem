@@ -9,7 +9,7 @@ import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.ListViewOption;
 import hs.mediasystem.screens.optiondialog.NumericOption;
 import hs.mediasystem.screens.optiondialog.Option;
-import hs.mediasystem.screens.optiondialog.SubOption;
+import hs.mediasystem.screens.optiondialog.OptionGroup;
 import hs.mediasystem.util.PropertyClassEq;
 import hs.mediasystem.util.PropertyEq;
 import hs.mediasystem.util.ServiceTracker;
@@ -91,7 +91,7 @@ public class PlaybackOverlayPresentation {
             new NumericOption(player.audioDelayProperty(), "Audio Delay", 100, -1200000, 1200000, playerBindings.formattedAudioDelay),
             new NumericOption(player.subtitleDelayProperty(), "Subtitle Delay", 100, -1200000, 1200000, playerBindings.formattedSubtitleDelay),
             new NumericOption(player.brightnessProperty(), "Brightness Adjustment", 0.01, 0, 2, playerBindings.formattedBrightness),
-            new SubOption("Download subtitle...", new Provider<List<Option>>() {
+            new OptionGroup("Download subtitle...", new Provider<List<Option>>() {
               @Override
               public List<Option> get() {
                 return new ArrayList<Option>() {{

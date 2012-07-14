@@ -4,10 +4,10 @@ import java.util.List;
 
 import javax.inject.Provider;
 
-public class SubOption extends Option {
+public class OptionGroup extends Option {
   private final Provider<List<Option>> optionCreator;
 
-  public SubOption(String description, Provider<List<Option>> optionCreator) {
+  public OptionGroup(String description, Provider<List<Option>> optionCreator) {
     super(description);
 
     this.optionCreator = optionCreator;

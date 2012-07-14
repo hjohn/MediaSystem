@@ -1,7 +1,7 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.screens.optiondialog.Option;
-import hs.mediasystem.screens.optiondialog.SubOption;
+import hs.mediasystem.screens.optiondialog.OptionGroup;
 import hs.mediasystem.util.PropertyEq;
 import hs.mediasystem.util.ServiceTracker;
 
@@ -51,8 +51,8 @@ public class SettingGroup implements Setting {
   }
 
   @Override
-  public SubOption createOption() {
-    return new SubOption(title, new Provider<List<Option>>() {
+  public OptionGroup createOption() {
+    return new OptionGroup(title, new Provider<List<Option>>() {
       @Override
       public List<Option> get() {
         return createChildOptions();

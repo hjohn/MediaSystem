@@ -42,8 +42,8 @@ public class DialogScreen extends BorderPane {
           Option selectedOption = (Option)getChildren().get(selectedIndex);
 
           if(ENTER.match(event)) {
-            if(selectedOption instanceof SubOption) {
-              SubOption option = (SubOption)selectedOption;
+            if(selectedOption instanceof OptionGroup) {
+              OptionGroup option = (OptionGroup)selectedOption;
 
               optionStack.add(new ArrayList<>(getChildren()));
 

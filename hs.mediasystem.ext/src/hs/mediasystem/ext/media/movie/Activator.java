@@ -18,7 +18,7 @@ import hs.mediasystem.screens.SettingGroup;
 import hs.mediasystem.screens.SimpleSetting;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.PathSelectOption;
-import hs.mediasystem.screens.optiondialog.SubOption;
+import hs.mediasystem.screens.optiondialog.OptionGroup;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 
 import java.nio.file.Path;
@@ -52,12 +52,12 @@ public class Activator extends DependencyActivatorBase {
       .setImplementation(new SimpleSetting("movies.add-remove", 0, new Provider<Option>() {
         @Override
         public Option get() {
-          return new SubOption("Add/Remove folder", new Provider<List<Option>>() {
+          return new OptionGroup("Add/Remove folder", new Provider<List<Option>>() {
             @Override
             public List<Option> get() {
               List<Option> options = new ArrayList<>();
 
-              options.add(new SubOption("Add folder", new Provider<List<Option>>() {
+              options.add(new OptionGroup("Add folder", new Provider<List<Option>>() {
                 @Override
                 public List<Option> get() {
                   List<Option> options = new ArrayList<>();
