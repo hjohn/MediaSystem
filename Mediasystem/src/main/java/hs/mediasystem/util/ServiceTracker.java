@@ -29,6 +29,10 @@ public class ServiceTracker<S> {
     this(bundleContext, serviceClass, null, ranker, defaultFilters);
   }
 
+  public ServiceTracker(BundleContext bundleContext, Class<S> serviceClass, Comparator<S> defaultOrder, PropertyMatcher... defaultFilters) {
+    this(bundleContext, serviceClass, defaultOrder, null, defaultFilters);
+  }
+
   public ServiceTracker(BundleContext bundleContext, Class<S> serviceClass, PropertyMatcher... defaultFilters) {
     this(bundleContext, serviceClass, null, null, defaultFilters);
   }
