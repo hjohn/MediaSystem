@@ -16,14 +16,18 @@ public class VLCPlayerFactory implements PlayerFactory {
   public Player create(Ini ini) {
     Section main = ini.getSection("vlc");
 
-    NativeLibrary.addSearchPath("libvlc", main.getDefault("libvlcSearchPath", "c:/program files/VideoLAN/VLC"));
+    if(main != null) {
+      NativeLibrary.addSearchPath("libvlc", main.getDefault("libvlcSearchPath", "c:/program files/VideoLAN/VLC"));
+    }
 
-    Section section = ini.getSection("vlc.args");
     List<String> args = new ArrayList<>();
+    Section vlcArgsSection = ini.getSection("vlc.args");
 
-    for(String key : section) {
-      args.add(key);
-      args.add(section.get(key));
+    if(vlcArgsSection != null) {
+      for(String key : vlcArgsSection) {
+        args.add(key);
+        args.add(vlcArgsSection.get(key));
+      }
     }
 
     return new VLCPlayer(args.toArray(new String[args.size()]));

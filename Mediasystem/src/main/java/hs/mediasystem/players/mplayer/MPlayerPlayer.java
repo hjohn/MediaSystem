@@ -9,10 +9,12 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Window;
+import java.awt.peer.ComponentPeer;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -296,13 +298,18 @@ public class MPlayerPlayer implements Player {
     subtitleDelay = delay;
   }
 
-  @SuppressWarnings({"restriction", "deprecation"})
+  @SuppressWarnings("deprecation")
   private static long getWindowId(Window window) {
-    if(window.getPeer() instanceof sun.awt.windows.WComponentPeer) {
-      return ((sun.awt.windows.WComponentPeer)window.getPeer()).getHWnd();
-    }
+    try {
+      ComponentPeer peer = window.getPeer();
+      Method method = peer.getClass().getMethod("getHWnd");
+      Object result = method.invoke(peer);
 
-    throw new RuntimeException("unable to get wid, window.getPeer().getClass(): " + window.getPeer().getClass());
+      return (Long)result;
+    }
+    catch(Exception e) {
+      throw new RuntimeException("unable to get wid, window.getPeer().getClass(): " + window.getPeer().getClass(), e);
+    }
   }
 
   @Override
