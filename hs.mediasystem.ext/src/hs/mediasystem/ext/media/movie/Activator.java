@@ -14,6 +14,8 @@ import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.Setting;
+import hs.mediasystem.screens.SettingGroup;
+import hs.mediasystem.screens.SimpleSetting;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.PathSelectOption;
 import hs.mediasystem.screens.optiondialog.SubOption;
@@ -40,60 +42,17 @@ public class Activator extends DependencyActivatorBase {
   public void init(BundleContext context, DependencyManager manager) throws Exception {
     manager.add(createComponent()
       .setInterface(Setting.class.getName(), null)
-      .setImplementation(new Setting() {
-        @Override
-        public double order() {
-          return 0;
-        }
-
-        @Override
-        public String getTitle() {
-          return "Movies";
-        }
-
-        @Override
-        public String getParentId() {
-          return null;
-        }
-
-        @Override
-        public String getId() {
-          return "movies";
-        }
-
-        @Override
-        public Option createOption() {
-          return null;
-        }
-      })
+      .setImplementation(new SettingGroup(context, "movies", "Movies", 0))
     );
 
     manager.add(createComponent()
-      .setInterface(Setting.class.getName(), null)
-      .setImplementation(new Setting() {
+      .setInterface(Setting.class.getName(), new Hashtable<String, Object>() {{
+        put("parentId", "movies");
+      }})
+      .setImplementation(new SimpleSetting("movies.add-remove", 0, new Provider<Option>() {
         @Override
-        public double order() {
-          return 0;
-        }
-
-        @Override
-        public String getTitle() {
-          return "Add/Remove folder";
-        }
-
-        @Override
-        public String getParentId() {
-          return "movies";
-        }
-
-        @Override
-        public String getId() {
-          return "movies";
-        }
-
-        @Override
-        public Option createOption() {
-          return new SubOption(getTitle(), new Provider<List<Option>>() {
+        public Option get() {
+          return new SubOption("Add/Remove folder", new Provider<List<Option>>() {
             @Override
             public List<Option> get() {
               List<Option> options = new ArrayList<>();
@@ -113,7 +72,7 @@ public class Activator extends DependencyActivatorBase {
             }
           });
         }
-      })
+      }))
     );
 
     manager.add(createComponent()

@@ -15,7 +15,7 @@ import hs.mediasystem.framework.PersisterProvider;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.persist.PersistQueue;
-import hs.mediasystem.screens.Setting;
+import hs.mediasystem.screens.SimpleSetting;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
@@ -24,6 +24,7 @@ import hs.mediasystem.screens.PlaybackOverlayPane;
 import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.PluginTracker;
 import hs.mediasystem.screens.ProgramController;
+import hs.mediasystem.screens.Setting;
 import hs.mediasystem.screens.StandardCell;
 import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.Option;
@@ -236,39 +237,19 @@ public class FrontEnd extends Application {
 
     dm.add(dm.createComponent()
       .setInterface(Setting.class.getName(), null)
-      .setImplementation(new Setting() {
+      .setImplementation(new SimpleSetting("information-bar.debug-mem", 0, new Provider<Option>() {
         @Override
-        public String getId() {
-          return "information-bar.debug-mem";
-        }
-
-        @Override
-        public String getTitle() {
-          return "Show Memory Use Information";
-        }
-
-        @Override
-        public String getParentId() {
-          return null;
-        }
-
-        @Override
-        public double order() {
-          return 0;
-        }
-
-        @Override
-        public Option createOption() {
+        public Option get() {
           final BooleanProperty booleanProperty = new SimpleBooleanProperty();
 
-          return new BooleanOption(getTitle(), booleanProperty, new StringBinding(booleanProperty) {
+          return new BooleanOption("Show Memory Use Information", booleanProperty, new StringBinding(booleanProperty) {
             @Override
             protected String computeValue() {
               return booleanProperty.get() ? "Yes" : "No";
             }
           });
         }
-      })
+      }))
     );
 
     injector.getInstance(EnrichCache.class).registerEnricher(MediaData.class, injector.getInstance(MediaDataEnricher.class));
