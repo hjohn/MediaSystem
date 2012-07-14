@@ -15,6 +15,6 @@ public class PropertyEq implements PropertyMatcher {
   public boolean match(ServiceReference<?> ref) {
     Object value = ref.getProperty(name);
 
-    return match.equals(value);
+    return (match == null && value == null) || (match != null && match.equals(value));
   }
 }
