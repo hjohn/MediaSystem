@@ -15,6 +15,7 @@ import hs.mediasystem.framework.PersisterProvider;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.persist.PersistQueue;
+import hs.mediasystem.screens.ConfigurationOption;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
@@ -24,6 +25,8 @@ import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.PluginTracker;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.StandardCell;
+import hs.mediasystem.screens.optiondialog.BooleanOption;
+import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.selectmedia.DetailPane;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.screens.selectmedia.SelectMediaView;
@@ -31,6 +34,7 @@ import hs.mediasystem.screens.selectmedia.StandardDetailPane;
 import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.util.DuoWindowSceneManager;
 import hs.mediasystem.util.SceneManager;
+import hs.mediasystem.util.StringBinding;
 import hs.mediasystem.util.TaskExecutor;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
@@ -60,6 +64,8 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 
 import javafx.application.Application;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.stage.Stage;
 
 import javax.sql.ConnectionPoolDataSource;
@@ -220,6 +226,43 @@ public class FrontEnd extends Application {
         @Override
         public MediaNodeCell get() {
           return new StandardCell();
+        }
+      })
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(ConfigurationOption.class.getName(), null)
+      .setImplementation(new ConfigurationOption() {
+        @Override
+        public String getId() {
+          return "information-bar.debug-mem";
+        }
+
+        @Override
+        public String getTitle() {
+          return "Show Memory Use Information";
+        }
+
+        @Override
+        public String getParentId() {
+          return null;
+        }
+
+        @Override
+        public double order() {
+          return 0;
+        }
+
+        @Override
+        public Option createOption() {
+          final BooleanProperty booleanProperty = new SimpleBooleanProperty();
+
+          return new BooleanOption(getTitle(), booleanProperty, new StringBinding(booleanProperty) {
+            @Override
+            protected String computeValue() {
+              return booleanProperty.get() ? "Yes" : "No";
+            }
+          });
         }
       })
     );
