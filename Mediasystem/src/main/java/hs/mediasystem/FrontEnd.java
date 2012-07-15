@@ -16,7 +16,7 @@ import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.persist.PersistQueue;
-import hs.mediasystem.screens.SimpleSetting;
+import hs.mediasystem.screens.AbstractSetting;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
@@ -243,7 +243,7 @@ public class FrontEnd extends Application {
 
     dm.add(dm.createComponent()
       .setInterface(Setting.class.getName(), null)
-      .setImplementation(new SimpleSetting("information-bar.debug-mem", 0) {
+      .setImplementation(new AbstractSetting("information-bar.debug-mem", 0) {
         @Override
         public Option createOption() {
           final BooleanProperty booleanProperty = new SimpleBooleanProperty();

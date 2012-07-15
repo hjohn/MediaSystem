@@ -2,11 +2,11 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.screens.optiondialog.Option;
 
-public abstract class SimpleSetting implements Setting {
+public abstract class AbstractSetting implements Setting {
   private final String id;
   private final double order;
 
-  public SimpleSetting(String id, double order) {
+  public AbstractSetting(String id, double order) {
     this.id = id;
     this.order = order;
   }

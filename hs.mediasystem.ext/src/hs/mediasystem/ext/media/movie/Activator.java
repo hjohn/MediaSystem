@@ -17,7 +17,7 @@ import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.Setting;
 import hs.mediasystem.screens.SettingGroup;
-import hs.mediasystem.screens.SimpleSetting;
+import hs.mediasystem.screens.AbstractSetting;
 import hs.mediasystem.screens.optiondialog.ListViewOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.OptionGroup;
@@ -57,7 +57,7 @@ public class Activator extends DependencyActivatorBase {
       .setInterface(Setting.class.getName(), new Hashtable<String, Object>() {{
         put("parentId", "movies");
       }})
-      .setImplementation(new SimpleSetting("movies.add-remove", 0) {
+      .setImplementation(new AbstractSetting("movies.add-remove", 0) {
         private volatile SettingsStore settingsStore;
 
         @Override
