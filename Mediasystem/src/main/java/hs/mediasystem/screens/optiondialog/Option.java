@@ -39,6 +39,7 @@ public class Option extends BorderPane {
   public void right() {
   }
 
-  public void select() {
+  public boolean select() {
+    return false;
   }
 }

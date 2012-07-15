@@ -25,67 +25,65 @@ public class DialogScreen extends BorderPane {
 
   private final ObservableList<Node> options;
   private final List<List<Node>> optionStack  = new ArrayList<>();
+  private final VBox optionList = new VBox();
 
   private int selectedIndex = 0;
 
   public DialogScreen(final String title, final List<? extends Option> options) {
-    final VBox optionList = new VBox() {{
-      setId("dialog-list");
+    optionList.setId("dialog-list");
 
-      for(Option option : options) {
-        getChildren().add(option);
-      }
+    for(Option option : options) {
+      optionList.getChildren().add(option);
+    }
 
-      setOnKeyPressed(new EventHandler<KeyEvent>() {
-        @Override
-        public void handle(KeyEvent event) {
-          Option selectedOption = (Option)getChildren().get(selectedIndex);
+    optionList.setOnKeyPressed(new EventHandler<KeyEvent>() {
+      @Override
+      public void handle(KeyEvent event) {
+        Option selectedOption = (Option)optionList.getChildren().get(selectedIndex);
 
-          if(ENTER.match(event)) {
-            if(selectedOption instanceof OptionGroup) {
-              OptionGroup option = (OptionGroup)selectedOption;
+        if(ENTER.match(event)) {
+          System.out.println(">>> ENTER : " + selectedOption);
+          if(selectedOption instanceof OptionGroup) {
+            OptionGroup option = (OptionGroup)selectedOption;
 
-              optionStack.add(new ArrayList<>(getChildren()));
+            optionStack.add(new ArrayList<>(optionList.getChildren()));
 
-              getChildren().clear();
-              getChildren().addAll(option.getOptions());
-              getChildren().get(0).requestFocus();
-              selectedIndex = 0;
+            optionList.getChildren().clear();
+            optionList.getChildren().addAll(option.getOptions());
+            optionList.getChildren().get(0).requestFocus();
+            selectedIndex = 0;
+          }
+          else {
+            if(selectedOption.select()) {
+              back();
             }
-            else {
-              selectedOption.select();
-            }
+          }
 
+          event.consume();
+        }
+        else if(event.getCode() == KeyCode.LEFT) {
+          selectedOption.left();
+          event.consume();
+        }
+        else if(event.getCode() == KeyCode.RIGHT) {
+          selectedOption.right();
+          event.consume();
+        }
+        else if(TAB.match(event) || DOWN.match(event)) {
+          moveFocusNext();
+          event.consume();
+        }
+        else if(SHIFT_TAB.match(event) || UP.match(event)) {
+          moveFocusPrevious();
+          event.consume();
+        }
+        else if(BACK_SPACE.match(event)) {
+          if(back()) {
             event.consume();
-          }
-          else if(event.getCode() == KeyCode.LEFT) {
-            selectedOption.left();
-            event.consume();
-          }
-          else if(event.getCode() == KeyCode.RIGHT) {
-            selectedOption.right();
-            event.consume();
-          }
-          else if(TAB.match(event) || DOWN.match(event)) {
-            moveFocusNext();
-            event.consume();
-          }
-          else if(SHIFT_TAB.match(event) || UP.match(event)) {
-            moveFocusPrevious();
-            event.consume();
-          }
-          else if(BACK_SPACE.match(event)) {
-            if(!optionStack.isEmpty()) {
-              getChildren().clear();
-              getChildren().addAll(optionStack.remove(optionStack.size() - 1));
-              getChildren().get(0).requestFocus();
-              selectedIndex = 0;
-              event.consume();
-            }
           }
         }
-      });
-    }};
+      }
+    });
 
     this.options = optionList.getChildren();
 
@@ -125,6 +123,18 @@ public class DialogScreen extends BorderPane {
 
     options.get(index).requestFocus();
     selectedIndex = index;
+  }
+
+  private boolean back() {
+    if(!optionStack.isEmpty()) {
+      optionList.getChildren().clear();
+      optionList.getChildren().addAll(optionStack.remove(optionStack.size() - 1));
+      optionList.getChildren().get(0).requestFocus();
+      selectedIndex = 0;
+      return true;
+    }
+
+    return false;
   }
 
   @Override

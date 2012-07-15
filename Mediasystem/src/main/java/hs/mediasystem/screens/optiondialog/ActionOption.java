@@ -11,7 +11,8 @@ public class ActionOption extends Option {
   }
 
   @Override
-  public void select() {
+  public boolean select() {
     callable.call();
+    return false;
   }
 }
