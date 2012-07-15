@@ -9,6 +9,7 @@ import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.ListViewOption;
 import hs.mediasystem.screens.optiondialog.NumericOption;
 import hs.mediasystem.screens.optiondialog.Option;
+import hs.mediasystem.screens.optiondialog.OptionDialogPane;
 import hs.mediasystem.screens.optiondialog.OptionGroup;
 import hs.mediasystem.util.PropertyClassEq;
 import hs.mediasystem.util.PropertyEq;
@@ -128,7 +129,7 @@ public class PlaybackOverlayPresentation {
             })
           );
 
-          controller.showOptionScreen("Video - Options", options);
+          controller.showOptionDialogPane(new OptionDialogPane("Video - Options", options));
           event.consume();
         }
       }

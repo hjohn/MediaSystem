@@ -21,6 +21,7 @@ import hs.mediasystem.screens.optiondialog.ActionOption;
 import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
+import hs.mediasystem.screens.optiondialog.OptionDialogPane;
 import hs.mediasystem.util.Callable;
 import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.PropertyEq;
@@ -130,7 +131,7 @@ public class SelectMediaPresentation {
             }
           }));
 
-          controller.showOptionScreen("Options: " + mediaItem.getTitle(), options);
+          controller.showOptionDialogPane(new OptionDialogPane("Options: " + mediaItem.getTitle(), options));
         }
 
         event.consume();
@@ -157,7 +158,7 @@ public class SelectMediaPresentation {
             })
           );
 
-          controller.showOptionScreen("Media - Options", options);
+          controller.showOptionDialogPane(new OptionDialogPane("Media - Options", options));
           event.consume();
         }
       }

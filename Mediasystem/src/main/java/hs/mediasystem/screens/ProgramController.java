@@ -5,8 +5,7 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.player.PlayerEvent;
 import hs.mediasystem.framework.player.PlayerEvent.Type;
 import hs.mediasystem.screens.Navigator.Destination;
-import hs.mediasystem.screens.optiondialog.DialogScreen;
-import hs.mediasystem.screens.optiondialog.Option;
+import hs.mediasystem.util.Dialog;
 import hs.mediasystem.util.KeyCombinationGroup;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.SceneUtil;
@@ -118,7 +117,7 @@ public class ProgramController {
       }
     });
 
-    sceneRoot.setOnKeyPressed(new EventHandler<KeyEvent>() {
+    scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
         if(BACK_SPACE.match(event)) {
@@ -442,25 +441,8 @@ public class ProgramController {
     });
   }
 
-  public void showDialog(final String title, final Node dialog) {
-    navigator.navigateToModal(new Destination("optionDialog", title) {
-
-      @Override
-      public void execute() {
-        sceneRoot.getChildren().add(dialog);
-
-        dialog.requestFocus();
-      }
-
-      @Override
-      public void outro() {
-        sceneRoot.getChildren().remove(dialog);
-      }
-    });
-  }
-
-  public void showOptionScreen(final String title, final List<? extends Option> options) {
-    showDialog(title, new DialogScreen(title, options));
+  public void showOptionDialogPane(Dialog dialog) {
+    sceneManager.displayDialog(dialog);
   }
 
   private static Node createMessage(final Worker<?> worker) {

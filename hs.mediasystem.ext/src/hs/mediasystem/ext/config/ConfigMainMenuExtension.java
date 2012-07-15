@@ -3,6 +3,7 @@ package hs.mediasystem.ext.config;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SettingGroup;
+import hs.mediasystem.screens.optiondialog.OptionDialogPane;
 import javafx.scene.image.Image;
 
 import org.osgi.framework.BundleContext;
@@ -33,6 +34,6 @@ public class ConfigMainMenuExtension implements MainMenuExtension {
 
   @Override
   public void select(final ProgramController controller) {
-    controller.showOptionScreen(getTitle(), settingGroup.createOption().getOptions());
+    controller.showOptionDialogPane(new OptionDialogPane("Configuration", settingGroup.createOption().getOptions()));
   }
 }

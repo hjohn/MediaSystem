@@ -1,5 +1,7 @@
 package hs.mediasystem.screens.optiondialog;
 
+import hs.mediasystem.util.DialogPane;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,11 +13,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
-public class DialogScreen extends BorderPane {
+public class OptionDialogPane extends DialogPane {
   private static final KeyCombination TAB = new KeyCodeCombination(KeyCode.TAB);
   private static final KeyCombination SHIFT_TAB = new KeyCodeCombination(KeyCode.TAB, KeyCombination.SHIFT_DOWN);
   private static final KeyCombination DOWN = new KeyCodeCombination(KeyCode.DOWN);
@@ -29,7 +30,7 @@ public class DialogScreen extends BorderPane {
 
   private int selectedIndex = 0;
 
-  public DialogScreen(final String title, final List<? extends Option> options) {
+  public OptionDialogPane(final String title, final List<? extends Option> options) {
     optionList.setId("dialog-list");
 
     for(Option option : options) {
@@ -42,7 +43,6 @@ public class DialogScreen extends BorderPane {
         Option selectedOption = (Option)optionList.getChildren().get(selectedIndex);
 
         if(ENTER.match(event)) {
-          System.out.println(">>> ENTER : " + selectedOption);
           if(selectedOption instanceof OptionGroup) {
             OptionGroup option = (OptionGroup)selectedOption;
 
@@ -78,9 +78,8 @@ public class DialogScreen extends BorderPane {
           event.consume();
         }
         else if(BACK_SPACE.match(event)) {
-          if(back()) {
-            event.consume();
-          }
+          back();
+          event.consume();
         }
       }
     });
@@ -100,7 +99,7 @@ public class DialogScreen extends BorderPane {
     }};
 
     setId("dialog");
-    setCenter(box);
+    getChildren().add(box);
   }
 
   private void moveFocusNext() {
@@ -125,16 +124,16 @@ public class DialogScreen extends BorderPane {
     selectedIndex = index;
   }
 
-  private boolean back() {
+  private void back() {
     if(!optionStack.isEmpty()) {
       optionList.getChildren().clear();
       optionList.getChildren().addAll(optionStack.remove(optionStack.size() - 1));
       optionList.getChildren().get(0).requestFocus();
       selectedIndex = 0;
-      return true;
     }
-
-    return false;
+    else {
+      close();
+    }
   }
 
   @Override
