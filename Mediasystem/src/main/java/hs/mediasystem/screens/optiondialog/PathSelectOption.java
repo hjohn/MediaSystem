@@ -1,6 +1,6 @@
 package hs.mediasystem.screens.optiondialog;
 
-import hs.mediasystem.util.StringConverter;
+import hs.mediasystem.util.PathToNameConverter;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -51,16 +51,10 @@ public class PathSelectOption extends ListViewOption<Path> {
   private Path currentPath = null;
 
   public PathSelectOption(final String description, final ObjectProperty<Path> property, Filter<Path> filter) {
-    super(description, property, new StringConverter<Path>() {
-      @Override
-      public String toString(Path object) {
-        String name = object.getFileName() == null ? object.toString() : object.getFileName().toString();
-
-        return Files.isDirectory(object) ? "[" + name + "]" : name;
-      }
-    });
+    super(description, property, new PathToNameConverter());
 
     this.filter = filter == null ? ALLOW_ALL_FILTER : filter;
+    this.backOnSelect = true;
 
     populateView();
   }
