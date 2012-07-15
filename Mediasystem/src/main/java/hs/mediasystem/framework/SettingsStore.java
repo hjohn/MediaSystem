@@ -1,13 +1,18 @@
 package hs.mediasystem.framework;
 
 import hs.mediasystem.dao.Setting;
-import hs.mediasystem.dao.SettingsDao;
 import hs.mediasystem.dao.Setting.PersistLevel;
+import hs.mediasystem.dao.SettingsDao;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.util.StringConverter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -58,5 +63,38 @@ public class SettingsStore {
     setting.setPersistLevel(level);
 
     return setting.valueProperty();
+  }
+
+  public <T> ObservableList<T> getListProperty(String system, PersistLevel level, String key, final StringConverter<T> stringConverter) {
+    final StringProperty valueProperty = getValueProperty(system, level, key);
+    final ObservableList<T> list = FXCollections.observableArrayList();
+
+    list.addListener(new InvalidationListener() {
+      @Override
+      public void invalidated(Observable observable) {
+        StringBuilder builder = new StringBuilder();
+
+        for(T t : list) {
+          String s = stringConverter.toString(t);
+
+          if(builder.length() > 0) {
+            builder.append("||");
+          }
+          builder.append(s.replace("|", "|p"));
+        }
+
+        valueProperty.set(builder.toString());
+      }
+    });
+
+    String encodedList = valueProperty.get();
+
+    if(encodedList != null) {
+      for(String item : encodedList.split("\\|\\|")) {
+        list.add(stringConverter.fromString(item.replace("|p", "|")));
+      }
+    }
+
+    return list;
   }
 }
