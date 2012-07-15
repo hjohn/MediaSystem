@@ -2,17 +2,13 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.screens.optiondialog.Option;
 
-import javax.inject.Provider;
-
-public class SimpleSetting implements Setting {
+public abstract class SimpleSetting implements Setting {
   private final String id;
   private final double order;
-  private final Provider<Option> optionProvider;
 
-  public SimpleSetting(String id, double order, Provider<Option> optionProvider) {
+  public SimpleSetting(String id, double order) {
     this.id = id;
     this.order = order;
-    this.optionProvider = optionProvider;
   }
 
   @Override
@@ -26,7 +22,5 @@ public class SimpleSetting implements Setting {
   }
 
   @Override
-  public Option createOption() {
-    return optionProvider == null ? null : optionProvider.get();
-  }
+  public abstract Option createOption();
 }

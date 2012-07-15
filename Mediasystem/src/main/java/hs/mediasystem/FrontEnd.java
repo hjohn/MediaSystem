@@ -13,6 +13,7 @@ import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaDataPersister;
 import hs.mediasystem.framework.PersisterProvider;
 import hs.mediasystem.framework.PlaybackOverlayView;
+import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.SimpleSetting;
@@ -223,6 +224,11 @@ public class FrontEnd extends Application {
     );
 
     dm.add(dm.createComponent()
+      .setInterface(SettingsStore.class.getName(), null)
+      .setImplementation(injector.getInstance(SettingsStore.class))
+    );
+
+    dm.add(dm.createComponent()
       .setInterface(MediaNodeCellProvider.class.getName(), new Hashtable<String, Object>() {{
         put("mediasystem.class", Media.class);
         put("type", MediaNodeCellProvider.Type.HORIZONTAL);
@@ -237,9 +243,9 @@ public class FrontEnd extends Application {
 
     dm.add(dm.createComponent()
       .setInterface(Setting.class.getName(), null)
-      .setImplementation(new SimpleSetting("information-bar.debug-mem", 0, new Provider<Option>() {
+      .setImplementation(new SimpleSetting("information-bar.debug-mem", 0) {
         @Override
-        public Option get() {
+        public Option createOption() {
           final BooleanProperty booleanProperty = new SimpleBooleanProperty();
 
           return new BooleanOption("Show Memory Use Information", booleanProperty, new StringBinding(booleanProperty) {
@@ -249,7 +255,7 @@ public class FrontEnd extends Application {
             }
           });
         }
-      }))
+      })
     );
 
     injector.getInstance(EnrichCache.class).registerEnricher(MediaData.class, injector.getInstance(MediaDataEnricher.class));
