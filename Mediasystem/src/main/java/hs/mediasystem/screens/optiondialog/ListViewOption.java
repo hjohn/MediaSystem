@@ -22,9 +22,14 @@ public class ListViewOption<T> extends Option {
   private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
 
   protected final ListView<T> listView = new ListView<>();
+  protected boolean backOnSelect;
+
+  private final ObjectProperty<T> property;
 
   public ListViewOption(final String description, final ObjectProperty<T> property, ObservableList<T> items, final StringConverter<T> stringConverter) {
     super(description);
+
+    this.property = property;
 
     getStyleClass().clear();
     getStyleClass().add("list");
@@ -64,11 +69,11 @@ public class ListViewOption<T> extends Option {
       @Override
       public void handle(KeyEvent event) {
         if(LEFT.match(event)) {
-          left();
+          Event.fireEvent(listView.getParent(), event);
           event.consume();
         }
         else if(RIGHT.match(event)) {
-          right();
+          Event.fireEvent(listView.getParent(), event);
           event.consume();
         }
       }
@@ -78,9 +83,7 @@ public class ListViewOption<T> extends Option {
       @Override
       public void handle(KeyEvent event) {
         if(event.getCode() == KeyCode.ENTER) {
-          if(property != null) {
-            property.set(listView.getFocusModel().getFocusedItem());
-          }
+          Event.fireEvent(listView.getParent(), event);
           event.consume();
         }
         else if(UP.match(event)) {
@@ -107,6 +110,15 @@ public class ListViewOption<T> extends Option {
 
   protected ListViewOption(final String description, final ObjectProperty<T> property, final StringConverter<T> stringConverter) {
     this(description, property, null, stringConverter);
+  }
+
+  @Override
+  public boolean select() {
+    if(property != null) {
+      property.set(listView.getFocusModel().getFocusedItem());
+    }
+
+    return backOnSelect;
   }
 
   @Override
