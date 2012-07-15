@@ -12,7 +12,7 @@ import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
-public class DialogStage extends Stage {
+public class DialogStage extends Stage implements Dialog {
 
   public DialogStage() {
     super(StageStyle.TRANSPARENT);
@@ -52,6 +52,7 @@ public class DialogStage extends Stage {
     setY(parent.getY() + parent.getHeight() / 2 - DialogStage.this.getHeight() / 2);
   }
 
+  @Override
   public final void showDialog(final Stage parent, boolean synchronous) {
     initOwner(parent);
 

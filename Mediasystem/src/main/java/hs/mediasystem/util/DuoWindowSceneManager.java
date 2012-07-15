@@ -163,12 +163,12 @@ public class DuoWindowSceneManager implements SceneManager {
   }
 
   @Override
-  public void displayDialog(DialogStage dialog) {
+  public void displayDialog(Dialog dialog) {
     dialog.showDialog(getPrimaryStage(), false);
   }
 
   @Override
-  public void displaySynchronousDialog(DialogStage dialog) {
+  public void displaySynchronousDialog(Dialog dialog) {
     dialog.showDialog(getPrimaryStage(), true);
   }
 }
