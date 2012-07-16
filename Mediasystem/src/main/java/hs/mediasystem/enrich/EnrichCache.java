@@ -226,9 +226,8 @@ public class EnrichCache {
               pendingEnrichmentMap.put(key, queuedPendingEnrichments);
             }
 
-            queuedPendingEnrichments.add(pendingEnrichment);
-            queuedPendingEnrichments.removeAll(dependencies);  // required so any pre-existing dependencies are positioned AFTER this pending enrichment (and so are processed before it)
-            queuedPendingEnrichments.addAll(dependencies);
+            queuedPendingEnrichments.addAll(0, dependencies);  // Adds any new dependencies at the start, but leaves existing (possibly active) dependencies alone
+            queuedPendingEnrichments.add(0, pendingEnrichment);  // Adds the final enrichment before the dependencies so it is processed last
             queueNext(key);
 
             return;
@@ -419,39 +418,42 @@ public class EnrichCache {
    */
   private void queueNext(CacheKey key) {
     synchronized(cache) {
-      PendingEnrichment<?> pendingEnrichment;
+      PendingEnrichment<?> pendingEnrichment = getNextPendingEnrichment(key);
 
-      while((pendingEnrichment = getNextPendingEnrichment(key)) != null && pendingEnrichment.getState() != PendingEnrichmentState.ACTIVE) {
-        assert pendingEnrichment.getState() == PendingEnrichmentState.INITIALIZED;
+      if(pendingEnrichment != null) {
+        if(pendingEnrichment.getState() != PendingEnrichmentState.ACTIVE) {
+          assert pendingEnrichment.getState() == PendingEnrichmentState.INITIALIZED;
 
-        EnrichCacheTask task = pendingEnrichment.enrich();
+          EnrichCacheTask task = pendingEnrichment.enrich();
 
-        if(task != null) {
-          EnrichCacheTask activeTask = key.getActiveTask();
+          if(task != null) {
+            EnrichCacheTask activeTask = key.getActiveTask();
 
-          if(activeTask != null && activeTask.isFast() && !task.isFast()) {
-            activeTask = null;
-          }
+            if(activeTask != null && activeTask.isFast() && !task.isFast()) {
+              activeTask = null;
+            }
 
-          if(activeTask != null) {
-            activeTask.setNextTask(task);
-          }
-          else {
-            key.setActiveTask(task);
-
-            if(task.isFast()) {
-              cacheQueue.submit(key, task);
+            if(activeTask != null) {
+              activeTask.setNextTask(task);
             }
             else {
-              normalQueue.submit(key, task);
-            }
-          }
+              key.setActiveTask(task);
 
-          return;
+              if(task.isFast()) {
+                cacheQueue.submit(key, task);
+              }
+              else {
+                normalQueue.submit(key, task);
+              }
+            }
+
+            return;
+          }
         }
       }
-
-      key.clearActiveTask();
+      else {
+        key.clearActiveTask();
+      }
     }
   }
 
@@ -509,6 +511,25 @@ public class EnrichCache {
       this.bypassCache = bypassCache;
     }
 
+    @Override
+    public int hashCode() {
+      return enrichableClass.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if(this == obj) {
+        return true;
+      }
+      if(obj == null || getClass() != obj.getClass()) {
+        return false;
+      }
+
+      PendingEnrichment<?> other = (PendingEnrichment<?>)obj;
+
+      return enrichableClass.equals(other.enrichableClass);
+    }
+
     public void cancel() {
       assert state == PendingEnrichmentState.INITIALIZED || state == PendingEnrichmentState.ACTIVE;
 
@@ -517,6 +538,10 @@ public class EnrichCache {
 
     public boolean isCancelled() {
       return state == PendingEnrichmentState.CANCELLED;
+    }
+
+    public boolean hasMoreEnrichers() {
+      return !enrichTasks.isEmpty();
     }
 
     public void requeue() {
@@ -669,8 +694,8 @@ public class EnrichCache {
 
           Object taskResult = currentEnrichTask.call();
 
-          if(taskResult == null) {
-            pendingEnrichment.requeue();  // requeue the original enrichment, which may have other options to get the needed information
+          if(taskResult == null && pendingEnrichment.hasMoreEnrichers()) {
+            pendingEnrichment.requeue();  // requeue the original enrichment, which has other options to get the needed information
             queueNext(pendingEnrichment.key);
           }
           else {
@@ -713,8 +738,13 @@ public class EnrichCache {
             insert(pendingEnrichment.key, taskResult);
           }
           else {
-            System.out.println("[WARN] " + createLogLine("FAILED") + ": " + e);
-            e.printStackTrace(System.out);
+            if(e != null) {
+              System.out.println("[WARN] " + createLogLine("EXCEPTION") + ": " + e);
+              e.printStackTrace(System.out);
+            }
+            else {
+              System.out.println("[FINE] " + createLogLine("NO RESULT"));
+            }
             insertFailedEnrichment(pendingEnrichment.key, pendingEnrichment.enrichableClass);
           }
         }
