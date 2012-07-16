@@ -119,6 +119,8 @@ public class SelectMediaPresentation {
           options.add(new ActionOption("Reload meta data", new Callable<Void>() {
             @Override
             public Void call() {
+              System.out.println("[INFO] SelectMedia: 'Reload meta data' selected for: " + mediaItem);
+
               mediaItem.reloadMetaData();
 
               Media media = mediaItem.get(Media.class);
