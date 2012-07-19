@@ -249,22 +249,24 @@ public class BannerListPane extends BorderPane implements ListPane {
 
   @Override
   public void setSelectedNode(MediaNode mediaNode) {
-    int index = mediaNode.getParent().indexOf(mediaNode);
+    if(tableView.getItems().size() > 0) {
+      int index = mediaNode == null ? 0 : mediaNode.getParent().indexOf(mediaNode);
 
-    if(index == -1) {
-      index = 0;
-    }
-
-    final int finalIndex = index;
-
-    tableView.getFocusModel().focus(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
-    tableView.getSelectionModel().select(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
-
-    Platform.runLater(new Runnable() {
-      @Override
-      public void run() {
-        tableView.scrollTo(finalIndex / 2);
+      if(index == -1) {
+        index = 0;
       }
-    });
+
+      final int finalIndex = index;
+
+      tableView.getFocusModel().focus(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
+      tableView.getSelectionModel().select(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
+
+      Platform.runLater(new Runnable() {
+        @Override
+        public void run() {
+          tableView.scrollTo(finalIndex / 2);
+        }
+      });
+    }
   }
 }
