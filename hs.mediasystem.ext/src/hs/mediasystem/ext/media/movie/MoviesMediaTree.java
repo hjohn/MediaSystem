@@ -15,27 +15,29 @@ import java.util.List;
 public class MoviesMediaTree implements MediaTree, MediaRoot {
   private final EnrichCache enrichCache;
   private final PersistQueue persister;
-  private final Path root;
+  private final List<Path> roots;
 
   private List<MediaItem> children;
 
-  public MoviesMediaTree(EnrichCache enrichCache, PersistQueue persister, Path root) {
+  public MoviesMediaTree(EnrichCache enrichCache, PersistQueue persister, List<Path> roots) {
     this.enrichCache = enrichCache;
     this.persister = persister;
-    this.root = root;
+    this.roots = new ArrayList<>(roots);
   }
 
   @Override
   public List<? extends MediaItem> getItems() {
     if(children == null) {
-      List<LocalInfo> scanResults = new EpisodeScanner(new MovieDecoder()).scan(root);
-
       children = new ArrayList<>();
 
-      for(LocalInfo localInfo : scanResults) {
-        MovieBase movie = new MovieBase(localInfo.getTitle(), localInfo.getEpisode(), localInfo.getSubtitle(), localInfo.getReleaseYear(), localInfo.getCode());
+      for(Path root : roots) {
+        List<LocalInfo> scanResults = new EpisodeScanner(new MovieDecoder()).scan(root);
 
-        children.add(new MediaItem(MoviesMediaTree.this, localInfo.getUri(), movie));
+        for(LocalInfo localInfo : scanResults) {
+          MovieBase movie = new MovieBase(localInfo.getTitle(), localInfo.getEpisode(), localInfo.getSubtitle(), localInfo.getReleaseYear(), localInfo.getCode());
+
+          children.add(new MediaItem(MoviesMediaTree.this, localInfo.getUri(), movie));
+        }
       }
     }
 

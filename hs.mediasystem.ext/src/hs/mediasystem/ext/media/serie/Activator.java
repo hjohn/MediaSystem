@@ -3,22 +3,33 @@ package hs.mediasystem.ext.media.serie;
 import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.persist.PersistQueue;
+import hs.mediasystem.screens.AbstractSetting;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
+import hs.mediasystem.screens.Setting;
+import hs.mediasystem.screens.SettingGroup;
+import hs.mediasystem.screens.optiondialog.Option;
+import hs.mediasystem.screens.optiondialog.PathListOption;
 import hs.mediasystem.screens.selectmedia.DetailPane;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
+import hs.mediasystem.util.PathStringConverter;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+
+import javafx.collections.ObservableList;
 
 import org.apache.felix.dm.DependencyActivatorBase;
 import org.apache.felix.dm.DependencyManager;
@@ -30,6 +41,31 @@ public class Activator extends DependencyActivatorBase {
 
   @Override
   public void init(BundleContext context, DependencyManager manager) throws Exception {
+    manager.add(createComponent()
+      .setInterface(Setting.class.getName(), null)
+      .setImplementation(new SettingGroup(context, "series", "Series", 0))
+    );
+
+    manager.add(createComponent()
+      .setInterface(Setting.class.getName(), new Hashtable<String, Object>() {{
+        put("parentId", "series");
+      }})
+      .setImplementation(new AbstractSetting("series.add-remove", 0) {
+        private volatile SettingsStore settingsStore;
+
+        @Override
+        public Option createOption() {
+          final ObservableList<Path> moviePaths = settingsStore.getListProperty("MediaSystem:Ext:Series", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
+
+          return new PathListOption("Add/Remove Series folder", moviePaths);
+        }
+      })
+      .add(createServiceDependency()
+        .setService(SettingsStore.class)
+        .setRequired(true)
+      )
+    );
+
     manager.add(createComponent()
       .setInterface(MediaNodeCellProvider.class.getName(), new Hashtable<String, Object>() {{
         put("mediasystem.class", Serie.class);
@@ -157,6 +193,10 @@ public class Activator extends DependencyActivatorBase {
       )
       .add(createServiceDependency()
         .setService(IdentifierDao.class)
+        .setRequired(true)
+      )
+      .add(createServiceDependency()
+        .setService(SettingsStore.class)
         .setRequired(true)
       )
     );

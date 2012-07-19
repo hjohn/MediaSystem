@@ -2,8 +2,10 @@ package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.IdentifierDao;
+import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.IdentifierEnricher;
+import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
@@ -12,9 +14,11 @@ import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.screens.selectmedia.StandardView;
+import hs.mediasystem.util.PathStringConverter;
 
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
+import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 
 public class SeriesMainMenuExtension implements MainMenuExtension {
@@ -24,6 +28,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   private volatile EnrichCache enrichCache;
   private volatile PersistQueue persister;
   private volatile IdentifierDao identifierDao;
+  private volatile SettingsStore settingsStore;
 
   public SeriesMainMenuExtension() {
     StandardView.registerLayout(SeriesMediaTree.class, MediaRootType.SERIES);
@@ -62,7 +67,9 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
       protected void intro() {
         controller.showScreen(presentation.getView());
         if(mediaTree == null) {
-          mediaTree = new SeriesMediaTree(enrichCache, persister, Paths.get(controller.getIni().getValue("general", "series.path")));
+          final ObservableList<Path> paths = settingsStore.getListProperty("MediaSystem:Ext:Series", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
+
+          mediaTree = new SeriesMediaTree(enrichCache, persister, paths);
           presentation.setMediaTree(mediaTree);
         }
       }

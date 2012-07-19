@@ -15,26 +15,28 @@ import java.util.List;
 public class SeriesMediaTree implements MediaTree, MediaRoot {
   private final EnrichCache enrichCache;
   private final PersistQueue persister;
-  private final Path root;
+  private final List<Path> roots;
 
   private List<MediaItem> children;
 
-  public SeriesMediaTree(EnrichCache enrichCache, PersistQueue persister, Path root) {
+  public SeriesMediaTree(EnrichCache enrichCache, PersistQueue persister, List<Path> roots) {
     this.enrichCache = enrichCache;
     this.persister = persister;
-    this.root = root;
+    this.roots = new ArrayList<>(roots);
   }
 
   @Override
   public List<? extends MediaItem> getItems() {
     if(children == null) {
-      List<LocalInfo> scanResults = new SerieScanner().scan(root);
-
       children = new ArrayList<>();
 
-      for(LocalInfo localInfo : scanResults) {
-        SerieBase serie = new SerieBase(localInfo.getTitle());
-        children.add(new SerieItem(SeriesMediaTree.this, localInfo.getUri(), serie));
+      for(Path root : roots) {
+        List<LocalInfo> scanResults = new SerieScanner().scan(root);
+
+        for(LocalInfo localInfo : scanResults) {
+          SerieBase serie = new SerieBase(localInfo.getTitle());
+          children.add(new SerieItem(SeriesMediaTree.this, localInfo.getUri(), serie));
+        }
       }
     }
 

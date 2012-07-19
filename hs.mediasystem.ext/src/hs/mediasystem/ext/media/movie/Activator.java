@@ -10,6 +10,7 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.persist.PersistQueue;
+import hs.mediasystem.screens.AbstractSetting;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.MediaGroup;
@@ -17,28 +18,17 @@ import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.Setting;
 import hs.mediasystem.screens.SettingGroup;
-import hs.mediasystem.screens.AbstractSetting;
-import hs.mediasystem.screens.optiondialog.ListViewOption;
 import hs.mediasystem.screens.optiondialog.Option;
-import hs.mediasystem.screens.optiondialog.OptionGroup;
-import hs.mediasystem.screens.optiondialog.PathSelectOption;
+import hs.mediasystem.screens.optiondialog.PathListOption;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.util.PathStringConverter;
-import hs.mediasystem.util.PathToFullPathConverter;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-
-import javax.inject.Provider;
 
 import org.apache.felix.dm.DependencyActivatorBase;
 import org.apache.felix.dm.DependencyManager;
@@ -62,49 +52,9 @@ public class Activator extends DependencyActivatorBase {
 
         @Override
         public Option createOption() {
-          return new OptionGroup("Add/Remove folder", new Provider<List<Option>>() {
-            @Override
-            public List<Option> get() {
-              List<Option> options = new ArrayList<>();
-              final ObservableList<Path> moviePaths = settingsStore.getListProperty("MediaSystem:Ext:Movies", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
+          final ObservableList<Path> moviePaths = settingsStore.getListProperty("MediaSystem:Ext:Movies", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
 
-              options.add(new OptionGroup("Add folder", new Provider<List<Option>>() {
-                @Override
-                public List<Option> get() {
-                  List<Option> options = new ArrayList<>();
-                  SimpleObjectProperty<Path> selectedPath = new SimpleObjectProperty<>();
-
-                  selectedPath.addListener(new ChangeListener<Path>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Path> observable, Path old, Path current) {
-                      if(!moviePaths.contains(current)) {
-                        moviePaths.add(current);
-                      }
-                    }
-                  });
-
-                  options.add(new PathSelectOption("Select folder", selectedPath, PathSelectOption.ONLY_DIRECTORIES_FILTER));
-
-                  return options;
-                }
-              }));
-
-              SimpleObjectProperty<Path> folderToDelete = new SimpleObjectProperty<>();
-
-              folderToDelete.addListener(new ChangeListener<Path>() {
-                @Override
-                public void changed(ObservableValue<? extends Path> observable, Path old, Path current) {
-                  moviePaths.remove(current);
-                }
-              });
-
-              options.add(new ListViewOption<Path>("Movie folders", folderToDelete, moviePaths, new PathToFullPathConverter()) {{
-                bottomLabel.setText("Select to remove a folder");
-              }});
-
-              return options;
-            }
-          });
+          return new PathListOption("Add/Remove Movie folder", moviePaths);
         }
       })
       .add(createServiceDependency()
@@ -206,6 +156,10 @@ public class Activator extends DependencyActivatorBase {
       )
       .add(createServiceDependency()
         .setService(IdentifierDao.class)
+        .setRequired(true)
+      )
+      .add(createServiceDependency()
+        .setService(SettingsStore.class)
         .setRequired(true)
       )
     );
