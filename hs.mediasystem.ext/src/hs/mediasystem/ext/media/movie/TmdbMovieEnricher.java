@@ -172,7 +172,9 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
         item.setReleaseDate(DATE_FORMAT.parseOrNull(movie.getReleaseDate()));
         item.setRuntime(movie.getRuntime());
         item.setTagline(movie.getTagline());
-        item.setLanguage(movie.getSpokenLanguages().get(0).getName());
+        if(!movie.getSpokenLanguages().isEmpty()) {
+          item.setLanguage(movie.getSpokenLanguages().get(0).getName());
+        }
 
         item.setBackgroundURL(backgroundURL == null ? null : backgroundURL.toExternalForm());
         item.setBannerURL(null);
