@@ -124,69 +124,6 @@
   -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-red, 0%) 0%, derive(color-red, 100%) 30%, white 36%, derive(color-red, 100%) 42%, derive(color-red, 0%) 72%, derive(color-red, -50%)); 
 }
 
-/*
- * Dialog styles
- */
-
-#dialog-main {
-  -fx-spacing: 5;
-  -fx-font-size: 18pt;
-  -fx-font-weight: bold;
-  
-  -fx-padding: 10;
-  
-  -c-border: -c-border-dialog;
-  -c-bg: -c-bg-dialog;
-  
-  -c-b1: derive(-c-border, +25%);
-  -c-b2: derive(-c-border, -30%);
-  -c-b3: derive(-c-border, -50%);
-  -c-b4: derive(-c-border, -70%);
-  -c-b5: derive(-c-border, -80%);
-
-  -c-bg1: derive(-c-bg, 5%);
-  -c-bg2: derive(-c-bg, -100%);
-  -c-bg3: derive(-c-bg, -160%);
-  
-  -fx-border-color: 
-    linear-gradient(to right, -c-b1, -c-b2 2%, -c-b3) 
-    linear-gradient(to bottom, -c-b3, -c-b3 25%, -c-b2 50%, -c-b4 98%, -c-b5) 
-    linear-gradient(to right, -c-b3, -c-b4 98%, -c-b5) 
-    linear-gradient(to bottom, -c-b1, -c-b3 2%, -c-b2 50%, -c-b3 98%, -c-b3),
-    rgba(0, 0, 0, 0.5),
-    rgba(0, 0, 0, 0.5);
-
-  -fx-border-radius: 25, 25, 24;
-  -fx-border-width: 3.5, 1, 1;
-  -fx-border-insets: 0, 0, 3;
-
-  -fx-background-color: linear-gradient(from 25% 0% to 75% 100%, -c-bg3, -c-bg1 28%, -c-bg2 68%, -c-bg3), linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 1.0));
-  -fx-background-radius: 23, 23;
-  -fx-background-insets: 1, 1;
-}
-
-#dialog-screen {
-  -fx-background-color: color-black-50;
-}
-
-#dialog-list {
-  -fx-spacing: 5;
-}
-
-#dialog .option-cell {
-  -fx-padding: 5;
-}
-
-#dialog .detail {
-  -fx-alignment: center-right;
-  -fx-font-size: 14pt;
-}
-
-#dialog .title {
-  -fx-font-size: 24pt; 
-  -fx-font-weight: bold;
-}
-
 .list-cell, .tree-cell, .option-cell {
   -fx-background-color: transparent;
 
@@ -216,24 +153,6 @@
 
 .list-cell:focused .label, .tree-cell:focused .label, .option-cell.focused .label {
   -fx-text-fill: -c-text-focused;
-}
-
-#dialog .list-cell {
-  -fx-text-fill: color-blue;
-}
-
-#dialog .list-cell:focused {
-  -fx-text-fill: -c-text-focused;
-}
-
-#dialog .title {
-  -fx-alignment: center;
-}
-
-#dialog .list-view {
-  -fx-background-color: transparent;
-  
-  -fx-font-size: 14pt;
 }
 
 .list .list-view {

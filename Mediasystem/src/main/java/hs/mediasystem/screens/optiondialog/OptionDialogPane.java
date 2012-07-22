@@ -31,7 +31,9 @@ public class OptionDialogPane extends DialogPane {
   private int selectedIndex = 0;
 
   public OptionDialogPane(final String title, final List<? extends Option> options) {
-    optionList.setId("dialog-list");
+    getStylesheets().add("dialog/option-dialog.css");
+
+    optionList.getStyleClass().add("dialog-list");
 
     for(Option option : options) {
       optionList.getChildren().add(option);
@@ -87,7 +89,7 @@ public class OptionDialogPane extends DialogPane {
     this.options = optionList.getChildren();
 
     VBox box = new VBox() {{
-      setId("dialog-main");
+      setPrefSize(800, 600);
       setMaxSize(800, 600);
 
       getChildren().add(new Label(title) {{
@@ -98,7 +100,6 @@ public class OptionDialogPane extends DialogPane {
       getChildren().add(optionList);
     }};
 
-    setId("dialog");
     getChildren().add(box);
   }
 
@@ -138,7 +139,7 @@ public class OptionDialogPane extends DialogPane {
 
   @Override
   public void requestFocus() {
-    Pane pane = (Pane)lookup("#dialog-list");
+    Pane pane = (Pane)lookup(".dialog-list");
 
     if(!pane.getChildren().isEmpty()) {
       pane.getChildren().get(0).requestFocus();

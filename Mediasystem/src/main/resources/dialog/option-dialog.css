@@ -1,0 +1,21 @@
+
+.dialog-list {
+  -fx-spacing: 5;
+}
+
+.option-cell {
+  -fx-padding: 5;
+}
+
+.detail {
+  -fx-font-size: 14pt;
+  
+  -fx-alignment: center-right;
+}
+
+.title {
+  -fx-font-size: 24pt; 
+  -fx-font-weight: bold;
+  
+  -fx-alignment: center;
+}

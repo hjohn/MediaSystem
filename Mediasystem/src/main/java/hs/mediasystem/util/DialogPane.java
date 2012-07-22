@@ -5,6 +5,7 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.scene.Parent;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -13,6 +14,11 @@ public class DialogPane extends StackPane implements Dialog {
   private final StackPane stackPane = new StackPane();
 
   private Stage owner;
+
+  public DialogPane() {
+    getStylesheets().add("dialog/dialog.css");
+    getStyleClass().add("dialog");
+  }
 
   protected void setParentEffect(Parent parent) {
     ColorAdjust colorAdjust = new ColorAdjust();
@@ -45,6 +51,8 @@ public class DialogPane extends StackPane implements Dialog {
 
     Parent root = parentStage.getScene().getRoot();
     parentStage.getScene().setRoot(stackPane);
+
+    this.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
     stackPane.getChildren().add(root);
     stackPane.getChildren().add(this);
