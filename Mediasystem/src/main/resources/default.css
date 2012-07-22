@@ -56,6 +56,10 @@
   -fx-text-fill: color-blue;
 }
 
+/*
+ * Debug styles
+ */
+ 
 .debug-border {
   -fx-stroke: red;
   -fx-stroke-width: 5;
@@ -66,7 +70,6 @@
 .debug-background {
   -fx-background-color: red;
 }
-
 
 /*
  * List & Tree styles
@@ -82,46 +85,6 @@
 
 .list-cell:focused, .tree-cell:focused {
   -fx-background-color: rgba(173, 216, 230, 0.3);
-}
-
-/*
- * Progress bar styles
- */
-
-.progress-bar {  
-  -fx-background-color: transparent;
-
-  -fx-border-insets: 0, 2;
-  -fx-border-width: 4, 2;
-  -fx-border-radius: 12, 12;
-  -fx-border-color: radial-gradient(center 50% 5%, radius 100%, rgb(255, 255, 255) 0%, rgb(64, 64, 64)),
-                    radial-gradient(center 50% 5%, radius 100%, rgb(32, 32, 32) 0%, rgb(255, 255, 255));
-
-}
-
-.progress-bar .track {
-  -fx-background-color: radial-gradient(focus-angle 90deg, focus-distance 0%, center 50% 0%, radius 75%, black 0%, grey);
-  -fx-background-radius: 10;
-  -fx-background-insets: 0;
-  -fx-effect: innershadow(gaussian, black, 5, 0.0, 0, 0);
-}
-
-.progress-bar .bar {
-  -fx-background-radius: 8;
-  -fx-background-insets: 2;
-  -fx-effect: innershadow(gaussian, black, 3, 0.0, 0, 0);
-}
-
-.blue-bar .progress-bar .bar {
-  -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-blue, 0%) 0%, derive(color-blue, 100%) 30%, white 36%, derive(color-blue, 100%) 42%, derive(color-blue, 0%) 72%, derive(color-blue, -50%)); 
-}
-
-.orange-bar .progress-bar .bar {
-  -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-orange, 0%) 0%, derive(color-orange, 100%) 30%, white 36%, derive(color-orange, 100%) 42%, derive(color-orange, 0%) 72%, derive(color-orange, -50%)); 
-}
-
-.red-bar .progress-bar .bar {
-  -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, derive(color-red, 0%) 0%, derive(color-red, 100%) 30%, white 36%, derive(color-red, 100%) 42%, derive(color-red, 0%) 72%, derive(color-red, -50%)); 
 }
 
 .list-cell, .tree-cell, .option-cell {
