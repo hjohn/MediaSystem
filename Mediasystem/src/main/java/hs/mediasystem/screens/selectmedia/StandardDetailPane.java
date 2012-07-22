@@ -258,6 +258,13 @@ public class StandardDetailPane extends StackPane implements DetailPane {
 
     tilePane.getStyleClass().add("castings-row");
 
+    tilePane.widthProperty().addListener(new ChangeListener<Number>() {
+      @Override
+      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+        createCastingChildren(tilePane, castings.get());
+      }
+    });
+
     castings.addListener(new ChangeListener<ObservableList<Casting>>() {
       private final ListChangeListener<Casting> listChangeListener = new ListChangeListener<Casting>() {
         @Override
@@ -292,6 +299,10 @@ public class StandardDetailPane extends StackPane implements DetailPane {
       double space = parent.getWidth() - castingSize;
 
       for(final Casting casting : castings) {
+        if(space < 0) {
+          break;
+        }
+
         if(casting.getRole().equals("Actor")) {
           parent.getChildren().add(new VBox() {{
             ScaledImageView imageView = new ScaledImageView(new Label("?"));
@@ -331,10 +342,6 @@ public class StandardDetailPane extends StackPane implements DetailPane {
           }});
 
           space -= castingSize;
-
-          if(space < 0) {
-            break;
-          }
         }
       }
     }
