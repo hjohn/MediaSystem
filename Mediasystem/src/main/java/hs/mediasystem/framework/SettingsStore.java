@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -63,6 +65,25 @@ public class SettingsStore {
     setting.setPersistLevel(level);
 
     return setting.valueProperty();
+  }
+
+  public BooleanProperty getBooleanProperty(String system, PersistLevel level, String key) {
+    final StringProperty valueProperty = getValueProperty(system, level, key);
+    final BooleanProperty booleanProperty = new SimpleBooleanProperty("TRUE".equals(valueProperty.get()));
+
+    valueProperty.bindBidirectional(booleanProperty, new StringConverter<Boolean>() {
+      @Override
+      public Boolean fromString(String string) {
+        return "TRUE".equals(string);
+      }
+
+      @Override
+      public String toString(Boolean object) {
+        return object ? "TRUE" : "FALSE";
+      }
+    });
+
+    return booleanProperty;
   }
 
   public <T> ObservableList<T> getListProperty(String system, PersistLevel level, String key, final StringConverter<T> stringConverter) {
