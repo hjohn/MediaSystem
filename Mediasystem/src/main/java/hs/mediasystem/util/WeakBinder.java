@@ -39,7 +39,6 @@ public class WeakBinder {
     dest.addListener(weakInvalidationListener);
     property.setValue(dest.getValue());
 
-    hardRefs.add(dest);
     hardRefs.add(invalidationListener);
   }
 }
