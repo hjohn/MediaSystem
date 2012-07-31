@@ -4,6 +4,7 @@ import hs.mediasystem.beans.BeanUtils;
 import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.DatabaseUpdater;
 import hs.mediasystem.db.SimpleConnectionPoolDataSource;
@@ -67,7 +68,6 @@ import java.util.ServiceLoader;
 
 import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.stage.Stage;
 
 import javax.sql.ConnectionPoolDataSource;
@@ -244,9 +244,11 @@ public class FrontEnd extends Application {
     dm.add(dm.createComponent()
       .setInterface(Setting.class.getName(), null)
       .setImplementation(new AbstractSetting("information-bar.debug-mem", 0) {
+        private volatile SettingsStore settingsStore;
+
         @Override
         public Option createOption() {
-          final BooleanProperty booleanProperty = new SimpleBooleanProperty();
+          final BooleanProperty booleanProperty = settingsStore.getBooleanProperty("MediaSystem:InformationBar", PersistLevel.PERMANENT, "Visible");
 
           return new BooleanOption("Show Memory Use Information", booleanProperty, new StringBinding(booleanProperty) {
             @Override
@@ -256,6 +258,10 @@ public class FrontEnd extends Application {
           });
         }
       })
+      .add(dm.createServiceDependency()
+        .setService(SettingsStore.class)
+        .setRequired(true)
+      )
     );
 
     injector.getInstance(EnrichCache.class).registerEnricher(MediaData.class, injector.getInstance(MediaDataEnricher.class));

@@ -1,13 +1,16 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Database.Transaction;
 import hs.mediasystem.db.DatabaseException;
+import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.util.SizeFormatter;
 import hs.mediasystem.util.SpecialEffects;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -84,8 +87,13 @@ public class InformationBorder extends HBox {
   }};
 
   @Inject
-  public InformationBorder(final Database database) {
+  public InformationBorder(final Database database, SettingsStore settingsStore) {
     getStylesheets().add("information-border.css");
+
+    BooleanProperty informationBarActive = settingsStore.getBooleanProperty("MediaSystem:InformationBar", PersistLevel.PERMANENT, "Visible");
+
+    gc.visibleProperty().bind(informationBarActive);
+    gc.managedProperty().bind(informationBarActive);
 
     getChildren().add(new HBox() {{
       getStyleClass().add("elements");
