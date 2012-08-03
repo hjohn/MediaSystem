@@ -2,10 +2,14 @@ package hs.mediasystem.util;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Bounds;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -15,6 +19,11 @@ import javafx.scene.layout.StackPane;
 public class ScaledImageView extends Region {
   private final ImageView imageView = new ImageView();
   private final StackPane effectRegion = new StackPane();
+
+  private final BooleanProperty zoom = new SimpleBooleanProperty(false);  // true = scale to cover whole area when preserveRatio is true
+  public BooleanProperty zoomProperty() { return zoom; }
+  public final boolean isZoom() { return zoom.get(); }
+  public final void setZoom(boolean zoom) { this.zoom.set(zoom); }
 
   private final ObjectProperty<Pos> alignment = new SimpleObjectProperty<>(Pos.TOP_LEFT);
   public ObjectProperty<Pos> alignmentProperty() { return alignment; }
@@ -50,15 +59,52 @@ public class ScaledImageView extends Region {
     imageView.setFitWidth(getWidth() - insetsWidth);
     imageView.setFitHeight(getHeight() - insetsHeight);
 
-    layoutInArea(imageView, insets.getLeft(), insets.getTop(), getWidth() - insetsWidth, getHeight() - insetsHeight, 0, alignment.get().getHpos(), alignment.get().getVpos());
     Bounds bounds = imageView.getLayoutBounds();
+
+    if(zoom.get() && preserveRatioProperty().get() && (bounds.getWidth() != imageView.getFitWidth() || bounds.getHeight() != imageView.getFitHeight())) {
+
+      /*
+       * Need to define a viewport to make sure the image fills the entire available area while still
+       * preserving ratio.
+       */
+
+      Image image = imageView.getImage();
+
+      if(image != null) {
+        double horizontalRatio = imageView.getFitWidth() / image.getWidth();
+        double verticalRatio = imageView.getFitHeight() / image.getHeight();
+
+        if(horizontalRatio > verticalRatio) {
+          double viewportWidth = image.getWidth();
+          double viewportHeight = imageView.getFitHeight() / horizontalRatio;
+
+          double yOffset = alignment.get().getVpos() == VPos.BOTTOM ? image.getHeight() - viewportHeight :
+                           alignment.get().getVpos() == VPos.CENTER ? (image.getHeight() - viewportHeight) / 2 : 0;
+
+          imageView.setViewport(new Rectangle2D(0, yOffset, viewportWidth, viewportHeight));
+        }
+        else {
+          double viewportWidth = imageView.getFitWidth() / verticalRatio;
+          double viewportHeight = image.getHeight();
+
+          double xOffset = alignment.get().getHpos() == HPos.RIGHT ? image.getWidth() - viewportWidth :
+                           alignment.get().getHpos() == HPos.CENTER ? (image.getWidth() - viewportWidth) / 2 : 0;
+
+          imageView.setViewport(new Rectangle2D(xOffset, 0, viewportWidth, viewportHeight));
+        }
+      }
+
+      bounds = imageView.getLayoutBounds();
+    }
+
+    layoutInArea(imageView, insets.getLeft(), insets.getTop(), getWidth() - insetsWidth, getHeight() - insetsHeight, 0, alignment.get().getHpos(), alignment.get().getVpos());
 
     effectRegion.setMinWidth(Math.round(bounds.getWidth()) + insetsWidth);
     effectRegion.setMinHeight(Math.round(bounds.getHeight()) + insetsHeight);
     effectRegion.setMaxWidth(effectRegion.getMinWidth());
     effectRegion.setMaxHeight(effectRegion.getMinHeight());
 
-    layoutInArea(effectRegion,  0, 0, getWidth(), getHeight(), 0, alignment.get().getHpos(), alignment.get().getVpos());
+    layoutInArea(effectRegion, 0, 0, getWidth(), getHeight(), 0, alignment.get().getHpos(), alignment.get().getVpos());
   }
 
   @Override
