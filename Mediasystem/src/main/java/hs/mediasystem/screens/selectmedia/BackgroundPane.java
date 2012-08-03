@@ -17,6 +17,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
@@ -38,12 +39,16 @@ public class BackgroundPane extends StackPane {
     imageProperty().bind(background);
     setPreserveRatio(true);
     setSmooth(true);
+    setAlignment(Pos.TOP_CENTER);
+    setZoom(true);
   }};
 
   private final ScaledImageView newBackgroundImageView = new ScaledImageView() {{
     imageProperty().bind(newBackground);
     setPreserveRatio(true);
     setSmooth(true);
+    setAlignment(Pos.TOP_CENTER);
+    setZoom(true);
   }};
 
   private final EventHandler<ActionEvent> beforeBackgroundChange = new EventHandler<ActionEvent>() {
