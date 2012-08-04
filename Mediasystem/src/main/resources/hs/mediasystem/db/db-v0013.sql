@@ -1,6 +1,6 @@
 CREATE TABLE images (
   url varchar(1000) NOT NULL,
-  image bytea NOT NULL,
+  image ${BinaryType} NOT NULL,
   
   CONSTRAINT images_url PRIMARY KEY (url)
 );

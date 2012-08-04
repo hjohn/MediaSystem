@@ -23,7 +23,7 @@ public class Setting extends DefaultEnrichable<Setting> {
   @Column
   private PersistLevel persistLevel;
 
-  @Column
+  @Column(name = "name")
   private String key;
 
   @Column

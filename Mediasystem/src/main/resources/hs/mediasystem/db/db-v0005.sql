@@ -1,2 +1,2 @@
-ALTER TABLE items ALTER COLUMN "type" TYPE varchar(50);
-ALTER TABLE mediadata ALTER COLUMN "type" TYPE varchar(50);
+ALTER TABLE items ALTER COLUMN type SET DATA TYPE varchar(50);
+ALTER TABLE mediadata ALTER COLUMN type SET DATA TYPE varchar(50);

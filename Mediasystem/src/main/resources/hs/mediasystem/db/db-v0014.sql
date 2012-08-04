@@ -1,8 +1,8 @@
 CREATE TABLE identifiers (
-  id serial4,
+  id ${SerialType},
   
-  mediadata_id int4 NOT NULL REFERENCES mediadata(id) ON DELETE CASCADE,
-  lastupdated timestamp without time zone NOT NULL,
+  mediadata_id integer NOT NULL REFERENCES mediadata(id) ON DELETE CASCADE,
+  lastupdated timestamp NOT NULL,
 
   mediatype varchar(50),
   provider varchar(20),

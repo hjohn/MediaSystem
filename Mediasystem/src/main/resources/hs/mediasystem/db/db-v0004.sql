@@ -1,7 +1,7 @@
 CREATE TABLE mediadata (
-  id serial4,
+  id ${SerialType},
   
-  "type" varchar(10) NOT NULL,
+  type varchar(10) NOT NULL,
   provider varchar(20) NOT NULL,
   providerid varchar(20) NOT NULL,
   
@@ -9,7 +9,7 @@ CREATE TABLE mediadata (
   
   filelength bigint NOT NULL,
   filetime bigint NOT NULL,
-  hash bytea,
+  hash ${Sha256Type},
   oshash bigint,
   
   matchtype varchar(20) NOT NULL,

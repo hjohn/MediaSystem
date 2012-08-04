@@ -5,11 +5,11 @@ CREATE TABLE dbinfo (
   CONSTRAINT dbinfo_pk PRIMARY KEY (name)
 );
 
-INSERT INTO dbinfo (name, value) VALUES ('version', 0);
+INSERT INTO dbinfo (name, value) VALUES ('version', '0');
 
 CREATE TABLE items (
-  id serial4,
-  "type" varchar(10) NOT NULL,
+  id ${SerialType},
+  type varchar(10) NOT NULL,
   provider varchar(20) NOT NULL,
   providerid varchar(20) NOT NULL,
   
@@ -21,7 +21,7 @@ CREATE TABLE items (
   releaseyear integer,
   plot varchar(2000),
   imdbid varchar(20),
-  rating numeric(4,1),
+  rating real,
   runtime integer,
   genres varchar(100),
   language varchar(20),
@@ -30,15 +30,15 @@ CREATE TABLE items (
   bannerurl varchar(1000),
   posterurl varchar(1000),
   
-  background bytea,
-  banner bytea,
-  poster bytea,
+  background ${BinaryType},
+  banner ${BinaryType},
+  poster ${BinaryType},
   
-  lastupdated timestamp without time zone NOT NULL,
-  lasthit timestamp without time zone NOT NULL,
-  lastchecked timestamp without time zone NOT NULL,
-  "version" integer NOT NULL,
+  lastupdated timestamp NOT NULL,
+  lasthit timestamp NOT NULL,
+  lastchecked timestamp NOT NULL,
+  version integer NOT NULL,
   
   CONSTRAINT items_id PRIMARY KEY (id),
-  CONSTRAINT items_providerkey UNIQUE ("type", provider, providerid)
+  CONSTRAINT items_providerkey UNIQUE (type, provider, providerid)
 );
