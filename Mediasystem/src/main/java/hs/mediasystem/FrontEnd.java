@@ -6,8 +6,10 @@ import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.db.ConnectionPool;
+import hs.mediasystem.db.DatabaseStatementTranslator;
 import hs.mediasystem.db.DatabaseUpdater;
 import hs.mediasystem.db.SimpleConnectionPoolDataSource;
+import hs.mediasystem.db.SimpleDatabaseStatementTranslator;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaDataEnricher;
@@ -59,8 +61,7 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
@@ -94,6 +95,7 @@ public class FrontEnd extends Application {
   private SceneManager sceneManager;
   private ConnectionPool pool;
   private Framework framework;
+  private DatabaseStatementTranslator translator;
 
   @Override
   public void start(Stage primaryStage) throws BundleException {
@@ -106,6 +108,7 @@ public class FrontEnd extends Application {
     ConnectionPoolDataSource dataSource = configureDataSource(INI.getSection("database"));
 
     pool = new ConnectionPool(dataSource, 5);
+    translator = createDatabaseStatementTranslator(INI.getSection("database"));
 
     framework = createHostedOSGiEnvironment();
 
@@ -166,18 +169,12 @@ public class FrontEnd extends Application {
 
       @Provides
       public Connection providesConnection() {
-        try {
-          Connection connection = pool.getConnection();
+        return pool.getConnection();
+      }
 
-          try(PreparedStatement statement = connection.prepareStatement("SET search_path = public")) {
-            statement.execute();
-          }
-
-          return connection;
-        }
-        catch(SQLException e) {
-          throw new RuntimeException(e);
-        }
+      @Provides
+      public DatabaseStatementTranslator providerDatabaseStatementTranslator() {
+        return translator;
       }
     };
 
@@ -364,18 +361,42 @@ public class FrontEnd extends Application {
     throw new IllegalStateException("Unable to load FrameworkFactory service.");
   }
 
+  private DatabaseStatementTranslator createDatabaseStatementTranslator(Section section) {
+    String databaseName = section.get("url").split(":")[1].toLowerCase();
+
+    if(databaseName.equals("postgresql")) {
+      return new SimpleDatabaseStatementTranslator(new HashMap<String, String>() {{
+        put("BinaryType", "bytea");
+        put("DropNotNull", "DROP NOT NULL");
+        put("Sha256Type", "bytea");
+        put("SerialType", "serial4");
+      }});
+    }
+
+    return new SimpleDatabaseStatementTranslator(new HashMap<String, String>() {{
+      put("BinaryType", "blob");
+      put("DropNotNull", "NULL");
+      put("Sha256Type", "char(32) for bit data");
+      put("SerialType", "integer generated always as identity");
+    }});
+  }
+
   private ConnectionPoolDataSource configureDataSource(Section section)  {
     try {
       Class.forName(section.get("driverClass"));
       Properties properties = new Properties();
 
       for(String key : section) {
-        if(!key.equals("driverClass") && !key.equals("url")) {
+        if(!key.equals("driverClass") && !key.equals("postConnectSql") && !key.equals("url")) {
           properties.put(key, section.get(key));
         }
       }
 
-      return new SimpleConnectionPoolDataSource(section.get("url"), properties);
+      SimpleConnectionPoolDataSource dataSource = new SimpleConnectionPoolDataSource(section.get("url"), properties);
+
+      dataSource.setPostConnectSql(section.get("postConnectSql"));
+
+      return dataSource;
     }
     catch(ClassNotFoundException e) {
       throw new RuntimeException(e);

@@ -15,10 +15,12 @@ import javax.inject.Provider;
 
 public class DatabaseUpdater {
   private final Provider<Connection> connectionProvider;
+  private final DatabaseStatementTranslator translator;
 
   @Inject
-  public DatabaseUpdater(Provider<Connection> connectionProvider) {
+  public DatabaseUpdater(Provider<Connection> connectionProvider, DatabaseStatementTranslator translator) {
     this.connectionProvider = connectionProvider;
+    this.translator = translator;
   }
 
   public void updateDatabase() {
@@ -72,6 +74,8 @@ public class DatabaseUpdater {
               sqlStatement += line;
             }
 
+            sqlStatement = translator.translate(sqlStatement.substring(0, sqlStatement.length() - 1));  // strip off semi-colon
+
             try(PreparedStatement statement = connection.prepareStatement(sqlStatement)) {
               System.out.println("[FINE] " + sqlStatement);
               statement.execute();
@@ -91,7 +95,9 @@ public class DatabaseUpdater {
         connection.commit();
       }
       finally {
-        connection.rollback();
+        if(!connection.isClosed()) {
+          connection.rollback();
+        }
       }
     }
   }
@@ -100,8 +106,9 @@ public class DatabaseUpdater {
     try(Connection connection = connectionProvider.get()) {
       DatabaseMetaData dbm = connection.getMetaData();
 
-      try(ResultSet rs = dbm.getTables(null, null, "dbinfo", null)) {
-        if(!rs.next()) {
+      try(ResultSet rs1 = dbm.getTables(null, null, "dbinfo", null);
+          ResultSet rs2 = dbm.getTables(null, null, "DBINFO", null)) {
+        if(!rs1.next() && !rs2.next()) {
           System.out.println("[FINE] DatabaseUpdater.getDatabaseVersion() - no dbinfo table exists, returning version 0");
           return 0;
         }
