@@ -9,7 +9,7 @@ public interface RecordMapper<T> {
   Map<String, Object> extractValues(T object);
 
   void applyValues(T object, Map<String, Object> values);
-  void setGeneratedKeys(T object, Map<String, Object> keys);
+  void setGeneratedKey(T object, Object key);
 
   void invokeAfterLoadStore(T object, Database database) throws DatabaseException;
 }

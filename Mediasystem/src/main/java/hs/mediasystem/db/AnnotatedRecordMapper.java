@@ -6,6 +6,8 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -119,10 +121,10 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   @Override
   public void applyValues(T object, Map<String, Object> map) {
     for(Accessor accessor : columns.keySet()) {
-      String fieldName = columns.get(accessor);
+      String columnName = columns.get(accessor);
 
-      if(map.containsKey(fieldName)) {
-        accessor.set(object, convertValue(accessor, map.get(fieldName)));
+      if(map.containsKey(columnName)) {
+        accessor.set(object, convertValue(accessor, map.get(columnName)));
       }
     }
 
@@ -159,21 +161,39 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
           return method.invoke(null, value);
         }
       }
+      else if(value instanceof Blob) {
+        Blob blob = (Blob)value;
+
+        return blob.getBytes(1L, (int)blob.length());
+      }
 
       return value;
     }
-    catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+    catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SQLException e) {
       throw new RuntimeException(e);
     }
   }
 
   @Override
-  public void setGeneratedKeys(T object, Map<String, Object> keys) {
-    for(Accessor accessor : ids.keySet()) {
-      String fieldName = ids.get(accessor);
+  public void setGeneratedKey(T object, Object key) {
+    if(ids.isEmpty()) {
+      return;
+    }
 
-      if(keys.containsKey(fieldName)) {
-        accessor.set(object, keys.get(fieldName));
+    if(ids.size() != 1) {
+      throw new IllegalStateException("cannot set generated keys for table with more than one id field: " + tableName);
+    }
+
+    Accessor accessor = ids.keySet().iterator().next();
+
+    if(key instanceof Number) {
+      Number number = (Number)key;
+
+      if(accessor.getType() == int.class || accessor.getType() == Integer.class) {
+        accessor.set(object, number.intValue());
+      }
+      else {
+        accessor.set(object, number.longValue());
       }
     }
   }

@@ -77,9 +77,9 @@ public class ItemsDao {
 
   public void storeItem(Item item) {
     try(Transaction transaction = database.beginTransaction()) {
-      Map<String, Object> generatedKeys = transaction.insert("items", createFieldMap(item));
+      Object generatedKey = transaction.insert("items", createFieldMap(item));
 
-      item.setId((int)generatedKeys.get("id"));
+      item.setId(((Number)generatedKey).intValue());
       putImagePlaceHolders(item);
 
       storeCastings(item, transaction);

@@ -44,9 +44,9 @@ public class MediaDataDao {
     try(Transaction transaction = database.beginTransaction()) {
       transaction.delete("mediadata", "uri = ? or hash = ?", mediaData.getUri(), mediaData.getMediaId().getHash());
 
-      Map<String, Object> generatedKeys = transaction.insert("mediadata", createMediaDataFieldMap(mediaData));
+      Object generatedKey = transaction.insert("mediadata", createMediaDataFieldMap(mediaData));
 
-      mediaData.setId((int)generatedKeys.get("id"));
+      mediaData.setId(((Number)generatedKey).intValue());
       transaction.commit();
     }
   }

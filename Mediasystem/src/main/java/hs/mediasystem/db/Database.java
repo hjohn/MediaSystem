@@ -10,7 +10,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -180,7 +179,7 @@ public class Database {
           Map<String, Integer> fieldMapping = new HashMap<>();
 
           for(int i = 0; i < metaData.getColumnCount(); i++) {
-            fieldMapping.put(metaData.getColumnName(i + 1), i);
+            fieldMapping.put(metaData.getColumnName(i + 1).toLowerCase(), i);
           }
 
           while(rs.next()) {
@@ -197,7 +196,7 @@ public class Database {
         }
       }
       catch(SQLException e) {
-        throw new DatabaseException(e);
+        throw new DatabaseException("SELECT " + fields + " FROM " + tableName + (whereCondition == null ? "" : " WHERE " + whereCondition), e);
       }
     }
 
@@ -227,7 +226,7 @@ public class Database {
             Map<String, Object> values = new HashMap<>();
 
             for(int i = 1; i <= metaData.getColumnCount(); i++) {
-              String columnName = metaData.getColumnName(i);
+              String columnName = metaData.getColumnName(i).toLowerCase();
 
               values.put(columnName, rs.getObject(i));
             }
@@ -270,9 +269,11 @@ public class Database {
 
       Map<String, Object> values = recordMapper.extractValues(obj);
 
-      Map<String, Object> generatedKeys = insert(recordMapper.getTableName(), values);
+      Object generatedKey = insert(recordMapper.getTableName(), values);
 
-      recordMapper.setGeneratedKeys(obj, generatedKeys);
+      if(generatedKey != null) {
+        recordMapper.setGeneratedKey(obj, generatedKey);
+      }
       recordMapper.invokeAfterLoadStore(obj, Database.this);
     }
 
@@ -304,22 +305,21 @@ public class Database {
       recordMapper.invokeAfterLoadStore(obj, Database.this);
     }
 
-    public synchronized Map<String, Object> merge(String tableName, int id, Map<String, Object> parameters) throws DatabaseException {
+    public synchronized Object merge(String tableName, int id, Map<String, Object> parameters) throws DatabaseException {
       if(id == 0) {
         return insert(tableName, parameters);
       }
 
       update(tableName, id, parameters);
 
-      return Collections.emptyMap();
+      return null;
     }
 
-    public synchronized Map<String, Object> insert(String tableName, Map<String, Object> parameters) throws DatabaseException {
+    public synchronized Object insert(String tableName, Map<String, Object> parameters) throws DatabaseException {
       ensureNotFinished();
 
       StringBuilder fields = new StringBuilder();
       StringBuilder values = new StringBuilder();
-      Map<String, Object> generatedKeys = new HashMap<>();
 
       for(String key : parameters.keySet()) {
         if(fields.length() > 0) {
@@ -340,20 +340,15 @@ public class Database {
 
         try(ResultSet rs = statement.getGeneratedKeys()) {
           if(rs.next()) {
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            for(int i = 1; i <= columnCount; i++) {
-              generatedKeys.put(metaData.getColumnName(i), rs.getObject(i));
-            }
+            return rs.getObject(1);
           }
+
+          return null;
         }
       }
       catch(SQLException e) {
         throw new DatabaseException(e);
       }
-
-      return generatedKeys;
     }
 
     public synchronized int update(String tableName, int id, Map<String, Object> parameters) throws DatabaseException {
