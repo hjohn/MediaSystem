@@ -1,42 +1,57 @@
 package hs.mediasystem;
 
-// TODO Viewed state toggling after reload metadata doesn't register --> because cannot make a MapBinding to writable property --> possible easy solution, close dialog after selecting reload meta data -- on the other hand, MediaData.class may not need to be removed from cache at all (since it is local information, not meta-data)
+// TODO Make Derby auto-fallback if no db specified
+// TODO Further testing with Derby to see if it is stable
+// TODO Look into SettingsStore PersistLevel system; determine useability for storing settings per video (like resume)
+// TODO Cells in TreeView sometimes become super wide after switching screens (to different resolutions)
+// TODO Serie in subdir support
+// TODO Change pause/mute overlays
+// TODO PathSelectOption: Start at last selected path
+
+// TODO BannerListPane and other ListPane really should externalize the cell provider to remove bundlecontext
 
 // TODO Movie Collections should show something fancy on their detail pane, or at the very least display a proper background (Collection view, count, list of items, picture of latest/first (or both), stacked pictures)
 
 // TODO Store scroll position (requires hacking skin)
 
-// TODO Banner view -- change layout to get bigger banners -> DEPENDS ON: provider specific detail panes
+// TODO Banner view -- change layout to get bigger banners -> DEPENDS ON: provider specific detail panes -> perhaps provide detail panes of varying sizes (1/2, 1/3, 1/4)
 // TODO Option screen, re-highlight last used option
-
-// Nice to have soon:
-// TODO Smart highlight of next-to-see episode --> hard to do because Viewed information is only present after enriching... also, the current system should already remember the last item selected and highlight that again, just press down once.. --> so why not remember last viewed as setting as well? :)
 
 // New users:
 // TODO Initial settings / Settings screen (configure db) --> means start should be possible without DB
-// TODO Consider using built-in database --> H2 looks like its best, but it is nowhere near PostgreSQL compatible (lacks transactional DDL) --> SQLite has transactional DDL it looks like
 // TODO Detect JavaFX, error dialog if not found
 
 // Big stuff:
 // TODO Add Information Pane (big version of Detail Pane)
 // TODO Movie gallery layout ext (cover flow)
 // TODO Linking of Actors between different movies, so one can see where else a certain actor played
-// TODO Settings screen, to get rid of most of the ini stuff, most importantly path locations
 // TODO Resume functionality
 //      - Make subtitles more persistent by storing them with file (or simply in db?) required if you want to show same sub again after resuming
 //      - Add extra fields to MediaData, like subtitle/audio delay, selected subtitle/audio track, that are important when resuming movie
 //      - Actually setting all player parameters to correct positions
+// TODO Improved Special Handling, including real specials and just bonus stuff
+
+// OSGI:
+// TODO Reloading of Bundles fails, needs a fix
+// TODO Externalize more of the services being registered in FrontEnd
 
 // Other:
 // TODO Rename Filter to TabGroup -- or refactor completely to use RadioButton API
 // TODO Subtitle Provider Podnapisi
-// TODO [Option Dialog] Modal navigation should use own Navigator as well?
 // TODO [Option Dialog] Separators for Dialog Screen
 // TODO [Select Media] Filtering possibilities (Action movies, Recent movies, etc)
 // TODO [PlaybackOverlay] For Episodes, in playback screen title should be serie name
 
 // Low priority:
 // TODO Some form of remote control support / Lirc support --> EventGhost makes this unnecessary, keyboard control suffices
+
+// Possible Configuration Options:
+// - Default Screen number
+// - Movie paths
+// - Serie paths
+// - Default player
+// - Debug mem bar
+// - Default visibility of info bar on playback screen
 
 // Considerations:
 // - New MediaData with uri and hash is great, but hash collisions can still easily occur when you simply have two copies of the same file
