@@ -1,7 +1,6 @@
 package hs.mediasystem.db;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,7 +16,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import javax.inject.Provider;
 
@@ -131,13 +129,12 @@ public class DatabaseTest {
   @Test
   public void shouldInsertRowAndReturnedGeneratedKey() throws SQLException {
     try(Transaction transaction = database.beginTransaction()) {
-      Map<String, Object> keys = transaction.insert("items", new LinkedHashMap<String, Object>() {{
+      Object key = transaction.insert("items", new LinkedHashMap<String, Object>() {{
         put("childcount", 2);
         put("creationtime", DATE);
       }});
 
-      assertTrue(keys.containsKey("id"));
-      assertEquals(1001, keys.get("id"));
+      assertEquals(1001, key);
     }
 
     verify(connection).prepareStatement("INSERT INTO items (childcount,creationtime) VALUES (?,?)", Statement.RETURN_GENERATED_KEYS);
