@@ -3,6 +3,7 @@ package hs.mediasystem.db;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
@@ -16,6 +17,7 @@ public class SimpleConnectionPoolDataSource implements ConnectionPoolDataSource 
 
   private String userName;
   private String password;
+  private String postConnectSql;
   private Properties properties;
 
   public SimpleConnectionPoolDataSource(String url) {
@@ -33,15 +35,31 @@ public class SimpleConnectionPoolDataSource implements ConnectionPoolDataSource 
     this.properties = properties;
   }
 
+  public void setPostConnectSql(String postConnectSql) {
+    this.postConnectSql = postConnectSql;
+  }
+
+  @SuppressWarnings("resource")
   private Connection getConnection() throws SQLException {
+    Connection conn = null;
+
     if(properties != null) {
-      return DriverManager.getConnection(url, properties);
+      conn = DriverManager.getConnection(url, properties);
     }
     else if(userName != null || password != null) {
-      return DriverManager.getConnection(url, userName, password);
+      conn = DriverManager.getConnection(url, userName, password);
+    }
+    else {
+      conn = DriverManager.getConnection(url);
     }
 
-    return DriverManager.getConnection(url);
+    if(postConnectSql != null) {
+      try(PreparedStatement statement = conn.prepareStatement(postConnectSql)) {
+        statement.execute();
+      }
+    }
+
+    return conn;
   }
 
   @Override
