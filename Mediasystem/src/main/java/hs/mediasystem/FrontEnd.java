@@ -105,10 +105,13 @@ public class FrontEnd extends Application {
 
     sceneManager = new DuoWindowSceneManager("MediaSystem", screenNumber);
 
-    ConnectionPoolDataSource dataSource = configureDataSource(INI.getSection("database"));
+    Section databaseIniSection = INI.getSection("database");
+
+    ConnectionPoolDataSource dataSource = databaseIniSection == null ? new SimpleConnectionPoolDataSource("jdbc:derby:db;create=true") : configureDataSource(databaseIniSection);
+    String databaseUrl = databaseIniSection == null ? "jdbc:derby:db;create=true" : databaseIniSection.get("url");
 
     pool = new ConnectionPool(dataSource, 5);
-    translator = createDatabaseStatementTranslator(INI.getSection("database"));
+    translator = createDatabaseStatementTranslator(databaseUrl);
 
     framework = createHostedOSGiEnvironment();
 
@@ -361,8 +364,8 @@ public class FrontEnd extends Application {
     throw new IllegalStateException("Unable to load FrameworkFactory service.");
   }
 
-  private DatabaseStatementTranslator createDatabaseStatementTranslator(Section section) {
-    String databaseName = section.get("url").split(":")[1].toLowerCase();
+  private DatabaseStatementTranslator createDatabaseStatementTranslator(String url) {
+    String databaseName = url.split(":")[1].toLowerCase();
 
     if(databaseName.equals("postgresql")) {
       return new SimpleDatabaseStatementTranslator(new HashMap<String, String>() {{
