@@ -22,20 +22,34 @@ public class EpisodeScanner implements Scanner<LocalInfo> {
   }
 
   @Override
-  public List<LocalInfo> scan(Path scanPath) {
+  public List<LocalInfo> scan(Path rootPath) {
     try {
+      List<Path> scanPaths = new ArrayList<>();
+
+      scanPaths.add(rootPath);
+
+      try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(rootPath)) {
+        for(Path path : dirStream) {
+          if(Files.isDirectory(path)) {
+            scanPaths.add(path);
+          }
+        }
+      }
+
       List<LocalInfo> results = new ArrayList<>();
 
-      try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
-        for(Path path : dirStream) {
-          if(path.getFileName().toString().matches(EXTENSION_PATTERN.pattern())) {
-            LocalInfo localInfo = decoder.decode(path);
+      for(Path scanPath : scanPaths) {
+        try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
+          for(Path path : dirStream) {
+            if(!Files.isDirectory(path) && path.getFileName().toString().matches(EXTENSION_PATTERN.pattern())) {
+              LocalInfo localInfo = decoder.decode(path);
 
-            if(localInfo != null) {
-              results.add(localInfo);
-            }
-            else {
-              System.err.println("EpisodeScanner: Could not decode as movie: " + path);
+              if(localInfo != null) {
+                results.add(localInfo);
+              }
+              else {
+                System.err.println("EpisodeScanner: Could not decode as episode: " + path);
+              }
             }
           }
         }
