@@ -32,25 +32,25 @@ public class NameDecoder {
   private static final String SEASON = "([0-9]{1,2})";
   private static final String EPISODE = "([0-9]{1,2})(?:-[Ee]?([0-9]{1,2}))?";
   private static final String NOT_PRECEDED_BY_DIGIT = "(?<!\\d)";
+  private static final String NOT_SUCCEEDED_BY_DIGIT_OR_LETTER = "(?!(?:\\d|\\p{L}))";
 
   private static final Set<Pattern> EPISODE_PATTERNS = new LinkedHashSet<Pattern>() {{
     add(Pattern.compile("(.*?)" + "-" + SEASON + "x" + EPISODE + "-" + "(.*?)"));
     add(Pattern.compile("(.*?)" + "\\(" + SEASON + "x" + EPISODE + "\\)" + "(.*?)"));
     add(Pattern.compile("(.*?)" + "\\[" + SEASON + "x" + EPISODE + "\\]" + "(.*?)"));
-    add(Pattern.compile("(.*?)" + "\\b" + "[Ss]" + SEASON + " ?[Ee]" + EPISODE + "\\b" + "(.*?)"));
+    add(Pattern.compile("(.*?)" + NOT_PRECEDED_BY_DIGIT + "[Ss]" + SEASON + " ?[Ee]" + EPISODE + NOT_SUCCEEDED_BY_DIGIT_OR_LETTER + "(.*?)"));
     add(Pattern.compile("(.*?)" + "-[Ss]" + SEASON + " ?[Ee]" + EPISODE + "-" + "(.*?)"));
     add(Pattern.compile("(.*?)" + "\\([Ss]" + SEASON + " ?[Ee]" + EPISODE + "\\)" + "(.*?)"));
     add(Pattern.compile("(.*?)" + "\\[[Ss]" + SEASON + " ?[Ee]" + EPISODE + "\\]" + "(.*?)"));
-    add(Pattern.compile("(.*?)" + "\\b" + SEASON + "x" + EPISODE + "\\b" + "(.*?)"));
+    add(Pattern.compile("(.*?)" + NOT_PRECEDED_BY_DIGIT + SEASON + "x" + EPISODE + NOT_SUCCEEDED_BY_DIGIT_OR_LETTER + "(.*?)"));
 
     add(Pattern.compile("(.*?)" + NOT_PRECEDED_BY_DIGIT + "([1-3][0-9]|0?[1-9])([1-3][0-9]|0[1-9])()" + "\\b" + "(.*?)"));    // matches seasons upto 39, episodes upto 39 when written without space
 
     add(Pattern.compile("(.*?)" + "()#" + EPISODE + "(.*?)"));  // No Season
-    add(Pattern.compile("(.*?)" + "\\b" + "[Ss]" + SEASON + "()()" + "\\b" + "(.*?)")); // Season Only
+    add(Pattern.compile("(.*?)" + NOT_PRECEDED_BY_DIGIT + "[Ss]" + SEASON + "()()" + NOT_SUCCEEDED_BY_DIGIT_OR_LETTER + "(.*?)")); // Season Only
   }};
 
   private static final Set<Pattern> MOVIE_PATTERNS = new LinkedHashSet<Pattern>() {{
-    // Could not find any Season/Episode combinations, so assume that the number is a Stand-alone sequence number
     add(Pattern.compile("(.*?)" + "- " + SEASON + "()()(( [-\\[]|$).*?)"));
   }};
 

@@ -85,15 +85,16 @@ public class NameDecoderTest {
       {hintsEpisode, "terminator.the.sarah.connor.chronicles.215.desert.cantos-sitv.mkv", "terminator the sarah connor chronicles", null, "desert cantos-sitv", "2,15", null, null, "mkv"},
 
       {hintsEpisode, "Stargate.Universe.S01E01-E03.Air.Extended.720p.Bluray.DTS.x264-DiRTY.mkv", "Stargate Universe", null, "Air Extended 720p Bluray DTS x264-DiRTY", "01,01-03", null, null, "mkv"},
-      {hintsEpisode, "Heroes.S04.Bonus.Genetics.of.a.Scene.720p.BluRay.x264-EbP.mkv", "Heroes", null, "Bonus Genetics of a Scene 720p BluRay x264-EbP", "04", null, null, "mkv"}
+      {hintsEpisode, "Heroes.S04.Bonus.Genetics.of.a.Scene.720p.BluRay.x264-EbP.mkv", "Heroes", null, "Bonus Genetics of a Scene 720p BluRay x264-EbP", "04", null, null, "mkv"},
+
+      {hintsEpisode, "Gooische Vrouwen - 02x01_xvid.avi", "Gooische Vrouwen", null, "_xvid","02,01", null, null, "avi"}
+
     });
   }
 
   @Test
   public void shouldDecodeProperly() {
     DecodeResult result = new NameDecoder(hints).decode(input);
-
-    System.out.println("title=" + result.getTitle() + "; subtitle=" + result.getSubtitle() + "; sequence=" + result.getSequence());
 
     Assert.assertEquals(title, result.getTitle());
     Assert.assertEquals(alternativeTitle, result.getAlternativeTitle());
@@ -102,7 +103,5 @@ public class NameDecoderTest {
     Assert.assertEquals(sequence, result.getSequence());
     Assert.assertEquals(imdb, result.getCode());
     Assert.assertEquals(extension, result.getExtension());
-
-    System.out.println("Birds of Prey (1x01) Bla".matches(".*?\\(\\b1x01\\b\\).*?"));
   }
 }
