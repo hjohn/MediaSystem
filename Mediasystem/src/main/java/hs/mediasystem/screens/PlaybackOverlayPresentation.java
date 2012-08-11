@@ -129,7 +129,7 @@ public class PlaybackOverlayPresentation {
             })
           );
 
-          controller.showOptionDialogPane(new OptionDialogPane("Video - Options", options));
+          controller.showDialog(new OptionDialogPane("Video - Options", options));
           event.consume();
         }
       }

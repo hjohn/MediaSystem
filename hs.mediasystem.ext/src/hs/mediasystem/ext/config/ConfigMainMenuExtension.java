@@ -34,6 +34,6 @@ public class ConfigMainMenuExtension implements MainMenuExtension {
 
   @Override
   public void select(final ProgramController controller) {
-    controller.showOptionDialogPane(new OptionDialogPane("Configuration", settingGroup.createOption().getOptions()));
+    controller.showDialog(new OptionDialogPane("Configuration", settingGroup.createOption().getOptions()));
   }
 }

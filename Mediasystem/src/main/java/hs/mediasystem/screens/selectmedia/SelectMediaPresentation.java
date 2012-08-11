@@ -133,7 +133,7 @@ public class SelectMediaPresentation {
             }
           }));
 
-          controller.showOptionDialogPane(new OptionDialogPane("Options: " + mediaItem.getTitle(), options));
+          controller.showDialog(new OptionDialogPane("Options: " + mediaItem.getTitle(), options));
         }
 
         event.consume();
@@ -160,7 +160,7 @@ public class SelectMediaPresentation {
             })
           );
 
-          controller.showOptionDialogPane(new OptionDialogPane("Media - Options", options));
+          controller.showDialog(new OptionDialogPane("Media - Options", options));
           event.consume();
         }
       }

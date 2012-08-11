@@ -441,7 +441,7 @@ public class ProgramController {
     });
   }
 
-  public void showOptionDialogPane(Dialog dialog) {
+  public void showDialog(Dialog dialog) {
     sceneManager.displayDialog(dialog);
   }
 
