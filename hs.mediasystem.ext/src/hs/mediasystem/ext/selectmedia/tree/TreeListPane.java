@@ -4,7 +4,7 @@ import hs.mediasystem.screens.Filter;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.MediaNodeEvent;
-import hs.mediasystem.screens.ServiceMediaNodeCellProvider;
+import hs.mediasystem.screens.ServiceMediaNodeCell;
 import hs.mediasystem.screens.selectmedia.ListPane;
 import hs.mediasystem.util.Events;
 import hs.mediasystem.util.ServiceTracker;
@@ -247,15 +247,15 @@ public class TreeListPane extends BorderPane implements ListPane {
   }
 
   private final class MediaItemTreeCell extends TreeCell<MediaNode> {
-    private final ServiceMediaNodeCellProvider provider = new ServiceMediaNodeCellProvider(mediaNodeCellProviderTracker);
+    private final ServiceMediaNodeCell mediaNodeCell = new ServiceMediaNodeCell(mediaNodeCellProviderTracker);
 
     @Override
     protected void updateItem(final MediaNode mediaNode, boolean empty) {
       super.updateItem(mediaNode, empty);
 
-      provider.configureGraphic(mediaNode);
+      mediaNodeCell.configureGraphic(mediaNode);
 
-      Region node = provider.getGraphic();
+      Region node = mediaNodeCell.getGraphic();
 
       if(node != null) {
         double maxWidth = treeView.getWidth() - 35;
