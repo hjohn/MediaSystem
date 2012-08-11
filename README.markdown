@@ -53,14 +53,14 @@ http://code.google.com/p/javatvdbapi/
 The MovieDB API (themoviedbapi)
 -------------------------------
 License: GNU GPL, version 3  
-http://code.google.com/p/themoviedbapi/  
+http://code.google.com/p/themoviedbapi/
 
 Apache Felix
 ------------
-License: Apache License, version 2.0
+License: Apache License, version 2.0  
 http://felix.apache.org/site/index.html
 
 Apache Derby
 ------------
-License: Apache License, version 2.0
+License: Apache License, version 2.0  
 http://db.apache.org/derby/
