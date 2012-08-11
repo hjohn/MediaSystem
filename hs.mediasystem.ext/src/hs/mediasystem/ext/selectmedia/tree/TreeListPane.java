@@ -253,15 +253,17 @@ public class TreeListPane extends BorderPane implements ListPane {
     protected void updateItem(final MediaNode mediaNode, boolean empty) {
       super.updateItem(mediaNode, empty);
 
-      if(!empty) {
-        Node node = provider.getConfiguredGraphic(mediaNode);
+      provider.configureGraphic(mediaNode);
 
+      Region node = provider.getGraphic();
+
+      if(node != null) {
         double maxWidth = treeView.getWidth() - 35;
-        ((Region)node).setMaxWidth(maxWidth);  // WORKAROUND for being unable to restrict cells to the width of the view
-        ((Region)node).setPrefWidth(maxWidth);
-
-        setGraphic(node);
+        node.setMaxWidth(maxWidth);  // WORKAROUND for being unable to restrict cells to the width of the view
+        node.setPrefWidth(maxWidth);
       }
+
+      setGraphic(node);
     }
   }
 

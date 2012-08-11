@@ -15,10 +15,8 @@ public class EpisodeCell extends DuoLineCell implements MediaNodeCell {
   private final WeakBinder binder = new WeakBinder();
 
   @Override
-  public void configureCell(MediaNode mediaNode) {
+  public void attach(MediaNode mediaNode) {
     StringBinding episodeRange = MapBindings.selectString(mediaNode.dataMapProperty(), Episode.class, "episodeRange");
-
-    binder.unbindAll();
 
     binder.bind(titleProperty(), MapBindings.selectString(mediaNode.dataMapProperty(), Media.class, "title"));
     binder.bind(ratingProperty(), MapBindings.selectDouble(mediaNode.dataMapProperty(), Media.class, "rating").divide(10));
@@ -26,5 +24,10 @@ public class EpisodeCell extends DuoLineCell implements MediaNodeCell {
     binder.bind(viewedProperty(), MapBindings.selectBoolean(mediaNode.dataMapProperty(), MediaData.class, "viewed"));
 
     subtitleProperty().set("");
+  }
+
+  @Override
+  public void detach() {
+    binder.unbindAll();
   }
 }

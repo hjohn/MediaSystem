@@ -214,21 +214,24 @@ public class BannerListPane extends BorderPane implements ListPane {
 
     public MediaNodeTableCell(int bannerWidth) {
       this.bannerWidth = bannerWidth;
+
+      setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     }
 
     @Override
     protected void updateItem(final MediaNode mediaNode, boolean empty) {
       super.updateItem(mediaNode, empty);
 
-      if(!empty) {
-        Region node = provider.getConfiguredGraphic(mediaNode);
+      provider.configureGraphic(mediaNode);
 
+      Region node = provider.getGraphic();
+
+      if(node != null) {
         node.setMinWidth(bannerWidth);
         node.setMaxWidth(bannerWidth);
-
-        setGraphic(node);
-        setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
       }
+
+      setGraphic(node);
     }
   }
 

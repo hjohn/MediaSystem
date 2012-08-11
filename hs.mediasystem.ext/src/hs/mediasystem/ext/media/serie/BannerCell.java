@@ -33,10 +33,8 @@ public class BannerCell extends HBox implements MediaNodeCell {
   }
 
   @Override
-  public void configureCell(MediaNode mediaNode) {
+  public void attach(MediaNode mediaNode) {
     final EnrichTrigger item = mediaNode.getMediaItem();
-
-    binder.unbindAll();
 
     // A banner from TVDB is 758 x 140
 
@@ -58,5 +56,10 @@ public class BannerCell extends HBox implements MediaNodeCell {
         fitWidthProperty().bind(BannerCell.this.minWidthProperty());
       }}));
     }
+  }
+
+  @Override
+  public void detach() {
+    binder.unbindAll();
   }
 }

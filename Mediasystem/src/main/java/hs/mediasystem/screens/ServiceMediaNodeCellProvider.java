@@ -14,16 +14,27 @@ public class ServiceMediaNodeCellProvider {
     this.cellProviderTracker = cellProviderTracker;
   }
 
-  public Region getConfiguredGraphic(MediaNode node) {
-    Class<?> dataType = node.getDataType();
-
-    if(!dataType.equals(currentDataType)) {
-      currentDataType = dataType;
-      mediaNodeCell = cellProviderTracker.getService(new PropertyClassEq("mediasystem.class", dataType)).get();
+  public void configureGraphic(MediaNode node) {
+    if(mediaNodeCell != null) {
+      mediaNodeCell.detach();
     }
 
-    mediaNodeCell.configureCell(node);
+    if(node != null) {
+      Class<?> dataType = node.getDataType();
 
+      if(!dataType.equals(currentDataType)) {
+        currentDataType = dataType;
+        mediaNodeCell = cellProviderTracker.getService(new PropertyClassEq("mediasystem.class", dataType)).get();
+      }
+
+      mediaNodeCell.attach(node);
+    }
+    else {
+      mediaNodeCell = null;
+    }
+  }
+
+  public Region getGraphic() {
     return (Region)mediaNodeCell;
   }
 }

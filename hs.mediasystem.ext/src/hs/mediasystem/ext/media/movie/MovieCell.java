@@ -13,7 +13,7 @@ public class MovieCell extends DuoLineCell implements MediaNodeCell {
   private final WeakBinder binder = new WeakBinder();
 
   @Override
-  public void configureCell(MediaNode mediaNode) {
+  public void attach(MediaNode mediaNode) {
     binder.unbindAll();
 
     binder.bind(titleProperty(), MapBindings.selectString(mediaNode.dataMapProperty(), Media.class, "title"));
@@ -24,5 +24,10 @@ public class MovieCell extends DuoLineCell implements MediaNodeCell {
 
     binder.bind(ratingProperty(), MapBindings.selectDouble(mediaNode.dataMapProperty(), Media.class, "rating").divide(10));
     binder.bind(viewedProperty(), MapBindings.selectBoolean(mediaNode.dataMapProperty(), MediaData.class, "viewed"));
+  }
+
+  @Override
+  public void detach() {
+    binder.unbindAll();
   }
 }
