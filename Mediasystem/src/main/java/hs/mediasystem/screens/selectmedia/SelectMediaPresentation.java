@@ -23,6 +23,9 @@ import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.OptionDialogPane;
 import hs.mediasystem.util.Callable;
+import hs.mediasystem.util.CollectionPane;
+import hs.mediasystem.util.DialogPane;
+import hs.mediasystem.util.GridPaneUtil;
 import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.PropertyEq;
 import hs.mediasystem.util.ServiceTracker;
@@ -51,6 +54,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 
@@ -133,7 +140,44 @@ public class SelectMediaPresentation {
             }
           }));
 
-          controller.showDialog(new OptionDialogPane("Options: " + mediaItem.getTitle(), options));
+          DialogPane dialogPane = new DialogPane();
+          CollectionPane collectionPane = new CollectionPane();
+//          collectionPane.setPrefSize(800, 600);
+//          collectionPane.setMaxSize(800, 600);
+
+          dialogPane.getChildren().add(collectionPane);
+
+          BorderPane borderPane = new BorderPane();
+          GridPane gridPane = GridPaneUtil.create(new double[] {33, 34, 33}, new double[] {100});
+          HBox hbox = new HBox();
+          hbox.setId("bottom");
+
+          collectionPane.getChildren().add(borderPane);
+
+          borderPane.setCenter(gridPane);
+          borderPane.setBottom(hbox);
+
+          VBox primary = new VBox();
+          primary.setId("primary");
+
+          VBox secondary = new VBox();
+          secondary.setId("secondary");
+
+          VBox tertiary = new VBox();
+          tertiary.setId("tertiary");
+
+          gridPane.add(primary, 0, 0);
+          gridPane.add(secondary, 1, 0);
+          gridPane.add(tertiary, 2, 0);
+
+          DetailPaneDecorator decorator = new DetailPaneDecorator();
+
+          decorator.mediaNodeProperty().set(event.getMediaNode());
+          decorator.decorate(collectionPane);
+
+          collectionPane.setFocusTraversable(true);
+          controller.showDialog(dialogPane);
+//          controller.showDialog(new OptionDialogPane("Options: " + mediaItem.getTitle(), options));
         }
 
         event.consume();

@@ -3,14 +3,21 @@ package hs.mediasystem.util;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.effect.ColorAdjust;
-import javafx.scene.layout.Region;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class DialogPane extends StackPane implements Dialog {
+  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
+
   private final StackPane stackPane = new StackPane();
 
   private Stage owner;
@@ -18,6 +25,16 @@ public class DialogPane extends StackPane implements Dialog {
   public DialogPane() {
     getStylesheets().add("dialog/dialog.css");
     getStyleClass().add("dialog");
+
+    setOnKeyPressed(new EventHandler<KeyEvent>() {
+      @Override
+      public void handle(KeyEvent event) {
+        if(BACK_SPACE.match(event)) {
+          event.consume();
+          close();
+        }
+      }
+    });
   }
 
   protected void setParentEffect(Parent parent) {
@@ -52,10 +69,12 @@ public class DialogPane extends StackPane implements Dialog {
     Parent root = parentStage.getScene().getRoot();
     parentStage.getScene().setRoot(stackPane);
 
-    this.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+   // this.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
     stackPane.getChildren().add(root);
     stackPane.getChildren().add(this);
+
+    StackPane.setMargin(this, new Insets(40, 40, 40, 40));
 
     setParentEffect(root);
     requestFocus();
