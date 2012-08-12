@@ -1,7 +1,8 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.dao.LocalInfo;
 import hs.mediasystem.framework.Decoder;
+import hs.mediasystem.fs.NameDecoder;
 import hs.mediasystem.fs.NameDecoder.DecodeResult;
 import hs.mediasystem.fs.NameDecoder.Hint;
 
