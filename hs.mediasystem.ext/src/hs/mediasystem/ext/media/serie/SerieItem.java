@@ -21,7 +21,7 @@ public class SerieItem extends MediaItem implements MediaRoot {
   @Override
   public List<? extends MediaItem> getItems() {
     if(children == null) {
-      List<LocalInfo> scanResults = new EpisodeScanner(new EpisodeDecoder(getTitle())).scan(Paths.get(getUri()));
+      List<LocalInfo> scanResults = new EpisodeScanner(new EpisodeDecoder(getTitle()), 2).scan(Paths.get(getUri()));
 
       children = new ArrayList<>();
 

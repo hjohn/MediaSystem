@@ -31,7 +31,7 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
       children = new ArrayList<>();
 
       for(Path root : roots) {
-        List<LocalInfo> scanResults = new EpisodeScanner(new MovieDecoder()).scan(root);
+        List<LocalInfo> scanResults = new EpisodeScanner(new MovieDecoder(), 1).scan(root);
 
         for(LocalInfo localInfo : scanResults) {
           MovieBase movie = new MovieBase(localInfo.getTitle(), localInfo.getEpisode(), localInfo.getSubtitle(), localInfo.getReleaseYear(), localInfo.getCode());

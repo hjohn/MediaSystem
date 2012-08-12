@@ -5,55 +5,53 @@ import hs.mediasystem.framework.Decoder;
 import hs.mediasystem.framework.Scanner;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class EpisodeScanner implements Scanner<LocalInfo> {
   private static final Pattern EXTENSION_PATTERN = Pattern.compile("(?i).+\\.(avi|flv|mkv|mov|mp4|mpg|mpeg)");
+  private static final Set<FileVisitOption> FOLLOW_LINKS = new HashSet<FileVisitOption>() {{
+    add(FileVisitOption.FOLLOW_LINKS);
+  }};
 
   private final Decoder decoder;
+  private final int maxDepth;
 
-  public EpisodeScanner(Decoder decoder) {
+  public EpisodeScanner(Decoder decoder, int maxDepth) {
     this.decoder = decoder;
+    this.maxDepth = maxDepth;
   }
 
   @Override
   public List<LocalInfo> scan(Path rootPath) {
     try {
-      List<Path> scanPaths = new ArrayList<>();
+      final List<LocalInfo> results = new ArrayList<>();
 
-      scanPaths.add(rootPath);
+      Files.walkFileTree(rootPath, FOLLOW_LINKS, maxDepth, new SimpleFileVisitor<Path>() {
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+          if(!attrs.isDirectory() && file.getFileName().toString().matches(EXTENSION_PATTERN.pattern())) {
+            LocalInfo localInfo = decoder.decode(file);
 
-      try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(rootPath)) {
-        for(Path path : dirStream) {
-          if(Files.isDirectory(path)) {
-            scanPaths.add(path);
-          }
-        }
-      }
-
-      List<LocalInfo> results = new ArrayList<>();
-
-      for(Path scanPath : scanPaths) {
-        try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(scanPath)) {
-          for(Path path : dirStream) {
-            if(!Files.isDirectory(path) && path.getFileName().toString().matches(EXTENSION_PATTERN.pattern())) {
-              LocalInfo localInfo = decoder.decode(path);
-
-              if(localInfo != null) {
-                results.add(localInfo);
-              }
-              else {
-                System.err.println("EpisodeScanner: Could not decode as episode: " + path);
-              }
+            if(localInfo != null) {
+              results.add(localInfo);
+            }
+            else {
+              System.err.println("EpisodeScanner: Could not decode as episode: " + file);
             }
           }
+          return FileVisitResult.CONTINUE;
         }
-      }
+      });
 
       return results;
     }
