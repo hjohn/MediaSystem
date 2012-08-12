@@ -31,6 +31,7 @@ public class ServiceMediaNodeCell {
     }
     else {
       mediaNodeCell = null;
+      currentDataType = null;
     }
   }
 
