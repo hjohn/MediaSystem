@@ -55,7 +55,7 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
               Image image = null;
 
               try {
-                image = ImageCache.loadImage(imageHandle);
+                image = ImageCache.loadImageUptoMaxSize(imageHandle, 1920, 1200);
               }
               catch(Exception e) {
                 System.out.println("[WARN] AsyncImageProperty - Exception while loading " + imageHandle + " in background: " + e);
