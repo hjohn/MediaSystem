@@ -377,25 +377,29 @@ public class ProgramController {
         MediaData mediaData = mediaItem.get(MediaData.class);
 
         if(mediaData != null) {
-          long timeViewed = totalTimeViewed + mediaData.getResumePosition() * 1000L;
+          long length = playerPresentation.getLength();
 
-          if(timeViewed >= playerPresentation.getLength() * 9 / 10) {  // 90% viewed?
-            System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
+          if(length > 0) {
+            long timeViewed = totalTimeViewed + mediaData.getResumePosition() * 1000L;
 
-            mediaData.viewedProperty().set(true);
-          }
+            if(timeViewed >= length * 9 / 10) {  // 90% viewed?
+              System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
 
-          if(totalTimeViewed > 30 * 1000) {
-            long resumePosition = 0;
-            long position = playerPresentation.getPosition();
-
-            if(position > 30 * 1000 && position < playerPresentation.getLength() * 9 / 10) {
-              System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Setting resume position to " + position + " ms: " + mediaItem);
-
-              resumePosition = position;
+              mediaData.viewedProperty().set(true);
             }
 
-            mediaData.resumePositionProperty().set((int)(resumePosition / 1000));
+            if(totalTimeViewed > 30 * 1000) {
+              long resumePosition = 0;
+              long position = playerPresentation.getPosition();
+
+              if(position > 30 * 1000 && position < length * 9 / 10) {
+                System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Setting resume position to " + position + " ms: " + mediaItem);
+
+                resumePosition = position;
+              }
+
+              mediaData.resumePositionProperty().set((int)(resumePosition / 1000));
+            }
           }
         }
       }
