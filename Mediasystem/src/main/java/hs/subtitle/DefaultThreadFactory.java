@@ -14,6 +14,10 @@ public class DefaultThreadFactory implements ThreadFactory {
     this(name, Thread.NORM_PRIORITY);
   }
 
+  public DefaultThreadFactory(String name, boolean daemon) {
+    this(name, Thread.NORM_PRIORITY, daemon);
+  }
+
   public DefaultThreadFactory(String name, int priority) {
     this(name, priority, false);
   }
@@ -23,7 +27,6 @@ public class DefaultThreadFactory implements ThreadFactory {
     ThreadGroup parentGroup = sm != null ? sm.getThreadGroup() : Thread.currentThread().getThreadGroup();
 
     this.group = new ThreadGroup(parentGroup, groupName);
-
     this.daemon = daemon;
     this.priority = priority;
   }
