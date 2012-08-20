@@ -1,4 +1,9 @@
 
+.dialog {
+  -fx-font-size: 18pt;
+  -fx-font-weight: bold;
+}
+
 .dialog-list {
   -fx-spacing: 5;
 }
