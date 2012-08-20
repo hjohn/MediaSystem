@@ -2,6 +2,11 @@ package hs.mediasystem.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
@@ -9,6 +14,8 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
@@ -191,5 +198,78 @@ public class MapBindingsTest {
     assertEquals(15, seasonBinding.get());
     assertEquals("Cassie", titleBinding.get());
     assertEquals(episode15, episodeBinding.get());
+  }
+
+  public static class MockObservableValue implements ObservableValue<String> {
+    private final List<InvalidationListener> listeners = new ArrayList<>();
+
+    private String value;
+    private boolean invalidated = true;
+
+    @Override
+    public void addListener(InvalidationListener listener) {
+      listeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(InvalidationListener listener) {
+      listeners.remove(listener);
+    }
+
+    @Override
+    public void addListener(ChangeListener<? super String> listener) {
+    }
+
+    @Override
+    public void removeListener(ChangeListener<? super String> listener) {
+    }
+
+    public int getListenerCount() {
+      return listeners.size();
+    }
+
+    @Override
+    public String getValue() {
+      this.invalidated = false;
+      return value;
+    }
+
+    public void setValue(String value) {
+      this.value = value;
+
+      if(!invalidated) {
+        for(InvalidationListener listener : new ArrayList<>(listeners)) {
+          listener.invalidated(this);
+        }
+      }
+
+      this.invalidated = true;
+    }
+  }
+
+  @Test
+  public void shouldOnlyRegisterListenerOnce() {
+    MockObservableValue mock = new MockObservableValue();
+
+    StringBinding selectString = MapBindings.selectString(mock);
+
+    assertEquals(0, mock.getListenerCount());
+
+    assertNull(selectString.getValue());
+
+    assertEquals(1, mock.getListenerCount());
+
+    mock.setValue("bla");
+
+    assertEquals(0, mock.getListenerCount());
+
+    mock.setValue("bla2");
+    mock.setValue("bla3");
+
+    assertEquals(0, mock.getListenerCount());
+
+    assertEquals("bla3", selectString.getValue());
+
+    assertEquals(1, mock.getListenerCount());
   }
 }
