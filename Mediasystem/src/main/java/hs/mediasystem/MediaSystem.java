@@ -1,10 +1,29 @@
 package hs.mediasystem;
 
-// TODO Make Derby auto-fallback if no db specified
+// TODO Changes to subtitles for VLC player
+// TODO Changes for fullscreen display
+// TODO Move stylesheets to bundles
+
+// TODO 1) Introduce Navigation events... Back being most important
+// TODO 2) Let screens decide for themselves what 'back' means, no navigator
+// TODO 3) Keep screens in memory detached when navigating deeper (from select-media to play for example)
+// TODO 4) Make it possible to navigate directly to a screen position (like jumping to a specific Episode from Movies) -- possible when there's no navigators
+// TODO 5) Related to 4, back won't go back to where you came from, back goes up in hierarchy... always.
+
+// TODO 1) Make Actor a scrollable, highlightable, selectable control
+// TODO 2) When actor selected show full list of every movie/episode they played in
+// TODO 3) Selecting from aformentioned list should take you to information pane of movie/episode, this might be tricky if it involves switching provider kind (serie->movie and vice versa)
+// TODO 4) Add Play button
+
+// TODO Possibly allow focus in multi-line text and actors boxes, for page navigation (dots below the control show number of pages and active page)
+
+// TODO Introduce back + navigation + select events ; look at navigation in DialogPane... use navigator or use custom backspace handler
+
+// TODO Completely remove dependency on mediasystem.ini (unless configuring a db)
+// TODO Create downloadable jar
+
 // TODO Further testing with Derby to see if it is stable
-// TODO Look into SettingsStore PersistLevel system; determine useability for storing settings per video (like resume)
 // TODO Cells in TreeView sometimes become super wide after switching screens (to different resolutions)
-// TODO Serie in subdir support
 // TODO Change pause/mute overlays
 // TODO PathSelectOption: Start at last selected path
 
@@ -17,15 +36,12 @@ package hs.mediasystem;
 // TODO Banner view -- change layout to get bigger banners -> DEPENDS ON: provider specific detail panes -> perhaps provide detail panes of varying sizes (1/2, 1/3, 1/4)
 // TODO Option screen, re-highlight last used option
 
-// New users:
-// TODO Initial settings / Settings screen (configure db) --> means start should be possible without DB
-// TODO Detect JavaFX, error dialog if not found
-
 // Big stuff:
 // TODO Add Information Pane (big version of Detail Pane)
 // TODO Movie gallery layout ext (cover flow)
 // TODO Linking of Actors between different movies, so one can see where else a certain actor played
 // TODO Resume functionality
+//      - Look into SettingsStore PersistLevel system; determine useability for storing settings per video (like resume)
 //      - Make subtitles more persistent by storing them with file (or simply in db?) required if you want to show same sub again after resuming
 //      - Add extra fields to MediaData, like subtitle/audio delay, selected subtitle/audio track, that are important when resuming movie
 //      - Actually setting all player parameters to correct positions
