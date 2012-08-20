@@ -42,7 +42,7 @@ import org.osgi.framework.BundleContext;
 
 public class TreeListPane extends BorderPane implements ListPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
-  private static final KeyCombination KEY_C = new KeyCodeCombination(KeyCode.C);
+  private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
   private static final KeyCombination LEFT = new KeyCodeCombination(KeyCode.LEFT);
   private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
 
@@ -119,7 +119,7 @@ public class TreeListPane extends BorderPane implements ListPane {
             if(ENTER.match(event)) {
               itemSelected(event, focusedItem);
             }
-            else if(KEY_C.match(event)) {
+            else if(KEY_I.match(event)) {
               Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(focusedItem.getValue()), event);
             }
           }

@@ -39,7 +39,7 @@ import org.osgi.framework.BundleContext;
 
 public class BannerListPane extends BorderPane implements ListPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
-  private static final KeyCombination KEY_C = new KeyCodeCombination(KeyCode.C);
+  private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
 
   private final TableColumn<DuoMediaNode, MediaNode> leftColumn = new TableColumn<>("Left");
   private final TableColumn<DuoMediaNode, MediaNode> rightColumn = new TableColumn<>("Right");
@@ -145,7 +145,7 @@ public class BannerListPane extends BorderPane implements ListPane {
           if(ENTER.match(event)) {
             itemSelected(event, focusedNode);
           }
-          else if(KEY_C.match(event)) {
+          else if(KEY_I.match(event)) {
             Events.dispatchEvent(onItemAlternateSelect, new MediaNodeEvent(focusedNode), event);
           }
         }
