@@ -78,7 +78,6 @@ public class ImageCache {
             image = new Image(new ByteArrayInputStream(data));
           }
           else {
-            // System.out.println(">>> Shrinking image of " + size.width + "x" + size.height + ": " + handle);
             image = new Image(new ByteArrayInputStream(data), w, h, true, true);
           }
 
