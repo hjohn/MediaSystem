@@ -1,33 +1,29 @@
 package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.framework.Media;
-import hs.mediasystem.screens.selectmedia.StandardDetailPane;
+import hs.mediasystem.screens.selectmedia.StandardDetailPaneDecorator;
+import hs.mediasystem.util.AreaPane;
 import hs.mediasystem.util.MapBindings;
 import javafx.beans.binding.StringBinding;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 
-public class EpisodeDetailPane extends StandardDetailPane {
+public class EpisodeDetailPaneDecorator extends StandardDetailPaneDecorator {
   protected final StringBinding season = MapBindings.selectInteger(mediaNodeProperty(), "dataMap", Episode.class, "season").asString();
   protected final StringBinding episode = MapBindings.selectString(mediaNodeProperty(), "dataMap", Episode.class, "episodeRange");
 
-  public EpisodeDetailPane() {
-    getStylesheets().add("select-media/episode-detail-pane.css");  // TODO move to bundle when possible
-
+  public EpisodeDetailPaneDecorator() {
     groupName.bind(MapBindings.selectString(mediaNodeProperty(), "dataMap", Episode.class, "serie", "dataMap", Media.class, "title"));
   }
 
   @Override
-  protected Pane createInfoBlock() {
-    return new VBox() {{
-      getChildren().add(createRating());
-      getChildren().add(createGenresField());
-      getChildren().add(createSeasonEpisodeBlock());
-      getChildren().add(createPlotBlock());
-      getChildren().add(createMiscelaneousFieldsBlock());
-    }};
+  public void decorate(AreaPane areaPane) {
+    super.decorate(areaPane);
+
+    areaPane.getStylesheets().add("select-media/episode-detail-pane.css");  // TODO move to bundle when possible
+
+    areaPane.add("title-area", 10, createSeasonEpisodeBlock());
   }
 
   protected Pane createSeasonEpisodeBlock() {

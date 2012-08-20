@@ -7,7 +7,7 @@ import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.StarRating;
-import hs.mediasystem.util.GridPaneUtil;
+import hs.mediasystem.util.AreaPane;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;
@@ -25,26 +25,23 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.WeakListChangeListener;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 
-public class StandardDetailPane extends StackPane implements DetailPane {
+public class StandardDetailPaneDecorator implements DetailPaneDecorator {
   private final ObjectProperty<MediaNode> mediaNode = new SimpleObjectProperty<>();
   @Override public ObjectProperty<MediaNode> mediaNodeProperty() { return mediaNode; }
 
-  protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaNode, "dataMap", Media.class, "image");
+  protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaNode, "dataMap", Media.class, "image");
+
   protected final AsyncImageProperty poster = new AsyncImageProperty();
 
   protected final StringProperty groupName = new SimpleStringProperty();
@@ -54,6 +51,7 @@ public class StandardDetailPane extends StackPane implements DetailPane {
   protected final StringBinding plot = MapBindings.selectString(mediaNode, "dataMap", Media.class, "description");
   protected final DoubleBinding rating = MapBindings.selectDouble(mediaNode, "dataMap", Media.class, "rating");
   protected final IntegerBinding runtime = MapBindings.selectInteger(mediaNode, "dataMap", Media.class, "runtime");
+  protected final ObjectBinding<ObservableList<Casting>> castings = MapBindings.select(mediaNode, "dataMap", Media.class, "castings");
   protected final StringBinding genres = new StringBinding() {
     final ObjectBinding<String[]> selectGenres = MapBindings.select(mediaNode, "dataMap", Media.class, "genres");
 
@@ -80,80 +78,72 @@ public class StandardDetailPane extends StackPane implements DetailPane {
     }
   };
 
-  protected final ObjectBinding<ObservableList<Casting>> castings = MapBindings.select(mediaNode, "dataMap", Media.class, "castings");
-  public StandardDetailPane() {
-    getStylesheets().add("select-media/detail-pane.css");
-    getStyleClass().add("detail-pane");
-
+  public StandardDetailPaneDecorator() {
     poster.imageHandleProperty().bind(posterHandle);
-
-    sceneProperty().addListener(new ChangeListener<Scene>() {
-      private boolean initialized;
-
-      @Override
-      public void changed(ObservableValue<? extends Scene> observable, Scene oldValue, Scene newValue) {
-        if(!initialized) {
-          initialized = true;
-          getChildren().add(createContent());
-        }
-      }
-    });
   }
 
-  protected Node createContent() {
-    BorderPane borderPane = new BorderPane();
+  @Override
+  public void decorate(AreaPane areaPane) {
+    areaPane.getStylesheets().add("select-media/detail-pane.css");
+    areaPane.getStyleClass().add("detail-pane");
 
-    GridPane grid = GridPaneUtil.create(new double[] {60, 40}, new double[] {100});
-
-    grid.getStyleClass().add("content-grid");
-
-    borderPane.setTop(createTitleBlock());
-    borderPane.setCenter(grid);
-    borderPane.setBottom(createTitledBlock("CAST", createCastingsRow(), null));
-
-    Node image = createImage(Pos.BOTTOM_CENTER);
-
-    grid.add(createInfoBlock(), 0, 0);
-    grid.add(image, 1, 0);
-
-    GridPane.setValignment(image, VPos.BOTTOM);
-    GridPane.setVgrow(image, Priority.ALWAYS);
-
-    return borderPane;
-  }
-
-  protected Node createImage(final Pos alignment) {
-    return new ScaledImageView() {{
-      getStyleClass().add("poster-image");
-      imageProperty().bind(poster);
-      setPreserveRatio(true);
-      setSmooth(true);
-      setAlignment(alignment);
-    }};
-  }
-
-  protected Node createGroupNameField() {
-    return new Label() {{
+    areaPane.add("title-area", 1, new Label() {{
       getStyleClass().add("group-name");
       textProperty().bind(groupName);
       managedProperty().bind(groupName.isNotEqualTo(""));
       visibleProperty().bind(groupName.isNotEqualTo(""));
-    }};
-  }
+    }});
 
-  protected Node createTitleField() {
-    return new Label() {{
+    areaPane.add("title-area", 2, new Label() {{
       getStyleClass().add("title");
       textProperty().bind(title);
+    }});
+
+    areaPane.add("title-area", 3, createSubtitleField());
+    areaPane.add("title-area", 4, createRating());
+    areaPane.add("title-area", 5, createGenresField());
+
+    ScaledImageView image = new ScaledImageView() {{
+      getStyleClass().add("poster-image");
+      imageProperty().bind(poster);
+      setPreserveRatio(true);
+      setSmooth(true);
+      setAlignment(Pos.TOP_CENTER);
+    }};
+    VBox.setVgrow(image, Priority.ALWAYS);
+
+    areaPane.add("title-image-area", 1, image);
+
+    areaPane.add("description-area", 6, createPlotBlock());
+
+    areaPane.add("description-area", 7, createMiscelaneousFieldsBlock());
+
+    Pane castingsRow = createTitledBlock("CAST", createCastingsRow(), null);
+    HBox.setHgrow(castingsRow, Priority.ALWAYS);
+
+    areaPane.add("link-area", 1, castingsRow);
+  }
+
+  protected Node createSubtitleField() {
+    return new Label() {{
+      getStyleClass().add("subtitle");
+      textProperty().bind(subtitle);
+      managedProperty().bind(textProperty().isNotEqualTo(""));
     }};
   }
 
-  protected Node createPlotField() {
-    return new Label() {{
-      getStyleClass().addAll("field", "plot");
-      textProperty().bind(plot);
-      managedProperty().bind(plot.isNotEqualTo(""));
-      visibleProperty().bind(plot.isNotEqualTo(""));
+  protected Node createRating() {
+    return new HBox() {{
+      setAlignment(Pos.CENTER_LEFT);
+      getChildren().add(new StarRating(12, 5, 5) {{
+        ratingProperty().bind(rating.divide(10));
+      }});
+      getChildren().add(new Label() {{
+        getStyleClass().add("rating");
+        textProperty().bind(Bindings.format("%3.1f/10", rating));
+      }});
+      managedProperty().bind(rating.greaterThan(0.0));
+      visibleProperty().bind(rating.greaterThan(0.0));
     }};
   }
 
@@ -161,14 +151,6 @@ public class StandardDetailPane extends StackPane implements DetailPane {
     return new Label() {{
       getStyleClass().add("genres");
       textProperty().bind(genres);
-      managedProperty().bind(textProperty().isNotEqualTo(""));
-    }};
-  }
-
-  protected Node createSubtitleField() {
-    return new Label() {{
-      getStyleClass().add("subtitle");
-      textProperty().bind(subtitle);
       managedProperty().bind(textProperty().isNotEqualTo(""));
     }};
   }
@@ -191,26 +173,11 @@ public class StandardDetailPane extends StackPane implements DetailPane {
     return createTitledBlock("RUNTIME", label, runtime.greaterThan(0.0));
   }
 
-  protected Node createRating() {
-    return new HBox() {{
-      setAlignment(Pos.CENTER_LEFT);
-      getChildren().add(new StarRating(12, 5, 5) {{
-        ratingProperty().bind(rating.divide(10));
-      }});
-      getChildren().add(new Label() {{
-        getStyleClass().add("rating");
-        textProperty().bind(Bindings.format("%3.1f/10", rating));
-      }});
-      managedProperty().bind(rating.greaterThan(0.0));
-      visibleProperty().bind(rating.greaterThan(0.0));
-    }};
-  }
-
-  protected Pane createTitleBlock() {
-    return new VBox() {{
-      getChildren().add(createGroupNameField());
-      getChildren().add(createTitleField());
-      getChildren().add(createSubtitleField());
+  protected Pane createMiscelaneousFieldsBlock() {
+    return new FlowPane() {{
+      getStyleClass().add("fields");
+      getChildren().add(createReleaseDateBlock());
+      getChildren().add(createRuntimeBlock());
     }};
   }
 
@@ -221,20 +188,12 @@ public class StandardDetailPane extends StackPane implements DetailPane {
     return createTitledBlock("PLOT", plotField, plot.isNotEqualTo(""));
   }
 
-  protected Pane createInfoBlock() {
-    return new VBox() {{
-      getChildren().add(createRating());
-      getChildren().add(createGenresField());
-      getChildren().add(createPlotBlock());
-      getChildren().add(createMiscelaneousFieldsBlock());
-    }};
-  }
-
-  protected Pane createMiscelaneousFieldsBlock() {
-    return new FlowPane() {{
-      getStyleClass().add("fields");
-      getChildren().add(createReleaseDateBlock());
-      getChildren().add(createRuntimeBlock());
+  protected Node createPlotField() {
+    return new Label() {{
+      getStyleClass().addAll("field", "plot");
+      textProperty().bind(plot);
+      managedProperty().bind(plot.isNotEqualTo(""));
+      visibleProperty().bind(plot.isNotEqualTo(""));
     }};
   }
 
@@ -273,16 +232,18 @@ public class StandardDetailPane extends StackPane implements DetailPane {
         }
       };
 
+      private final WeakListChangeListener<Casting> weakListChangeListener = new WeakListChangeListener<>(listChangeListener);
+
       @Override
       public void changed(ObservableValue<? extends ObservableList<Casting>> observable, ObservableList<Casting> old, ObservableList<Casting> current) {
         if(old != null) {
-          old.removeListener(listChangeListener);
+          old.removeListener(weakListChangeListener);
         }
 
         if(current != null) {
           createCastingChildren(tilePane, current);
 
-          current.addListener(listChangeListener);
+          current.addListener(weakListChangeListener);
         }
       }
     });
@@ -304,42 +265,7 @@ public class StandardDetailPane extends StackPane implements DetailPane {
         }
 
         if(casting.getRole().equals("Actor")) {
-          parent.getChildren().add(new VBox() {{
-            ScaledImageView imageView = new ScaledImageView(new Label("?"));
-
-            Label label = new Label();
-
-            AsyncImageProperty photo = new AsyncImageProperty();
-
-            if(casting.getPerson().getPhoto() != null) {
-              photo.imageHandleProperty().set(new SourceImageHandle(casting.getPerson().getPhoto(), "StandardDetailPane://" + casting.getPerson().getName()));
-            }
-
-            imageView.getStyleClass().add("cast-photo");
-            imageView.imageProperty().bind(photo);
-            imageView.setSmooth(true);
-            imageView.setPreserveRatio(true);
-            imageView.setMinHeight(122);
-            imageView.setAlignment(Pos.CENTER);
-
-            label.getStyleClass().add("cast-name");
-            label.setText(casting.getPerson().getName());
-            label.setMinWidth(100);
-            label.setMaxWidth(100);
-
-            getChildren().addAll(imageView, label);
-
-            if(casting.getCharacterName() != null && !casting.getCharacterName().trim().isEmpty()) {
-              Label characterNameLabel = new Label();
-
-              characterNameLabel.getStyleClass().add("cast-character-name");
-              characterNameLabel.setText("as " + formattedCharacterName(casting.getCharacterName(), 40));
-              characterNameLabel.setMinWidth(100);
-              characterNameLabel.setMaxWidth(100);
-
-              getChildren().add(characterNameLabel);
-            }
-          }});
+          parent.getChildren().add(new CastingImage(casting));
 
           space -= castingSize;
         }
@@ -347,29 +273,68 @@ public class StandardDetailPane extends StackPane implements DetailPane {
     }
   }
 
-  private String formattedCharacterName(String rawCharacterName, int cutOffLength) {
-    String characterName = rawCharacterName.replaceAll(" / ", "|");
-    int more = 0;
+  private static final class CastingImage extends VBox {
+    public CastingImage(Casting casting) {
+      ScaledImageView imageView = new ScaledImageView(new Label("?"));
 
-    for(;;) {
-      int index = characterName.lastIndexOf('|');
+      Label label = new Label();
 
-      if(index == -1) {
-        return characterName;
+      AsyncImageProperty photo = new AsyncImageProperty();
+
+      if(casting.getPerson().getPhoto() != null) {
+        photo.imageHandleProperty().set(new SourceImageHandle(casting.getPerson().getPhoto(), "StandardDetailPane://" + casting.getPerson().getName()));
       }
 
-      if(index > cutOffLength) { // too long, cut it off
-        characterName = characterName.substring(0, index).trim();
-        more++;
+      imageView.getStyleClass().add("cast-photo");
+      imageView.imageProperty().bind(photo);
+      imageView.setSmooth(true);
+      imageView.setPreserveRatio(true);
+      imageView.setMinHeight(122);
+      imageView.setAlignment(Pos.CENTER);
+
+      label.getStyleClass().add("cast-name");
+      label.setText(casting.getPerson().getName());
+      label.setMinWidth(100);
+      label.setMaxWidth(100);
+
+      getChildren().addAll(imageView, label);
+
+      if(casting.getCharacterName() != null && !casting.getCharacterName().trim().isEmpty()) {
+        Label characterNameLabel = new Label();
+
+        characterNameLabel.getStyleClass().add("cast-character-name");
+        characterNameLabel.setText("as " + formattedCharacterName(casting.getCharacterName(), 40));
+        characterNameLabel.setMinWidth(100);
+        characterNameLabel.setMaxWidth(100);
+
+        getChildren().add(characterNameLabel);
       }
-      else {
-        if(more == 0) {
-          characterName = characterName.substring(0, index).trim() + " & " + characterName.substring(index + 1).trim();
+    }
+
+    private String formattedCharacterName(String rawCharacterName, int cutOffLength) {
+      String characterName = rawCharacterName.replaceAll(" / ", "|");
+      int more = 0;
+
+      for(;;) {
+        int index = characterName.lastIndexOf('|');
+
+        if(index == -1) {
+          return characterName;
+        }
+
+        if(index > cutOffLength) { // too long, cut it off
+          characterName = characterName.substring(0, index).trim();
+          more++;
         }
         else {
-          characterName = characterName.substring(0, index).trim() + " (" + (more + 1) + "\u00a0more)";
+          if(more == 0) {
+            characterName = characterName.substring(0, index).trim() + " & " + characterName.substring(index + 1).trim();
+          }
+          else {
+            characterName = characterName.substring(0, index).trim() + " (" + (more + 1) + "\u00a0more)";
+          }
+          return characterName.replaceAll(" *\\| *", ", ");
         }
-        return characterName.replaceAll(" *\\| *", ", ");
       }
     }
   }

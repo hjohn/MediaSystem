@@ -2,8 +2,10 @@ package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
+import hs.mediasystem.util.AreaPane;
 import hs.mediasystem.util.GridPaneUtil;
-import hs.mediasystem.util.PropertyEq;
+import hs.mediasystem.util.InheritanceDepthRanker;
+import hs.mediasystem.util.PropertyClassEq;
 import hs.mediasystem.util.ServiceTracker;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
@@ -15,8 +17,11 @@ import javafx.scene.Node;
 import javafx.scene.effect.Light;
 import javafx.scene.effect.Lighting;
 import javafx.scene.effect.Reflection;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import org.osgi.framework.BundleContext;
@@ -25,7 +30,7 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
   private final ListPane listPane;
 
   public AbstractDuoPaneStandardLayout(BundleContext bundleContext, final ListPane listPane) {
-    final ServiceTracker<DetailPane> detailPaneTracker = new ServiceTracker<>(bundleContext, DetailPane.class);
+    final ServiceTracker<DetailPaneDecoratorFactory> detailPaneDecoratorFactoryTracker = new ServiceTracker<>(bundleContext, DetailPaneDecoratorFactory.class, new InheritanceDepthRanker<DetailPaneDecoratorFactory>());
 
     this.listPane = listPane;
 
@@ -71,31 +76,61 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
     getChildren().add(root);
 
     mediaNodeBinding().addListener(new ChangeListener<MediaNode>() {
-      private DetailPane currentDetailPane;
+      private DetailPaneDecorator currentDecorator;
 
       @Override
       public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
-        if(currentDetailPane != null) {
-          detailPaneContainer.getChildren().clear();
-          currentDetailPane.mediaNodeProperty().unbind();
+        AreaPane detailPane = createDetailPane();
+
+        detailPaneContainer.getChildren().setAll(detailPane);
+
+        if(currentDecorator != null) {
+          currentDecorator.mediaNodeProperty().unbind();
+          currentDecorator = null;
         }
 
         if(current != null) {
-          DetailPane detailPane = null;
           Class<?> cls = current.getDataType();
 
-          while(detailPane == null) {
-            detailPane = detailPaneTracker.getService(new PropertyEq("mediasystem.class", cls));
-            cls = cls.getSuperclass();
-          }
+          DetailPaneDecoratorFactory detailPaneDecoratorFactory = detailPaneDecoratorFactoryTracker.getService(new PropertyClassEq("mediasystem.class", cls));
 
-          detailPane.mediaNodeProperty().bind(listPane.mediaNodeBinding());
-          detailPaneContainer.getChildren().add((Node)detailPane);
+          currentDecorator = detailPaneDecoratorFactory.create();
 
-          currentDetailPane = detailPane;
+          currentDecorator.mediaNodeProperty().bind(listPane.mediaNodeBinding());
+          currentDecorator.decorate(detailPane);
         }
       }
     });
+  }
+
+  protected AreaPane createDetailPane() {
+    AreaPane areaPane = new AreaPane();
+
+    areaPane.getChildren().add(new BorderPane() {{
+      setTop(new VBox() {{
+        setId("title-area");
+      }});
+
+      setCenter(new GridPane() {{
+        GridPaneUtil.configure(this, new double[] {60, 40}, new double[] {100});
+
+        setHgap(20);
+
+        add(new VBox() {{
+          setId("description-area");
+        }}, 0, 0);
+
+        add(new VBox() {{
+          setId("title-image-area");
+        }}, 1, 0);
+      }});
+
+      setBottom(new HBox() {{
+        setId("link-area");
+      }});
+    }});
+
+    return areaPane;
   }
 
   @Override

@@ -17,16 +17,17 @@ import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.Navigator;
 import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
-import hs.mediasystem.screens.optiondialog.ActionOption;
-import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
+import hs.mediasystem.screens.optiondialog.OptionButton;
+import hs.mediasystem.screens.optiondialog.OptionCheckBox;
 import hs.mediasystem.screens.optiondialog.OptionDialogPane;
-import hs.mediasystem.util.Callable;
-import hs.mediasystem.util.CollectionPane;
+import hs.mediasystem.util.AreaPane;
 import hs.mediasystem.util.DialogPane;
 import hs.mediasystem.util.GridPaneUtil;
 import hs.mediasystem.util.ImageCache;
+import hs.mediasystem.util.InheritanceDepthRanker;
+import hs.mediasystem.util.PropertyClassEq;
 import hs.mediasystem.util.PropertyEq;
 import hs.mediasystem.util.ServiceTracker;
 import hs.mediasystem.util.StringBinding;
@@ -40,7 +41,6 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -71,11 +71,13 @@ public class SelectMediaPresentation {
   private final Navigator navigator;
   private final ServiceTracker<MediaGroup> mediaGroupTracker;
   private final SettingUpdater<MediaGroup> mediaGroupSettingUpdater;
+  private final ServiceTracker<DetailPaneDecoratorFactory> detailPaneDecoratorFactoryTracker;
 
   private SelectMediaView view;
 
   @Inject
   public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final SettingsStore settingsStore, BundleContext bundleContext) {
+    this.detailPaneDecoratorFactoryTracker = new ServiceTracker<>(bundleContext, DetailPaneDecoratorFactory.class, new InheritanceDepthRanker<DetailPaneDecoratorFactory>());
     this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
 
@@ -105,80 +107,7 @@ public class SelectMediaPresentation {
     view.onNodeAlternateSelect().set(new EventHandler<MediaNodeEvent>() {
       @Override
       public void handle(MediaNodeEvent event) {
-        final MediaItem mediaItem = event.getMediaNode().getMediaItem();
-
-        List<Option> options = new ArrayList<>();
-
-        if(mediaItem != null) {
-          MediaData mediaData = mediaItem.get(MediaData.class);
-
-          if(mediaData != null) {
-            final BooleanProperty viewedProperty = mediaData.viewedProperty();
-
-            options.add(new BooleanOption("Viewed", viewedProperty, new StringBinding(viewedProperty) {
-              @Override
-              protected String computeValue() {
-                return viewedProperty.get() ? "Yes" : "No";
-              }
-            }));
-          }
-
-          options.add(new ActionOption("Reload meta data", new Callable<Void>() {
-            @Override
-            public Void call() {
-              System.out.println("[INFO] SelectMedia: 'Reload meta data' selected for: " + mediaItem);
-
-              mediaItem.reloadMetaData();
-
-              Media media = mediaItem.get(Media.class);
-
-              ImageCache.expunge(media.getBanner());
-              ImageCache.expunge(media.getImage());
-              ImageCache.expunge(media.getBackground());
-
-              return null;
-            }
-          }));
-
-          DialogPane dialogPane = new DialogPane();
-          CollectionPane collectionPane = new CollectionPane();
-//          collectionPane.setPrefSize(800, 600);
-//          collectionPane.setMaxSize(800, 600);
-
-          dialogPane.getChildren().add(collectionPane);
-
-          BorderPane borderPane = new BorderPane();
-          GridPane gridPane = GridPaneUtil.create(new double[] {33, 34, 33}, new double[] {100});
-          HBox hbox = new HBox();
-          hbox.setId("bottom");
-
-          collectionPane.getChildren().add(borderPane);
-
-          borderPane.setCenter(gridPane);
-          borderPane.setBottom(hbox);
-
-          VBox primary = new VBox();
-          primary.setId("primary");
-
-          VBox secondary = new VBox();
-          secondary.setId("secondary");
-
-          VBox tertiary = new VBox();
-          tertiary.setId("tertiary");
-
-          gridPane.add(primary, 0, 0);
-          gridPane.add(secondary, 1, 0);
-          gridPane.add(tertiary, 2, 0);
-
-          DetailPaneDecorator decorator = new DetailPaneDecorator();
-
-          decorator.mediaNodeProperty().set(event.getMediaNode());
-          decorator.decorate(collectionPane);
-
-          collectionPane.setFocusTraversable(true);
-          controller.showDialog(dialogPane);
-//          controller.showDialog(new OptionDialogPane("Options: " + mediaItem.getTitle(), options));
-        }
+        controller.showDialog(createInformationDialog(event.getMediaNode()));
 
         event.consume();
       }
@@ -384,4 +313,91 @@ public class SelectMediaPresentation {
 
   private final ObjectProperty<MediaGroup> groupSet = new SimpleObjectProperty<>();
   public ObjectProperty<MediaGroup> groupSetProperty() { return groupSet; }
+
+  private DialogPane createInformationDialog(final MediaNode mediaNode) {
+    AreaPane areaPane = new AreaPane();
+
+    BorderPane borderPane = new BorderPane();
+    GridPane gridPane = GridPaneUtil.create(new double[] {33, 34, 33}, new double[] {100});
+    gridPane.setHgap(20);
+
+    HBox hbox = new HBox();
+    hbox.setId("link-area");
+
+    areaPane.getChildren().add(borderPane);
+
+    borderPane.setCenter(gridPane);
+    borderPane.setBottom(hbox);
+
+    gridPane.add(new VBox() {{
+      setId("title-image-area");
+    }}, 0, 0);
+
+    gridPane.add(new VBox() {{
+      getChildren().add(new VBox() {{
+        setId("title-area");
+      }});
+
+      getChildren().add(new VBox() {{
+        setId("description-area");
+      }});
+    }}, 1, 0);
+
+    gridPane.add(new VBox() {{
+      setId("action-area");
+      setSpacing(2);
+    }}, 2, 0);
+
+    DetailPaneDecoratorFactory decoratorFactory = detailPaneDecoratorFactoryTracker.getService(new PropertyClassEq("mediasystem.class", mediaNode.getDataType()));
+    final DetailPaneDecorator decorator = decoratorFactory.create();
+
+    decorator.mediaNodeProperty().set(mediaNode);
+    decorator.decorate(areaPane);
+
+    areaPane.getStylesheets().add("controls.css");
+
+    final MediaItem mediaItem = mediaNode.getMediaItem();
+
+    if(mediaItem != null) {
+      final MediaData mediaData = mediaItem.get(MediaData.class);
+
+      if(mediaData != null) {
+        areaPane.add("action-area", 1, new OptionCheckBox("Viewed") {{
+          getStyleClass().add("initial-focus");
+          selectedProperty().bindBidirectional(mediaData.viewedProperty());
+        }});
+      }
+
+      areaPane.add("action-area", 2, new OptionButton("Reload Meta Data") {{
+        getStyleClass().add("initial-focus");
+        setOnAction(new EventHandler<ActionEvent>() {
+          @Override
+          public void handle(ActionEvent event) {
+            System.out.println("[INFO] SelectMedia: 'Reload meta data' selected for: " + mediaItem);
+
+            mediaItem.reloadMetaData();
+
+            Media media = mediaItem.get(Media.class);
+
+            ImageCache.expunge(media.getBanner());
+            ImageCache.expunge(media.getImage());
+            ImageCache.expunge(media.getBackground());
+          }
+        });
+      }});
+    }
+
+    DialogPane dialogPane = new DialogPane() {
+      @Override
+      public void close() {
+        super.close();
+
+        decorator.mediaNodeProperty().set(null);
+      }
+    };
+
+    dialogPane.getChildren().add(areaPane);
+
+    return dialogPane;
+  }
 }

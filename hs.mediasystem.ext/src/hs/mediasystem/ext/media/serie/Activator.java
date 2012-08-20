@@ -20,7 +20,8 @@ import hs.mediasystem.screens.Setting;
 import hs.mediasystem.screens.SettingGroup;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.PathListOption;
-import hs.mediasystem.screens.selectmedia.DetailPane;
+import hs.mediasystem.screens.selectmedia.DetailPaneDecorator;
+import hs.mediasystem.screens.selectmedia.DetailPaneDecoratorFactory;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.util.PathStringConverter;
 
@@ -123,10 +124,15 @@ public class Activator extends DependencyActivatorBase {
     );
 
     manager.add(createComponent()
-      .setInterface(DetailPane.class.getName(), new Hashtable<String, Object>() {{
+      .setInterface(DetailPaneDecoratorFactory.class.getName(), new Hashtable<String, Object>() {{
         put("mediasystem.class", Episode.class);
       }})
-      .setImplementation(EpisodeDetailPane.class)
+      .setImplementation(new DetailPaneDecoratorFactory() {
+        @Override
+        public DetailPaneDecorator create() {
+          return new EpisodeDetailPaneDecorator();
+        }
+      })
     );
 
     manager.add(createComponent()

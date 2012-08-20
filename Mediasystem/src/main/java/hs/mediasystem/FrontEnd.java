@@ -32,10 +32,11 @@ import hs.mediasystem.screens.Setting;
 import hs.mediasystem.screens.StandardCell;
 import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.Option;
-import hs.mediasystem.screens.selectmedia.DetailPane;
+import hs.mediasystem.screens.selectmedia.DetailPaneDecorator;
+import hs.mediasystem.screens.selectmedia.DetailPaneDecoratorFactory;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.screens.selectmedia.SelectMediaView;
-import hs.mediasystem.screens.selectmedia.StandardDetailPane;
+import hs.mediasystem.screens.selectmedia.StandardDetailPaneDecorator;
 import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.util.DuoWindowSceneManager;
 import hs.mediasystem.util.SceneManager;
@@ -192,10 +193,15 @@ public class FrontEnd extends Application {
     DependencyManager dm = new DependencyManager(framework.getBundleContext());
 
     dm.add(dm.createComponent()
-      .setInterface(DetailPane.class.getName(), new Hashtable<String, Object>() {{
+      .setInterface(DetailPaneDecoratorFactory.class.getName(), new Hashtable<String, Object>() {{
         put("mediasystem.class", Media.class);
       }})
-      .setImplementation(StandardDetailPane.class)
+      .setImplementation(new DetailPaneDecoratorFactory() {
+        @Override
+        public DetailPaneDecorator create() {
+          return new StandardDetailPaneDecorator();
+        }
+      })
     );
 
     dm.add(dm.createComponent()
