@@ -89,9 +89,6 @@ public class OptionDialogPane extends DialogPane {
     this.options = optionList.getChildren();
 
     VBox box = new VBox() {{
-      setPrefSize(800, 600);
-      setMaxSize(800, 600);
-
       getChildren().add(new Label(title) {{
         getStyleClass().add("title");
         setMaxWidth(Integer.MAX_VALUE);
@@ -99,6 +96,9 @@ public class OptionDialogPane extends DialogPane {
 
       getChildren().add(optionList);
     }};
+
+    setPrefSize(800, 600);
+    setMaxSize(800, 600);
 
     getChildren().add(box);
   }
