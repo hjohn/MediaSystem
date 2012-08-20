@@ -5,6 +5,7 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.input.KeyCode;
@@ -40,6 +41,8 @@ public class DialogPane extends StackPane implements Dialog {
   protected void setParentEffect(Parent parent) {
     ColorAdjust colorAdjust = new ColorAdjust();
 
+    parent.setDisable(true);
+
     Timeline fadeOut = new Timeline(
       new KeyFrame(Duration.ZERO,
         new KeyValue(colorAdjust.brightnessProperty(), 0)
@@ -55,6 +58,7 @@ public class DialogPane extends StackPane implements Dialog {
   }
 
   protected void removeParentEffect(Parent parent) {
+    parent.setDisable(false);
     parent.setEffect(null);
   }
 
@@ -66,15 +70,14 @@ public class DialogPane extends StackPane implements Dialog {
 
     this.owner = parentStage;
 
-    Parent root = parentStage.getScene().getRoot();
-    parentStage.getScene().setRoot(stackPane);
+    StackPane.setMargin(this, new Insets(40, 40, 40, 40));
 
-   // this.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+    Parent root = parentStage.getScene().getRoot();
 
     stackPane.getChildren().add(root);
     stackPane.getChildren().add(this);
 
-    StackPane.setMargin(this, new Insets(40, 40, 40, 40));
+    parentStage.getScene().setRoot(stackPane);
 
     setParentEffect(root);
     requestFocus();
@@ -91,6 +94,13 @@ public class DialogPane extends StackPane implements Dialog {
 
   @Override
   public void requestFocus() {
-    getChildren().get(0).requestFocus();
+    Node initialFocusNode = lookup(".initial-focus");
+
+    if(initialFocusNode != null) {
+      initialFocusNode.requestFocus();
+    }
+    else {
+      getChildren().get(0).requestFocus();
+    }
   }
 }
