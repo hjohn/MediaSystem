@@ -2,6 +2,7 @@ package hs.mediasystem.beans;
 
 import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.ImageHandle;
+import hs.subtitle.DefaultThreadFactory;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -16,8 +17,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.image.Image;
 
 public class AsyncImageProperty extends SimpleObjectProperty<Image> {
-  private static final ThreadPoolExecutor SLOW_EXECUTOR = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-  private static final ThreadPoolExecutor FAST_EXECUTOR = new ThreadPoolExecutor(3, 3, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+  private static final ThreadPoolExecutor SLOW_EXECUTOR = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new DefaultThreadFactory("AsyncImageProperty[Slow]", true));
+  private static final ThreadPoolExecutor FAST_EXECUTOR = new ThreadPoolExecutor(3, 3, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new DefaultThreadFactory("AsyncImageProperty[Fast]", true));
 
   static {
     SLOW_EXECUTOR.allowCoreThreadTimeOut(true);

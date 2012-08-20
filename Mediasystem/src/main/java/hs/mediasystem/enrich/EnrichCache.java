@@ -7,6 +7,7 @@ import hs.mediasystem.util.TaskThreadPoolExecutor;
 import hs.mediasystem.util.UniqueArrayList;
 import hs.mediasystem.util.UniqueList;
 import hs.mediasystem.util.WeakValueMap;
+import hs.subtitle.DefaultThreadFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -51,7 +52,7 @@ public class EnrichCache {
   private final Map<CacheKey, Set<EnrichmentListener>> enrichmentListeners = new WeakHashMap<>();
   private final Map<CacheKey, UniqueList<PendingEnrichment<?>>> pendingEnrichmentMap = new WeakHashMap<>();  // PendingEnrichments are in reverse execution order
 
-  private final OrderedExecutionQueue<CacheKey> cacheQueue = new OrderedExecutionQueueExecutor<>(taskPriorityComparator, new TaskThreadPoolExecutor(new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>())));
+  private final OrderedExecutionQueue<CacheKey> cacheQueue = new OrderedExecutionQueueExecutor<>(taskPriorityComparator, new TaskThreadPoolExecutor(new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new DefaultThreadFactory("EnrichCache"))));
   private final OrderedExecutionQueue<CacheKey> normalQueue;
 
   public synchronized <T> void registerEnricher(Class<T> cls, Enricher<T> enricher) {
