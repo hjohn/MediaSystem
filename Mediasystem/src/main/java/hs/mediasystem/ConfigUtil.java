@@ -43,6 +43,7 @@ public final class ConfigUtil {
       "javafx.collections",
       "javafx.geometry",
       "javafx.scene.control.cell",
+      "javafx.scene.paint",
       "javafx.event",
       "javafx.scene",
       "javafx.scene.control",
