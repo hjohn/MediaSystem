@@ -15,31 +15,32 @@ public class ServiceTracker<S> {
   private final Comparator<S> defaultOrder;
   private final Ranker<S> ranker;
 
-  public ServiceTracker(BundleContext bundleContext, Class<S> serviceClass, Comparator<S> defaultOrder, Ranker<S> ranker, PropertyMatcher... defaultFilters) {
+  @SuppressWarnings("unchecked")
+  public ServiceTracker(BundleContext bundleContext, Class<?> serviceClass, Comparator<S> defaultOrder, Ranker<S> ranker, PropertyMatcher... defaultFilters) {
     this.bundleContext = bundleContext;
     this.defaultOrder = defaultOrder;
     this.ranker = ranker;
     this.defaultFilters = defaultFilters.clone();
 
-    tracker = new org.osgi.util.tracker.ServiceTracker<>(bundleContext, serviceClass, null);
+    tracker = new org.osgi.util.tracker.ServiceTracker<>(bundleContext, (Class<S>)serviceClass, null);
     tracker.open();
   }
 
-  public ServiceTracker(BundleContext bundleContext, Class<S> serviceClass, Ranker<S> ranker, PropertyMatcher... defaultFilters) {
+  public ServiceTracker(BundleContext bundleContext, Class<?> serviceClass, Ranker<S> ranker, PropertyMatcher... defaultFilters) {
     this(bundleContext, serviceClass, null, ranker, defaultFilters);
   }
 
-  public ServiceTracker(BundleContext bundleContext, Class<S> serviceClass, Comparator<S> defaultOrder, PropertyMatcher... defaultFilters) {
+  public ServiceTracker(BundleContext bundleContext, Class<?> serviceClass, Comparator<S> defaultOrder, PropertyMatcher... defaultFilters) {
     this(bundleContext, serviceClass, defaultOrder, null, defaultFilters);
   }
 
-  public ServiceTracker(BundleContext bundleContext, Class<S> serviceClass, PropertyMatcher... defaultFilters) {
+  public ServiceTracker(BundleContext bundleContext, Class<?> serviceClass, PropertyMatcher... defaultFilters) {
     this(bundleContext, serviceClass, null, null, defaultFilters);
   }
 
   @SuppressWarnings("unchecked")
   public ServiceReference<S>[] getServiceReferences() {
-    ServiceReference<S>[] serviceReferences = tracker.getServiceReferences();
+    ServiceReference<?>[] serviceReferences = tracker.getServiceReferences();
 
     return serviceReferences == null ? new ServiceReference[0] : serviceReferences;
   }
