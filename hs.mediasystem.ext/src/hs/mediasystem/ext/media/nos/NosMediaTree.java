@@ -95,4 +95,9 @@ public class NosMediaTree implements MediaTree, MediaRoot {
   public String getId() {
     return "nosRoot";
   }
+
+  @Override
+  public MediaRoot getParent() {
+    return null;
+  }
 }

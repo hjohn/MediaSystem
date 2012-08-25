@@ -61,4 +61,9 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
   public String getId() {
     return "serieRoot";
   }
+
+  @Override
+  public MediaRoot getParent() {
+    return null;
+  }
 }

@@ -3,7 +3,6 @@ package hs.mediasystem.ext.media.serie;
 import hs.mediasystem.dao.LocalInfo;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.EpisodeScanner;
 
 import java.nio.file.Paths;
@@ -11,10 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SerieItem extends MediaItem implements MediaRoot {
+  private final SeriesMediaTree mediaRoot;
+
   private List<MediaItem> children;
 
-  public SerieItem(MediaTree mediaTree, String uri, SerieBase serie) {
+  public SerieItem(SeriesMediaTree mediaTree, String uri, SerieBase serie) {
     super(mediaTree, uri, serie);
+
+    this.mediaRoot = mediaTree;
   }
 
   @Override
@@ -43,4 +46,10 @@ public class SerieItem extends MediaItem implements MediaRoot {
   public String getId() {
     return "serie[" + getTitle() + "]";
   }
+
+  @Override
+  public MediaRoot getParent() {
+    return mediaRoot;
+  }
+
 }

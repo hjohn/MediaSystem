@@ -77,4 +77,9 @@ public class YouTubeMediaTree implements MediaTree, MediaRoot {
   public String getId() {
     return "youtubeRoot";
   }
+
+  @Override
+  public MediaRoot getParent() {
+    return null;
+  }
 }

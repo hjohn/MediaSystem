@@ -5,7 +5,6 @@ import hs.mediasystem.ext.media.youtube.YouTubeMediaTree.Feed;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.fs.SourceImageHandle;
 
 import java.io.IOException;
@@ -24,11 +23,14 @@ import com.google.gdata.util.ServiceException;
 
 public class YouTubeFeed extends MediaItem implements MediaRoot {
   private final Feed feed;
+  private final YouTubeMediaTree mediaRoot;
 
   private List<MediaItem> children;
 
-  public YouTubeFeed(MediaTree mediaTree, String uri, Feed feed, Media media) {
+  public YouTubeFeed(YouTubeMediaTree mediaTree, String uri, Feed feed, Media media) {
     super(mediaTree, uri, media);
+
+    this.mediaRoot = mediaTree;
     this.feed = feed;
   }
 
@@ -97,5 +99,10 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
   @Override
   public String getId() {
     return "youtubeFeed[" + feed.getName() + "]";
+  }
+
+  @Override
+  public MediaRoot getParent() {
+    return mediaRoot;
   }
 }

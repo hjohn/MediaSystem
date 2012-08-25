@@ -63,4 +63,9 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
   public String getId() {
     return "movieRoot";
   }
+
+  @Override
+  public MediaRoot getParent() {
+    return null;
+  }
 }
