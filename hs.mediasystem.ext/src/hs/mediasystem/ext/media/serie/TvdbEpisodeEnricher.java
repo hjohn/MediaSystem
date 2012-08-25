@@ -131,15 +131,17 @@ public class TvdbEpisodeEnricher implements MediaIdentifier, MediaLoader {
 
     System.out.println("[FINE] TvdbEpisodeEnricher.selectBestMatch() - Looking to match: " + matchString);
 
-    for(Episode episode : episodes) {
-      double matchScore = Levenshtein.compare(episode.getEpisodeName(), matchString);
+    if(episodes != null) {
+      for(Episode episode : episodes) {
+        double matchScore = Levenshtein.compare(episode.getEpisodeName(), matchString);
 
-      if(matchScore > bestScore) {
-        bestMatch = episode;
-        bestScore = matchScore;
+        if(matchScore > bestScore) {
+          bestMatch = episode;
+          bestScore = matchScore;
+        }
+
+        System.out.println("[FINE] TvdbEpisodeEnricher.selectBestMatch() - " + String.format("Match: %5.1f (%4.2f) -- %s", matchScore * 100, matchScore, episode.getEpisodeName()));
       }
-
-      System.out.println("[FINE] TvdbEpisodeEnricher.selectBestMatch() - " + String.format("Match: %5.1f (%4.2f) -- %s", matchScore * 100, matchScore, episode.getEpisodeName()));
     }
 
     return bestMatch == null ? null : new EpisodeSearchResult(bestMatch, MatchType.NAME, (float)bestScore);
