@@ -22,7 +22,6 @@ import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.PathListOption;
 import hs.mediasystem.screens.selectmedia.DetailPaneDecorator;
 import hs.mediasystem.screens.selectmedia.DetailPaneDecoratorFactory;
-import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.util.PathStringConverter;
 
 import java.nio.file.Path;
@@ -177,10 +176,6 @@ public class Activator extends DependencyActivatorBase {
     manager.add(createComponent()
       .setInterface(MainMenuExtension.class.getName(), null)
       .setImplementation(SeriesMainMenuExtension.class)
-      .add(createServiceDependency()
-        .setService(SelectMediaPresentationProvider.class)
-        .setRequired(true)
-      )
       .add(createServiceDependency()
         .setService(SerieEnricher.class)
         .setRequired(true)

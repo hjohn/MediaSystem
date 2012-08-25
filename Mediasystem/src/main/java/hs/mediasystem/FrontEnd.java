@@ -21,12 +21,17 @@ import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.AbstractSetting;
 import hs.mediasystem.screens.MainMenuExtension;
+import hs.mediasystem.screens.MainScreenLocation;
+import hs.mediasystem.screens.MainScreenPresentation;
 import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.MessagePaneTaskExecutor;
+import hs.mediasystem.screens.PlaybackLocation;
 import hs.mediasystem.screens.PlaybackOverlayPane;
+import hs.mediasystem.screens.PlaybackOverlayPresentation;
 import hs.mediasystem.screens.PlayerPresentation;
 import hs.mediasystem.screens.PluginTracker;
+import hs.mediasystem.screens.Presentation;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.Setting;
 import hs.mediasystem.screens.StandardCell;
@@ -34,11 +39,15 @@ import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.selectmedia.DetailPaneDecorator;
 import hs.mediasystem.screens.selectmedia.DetailPaneDecoratorFactory;
+import hs.mediasystem.screens.selectmedia.SelectMediaLocation;
+import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.screens.selectmedia.SelectMediaView;
 import hs.mediasystem.screens.selectmedia.StandardDetailPaneDecorator;
 import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.util.DuoWindowSceneManager;
+import hs.mediasystem.util.Location;
+import hs.mediasystem.util.LocationHandler;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.StringBinding;
 import hs.mediasystem.util.TaskExecutor;
@@ -182,7 +191,7 @@ public class FrontEnd extends Application {
       }
     };
 
-    Injector injector = Guice.createInjector(module);
+    final Injector injector = Guice.createInjector(module);
 
     DatabaseUpdater updater = injector.getInstance(DatabaseUpdater.class);
 
@@ -270,9 +279,55 @@ public class FrontEnd extends Application {
       )
     );
 
-    injector.getInstance(EnrichCache.class).registerEnricher(MediaData.class, injector.getInstance(MediaDataEnricher.class));
+    final ProgramController controller = injector.getInstance(ProgramController.class);
 
-    ProgramController controller = injector.getInstance(ProgramController.class);
+    dm.add(dm.createComponent()
+      .setInterface(LocationHandler.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", MainScreenLocation.class);
+      }})
+      .setImplementation(new LocationHandler() {
+        @Override
+        public Presentation go(Location location, Presentation current) {
+          return new MainScreenPresentation(controller);
+        }
+      })
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(LocationHandler.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", PlaybackLocation.class);
+      }})
+      .setImplementation(new LocationHandler() {
+        @Override
+        public Presentation go(Location location, Presentation current) {
+          return injector.getInstance(PlaybackOverlayPresentation.class);
+        }
+      })
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(LocationHandler.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", SelectMediaLocation.class);
+      }})
+      .setImplementation(new LocationHandler() {
+        private volatile SelectMediaPresentationProvider selectMediaPresentationProvider;
+
+        @Override
+        public Presentation go(Location location, Presentation current) {
+          SelectMediaPresentation presentation = current instanceof SelectMediaPresentation ? (SelectMediaPresentation)current : selectMediaPresentationProvider.get();
+
+          presentation.setMediaTree(((SelectMediaLocation)location).getMediaRoot());
+
+          return presentation;
+        }
+      })
+      .add(dm.createServiceDependency()
+        .setService(SelectMediaPresentationProvider.class)
+        .setRequired(true)
+      )
+    );
+
+    injector.getInstance(EnrichCache.class).registerEnricher(MediaData.class, injector.getInstance(MediaDataEnricher.class));
 
     controller.showMainScreen();
   }

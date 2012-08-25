@@ -7,7 +7,6 @@ import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
-import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
 import hs.mediasystem.util.ServiceTracker;
 
@@ -24,13 +23,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.StringConverter;
@@ -40,10 +34,6 @@ import javax.inject.Inject;
 import org.osgi.framework.BundleContext;
 
 public class StandardView extends StackPane implements SelectMediaView {
-  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
-
-  private final ObjectProperty<EventHandler<ActionEvent>> onBack = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<ActionEvent>> onBack() { return onBack; }
 
   private final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected = new SimpleObjectProperty<>();
   @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected() { return onNodeSelected; }
@@ -68,15 +58,6 @@ public class StandardView extends StackPane implements SelectMediaView {
     standardLayoutExtensionTracker = new ServiceTracker<>(bundleContext, StandardLayoutExtension.class);
 
     getStylesheets().add("select-media/duo-pane-select-media-view.css");
-
-    addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-      @Override
-      public void handle(KeyEvent event) {
-        if(BACK_SPACE.match(event)) {
-          Events.dispatchEvent(onBack, new ActionEvent(StandardView.this, null), event);
-        }
-      }
-    });
 
     GridPane stage = GridPaneUtil.create(new double[] {100}, new double[] {90, 10});
 

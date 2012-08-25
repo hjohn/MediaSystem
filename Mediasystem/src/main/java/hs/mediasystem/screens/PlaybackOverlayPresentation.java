@@ -1,5 +1,6 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
@@ -39,7 +40,7 @@ import javax.inject.Provider;
 
 import org.osgi.framework.BundleContext;
 
-public class PlaybackOverlayPresentation {
+public class PlaybackOverlayPresentation implements Presentation {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
   private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
 
@@ -51,15 +52,20 @@ public class PlaybackOverlayPresentation {
   };
 
   private final PlaybackOverlayView view;
+  private final PlayerPresentation playerPresentation;
+  private final MediaItem mediaItem;
 
   private final ObjectProperty<SubtitleDescriptor> selectedSubtitleForDownload = new SimpleObjectProperty<>();
 
+  private long totalTimeViewed = 0;
+
   @Inject
   public PlaybackOverlayPresentation(BundleContext bundleContext, final ProgramController controller, final PlayerPresentation playerPresentation, final PlaybackOverlayView view) {
+    this.playerPresentation = playerPresentation;
     this.view = view;
+    this.mediaItem = controller.getCurrentMediaItem();
 
     final Player player = playerPresentation.getPlayer();
-    final MediaItem mediaItem = controller.getCurrentMediaItem();
     final PlayerBindings playerBindings = new PlayerBindings(view.playerProperty());
 
     final ServiceTracker<SubtitleProvider> subtitleProviderTracker = new ServiceTracker<>(bundleContext, SubtitleProvider.class);
@@ -146,9 +152,58 @@ public class PlaybackOverlayPresentation {
         }
       }
     });
+
+    playerPresentation.getPlayer().positionProperty().addListener(new ChangeListener<Number>() {
+      @Override
+      public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number value) {
+        long old = oldValue.longValue();
+        long current = value.longValue();
+
+        if(old < current) {
+          long diff = current - old;
+
+          if(diff < 1000) {
+            totalTimeViewed += diff;
+          }
+        }
+      }
+    });
   }
 
+  @Override
   public Node getView() {
     return (Node)view;
+  }
+
+  @Override
+  public void dispose() {
+    MediaData mediaData = mediaItem.get(MediaData.class);
+
+    if(mediaData != null) {
+      long length = playerPresentation.getLength();
+
+      if(length > 0) {
+        long timeViewed = totalTimeViewed + mediaData.getResumePosition() * 1000L;
+
+        if(timeViewed >= length * 9 / 10) {  // 90% viewed?
+          System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
+
+          mediaData.viewedProperty().set(true);
+        }
+
+        if(totalTimeViewed > 30 * 1000) {
+          long resumePosition = 0;
+          long position = playerPresentation.getPosition();
+
+          if(position > 30 * 1000 && position < length * 9 / 10) {
+            System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Setting resume position to " + position + " ms: " + mediaItem);
+
+            resumePosition = position;
+          }
+
+          mediaData.resumePositionProperty().set((int)(resumePosition / 1000));
+        }
+      }
+    }
   }
 }

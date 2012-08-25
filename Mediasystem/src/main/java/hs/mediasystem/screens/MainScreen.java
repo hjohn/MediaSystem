@@ -27,8 +27,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
-import javax.inject.Inject;
-
 public class MainScreen extends BorderPane {
   private final List<Button> buttons = new ArrayList<>();
   private final List<StackPane> stackPanes = new ArrayList<>();
@@ -40,8 +38,8 @@ public class MainScreen extends BorderPane {
 
   private Button lastSelected;
 
-  @Inject
-  public MainScreen(final ProgramController controller, final PluginTracker<MainMenuExtension> tracker) {
+  public MainScreen(final ProgramController controller) {
+    final PluginTracker<MainMenuExtension> tracker = new PluginTracker<>(controller.getBundleContext(), MainMenuExtension.class);
     getStylesheets().add("main-screen.css");
 
     menuBox = new StackPane();

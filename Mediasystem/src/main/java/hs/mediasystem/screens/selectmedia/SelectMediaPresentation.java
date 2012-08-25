@@ -14,8 +14,7 @@ import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
-import hs.mediasystem.screens.Navigator;
-import hs.mediasystem.screens.Navigator.Destination;
+import hs.mediasystem.screens.Presentation;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
@@ -65,37 +64,29 @@ import javax.inject.Inject;
 
 import org.osgi.framework.BundleContext;
 
-public class SelectMediaPresentation {
+public class SelectMediaPresentation implements Presentation {
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
 
-  private final Navigator navigator;
   private final ServiceTracker<MediaGroup> mediaGroupTracker;
   private final SettingUpdater<MediaGroup> mediaGroupSettingUpdater;
   private final ServiceTracker<DetailPaneDecoratorFactory> detailPaneDecoratorFactoryTracker;
+  private final ProgramController controller;
 
   private SelectMediaView view;
 
   @Inject
   public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final SettingsStore settingsStore, BundleContext bundleContext) {
+    this.controller = controller;
     this.detailPaneDecoratorFactoryTracker = new ServiceTracker<>(bundleContext, DetailPaneDecoratorFactory.class, new InheritanceDepthRanker<DetailPaneDecoratorFactory>());
-    this.navigator = new Navigator(controller.getNavigator());
     this.view = view;
 
     mediaGroupTracker = new ServiceTracker<>(bundleContext, MediaGroup.class);
-
-    view.onBack().set(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-        navigator.back();
-        event.consume();
-      }
-    });
 
     view.onNodeSelected().set(new EventHandler<MediaNodeEvent>() {
       @Override
       public void handle(MediaNodeEvent event) {
         if(event.getMediaNode().getMediaItem() instanceof MediaRoot) {
-          setTreeRoot((MediaRoot)event.getMediaNode().getMediaItem());
+          controller.setLocation(new SelectMediaLocation((MediaRoot)event.getMediaNode().getMediaItem()));
         }
         else {
           controller.play(event.getMediaNode().getMediaItem());
@@ -149,7 +140,7 @@ public class SelectMediaPresentation {
         Platform.runLater(new Runnable() {
           @Override
           public void run() {
-            String key = createKeyFromTrail("LastSelected");
+            String key = createKey("LastSelected");
             String id = settingsStore.getSetting("MediaSystem:SelectMedia", key);
             MediaNode nodeToSelect = null;
 
@@ -187,12 +178,13 @@ public class SelectMediaPresentation {
       @Override
       public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
         if(current != null) {
-          settingsStore.storeSetting("MediaSystem:SelectMedia", PersistLevel.TEMPORARY, createKeyFromTrail("LastSelected"), current.getId());
+          settingsStore.storeSetting("MediaSystem:SelectMedia", PersistLevel.TEMPORARY, createKey("LastSelected"), current.getId());
         }
       }
     });
   }
 
+  @Override
   public Node getView() {
     return (Node)view;
   }
@@ -200,49 +192,35 @@ public class SelectMediaPresentation {
   private MediaRoot currentRoot;
 
   private void setTreeRoot(final MediaRoot root) {
-    navigator.navigateTo(new Destination(root.getId(), root.getRootName()) {
+    currentRoot = root;
+
+    List<MediaGroup> mediaGroups = mediaGroupTracker.getServices(new PropertyEq(MediaGroup.Constants.MEDIA_ROOT_CLASS.name(), root.getClass()));
+
+    if(mediaGroups.isEmpty()) {
+      mediaGroups.add(new DefaultMediaGroup("alpha", "Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
+    }
+
+    Collections.sort(mediaGroups, new Comparator<MediaGroup>() {
       @Override
-      public void execute() {
-        currentRoot = root;
-
-        List<MediaGroup> mediaGroups = mediaGroupTracker.getServices(new PropertyEq(MediaGroup.Constants.MEDIA_ROOT_CLASS.name(), root.getClass()));
-
-        if(mediaGroups.isEmpty()) {
-          mediaGroups.add(new DefaultMediaGroup("alpha", "Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
-        }
-
-        Collections.sort(mediaGroups, new Comparator<MediaGroup>() {
-          @Override
-          public int compare(MediaGroup o1, MediaGroup o2) {
-            return o1.getTitle().compareTo(o2.getTitle());
-          }
-        });
-        availableGroupSetsProperty().setAll(mediaGroups);
-
-        mediaGroupSettingUpdater.setBackingSetting("MediaSystem:SelectMedia", PersistLevel.PERMANENT, createKeyFromTrail("SortGroup"));
-
-        MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSetsProperty().get(0));
-
-        groupSetProperty().set(selectedMediaGroup);
+      public int compare(MediaGroup o1, MediaGroup o2) {
+        return o1.getTitle().compareTo(o2.getTitle());
       }
     });
+    availableGroupSetsProperty().setAll(mediaGroups);
+
+    mediaGroupSettingUpdater.setBackingSetting("MediaSystem:SelectMedia", PersistLevel.PERMANENT, createKey("SortGroup"));
+
+    MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSetsProperty().get(0));
+
+    groupSetProperty().set(selectedMediaGroup);
   }
 
   public void setMediaTree(final MediaRoot mediaRoot) {
     setTreeRoot(mediaRoot);
   }
 
-  private String createKeyFromTrail(String prefix) {
-    String key = "";
-
-    for(Destination destination : navigator.getTrail()) {
-      if(!key.isEmpty()) {
-        key += "/";
-      }
-      key += destination.getId();
-    }
-
-    return prefix + ":" + key;
+  private String createKey(String prefix) {
+    return prefix + ":" + controller.getLocation().getId();
   }
 
   private List<MediaNode> getChildren(MediaRoot mediaRoot) {
@@ -399,5 +377,9 @@ public class SelectMediaPresentation {
     dialogPane.getChildren().add(areaPane);
 
     return dialogPane;
+  }
+
+  @Override
+  public void dispose() {
   }
 }

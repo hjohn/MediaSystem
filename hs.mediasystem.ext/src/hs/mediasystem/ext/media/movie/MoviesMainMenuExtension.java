@@ -9,10 +9,8 @@ import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
-import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.screens.ProgramController;
-import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
-import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
+import hs.mediasystem.screens.selectmedia.SelectMediaLocation;
 import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.util.PathStringConverter;
 
@@ -22,7 +20,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 
 public class MoviesMainMenuExtension implements MainMenuExtension {
-  private volatile SelectMediaPresentationProvider selectMediaPresentationProvider;
   private volatile MovieEnricher movieEnricher;
   private volatile EnrichCache enrichCache;
   private volatile PersistQueue persister;
@@ -50,26 +47,9 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
 
   @Override
   public void select(final ProgramController controller) {
-    controller.getNavigator().navigateTo(new Destination("movie", getTitle()) {
-      private SelectMediaPresentation presentation;
-      private MoviesMediaTree mediaTree;
+    ObservableList<Path> paths = settingsStore.getListProperty("MediaSystem:Ext:Movies", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
 
-      @Override
-      protected void init() {
-        presentation = selectMediaPresentationProvider.get();
-      }
-
-      @Override
-      protected void intro() {
-        controller.showScreen(presentation.getView());
-        if(mediaTree == null) {
-          final ObservableList<Path> moviePaths = settingsStore.getListProperty("MediaSystem:Ext:Movies", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
-
-          mediaTree = new MoviesMediaTree(enrichCache, persister, moviePaths);
-          presentation.setMediaTree(mediaTree);
-        }
-      }
-    });
+    controller.setLocation(new SelectMediaLocation(new MoviesMediaTree(enrichCache, persister, paths)));
   }
 
   @Override

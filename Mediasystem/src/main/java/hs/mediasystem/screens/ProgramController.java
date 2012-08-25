@@ -1,23 +1,24 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.player.PlayerEvent;
 import hs.mediasystem.framework.player.PlayerEvent.Type;
-import hs.mediasystem.screens.Navigator.Destination;
 import hs.mediasystem.util.Dialog;
 import hs.mediasystem.util.KeyCombinationGroup;
+import hs.mediasystem.util.Location;
+import hs.mediasystem.util.LocationHandler;
+import hs.mediasystem.util.PropertyClassEq;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.SceneUtil;
+import hs.mediasystem.util.ServiceTracker;
 import hs.mediasystem.util.annotation.Nullable;
 import hs.mediasystem.util.ini.Ini;
-
-import java.util.List;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -45,8 +46,9 @@ import javafx.stage.Screen;
 import javafx.util.Duration;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
+
+import org.osgi.framework.BundleContext;
 
 @Singleton
 public class ProgramController {
@@ -60,14 +62,14 @@ public class ProgramController {
   private static final KeyCombination FUNC_JUMP_FORWARD = new KeyCombinationGroup(new KeyCodeCombination(KeyCode.UP), new KeyCodeCombination(KeyCode.NUMPAD8));
   private static final KeyCombination FUNC_JUMP_BACKWARD = new KeyCombinationGroup(new KeyCodeCombination(KeyCode.DOWN), new KeyCodeCombination(KeyCode.NUMPAD2));
 
+  private static final MainScreenLocation MAIN_SCREEN_LOCATION = new MainScreenLocation();
+
   private final Scene scene;
   private final StackPane sceneRoot = new StackPane();
   private final BorderPane contentBorderPane = new BorderPane();
   private final BorderPane informationBorderPane = new BorderPane();
   private final BorderPane messageBorderPane = new BorderPane();
   private final Ini ini;
-  private final Provider<MainScreen> mainScreenProvider;
-  private final Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider;
   private final SubtitleDownloadService subtitleDownloadService = new SubtitleDownloadService();
   private final SceneManager sceneManager;
   private final PlayerPresentation playerPresentation;
@@ -78,16 +80,15 @@ public class ProgramController {
     setVisible(false);
   }};
 
-  private final Navigator navigator = new Navigator();
   private final InformationBorder informationBorder;
+  private final BundleContext bundleContext;
 
   @Inject
-  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, Provider<MainScreen> mainScreenProvider, Provider<PlaybackOverlayPresentation> playbackOverlayPresentationProvider, InformationBorder informationBorder) {
+  public ProgramController(Ini ini, BundleContext bundleContext, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder) {
     this.ini = ini;
+    this.bundleContext = bundleContext;
     this.sceneManager = sceneManager;
     this.playerPresentation = playerPresentation;
-    this.mainScreenProvider = mainScreenProvider;
-    this.playbackOverlayPresentationProvider = playbackOverlayPresentationProvider;
     this.informationBorder = informationBorder;
     this.scene = SceneUtil.createScene(sceneRoot);
 
@@ -100,20 +101,13 @@ public class ProgramController {
     messageBorderPane.setMouseTransparent(true);
     messageBorderPane.setRight(new Group(messagePane));
 
-    navigator.onNavigation().set(new EventHandler<ActionEvent>() {
+    scene.addEventHandler(NavigationEvent.NAVIGATION_BACK, new EventHandler<NavigationEvent>() {
       @Override
-      public void handle(ActionEvent event) {
-        List<Destination> trail = navigator.getTrail();
-        StringBuilder builder = new StringBuilder();
+      public void handle(NavigationEvent event) {
+        Location parent = getLocation().getParent();
 
-        for(Destination dest : trail) {
-          if(builder.length() > 0) {
-            builder.append(" > ");
-          }
-          builder.append(dest.getDescription());
-        }
-
-        ProgramController.this.informationBorder.breadCrumbProperty().set(builder.toString());
+        setLocation(parent == null ? MAIN_SCREEN_LOCATION : parent);
+        event.consume();
       }
     });
 
@@ -121,7 +115,7 @@ public class ProgramController {
       @Override
       public void handle(KeyEvent event) {
         if(BACK_SPACE.match(event)) {
-          navigator.back();
+          scene.getFocusOwner().fireEvent(new NavigationEvent(NavigationEvent.NAVIGATION_BACK));
           event.consume();
         }
         else if(KEY_CTRL_ALT_S.match(event)) {
@@ -221,22 +215,54 @@ public class ProgramController {
         }
       }
     });
+
+    final ServiceTracker<LocationHandler> locationHandlerTracker = new ServiceTracker<>(bundleContext, LocationHandler.class);
+
+    location.addListener(new ChangeListener<Location>() {
+      @Override
+      public void changed(ObservableValue<? extends Location> observable, Location old, Location current) {
+        System.out.println("[INFO] Changing Location" + (old == null ? "" : " from " + old.getId()) + " to " + current.getId());
+
+        Presentation oldPresentation = activePresentation;
+
+        LocationHandler locationHandler = locationHandlerTracker.getService(new PropertyClassEq("mediasystem.class", current.getClass()));
+
+        if(locationHandler == null) {
+          throw new RuntimeException("No LocationHandler found for: " + current.getClass());
+        }
+
+        activePresentation = locationHandler.go(current, activePresentation);
+
+        if(!activePresentation.equals(oldPresentation)) {
+          displayOnStage(activePresentation.getView(), current.getBackgroundColor());
+
+          if(oldPresentation != null) {
+            oldPresentation.dispose();
+          }
+        }
+
+        ProgramController.this.informationBorder.breadCrumbProperty().set(current.getBreadCrumb());
+      }
+    });
+  }
+
+  private Presentation activePresentation;
+
+  private final ObjectProperty<Location> location = new SimpleObjectProperty<>();
+  public Location getLocation() { return location.get(); }
+  public void setLocation(Location location) { this.location.set(location); }
+  public ObjectProperty<Location> locationProperty() { return location; }
+
+  public BundleContext getBundleContext() {
+    return bundleContext;
   }
 
   public Ini getIni() {
     return ini;
   }
 
-  public Navigator getNavigator() {
-    return navigator;
-  }
-
   private void displayOnMainStage(Node node) {
     displayOnStage(node, Color.BLACK);
-  }
-
-  private void displayOnOverlayStage(Node node) {
-    displayOnStage(node, Color.TRANSPARENT);
   }
 
   private void displayOnStage(final Node node, Color background) {
@@ -263,19 +289,7 @@ public class ProgramController {
   }
 
   public void showMainScreen() {
-    navigator.navigateTo(new Destination("home", "Home") {
-      private MainScreen mainScreen;
-
-      @Override
-      protected void init() {
-        mainScreen = mainScreenProvider.get();
-      }
-
-      @Override
-      public void execute() {
-        displayOnMainStage(mainScreen);
-      }
-    });
+    location.set(MAIN_SCREEN_LOCATION);
   }
 
   public void showScreen(final Node node) {
@@ -343,67 +357,7 @@ public class ProgramController {
     playerPresentation.play(mediaItem.getUri(), positionMillis);
     currentMediaItem = mediaItem;
 
-    final PlaybackOverlayPresentation playbackOverlayPresentation = playbackOverlayPresentationProvider.get();
-
-    navigator.navigateTo(new Destination("playback", mediaItem.getTitle()) {
-      private long totalTimeViewed = 0;
-
-      @Override
-      protected void init() {
-        playerPresentation.getPlayer().positionProperty().addListener(new ChangeListener<Number>() {
-          @Override
-          public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number value) {
-            long old = oldValue.longValue();
-            long current = value.longValue();
-
-            if(old < current) {
-              long diff = current - old;
-
-              if(diff < 1000) {
-                totalTimeViewed += diff;
-              }
-            }
-          }
-        });
-      }
-
-      @Override
-      public void execute() {
-        displayOnOverlayStage(playbackOverlayPresentation.getView());
-      }
-
-      @Override
-      protected void outro() {
-        MediaData mediaData = mediaItem.get(MediaData.class);
-
-        if(mediaData != null) {
-          long length = playerPresentation.getLength();
-
-          if(length > 0) {
-            long timeViewed = totalTimeViewed + mediaData.getResumePosition() * 1000L;
-
-            if(timeViewed >= length * 9 / 10) {  // 90% viewed?
-              System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
-
-              mediaData.viewedProperty().set(true);
-            }
-
-            if(totalTimeViewed > 30 * 1000) {
-              long resumePosition = 0;
-              long position = playerPresentation.getPosition();
-
-              if(position > 30 * 1000 && position < length * 9 / 10) {
-                System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Setting resume position to " + position + " ms: " + mediaItem);
-
-                resumePosition = position;
-              }
-
-              mediaData.resumePositionProperty().set((int)(resumePosition / 1000));
-            }
-          }
-        }
-      }
-    });
+    setLocation(new PlaybackLocation(getLocation()));
 
     informationBorder.setVisible(false);
   }
@@ -411,9 +365,7 @@ public class ProgramController {
   public synchronized void stop() {
     playerPresentation.getPlayer().onPlayerEvent().set(null);
 
-    while(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
-      navigator.back();
-    }
+    setLocation(getLocation().getParent());
 
     informationBorder.setVisible(true);
 

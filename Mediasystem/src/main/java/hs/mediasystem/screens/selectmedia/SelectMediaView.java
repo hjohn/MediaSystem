@@ -5,11 +5,9 @@ import hs.mediasystem.screens.MediaNodeEvent;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
 public interface SelectMediaView {
-  ObjectProperty<EventHandler<ActionEvent>> onBack();
   ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect();
   ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected();
 
