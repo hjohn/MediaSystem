@@ -30,7 +30,7 @@ public class NameDecoder {
   }};
 
   private static final String SEASON = "([0-9]{1,2})";
-  private static final String EPISODE = "([0-9]{1,2})(?:-[Ee]?([0-9]{1,2}))?";
+  private static final String EPISODE = "([0-9]{1,2})(?:-?[Ee]?([0-9]{1,2}))?";
   private static final String NOT_PRECEDED_BY_DIGIT = "(?<!\\d)";
   private static final String NOT_SUCCEEDED_BY_DIGIT_OR_LETTER = "(?!(?:\\d|\\p{L}))";
 
@@ -47,6 +47,7 @@ public class NameDecoder {
     add(Pattern.compile("(.*?)" + NOT_PRECEDED_BY_DIGIT + "([1-3][0-9]|0?[1-9])([1-3][0-9]|0[1-9])()" + "\\b" + "(.*?)"));    // matches seasons upto 39, episodes upto 39 when written without space
 
     add(Pattern.compile("(.*?)" + "()#" + EPISODE + "(.*?)"));  // No Season
+    add(Pattern.compile("(.*?)" + "()(?:Part|part|PART) " + EPISODE + "(.*?)"));  // No Season
     add(Pattern.compile("(.*?)" + NOT_PRECEDED_BY_DIGIT + "[Ss]" + SEASON + "()()" + NOT_SUCCEEDED_BY_DIGIT_OR_LETTER + "(.*?)")); // Season Only
   }};
 

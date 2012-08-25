@@ -87,8 +87,10 @@ public class NameDecoderTest {
       {hintsEpisode, "Stargate.Universe.S01E01-E03.Air.Extended.720p.Bluray.DTS.x264-DiRTY.mkv", "Stargate Universe", null, "Air Extended 720p Bluray DTS x264-DiRTY", "01,01-03", null, null, "mkv"},
       {hintsEpisode, "Heroes.S04.Bonus.Genetics.of.a.Scene.720p.BluRay.x264-EbP.mkv", "Heroes", null, "Bonus Genetics of a Scene 720p BluRay x264-EbP", "04", null, null, "mkv"},
 
-      {hintsEpisode, "Gooische Vrouwen - 02x01_xvid.avi", "Gooische Vrouwen", null, "_xvid","02,01", null, null, "avi"}
+      {hintsEpisode, "Gooische Vrouwen - 02x01_xvid.avi", "Gooische Vrouwen", null, "_xvid", "02,01", null, null, "avi"},
 
+      {hintsEpisode, "Pillars.of.the.Earth.Part.1.720p.BluRay.X264-REWARD.mkv", "Pillars of the Earth", null, "720p BluRay X264-REWARD", ",1", null, null, "mkv"},
+      {hintsEpisode, "Desperate.Housewives.S04E16E17.720p.HDTV.X264-DIMENSION.mkv", "Desperate Housewives", null, "720p HDTV X264-DIMENSION", "04,16-17", null, null, "mkv"}
     });
   }
 
