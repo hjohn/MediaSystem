@@ -31,7 +31,7 @@
 			<groupId>javafx</groupId>
 			<artifactId>javafx</artifactId>
 			<scope>system</scope>
-			<systemPath>C:\Program Files (x86)\Oracle\JavaFX 2.2 SDK\rt\lib\jfxrt.jar</systemPath>
+			<systemPath>C:\Program Files (x86)\Java\jdk1.7.0_06\jre\lib\jfxrt.jar</systemPath>
 			<version>2.2</version>
 		</dependency>
 		<dependency>
