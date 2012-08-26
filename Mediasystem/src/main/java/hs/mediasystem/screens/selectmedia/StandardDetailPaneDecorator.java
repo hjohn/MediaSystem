@@ -28,6 +28,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -273,8 +274,11 @@ public class StandardDetailPaneDecorator implements DetailPaneDecorator {
     }
   }
 
-  private static final class CastingImage extends VBox {
+  private static final class CastingImage extends Button {
     public CastingImage(Casting casting) {
+      getStyleClass().add("cast-item");
+
+      VBox vbox = new VBox();
       ScaledImageView imageView = new ScaledImageView(new Label("?"));
 
       Label label = new Label();
@@ -297,7 +301,7 @@ public class StandardDetailPaneDecorator implements DetailPaneDecorator {
       label.setMinWidth(100);
       label.setMaxWidth(100);
 
-      getChildren().addAll(imageView, label);
+      vbox.getChildren().addAll(imageView, label);
 
       if(casting.getCharacterName() != null && !casting.getCharacterName().trim().isEmpty()) {
         Label characterNameLabel = new Label();
@@ -307,8 +311,10 @@ public class StandardDetailPaneDecorator implements DetailPaneDecorator {
         characterNameLabel.setMinWidth(100);
         characterNameLabel.setMaxWidth(100);
 
-        getChildren().add(characterNameLabel);
+        vbox.getChildren().add(characterNameLabel);
       }
+
+      setGraphic(vbox);
     }
 
     private String formattedCharacterName(String rawCharacterName, int cutOffLength) {
