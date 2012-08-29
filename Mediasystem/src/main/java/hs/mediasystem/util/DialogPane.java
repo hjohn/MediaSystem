@@ -22,6 +22,7 @@ public class DialogPane extends StackPane implements Dialog {
   private final StackPane stackPane = new StackPane();
 
   private Stage owner;
+  private Node oldFocusOwner;
 
   public DialogPane() {
     getStylesheets().add("dialog/dialog.css");
@@ -69,6 +70,7 @@ public class DialogPane extends StackPane implements Dialog {
     }
 
     this.owner = parentStage;
+    this.oldFocusOwner = parentStage.getScene().getFocusOwner();
 
     StackPane.setMargin(this, new Insets(40, 40, 40, 40));
 
@@ -90,6 +92,10 @@ public class DialogPane extends StackPane implements Dialog {
     removeParentEffect(originalRoot);
 
     owner = null;
+
+    if(oldFocusOwner != null) {
+      oldFocusOwner.requestFocus();
+    }
   }
 
   @Override
