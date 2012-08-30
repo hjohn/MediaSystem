@@ -10,11 +10,11 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 
 public class EpisodeDetailPaneDecorator extends StandardDetailPaneDecorator {
-  protected final StringBinding season = MapBindings.selectInteger(mediaNodeProperty(), "dataMap", Episode.class, "season").asString();
-  protected final StringBinding episode = MapBindings.selectString(mediaNodeProperty(), "dataMap", Episode.class, "episodeRange");
+  protected final StringBinding season = MapBindings.selectInteger(dataProperty(), "season").asString();
+  protected final StringBinding episode = MapBindings.selectString(dataProperty(), "episodeRange");
 
   public EpisodeDetailPaneDecorator() {
-    groupName.bind(MapBindings.selectString(mediaNodeProperty(), "dataMap", Episode.class, "serie", "dataMap", Media.class, "title"));
+    groupName.bind(MapBindings.selectString(dataProperty(), "serie", "dataMap", Media.class, "title"));
   }
 
   @Override

@@ -5,7 +5,6 @@ import hs.mediasystem.dao.Casting;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.screens.MediaItemFormatter;
-import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.StarRating;
 import hs.mediasystem.util.AreaPane;
 import hs.mediasystem.util.ImageHandle;
@@ -37,24 +36,25 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 
-public class StandardDetailPaneDecorator implements DetailPaneDecorator {
-  private final ObjectProperty<MediaNode> mediaNode = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<MediaNode> mediaNodeProperty() { return mediaNode; }
+public class StandardDetailPaneDecorator implements DetailPaneDecorator<Media> {
+  private final ObjectProperty<Media> data = new SimpleObjectProperty<>();
+  @Override
+  public ObjectProperty<Media> dataProperty() { return data; }
 
-  protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaNode, "dataMap", Media.class, "image");
+  protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(dataProperty(), "image");
 
   protected final AsyncImageProperty poster = new AsyncImageProperty();
 
   protected final StringProperty groupName = new SimpleStringProperty();
-  protected final StringBinding title = MapBindings.selectString(mediaNode, "dataMap", Media.class, "title");
-  protected final StringBinding subtitle = MapBindings.selectString(mediaNode, "dataMap", Media.class, "subtitle");
-  protected final StringBinding releaseTime = MediaItemFormatter.releaseTimeBinding(mediaNode);
-  protected final StringBinding plot = MapBindings.selectString(mediaNode, "dataMap", Media.class, "description");
-  protected final DoubleBinding rating = MapBindings.selectDouble(mediaNode, "dataMap", Media.class, "rating");
-  protected final IntegerBinding runtime = MapBindings.selectInteger(mediaNode, "dataMap", Media.class, "runtime");
-  protected final ObjectBinding<ObservableList<Casting>> castings = MapBindings.select(mediaNode, "dataMap", Media.class, "castings");
+  protected final StringBinding title = MapBindings.selectString(dataProperty(), "title");
+  protected final StringBinding subtitle = MapBindings.selectString(dataProperty(), "subtitle");
+  protected final StringBinding releaseTime = MediaItemFormatter.releaseTimeBinding2(dataProperty());
+  protected final StringBinding plot = MapBindings.selectString(dataProperty(), "description");
+  protected final DoubleBinding rating = MapBindings.selectDouble(dataProperty(), "rating");
+  protected final IntegerBinding runtime = MapBindings.selectInteger(dataProperty(), "runtime");
+  protected final ObjectBinding<ObservableList<Casting>> castings = MapBindings.select(dataProperty(), "castings");
   protected final StringBinding genres = new StringBinding() {
-    final ObjectBinding<String[]> selectGenres = MapBindings.select(mediaNode, "dataMap", Media.class, "genres");
+    final ObjectBinding<String[]> selectGenres = MapBindings.select(dataProperty(), "genres");
 
     {
       bind(selectGenres);

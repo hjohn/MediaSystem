@@ -207,7 +207,7 @@ public class FrontEnd extends Application {
       }})
       .setImplementation(new DetailPaneDecoratorFactory() {
         @Override
-        public DetailPaneDecorator create() {
+        public DetailPaneDecorator<?> create() {
           return new StandardDetailPaneDecorator();
         }
       })

@@ -1,10 +1,9 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.util.AreaPane;
 import javafx.beans.property.ObjectProperty;
 
-public interface DetailPaneDecorator {
+public interface DetailPaneDecorator<T> {
   void decorate(AreaPane areaPane);
-  ObjectProperty<MediaNode> mediaNodeProperty();
+  ObjectProperty<T> dataProperty();
 }

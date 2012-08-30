@@ -327,9 +327,10 @@ public class SelectMediaPresentation implements Presentation {
     }}, 2, 0);
 
     DetailPaneDecoratorFactory decoratorFactory = detailPaneDecoratorFactoryTracker.getService(new PropertyClassEq("mediasystem.class", mediaNode.getDataType()));
-    final DetailPaneDecorator decorator = decoratorFactory.create();
+    @SuppressWarnings("unchecked")
+    final DetailPaneDecorator<Media> decorator = (DetailPaneDecorator<Media>)decoratorFactory.create();
 
-    decorator.mediaNodeProperty().set(mediaNode);
+    decorator.dataProperty().set(mediaNode.getMedia());
     decorator.decorate(areaPane);
 
     areaPane.getStylesheets().add("controls.css");
@@ -370,7 +371,7 @@ public class SelectMediaPresentation implements Presentation {
       public void close() {
         super.close();
 
-        decorator.mediaNodeProperty().set(null);
+        decorator.dataProperty().set(null);
       }
     };
 

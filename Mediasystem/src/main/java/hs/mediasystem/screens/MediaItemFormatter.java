@@ -57,4 +57,26 @@ public class MediaItemFormatter {
       }
     };
   }
+
+  public static StringBinding releaseTimeBinding2(final ObservableValue<Media> media) {
+    return new StringBinding() {
+      final ObjectBinding<Date> selectReleaseDate = MapBindings.select(media, "releaseDate");
+      final ObjectBinding<Integer> selectReleaseYear = MapBindings.select(media, "releaseYear");
+
+      {
+        bind(selectReleaseDate, selectReleaseYear);
+      }
+
+      @Override
+      protected String computeValue() {
+        String releaseTime = selectReleaseDate.get() == null ? null : DATE_FORMAT.format(selectReleaseDate.get());
+
+        if(releaseTime == null) {
+          releaseTime = selectReleaseYear.get() == null ? "" : "" + selectReleaseYear.get();
+        }
+
+        return releaseTime;
+      }
+    };
+  }
 }
