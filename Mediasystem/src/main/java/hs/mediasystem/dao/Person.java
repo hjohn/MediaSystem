@@ -1,5 +1,6 @@
 package hs.mediasystem.dao;
 
+import hs.mediasystem.db.AnnotatedRecordMapper;
 import hs.mediasystem.db.Column;
 import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Id;
@@ -7,17 +8,16 @@ import hs.mediasystem.db.Table;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 @Table(name = "persons")
 public class Person {
+
   @Id
   private Integer id;
-
-  @Column
-  private String name;
-
-  @Column
-  private String biography;
 
   @Column
   private String birthPlace;
@@ -29,6 +29,8 @@ public class Person {
   private String photoURL;
 
   private Source<byte[]> photo;
+
+  private List<Casting> castings;
 
   public void afterLoadStore(Database database) throws SQLException {
     setPhoto(DatabaseUrlSource.create(database, getPhotoURL()));
@@ -42,13 +44,15 @@ public class Person {
     this.id = id;
   }
 
-  public String getName() {
-    return name;
-  }
+  private final StringProperty name = new SimpleStringProperty();
+  public StringProperty nameProperty() { return name; }
+  @Column public String getName() { return this.name.get(); }
+  public void setName(String name) { this.name.set(name); }
 
-  public void setName(String name) {
-    this.name = name;
-  }
+  private final StringProperty biography = new SimpleStringProperty();
+  public StringProperty biographyProperty() { return biography; }
+  @Column public String getBiography() { return this.biography.get(); }
+  public void setBiography(String biography) { this.biography.set(biography); }
 
   public String getPhotoURL() {
     return photoURL;
@@ -66,14 +70,6 @@ public class Person {
     this.photo = photo;
   }
 
-  public String getBiography() {
-    return biography;
-  }
-
-  public void setBiography(String biography) {
-    this.biography = biography;
-  }
-
   public String getBirthPlace() {
     return birthPlace;
   }
@@ -88,5 +84,16 @@ public class Person {
 
   public void setBirthDate(Date birthDate) {
     this.birthDate = birthDate;
+  }
+
+  public boolean isCastingsLoaded() {
+    return castings != null;
+  }
+
+  public List<Casting> getCastings() {
+    if(castings == null) {
+      castings = AnnotatedRecordMapper.fetch(Casting.class, this);
+    }
+    return castings;
   }
 }

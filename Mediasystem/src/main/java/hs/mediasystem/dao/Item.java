@@ -1,13 +1,17 @@
 package hs.mediasystem.dao;
 
-import hs.mediasystem.db.Database;
+import hs.mediasystem.db.AnnotatedRecordMapper;
+import hs.mediasystem.db.Id;
+import hs.mediasystem.db.Table;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Table(name = "items")
 public class Item {
-  private int id;
+
+  @Id
+  private Integer id;
 
   private Identifier identifier;
 
@@ -44,11 +48,11 @@ public class Item {
     this.identifier = identifier;
   }
 
-  public int getId() {
+  public Integer getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 
@@ -202,12 +206,7 @@ public class Item {
 
   public List<Casting> getCastings() {
     if(castings == null) {
-      if(id > 0) {
-        castings = Database.fetch(this, CastingsFetcher.class);
-      }
-      else {
-        castings = new ArrayList<>();
-      }
+      castings = AnnotatedRecordMapper.fetch(Casting.class, this);
     }
     return castings;
   }

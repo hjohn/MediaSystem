@@ -1,15 +1,29 @@
 package hs.mediasystem.dao;
 
+import hs.mediasystem.db.AnnotatedRecordMapper;
+import hs.mediasystem.db.Column;
+import hs.mediasystem.db.Table;
 
+@Table(name = "castings")
 public class Casting {
+
+  @Column(name = "persons_id")
   private Person person;
+
+  @Column(name = "items_id")
   private Item item;
 
+  @Column
   private String role;
+
+  @Column
   private String characterName;
+
+  @Column
   private int index = Integer.MAX_VALUE;
 
   public Person getPerson() {
+    person = AnnotatedRecordMapper.fetch(person);
     return person;
   }
 
