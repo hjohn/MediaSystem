@@ -41,30 +41,32 @@ public class ItemsDao {
         System.out.println("[FINE] ItemsDao.getItem() - Selecting Item with type/provider/providerid = " + identifier.getMediaType() + "/" + identifier.getProvider() + "/" + identifier.getProviderId());
 
         if(record != null) {
-          return new Item(identifier) {{
-            setId(record.getInteger("id"));
-            setImdbId(record.getString("imdbid"));
-            setTitle(record.getString("title"));
-            setSeason(record.getInteger("season"));
-            setEpisode(record.getInteger("episode"));
-            setReleaseDate(record.getDate("releasedate"));
-            setPlot(record.getString("plot"));
-            setRating(record.getFloat("rating"));
-            setRuntime(record.getInteger("runtime"));
-            setVersion(record.getInteger("version"));
-            setLanguage(record.getString("language"));
-            setTagline(record.getString("tagline"));
-            setBackgroundURL(record.getString("backgroundurl"));
-            setBannerURL(record.getString("bannerurl"));
-            setPosterURL(record.getString("posterurl"));
+          Item item = new Item(identifier);
 
-            setBackground(DatabaseUrlSource.create(database, getBackgroundURL()));
-            setBanner(DatabaseUrlSource.create(database, getBannerURL()));
-            setPoster(DatabaseUrlSource.create(database, getPosterURL()));
+          item.setId(record.getInteger("id"));
+          item.setImdbId(record.getString("imdbid"));
+          item.setTitle(record.getString("title"));
+          item.setSeason(record.getInteger("season"));
+          item.setEpisode(record.getInteger("episode"));
+          item.setReleaseDate(record.getDate("releasedate"));
+          item.setPlot(record.getString("plot"));
+          item.setRating(record.getFloat("rating"));
+          item.setRuntime(record.getInteger("runtime"));
+          item.setVersion(record.getInteger("version"));
+          item.setLanguage(record.getString("language"));
+          item.setTagline(record.getString("tagline"));
+          item.setBackgroundURL(record.getString("backgroundurl"));
+          item.setBannerURL(record.getString("bannerurl"));
+          item.setPosterURL(record.getString("posterurl"));
 
-            String genres = record.getString("genres");
-            setGenres(genres == null ? new String[] {} : genres.split(","));
-          }};
+          item.setBackground(DatabaseUrlSource.create(database, item.getBackgroundURL()));
+          item.setBanner(DatabaseUrlSource.create(database, item.getBannerURL()));
+          item.setPoster(DatabaseUrlSource.create(database, item.getPosterURL()));
+
+          String genres = record.getString("genres");
+          item.setGenres(genres == null ? new String[] {} : genres.split(","));
+
+          return item;
         }
 
         throw new ItemNotFoundException(identifier);
