@@ -4,6 +4,7 @@ import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.ImageHandle;
 import hs.subtitle.DefaultThreadFactory;
 
+import java.io.ByteArrayInputStream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -19,6 +20,8 @@ import javafx.scene.image.Image;
 public class AsyncImageProperty extends SimpleObjectProperty<Image> {
   private static final ThreadPoolExecutor SLOW_EXECUTOR = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new DefaultThreadFactory("AsyncImageProperty[Slow]", true));
   private static final ThreadPoolExecutor FAST_EXECUTOR = new ThreadPoolExecutor(3, 3, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new DefaultThreadFactory("AsyncImageProperty[Fast]", true));
+
+  private static final Image NULL_IMAGE = new Image(new ByteArrayInputStream(new byte[0]));
 
   static {
     SLOW_EXECUTOR.allowCoreThreadTimeOut(true);
@@ -43,7 +46,7 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
   }
 
   private void loadImageInBackground(final ImageHandle imageHandle) {
-    set(null);
+    set(NULL_IMAGE);  // WORKAROUND for JavaFX Jira Issue RT-23974; should be null, but that causes an Exception in ImageView code
 
     synchronized(FAST_EXECUTOR) {
       if(!taskQueued && imageHandle != null) {
