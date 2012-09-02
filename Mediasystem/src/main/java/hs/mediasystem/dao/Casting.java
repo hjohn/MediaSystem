@@ -32,6 +32,7 @@ public class Casting {
   }
 
   public Item getItem() {
+    item = AnnotatedRecordMapper.fetch(item);
     return item;
   }
 
