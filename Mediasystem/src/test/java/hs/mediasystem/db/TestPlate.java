@@ -2,7 +2,11 @@ package hs.mediasystem.db;
 
 @IdClass
 public class TestPlate {
+
+  @IdColumn(1)
   private final String countryCode;
+
+  @IdColumn(2)
   private final String licensePlate;
 
   public TestPlate(String countryCode, String licensePlate) {

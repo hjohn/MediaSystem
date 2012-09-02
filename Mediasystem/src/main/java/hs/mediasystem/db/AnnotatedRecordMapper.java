@@ -3,9 +3,11 @@ package hs.mediasystem.db;
 import hs.mediasystem.db.Database.Transaction;
 import hs.mediasystem.util.WeakValueMap;
 
+import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -14,6 +16,8 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +26,12 @@ import java.util.WeakHashMap;
 public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   private static final Map<Class<?>, AnnotatedRecordMapper<?>> RECORD_MAPPERS = new WeakValueMap<>();
 
-  private final Map<Accessor, String[]> ids = new HashMap<>();
   private final Map<Accessor, String[]> columns = new HashMap<>();
   private final Map<Class<?>, String[]> relations = new HashMap<>();
   private final String tableName;
 
+  private Accessor idAccessor;
+  private String[] idColumnNames;
   private MethodHandle afterLoadStore;
 
   private AnnotatedRecordMapper(Class<T> cls) {
@@ -34,27 +39,35 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
 
     tableName = table.name();
 
-    for(Field field : cls.getDeclaredFields()) {
-      Id id = field.getAnnotation(Id.class);
-      Column column = field.getAnnotation(Column.class);
+    List<Accessor> accessors = getAnnotatedAccessors(cls, null, Column.class, Id.class);
 
-      if(id != null || column != null) {
-        String[] columnNames = column == null ? null : column.name();
+    for(Accessor accessor : accessors) {
+      Id id = accessor.getAnnotation(Id.class);
+      Column column = accessor.getAnnotation(Column.class);
 
-        if(columnNames == null || columnNames.length == 0) {
-          columnNames = new String[] {field.getName().toLowerCase()};
-        }
+      String[] columnNames = column == null ? null : column.name();
 
-        if(id != null) {
-          ids.put(new FieldAccessor(field), columnNames);
-        }
-        else if(column != null) {
-          columns.put(new FieldAccessor(field), columnNames);
-        }
+      if(columnNames == null || columnNames.length == 0) {
+        columnNames = new String[] {accessor.getName()};
+      }
 
-        if(isRelation(field.getType())) {
-          relations.put(field.getType(), columnNames);
-        }
+      for(int i = 0; i < columnNames.length; i++) {
+        columnNames[i] = columnNames[i].toLowerCase();
+      }
+
+      if(id != null && idAccessor != null) {
+        throw new IllegalStateException("only one @Id annotation allowed: " + cls);
+      }
+      else if(id != null) {
+        idAccessor = accessor;
+        idColumnNames = columnNames;
+      }
+      else if(column != null) {
+        columns.put(accessor, columnNames);
+      }
+
+      if(isRelation(accessor.getType())) {
+        relations.put(accessor.getType(), columnNames);
       }
     }
 
@@ -63,46 +76,6 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     }
     catch(NoSuchMethodException | IllegalAccessException e) {
       // ignore and continue
-    }
-
-    try {
-      for(Method method : cls.getDeclaredMethods()) {
-        Id id = method.getAnnotation(Id.class);
-        Column column = method.getAnnotation(Column.class);
-
-        if(id != null || column != null) {
-          String[] columnNames = column == null ? new String[0] : column.name();
-
-          String methodName = method.getName();
-
-          if(methodName.startsWith("get")) {
-            methodName = methodName.substring(3);
-          }
-          else if(methodName.startsWith("is")) {
-            methodName = methodName.substring(2);
-          }
-
-          if(columnNames == null || columnNames.length == 0) {
-            columnNames = new String[] {methodName.toLowerCase()};
-          }
-
-          Method writeMethod = cls.getDeclaredMethod("set" + methodName, method.getReturnType());
-
-          if(id != null) {
-            ids.put(new MethodAccessor(method, writeMethod), columnNames);
-          }
-          else if(column != null) {
-            columns.put(new MethodAccessor(method, writeMethod), columnNames);
-          }
-
-          if(isRelation(method.getReturnType())) {
-            relations.put(method.getReturnType(), columnNames);
-          }
-        }
-      }
-    }
-    catch(NoSuchMethodException e) {
-      throw new RuntimeException(e);
     }
   }
 
@@ -146,13 +119,32 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   }
 
   public List<String> getIdColumnNames() {
-    List<String> idColumnNames = new ArrayList<>();
+    return new ArrayList<>(Arrays.asList(idColumnNames));
+  }
 
-    for(String[] names : ids.values()) {
-      idColumnNames.addAll(Arrays.asList(names));
+  public Object[] getIds(T instance) {
+    Object value = idAccessor.get(instance);
+
+    if(idAccessor.getType().getAnnotation(IdClass.class) == null) {
+      return new Object[] {value};
     }
 
-    return idColumnNames;
+    List<Accessor> accessors = getAnnotatedAccessors(idAccessor.getType(), new Comparator<Accessor>() {
+      @Override
+      public int compare(Accessor o1, Accessor o2) {
+        return Integer.compare(o1.getAnnotation(IdColumn.class).value(), o2.getAnnotation(IdColumn.class).value());
+      }
+    }, IdColumn.class);
+
+
+    Object[] ids = new Object[accessors.size()];
+    int index = 0;
+
+    for(Accessor accessor : accessors) {
+      ids[index++] = accessor.get(value);
+    }
+
+    return ids;
   }
 
   @Override
@@ -160,7 +152,24 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     Map<String, Object> values = new HashMap<>();
 
     for(Accessor accessor : columns.keySet()) {
-      values.put(columns.get(accessor)[0], accessor.get(object));
+      Object value = accessor.get(object);
+
+      if(value != null && isRelation(value.getClass())) {
+        @SuppressWarnings("unchecked")
+        AnnotatedRecordMapper<Object> mapper = (AnnotatedRecordMapper<Object>)create(value.getClass());
+
+        Object[] ids = mapper.getIds(value);
+        String[] columnNames = columns.get(accessor);
+
+        for(int i = 0; i < ids.length; i++) {
+          values.put(columnNames[i], ids[i]);
+        }
+      }
+      else {
+        for(String columnName : columns.get(accessor)) {
+          values.put(columnName, value);
+        }
+      }
     }
 
     return values;
@@ -170,12 +179,10 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   public Map<String, Object> extractIds(T object) {
     Map<String, Object> values = new HashMap<>();
 
-    for(Accessor accessor : ids.keySet()) {
-      Object id = accessor.get(object);
+    Object[] ids = getIds(object);
 
-      if(id != null) {
-        values.put(ids.get(accessor)[0], id);
-      }
+    for(int i = 0; i < ids.length; i++) {
+      values.put(idColumnNames[i], ids[i]);
     }
 
     return values;
@@ -184,11 +191,11 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   @Override
   public void applyValues(Transaction transaction, T object, Map<String, Object> map) {
     for(Accessor accessor : columns.keySet()) {
-      accessor.set(object, convertValue(accessor, map, transaction));
+      accessor.set(object, convertValue(columns.get(accessor), accessor.getType(), map, transaction));
     }
 
-    for(Accessor accessor : ids.keySet()) {
-      accessor.set(object, convertValue(accessor, map, transaction));
+    if(idAccessor != null) {
+      idAccessor.set(object, convertValue(idColumnNames, idAccessor.getType(), map, transaction));
     }
   }
 
@@ -207,11 +214,9 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     }
   }
 
-  private Object convertValue(Accessor accessor, Map<String, Object> map, Transaction transaction) {
-    String[] columnNames = columns.containsKey(accessor) ? columns.get(accessor) : ids.get(accessor);
-
+  private Object convertValue(String[] columnNames, Class<?> type, Map<String, Object> map, Transaction transaction) {
     try {
-      if(accessor.getType().getAnnotation(IdClass.class) != null) {
+      if(type.getAnnotation(IdClass.class) != null) {
         Class<?>[] types = new Class<?>[columnNames.length];
         Object[] idValues = new Object[columnNames.length];
 
@@ -222,21 +227,21 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
           idValues[i] = value;
         }
 
-        Constructor<?> constructor = accessor.getType().getConstructor(types);
+        Constructor<?> constructor = type.getConstructor(types);
 
         return constructor.newInstance(idValues);
       }
-      else if(isRelation(accessor.getType())) {
+      else if(isRelation(type)) {
         Object[] idValues = new Object[columnNames.length];
 
         for(int i = 0; i < columnNames.length; i++) {
           idValues[i] = map.get(columnNames[i]);
         }
 
-        Object associatedObject = transaction.findAssociatedObject(accessor.getType(), idValues);
+        Object associatedObject = transaction.findAssociatedObject(type, idValues);
 
         if(associatedObject == null) {
-          associatedObject = accessor.getType().newInstance();
+          associatedObject = type.newInstance();
           associateStub(transaction, associatedObject, idValues);
         }
 
@@ -245,12 +250,13 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
 
       Object value = map.get(columnNames[0]);
 
-      if(accessor.getType().isEnum()) {
-        if(value instanceof String) {
-          Method method = accessor.getType().getMethod("valueOf", String.class);
+      if(type.isEnum() && value instanceof String) {
+        Method method = type.getMethod("valueOf", String.class);
 
-          return method.invoke(null, value);
-        }
+        return method.invoke(null, value);
+      }
+      else if(type.isArray() && value instanceof String) {
+        return ((String)value).split(",");
       }
       else if(value instanceof Blob) {
         Blob blob = (Blob)value;
@@ -267,24 +273,18 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
 
   @Override
   public void setGeneratedKey(T object, Object key) {
-    if(ids.isEmpty()) {
+    if(idAccessor == null) {
       return;
     }
-
-    if(ids.size() != 1) {
-      throw new IllegalStateException("cannot set generated keys for table with more than one id field: " + tableName);
-    }
-
-    Accessor accessor = ids.keySet().iterator().next();
 
     if(key instanceof Number) {
       Number number = (Number)key;
 
-      if(accessor.getType() == int.class || accessor.getType() == Integer.class) {
-        accessor.set(object, number.intValue());
+      if(idAccessor.getType() == int.class || idAccessor.getType() == Integer.class) {
+        idAccessor.set(object, number.intValue());
       }
       else {
-        accessor.set(object, number.longValue());
+        idAccessor.set(object, number.longValue());
       }
     }
   }
@@ -357,6 +357,73 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     Object get(Object instance);
     void set(Object instance, Object value);
     Class<?> getType();
+    <A extends Annotation> A getAnnotation(Class<A> cls);
+    String getName();
+  }
+
+  @SafeVarargs
+  public static List<Accessor> getAnnotatedAccessors(Class<?> cls, Comparator<Accessor> comparator, Class<? extends Annotation>... annotationClasses) {
+    List<Accessor> accessors = new ArrayList<>();
+    List<AccessibleObject> accessibleObjects = new ArrayList<>();
+
+    accessibleObjects.addAll(Arrays.asList(cls.getDeclaredFields()));
+    accessibleObjects.addAll(Arrays.asList(cls.getDeclaredMethods()));
+
+    for(AccessibleObject accessibleObject : accessibleObjects) {
+      for(Class<? extends Annotation> annotationClass : annotationClasses) {
+        if(accessibleObject.getAnnotation(annotationClass) != null) {
+          accessors.add(createAccessor(accessibleObject));
+          break;
+        }
+      }
+    }
+
+    if(comparator != null) {
+      Collections.sort(accessors, comparator);
+    }
+
+    return accessors;
+  }
+
+  public static String getAccessibleObjectName(AccessibleObject accessibleObject) {
+    if(accessibleObject instanceof Field) {
+      return ((Field)accessibleObject).getName();
+    }
+
+    Method method = (Method)accessibleObject;
+
+    return getBaseNameFromGetter(method);
+  }
+
+  protected static String getBaseNameFromGetter(Method method) {
+    String methodName = method.getName();
+
+    if(methodName.startsWith("get")) {
+      methodName = methodName.substring(3);
+    }
+    else if(methodName.startsWith("is")) {
+      methodName = methodName.substring(2);
+    }
+
+    return methodName;
+  }
+
+  public static Accessor createAccessor(AccessibleObject accessibleObject) {
+    if(accessibleObject instanceof Field) {
+      return new FieldAccessor((Field)accessibleObject);
+    }
+
+    Method method = (Method)accessibleObject;
+    String baseName = getBaseNameFromGetter(method);
+
+    try {
+      Method writeMethod = method.getDeclaringClass().getDeclaredMethod("set" + baseName, method.getReturnType());
+
+      return new MethodAccessor(method, writeMethod);
+    }
+    catch(NoSuchMethodException | SecurityException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static class FieldAccessor implements Accessor {
@@ -392,6 +459,16 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     public Class<?> getType() {
       return field.getType();
     }
+
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> cls) {
+      return field.getAnnotation(cls);
+    }
+
+    @Override
+    public String getName() {
+      return field.getName();
+    }
   }
 
   public static class MethodAccessor implements Accessor {
@@ -426,6 +503,18 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     @Override
     public Class<?> getType() {
       return readMethod.getReturnType();
+    }
+
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> cls) {
+      return readMethod.getAnnotation(cls);
+    }
+
+    @Override
+    public String getName() {
+      String name = readMethod.getName();
+
+      return name.startsWith("get") ? name.substring(3) : name.substring(2);
     }
   }
 }
