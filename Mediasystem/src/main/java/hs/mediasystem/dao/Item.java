@@ -1,9 +1,12 @@
 package hs.mediasystem.dao;
 
 import hs.mediasystem.db.AnnotatedRecordMapper;
+import hs.mediasystem.db.Column;
+import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
@@ -13,31 +16,70 @@ public class Item {
   @Id
   private Integer id;
 
+  @Column
   private Identifier identifier;
 
+  @Column
   private String title;
+
+  @Column
   private int version;
+
+  @Column
   private String imdbId;
+
+  @Column
   private String plot;
+
+  @Column
   private String backgroundURL;
+
+  @Column
   private String bannerURL;
+
+  @Column
   private String posterURL;
+
+  @Column
+  private Float rating;
+
+  @Column
+  private Date releaseDate;
+
+  @Column
+  private int runtime;
+
+  @Column
+  private Integer season;
+
+  @Column
+  private Integer episode;
+
+  @Column
+  private String[] genres = new String[] {};
+
+  @Column
+  private String language;
+
+  @Column
+  private String tagline;
+
   private Source<byte[]> background;
   private Source<byte[]> banner;
   private Source<byte[]> poster;
-  private Float rating;
-  private Date releaseDate;
-  private int runtime;
-  private Integer season;
-  private Integer episode;
-  private String[] genres = new String[] {};
-  private String language;
-  private String tagline;
-
   private List<Casting> castings;
 
   public Item(Identifier identifier) {
     this.identifier = identifier;
+  }
+
+  public Item() {
+  }
+
+  public void afterLoadStore(Database database) throws SQLException {
+    setBackground(DatabaseUrlSource.create(database, getBackgroundURL()));
+    setBanner(DatabaseUrlSource.create(database, getBannerURL()));
+    setPoster(DatabaseUrlSource.create(database, getPosterURL()));
   }
 
   public Identifier getIdentifier() {
