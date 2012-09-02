@@ -1,5 +1,7 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.util.WeakValueMap;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,9 +43,16 @@ public class Database {
     return fetcher.fetch(parent);
   }
 
+  private static Database instance;
+
+  public static Database getAssociatedDatabase(@SuppressWarnings("unused") Class<?> cls) {
+    return instance;
+  }
+
   @Inject
   public Database(Provider<Connection> connectionProvider) {
     this.connectionProvider = connectionProvider;
+    instance = this;  // TODO dirty
   }
 
   private static final ThreadLocal<Transaction> CURRENT_TRANSACTION = new ThreadLocal<>();
@@ -80,12 +89,12 @@ public class Database {
 
   private static final Map<Class<?>, RecordMapper<?>> RECORD_MAPPERS = new HashMap<>();
 
-  private static <T> RecordMapper<T> getRecordMapper(Class<T> cls) {
+  public <T> RecordMapper<T> getRecordMapper(Class<T> cls) {
     @SuppressWarnings("unchecked")
     RecordMapper<T> recordMapper = (RecordMapper<T>)RECORD_MAPPERS.get(cls);
 
     if(recordMapper == null) {
-      recordMapper = new AnnotatedRecordMapper<>(cls);
+      recordMapper = AnnotatedRecordMapper.create(cls);
 
       RECORD_MAPPERS.put(cls, recordMapper);
     }
@@ -97,6 +106,8 @@ public class Database {
     private final Transaction parent;
     private final Connection connection;
     private final Savepoint savepoint;
+
+    private final WeakValueMap<String, Object> associatedObjects = new WeakValueMap<>();
 
     private int activeNestedTransactions;
     private boolean finished;
@@ -126,6 +137,10 @@ public class Database {
       assert (this.parent != null && this.savepoint != null) || (this.parent == null && this.savepoint == null);
     }
 
+    public Database getDatabase() {
+      return Database.this;
+    }
+
     public Provider<Connection> getConnectionProvider() {
       return connectionProvider;
     }
@@ -138,6 +153,21 @@ public class Database {
       if(finished) {
         throw new IllegalStateException("transaction already ended");
       }
+    }
+
+    private String createAssociatedObjectId(Class<?> cls, Object[] ids) {
+      return cls.getName() + ":" + Arrays.toString(ids);
+    }
+
+    public void associate(Object obj) {
+      @SuppressWarnings("unchecked")
+      RecordMapper<Object> recordMapper = (RecordMapper<Object>) getRecordMapper(obj.getClass());
+
+      associatedObjects.put(createAssociatedObjectId(obj.getClass(), recordMapper.extractIds(obj).values().toArray()), obj);
+    }
+
+    public Object findAssociatedObject(Class<?> cls, Object[] ids) {
+      return associatedObjects.get(createAssociatedObjectId(cls, ids));
     }
 
     public synchronized long getDatabaseSize() throws DatabaseException {
@@ -232,8 +262,8 @@ public class Database {
             }
 
             T record = cls.newInstance();
-            recordMapper.applyValues(record, values);
-            recordMapper.invokeAfterLoadStore(record, Database.this);
+            recordMapper.applyValues(this, record, values);
+            recordMapper.invokeAfterLoadStore(record, Database.this);  // TODO can probably be merged with applyValues now
 
             records.add(record);
           }

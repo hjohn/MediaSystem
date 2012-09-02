@@ -1,24 +1,35 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.db.Database.Transaction;
+import hs.mediasystem.util.WeakValueMap;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
-  private final Map<Accessor, String> ids = new HashMap<>();
-  private final Map<Accessor, String> columns = new HashMap<>();
+  private static final Map<Class<?>, AnnotatedRecordMapper<?>> RECORD_MAPPERS = new WeakValueMap<>();
+
+  private final Map<Accessor, String[]> ids = new HashMap<>();
+  private final Map<Accessor, String[]> columns = new HashMap<>();
+  private final Map<Class<?>, String[]> relations = new HashMap<>();
   private final String tableName;
 
   private MethodHandle afterLoadStore;
 
-  public AnnotatedRecordMapper(Class<T> cls) {
+  private AnnotatedRecordMapper(Class<T> cls) {
     Table table = cls.getAnnotation(Table.class);
 
     tableName = table.name();
@@ -28,17 +39,21 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
       Column column = field.getAnnotation(Column.class);
 
       if(id != null || column != null) {
-        String columnName = column == null ? "" : column.name();
+        String[] columnNames = column == null ? null : column.name();
 
-        if(columnName.isEmpty()) {
-          columnName = field.getName().toLowerCase();
+        if(columnNames == null || columnNames.length == 0) {
+          columnNames = new String[] {field.getName().toLowerCase()};
         }
 
         if(id != null) {
-          ids.put(new FieldAccessor(field), columnName);
+          ids.put(new FieldAccessor(field), columnNames);
         }
         else if(column != null) {
-          columns.put(new FieldAccessor(field), columnName);
+          columns.put(new FieldAccessor(field), columnNames);
+        }
+
+        if(isRelation(field.getType())) {
+          relations.put(field.getType(), columnNames);
         }
       }
     }
@@ -56,7 +71,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
         Column column = method.getAnnotation(Column.class);
 
         if(id != null || column != null) {
-          String columnName = column == null ? "" : column.name();
+          String[] columnNames = column == null ? new String[0] : column.name();
 
           String methodName = method.getName();
 
@@ -67,17 +82,21 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
             methodName = methodName.substring(2);
           }
 
-          if(columnName.isEmpty()) {
-            columnName = methodName.toLowerCase();
+          if(columnNames == null || columnNames.length == 0) {
+            columnNames = new String[] {methodName.toLowerCase()};
           }
 
           Method writeMethod = cls.getDeclaredMethod("set" + methodName, method.getReturnType());
 
           if(id != null) {
-            ids.put(new MethodAccessor(method, writeMethod), columnName);
+            ids.put(new MethodAccessor(method, writeMethod), columnNames);
           }
           else if(column != null) {
-            columns.put(new MethodAccessor(method, writeMethod), columnName);
+            columns.put(new MethodAccessor(method, writeMethod), columnNames);
+          }
+
+          if(isRelation(method.getReturnType())) {
+            relations.put(method.getReturnType(), columnNames);
           }
         }
       }
@@ -87,9 +106,53 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     }
   }
 
+  public static <T> AnnotatedRecordMapper<T> create(Class<T> cls) {
+    @SuppressWarnings("unchecked")
+    AnnotatedRecordMapper<T> annotatedRecordMapper = (AnnotatedRecordMapper<T>)RECORD_MAPPERS.get(cls);
+
+    if(annotatedRecordMapper == null) {
+      annotatedRecordMapper = new AnnotatedRecordMapper<>(cls);
+      RECORD_MAPPERS.put(cls, annotatedRecordMapper);
+    }
+
+    return annotatedRecordMapper;
+  }
+
+  private boolean isRelation(Class<?> type) {
+    return type.getAnnotation(Table.class) != null;
+  }
+
   @Override
   public String getTableName() {
     return tableName;
+  }
+
+  public List<String> getRelationColumnNames(Class<?> relation) {
+    List<String> relationColumnNames = new ArrayList<>();
+
+    relationColumnNames.addAll(Arrays.asList(relations.get(relation)));
+
+    return relationColumnNames;
+  }
+
+  public List<String> getColumnNames() {
+    List<String> columnNames = new ArrayList<>();
+
+    for(String[] names : columns.values()) {
+      columnNames.addAll(Arrays.asList(names));
+    }
+
+    return columnNames;
+  }
+
+  public List<String> getIdColumnNames() {
+    List<String> idColumnNames = new ArrayList<>();
+
+    for(String[] names : ids.values()) {
+      idColumnNames.addAll(Arrays.asList(names));
+    }
+
+    return idColumnNames;
   }
 
   @Override
@@ -97,7 +160,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     Map<String, Object> values = new HashMap<>();
 
     for(Accessor accessor : columns.keySet()) {
-      values.put(columns.get(accessor), accessor.get(object));
+      values.put(columns.get(accessor)[0], accessor.get(object));
     }
 
     return values;
@@ -111,7 +174,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
       Object id = accessor.get(object);
 
       if(id != null) {
-        values.put(ids.get(accessor), id);
+        values.put(ids.get(accessor)[0], id);
       }
     }
 
@@ -119,21 +182,13 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   }
 
   @Override
-  public void applyValues(T object, Map<String, Object> map) {
+  public void applyValues(Transaction transaction, T object, Map<String, Object> map) {
     for(Accessor accessor : columns.keySet()) {
-      String columnName = columns.get(accessor);
-
-      if(map.containsKey(columnName)) {
-        accessor.set(object, convertValue(accessor, map.get(columnName)));
-      }
+      accessor.set(object, convertValue(accessor, map, transaction));
     }
 
     for(Accessor accessor : ids.keySet()) {
-      String fieldName = ids.get(accessor);
-
-      if(map.containsKey(fieldName)) {
-        accessor.set(object, convertValue(accessor, map.get(fieldName)));
-      }
+      accessor.set(object, convertValue(accessor, map, transaction));
     }
   }
 
@@ -152,8 +207,44 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     }
   }
 
-  private Object convertValue(Accessor accessor, Object value) {
+  private Object convertValue(Accessor accessor, Map<String, Object> map, Transaction transaction) {
+    String[] columnNames = columns.containsKey(accessor) ? columns.get(accessor) : ids.get(accessor);
+
     try {
+      if(accessor.getType().getAnnotation(IdClass.class) != null) {
+        Class<?>[] types = new Class<?>[columnNames.length];
+        Object[] idValues = new Object[columnNames.length];
+
+        for(int i = 0; i < columnNames.length; i++) {
+          Object value = map.get(columnNames[i]);
+
+          types[i] = value.getClass();
+          idValues[i] = value;
+        }
+
+        Constructor<?> constructor = accessor.getType().getConstructor(types);
+
+        return constructor.newInstance(idValues);
+      }
+      else if(isRelation(accessor.getType())) {
+        Object[] idValues = new Object[columnNames.length];
+
+        for(int i = 0; i < columnNames.length; i++) {
+          idValues[i] = map.get(columnNames[i]);
+        }
+
+        Object associatedObject = transaction.findAssociatedObject(accessor.getType(), idValues);
+
+        if(associatedObject == null) {
+          associatedObject = accessor.getType().newInstance();
+          associateStub(transaction, associatedObject, idValues);
+        }
+
+        return associatedObject;
+      }
+
+      Object value = map.get(columnNames[0]);
+
       if(accessor.getType().isEnum()) {
         if(value instanceof String) {
           Method method = accessor.getType().getMethod("valueOf", String.class);
@@ -169,7 +260,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
 
       return value;
     }
-    catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SQLException e) {
+    catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SQLException | InstantiationException e) {
       throw new RuntimeException(e);
     }
   }
@@ -195,6 +286,70 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
       else {
         accessor.set(object, number.longValue());
       }
+    }
+  }
+
+  private static final Map<Object, Database> DATABASES = new HashMap<>();
+  private static final Map<Object, Object[]> STUBS = new WeakHashMap<>();
+
+  public void associateStub(Transaction transaction, Object stub, Object[] ids) {
+    STUBS.put(stub, ids);
+    DATABASES.put(stub, transaction.getDatabase());
+  }
+
+  public static <T> T fetch(T instance) {
+    Database database = DATABASES.get(instance);
+    Object[] ids = STUBS.get(instance);
+
+    if(database == null || ids == null) {
+      return instance;
+    }
+
+    AnnotatedRecordMapper<? extends Object> mapper = create(instance.getClass());
+
+    String whereClause = "";
+
+    for(String fieldName : mapper.getIdColumnNames()) {
+      if(!whereClause.isEmpty()) {
+        whereClause += " AND ";
+      }
+      whereClause += fieldName + "=?";
+    }
+
+    try(Transaction transaction = database.beginTransaction()) {
+      @SuppressWarnings("unchecked")
+      T result = (T)transaction.selectUnique(instance.getClass(), whereClause, ids);
+      return result;
+    }
+  }
+
+  public static <C> List<C> fetch(Class<C> cls, Object filteredBy) {
+    Database database = Database.getAssociatedDatabase(cls);
+
+    @SuppressWarnings("unchecked")
+    AnnotatedRecordMapper<Object> parentMapper = (AnnotatedRecordMapper<Object>)create(filteredBy.getClass());
+    AnnotatedRecordMapper<?> mapper = create(cls);
+
+    List<String> relationColumnNames = mapper.getRelationColumnNames(filteredBy.getClass());
+    List<String> idColumnNames = parentMapper.getIdColumnNames();
+    Map<String, Object> values = parentMapper.extractIds(filteredBy);
+
+    String relationExpression = "";
+    Object[] parameters = new Object[relationColumnNames.size()];
+
+    for(int i = 0; i < relationColumnNames.size(); i++) {
+      relationExpression += relationColumnNames.get(i) + "=?";
+      parameters[i] = values.get(idColumnNames.get(i));
+
+      if(parameters[i] == null) {
+        return new ArrayList<>();
+      }
+    }
+
+    try(Transaction transaction = database.beginTransaction()) {
+      transaction.associate(filteredBy);
+
+      return transaction.select(cls, relationExpression, parameters);
     }
   }
 

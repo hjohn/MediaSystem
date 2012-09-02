@@ -2,11 +2,12 @@ package hs.mediasystem.util;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class WeakValueMap<K, V> {
+public class WeakValueMap<K, V> implements Map<K, V> {
   private final ReferenceQueue<V> referenceQueue = new ReferenceQueue<>();
   private final Map<K, KeyedWeakReference<K, V>> map = new HashMap<>();
 
@@ -22,6 +23,7 @@ public class WeakValueMap<K, V> {
    * values in this map as some of them may have been garbage collected already.
    */
 
+  @Override
   public V put(K key, V value) {
     if(key == null) {
       throw new IllegalArgumentException("key cannot be null");
@@ -41,12 +43,14 @@ public class WeakValueMap<K, V> {
     return null;
   }
 
+  @Override
   public V get(Object key) {
     WeakReference<V> valueRef = map.get(key);
 
     return valueRef == null ? null : valueRef.get();
   }
 
+  @Override
   @SuppressWarnings("unchecked")
   public boolean containsValue(Object value) {
     return map.containsValue(new KeyedWeakReference<>((K)null, (V)value, referenceQueue));
@@ -67,18 +71,22 @@ public class WeakValueMap<K, V> {
     }
   }
 
+  @Override
   public int size() {
     return map.size();
   }
 
+  @Override
   public boolean isEmpty() {
     return map.isEmpty();
   }
 
+  @Override
   public boolean containsKey(Object key) {
     return map.containsKey(key);
   }
 
+  @Override
   public V remove(Object key) {
     cleanReferenceQueue();
 
@@ -94,6 +102,7 @@ public class WeakValueMap<K, V> {
     return null;
   }
 
+  @Override
   public void clear() {
     for(Map.Entry<K, KeyedWeakReference<K, V>> entry : map.entrySet()) {
       entry.getValue().clear();
@@ -102,7 +111,23 @@ public class WeakValueMap<K, V> {
     cleanReferenceQueue();
   }
 
+  @Override
   public Set<K> keySet() {
     return map.keySet();
+  }
+
+  @Override
+  public Set<java.util.Map.Entry<K, V>> entrySet() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void putAll(Map<? extends K, ? extends V> m) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Collection<V> values() {
+    throw new UnsupportedOperationException();
   }
 }
