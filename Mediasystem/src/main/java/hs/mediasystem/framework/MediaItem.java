@@ -128,11 +128,11 @@ public class MediaItem implements EnrichTrigger {
     return uri;
   }
 
-  public MediaTree getMediaTree() {
+  protected MediaTree getMediaTree() {
     return mediaTree;
   }
 
-  public EnrichCache getEnrichCache() {
+  protected EnrichCache getEnrichCache() {
     return mediaTree.getEnrichCache();
   }
 
