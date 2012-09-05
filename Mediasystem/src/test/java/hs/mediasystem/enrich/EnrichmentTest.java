@@ -13,6 +13,7 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemUri;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.persist.PersistQueue;
+import hs.mediasystem.test.JavaFXTestCase;
 import hs.mediasystem.util.TaskThreadPoolExecutor;
 
 import java.util.ArrayList;
@@ -21,17 +22,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.stage.Stage;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class EnrichmentTest {
+public class EnrichmentTest extends JavaFXTestCase {
   private static final String MOVIE_ALICE_URI = "";
 
   private MediaTree mediaTree;
@@ -41,16 +39,6 @@ public class EnrichmentTest {
   private List<SlowData> slowDataObjects;
 
   @Mock private MediaDataDao mediaDataDao;
-
-  @BeforeClass
-  public static void beforeClass() {
-    new Thread() {
-      @Override
-      public void run() {
-        Application.launch(FXRunnerApplication.class);
-      }
-    }.start();
-  }
 
   @Before
   public void before() {
@@ -279,21 +267,6 @@ public class EnrichmentTest {
      */
 
     assertTrue(slowDataObjects.indexOf(new SlowData("item-25")) < 10);
-  }
-
-  private void sleep(int millis) {
-    try {
-      Thread.sleep(millis);
-    }
-    catch(InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public static class FXRunnerApplication extends Application {
-    @Override
-    public void start(Stage paramStage) throws Exception {
-    }
   }
 
   private static class SlowData extends DefaultEnrichable<SlowData> {
