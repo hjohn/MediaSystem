@@ -1,9 +1,8 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.beans.AsyncImageProperty;
-import hs.mediasystem.dao.Casting;
 import hs.mediasystem.framework.Media;
-import hs.mediasystem.fs.SourceImageHandle;
+import hs.mediasystem.screens.Casting;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.StarRating;
 import hs.mediasystem.util.ImageHandle;
@@ -267,13 +266,13 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media> {
           break;
         }
 
-        if(casting.getRole().equals("Actor")) {
+        if(casting.role.get().equals("Actor")) {
           CastingImage castingImage = new CastingImage(casting);
 
           castingImage.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-              decoratablePane.decoratorContentProperty().set(casting.getPerson());
+              decoratablePane.decoratorContentProperty().set(casting.person.get());
             }
           });
 
@@ -296,8 +295,8 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media> {
 
       AsyncImageProperty photo = new AsyncImageProperty();
 
-      if(casting.getPerson().getPhoto() != null) {
-        photo.imageHandleProperty().set(new SourceImageHandle(casting.getPerson().getPhoto(), getClass().getName() + "://" + casting.getPerson().getName()));
+      if(casting.person.get().photo.get() != null) {
+        photo.imageHandleProperty().set(casting.person.get().photo.get());
       }
 
       imageView.getStyleClass().add("cast-photo");
@@ -308,17 +307,17 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media> {
       imageView.setAlignment(Pos.CENTER);
 
       label.getStyleClass().add("cast-name");
-      label.setText(casting.getPerson().getName());
+      label.setText(casting.person.get().name.get());
       label.setMinWidth(100);
       label.setMaxWidth(100);
 
       vbox.getChildren().addAll(imageView, label);
 
-      if(casting.getCharacterName() != null && !casting.getCharacterName().trim().isEmpty()) {
+      if(casting.characterName.get() != null && !casting.characterName.get().trim().isEmpty()) {
         Label characterNameLabel = new Label();
 
         characterNameLabel.getStyleClass().add("cast-character-name");
-        characterNameLabel.setText("as " + formattedCharacterName(casting.getCharacterName(), 40));
+        characterNameLabel.setText("as " + formattedCharacterName(casting.characterName.get(), 40));
         characterNameLabel.setMinWidth(100);
         characterNameLabel.setMaxWidth(100);
 

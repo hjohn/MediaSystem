@@ -1,11 +1,13 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.dao.Casting;
 import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.enrich.EnrichTask;
+import hs.mediasystem.fs.SourceImageHandle;
+import hs.mediasystem.screens.Casting;
+import hs.mediasystem.screens.Person;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -111,11 +113,11 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
   }
 
   private static List<Casting> getOrderedCastings(Item item) {
-    List<Casting> castings = new ArrayList<>(item.getCastings());
+    List<hs.mediasystem.dao.Casting> castings = new ArrayList<>(item.getCastings());
 
-    Collections.sort(castings, new Comparator<Casting>() {
+    Collections.sort(castings, new Comparator<hs.mediasystem.dao.Casting>() {
       @Override
-      public int compare(Casting o1, Casting o2) {
+      public int compare(hs.mediasystem.dao.Casting o1, hs.mediasystem.dao.Casting o2) {
         int result = Integer.compare(o1.getIndex(), o2.getIndex());
 
         if(result == 0) {
@@ -129,6 +131,30 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
       }
     });
 
-    return castings;
+    List<Casting> result = new ArrayList<>();
+
+    for(hs.mediasystem.dao.Casting casting : castings) {
+      Person p = new Person();
+
+      p.name.set(casting.getPerson().getName());
+      p.birthDate.set(casting.getPerson().getBirthDate());
+      p.birthPlace.set(casting.getPerson().getBirthPlace());
+      p.biography.set(casting.getPerson().getBiography());
+
+      if(casting.getPerson().getPhoto() != null) {
+        p.photo.set(new SourceImageHandle(casting.getPerson().getPhoto(), "StandardDetailPane://" + casting.getPerson().getName()));
+      }
+
+      Casting c = new Casting();
+
+      c.person.set(p);
+      c.role.set(casting.getRole());
+      c.characterName.set(casting.getCharacterName());
+      c.index.set(casting.getIndex());
+
+      result.add(c);
+    }
+
+    return result;
   }
 }

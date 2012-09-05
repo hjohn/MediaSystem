@@ -1,9 +1,8 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.beans.AsyncImageProperty;
-import hs.mediasystem.dao.Casting;
-import hs.mediasystem.dao.Person;
-import hs.mediasystem.fs.SourceImageHandle;
+import hs.mediasystem.screens.Casting;
+import hs.mediasystem.screens.Person;
 import hs.mediasystem.screens.StarRating;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
@@ -44,9 +43,9 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
   protected final AsyncImageProperty poster = new AsyncImageProperty();
 
   protected final StringProperty groupName = new SimpleStringProperty();
-  protected final StringBinding name = MapBindings.selectString(dataProperty(), "name");
+//  protected final StringBinding name = MapBindings.selectString(dataProperty(), "name");
   protected final StringBinding subtitle = MapBindings.selectString(dataProperty(), "subtitle");
-  protected final StringBinding biography = MapBindings.selectString(dataProperty(), "biography");
+//  protected final StringBinding biography = MapBindings.selectString(dataProperty(), "biography");
   protected final DoubleBinding rating = MapBindings.selectDouble(dataProperty(), "rating");
   protected final IntegerBinding runtime = MapBindings.selectInteger(dataProperty(), "runtime");
   //protected final ObjectBinding<ObservableList<Casting>> castings = MapBindings.select(dataProperty(), "castings");
@@ -89,11 +88,11 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
 
     decoratablePane.add("title-area", 2, new Label() {{
       getStyleClass().add("title");
-      textProperty().bind(name);
+      textProperty().bind(dataProperty().get().name);
     }});
 
-    if(dataProperty().get().getPhoto() != null) {
-      poster.imageHandleProperty().set(new SourceImageHandle(dataProperty().get().getPhoto(), "StandardDetailPane://" + dataProperty().get().getName()));
+    if(dataProperty().get().photo.get() != null) {
+      poster.imageHandleProperty().set(dataProperty().get().photo.get());
     }
 
     ScaledImageView image = new ScaledImageView() {{
@@ -159,15 +158,13 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
     Node plotField = createBiographyField();
     VBox.setVgrow(plotField, Priority.ALWAYS);
 
-    return createTitledBlock("BIOGRAPHY", plotField, biography.isNotEqualTo(""));
+    return createTitledBlock("BIOGRAPHY", plotField, dataProperty().get().biography.isNotEqualTo(""));
   }
 
   protected Node createBiographyField() {
     return new Label() {{
       getStyleClass().addAll("field", "plot");
-      textProperty().bind(biography);
-      managedProperty().bind(biography.isNotEqualTo(""));
-      visibleProperty().bind(biography.isNotEqualTo(""));
+      textProperty().bind(dataProperty().get().biography);
     }};
   }
 
@@ -194,14 +191,14 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
     tilePane.widthProperty().addListener(new ChangeListener<Number>() {
       @Override
       public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        createCastingChildren(tilePane, dataProperty().get().getCastings());
+        createCastingChildren(tilePane, dataProperty().get().castings.get());
       }
     });
 
     dataProperty().addListener(new ChangeListener<Person>() {
       @Override
       public void changed(ObservableValue<? extends Person> observable, Person old, Person current) {
-        createCastingChildren(tilePane, current.getCastings());
+        createCastingChildren(tilePane, current.castings.get());
       }
     });
 
@@ -221,7 +218,7 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
           break;
         }
 
-        if(casting.getRole().equals("Actor")) {
+        if(casting.role.get().equals("Actor")) {
           CastingImage castingImage = new CastingImage(casting);
 
           castingImage.setOnAction(new EventHandler<ActionEvent>() {
@@ -250,8 +247,8 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
 
       AsyncImageProperty photo = new AsyncImageProperty();
 
-      if(casting.getItem().getPoster() != null) {
-        photo.imageHandleProperty().set(new SourceImageHandle(casting.getItem().getPoster(), getClass().getName() + "://" + casting.getItem().getTitle()));
+      if(casting.media.get().getImage() != null) {
+        photo.imageHandleProperty().set(casting.media.get().getImage());
       }
 
       imageView.getStyleClass().add("cast-photo");
@@ -262,17 +259,17 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
       imageView.setAlignment(Pos.CENTER);
 
       label.getStyleClass().add("cast-name");
-      label.setText(casting.getItem().getTitle());
+      label.setText(casting.media.get().getTitle());
       label.setMinWidth(100);
       label.setMaxWidth(100);
 
       vbox.getChildren().addAll(imageView, label);
 
-      if(casting.getCharacterName() != null && !casting.getCharacterName().trim().isEmpty()) {
+      if(casting.characterName.get() != null && !casting.characterName.get().trim().isEmpty()) {
         Label characterNameLabel = new Label();
 
         characterNameLabel.getStyleClass().add("cast-character-name");
-        characterNameLabel.setText("as " + formattedCharacterName(casting.getCharacterName(), 40));
+        characterNameLabel.setText("as " + formattedCharacterName(casting.characterName.get(), 40));
         characterNameLabel.setMinWidth(100);
         characterNameLabel.setMaxWidth(100);
 
