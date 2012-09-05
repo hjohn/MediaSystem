@@ -1,29 +1,31 @@
 package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.framework.Media;
-import hs.mediasystem.screens.selectmedia.StandardDetailPaneDecorator;
-import hs.mediasystem.util.AreaPane;
+import hs.mediasystem.screens.selectmedia.DetailPane;
+import hs.mediasystem.screens.selectmedia.MediaDetailPaneDecorator;
 import hs.mediasystem.util.MapBindings;
 import javafx.beans.binding.StringBinding;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 
-public class EpisodeDetailPaneDecorator extends StandardDetailPaneDecorator {
+public class EpisodeDetailPaneDecorator extends MediaDetailPaneDecorator {
   protected final StringBinding season = MapBindings.selectInteger(dataProperty(), "season").asString();
   protected final StringBinding episode = MapBindings.selectString(dataProperty(), "episodeRange");
 
-  public EpisodeDetailPaneDecorator() {
+  public EpisodeDetailPaneDecorator(DetailPane.DecoratablePane decoratablePane) {
+    super(decoratablePane);
+
     groupName.bind(MapBindings.selectString(dataProperty(), "serie", "dataMap", Media.class, "title"));
   }
 
   @Override
-  public void decorate(AreaPane areaPane) {
-    super.decorate(areaPane);
+  public void decorate() {
+    super.decorate();
 
-    areaPane.getStylesheets().add("select-media/episode-detail-pane.css");  // TODO move to bundle when possible
+    decoratablePane.getStylesheets().add("select-media/episode-detail-pane.css");  // TODO move to bundle when possible
 
-    areaPane.add("title-area", 10, createSeasonEpisodeBlock());
+    decoratablePane.add("title-area", 10, createSeasonEpisodeBlock());
   }
 
   protected Pane createSeasonEpisodeBlock() {

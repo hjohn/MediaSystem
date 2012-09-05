@@ -8,8 +8,6 @@ import hs.mediasystem.util.MapBindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.effect.Light;
@@ -26,10 +24,8 @@ import org.osgi.framework.BundleContext;
 
 public abstract class AbstractDuoPaneStandardLayout extends StackPane implements StandardLayout {
   private final ListPane listPane;
-  private final BundleContext bundleContext;
 
   public AbstractDuoPaneStandardLayout(BundleContext bundleContext, final ListPane listPane) {
-    this.bundleContext = bundleContext;
     this.listPane = listPane;
 
     final GridPane root = GridPaneUtil.create(new double[] {100}, new double[] {17, 75, 8});
@@ -42,10 +38,12 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
     panelGroup.setEffect(new Reflection(5, 0.025, 0.25, 0.0));
 
     final StackPane listPaneContainer = new StackPane();
-    final StackPane detailPaneContainer = new StackPane();
+    final DetailPane detailPane = createDetailPane(bundleContext);
+
+    detailPane.contentProperty().bind(MapBindings.select(listPane.mediaNodeBinding(), "dataMap", Media.class));
 
     listPaneContainer.getStyleClass().add("box-content");
-    detailPaneContainer.getStyleClass().add("box-content");
+    detailPane.getStyleClass().add("box-content");
 
     panelGroup.add(new StackPane() {{
       getChildren().add(new StackPane() {{
@@ -55,7 +53,7 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
           setSurfaceScale(3.0);
         }});
       }});
-      getChildren().add(detailPaneContainer);
+      getChildren().add(detailPane);
     }}, 0, 0);
 
     panelGroup.add(new StackPane() {{
@@ -72,33 +70,13 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
     listPaneContainer.getChildren().add((Node)listPane);
 
     getChildren().add(root);
-
-    mediaNodeBinding().addListener(new ChangeListener<MediaNode>() {
-      private DetailPane detailPane;
-
-      @Override
-      public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
-        if(detailPane != null) {
-          detailPane.rootProperty().unbind();
-          detailPane = null;
-        }
-
-        detailPane = createDetailPane();
-
-        detailPaneContainer.getChildren().setAll(detailPane);
-
-        if(current != null) {
-          detailPane.rootProperty().bind(MapBindings.select(listPane.mediaNodeBinding(), "dataMap", Media.class));
-        }
-      }
-    });
   }
 
-  protected DetailPane createDetailPane() {
+  private static DetailPane createDetailPane(BundleContext bundleContext) {
     return new DetailPane(bundleContext) {
       @Override
-      protected void initialize() {
-        getChildren().add(new BorderPane() {{
+      protected void initialize(DecoratablePane decoratablePane) {
+        decoratablePane.getChildren().add(new BorderPane() {{
           setTop(new VBox() {{
             setId("title-area");
           }});

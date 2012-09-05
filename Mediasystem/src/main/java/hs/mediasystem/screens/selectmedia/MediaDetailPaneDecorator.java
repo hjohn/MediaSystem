@@ -6,7 +6,6 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.StarRating;
-import hs.mediasystem.util.AreaPane;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;
@@ -25,6 +24,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -36,10 +37,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 
-public class StandardDetailPaneDecorator implements DetailPaneDecorator<Media> {
+public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media> {
   private final ObjectProperty<Media> data = new SimpleObjectProperty<>();
-  @Override
-  public ObjectProperty<Media> dataProperty() { return data; }
+  @Override public ObjectProperty<Media> dataProperty() { return data; }
 
   protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(dataProperty(), "image");
 
@@ -79,30 +79,32 @@ public class StandardDetailPaneDecorator implements DetailPaneDecorator<Media> {
     }
   };
 
-  public StandardDetailPaneDecorator() {
+  protected final DetailPane.DecoratablePane decoratablePane;
+
+  public MediaDetailPaneDecorator(DetailPane.DecoratablePane decoratablePane) {
+    this.decoratablePane = decoratablePane;
     poster.imageHandleProperty().bind(posterHandle);
   }
 
   @Override
-  public void decorate(AreaPane areaPane) {
-    areaPane.getStylesheets().add("select-media/detail-pane.css");
-    areaPane.getStyleClass().add("detail-pane");
+  public void decorate() {
+    decoratablePane.getStylesheets().add("select-media/media-detail-pane.css");
 
-    areaPane.add("title-area", 1, new Label() {{
+    decoratablePane.add("title-area", 1, new Label() {{
       getStyleClass().add("group-name");
       textProperty().bind(groupName);
       managedProperty().bind(groupName.isNotEqualTo(""));
       visibleProperty().bind(groupName.isNotEqualTo(""));
     }});
 
-    areaPane.add("title-area", 2, new Label() {{
+    decoratablePane.add("title-area", 2, new Label() {{
       getStyleClass().add("title");
       textProperty().bind(title);
     }});
 
-    areaPane.add("title-area", 3, createSubtitleField());
-    areaPane.add("title-area", 4, createRating());
-    areaPane.add("title-area", 5, createGenresField());
+    decoratablePane.add("title-area", 3, createSubtitleField());
+    decoratablePane.add("title-area", 4, createRating());
+    decoratablePane.add("title-area", 5, createGenresField());
 
     ScaledImageView image = new ScaledImageView() {{
       getStyleClass().add("poster-image");
@@ -113,16 +115,16 @@ public class StandardDetailPaneDecorator implements DetailPaneDecorator<Media> {
     }};
     VBox.setVgrow(image, Priority.ALWAYS);
 
-    areaPane.add("title-image-area", 1, image);
+    decoratablePane.add("title-image-area", 1, image);
 
-    areaPane.add("description-area", 6, createPlotBlock());
+    decoratablePane.add("description-area", 6, createPlotBlock());
 
-    areaPane.add("description-area", 7, createMiscelaneousFieldsBlock());
+    decoratablePane.add("description-area", 7, createMiscelaneousFieldsBlock());
 
     Pane castingsRow = createTitledBlock("CAST", createCastingsRow(), null);
     HBox.setHgrow(castingsRow, Priority.ALWAYS);
 
-    areaPane.add("link-area", 1, castingsRow);
+    decoratablePane.add("link-area", 1, castingsRow);
   }
 
   protected Node createSubtitleField() {
@@ -266,7 +268,16 @@ public class StandardDetailPaneDecorator implements DetailPaneDecorator<Media> {
         }
 
         if(casting.getRole().equals("Actor")) {
-          parent.getChildren().add(new CastingImage(casting));
+          CastingImage castingImage = new CastingImage(casting);
+
+          castingImage.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+              decoratablePane.decoratorContentProperty().set(casting.getPerson());
+            }
+          });
+
+          parent.getChildren().add(castingImage);
 
           space -= castingSize;
         }
@@ -286,7 +297,7 @@ public class StandardDetailPaneDecorator implements DetailPaneDecorator<Media> {
       AsyncImageProperty photo = new AsyncImageProperty();
 
       if(casting.getPerson().getPhoto() != null) {
-        photo.imageHandleProperty().set(new SourceImageHandle(casting.getPerson().getPhoto(), "StandardDetailPane://" + casting.getPerson().getName()));
+        photo.imageHandleProperty().set(new SourceImageHandle(casting.getPerson().getPhoto(), getClass().getName() + "://" + casting.getPerson().getName()));
       }
 
       imageView.getStyleClass().add("cast-photo");

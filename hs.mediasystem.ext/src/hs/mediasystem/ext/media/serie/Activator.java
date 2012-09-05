@@ -20,6 +20,7 @@ import hs.mediasystem.screens.Setting;
 import hs.mediasystem.screens.SettingGroup;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.PathListOption;
+import hs.mediasystem.screens.selectmedia.DetailPane;
 import hs.mediasystem.screens.selectmedia.DetailPaneDecorator;
 import hs.mediasystem.screens.selectmedia.DetailPaneDecoratorFactory;
 import hs.mediasystem.util.PathStringConverter;
@@ -128,8 +129,8 @@ public class Activator extends DependencyActivatorBase {
       }})
       .setImplementation(new DetailPaneDecoratorFactory() {
         @Override
-        public DetailPaneDecorator<?> create() {
-          return new EpisodeDetailPaneDecorator();
+        public DetailPaneDecorator<?> create(DetailPane.DecoratablePane decoratablePane) {
+          return new EpisodeDetailPaneDecorator(decoratablePane);
         }
       })
     );

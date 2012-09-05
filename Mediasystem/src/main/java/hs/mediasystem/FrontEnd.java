@@ -4,6 +4,7 @@ import hs.mediasystem.beans.BeanUtils;
 import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.Person;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.DatabaseStatementTranslator;
@@ -37,13 +38,15 @@ import hs.mediasystem.screens.Setting;
 import hs.mediasystem.screens.StandardCell;
 import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.Option;
+import hs.mediasystem.screens.selectmedia.DetailPane;
 import hs.mediasystem.screens.selectmedia.DetailPaneDecorator;
 import hs.mediasystem.screens.selectmedia.DetailPaneDecoratorFactory;
+import hs.mediasystem.screens.selectmedia.MediaDetailPaneDecorator;
+import hs.mediasystem.screens.selectmedia.PersonDetailPaneDecorator;
 import hs.mediasystem.screens.selectmedia.SelectMediaLocation;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
 import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.screens.selectmedia.SelectMediaView;
-import hs.mediasystem.screens.selectmedia.StandardDetailPaneDecorator;
 import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.util.DuoWindowSceneManager;
 import hs.mediasystem.util.Location;
@@ -207,8 +210,20 @@ public class FrontEnd extends Application {
       }})
       .setImplementation(new DetailPaneDecoratorFactory() {
         @Override
-        public DetailPaneDecorator<?> create() {
-          return new StandardDetailPaneDecorator();
+        public DetailPaneDecorator<?> create(DetailPane.DecoratablePane decoratablePane) {
+          return new MediaDetailPaneDecorator(decoratablePane);
+        }
+      })
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(DetailPaneDecoratorFactory.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", Person.class);
+      }})
+      .setImplementation(new DetailPaneDecoratorFactory() {
+        @Override
+        public DetailPaneDecorator<?> create(DetailPane.DecoratablePane decoratablePane) {
+          return new PersonDetailPaneDecorator(decoratablePane);
         }
       })
     );
