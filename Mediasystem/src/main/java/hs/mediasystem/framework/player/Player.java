@@ -1,6 +1,5 @@
 package hs.mediasystem.framework.player;
 
-import java.awt.Component;
 import java.nio.file.Path;
 
 import javafx.beans.property.BooleanProperty;
@@ -116,7 +115,7 @@ public interface Player {
 
   ObservableList<AudioTrack> getAudioTracks();
 
-  Component getDisplayComponent();
+  Object getDisplayComponent();
 
   ObjectProperty<EventHandler<PlayerEvent>> onPlayerEvent();
 }

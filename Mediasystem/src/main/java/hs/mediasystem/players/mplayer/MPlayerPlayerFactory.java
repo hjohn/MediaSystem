@@ -20,4 +20,9 @@ public class MPlayerPlayerFactory implements PlayerFactory {
   public Player create(Ini ini) {
     return new MPlayerPlayer(mplayerPath, true);
   }
+
+  @Override
+  public String getName() {
+    return "MPlayer";
+  }
 }

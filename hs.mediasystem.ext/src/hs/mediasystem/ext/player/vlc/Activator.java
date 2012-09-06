@@ -1,5 +1,6 @@
 package hs.mediasystem.ext.player.vlc;
 
+import hs.mediasystem.ext.player.vlc.VLCPlayer.Mode;
 import hs.mediasystem.framework.player.PlayerFactory;
 
 import org.apache.felix.dm.DependencyActivatorBase;
@@ -10,9 +11,13 @@ public class Activator extends DependencyActivatorBase {
 
   @Override
   public void init(BundleContext context, DependencyManager manager) throws Exception {
+//    manager.add(createComponent()
+//      .setInterface(PlayerFactory.class.getName(), null)
+//      .setImplementation(new VLCPlayerFactory("VLC (seperate window)", Mode.SEPERATE_WINDOW))
+//    );
     manager.add(createComponent()
       .setInterface(PlayerFactory.class.getName(), null)
-      .setImplementation(VLCPlayerFactory.class)
+      .setImplementation(new VLCPlayerFactory("VLC (integrated, slower)", Mode.CANVAS))
     );
   }
 

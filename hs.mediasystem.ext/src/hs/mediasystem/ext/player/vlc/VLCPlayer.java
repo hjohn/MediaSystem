@@ -15,7 +15,7 @@ import hs.mediasystem.framework.player.Subtitle;
 import hs.mediasystem.util.Events;
 
 import java.awt.Canvas;
-import java.awt.Component;
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,18 +32,32 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.scene.image.PixelFormat;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritablePixelFormat;
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.TrackDescription;
+import uk.co.caprica.vlcj.player.direct.DirectMediaPlayer;
+import uk.co.caprica.vlcj.player.direct.RenderCallback;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
-public class VLCPlayer implements Player {
-  private final EmbeddedMediaPlayer mediaPlayer;
-  private final Canvas canvas = new Canvas();
+import com.sun.jna.Memory;
 
-  public VLCPlayer(String... args) {
+public class VLCPlayer implements Player {
+  public enum Mode {
+    SEPERATE_WINDOW, CANVAS
+  }
+
+  private static final int WIDTH = 1920;
+  private static final int HEIGHT = 1080;
+
+  private final MediaPlayer mediaPlayer;
+  private final Object canvas;
+
+  public VLCPlayer(Mode mode, String... args) {
     List<String> arguments = new ArrayList<>(Arrays.asList(args));
 
     arguments.add("--no-plugins-cache");
@@ -58,8 +72,34 @@ public class VLCPlayer implements Player {
     arguments.add("dummy");
 
     MediaPlayerFactory factory = new MediaPlayerFactory(arguments);
-    mediaPlayer = factory.newEmbeddedMediaPlayer();
-    mediaPlayer.setVideoSurface(factory.newVideoSurface(canvas));
+
+    if(mode == Mode.SEPERATE_WINDOW) {
+      EmbeddedMediaPlayer mp = factory.newEmbeddedMediaPlayer();
+
+      Canvas canvas = new Canvas();
+
+      mp.setVideoSurface(factory.newVideoSurface(canvas));
+
+      this.canvas = canvas;
+      this.mediaPlayer = mp;
+    }
+    else {
+      javafx.scene.canvas.Canvas canvas = new javafx.scene.canvas.Canvas(WIDTH, HEIGHT);
+
+      final PixelWriter pixelWriter = canvas.getGraphicsContext2D().getPixelWriter();
+      final WritablePixelFormat<ByteBuffer> byteBgraInstance = PixelFormat.getByteBgraPreInstance();
+
+      DirectMediaPlayer mp = factory.newDirectMediaPlayer("RV32", WIDTH, HEIGHT, WIDTH * 4, new RenderCallback() {
+        @Override
+        public void display(Memory memory) {
+          ByteBuffer byteBuffer = memory.getByteBuffer(0, memory.size());
+          pixelWriter.setPixels(0, 0, WIDTH, HEIGHT, byteBgraInstance, byteBuffer, WIDTH * 4);
+        }
+      });
+
+      this.canvas = canvas;
+      this.mediaPlayer = mp;
+    }
 
     mediaPlayer.addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
       private AtomicInteger ignoreFinish = new AtomicInteger();
@@ -295,7 +335,7 @@ public class VLCPlayer implements Player {
   }
 
   @Override
-  public Component getDisplayComponent() {
+  public Object getDisplayComponent() {
     return canvas;
   }
 

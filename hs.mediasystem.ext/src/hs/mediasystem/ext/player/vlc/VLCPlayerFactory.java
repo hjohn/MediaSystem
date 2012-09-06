@@ -1,5 +1,6 @@
 package hs.mediasystem.ext.player.vlc;
 
+import hs.mediasystem.ext.player.vlc.VLCPlayer.Mode;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.util.ini.Ini;
@@ -11,6 +12,13 @@ import java.util.List;
 import com.sun.jna.NativeLibrary;
 
 public class VLCPlayerFactory implements PlayerFactory {
+  private final String name;
+  private final Mode mode;
+
+  public VLCPlayerFactory(String name, Mode mode) {
+    this.name = name;
+    this.mode = mode;
+  }
 
   @Override
   public Player create(Ini ini) {
@@ -30,6 +38,11 @@ public class VLCPlayerFactory implements PlayerFactory {
       }
     }
 
-    return new VLCPlayer(args.toArray(new String[args.size()]));
+    return new VLCPlayer(mode, args.toArray(new String[args.size()]));
+  }
+
+  @Override
+  public String getName() {
+    return name;
   }
 }
