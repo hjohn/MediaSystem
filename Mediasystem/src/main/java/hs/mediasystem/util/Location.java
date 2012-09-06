@@ -1,11 +1,13 @@
 package hs.mediasystem.util;
 
-import javafx.scene.paint.Color;
-
 public interface Location {
+  public enum Type {
+    NORMAL, PLAYBACK;
+  }
+
   String getId();
   String getBreadCrumb();
   Location getParent();
   Class<?> getParameterType();
-  Color getBackgroundColor();
+  Type getType();
 }

@@ -31,6 +31,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.input.KeyCode;
@@ -66,6 +67,7 @@ public class ProgramController {
 
   private final Scene scene;
   private final StackPane sceneRoot = new StackPane();
+  private final BorderPane videoPane = new BorderPane();
   private final BorderPane contentBorderPane = new BorderPane();
   private final BorderPane informationBorderPane = new BorderPane();
   private final BorderPane messageBorderPane = new BorderPane();
@@ -83,6 +85,8 @@ public class ProgramController {
   private final InformationBorder informationBorder;
   private final BundleContext bundleContext;
 
+  private Canvas videoCanvas;
+
   @Inject
   public ProgramController(Ini ini, BundleContext bundleContext, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder) {
     this.ini = ini;
@@ -92,7 +96,14 @@ public class ProgramController {
     this.informationBorder = informationBorder;
     this.scene = SceneUtil.createScene(sceneRoot);
 
-    sceneRoot.getChildren().addAll(contentBorderPane, informationBorderPane, messageBorderPane);
+    sceneRoot.getChildren().addAll(videoPane, contentBorderPane, informationBorderPane, messageBorderPane);
+
+    Object displayComponent = playerPresentation == null ? null : playerPresentation.getPlayer().getDisplayComponent();
+
+    if(displayComponent instanceof Canvas) {
+      videoCanvas = (Canvas)displayComponent;
+      videoPane.setCenter(videoCanvas);
+    }
 
     sceneManager.setScene(scene);
 
@@ -234,7 +245,7 @@ public class ProgramController {
         activePresentation = locationHandler.go(current, activePresentation);
 
         if(!activePresentation.equals(oldPresentation)) {
-          displayOnStage(activePresentation.getView(), current.getBackgroundColor());
+          displayOnStage(activePresentation.getView(), current.getType());
 
           if(oldPresentation != null) {
             oldPresentation.dispose();
@@ -262,10 +273,21 @@ public class ProgramController {
   }
 
   private void displayOnMainStage(Node node) {
-    displayOnStage(node, Color.BLACK);
+    displayOnStage(node, Location.Type.NORMAL);
   }
 
-  private void displayOnStage(final Node node, Color background) {
+  private void displayOnStage(final Node node, Location.Type type) {
+    Color background = Color.BLACK;
+
+    if(videoCanvas == null && type == Location.Type.PLAYBACK) {
+      background = Color.TRANSPARENT;
+    }
+
+    if(videoCanvas != null) {
+      videoCanvas.getGraphicsContext2D().clearRect(0, 0, videoCanvas.getWidth(), videoCanvas.getHeight());
+      videoCanvas.setVisible(type == Location.Type.PLAYBACK);
+    }
+
     Timeline timeline = new Timeline(
       new KeyFrame(Duration.ZERO, new KeyValue(scene.getRoot().opacityProperty(), 0.0)),
       new KeyFrame(Duration.seconds(1), new KeyValue(scene.getRoot().opacityProperty(), 1.0))

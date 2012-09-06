@@ -1,6 +1,5 @@
 package hs.mediasystem.screens;
 
-import javafx.scene.paint.Color;
 import hs.mediasystem.util.Location;
 
 public class PlaybackLocation implements Location {
@@ -26,8 +25,8 @@ public class PlaybackLocation implements Location {
   }
 
   @Override
-  public Color getBackgroundColor() {
-    return Color.TRANSPARENT;
+  public Type getType() {
+    return Type.PLAYBACK;
   }
 
   @Override

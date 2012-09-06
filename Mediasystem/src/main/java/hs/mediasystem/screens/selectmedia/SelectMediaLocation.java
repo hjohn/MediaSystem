@@ -2,7 +2,6 @@ package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.util.Location;
-import javafx.scene.paint.Color;
 
 public class SelectMediaLocation implements Location {
   private final MediaRoot mediaRoot;
@@ -22,8 +21,8 @@ public class SelectMediaLocation implements Location {
   }
 
   @Override
-  public Color getBackgroundColor() {
-    return Color.BLACK;
+  public Type getType() {
+    return Type.NORMAL;
   }
 
   public MediaRoot getMediaRoot() {

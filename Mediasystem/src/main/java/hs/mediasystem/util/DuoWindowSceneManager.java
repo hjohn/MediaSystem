@@ -22,8 +22,6 @@ public class DuoWindowSceneManager implements SceneManager {
   private final Stage mainStage;  // WORKAROUND: Two stages because a transparent mainstage performs so poorly; only using a transparent stage when media is playing; refactor this
   private final Stage transparentStage;
 
-  private Frame playerFrame;
-
   private final ChangeListener<Paint> fillChangeListener = new ChangeListener<Paint>() {
     @Override
     public void changed(ObservableValue<? extends Paint> observable, Paint oldValue, Paint newValue) {
@@ -31,6 +29,7 @@ public class DuoWindowSceneManager implements SceneManager {
     }
   };
 
+  private Frame playerFrame;
   private Scene scene;
   private int screenNumber;
 
@@ -42,8 +41,6 @@ public class DuoWindowSceneManager implements SceneManager {
 
     mainStage.setTitle(title);
     transparentStage.setTitle(title);
-
-    setPlayerScreen(initialScreenNumber);
   }
 
   @Override
@@ -92,15 +89,24 @@ public class DuoWindowSceneManager implements SceneManager {
   }
 
   @Override
-  public void setPlayerRoot(Component playerDisplay) {
-    playerFrame.removeAll();
-    playerFrame.add(playerDisplay, BorderLayout.CENTER);
-    playerFrame.doLayout();
+  public void setPlayerRoot(Object playerDisplay) {
+    if(playerDisplay instanceof Component) {
+
+      /*
+       * AWT node, put on seperate window
+       */
+
+      createPlayerFrame();
+
+      playerFrame.removeAll();
+      playerFrame.add((Component)playerDisplay, BorderLayout.CENTER);
+      playerFrame.doLayout();
+    }
   }
 
   @Override
   public void disposePlayerRoot() {
-    playerFrame.removeAll();
+    destroyPlayerFrame();
   }
 
   @Override
@@ -112,7 +118,7 @@ public class DuoWindowSceneManager implements SceneManager {
   public void setScreenNumber(int screenNumber) {
     this.screenNumber = screenNumber;
 
-    setPlayerScreen(screenNumber);
+    setPlayerScreen();
 
     setupStageLocation(mainStage);
     setupStageLocation(transparentStage);
@@ -141,13 +147,13 @@ public class DuoWindowSceneManager implements SceneManager {
     }
   }
 
-  private void setPlayerScreen(int screenNumber) {
-    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    GraphicsDevice[] gs = ge.getScreenDevices();
-
-    GraphicsDevice graphicsDevice = (screenNumber >= 0 && screenNumber < gs.length) ? gs[screenNumber] : gs[0];
-
+  private void createPlayerFrame() {
     if(playerFrame == null) {
+      GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+      GraphicsDevice[] gs = ge.getScreenDevices();
+
+      GraphicsDevice graphicsDevice = (screenNumber >= 0 && screenNumber < gs.length) ? gs[screenNumber] : gs[0];
+
       playerFrame = new Frame(graphicsDevice.getDefaultConfiguration());
       playerFrame.setLayout(new BorderLayout());
       playerFrame.setUndecorated(true);
@@ -155,7 +161,22 @@ public class DuoWindowSceneManager implements SceneManager {
       playerFrame.setBackground(new java.awt.Color(0, 0, 0));
       playerFrame.setVisible(true);
     }
-    else {
+  }
+
+  private void destroyPlayerFrame() {
+    if(playerFrame != null) {
+      playerFrame.dispose();
+      playerFrame = null;
+    }
+  }
+
+  private void setPlayerScreen() {
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice[] gs = ge.getScreenDevices();
+
+    GraphicsDevice graphicsDevice = (screenNumber >= 0 && screenNumber < gs.length) ? gs[screenNumber] : gs[0];
+
+    if(playerFrame != null) {
       Rectangle rectangle = graphicsDevice.getDefaultConfiguration().getBounds();
 
       playerFrame.setBounds(rectangle);

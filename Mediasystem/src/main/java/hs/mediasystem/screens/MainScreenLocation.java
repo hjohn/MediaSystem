@@ -1,6 +1,5 @@
 package hs.mediasystem.screens;
 
-import javafx.scene.paint.Color;
 import hs.mediasystem.util.Location;
 
 public class MainScreenLocation implements Location {
@@ -16,8 +15,8 @@ public class MainScreenLocation implements Location {
   }
 
   @Override
-  public Color getBackgroundColor() {
-    return Color.BLACK;
+  public Type getType() {
+    return Type.NORMAL;
   }
 
   @Override

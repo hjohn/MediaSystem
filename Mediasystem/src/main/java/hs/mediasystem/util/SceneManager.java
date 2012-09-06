@@ -1,12 +1,10 @@
 package hs.mediasystem.util;
 
-import java.awt.Component;
-
 import javafx.scene.Scene;
 
 public interface SceneManager {
   void setScene(Scene scene);
-  void setPlayerRoot(Component root);
+  void setPlayerRoot(Object root);
   void disposePlayerRoot();
 
   int getScreenNumber();
