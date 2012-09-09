@@ -125,11 +125,17 @@ public class Log {
     }
 
     private static String method() {
-      StackTraceElement[] elements = new Exception().getStackTrace();
+      StackTraceElement[] elements = new Throwable().getStackTrace();
+      boolean foundLogSystem = false;
 
       for(int i = 0; i < elements.length; i++) {
-        if(elements[i].toString().startsWith("java.io.PrintStream.println(")) {
-          return " -- " + elements[i + 1].toString();
+        String frame = elements[i].toString();
+
+        if(frame.startsWith("java.io.PrintStream.println(") || frame.startsWith("java.util.logging.Logger.")) {
+          foundLogSystem = true;
+        }
+        else if(foundLogSystem) {
+          return " -- " + frame;
         }
       }
 
