@@ -27,7 +27,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   private static final Comparator<Accessor> ACCESSOR_COMPARATOR = new Comparator<Accessor>() {
     @Override
     public int compare(Accessor o1, Accessor o2) {
-      return Integer.compare(o1.getAnnotation(IdColumn.class).value(), o2.getAnnotation(IdColumn.class).value());
+      return Integer.compare(o1.getAnnotation(EmbeddableColumn.class).value(), o2.getAnnotation(EmbeddableColumn.class).value());
     }
   };
 
@@ -138,7 +138,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   }
 
   public Object[] getEmbeddedFields(Object embeddedInstance) {
-    List<Accessor> accessors = getAnnotatedAccessors(embeddedInstance.getClass(), ACCESSOR_COMPARATOR, IdColumn.class);
+    List<Accessor> accessors = getAnnotatedAccessors(embeddedInstance.getClass(), ACCESSOR_COMPARATOR, EmbeddableColumn.class);
 
     Object[] values = new Object[accessors.size()];
     int index = 0;
@@ -495,7 +495,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     }
 
     public boolean isEmbedded() {
-      return getType().getAnnotation(IdClass.class) != null;
+      return getType().getAnnotation(Embeddable.class) != null;
     }
 
     public void toStorageType(Object value, Map<String, Object> valuesRef) {

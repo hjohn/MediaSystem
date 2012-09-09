@@ -1,12 +1,12 @@
 package hs.mediasystem.db;
 
-@IdClass
+@Embeddable
 public class TestPlate {
 
-  @IdColumn(1)
+  @EmbeddableColumn(1)
   private final String countryCode;
 
-  @IdColumn(2)
+  @EmbeddableColumn(2)
   private final String licensePlate;
 
   public TestPlate(String countryCode, String licensePlate) {

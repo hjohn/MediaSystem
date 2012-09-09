@@ -1,24 +1,24 @@
 package hs.mediasystem.dao;
 
-import hs.mediasystem.db.IdClass;
-import hs.mediasystem.db.IdColumn;
+import hs.mediasystem.db.Embeddable;
+import hs.mediasystem.db.EmbeddableColumn;
 
-@IdClass
+@Embeddable
 public class MediaId {
 
-  @IdColumn(1)
+  @EmbeddableColumn(1)
   private long fileLength;
 
-  @IdColumn(2)
+  @EmbeddableColumn(2)
   private long fileTime;
 
-  @IdColumn(3)
+  @EmbeddableColumn(3)
   private long fileCreateTime;
 
-  @IdColumn(4)
+  @EmbeddableColumn(4)
   private byte[] hash;
 
-  @IdColumn(5)
+  @EmbeddableColumn(5)
   private Long osHash;
 
   public MediaId(long fileLength, long fileTime, long fileCreateTime, byte[] hash, Long osHash) {

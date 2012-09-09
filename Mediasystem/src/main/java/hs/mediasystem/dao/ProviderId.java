@@ -1,18 +1,18 @@
 package hs.mediasystem.dao;
 
-import hs.mediasystem.db.IdClass;
-import hs.mediasystem.db.IdColumn;
+import hs.mediasystem.db.Embeddable;
+import hs.mediasystem.db.EmbeddableColumn;
 
-@IdClass
+@Embeddable
 public class ProviderId {
 
-  @IdColumn(1)
+  @EmbeddableColumn(1)
   private final String type;
 
-  @IdColumn(2)
+  @EmbeddableColumn(2)
   private final String provider;
 
-  @IdColumn(3)
+  @EmbeddableColumn(3)
   private final String id;
 
   public ProviderId(String type, String provider, String id) {
