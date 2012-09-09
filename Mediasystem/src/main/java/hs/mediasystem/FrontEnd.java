@@ -74,8 +74,10 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
@@ -194,6 +196,8 @@ public class FrontEnd extends Application {
       }
     };
 
+    waitFor(PlayerFactory.class);
+
     final Injector injector = Guice.createInjector(module);
 
     DatabaseUpdater updater = injector.getInstance(DatabaseUpdater.class);
@@ -203,6 +207,8 @@ public class FrontEnd extends Application {
     PersisterProvider.register(MediaData.class, injector.getInstance(MediaDataPersister.class));
 
     DependencyManager dm = new DependencyManager(framework.getBundleContext());
+
+    System.out.println("Registering components...");
 
     dm.add(dm.createComponent()
       .setInterface(DetailPaneDecoratorFactory.class.getName(), new Hashtable<String, Object>() {{
@@ -294,6 +300,8 @@ public class FrontEnd extends Application {
       )
     );
 
+    System.out.println("Creating controller...");
+
     final ProgramController controller = injector.getInstance(ProgramController.class);
 
     dm.add(dm.createComponent()
@@ -355,6 +363,37 @@ public class FrontEnd extends Application {
     if(pool != null) {
       pool.close();
     }
+  }
+
+  private void waitFor(Class<?>... classes) {
+    List<Class<?>> unavailableServices = new ArrayList<>();
+
+    for(int i = 0; i < 20; i++) {
+      unavailableServices.clear();
+
+      for(Class<?> cls : classes) {
+        ServiceReference<?> serviceReference = framework.getBundleContext().getServiceReference(cls);
+
+        if(serviceReference == null) {
+          unavailableServices.add(cls);
+        }
+      }
+
+      if(unavailableServices.isEmpty()) {
+        return;
+      }
+
+      System.out.println("Waiting for services " + unavailableServices);
+
+      try {
+        Thread.sleep(500);
+      }
+      catch(InterruptedException e) {
+        // Not interested
+      }
+    }
+
+    System.out.println("Giving up, cannot find services " + unavailableServices);
   }
 
   private Framework createHostedOSGiEnvironment() throws BundleException {
