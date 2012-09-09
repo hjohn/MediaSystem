@@ -41,14 +41,8 @@ public class Identifier {
   @Id
   private Integer id;
 
-  @Column
-  private String mediaType;
-
-  @Column
-  private String provider;
-
-  @Column
-  private String providerId;
+  @Column(name = {"mediatype", "provider", "providerid"})
+  private ProviderId providerId;
 
   @Column
   private MatchType matchType;
@@ -57,20 +51,16 @@ public class Identifier {
   private Float matchAccuracy;
 
   @Column(name = "mediadata_id")
-  private Integer mediaDataId;
+  private MediaData mediaData;
 
   @Column
   private Date lastUpdated;
 
-  public Identifier(String mediaType, String provider, String providerId, MatchType matchType, float matchAccuracy) {
-    assert mediaType != null;
-    assert provider != null;
+  public Identifier(ProviderId providerId, MatchType matchType, float matchAccuracy) {
     assert providerId != null;
     assert matchType != null;
     assert matchAccuracy >= 0 && matchAccuracy <= 1.0;
 
-    this.mediaType = mediaType;
-    this.provider = provider;
     this.providerId = providerId;
     this.matchType = matchType;
     this.matchAccuracy = matchAccuracy;
@@ -87,15 +77,7 @@ public class Identifier {
     this.id = id;
   }
 
-  public String getMediaType() {
-    return mediaType;
-  }
-
-  public String getProvider() {
-    return provider;
-  }
-
-  public String getProviderId() {
+  public ProviderId getProviderId() {
     return providerId;
   }
 
@@ -107,12 +89,12 @@ public class Identifier {
     return matchAccuracy;
   }
 
-  public Integer getMediaDataId() {
-    return mediaDataId;
+  public MediaData getMediaData() {
+    return mediaData;
   }
 
-  public void setMediaDataId(Integer mediaDataId) {
-    this.mediaDataId = mediaDataId;
+  public void setMediaData(MediaData mediaData) {
+    this.mediaData = mediaData;
   }
 
   public Date getLastUpdated() {
@@ -125,6 +107,6 @@ public class Identifier {
 
   @Override
   public String toString() {
-    return "(" + mediaType + ";" + provider + ";" + providerId + ")";
+    return "(" + providerId + "; matchType: " + matchType + ")";
   }
 }

@@ -6,6 +6,7 @@ import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
+import hs.mediasystem.dao.ProviderId;
 import hs.mediasystem.framework.IdentifyException;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaIdentifier;
@@ -133,7 +134,7 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
         }
 
         if(tmdbMovieId != -1) {
-          return new Identifier(media.getClass().getSimpleName(), "TMDB", Integer.toString(tmdbMovieId), matchType, matchAccuracy);
+          return new Identifier(new ProviderId(media.getClass().getSimpleName(), "TMDB", Integer.toString(tmdbMovieId)), matchType, matchAccuracy);
         }
 
         throw new IdentifyException(media);
@@ -145,17 +146,17 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
   }
 
   @Override
-  public Item loadItem(Identifier identifier) throws ItemNotFoundException {
+  public Item loadItem(ProviderId providerId) throws ItemNotFoundException {
     synchronized(Movie.class) {
       try {
-        System.out.println("[FINE] TmdbMovieEnricher.loadItem() - tmdb.id = " + identifier);
+        System.out.println("[FINE] TmdbMovieEnricher.loadItem() - tmdb.id = " + providerId);
 
-        int tmdbId = Integer.parseInt(identifier.getProviderId());
+        int tmdbId = Integer.parseInt(providerId.getId());
 
         MovieDb movie = getTMDB().getMovieInfo(tmdbId, "en");
 
         if(movie == null) {
-          throw new ItemNotFoundException("TMDB lookup by tmdb.id failed: " + identifier);
+          throw new ItemNotFoundException("TMDB lookup by tmdb.id failed: " + providerId);
         }
 
         System.out.println("[FINE] TmdbMovieEnricher.loadItem() - Found: name=" + movie.getTitle() + "; release date=" + movie.getReleaseDate() + "; runtime=" + movie.getRuntime() + "; popularity=" + movie.getPopularity() + "; language=" + movie.getSpokenLanguages() + "; tagline=" + movie.getTagline() + "; genres=" + movie.getGenres());
@@ -163,7 +164,7 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
         URL posterURL = getTMDB().createImageUrl(movie.getPosterPath(), "original");
         URL backgroundURL = getTMDB().createImageUrl(movie.getBackdropPath(), "original");
 
-        Item item = new Item(identifier);
+        Item item = new Item(providerId);
 
         item.setImdbId(movie.getImdbID());
         item.setTitle(movie.getTitle());
@@ -232,7 +233,7 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
         return item;
       }
       catch(MovieDbException e) {
-        throw new ItemNotFoundException(identifier, e);
+        throw new ItemNotFoundException(providerId, e);
       }
     }
   }

@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -24,6 +25,9 @@ import javax.inject.Singleton;
 @Singleton
 public class Database {
   private static final Map<Class<? extends Fetcher<?, ?>>, Fetcher<?, ?>> FETCHERS = new HashMap<>();
+  private static final Logger LOG = Logger.getLogger(Database.class.getName());
+
+  private static long uniqueIdentifier;
 
   private final Provider<Connection> connectionProvider;
 
@@ -106,6 +110,7 @@ public class Database {
     private final Transaction parent;
     private final Connection connection;
     private final Savepoint savepoint;
+    private final long id;
 
     private final WeakValueMap<String, Object> associatedObjects = new WeakValueMap<>();
 
@@ -114,6 +119,7 @@ public class Database {
 
     Transaction(Transaction parent) throws DatabaseException {
       this.parent = parent;
+      this.id = ++uniqueIdentifier;
 
       try {
         if(parent == null) {
@@ -128,9 +134,11 @@ public class Database {
 
           parent.activeNestedTransactions++;
         }
+
+        LOG.finer("New Transaction " + this);
       }
       catch(SQLException e) {
-        throw new DatabaseException(e);
+        throw new DatabaseException(this, "Exception while creating new transaction", e);
       }
 
       assert this.connection != null;
@@ -151,7 +159,7 @@ public class Database {
 
     private void ensureNotFinished() {
       if(finished) {
-        throw new IllegalStateException("transaction already ended");
+        throw new IllegalStateException(this + ": Transaction already ended");
       }
     }
 
@@ -173,16 +181,20 @@ public class Database {
     public synchronized long getDatabaseSize() throws DatabaseException {
       ensureNotFinished();
 
-      try(PreparedStatement statement = connection.prepareStatement("SELECT pg_database_size('mediasystem')");
+      String sql = "SELECT pg_database_size('mediasystem')";
+
+      LOG.fine(this + ": " + sql);
+
+      try(PreparedStatement statement = connection.prepareStatement(sql);
           ResultSet rs = statement.executeQuery()) {
         if(rs.next()) {
           return rs.getLong(1);
         }
 
-        throw new DatabaseException("unable to get database size");
+        throw new DatabaseException(this, "Unable to get database size");
       }
       catch(SQLException e) {
-        throw new DatabaseException(e);
+        throw new DatabaseException(this, sql, e);
       }
     }
 
@@ -195,7 +207,11 @@ public class Database {
     public List<Record> select(String fields, String tableName, String whereCondition, Object... parameters) throws DatabaseException {
       ensureNotFinished();
 
-      try(PreparedStatement statement = connection.prepareStatement("SELECT " + fields + " FROM " + tableName + (whereCondition == null ? "" : " WHERE " + whereCondition))) {
+      String sql = "SELECT " + fields + " FROM " + tableName + (whereCondition == null ? "" : " WHERE " + whereCondition);
+
+      LOG.fine(this + ": " + sql + ": " + Arrays.toString(parameters));
+
+      try(PreparedStatement statement = connection.prepareStatement(sql)) {
         int parameterIndex = 1;
 
         for(Object o : parameters) {
@@ -226,7 +242,7 @@ public class Database {
         }
       }
       catch(SQLException e) {
-        throw new DatabaseException("SELECT " + fields + " FROM " + tableName + (whereCondition == null ? "" : " WHERE " + whereCondition), e);
+        throw new DatabaseException(this, sql + ": " + Arrays.toString(parameters), e);
       }
     }
 
@@ -241,7 +257,11 @@ public class Database {
 
       RecordMapper<T> recordMapper = getRecordMapper(cls);
 
-      try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + recordMapper.getTableName() + (whereCondition == null ? "" : " WHERE " + whereCondition))) {
+      String sql = "SELECT * FROM " + recordMapper.getTableName() + (whereCondition == null ? "" : " WHERE " + whereCondition);
+
+      LOG.fine(this + ": " + sql + ": " + Arrays.toString(parameters));
+
+      try(PreparedStatement statement = connection.prepareStatement(sql)) {
         int parameterIndex = 1;
 
         for(Object o : parameters) {
@@ -275,7 +295,7 @@ public class Database {
         }
       }
       catch(SQLException e) {
-        throw new DatabaseException(e);
+        throw new DatabaseException(this, sql + ": " + Arrays.toString(parameters), e);
       }
     }
 
@@ -283,9 +303,7 @@ public class Database {
       @SuppressWarnings("unchecked")
       RecordMapper<T> recordMapper = (RecordMapper<T>)getRecordMapper(obj.getClass());
 
-      Map<String, Object> ids = recordMapper.extractIds(obj);
-
-      if(ids.isEmpty()) {
+      if(recordMapper.isTransient(obj)) {
         insert(obj);
       }
       else {
@@ -315,7 +333,7 @@ public class Database {
       Map<String, Object> values = recordMapper.extractValues(obj);
 
       if(ids.isEmpty()) {
-        throw new DatabaseException("Cannot update records that donot exist in the database: " + obj);
+        throw new DatabaseException(this, "Cannot update records that donot exist in the database: " + obj);
       }
 
       String whereCondition = "";
@@ -361,9 +379,11 @@ public class Database {
         values.append("?");
       }
 
-      System.out.println("[FINE] Database.Transaction.insert() - Inserting into '" + tableName + "': " + parameters);
+      String sql = "INSERT INTO " + tableName + " (" + fields.toString() + ") VALUES (" + values.toString() + ")";
 
-      try(PreparedStatement statement = connection.prepareStatement("INSERT INTO " + tableName + " (" + fields.toString() + ") VALUES (" + values.toString() + ")", Statement.RETURN_GENERATED_KEYS)) {
+      LOG.fine(this + ": " + sql + ": " + parameters);
+
+      try(PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
         setParameters(parameters, statement);
 
         statement.execute();
@@ -377,7 +397,7 @@ public class Database {
         }
       }
       catch(SQLException e) {
-        throw new DatabaseException(e);
+        throw new DatabaseException(this, sql + ": " + parameters, e);
       }
     }
 
@@ -399,9 +419,11 @@ public class Database {
         set.append("=?");
       }
 
-      System.out.println("[FINE] Database.Transaction.update() - Updating '" + tableName + "' with condition: '" + whereCondition + "': " + Arrays.toString(parameters) + " and values: " + values);
+      String sql = "UPDATE " + tableName + " SET " + set.toString() + " WHERE " + whereCondition;
 
-      try(PreparedStatement statement = connection.prepareStatement("UPDATE " + tableName + " SET " + set.toString() + " WHERE " + whereCondition)) {
+      LOG.fine(this + ": " + sql + ": " + Arrays.toString(parameters) + ": " + values);
+
+      try(PreparedStatement statement = connection.prepareStatement(sql)) {
         setParameters(values, statement);
         int parameterIndex = values.size() + 1;
 
@@ -412,16 +434,18 @@ public class Database {
         return statement.executeUpdate();
       }
       catch(SQLException e) {
-        throw new DatabaseException(e);
+        throw new DatabaseException(this, sql + ": " + Arrays.toString(parameters) + ": " + values, e);
       }
     }
 
     public synchronized int delete(String tableName, String whereCondition, Object... parameters) throws DatabaseException {
       ensureNotFinished();
 
-      System.out.println("[FINE] Database.Transaction.delete() - Deleting from '" + tableName + "' with condition: '" + whereCondition + "': " + Arrays.toString(parameters));
+      String sql = "DELETE FROM " + tableName + " WHERE " + whereCondition;
 
-      try(PreparedStatement statement = connection.prepareStatement("DELETE FROM " + tableName + " WHERE " + whereCondition)) {
+      LOG.fine(this + ": " + sql + ": " + Arrays.toString(parameters));
+
+      try(PreparedStatement statement = connection.prepareStatement(sql)) {
         int parameterIndex = 1;
 
         for(Object o : parameters) {
@@ -431,22 +455,24 @@ public class Database {
         return statement.executeUpdate();
       }
       catch(SQLException e) {
-        throw new DatabaseException(e);
+        throw new DatabaseException(this, sql + ": " + Arrays.toString(parameters), e);
       }
     }
 
     public synchronized int deleteChildren(String tableName, String parentTableName, long parentId) throws DatabaseException {
       ensureNotFinished();
 
-      System.out.println("[FINE] Database.Transaction.deleteChildren() - Deleting '" + tableName + "' Children of '" + parentTableName + "' with id " + parentId);
+      String sql = "DELETE FROM " + tableName + " WHERE " + parentTableName + "_id = ?";
 
-      try(PreparedStatement statement = connection.prepareStatement("DELETE FROM " + tableName + " WHERE " + parentTableName + "_id = ?")) {
+      LOG.fine(this + ": " + sql + ": [" + parentId + "]");
+
+      try(PreparedStatement statement = connection.prepareStatement(sql)) {
         statement.setLong(1, parentId);
 
         return statement.executeUpdate();
       }
       catch(SQLException e) {
-        throw new DatabaseException(e);
+        throw new DatabaseException(this, sql + ": [" + parentId + "]", e);
       }
     }
 
@@ -454,10 +480,12 @@ public class Database {
       ensureNotFinished();
 
       if(activeNestedTransactions != 0) {
-        throw new IllegalStateException("attempt at rollback/commit while there are uncommitted nested transactions");
+        throw new DatabaseException(this, "Attempt at rollback/commit while there are uncommitted nested transactions");
       }
 
       endTransaction();
+
+      LOG.finer(this + (commit ? ": COMMIT" : ": ROLLBACK"));
 
       try {
         if(parent == null) {
@@ -470,14 +498,14 @@ public class Database {
             }
           }
           catch(SQLException e) {
-            throw new DatabaseException(e);
+            throw new DatabaseException(this, "Exception while committing/rolling back connection", e);
           }
           finally {
             try {
               connection.close();
             }
             catch(SQLException e) {
-              System.out.println("[FINE] Database.Transaction.finishTransaction() - exception while closing connection: " + e);
+              LOG.fine(this + ": exception while closing connection: " + e);
             }
           }
         }
@@ -491,7 +519,7 @@ public class Database {
             }
           }
           catch(SQLException e) {
-            throw new DatabaseException(e);
+            throw new DatabaseException(this, "Exception while finishing nested transaction", e);
           }
           finally {
             parent.activeNestedTransactions--;
@@ -509,6 +537,11 @@ public class Database {
 
     public synchronized void rollback() throws DatabaseException {
       finishTransaction(false);
+    }
+
+    @Override
+    public String toString() {
+      return String.format("T%04d%s", id, parent == null ? "" : " (" + parent + ")");
     }
 
     @Override

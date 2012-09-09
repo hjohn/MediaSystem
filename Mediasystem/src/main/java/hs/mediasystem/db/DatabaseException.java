@@ -1,17 +1,14 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.db.Database.Transaction;
+
 public class DatabaseException extends RuntimeException {
 
-  public DatabaseException(String message, Throwable cause) {
-    super(message, cause);
+  public DatabaseException(Transaction transaction, String message, Throwable cause) {
+    super(transaction + ": " + message, cause);
   }
 
-  public DatabaseException(Throwable cause) {
-    super(cause);
+  public DatabaseException(Transaction transaction, String message) {
+    super(transaction + ": " + message);
   }
-
-  public DatabaseException(String message) {
-    super(message);
-  }
-
 }

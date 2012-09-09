@@ -2,6 +2,7 @@ package hs.mediasystem.dao;
 
 import hs.mediasystem.db.AnnotatedRecordMapper;
 import hs.mediasystem.db.Column;
+import hs.mediasystem.db.DataTypeConverter;
 import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
@@ -12,18 +13,28 @@ import java.util.List;
 
 @Table(name = "items")
 public class Item {
+  public static final int VERSION = 2;
 
   @Id
   private Integer id;
 
-  @Column
-  private Identifier identifier;
+  @Column(name = {"type", "provider", "providerid"})
+  private ProviderId identifier;
 
   @Column
   private String title;
 
-  @Column
+  @Column(converterClass = VersionConverter.class)
   private int version;
+
+  @Column(converterClass = UpdateDateConverter.class)
+  private Date lastChecked;
+
+  @Column(converterClass = UpdateDateConverter.class)
+  private Date lastHit;
+
+  @Column(converterClass = UpdateDateConverter.class)
+  private Date lastUpdated;
 
   @Column
   private String imdbId;
@@ -55,7 +66,7 @@ public class Item {
   @Column
   private Integer episode;
 
-  @Column
+  @Column(converterClass = GenresConverter.class)
   private String[] genres = new String[] {};
 
   @Column
@@ -69,7 +80,7 @@ public class Item {
   private Source<byte[]> poster;
   private List<Casting> castings;
 
-  public Item(Identifier identifier) {
+  public Item(ProviderId identifier) {
     this.identifier = identifier;
   }
 
@@ -82,11 +93,11 @@ public class Item {
     setPoster(DatabaseUrlSource.create(database, getPosterURL()));
   }
 
-  public Identifier getIdentifier() {
+  public ProviderId getIdentifier() {
     return identifier;
   }
 
-  public void setIdentifier(Identifier identifier) {
+  public void setIdentifier(ProviderId identifier) {
     this.identifier = identifier;
   }
 
@@ -242,6 +253,30 @@ public class Item {
     this.posterURL = posterURL;
   }
 
+  public Date getLastChecked() {
+    return lastChecked;
+  }
+
+  public void setLastChecked(Date lastChecked) {
+    this.lastChecked = lastChecked;
+  }
+
+  public Date getLastHit() {
+    return lastHit;
+  }
+
+  public void setLastHit(Date lastHit) {
+    this.lastHit = lastHit;
+  }
+
+  public Date getLastUpdated() {
+    return lastUpdated;
+  }
+
+  public void setLastUpdated(Date lastUpdated) {
+    this.lastUpdated = lastUpdated;
+  }
+
   public boolean isCastingsLoaded() {
     return castings != null;
   }
@@ -256,5 +291,50 @@ public class Item {
   @Override
   public String toString() {
     return "('" + title + "', Item[id=" + id + ", identifier=" + identifier + "])";
+  }
+
+  public static class UpdateDateConverter implements DataTypeConverter<Date, Date> {
+    @Override
+    public Date toStorageType(Date input) {
+      return new Date();
+    }
+
+    @Override
+    public Date toJavaType(Date input, Class<? extends Date> type) {
+      return input;
+    }
+  }
+
+  public static class VersionConverter implements DataTypeConverter<Integer, Integer> {
+    @Override
+    public Integer toStorageType(Integer input) {
+      return VERSION;
+    }
+
+    @Override
+    public Integer toJavaType(Integer input, Class<? extends Integer> type) {
+      return input;
+    }
+  }
+
+  public static class GenresConverter implements DataTypeConverter<String[], String> {
+    @Override
+    public String toStorageType(String[] input) {
+      String genres = "";
+
+      for(String genre : input) {
+        if(genre.length() > 0) {
+          genres += ",";
+        }
+        genres += genre;
+      }
+
+      return genres;
+    }
+
+    @Override
+    public String[] toJavaType(String input, Class<? extends String[]> type) {
+      return input == null ? new String[] {} : input.split(",");
+    }
   }
 }

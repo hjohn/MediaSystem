@@ -38,13 +38,13 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
       @Override
       protected T call() {
         try {
-          if(identifier.getMediaType() == null) {
+          if(identifier.getProviderId() == null) {
             return null;
           }
 
-          Item item = itemsDao.loadItem(identifier);
+          Item item = itemsDao.loadItem(identifier.getProviderId());
 
-          if(item.getVersion() < ItemsDao.VERSION) {
+          if(item.getVersion() < Item.VERSION) {
             return null;
           }
 
@@ -70,14 +70,14 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
 
       @Override
       protected T call() throws Exception {
-        if(identifier.getMediaType() == null) {
+        if(identifier.getProviderId() == null) {
           return null;
         }
 
         Item oldItem;
 
         try {
-          oldItem = itemsDao.loadItem(identifier);
+          oldItem = itemsDao.loadItem(identifier.getProviderId());
         }
         catch(ItemNotFoundException e) {
           oldItem = null;
@@ -85,7 +85,7 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
 
         updateProgress(1, 4);
 
-        Item item = bypassCache || oldItem == null ? mediaLoader.loadItem(identifier) : oldItem;
+        Item item = bypassCache || oldItem == null ? mediaLoader.loadItem(identifier.getProviderId()) : oldItem;
 
         updateProgress(2, 4);
 

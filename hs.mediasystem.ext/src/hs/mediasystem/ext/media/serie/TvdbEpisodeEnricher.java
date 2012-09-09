@@ -6,6 +6,7 @@ import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
+import hs.mediasystem.dao.ProviderId;
 import hs.mediasystem.framework.IdentifyException;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaIdentifier;
@@ -34,22 +35,22 @@ public class TvdbEpisodeEnricher implements MediaIdentifier, MediaLoader {
     Identifier serieMatch = itemIdentifier.identifyItem(episode.getSerie().getMedia());
 
     // TODO may need some TVDB caching here, as we're doing this query twice for each episode... and TVDB returns whole seasons I think
-    EpisodeSearchResult result = findEpisode(serieMatch.getProviderId(), episode);
+    EpisodeSearchResult result = findEpisode(serieMatch.getProviderId().getId(), episode);
 
     if(result == null) {
       throw new IdentifyException("unable to find episode with serieId " + serieMatch.getProviderId() + " and " + episode);
     }
 
-    return new Identifier(media.getClass().getSimpleName(), "TVDB", serieMatch.getProviderId() + "," + result.episode.getId(), result.matchType, result.matchAccuracy);  // TODO better would be episode id -- this is done here for specials, with season 0 and a nonsense episode number
+    return new Identifier(new ProviderId(media.getClass().getSimpleName(), "TVDB", serieMatch.getProviderId().getId() + "," + result.episode.getId()), result.matchType, result.matchAccuracy);  // TODO better would be episode id -- this is done here for specials, with season 0 and a nonsense episode number
   }
 
   @Override
-  public Item loadItem(Identifier identifier) throws ItemNotFoundException {
-    String[] split = identifier.getProviderId().split(",");
+  public Item loadItem(ProviderId providerId) throws ItemNotFoundException {
+    String[] split = providerId.getId().split(",");
 
     Episode episode = getEpisodeById(split[1]);
 
-    Item item = new Item(identifier);
+    Item item = new Item(providerId);
 
     item.setTitle(episode.getEpisodeName());
     item.setSeason(episode.getSeasonNumber());

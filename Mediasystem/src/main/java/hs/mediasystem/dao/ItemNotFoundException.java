@@ -1,14 +1,13 @@
 package hs.mediasystem.dao;
 
-
 public class ItemNotFoundException extends Exception {
 
-  public ItemNotFoundException(Identifier identifier) {
-    super(identifier.toString());
+  public ItemNotFoundException(ProviderId providerId) {
+    super(providerId.toString());
   }
 
-  public ItemNotFoundException(Identifier identifier, Exception cause) {
-    super(identifier.toString(), cause);
+  public ItemNotFoundException(ProviderId providerId, Exception cause) {
+    super(providerId.toString(), cause);
   }
 
   public ItemNotFoundException(String message) {

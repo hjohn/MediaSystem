@@ -1,5 +1,8 @@
 package hs.mediasystem.dao;
 
+import hs.mediasystem.db.Column;
+import hs.mediasystem.db.Id;
+import hs.mediasystem.db.Table;
 import hs.mediasystem.enrich.DefaultEnrichable;
 
 import java.util.Date;
@@ -9,13 +12,19 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
+@Table(name = "mediadata")
 public class MediaData extends DefaultEnrichable<MediaData> {
+
+  @Id
   private Integer id;
 
+  @Column
   private Date lastUpdated;
 
+  @Column
   private String uri;
 
+  @Column
   private MediaId mediaId;
 
   public String getUri() {
@@ -41,6 +50,7 @@ public class MediaData extends DefaultEnrichable<MediaData> {
   };
   public BooleanProperty viewedProperty() { return viewed; }
 
+  @Column
   public boolean isViewed() {
     return viewed.get();
   }
@@ -64,6 +74,7 @@ public class MediaData extends DefaultEnrichable<MediaData> {
   };
   public IntegerProperty resumePositionProperty() { return resumePosition; }
 
+  @Column
   public int getResumePosition() {
     return resumePosition.get();
   }

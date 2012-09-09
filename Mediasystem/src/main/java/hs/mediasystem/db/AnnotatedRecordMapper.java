@@ -1,5 +1,6 @@
 package hs.mediasystem.db;
 
+import hs.mediasystem.db.Column.DefaultConverter;
 import hs.mediasystem.db.Database.Transaction;
 import hs.mediasystem.util.WeakValueMap;
 
@@ -12,8 +13,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,13 +24,18 @@ import java.util.WeakHashMap;
 
 public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   private static final Map<Class<?>, AnnotatedRecordMapper<?>> RECORD_MAPPERS = new WeakValueMap<>();
+  private static final Comparator<Accessor> ACCESSOR_COMPARATOR = new Comparator<Accessor>() {
+    @Override
+    public int compare(Accessor o1, Accessor o2) {
+      return Integer.compare(o1.getAnnotation(IdColumn.class).value(), o2.getAnnotation(IdColumn.class).value());
+    }
+  };
 
-  private final Map<Accessor, String[]> columns = new HashMap<>();
+  private final List<Column> columns = new ArrayList<>();
   private final Map<Class<?>, String[]> relations = new HashMap<>();
   private final String tableName;
 
-  private Accessor idAccessor;
-  private String[] idColumnNames;
+  private Column idColumn;
   private MethodHandle afterLoadStore;
 
   private AnnotatedRecordMapper(Class<T> cls) {
@@ -39,12 +43,14 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
 
     tableName = table.name();
 
-    List<Accessor> accessors = getAnnotatedAccessors(cls, null, Column.class, Id.class);
+    List<Accessor> accessors = getAnnotatedAccessors(cls, null, hs.mediasystem.db.Column.class, Id.class);
 
     for(Accessor accessor : accessors) {
       Id id = accessor.getAnnotation(Id.class);
-      Column column = accessor.getAnnotation(Column.class);
+      hs.mediasystem.db.Column column = accessor.getAnnotation(hs.mediasystem.db.Column.class);
 
+      @SuppressWarnings("unchecked")
+      Class<DataTypeConverter<Object, Object>> dataTypeConverterClass = (Class<DataTypeConverter<Object, Object>>)(column == null ? DefaultConverter.class : column.converterClass());
       String[] columnNames = column == null ? null : column.name();
 
       if(columnNames == null || columnNames.length == 0) {
@@ -55,15 +61,14 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
         columnNames[i] = columnNames[i].toLowerCase();
       }
 
-      if(id != null && idAccessor != null) {
+      if(id != null && idColumn != null) {
         throw new IllegalStateException("only one @Id annotation allowed: " + cls);
       }
       else if(id != null) {
-        idAccessor = accessor;
-        idColumnNames = columnNames;
+        idColumn = new Column(columnNames, accessor, dataTypeConverterClass);
       }
       else if(column != null) {
-        columns.put(accessor, columnNames);
+        columns.add(new Column(columnNames, accessor, dataTypeConverterClass));
       }
 
       if(isRelation(accessor.getType())) {
@@ -91,7 +96,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     return annotatedRecordMapper;
   }
 
-  private boolean isRelation(Class<?> type) {
+  private static boolean isRelation(Class<?> type) {
     return type.getAnnotation(Table.class) != null;
   }
 
@@ -111,65 +116,46 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   public List<String> getColumnNames() {
     List<String> columnNames = new ArrayList<>();
 
-    for(String[] names : columns.values()) {
-      columnNames.addAll(Arrays.asList(names));
+    for(Column column : columns) {
+      columnNames.addAll(Arrays.asList(column.getNames()));
     }
 
     return columnNames;
   }
 
   public List<String> getIdColumnNames() {
-    return new ArrayList<>(Arrays.asList(idColumnNames));
+    return new ArrayList<>(Arrays.asList(idColumn.getNames()));
   }
 
   public Object[] getIds(T instance) {
-    Object value = idAccessor.get(instance);
+    Object value = idColumn.getAccessor().get(instance);
 
-    if(idAccessor.getType().getAnnotation(IdClass.class) == null) {
+    if(!idColumn.isEmbedded()) {
       return new Object[] {value};
     }
 
-    List<Accessor> accessors = getAnnotatedAccessors(idAccessor.getType(), new Comparator<Accessor>() {
-      @Override
-      public int compare(Accessor o1, Accessor o2) {
-        return Integer.compare(o1.getAnnotation(IdColumn.class).value(), o2.getAnnotation(IdColumn.class).value());
-      }
-    }, IdColumn.class);
+    return getEmbeddedFields(value);
+  }
 
+  public Object[] getEmbeddedFields(Object embeddedInstance) {
+    List<Accessor> accessors = getAnnotatedAccessors(embeddedInstance.getClass(), ACCESSOR_COMPARATOR, IdColumn.class);
 
-    Object[] ids = new Object[accessors.size()];
+    Object[] values = new Object[accessors.size()];
     int index = 0;
 
     for(Accessor accessor : accessors) {
-      ids[index++] = accessor.get(value);
+      values[index++] = accessor.get(embeddedInstance);
     }
 
-    return ids;
+    return values;
   }
 
   @Override
   public Map<String, Object> extractValues(T object) {
     Map<String, Object> values = new HashMap<>();
 
-    for(Accessor accessor : columns.keySet()) {
-      Object value = accessor.get(object);
-
-      if(value != null && isRelation(value.getClass())) {
-        @SuppressWarnings("unchecked")
-        AnnotatedRecordMapper<Object> mapper = (AnnotatedRecordMapper<Object>)create(value.getClass());
-
-        Object[] ids = mapper.getIds(value);
-        String[] columnNames = columns.get(accessor);
-
-        for(int i = 0; i < ids.length; i++) {
-          values.put(columnNames[i], ids[i]);
-        }
-      }
-      else {
-        for(String columnName : columns.get(accessor)) {
-          values.put(columnName, value);
-        }
-      }
+    for(Column column : columns) {
+      column.toStorageType(column.getAccessor().get(object), values);
     }
 
     return values;
@@ -182,20 +168,31 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     Object[] ids = getIds(object);
 
     for(int i = 0; i < ids.length; i++) {
-      values.put(idColumnNames[i], ids[i]);
+      values.put(idColumn.getNames()[i], ids[i]);
     }
 
     return values;
   }
 
   @Override
-  public void applyValues(Transaction transaction, T object, Map<String, Object> map) {
-    for(Accessor accessor : columns.keySet()) {
-      accessor.set(object, convertValue(columns.get(accessor), accessor.getType(), map, transaction));
+  public boolean isTransient(T object) {
+    for(Object value : extractIds(object).values()) {
+      if(value != null) {
+        return false;
+      }
     }
 
-    if(idAccessor != null) {
-      idAccessor.set(object, convertValue(idColumnNames, idAccessor.getType(), map, transaction));
+    return true;
+  }
+
+  @Override
+  public void applyValues(Transaction transaction, T object, Map<String, Object> map) {
+    for(Column column : columns) {
+      column.getAccessor().set(object, column.toJavaType(map, transaction));
+    }
+
+    if(idColumn != null) {
+      idColumn.getAccessor().set(object, idColumn.toJavaType(map, transaction));
     }
   }
 
@@ -214,77 +211,20 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     }
   }
 
-  private Object convertValue(String[] columnNames, Class<?> type, Map<String, Object> map, Transaction transaction) {
-    try {
-      if(type.getAnnotation(IdClass.class) != null) {
-        Class<?>[] types = new Class<?>[columnNames.length];
-        Object[] idValues = new Object[columnNames.length];
-
-        for(int i = 0; i < columnNames.length; i++) {
-          Object value = map.get(columnNames[i]);
-
-          types[i] = value.getClass();
-          idValues[i] = value;
-        }
-
-        Constructor<?> constructor = type.getConstructor(types);
-
-        return constructor.newInstance(idValues);
-      }
-      else if(isRelation(type)) {
-        Object[] idValues = new Object[columnNames.length];
-
-        for(int i = 0; i < columnNames.length; i++) {
-          idValues[i] = map.get(columnNames[i]);
-        }
-
-        Object associatedObject = transaction.findAssociatedObject(type, idValues);
-
-        if(associatedObject == null) {
-          associatedObject = type.newInstance();
-          associateStub(transaction, associatedObject, idValues);
-        }
-
-        return associatedObject;
-      }
-
-      Object value = map.get(columnNames[0]);
-
-      if(type.isEnum() && value instanceof String) {
-        Method method = type.getMethod("valueOf", String.class);
-
-        return method.invoke(null, value);
-      }
-      else if(type.isArray() && value instanceof String) {
-        return ((String)value).split(",");
-      }
-      else if(value instanceof Blob) {
-        Blob blob = (Blob)value;
-
-        return blob.getBytes(1L, (int)blob.length());
-      }
-
-      return value;
-    }
-    catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | SQLException | InstantiationException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   @Override
   public void setGeneratedKey(T object, Object key) {
-    if(idAccessor == null) {
+    if(idColumn == null) {
       return;
     }
 
     if(key instanceof Number) {
       Number number = (Number)key;
 
-      if(idAccessor.getType() == int.class || idAccessor.getType() == Integer.class) {
-        idAccessor.set(object, number.intValue());
+      if(idColumn.getType() == int.class || idColumn.getType() == Integer.class) {
+        idColumn.getAccessor().set(object, number.intValue());
       }
       else {
-        idAccessor.set(object, number.longValue());
+        idColumn.getAccessor().set(object, number.longValue());
       }
     }
   }
@@ -293,13 +233,20 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   private static final Map<Object, Object[]> STUBS = new WeakHashMap<>();
 
   public void associateStub(Transaction transaction, Object stub, Object[] ids) {
-    STUBS.put(stub, ids);
-    DATABASES.put(stub, transaction.getDatabase());
+    synchronized(DATABASES) {
+      STUBS.put(stub, ids);
+      DATABASES.put(stub, transaction.getDatabase());
+    }
   }
 
   public static <T> T fetch(T instance) {
-    Database database = DATABASES.get(instance);
-    Object[] ids = STUBS.get(instance);
+    Database database;
+    Object[] ids;
+
+    synchronized(DATABASES) {
+      database = DATABASES.get(instance);
+      ids = STUBS.get(instance);
+    }
 
     if(database == null || ids == null) {
       return instance;
@@ -515,6 +462,117 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
       String name = readMethod.getName();
 
       return name.startsWith("get") ? name.substring(3) : name.substring(2);
+    }
+  }
+
+  public class Column {
+    private final String[] names;
+    private final Accessor accessor;
+    private final DataTypeConverter<Object, Object> dataTypeConverter;
+
+    public Column(String[] names, Accessor accessor, Class<DataTypeConverter<Object, Object>> dataTypeConverterClass) {
+      this.names = names;
+      this.accessor = accessor;
+
+      try {
+        this.dataTypeConverter = dataTypeConverterClass.newInstance();
+      }
+      catch(IllegalAccessException | InstantiationException e) {
+        throw new RuntimeException("Exception while creating DataTypeConverter: " + dataTypeConverterClass, e);
+      }
+    }
+
+    public String[] getNames() {
+      return names;
+    }
+
+    public Accessor getAccessor() {
+      return accessor;
+    }
+
+    public Class<?> getType() {
+      return accessor.getType();
+    }
+
+    public boolean isEmbedded() {
+      return getType().getAnnotation(IdClass.class) != null;
+    }
+
+    public void toStorageType(Object value, Map<String, Object> valuesRef) {
+      Object[] values = null;
+
+      if(isRelation(getType())) {
+        if(value != null) {
+          @SuppressWarnings("unchecked")
+          AnnotatedRecordMapper<Object> mapper = (AnnotatedRecordMapper<Object>)create(getType());
+
+          values = mapper.getIds(value);
+        }
+      }
+      else if(isEmbedded()) {
+        if(value != null) {
+          values = getEmbeddedFields(value);
+        }
+      }
+      else {
+        values = new Object[] {dataTypeConverter.toStorageType(value)};
+      }
+
+      if(values != null) {
+        for(int i = 0; i < names.length; i++) {
+          valuesRef.put(names[i], values[i]);
+        }
+      }
+      else {
+        for(String columnName : names) {
+          valuesRef.put(columnName, null);
+        }
+      }
+    }
+
+    public Object toJavaType(Map<String, Object> map, Transaction transaction) {
+      try {
+        if(isEmbedded()) {
+          Class<?>[] types = new Class<?>[names.length];
+          Object[] idValues = new Object[names.length];
+
+          for(int i = 0; i < names.length; i++) {
+            Object value = map.get(names[i]);
+
+            if(value == null) {
+              return null;
+            }
+
+            types[i] = value.getClass();
+            idValues[i] = value;
+          }
+
+          Constructor<?> constructor = getType().getConstructor(types);
+
+          return constructor.newInstance(idValues);
+        }
+        else if(isRelation(getType())) {
+          Object[] idValues = new Object[names.length];
+
+          for(int i = 0; i < names.length; i++) {
+            idValues[i] = map.get(names[i]);
+          }
+
+          Object associatedObject = transaction.findAssociatedObject(getType(), idValues);
+
+          if(associatedObject == null) {
+            associatedObject = getType().newInstance();
+            associateStub(transaction, associatedObject, idValues);
+          }
+
+          return associatedObject;
+        }
+
+        return dataTypeConverter.toJavaType(map.get(names[0]), getType());
+      }
+      catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 }

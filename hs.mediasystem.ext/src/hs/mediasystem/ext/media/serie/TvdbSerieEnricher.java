@@ -6,6 +6,7 @@ import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
+import hs.mediasystem.dao.ProviderId;
 import hs.mediasystem.framework.IdentifyException;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaIdentifier;
@@ -28,26 +29,26 @@ public class TvdbSerieEnricher implements MediaIdentifier, MediaLoader {
     synchronized(TheTVDB.class) {
       List<Series> results = TVDB.searchSeries(media.getTitle(), "en");
 
-      System.out.println("TVDB results: " + results);
+      System.out.println("TVDB results for '" + media.getTitle() + "': " + results);
 
       if(results.isEmpty()) {
         throw new IdentifyException("Cannot identify Serie with name: " + media.getTitle());
       }
 
-      return new Identifier(SerieBase.class.getSimpleName(), "TVDB", results.get(0).getId(), MatchType.NAME, 1.0f);
+      return new Identifier(new ProviderId(SerieBase.class.getSimpleName(), "TVDB", results.get(0).getId()), MatchType.NAME, 1.0f);
     }
   }
 
   @Override
-  public Item loadItem(Identifier identifier) throws ItemNotFoundException {
+  public Item loadItem(ProviderId providerId) throws ItemNotFoundException {
     synchronized(TheTVDB.class) {
-      final Series series = TVDB.getSeries(identifier.getProviderId(), "en");
+      final Series series = TVDB.getSeries(providerId.getId(), "en");
 
       if(series == null) {
-        throw new ItemNotFoundException(identifier);
+        throw new ItemNotFoundException(providerId);
       }
 
-      Item item = new Item(identifier);
+      Item item = new Item(providerId);
 
       item.setTitle(series.getSeriesName());
       item.setRating(Float.valueOf(series.getRating()));
@@ -68,7 +69,7 @@ public class TvdbSerieEnricher implements MediaIdentifier, MediaLoader {
         }
       });
 
-      actors.addAll(TVDB.getActors(identifier.getProviderId()));  // de-duplicates the actors we get from tvdb
+      actors.addAll(TVDB.getActors(providerId.getId()));  // de-duplicates the actors we get from tvdb
 
       for(Actor actor : actors) {
         Person person = new Person();

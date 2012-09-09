@@ -14,4 +14,6 @@ public interface RecordMapper<T> {
   void setGeneratedKey(T object, Object key);
 
   void invokeAfterLoadStore(T object, Database database) throws DatabaseException;
+
+  boolean isTransient(T object);
 }

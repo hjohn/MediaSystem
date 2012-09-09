@@ -65,7 +65,7 @@ public class IdentifierEnricher implements Enricher<Identifier> {
          * identification should be re-attempted.  To trigger this, null is returned.
          */
 
-        if(identifier != null && identifier.getMediaType() == null && identifier.getLastUpdated().getTime() < System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000) {
+        if(identifier != null && identifier.getProviderId() == null && identifier.getLastUpdated().getTime() < System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000) {
           return null;
         }
 
@@ -95,7 +95,7 @@ public class IdentifierEnricher implements Enricher<Identifier> {
 
           updateProgress(1, 2);
 
-          identifier.setMediaDataId(mediaData.getId());
+          identifier.setMediaData(mediaData);
           identifier.setLastUpdated(new Date());
 
           Identifier existingIdentifier = identifierDao.getIdentifierByMediaDataId(mediaData.getId());
