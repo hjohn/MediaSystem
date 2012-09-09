@@ -11,14 +11,14 @@ public class Activator extends DependencyActivatorBase {
 
   @Override
   public void init(BundleContext context, DependencyManager manager) throws Exception {
-//    manager.add(createComponent()
-//      .setInterface(PlayerFactory.class.getName(), null)
-//      .setImplementation(new VLCPlayerFactory("VLC (seperate window)", Mode.SEPERATE_WINDOW))
-//    );
     manager.add(createComponent()
       .setInterface(PlayerFactory.class.getName(), null)
-      .setImplementation(new VLCPlayerFactory("VLC (integrated, slower)", Mode.CANVAS))
+      .setImplementation(new VLCPlayerFactory("VLC (seperate window)", Mode.SEPERATE_WINDOW))
     );
+//    manager.add(createComponent()
+//      .setInterface(PlayerFactory.class.getName(), null)
+//      .setImplementation(new VLCPlayerFactory("VLC (integrated, slower)", Mode.CANVAS))
+//    );
   }
 
   @Override
