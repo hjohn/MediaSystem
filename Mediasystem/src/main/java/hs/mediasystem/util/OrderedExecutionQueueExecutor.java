@@ -59,7 +59,7 @@ public class OrderedExecutionQueueExecutor<K> implements OrderedExecutionQueue<K
 
   @Override
   public List<Task<?>> removeAll(K key) {
-    synchronized(queue) {
+    synchronized(executor) {
       return queue.remove(key);
     }
   }
