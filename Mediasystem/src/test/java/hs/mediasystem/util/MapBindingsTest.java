@@ -54,6 +54,8 @@ public class MapBindingsTest {
     private final IntegerProperty season = new SimpleIntegerProperty();
     public IntegerProperty seasonProperty() { return season; }
 
+    public final IntegerProperty episodeNumber = new SimpleIntegerProperty(21);
+
     public Episode(int season) {
       this.season.set(season);
     }
@@ -90,6 +92,13 @@ public class MapBindingsTest {
     ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "episode", "season");
 
     assertEquals(5, select.get());
+  }
+
+  @Test
+  public void shouldGetEpisodeNumber() {
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "episode", "episodeNumber");
+
+    assertEquals(21, select.get());
   }
 
   @Test
