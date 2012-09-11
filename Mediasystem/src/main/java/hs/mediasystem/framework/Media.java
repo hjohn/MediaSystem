@@ -83,8 +83,6 @@ public class Media<T extends Media<T>> extends Entity<T> {
     item.addListener(new ChangeListener<Item>() {
       @Override
       public void changed(ObservableValue<? extends Item> observableValue, Item old, Item current) {
-        System.out.println("Setting media '" + current.getTitle() + "'");
-
         title.set(current.getTitle());
         background.set(createImageHandle(current.getBackground(), current, "background"));
         banner.set(createImageHandle(current.getBanner(), current, "banner"));
@@ -94,9 +92,6 @@ public class Media<T extends Media<T>> extends Entity<T> {
         runtime.set(current.getRuntime());
         genres.set(current.getGenres());
         releaseDate.set(current.getReleaseDate());
-//        movie.languageProperty().set(current.getLanguage());
-//        movie.tagLineProperty().set(current.getTagline());
-//        movie.imdbNumberProperty().set(current.getImdbId());
       }
     });
   }
