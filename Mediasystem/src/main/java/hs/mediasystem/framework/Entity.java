@@ -1,6 +1,5 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.enrich.EntityEnricher;
 import hs.mediasystem.enrich.InstanceEnricher;
 import hs.mediasystem.persist.Persister;
 import hs.subtitle.DefaultThreadFactory;
@@ -137,7 +136,7 @@ public class Entity<T> {
     };
   }
 
-  protected <P> ObjectProperty<P> entity(final EntityEnricher<T, P> enricher) {
+  protected <P> ObjectProperty<P> entity(final InstanceEnricher<T, P> enricher) {
     return new SimpleObjectProperty<P>() {
       private boolean enricherCalled;
 
@@ -154,8 +153,6 @@ public class Entity<T> {
         if(enricher != null && !enricherCalled) {
           enricherCalled = true;
 
-          final SimpleObjectProperty<P> property = this;
-
           PRIMARY_EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
@@ -164,7 +161,7 @@ public class Entity<T> {
               Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                  property.set(result);
+                  enricher.update(self(), result);
                 }
               });
             }
