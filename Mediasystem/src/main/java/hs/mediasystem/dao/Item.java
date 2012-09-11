@@ -19,7 +19,7 @@ public class Item {
   private Integer id;
 
   @Column(name = {"type", "provider", "providerid"})
-  private ProviderId identifier;
+  private ProviderId providerId;
 
   @Column
   private String title;
@@ -80,8 +80,8 @@ public class Item {
   private Source<byte[]> poster;
   private List<Casting> castings;
 
-  public Item(ProviderId identifier) {
-    this.identifier = identifier;
+  public Item(ProviderId providerId) {
+    this.providerId = providerId;
   }
 
   public Item() {
@@ -93,12 +93,12 @@ public class Item {
     setPoster(DatabaseUrlSource.create(database, getPosterURL()));
   }
 
-  public ProviderId getIdentifier() {
-    return identifier;
+  public ProviderId getProviderId() {
+    return providerId;
   }
 
-  public void setIdentifier(ProviderId identifier) {
-    this.identifier = identifier;
+  public void setProviderId(ProviderId providerId) {
+    this.providerId = providerId;
   }
 
   public Integer getId() {
@@ -290,7 +290,7 @@ public class Item {
 
   @Override
   public String toString() {
-    return "('" + title + "', Item[id=" + id + ", identifier=" + identifier + "])";
+    return "('" + title + "', Item[id=" + id + ", providerId=" + providerId + "])";
   }
 
   public static class UpdateDateConverter implements DataTypeConverter<Date, Date> {

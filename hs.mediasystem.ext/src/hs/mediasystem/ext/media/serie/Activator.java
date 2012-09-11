@@ -166,7 +166,7 @@ public class Activator extends DependencyActivatorBase {
       .setImplementation(new EntityProvider<Serie>() {
         @Override
         public Serie get(Object... parameters) {
-          if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getIdentifier().getType().equals("Serie")) {
+          if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getProviderId().getType().equals("Serie")) {
             return null;
           }
 
@@ -188,7 +188,7 @@ public class Activator extends DependencyActivatorBase {
       .setImplementation(new EntityProvider<Episode>() {
         @Override
         public Episode get(Object... parameters) {
-          if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getIdentifier().getType().equals("Episode")) {
+          if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getProviderId().getType().equals("Episode")) {
             return null;
           }
 

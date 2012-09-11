@@ -136,7 +136,7 @@ public class Activator extends DependencyActivatorBase {
       .setImplementation(new EntityProvider<Movie>() {
         @Override
         public Movie get(Object... parameters) {
-          if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getIdentifier().getType().equals("Movie")) {
+          if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getProviderId().getType().equals("Movie")) {
             return null;
           }
 
