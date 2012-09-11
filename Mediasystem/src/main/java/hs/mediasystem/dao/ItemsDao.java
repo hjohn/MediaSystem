@@ -20,8 +20,10 @@ public class ItemsDao {
   }
 
   public Item loadItem(final ProviderId providerId) throws ItemNotFoundException {
+    assert providerId != null;
+
     try(Transaction transaction = database.beginTransaction()) {
-      System.out.println("[FINE] ItemsDao.getItem() - Selecting Item with type/provider/providerid = " + providerId.getType() + "/" + providerId.getProvider() + "/" + providerId.getId());
+      System.out.println("[FINE] ItemsDao.getItem() - Selecting Item with " + providerId);
 
       Item item = transaction.selectUnique(Item.class, "type=? AND provider=? AND providerid=?", providerId.getType(), providerId.getProvider(), providerId.getId());
 
