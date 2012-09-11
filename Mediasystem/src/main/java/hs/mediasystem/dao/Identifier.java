@@ -107,6 +107,6 @@ public class Identifier {
 
   @Override
   public String toString() {
-    return "(" + providerId + "; matchType: " + matchType + ")";
+    return "Identifier(" + providerId + "; matchType: " + matchType + ")";
   }
 }
