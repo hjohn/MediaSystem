@@ -1,5 +1,6 @@
 package hs.mediasystem.util;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -216,6 +217,7 @@ public class MapBindings {
     private final Object name;
 
     private Method method;
+    private Field field;
 
     public Property(Class<?> cls, Object name) {
       this.cls = cls;
@@ -226,16 +228,21 @@ public class MapBindings {
     public ObservableValue<?> getObservableValue(Object bean) {
       try {
         if(name instanceof String) {
-          if(method == null) {
-            method = cls.getMethod(name + "Property");
+          if(method == null && field == null) {
+            try {
+              method = cls.getMethod(name + "Property");
+            }
+            catch(NoSuchMethodException e) {
+              field = cls.getField((String)name);
+            }
           }
 
-          return (ObservableValue<?>)method.invoke(bean);
+          return method != null ? (ObservableValue<?>)method.invoke(bean) : (ObservableValue<?>)field.get(bean);
         }
 
         return Bindings.valueAt((ObservableMap<Object, ?>)bean, name);
       }
-      catch(NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+      catch(NoSuchFieldException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
         e.printStackTrace();
         return null;
       }
