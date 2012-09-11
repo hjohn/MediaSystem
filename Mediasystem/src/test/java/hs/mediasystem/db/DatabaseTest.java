@@ -117,7 +117,7 @@ public class DatabaseTest {
     verify(connection).commit();
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = DatabaseException.class)
   public void shouldNotAllowUncommitedNestedTransactions() {
     try(Transaction transaction = database.beginTransaction()) {
       try(Transaction nestedTransaction = database.beginTransaction()) {
