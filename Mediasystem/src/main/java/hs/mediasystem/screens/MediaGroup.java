@@ -15,7 +15,7 @@ public interface MediaGroup {
   Comparator<? super MediaItem> getSortComparator();
   Grouper<MediaItem> getGrouper();
 
-  Media createMediaFromFirstItem(MediaItem item);
+  Media<?> createMediaFromFirstItem(MediaItem item);
 
   String getShortTitle(MediaItem item);
 

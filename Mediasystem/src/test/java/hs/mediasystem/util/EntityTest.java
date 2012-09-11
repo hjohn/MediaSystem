@@ -6,61 +6,42 @@ import static org.junit.Assert.assertNull;
 import hs.mediasystem.enrich.InstanceEnricher;
 import hs.mediasystem.screens.Casting;
 import hs.mediasystem.screens.Person;
-
-import java.util.List;
+import hs.mediasystem.test.JavaFXTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
 
-public class EntityTest {
-  private InstanceEnricher immediateEnricher;
-  private InstanceEnricher slowEnricher;
+public class EntityTest extends JavaFXTestCase {
+  private InstanceEnricher<Casting, Void> castingEnricher;
+  private InstanceEnricher<Person, Void> personEnricher;
 
   @Before
   public void before() {
-    immediateEnricher = new InstanceEnricher() {
+    castingEnricher = new InstanceEnricher<Casting, Void>() {
       @Override
-      public void enrich(Object o) {
-        if(o instanceof Person) {
-          Person p = (Person)o;
-
-          p.name.set("John Doe");
-          p.birthPlace.set("Amsterdam");
-        }
-        else if(o instanceof Casting) {
-          Casting c = (Casting)o;
-
-          c.characterName.set("Alice");
-          c.index.set(1);
-          c.role.set("actor");
-          c.person.set(new Person());
-        }
+      public Void enrich(Casting c) {
+        return null;
       }
 
       @Override
-      public void enrich(Object o, List<?> list, String listName) {
+      public void update(Casting c, Void result) {
+        c.characterName.set("Alice");
+        c.index.set(1);
+        c.role.set("actor");
+        c.person.set(new Person());
       }
     };
 
-    slowEnricher = new InstanceEnricher() {
+    personEnricher = new InstanceEnricher<Person, Void>() {
       @Override
-      public void enrich(final Object o) {
-        new Thread() {
-          @Override
-          public void run() {
-            try {
-              Thread.sleep(100);
-              immediateEnricher.enrich(o);
-            }
-            catch(InterruptedException e) {
-              throw new RuntimeException(e);
-            }
-          }
-        }.start();
+      public Void enrich(Person p) {
+        return null;
       }
 
       @Override
-      public void enrich(Object o, List<?> list, String listName) {
+      public void update(Person p, Void result) {
+        p.name.set("John Doe");
+        p.birthPlace.set("Amsterdam");
       }
     };
   }
@@ -69,8 +50,10 @@ public class EntityTest {
   public void shouldEnrichWhenAccessed() {
     Person person = new Person();
 
-    person.setEnricher(immediateEnricher);
+    person.setEnricher(personEnricher);
 
+    assertNull(person.name.get());
+    sleep(200);
     assertEquals("John Doe", person.name.get());
     assertEquals("Amsterdam", person.birthPlace.get());
   }
@@ -84,28 +67,10 @@ public class EntityTest {
   public void shouldEnrichEntityWhenAccessed() {
     Casting casting = new Casting();
 
-    casting.setEnricher(immediateEnricher);
-
-    assertNotNull(casting.person.get());
-  }
-
-  @Test
-  public void shouldAsyncEnrichEntityWhenAccessed() {
-    Casting casting = new Casting();
-
-    casting.setEnricher(slowEnricher);
+    casting.setEnricher(castingEnricher);
 
     assertNull(casting.person.get());
     sleep(200);
     assertNotNull(casting.person.get());
-  }
-
-  protected void sleep(int millis) {
-    try {
-      Thread.sleep(millis);
-    }
-    catch(InterruptedException e) {
-      throw new RuntimeException(e);
-    }
   }
 }

@@ -20,7 +20,20 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
 public class MediaItem implements EnrichTrigger {
-  private final ObservableMap<Class<?>, Object> data = FXCollections.observableHashMap();
+  private final ObservableMap<Class<?>, Object> data = FXCollections.observableMap(new HashMap<Class<?>, Object>() {
+    @Override
+    public Object get(Object key) {
+      Object t = super.get(key);
+      EnrichmentState enrichmentState = enrichmentStates.get(key);
+
+      if(t == null && enrichmentState == null && getEnrichCache() != null) {
+        getEnrichCache().enrich(cacheKey, (Class<?>)key);
+      }
+
+      return t;
+    }
+  });
+
   private final ObjectProperty<ObservableMap<Class<?>, Object>> dataMap = new SimpleObjectProperty<>(data);
   public ObjectProperty<ObservableMap<Class<?>, Object>> dataMapProperty() { return dataMap; }
 
@@ -95,16 +108,10 @@ public class MediaItem implements EnrichTrigger {
     @SuppressWarnings("unchecked")
     T t = (T)data.get(cls);
 
-    EnrichmentState enrichmentState = enrichmentStates.get(cls);
-
-    if(t == null && enrichmentState == null && getEnrichCache() != null) {
-      getEnrichCache().enrich(cacheKey, cls);
-    }
-
     return t;
   }
 
-  public Media getMedia() {
+  public Media<?> getMedia() {
     return get(Media.class);
   }
 
@@ -113,7 +120,7 @@ public class MediaItem implements EnrichTrigger {
   }
 
   public String getTitle() {
-    return getMedia().getTitle();
+    return getMedia().title.get();
   }
 
   public String getMediaType() {
@@ -176,6 +183,6 @@ public class MediaItem implements EnrichTrigger {
 
   @Override
   public String toString() {
-    return "MediaItem[" + getMediaType() + ": '" + getMedia().getTitle() + "' uri='" + uri +"']";
+    return "MediaItem[" + getMediaType() + ": '" + getMedia().title.get() + "' uri='" + uri +"']";
   }
 }

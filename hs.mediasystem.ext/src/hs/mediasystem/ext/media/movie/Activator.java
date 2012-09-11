@@ -1,10 +1,13 @@
 package hs.mediasystem.ext.media.movie;
 
 import hs.mediasystem.dao.IdentifierDao;
+import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.enrich.EnrichCache;
+import hs.mediasystem.framework.EntityFactory;
+import hs.mediasystem.framework.EntityProvider;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SettingsStore;
@@ -34,6 +37,7 @@ import org.apache.felix.dm.DependencyManager;
 import org.osgi.framework.BundleContext;
 
 public class Activator extends DependencyActivatorBase {
+  static final TmdbMovieEnricher TMDB_ENRICHER = new TmdbMovieEnricher();
 
   @Override
   public void init(BundleContext context, DependencyManager manager) throws Exception {
@@ -82,18 +86,18 @@ public class Activator extends DependencyActivatorBase {
       .setImplementation(new SubtitleCriteriaProvider() {
         @Override
         public Map<String, Object> getCriteria(MediaItem mediaItem) {
-          Media media = mediaItem.getMedia();
+          Media<?> media = mediaItem.getMedia();
           MediaData mediaData = mediaItem.get(MediaData.class);
 
           Map<String, Object> criteria = new HashMap<>();
 
-          criteria.put(SubtitleCriteriaProvider.TITLE, media.getTitle());
+          criteria.put(SubtitleCriteriaProvider.TITLE, media.title.get());
 
           if(media instanceof Movie) {
             Movie movie = (Movie)media;
 
-            criteria.put(SubtitleCriteriaProvider.YEAR, movie.getReleaseYear());
-            criteria.put(SubtitleCriteriaProvider.IMDB_ID, movie.getImdbNumber());
+            criteria.put(SubtitleCriteriaProvider.YEAR, movie.releaseYear.get());
+            criteria.put(SubtitleCriteriaProvider.IMDB_ID, movie.imdbNumber.get());
           }
 
           if(mediaData != null) {
@@ -112,8 +116,8 @@ public class Activator extends DependencyActivatorBase {
       }})
       .setImplementation(new DefaultMediaGroup("alpha-group-title", "Alphabetically, grouped by Title", new MovieGrouper(), MovieTitleGroupingComparator.INSTANCE, false, false) {
         @Override
-        public Media createMediaFromFirstItem(MediaItem item) {
-          return new Media(item.getTitle(), null, item.getMedia().getReleaseYear());
+        public Media<?> createMediaFromFirstItem(MediaItem item) {
+          return new Media<>(item.getTitle(), null, item.getMedia().releaseYear.get());
         }
       })
     );
@@ -126,27 +130,44 @@ public class Activator extends DependencyActivatorBase {
     );
 
     manager.add(createComponent()
-      .setInterface(MovieEnricher.class.getName(), null)
-      .setImplementation(MovieEnricher.class)
-      .add(createServiceDependency()
-        .setService(ItemsDao.class)
-        .setRequired(true)
-      )
+      .setInterface(EntityProvider.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", Media.class);
+      }})
+      .setImplementation(new EntityProvider<Movie>() {
+        @Override
+        public Movie get(Object... parameters) {
+          if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getIdentifier().getType().equals("Movie")) {
+            return null;
+          }
+
+          Item item = (Item)parameters[0];
+
+          Movie movie = new Movie(item.getTitle(), item.getEpisode(), "", null, item.getImdbId());
+
+          movie.item.set(item);
+
+          return movie;
+        }
+      })
     );
 
     manager.add(createComponent()
       .setInterface(MainMenuExtension.class.getName(), null)
       .setImplementation(MoviesMainMenuExtension.class)
       .add(createServiceDependency()
-        .setService(MovieEnricher.class)
-        .setRequired(true)
-      )
-      .add(createServiceDependency()
         .setService(EnrichCache.class)
         .setRequired(true)
       )
       .add(createServiceDependency()
         .setService(PersistQueue.class)
+        .setRequired(true)
+      )
+      .add(createServiceDependency()
+        .setService(ItemsDao.class)
+        .setRequired(true)
+      )
+      .add(createServiceDependency()
+        .setService(EntityFactory.class)
         .setRequired(true)
       )
       .add(createServiceDependency()
@@ -163,5 +184,4 @@ public class Activator extends DependencyActivatorBase {
   @Override
   public void destroy(BundleContext context, DependencyManager manager) throws Exception {
   }
-
 }

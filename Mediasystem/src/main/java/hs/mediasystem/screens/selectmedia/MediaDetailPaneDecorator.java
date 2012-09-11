@@ -36,9 +36,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 
-public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media> {
-  private final ObjectProperty<Media> data = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<Media> dataProperty() { return data; }
+public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
+  private final ObjectProperty<Media<?>> data = new SimpleObjectProperty<>();
+  @Override public ObjectProperty<Media<?>> dataProperty() { return data; }
 
   protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(dataProperty(), "image");
 
@@ -47,7 +47,7 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media> {
   protected final StringProperty groupName = new SimpleStringProperty();
   protected final StringBinding title = MapBindings.selectString(dataProperty(), "title");
   protected final StringBinding subtitle = MapBindings.selectString(dataProperty(), "subtitle");
-  protected final StringBinding releaseTime = MediaItemFormatter.releaseTimeBinding2(dataProperty());
+  protected final StringBinding releaseTime = MediaItemFormatter.releaseTimeBinding(dataProperty());
   protected final StringBinding plot = MapBindings.selectString(dataProperty(), "description");
   protected final DoubleBinding rating = MapBindings.selectDouble(dataProperty(), "rating");
   protected final IntegerBinding runtime = MapBindings.selectInteger(dataProperty(), "runtime");

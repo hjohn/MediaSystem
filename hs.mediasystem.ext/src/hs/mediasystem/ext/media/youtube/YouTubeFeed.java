@@ -27,7 +27,7 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
 
   private List<MediaItem> children;
 
-  public YouTubeFeed(YouTubeMediaTree mediaTree, String uri, Feed feed, Media media) {
+  public YouTubeFeed(YouTubeMediaTree mediaTree, String uri, Feed feed, Media<?> media) {
     super(mediaTree, uri, media);
 
     this.mediaRoot = mediaTree;
@@ -55,12 +55,12 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
           for(YouTubeMediaContent mediaContent : mediaGroup.getYouTubeContents()) {
             YouTubeVideo youTube = new YouTubeVideo(videoEntry.getTitle().getPlainText());
 
-            youTube.descriptionProperty().set(mediaGroup.getDescription().getPlainTextContent());
+            youTube.description.set(mediaGroup.getDescription().getPlainTextContent());
             if(videoEntry.getRating() != null) {
-              youTube.ratingProperty().set(videoEntry.getRating().getAverage() * 2);
+              youTube.rating.set(videoEntry.getRating().getAverage() * 2);
             }
-            youTube.releaseDateProperty().set(new Date(videoEntry.getPublished().getValue()));
-            youTube.runtimeProperty().set(mediaGroup.getYouTubeContents().get(0).getDuration() / 60);
+            youTube.releaseDate.set(new Date(videoEntry.getPublished().getValue()));
+            youTube.runtime.set(mediaGroup.getYouTubeContents().get(0).getDuration() / 60);
 
             List<MediaThumbnail> thumbnails = videoEntry.getMediaGroup().getThumbnails();
             MediaThumbnail bestThumbnail = null;
@@ -75,7 +75,7 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
 
             String url = bestThumbnail == null ? null : bestThumbnail.getUrl();
 
-            youTube.imageProperty().set(new SourceImageHandle(new URLImageSource(url), "YouTubeMediaTree:/" + videoEntry.getId()));
+            youTube.image.set(new SourceImageHandle(new URLImageSource(url), "YouTubeMediaTree:/" + videoEntry.getId()));
 
             children.add(new MediaItem(getMediaTree(), mediaContent.getUrl().replaceAll("https://", "http://"), youTube, videoEntry));
             break;
@@ -90,7 +90,7 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
     return children;
   }
 
-  public static class YouTubeVideo extends Media {
+  public static class YouTubeVideo extends Media<YouTubeVideo> {
     public YouTubeVideo(String title) {
       super(title);
     }

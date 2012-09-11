@@ -18,9 +18,9 @@ public class IdentifierEnricher implements Enricher<Identifier> {
   private final IdentifierDao identifierDao;
   private final MediaIdentifier itemEnricher;
 
-  private final Class<? extends Media> mediaClass;
+  private final Class<? extends Media<?>> mediaClass;
 
-  public IdentifierEnricher(IdentifierDao identifierDao, MediaIdentifier mediaIdentifier, final Class<? extends Media> mediaClass) {
+  public IdentifierEnricher(IdentifierDao identifierDao, MediaIdentifier mediaIdentifier, final Class<? extends Media<?>> mediaClass) {
     this.identifierDao = identifierDao;
     this.itemEnricher = mediaIdentifier;
     this.mediaClass = mediaClass;
@@ -74,7 +74,7 @@ public class IdentifierEnricher implements Enricher<Identifier> {
     };
   }
 
-  public EnrichTask<Identifier> createTask(final String title, final MediaData mediaData, final Media media) {
+  public EnrichTask<Identifier> createTask(final String title, final MediaData mediaData, final Media<?> media) {
     return new EnrichTask<Identifier>(false) {
       {
         updateTitle(title);

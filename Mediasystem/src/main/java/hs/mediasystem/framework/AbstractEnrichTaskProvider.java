@@ -5,7 +5,6 @@ import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.enrich.EnrichTask;
-import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.screens.Casting;
 import hs.mediasystem.screens.Person;
 
@@ -14,7 +13,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public abstract class AbstractEnrichTaskProvider<T extends Media> {
+public abstract class AbstractEnrichTaskProvider<T extends Media<?>> {
   private final String title;
   private final ItemsDao itemsDao;
   private final MediaLoader mediaLoader;
@@ -50,7 +49,7 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
 
           T enrichType = itemToEnrichType(item);
 
-          enrichType.castingsProperty().get().addAll(getOrderedCastings(item));
+          enrichType.castings.get().addAll(getOrderedCastings(item));
 
           return enrichType;
         }
@@ -103,7 +102,7 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
 
         T enrichType = itemToEnrichType(item);
 
-        enrichType.castingsProperty().get().addAll(getOrderedCastings(item));
+        enrichType.castings.get().addAll(getOrderedCastings(item));
 
         updateProgress(4, 4);
 
@@ -133,17 +132,10 @@ public abstract class AbstractEnrichTaskProvider<T extends Media> {
 
     List<Casting> result = new ArrayList<>();
 
-    for(hs.mediasystem.dao.Casting casting : castings) {
+    for(final hs.mediasystem.dao.Casting casting : castings) {
       Person p = new Person();
 
-      p.name.set(casting.getPerson().getName());
-      p.birthDate.set(casting.getPerson().getBirthDate());
-      p.birthPlace.set(casting.getPerson().getBirthPlace());
-      p.biography.set(casting.getPerson().getBiography());
-
-      if(casting.getPerson().getPhoto() != null) {
-        p.photo.set(new SourceImageHandle(casting.getPerson().getPhoto(), "StandardDetailPane://" + casting.getPerson().getName()));
-      }
+      p.personRecord.set(casting.getPerson());
 
       Casting c = new Casting();
 

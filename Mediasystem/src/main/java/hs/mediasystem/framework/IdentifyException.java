@@ -3,11 +3,11 @@ package hs.mediasystem.framework;
 
 public class IdentifyException extends Exception {
 
-  public IdentifyException(Media media, Exception cause) {
+  public IdentifyException(Media<?> media, Exception cause) {
     super(media.toString(), cause);
   }
 
-  public IdentifyException(Media media) {
+  public IdentifyException(Media<?> media) {
     super(media.toString());
   }
 

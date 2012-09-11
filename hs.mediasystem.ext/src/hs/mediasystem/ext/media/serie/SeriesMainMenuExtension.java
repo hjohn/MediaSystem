@@ -2,8 +2,10 @@ package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.IdentifierDao;
+import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.enrich.EnrichCache;
+import hs.mediasystem.framework.EntityFactory;
 import hs.mediasystem.framework.IdentifierEnricher;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.fs.MediaRootType;
@@ -20,11 +22,11 @@ import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 
 public class SeriesMainMenuExtension implements MainMenuExtension {
-  private volatile SerieEnricher serieEnricher;
-  private volatile EpisodeEnricher episodeEnricher;
   private volatile EnrichCache enrichCache;
   private volatile PersistQueue persister;
   private volatile IdentifierDao identifierDao;
+  private volatile ItemsDao itemsDao;
+  private volatile EntityFactory entityFactory;
   private volatile SettingsStore settingsStore;
 
   public SeriesMainMenuExtension() {
@@ -33,10 +35,8 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   }
 
   public void init() {
-    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, Activator.TVDB_SERIE_ENRICHER, SerieBase.class));
-    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, Activator.TVDB_EPISODE_ENRICHER, EpisodeBase.class));
-    enrichCache.registerEnricher(Serie.class, serieEnricher);
-    enrichCache.registerEnricher(Episode.class, episodeEnricher);
+    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, Activator.TVDB_SERIE_ENRICHER, Serie.class));
+    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, Activator.TVDB_EPISODE_ENRICHER, Episode.class));
   }
 
   @Override
@@ -53,7 +53,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   public void select(final ProgramController controller) {
     ObservableList<Path> paths = settingsStore.getListProperty("MediaSystem:Ext:Series", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
 
-    controller.setLocation(new SelectMediaLocation(new SeriesMediaTree(enrichCache, persister, paths)));
+    controller.setLocation(new SelectMediaLocation(new SeriesMediaTree(enrichCache, persister, itemsDao, entityFactory, paths)));
   }
 
   @Override

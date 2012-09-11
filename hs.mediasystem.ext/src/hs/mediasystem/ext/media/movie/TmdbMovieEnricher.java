@@ -49,21 +49,21 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
   }
 
   @Override
-  public Identifier identifyItem(Media media) throws IdentifyException {
+  public Identifier identifyItem(Media<?> media) throws IdentifyException {
     synchronized(TheMovieDb.class) {
-      MovieBase movieBase = (MovieBase)media;
+      Movie movie = (Movie)media;
 
-      String title = movieBase.getGroupTitle();
-      String subtitle = movieBase.getSubtitle();
-      Integer year = movieBase.getReleaseYear();
-      int seq = movieBase.getSequence() == null ? 1 : movieBase.getSequence();
+      String title = movie.groupTitle.get();
+      String subtitle = movie.subtitle.get();
+      Integer year = movie.releaseYear.get();
+      int seq = movie.sequence.get() == null ? 1 : movie.sequence.get();
       int tmdbMovieId = -1;
 
       try {
         float matchAccuracy = 1.0f;
         MatchType matchType = MatchType.ID;
 
-        if(movieBase.getImdbNumber() == null) {
+        if(movie.imdbNumber.get() == null) {
           TreeSet<Score> scores = new TreeSet<>(new Comparator<Score>() {
             @Override
             public int compare(Score o1, Score o2) {
@@ -92,9 +92,9 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
 
             System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Looking to match: " + searchString + "; year = " + year);
 
-            for(MovieDb movie : getTMDB().searchMovie(searchString, "en", false)) {
+            for(MovieDb movieDb : getTMDB().searchMovie(searchString, "en", false)) {
               MatchType nameMatchType = MatchType.NAME;
-              Integer movieYear = extractYear(DATE_FORMAT.parseOrNull(movie.getReleaseDate()));
+              Integer movieYear = extractYear(DATE_FORMAT.parseOrNull(movieDb.getReleaseDate()));
               double score = 0;
 
               if(year != null && movieYear != null) {
@@ -107,13 +107,13 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
                 }
               }
 
-              double matchScore = Levenshtein.compare(movie.getTitle().toLowerCase(), searchString.toLowerCase());
+              double matchScore = Levenshtein.compare(movieDb.getTitle().toLowerCase(), searchString.toLowerCase());
 
               score += matchScore * 55;
 
-              scores.add(new Score(movie, nameMatchType, score));
-              String name = movie.getTitle() + (movie.getOriginalTitle() != null ? " (" + movie.getOriginalTitle() + ")" : "");
-              System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - " + String.format("Match: %5.1f (%4.2f) IMDB: %9s YEAR: %s -- %s", score, matchScore, movie.getImdbID(), movie.getReleaseDate(), name));
+              scores.add(new Score(movieDb, nameMatchType, score));
+              String name = movieDb.getTitle() + (movieDb.getOriginalTitle() != null ? " (" + movieDb.getOriginalTitle() + ")" : "");
+              System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - " + String.format("Match: %5.1f (%4.2f) IMDB: %9s YEAR: %s -- %s", score, matchScore, movieDb.getImdbID(), movieDb.getReleaseDate(), name));
             }
 
             if(!scores.isEmpty()) {
@@ -126,10 +126,10 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
           }
         }
         else {
-          final MovieDb movie = getTMDB().getMovieInfoImdb(movieBase.getImdbNumber(), "en");
+          final MovieDb movieDb = getTMDB().getMovieInfoImdb(movie.imdbNumber.get(), "en");
 
-          if(movie != null) {
-            tmdbMovieId = movie.getId();
+          if(movieDb != null) {
+            tmdbMovieId = movieDb.getId();
           }
         }
 

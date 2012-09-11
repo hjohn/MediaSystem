@@ -9,6 +9,6 @@ public class SeasonGrouper implements Grouper<MediaItem> {
   public Object getGroup(MediaItem item) {
     Episode episode = item.get(Episode.class);
 
-    return episode.getSeason();
+    return episode.season.get();
   }
 }

@@ -2,8 +2,10 @@ package hs.mediasystem.ext.media.movie;
 
 import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.IdentifierDao;
+import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.enrich.EnrichCache;
+import hs.mediasystem.framework.EntityFactory;
 import hs.mediasystem.framework.IdentifierEnricher;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.fs.MediaRootType;
@@ -20,10 +22,11 @@ import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 
 public class MoviesMainMenuExtension implements MainMenuExtension {
-  private volatile MovieEnricher movieEnricher;
   private volatile EnrichCache enrichCache;
   private volatile PersistQueue persister;
   private volatile IdentifierDao identifierDao;
+  private volatile ItemsDao itemsDao;
+  private volatile EntityFactory entityFactory;
   private volatile SettingsStore settingsStore;
 
   public MoviesMainMenuExtension() {
@@ -31,8 +34,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
   }
 
   public void init() {
-    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, new TmdbMovieEnricher(), MovieBase.class));
-    enrichCache.registerEnricher(Movie.class, movieEnricher);
+    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, Activator.TMDB_ENRICHER, Movie.class));
   }
 
   @Override
@@ -49,7 +51,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
   public void select(final ProgramController controller) {
     ObservableList<Path> paths = settingsStore.getListProperty("MediaSystem:Ext:Movies", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
 
-    controller.setLocation(new SelectMediaLocation(new MoviesMediaTree(enrichCache, persister, paths)));
+    controller.setLocation(new SelectMediaLocation(new MoviesMediaTree(enrichCache, persister, itemsDao, entityFactory, paths)));
   }
 
   @Override

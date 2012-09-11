@@ -7,6 +7,6 @@ public class MediaNodeComparator implements Comparator<MediaNode> {
 
   @Override
   public int compare(MediaNode o1, MediaNode o2) {
-    return o1.getMedia().getTitle().compareTo(o2.getMedia().getTitle());
+    return o1.getMedia().title.get().compareTo(o2.getMedia().title.get());
   }
 }

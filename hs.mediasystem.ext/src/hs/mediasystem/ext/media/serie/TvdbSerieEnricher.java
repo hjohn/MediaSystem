@@ -25,17 +25,17 @@ public class TvdbSerieEnricher implements MediaIdentifier, MediaLoader {
   static final TheTVDB TVDB = new TheTVDB(CryptoUtil.decrypt("E6A6CF878B4A6200A66E31AED48627CE83A778EBD28200A031F035F4209B61A4", "-MediaSystem-"));
 
   @Override
-  public Identifier identifyItem(final Media media) throws IdentifyException {
+  public Identifier identifyItem(final Media<?> media) throws IdentifyException {
     synchronized(TheTVDB.class) {
-      List<Series> results = TVDB.searchSeries(media.getTitle(), "en");
+      List<Series> results = TVDB.searchSeries(media.title.get(), "en");
 
-      System.out.println("TVDB results for '" + media.getTitle() + "': " + results);
+      System.out.println("TVDB results for '" + media.title.get() + "': " + results);
 
       if(results.isEmpty()) {
-        throw new IdentifyException("Cannot identify Serie with name: " + media.getTitle());
+        throw new IdentifyException("Cannot identify Serie with name: " + media.title.get());
       }
 
-      return new Identifier(new ProviderId(SerieBase.class.getSimpleName(), "TVDB", results.get(0).getId()), MatchType.NAME, 1.0f);
+      return new Identifier(new ProviderId("Serie", "TVDB", results.get(0).getId()), MatchType.NAME, 1.0f);
     }
   }
 

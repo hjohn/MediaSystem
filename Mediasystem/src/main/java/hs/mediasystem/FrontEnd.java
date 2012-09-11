@@ -11,6 +11,9 @@ import hs.mediasystem.db.DatabaseUpdater;
 import hs.mediasystem.db.SimpleConnectionPoolDataSource;
 import hs.mediasystem.db.SimpleDatabaseStatementTranslator;
 import hs.mediasystem.enrich.EnrichCache;
+import hs.mediasystem.framework.Entity;
+import hs.mediasystem.framework.EntityFactory;
+import hs.mediasystem.framework.EntityProvider;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaDataPersister;
@@ -51,7 +54,9 @@ import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.util.DuoWindowSceneManager;
 import hs.mediasystem.util.Location;
 import hs.mediasystem.util.LocationHandler;
+import hs.mediasystem.util.PropertyEq;
 import hs.mediasystem.util.SceneManager;
+import hs.mediasystem.util.ServiceTracker;
 import hs.mediasystem.util.StringBinding;
 import hs.mediasystem.util.TaskExecutor;
 import hs.mediasystem.util.ini.Ini;
@@ -209,6 +214,42 @@ public class FrontEnd extends Application {
     DependencyManager dm = new DependencyManager(framework.getBundleContext());
 
     System.out.println("Registering components...");
+
+    dm.add(dm.createComponent()
+      .setInterface(EntityFactory.class.getName(), null)
+      .setImplementation(new EntityFactory() {
+        private final ServiceTracker<EntityProvider<?>> tracker = new ServiceTracker<>(framework.getBundleContext(), EntityProvider.class);
+
+        @Override
+        public <T extends Entity<?>> T create(Class<T> cls, Object... parameters) {
+          List<EntityProvider<?>> services = tracker.getServices(new PropertyEq("mediasystem.class", cls));
+
+          for(EntityProvider<?> provider : services) {
+            @SuppressWarnings("unchecked")
+            T result = (T)provider.get(parameters);
+
+            if(result != null) {
+              result.setEntityFactory(this);
+
+              return result;
+            }
+          }
+
+          try {
+            T result = cls.newInstance();
+
+            result.setEntityFactory(this);
+
+            return result;
+          }
+          catch(InstantiationException | IllegalAccessException e) {
+            // Not interested
+          }
+
+          return null;
+        }
+      })
+    );
 
     dm.add(dm.createComponent()
       .setInterface(DetailPaneDecoratorFactory.class.getName(), new Hashtable<String, Object>() {{

@@ -36,29 +36,7 @@ public class MediaItemFormatter {
     };
   }
 
-  public static StringBinding releaseTimeBinding(final ObservableValue<MediaNode> node) {
-    return new StringBinding() {
-      final ObjectBinding<Date> selectReleaseDate = MapBindings.select(node, "dataMap", Media.class, "releaseDate");
-      final ObjectBinding<Integer> selectReleaseYear = MapBindings.select(node, "dataMap", Media.class, "releaseYear");
-
-      {
-        bind(selectReleaseDate, selectReleaseYear);
-      }
-
-      @Override
-      protected String computeValue() {
-        String releaseTime = selectReleaseDate.get() == null ? null : DATE_FORMAT.format(selectReleaseDate.get());
-
-        if(releaseTime == null) {
-          releaseTime = selectReleaseYear.get() == null ? "" : "" + selectReleaseYear.get();
-        }
-
-        return releaseTime;
-      }
-    };
-  }
-
-  public static StringBinding releaseTimeBinding2(final ObservableValue<Media> media) {
+  public static StringBinding releaseTimeBinding(final ObservableValue<Media<?>> media) {
     return new StringBinding() {
       final ObjectBinding<Date> selectReleaseDate = MapBindings.select(media, "releaseDate");
       final ObjectBinding<Integer> selectReleaseYear = MapBindings.select(media, "releaseYear");

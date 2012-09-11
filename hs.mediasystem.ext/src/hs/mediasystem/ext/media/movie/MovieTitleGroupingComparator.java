@@ -16,16 +16,16 @@ public class MovieTitleGroupingComparator implements Comparator<MediaItem> {
       Movie m1 = o1.get(Movie.class);
       Movie m2 = o2.get(Movie.class);
 
-      Integer s1 = m1 == null || m1.getSequence() == null ? 0 : m1.getSequence();
-      Integer s2 = m2 == null || m2.getSequence() == null ? 0 : m2.getSequence();
+      Integer s1 = m1 == null || m1.sequence.get() == null ? 0 : m1.sequence.get();
+      Integer s2 = m2 == null || m2.sequence.get() == null ? 0 : m2.sequence.get();
 
       result = Integer.compare(s1, s2);
 
       if(result == 0) {
-        Media media1 = o1.get(Media.class);
-        Media media2 = o2.get(Media.class);
+        Media<?> media1 = o1.get(Media.class);
+        Media<?> media2 = o2.get(Media.class);
 
-        result = media1.getSubtitle().compareTo(media2.getSubtitle());
+        result = media1.subtitle.get().compareTo(media2.subtitle.get());
       }
     }
 

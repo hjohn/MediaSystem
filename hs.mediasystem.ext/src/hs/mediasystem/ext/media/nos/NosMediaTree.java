@@ -49,9 +49,9 @@ public class NosMediaTree implements MediaTree, MediaRoot {
           Matcher matcher2 = pattern2.matcher(vid.toString());
 
           if(matcher2.find()) {
-            Media media = new Media(title, meta, null);
+            Media<?> media = new Media<>(title, meta, null);
 
-            media.imageProperty().set(new SourceImageHandle(new URLImageSource(thumbUrl), "NosMediaTree:/" + title));
+            media.image.set(new SourceImageHandle(new URLImageSource(thumbUrl), "NosMediaTree:/" + title));
 
             MediaItem mediaItem = new MediaItem(this, matcher2.group(0), media);
 

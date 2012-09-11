@@ -239,11 +239,12 @@ public class SelectMediaPresentation implements Presentation {
         if(group.size() > 1 || mediaGroup.isAllowedSingleItemGroups()) {
           Collections.sort(group, mediaGroup.getSortComparator());
 
-          Media media = mediaGroup.createMediaFromFirstItem(group.get(0));
+          Media<?> media = mediaGroup.createMediaFromFirstItem(group.get(0));
           String shortTitle = mediaGroup.getShortTitle(group.get(0));
 
-          Media groupMedia = new Media(media.getTitle());
-          MediaNode groupNode = new MediaNode(mediaGroup.getId() + "[" + media.getTitle() + "]", groupMedia, shortTitle);
+          Media<?> groupMedia = new Media<>(null);
+          groupMedia.title.set(media.title.get());
+          MediaNode groupNode = new MediaNode(mediaGroup.getId() + "[" + media.title.get() + "]", groupMedia, shortTitle);
 
           List<MediaNode> nodeChildren = new ArrayList<>();
 

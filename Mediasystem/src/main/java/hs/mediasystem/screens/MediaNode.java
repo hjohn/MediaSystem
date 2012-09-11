@@ -42,7 +42,7 @@ public class MediaNode {
     this.showTopLevelExpanded = false;
   }
 
-  public MediaNode(String id, Media media, String shortTitle) {
+  public MediaNode(String id, Media<?> media, String shortTitle) {
     assert id != null;
     assert !id.contains("/");
     assert !id.contains(":");
@@ -54,7 +54,7 @@ public class MediaNode {
 
     this.id = id;
     this.showTopLevelExpanded = false;
-    this.shortTitle = shortTitle == null ? media.getTitle() : shortTitle;
+    this.shortTitle = shortTitle == null ? media.title.get() : shortTitle;
 
     this.isLeaf = false;
     this.dataType = Media.class;
@@ -65,7 +65,7 @@ public class MediaNode {
   private Callback<MediaRoot, List<MediaNode>> childrenCallback;
 
   public MediaNode(MediaRoot mediaRoot, boolean showTopLevelExpanded, Callback<MediaRoot, List<MediaNode>> childrenCallback) {
-    this(mediaRoot.getId(), new Media(mediaRoot.getRootName()), null);
+    this(mediaRoot.getId(), new Media<>(mediaRoot.getRootName()), null);
 
     this.mediaRoot = mediaRoot;
     this.showTopLevelExpanded = showTopLevelExpanded;
@@ -173,8 +173,8 @@ public class MediaNode {
     return id.equals(other.id);
   }
 
-  public Media getMedia() {
-    return (Media)dataMap.get().get(Media.class);
+  public Media<?> getMedia() {
+    return (Media<?>)dataMap.get().get(Media.class);
   }
 
   @Override

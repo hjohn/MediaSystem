@@ -1,10 +1,13 @@
 package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.dao.IdentifierDao;
+import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.enrich.EnrichCache;
+import hs.mediasystem.framework.EntityFactory;
+import hs.mediasystem.framework.EntityProvider;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SettingsStore;
@@ -100,7 +103,7 @@ public class Activator extends DependencyActivatorBase {
       .setImplementation(new SubtitleCriteriaProvider() {
         @Override
         public Map<String, Object> getCriteria(MediaItem mediaItem) {
-          Media media = mediaItem.getMedia();
+          Media<?> media = mediaItem.getMedia();
           MediaData mediaData = mediaItem.get(MediaData.class);
 
           Map<String, Object> criteria = new HashMap<>();
@@ -108,9 +111,9 @@ public class Activator extends DependencyActivatorBase {
           if(media instanceof Episode) {
             Episode ep = (Episode)media;
 
-            criteria.put(SubtitleCriteriaProvider.TITLE, ep.getSerie().getTitle());
-            criteria.put(SubtitleCriteriaProvider.SEASON, ep.getSeason());
-            criteria.put(SubtitleCriteriaProvider.EPISODE, ep.getEpisode());
+            criteria.put(SubtitleCriteriaProvider.TITLE, ep.serie.get().getTitle());
+            criteria.put(SubtitleCriteriaProvider.SEASON, ep.season.get());
+            criteria.put(SubtitleCriteriaProvider.EPISODE, ep.episode.get());
           }
 
           if(mediaData != null) {
@@ -141,15 +144,15 @@ public class Activator extends DependencyActivatorBase {
       }})
       .setImplementation(new DefaultMediaGroup("episodeNumber-group-season", "Season", new SeasonGrouper(), EpisodeComparator.INSTANCE, true, true) {
         @Override
-        public Media createMediaFromFirstItem(MediaItem item) {
-          Integer season = item.get(Episode.class).getSeason();
+        public Media<?> createMediaFromFirstItem(MediaItem item) {
+          Integer season = item.get(Episode.class).season.get();
 
-          return new Media(season == null || season == 0 ? "Specials" : "Season " + season);
+          return new Media<>(season == null || season == 0 ? "Specials" : "Season " + season);
         }
 
         @Override
         public String getShortTitle(MediaItem item) {
-          Integer season = item.get(Episode.class).getSeason();
+          Integer season = item.get(Episode.class).season.get();
 
           return season == null || season == 0 ? "Sp." : "" + season;
         }
@@ -157,34 +160,52 @@ public class Activator extends DependencyActivatorBase {
     );
 
     manager.add(createComponent()
-      .setInterface(SerieEnricher.class.getName(), null)
-      .setImplementation(SerieEnricher.class)
-      .add(createServiceDependency()
-        .setService(ItemsDao.class)
-        .setRequired(true)
-      )
+      .setInterface(EntityProvider.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", Media.class);
+      }})
+      .setImplementation(new EntityProvider<Serie>() {
+        @Override
+        public Serie get(Object... parameters) {
+          if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getIdentifier().getType().equals("Serie")) {
+            return null;
+          }
+
+          Item item = (Item)parameters[0];
+
+          Serie serie = new Serie(item.getTitle());
+
+          serie.item.set(item);
+
+          return serie;
+        }
+      })
     );
 
     manager.add(createComponent()
-      .setInterface(EpisodeEnricher.class.getName(), null)
-      .setImplementation(EpisodeEnricher.class)
-      .add(createServiceDependency()
-        .setService(ItemsDao.class)
-        .setRequired(true)
-      )
+      .setInterface(EntityProvider.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", Media.class);
+      }})
+      .setImplementation(new EntityProvider<Episode>() {
+        @Override
+        public Episode get(Object... parameters) {
+          if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getIdentifier().getType().equals("Episode")) {
+            return null;
+          }
+
+          Item item = (Item)parameters[0];
+
+          Episode episode = new Episode(null, item.getTitle(), item.getSeason(), item.getEpisode(), item.getEpisode());
+
+          episode.item.set(item);
+
+          return episode;
+        }
+      })
     );
 
     manager.add(createComponent()
       .setInterface(MainMenuExtension.class.getName(), null)
       .setImplementation(SeriesMainMenuExtension.class)
-      .add(createServiceDependency()
-        .setService(SerieEnricher.class)
-        .setRequired(true)
-      )
-      .add(createServiceDependency()
-        .setService(EpisodeEnricher.class)
-        .setRequired(true)
-      )
       .add(createServiceDependency()
         .setService(EnrichCache.class)
         .setRequired(true)
@@ -198,6 +219,14 @@ public class Activator extends DependencyActivatorBase {
         .setRequired(true)
       )
       .add(createServiceDependency()
+        .setService(ItemsDao.class)
+        .setRequired(true)
+      )
+      .add(createServiceDependency()
+        .setService(EntityFactory.class)
+        .setRequired(true)
+      )
+      .add(createServiceDependency()
         .setService(SettingsStore.class)
         .setRequired(true)
       )
@@ -207,5 +236,4 @@ public class Activator extends DependencyActivatorBase {
   @Override
   public void destroy(BundleContext context, DependencyManager manager) throws Exception {
   }
-
 }

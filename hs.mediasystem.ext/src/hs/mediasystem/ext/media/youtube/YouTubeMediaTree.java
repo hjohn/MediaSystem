@@ -50,7 +50,7 @@ public class YouTubeMediaTree implements MediaTree, MediaRoot {
       children = new ArrayList<>();
 
       for(Feed feed : FEEDS) {
-        Media media = new Media(feed.getName());
+        Media<?> media = new Media<>(feed.getName());
         children.add(new YouTubeFeed(YouTubeMediaTree.this, feed.getUrl(), feed, media));
       }
     }

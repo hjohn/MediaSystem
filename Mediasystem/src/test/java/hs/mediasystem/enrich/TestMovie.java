@@ -6,28 +6,16 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class TestMovie extends Media {
+public class TestMovie extends Media<TestMovie> {
   private final ObjectProperty<Integer> sequence = new SimpleObjectProperty<>();
   public Integer getSequence() { return sequence.get(); }
   public ObjectProperty<Integer> sequenceProperty() { return sequence; }
 
-  private final StringProperty language = new SimpleStringProperty() {
-    @Override
-    public String get() {
-      queueForEnrichment();
-      return super.get();
-    }
-  };
+  private final StringProperty language = new SimpleStringProperty();
   public String getLanguage() { return language.get(); }
   public StringProperty languageProperty() { return language; }
 
-  private final StringProperty tagLine = new SimpleStringProperty() {
-    @Override
-    public String get() {
-      queueForEnrichment();
-      return super.get();
-    }
-  };
+  private final StringProperty tagLine = new SimpleStringProperty();
   public String getTagLine() { return tagLine.get(); }
   public StringProperty tagLineProperty() { return tagLine; }
 

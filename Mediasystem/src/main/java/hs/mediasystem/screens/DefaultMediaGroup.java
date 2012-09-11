@@ -61,7 +61,7 @@ public class DefaultMediaGroup implements MediaGroup {
   }
 
   @Override
-  public Media createMediaFromFirstItem(MediaItem item) {
+  public Media<?> createMediaFromFirstItem(MediaItem item) {
     return null;
   }
 }
