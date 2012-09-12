@@ -3,7 +3,7 @@ package hs.mediasystem.dao;
 import hs.mediasystem.db.Column;
 import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
-import hs.mediasystem.enrich.DefaultEnrichable;
+import hs.mediasystem.enrich.DefaultPersistable;
 
 import java.util.Date;
 
@@ -11,7 +11,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 @Table(name = "settings")
-public class Setting extends DefaultEnrichable<Setting> {
+public class Setting extends DefaultPersistable<Setting> {
   public enum PersistLevel {PERMANENT, TEMPORARY, SESSION}
 
   @Id

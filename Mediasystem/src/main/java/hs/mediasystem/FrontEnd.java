@@ -10,7 +10,6 @@ import hs.mediasystem.db.DatabaseStatementTranslator;
 import hs.mediasystem.db.DatabaseUpdater;
 import hs.mediasystem.db.SimpleConnectionPoolDataSource;
 import hs.mediasystem.db.SimpleDatabaseStatementTranslator;
-import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.Entity;
 import hs.mediasystem.framework.EntityFactory;
 import hs.mediasystem.framework.EntityProvider;
@@ -278,11 +277,6 @@ public class FrontEnd extends Application {
     dm.add(dm.createComponent()
       .setInterface(SelectMediaPresentationProvider.class.getName(), null)
       .setImplementation(injector.getInstance(SelectMediaPresentationProvider.class))
-    );
-
-    dm.add(dm.createComponent()
-      .setInterface(EnrichCache.class.getName(), null)
-      .setImplementation(injector.getInstance(EnrichCache.class))
     );
 
     dm.add(dm.createComponent()

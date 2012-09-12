@@ -1,6 +1,5 @@
 package hs.mediasystem.ext.media.youtube;
 
-import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
@@ -61,11 +60,6 @@ public class YouTubeMediaTree implements MediaTree, MediaRoot {
   @Override
   public String getRootName() {
     return "YouTube";
-  }
-
-  @Override
-  public EnrichCache getEnrichCache() {
-    return null;
   }
 
   @Override

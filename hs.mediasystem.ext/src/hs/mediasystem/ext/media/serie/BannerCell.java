@@ -1,8 +1,8 @@
 package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.beans.AsyncImageProperty;
-import hs.mediasystem.enrich.EnrichTrigger;
 import hs.mediasystem.framework.Media;
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.util.ImageHandle;
@@ -34,7 +34,7 @@ public class BannerCell extends HBox implements MediaNodeCell {
 
   @Override
   public void attach(MediaNode mediaNode) {
-    final EnrichTrigger item = mediaNode.getMediaItem();
+    final MediaItem item = mediaNode.getMediaItem();
 
     // A banner from TVDB is 758 x 140
 

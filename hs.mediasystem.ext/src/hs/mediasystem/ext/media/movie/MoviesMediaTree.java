@@ -5,7 +5,6 @@ import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.LocalInfo;
-import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.enrich.InstanceEnricher;
 import hs.mediasystem.framework.EnrichCallback;
 import hs.mediasystem.framework.EnricherBuilder;
@@ -23,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MoviesMediaTree implements MediaTree, MediaRoot {
-  private final EnrichCache enrichCache;
   private final PersistQueue persister;
   private final List<Path> roots;
   private final ItemsDao itemsDao;
@@ -32,8 +30,7 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
 
   private List<MediaItem> children;
 
-  public MoviesMediaTree(EnrichCache enrichCache, PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory entityFactory, List<Path> roots) {
-    this.enrichCache = enrichCache;
+  public MoviesMediaTree(PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory entityFactory, List<Path> roots) {
     this.persister = persister;
     this.itemsDao = itemsDao;
     this.mediaItemConfigurator = mediaItemConfigurator;
@@ -121,11 +118,6 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
   @Override
   public String getRootName() {
     return "Movies";
-  }
-
-  @Override
-  public EnrichCache getEnrichCache() {
-    return enrichCache;
   }
 
   @Override

@@ -2,7 +2,6 @@ package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.Setting.PersistLevel;
-import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.EntityFactory;
 import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.SettingsStore;
@@ -20,7 +19,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 
 public class SeriesMainMenuExtension implements MainMenuExtension {
-  private volatile EnrichCache enrichCache;
   private volatile PersistQueue persister;
   private volatile ItemsDao itemsDao;
   private volatile MediaItemConfigurator mediaItemConfigurator;
@@ -46,7 +44,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   public void select(final ProgramController controller) {
     ObservableList<Path> paths = settingsStore.getListProperty("MediaSystem:Ext:Series", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
 
-    controller.setLocation(new SelectMediaLocation(new SeriesMediaTree(enrichCache, persister, itemsDao, mediaItemConfigurator, entityFactory, paths)));
+    controller.setLocation(new SelectMediaLocation(new SeriesMediaTree(persister, itemsDao, mediaItemConfigurator, entityFactory, paths)));
   }
 
   @Override

@@ -334,7 +334,7 @@ public class ProgramController {
 
     int resumePosition = 0;
 
-    if(mediaItem.isCachable()) {
+    if(mediaItem.mediaData.get() != null) {
       final ResumeDialog resumeDialog = new ResumeDialog(mediaItem);
 
       sceneManager.displaySynchronousDialog(resumeDialog);

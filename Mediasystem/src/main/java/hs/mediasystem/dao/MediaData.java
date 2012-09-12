@@ -3,7 +3,7 @@ package hs.mediasystem.dao;
 import hs.mediasystem.db.Column;
 import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
-import hs.mediasystem.enrich.DefaultEnrichable;
+import hs.mediasystem.enrich.DefaultPersistable;
 
 import java.util.Date;
 
@@ -13,7 +13,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
 @Table(name = "mediadata")
-public class MediaData extends DefaultEnrichable<MediaData> {
+public class MediaData extends DefaultPersistable<MediaData> {
 
   @Id
   private Integer id;

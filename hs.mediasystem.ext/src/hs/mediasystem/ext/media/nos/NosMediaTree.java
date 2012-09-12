@@ -1,7 +1,6 @@
 package hs.mediasystem.ext.media.nos;
 
 import hs.mediasystem.dao.URLImageSource;
-import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
@@ -79,11 +78,6 @@ public class NosMediaTree implements MediaTree, MediaRoot {
   @Override
   public String getRootName() {
     return "NOS";
-  }
-
-  @Override
-  public EnrichCache getEnrichCache() {
-    return null;
   }
 
   @Override
