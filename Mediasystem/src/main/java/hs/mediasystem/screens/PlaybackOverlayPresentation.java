@@ -177,7 +177,7 @@ public class PlaybackOverlayPresentation implements Presentation {
 
   @Override
   public void dispose() {
-    MediaData mediaData = mediaItem.get(MediaData.class);
+    MediaData mediaData = mediaItem.mediaData.get();
 
     if(mediaData != null) {
       long length = playerPresentation.getLength();

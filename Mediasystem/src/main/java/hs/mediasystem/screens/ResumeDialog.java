@@ -26,7 +26,7 @@ public class ResumeDialog extends DialogStage {
   private final Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.1), new EventHandler<ActionEvent>() {
     @Override
     public void handle(ActionEvent event) {
-      MediaData mediaData = mediaItem.get(MediaData.class);
+      MediaData mediaData = mediaItem.mediaData.get();
 
       if(mediaData != null) {
         foundMediaData(mediaData);

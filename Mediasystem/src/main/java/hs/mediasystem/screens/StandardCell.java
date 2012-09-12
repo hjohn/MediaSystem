@@ -1,6 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.WeakBinder;
@@ -17,7 +16,7 @@ public class StandardCell extends DuoLineCell implements MediaNodeCell {
     collectionSizeProperty().set(mediaNode.getChildren().size());
 
     binder.bind(ratingProperty(), MapBindings.selectDouble(mediaNode.dataMapProperty(), Media.class, "rating").divide(10));
-    binder.bind(viewedProperty(), MapBindings.selectBoolean(mediaNode.dataMapProperty(), MediaData.class, "viewed"));
+    binder.bind(viewedProperty(), MapBindings.selectBoolean(mediaNode.mediaData, "viewed"));
   }
 
   @Override

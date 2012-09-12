@@ -1,8 +1,10 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
+import hs.mediasystem.framework.SimpleEntityProperty;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +16,8 @@ import javafx.collections.ObservableMap;
 import javafx.util.Callback;
 
 public class MediaNode {
+  public final SimpleEntityProperty<MediaData> mediaData;
+
   private MediaItem mediaItem;
 
   public MediaItem getMediaItem() { return mediaItem; }
@@ -34,6 +38,7 @@ public class MediaNode {
 
     this.id = mediaItem.getId();
     this.mediaItem = mediaItem;
+    this.mediaData = mediaItem.mediaData;
     this.dataMap = mediaItem.dataMapProperty();
 
     this.shortTitle = "";
@@ -53,6 +58,7 @@ public class MediaNode {
     data.put(Media.class, media);
 
     this.id = id;
+    this.mediaData = new SimpleEntityProperty<>(this, "mediaData");
     this.showTopLevelExpanded = false;
     this.shortTitle = shortTitle == null ? media.title.get() : shortTitle;
 
@@ -168,7 +174,7 @@ public class MediaNode {
       return false;
     }
 
-    MediaNode other = (MediaNode) obj;
+    MediaNode other = (MediaNode)obj;
 
     return id.equals(other.id);
   }
