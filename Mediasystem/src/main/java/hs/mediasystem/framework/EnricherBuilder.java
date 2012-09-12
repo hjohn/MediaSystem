@@ -9,9 +9,15 @@ import javafx.beans.property.Property;
 import javafx.collections.ObservableMap;
 
 public class EnricherBuilder<T, P> {
+  private final Class<?> endResultClass;
+
   private List<Requirement<T>> requirements = new ArrayList<>();
   private List<EnrichCallback<P>> callbacks = new ArrayList<>();
   private FinishEnrichCallback<P> finishCallback;
+
+  public EnricherBuilder(Class<?> endResultClass) {
+    this.endResultClass = endResultClass;
+  }
 
   public <R> EnricherBuilder<T, P> require(Property<R> property) {
     requirements.add(new Requirement<T>(property));
@@ -39,7 +45,7 @@ public class EnricherBuilder<T, P> {
 
   @SuppressWarnings("unchecked")
   public InstanceEnricher<T, Void> build() {
-    return new DependentEnricher<>(callbacks, finishCallback, requirements.toArray(new Requirement[requirements.size()]));
+    return new DependentEnricher<>(endResultClass, callbacks, finishCallback, requirements.toArray(new Requirement[requirements.size()]));
   }
 
   public static class Parameters {

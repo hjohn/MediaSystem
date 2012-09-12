@@ -5,10 +5,10 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 
 public class Episode extends Media<Episode> {
-  public final ObjectProperty<SerieItem> serie = object();
-  public final ObjectProperty<Integer> season = object();
-  public final ObjectProperty<Integer> episode = object();
-  public final ObjectProperty<Integer> endEpisode = object();
+  public final ObjectProperty<SerieItem> serie = object("serie");
+  public final ObjectProperty<Integer> season = object("season");
+  public final ObjectProperty<Integer> episode = object("episode");
+  public final ObjectProperty<Integer> endEpisode = object("endEpisode");
   public final StringProperty episodeRange = string();
 
   public Episode(SerieItem serie, String episodeName, Integer season, Integer episode, Integer endEpisode) {

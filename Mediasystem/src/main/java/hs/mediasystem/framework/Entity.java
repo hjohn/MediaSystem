@@ -2,8 +2,13 @@ package hs.mediasystem.framework;
 
 import hs.mediasystem.enrich.InstanceEnricher;
 import hs.mediasystem.persist.Persister;
+import hs.mediasystem.util.DebugConsole;
+import hs.mediasystem.util.DebugConsole.CommandCallback;
 import hs.subtitle.DefaultThreadFactory;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -21,12 +26,71 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class Entity<T> {
-  static final ThreadPoolExecutor PRIMARY_EXECUTOR = new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-  static final ThreadPoolExecutor SECONDARY_EXECUTOR = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+  private static final ThreadPoolExecutor PRIMARY_EXECUTOR = new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+  private static final ThreadPoolExecutor SECONDARY_EXECUTOR = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+
+  private static final Map<EnrichmentRunnable, String> PRIMARY_TASKS = new WeakHashMap<>();
+  private static final Map<EnrichmentRunnable, String> SECONDARY_TASKS = new WeakHashMap<>();
+  private static final Map<InstanceEnricher<?, ?>, String> ENRICHERS = new WeakHashMap<>();
 
   static {
     PRIMARY_EXECUTOR.setThreadFactory(new DefaultThreadFactory("EntityEnrichPrimary", Thread.NORM_PRIORITY - 2, true));
     SECONDARY_EXECUTOR.setThreadFactory(new DefaultThreadFactory("EntityEnrichSecondary", Thread.NORM_PRIORITY - 2, true));
+
+    DebugConsole.addCommand("d", new CommandCallback() {
+      @Override
+      public String execute(String name, String parameters) {
+        synchronized(ENRICHERS) {
+          StringBuilder builder = new StringBuilder();
+
+          builder.append("Running threads and enrichments:\n");
+
+          builder.append("PRIMARY_EXECUTOR   : active: " + PRIMARY_EXECUTOR.getActiveCount() + "/" + PRIMARY_EXECUTOR.getPoolSize() + "   queued: " + PRIMARY_EXECUTOR.getQueue().size() + "\n");
+
+          for(EnrichmentRunnable runnable : PRIMARY_TASKS.keySet()) {
+            builder.append("- ");
+            builder.append(runnable);
+            builder.append("\n");
+          }
+
+          builder.append("SECONDARY_EXECUTOR : active: " + SECONDARY_EXECUTOR.getActiveCount() + "/" + SECONDARY_EXECUTOR.getPoolSize() + "   queued: " + SECONDARY_EXECUTOR.getQueue().size() + "\n");
+
+          for(EnrichmentRunnable runnable : SECONDARY_TASKS.keySet()) {
+            builder.append("- ");
+            builder.append(runnable);
+            builder.append("\n");
+          }
+
+          builder.append("\n");
+
+          for(InstanceEnricher<?, ?> enricher : ENRICHERS.keySet()) {
+            String text = enricher.toString();
+
+            if(!text.startsWith("INACTIVE")) {
+              builder.append(text + "\n");
+            }
+          }
+
+          return builder.toString();
+        }
+      }
+    });
+  }
+
+  static void submit(boolean primary, EnrichmentRunnable runnable) {
+    synchronized(ENRICHERS) {
+      Executor executor = primary ? PRIMARY_EXECUTOR : SECONDARY_EXECUTOR;
+      Map<EnrichmentRunnable, String> tasks = primary ? PRIMARY_TASKS : SECONDARY_TASKS;
+
+      tasks.put(runnable, "");
+      executor.execute(runnable);
+    }
+  }
+
+  private static void registerEnricher(InstanceEnricher<?, ?> enricher) {
+    synchronized(ENRICHERS) {
+      ENRICHERS.put(enricher, "");
+    }
   }
 
   private EntityFactory factory;
@@ -60,31 +124,29 @@ public class Entity<T> {
     if(value == null && enricher != null && !enricherCalled) {
       enricherCalled = true;
 
-      PRIMARY_EXECUTOR.execute(new EnrichTask<>(self(), enricher));
+      submit(true, new EnrichTask<>(self(), enricher));
     }
 
     return value;
   }
 
-  public static class EnrichTask<T, R> implements Runnable {
-    private final InstanceEnricher<T, R> taskEnricher;
-    private final T parent;
-
-    public EnrichTask(T parent, InstanceEnricher<T, R> enricher) {
-      this.parent = parent;
-      this.taskEnricher = enricher;
-    }
-
-    @Override
-    public void run() {
-      final R result = taskEnricher.enrich(parent);
-
-      Platform.runLater(new Runnable() {
+  public static class EnrichTask<T, R> extends EnrichmentRunnable {
+    public EnrichTask(final T parent, final InstanceEnricher<T, R> enricher) {
+      super(new Runnable() {
         @Override
         public void run() {
-          taskEnricher.update(parent, result);
+          final R result = enricher.enrich(parent);
+
+          Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+              enricher.update(parent, result);
+            }
+          });
         }
       });
+
+      Entity.registerEnricher(enricher);
     }
   }
 
@@ -136,8 +198,8 @@ public class Entity<T> {
     };
   }
 
-  protected <P> ObjectProperty<P> entity(final InstanceEnricher<T, P> enricher) {
-    return new SimpleObjectProperty<P>() {
+  protected <P> SimpleEntityProperty<P> entity(String name) {
+    return new SimpleEntityProperty<P>(this, name) {
       private boolean enricherCalled;
 
       @Override
@@ -150,31 +212,18 @@ public class Entity<T> {
 
       @Override
       public P get() {
-        if(enricher != null && !enricherCalled) {
+        if(getEnricher() != null && !enricherCalled) {
           enricherCalled = true;
 
-          PRIMARY_EXECUTOR.execute(new Runnable() {
-            @Override
-            public void run() {
-              final P result = enricher.enrich(self());
-
-              Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                  enricher.update(self(), result);
-                }
-              });
-            }
-          });
-          enricher.enrich(self());
+          submit(true, new EnrichTask<>(self(), getEnricher()));
         }
         return super.get();
       }
     };
   }
 
-  protected <P> ObjectProperty<P> object() {
-    return new SimpleObjectProperty<P>() {
+  protected <P> ObjectProperty<P> object(String name) {
+    return new SimpleObjectProperty<P>(this, name) {
       @Override
       protected void invalidated() {
         if(persister != null) {

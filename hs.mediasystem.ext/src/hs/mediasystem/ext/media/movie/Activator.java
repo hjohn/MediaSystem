@@ -4,6 +4,7 @@ import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.MediaDataDao;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.EntityFactory;
@@ -160,6 +161,10 @@ public class Activator extends DependencyActivatorBase {
       )
       .add(createServiceDependency()
         .setService(PersistQueue.class)
+        .setRequired(true)
+      )
+      .add(createServiceDependency()
+        .setService(MediaDataDao.class)
         .setRequired(true)
       )
       .add(createServiceDependency()

@@ -52,7 +52,7 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
 
           SerieItem mediaItem = new SerieItem(SeriesMediaTree.this, localInfo.getUri(), serie, entityFactory, itemsDao);
 
-          InstanceEnricher<Serie, Void> enricher = new EnricherBuilder<Serie, Item>()
+          InstanceEnricher<Serie, Void> enricher = new EnricherBuilder<Serie, Item>(Item.class)
             .require(mediaItem.dataMapProperty().get(), Identifier.class)
             .enrich(new EnrichCallback<Item>() {
               @Override

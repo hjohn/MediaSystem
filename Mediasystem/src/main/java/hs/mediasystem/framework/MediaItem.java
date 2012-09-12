@@ -1,5 +1,7 @@
 package hs.mediasystem.framework;
 
+import hs.mediasystem.dao.Identifier;
+import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.enrich.EnrichCache.CacheKey;
 import hs.mediasystem.enrich.EnrichTrigger;
@@ -19,7 +21,10 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
-public class MediaItem implements EnrichTrigger {
+public class MediaItem extends Entity<MediaItem> implements EnrichTrigger {
+  public final SimpleEntityProperty<MediaData> mediaData = entity("mediaData");
+  public final SimpleEntityProperty<Identifier> identifier = entity("identifier");
+
   private final ObservableMap<Class<?>, Object> data = FXCollections.observableMap(new HashMap<Class<?>, Object>() {
     @Override
     public Object get(Object key) {

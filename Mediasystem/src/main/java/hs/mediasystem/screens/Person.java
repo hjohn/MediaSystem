@@ -20,15 +20,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class Person extends Entity<Person> {
-  public final ObjectProperty<hs.mediasystem.dao.Person> personRecord = object();
+  public final ObjectProperty<hs.mediasystem.dao.Person> personRecord = object("personRecord");
 
   public final StringProperty name = string();
   public final StringProperty birthPlace = string();
   public final StringProperty biography = string();
-  public final ObjectProperty<Date> birthDate = object();
-  public final ObjectProperty<ImageHandle> photo = object();
+  public final ObjectProperty<Date> birthDate = object("birthDate");
+  public final ObjectProperty<ImageHandle> photo = object("photo");
 
-  public final ObjectProperty<ObservableList<Casting>> castings = list(new EnricherBuilder<Person, List<Casting>>()
+  public final ObjectProperty<ObservableList<Casting>> castings = list(new EnricherBuilder<Person, List<Casting>>(List.class)
     .require(personRecord)
     .enrich(new EnrichCallback<List<Casting>>() {
       @Override

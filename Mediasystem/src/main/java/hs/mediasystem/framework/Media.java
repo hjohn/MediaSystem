@@ -22,22 +22,22 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class Media<T extends Media<T>> extends Entity<T> {
-  public final ObjectProperty<Item> item = object();
+  public final ObjectProperty<Item> item = object("item");
 
   public final StringProperty title = string();
   public final StringProperty subtitle = string("");
   public final StringProperty description = string();
-  public final ObjectProperty<Date> releaseDate = object();
+  public final ObjectProperty<Date> releaseDate = object("releaseDate");
   public final ObjectProperty<Integer> releaseYear = new SimpleObjectProperty<>();
-  public final ObjectProperty<String[]> genres = object();
+  public final ObjectProperty<String[]> genres = object("genres");
   public final DoubleProperty rating = doubleProperty();
   public final IntegerProperty runtime = integer();
 
-  public final ObjectProperty<ImageHandle> image = object();
-  public final ObjectProperty<ImageHandle> background = object();
-  public final ObjectProperty<ImageHandle> banner = object();
+  public final ObjectProperty<ImageHandle> image = object("image");
+  public final ObjectProperty<ImageHandle> background = object("background");
+  public final ObjectProperty<ImageHandle> banner = object("banner");
 
-  public final ObjectProperty<ObservableList<Casting>> castings = list(new EnricherBuilder<T, List<Casting>>()
+  public final ObjectProperty<ObservableList<Casting>> castings = list(new EnricherBuilder<T, List<Casting>>(List.class)
     .require(item)
     .enrich(new EnrichCallback<List<Casting>>() {
       @Override
@@ -108,5 +108,10 @@ public class Media<T extends Media<T>> extends Entity<T> {
     String key = "Media:/" + item.getTitle() + "-" + item.getSeason() + "x" + item.getEpisode() + "-" + item.getImdbId() + "-" + keyPostFix;
 
     return source == null ? null : new SourceImageHandle(source, key);
+  }
+
+  @Override
+  public String toString() {
+    return "Media('" + title.get() +"', " + item.get() + ")";
   }
 }

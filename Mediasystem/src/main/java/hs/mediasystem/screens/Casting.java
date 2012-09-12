@@ -11,6 +11,6 @@ public class Casting extends Entity<Casting> {
   public final StringProperty characterName = string();
   public final IntegerProperty index = integer();
 
-  public final ObjectProperty<Person> person = object();
-  public final ObjectProperty<Media<?>> media = object();
+  public final ObjectProperty<Person> person = object("person");
+  public final ObjectProperty<Media<?>> media = object("media");
 }

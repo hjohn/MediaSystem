@@ -47,7 +47,7 @@ public class SerieItem extends MediaItem implements MediaRoot {
 
         final MediaItem mediaItem = new MediaItem(getMediaTree(), localInfo.getUri(), episode);
 
-        InstanceEnricher<Episode, Void> enricher = new EnricherBuilder<Episode, Item>()
+        InstanceEnricher<Episode, Void> enricher = new EnricherBuilder<Episode, Item>(Item.class)
             .require(mediaItem.dataMapProperty().get(), Identifier.class)
             .enrich(new EnrichCallback<Item>() {
               @Override
