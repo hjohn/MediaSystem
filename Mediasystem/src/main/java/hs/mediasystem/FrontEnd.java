@@ -4,6 +4,7 @@ import hs.mediasystem.beans.BeanUtils;
 import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.MediaDataDao;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.DatabaseStatementTranslator;
@@ -298,6 +299,11 @@ public class FrontEnd extends Application {
     dm.add(dm.createComponent()
       .setInterface(IdentifierDao.class.getName(), null)
       .setImplementation(injector.getInstance(IdentifierDao.class))
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(MediaDataDao.class.getName(), null)
+      .setImplementation(injector.getInstance(MediaDataDao.class))
     );
 
     dm.add(dm.createComponent()
