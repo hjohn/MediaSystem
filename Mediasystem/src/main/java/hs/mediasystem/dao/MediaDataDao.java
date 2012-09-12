@@ -4,6 +4,11 @@ import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Database.Transaction;
 import hs.mediasystem.db.Record;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -87,5 +92,29 @@ public class MediaDataDao {
     columns.put("viewed", mediaData.isViewed());
 
     return columns;
+  }
+
+  public static MediaId createMediaId(String uri) {
+    long millis = System.currentTimeMillis();
+
+    try {
+      Path path = Paths.get(uri);
+      boolean isDirectory = Files.isDirectory(path);
+
+      MediaId mediaId = new MediaId(
+        isDirectory ? 0 : Files.size(path),
+        Files.getLastModifiedTime(path).toMillis(),
+        ((FileTime)Files.getAttribute(path, "creationTime")).toMillis(),
+        isDirectory ? null : MediaHash.loadMediaHash(path),
+        isDirectory ? null : MediaHash.loadOpenSubtitlesHash(path)
+      );
+
+      System.out.println("[FINE] MediaDataEnricher.createMediaId() - computed MediaId in " + (System.currentTimeMillis() - millis) + " ms for: '" + uri + "'");
+
+      return mediaId;
+    }
+    catch(IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
