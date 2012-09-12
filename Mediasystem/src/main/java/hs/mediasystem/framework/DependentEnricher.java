@@ -26,12 +26,19 @@ public class DependentEnricher<T, P> implements InstanceEnricher<T, Void> {
   }
 
   @Override
-  public Void enrich(T parent) {
-    state = new Object[] {"ATTACH LISTENERS", null, parent};
+  public Void enrich(final T parent) {
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+        state = new Object[] {"ATTACH LISTENERS", null, parent};
 
-    for(Requirement<T> requirement : requirements) {
-      requirement.attachListener(this, parent);
-    }
+        for(Requirement<T> requirement : requirements) {
+          requirement.attachListener(DependentEnricher.this, parent);
+        }
+
+        System.out.printf("Entity [LISTENERS]: %-20s REQ: %s BEAN: %s\n", endResultClass.getSimpleName(), requirements, parent);
+      }
+    });
 
     return null;
   }
@@ -40,6 +47,8 @@ public class DependentEnricher<T, P> implements InstanceEnricher<T, Void> {
   public void update(final T parent, Void v) {
     final Object[] parameters = new Object[requirements.size()];
     int index = 0;
+
+    System.out.printf("Entity [CHECK_REQ]: %-20s REQ: %s BEAN: %s\n", endResultClass.getSimpleName(), requirements, parent);
 
     for(Requirement<T> requirement : requirements) {
       Object value = requirement.getValue();
@@ -52,7 +61,7 @@ public class DependentEnricher<T, P> implements InstanceEnricher<T, Void> {
       parameters[index++] = value;
     }
 
-    System.out.println("Entity: DependentEnrich for " + endResultClass.getSimpleName() + ": requirements met " + Arrays.toString(parameters) + ":--- " + parent);
+    System.out.printf("Entity [REQ_MET  ]: %-20s VALUES: %s BEAN: %s\n", endResultClass.getSimpleName(), Arrays.toString(parameters), parent);
 
     final Iterator<EnrichCallback<P>> iterator = callbacks.iterator();
 
@@ -80,7 +89,8 @@ public class DependentEnricher<T, P> implements InstanceEnricher<T, Void> {
             public void run() {
               state = new Object[] {"FINISHING", null, parent};
 
-              System.out.println("Entity: DependentEnrich for " + endResultClass.getSimpleName() + " -> " + result + ":--- " + parent);
+              System.out.printf("Entity [COMPLETED]: %-20s RESULT: %s BEAN: %s\n", endResultClass.getSimpleName(), result, parent);
+
               finishCallback.update(result);
 
               state = new Object[] {"INACTIVE", null, parent};
