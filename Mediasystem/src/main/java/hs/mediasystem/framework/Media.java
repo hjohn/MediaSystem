@@ -9,6 +9,7 @@ import hs.mediasystem.entity.FinishEnrichCallback;
 import hs.mediasystem.util.ImageHandle;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -47,6 +48,9 @@ public class Media<T extends Media<T>> extends Entity<T> {
         Item item = (Item)parameters[0];
 
         List<hs.mediasystem.dao.Casting> castings = item.getCastings();
+
+        Collections.sort(castings, Item.CASTINGS_BY_INDEX_THEN_CHARACTERNAME);
+
         List<Casting> result = new ArrayList<>();
 
         for(final hs.mediasystem.dao.Casting casting : castings) {
