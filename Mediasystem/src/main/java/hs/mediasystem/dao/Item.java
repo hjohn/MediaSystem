@@ -8,11 +8,28 @@ import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
 
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 @Table(name = "items")
 public class Item {
+  public static final Comparator<Casting> CASTINGS_BY_INDEX_THEN_CHARACTERNAME = new Comparator<Casting>() {
+    @Override
+    public int compare(Casting o1, Casting o2) {
+      int result = Integer.compare(o1.getIndex(), o2.getIndex());
+
+      if(result == 0) {
+        String c1 = o1.getCharacterName() == null ? "" : o1.getCharacterName();
+        String c2 = o2.getCharacterName() == null ? "" : o2.getCharacterName();
+
+        result = c1.compareTo(c2);
+      }
+
+      return result;
+    }
+  };
+
   public static final int VERSION = 2;
 
   @Id
