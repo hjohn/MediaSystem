@@ -1,7 +1,6 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.framework;
 
-import hs.mediasystem.framework.Entity;
-import hs.mediasystem.framework.Media;
+import hs.mediasystem.entity.Entity;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;

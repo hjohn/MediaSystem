@@ -1,4 +1,4 @@
-package hs.mediasystem.framework;
+package hs.mediasystem.entity;
 
 public class EnrichmentRunnable implements Runnable {
   private final Runnable runnable;

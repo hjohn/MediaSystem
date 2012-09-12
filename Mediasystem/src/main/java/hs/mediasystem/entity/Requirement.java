@@ -1,6 +1,5 @@
-package hs.mediasystem.framework;
+package hs.mediasystem.entity;
 
-import hs.mediasystem.enrich.InstanceEnricher;
 import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;

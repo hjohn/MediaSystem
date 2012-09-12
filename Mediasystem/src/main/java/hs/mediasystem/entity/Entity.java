@@ -1,6 +1,5 @@
-package hs.mediasystem.framework;
+package hs.mediasystem.entity;
 
-import hs.mediasystem.enrich.InstanceEnricher;
 import hs.mediasystem.persist.Persister;
 import hs.mediasystem.util.DebugConsole;
 import hs.mediasystem.util.DebugConsole.CommandCallback;

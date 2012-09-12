@@ -1,8 +1,8 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.beans.AsyncImageProperty;
+import hs.mediasystem.framework.Casting;
 import hs.mediasystem.framework.Media;
-import hs.mediasystem.screens.Casting;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.StarRating;
 import hs.mediasystem.util.ImageHandle;

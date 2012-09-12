@@ -2,7 +2,7 @@ package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.Setting.PersistLevel;
-import hs.mediasystem.framework.EntityFactory;
+import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.fs.MediaRootType;

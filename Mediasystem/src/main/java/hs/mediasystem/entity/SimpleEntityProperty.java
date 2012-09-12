@@ -1,6 +1,5 @@
-package hs.mediasystem.framework;
+package hs.mediasystem.entity;
 
-import hs.mediasystem.enrich.InstanceEnricher;
 import javafx.beans.property.SimpleObjectProperty;
 
 public class SimpleEntityProperty<T> extends SimpleObjectProperty<T> {

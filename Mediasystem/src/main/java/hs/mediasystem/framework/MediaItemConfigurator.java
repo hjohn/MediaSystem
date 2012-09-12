@@ -5,6 +5,9 @@ import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.dao.MediaDataDao;
 import hs.mediasystem.dao.MediaId;
+import hs.mediasystem.entity.EnrichCallback;
+import hs.mediasystem.entity.EnricherBuilder;
+import hs.mediasystem.entity.FinishEnrichCallback;
 
 import java.util.Date;
 

@@ -1,4 +1,4 @@
-package hs.mediasystem.framework;
+package hs.mediasystem.entity;
 
 /**
  * Called on JavaFX thread to store results from an enrich chain.

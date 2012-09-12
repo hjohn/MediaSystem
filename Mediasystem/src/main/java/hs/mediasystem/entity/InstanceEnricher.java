@@ -1,4 +1,4 @@
-package hs.mediasystem.enrich;
+package hs.mediasystem.entity;
 
 public interface InstanceEnricher<T, R> {
   R enrich(T parent);

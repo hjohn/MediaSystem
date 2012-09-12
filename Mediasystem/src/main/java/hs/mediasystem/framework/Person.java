@@ -1,10 +1,9 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.framework;
 
-import hs.mediasystem.framework.EnrichCallback;
-import hs.mediasystem.framework.EnricherBuilder;
-import hs.mediasystem.framework.Entity;
-import hs.mediasystem.framework.FinishEnrichCallback;
-import hs.mediasystem.framework.Media;
+import hs.mediasystem.entity.EnrichCallback;
+import hs.mediasystem.entity.EnricherBuilder;
+import hs.mediasystem.entity.Entity;
+import hs.mediasystem.entity.FinishEnrichCallback;
 import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.util.ImageHandle;
 

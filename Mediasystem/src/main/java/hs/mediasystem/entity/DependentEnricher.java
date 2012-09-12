@@ -1,6 +1,5 @@
-package hs.mediasystem.framework;
+package hs.mediasystem.entity;
 
-import hs.mediasystem.enrich.InstanceEnricher;
 
 import java.util.ArrayList;
 import java.util.Arrays;

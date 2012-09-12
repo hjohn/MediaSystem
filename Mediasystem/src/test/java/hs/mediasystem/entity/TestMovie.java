@@ -1,4 +1,4 @@
-package hs.mediasystem.enrich;
+package hs.mediasystem.entity;
 
 import hs.mediasystem.framework.Media;
 import javafx.beans.property.ObjectProperty;

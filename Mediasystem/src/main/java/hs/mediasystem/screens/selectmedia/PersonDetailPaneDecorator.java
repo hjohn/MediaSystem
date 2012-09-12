@@ -1,8 +1,8 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.beans.AsyncImageProperty;
-import hs.mediasystem.screens.Casting;
-import hs.mediasystem.screens.Person;
+import hs.mediasystem.framework.Casting;
+import hs.mediasystem.framework.Person;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;

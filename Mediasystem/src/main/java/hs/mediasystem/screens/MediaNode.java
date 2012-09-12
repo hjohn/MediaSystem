@@ -1,10 +1,10 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.entity.SimpleEntityProperty;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.framework.SimpleEntityProperty;
 
 import java.util.Collections;
 import java.util.List;

@@ -2,9 +2,11 @@ package hs.mediasystem.framework;
 
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.Source;
+import hs.mediasystem.entity.EnrichCallback;
+import hs.mediasystem.entity.EnricherBuilder;
+import hs.mediasystem.entity.Entity;
+import hs.mediasystem.entity.FinishEnrichCallback;
 import hs.mediasystem.fs.SourceImageHandle;
-import hs.mediasystem.screens.Casting;
-import hs.mediasystem.screens.Person;
 import hs.mediasystem.util.ImageHandle;
 
 import java.util.ArrayList;
