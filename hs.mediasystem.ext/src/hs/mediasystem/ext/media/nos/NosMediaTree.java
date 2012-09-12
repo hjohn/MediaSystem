@@ -5,7 +5,7 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.fs.SourceImageHandle;
+import hs.mediasystem.framework.SourceImageHandle;
 import hs.mediasystem.persist.PersistQueue;
 
 import java.io.IOException;

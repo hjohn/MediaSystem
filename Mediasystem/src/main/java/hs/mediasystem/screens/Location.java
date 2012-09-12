@@ -1,4 +1,4 @@
-package hs.mediasystem.util;
+package hs.mediasystem.screens;
 
 public interface Location {
   public enum Type {

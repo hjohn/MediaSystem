@@ -4,7 +4,6 @@ import hs.mediasystem.entity.EnrichCallback;
 import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.Entity;
 import hs.mediasystem.entity.FinishEnrichCallback;
-import hs.mediasystem.fs.SourceImageHandle;
 import hs.mediasystem.util.ImageHandle;
 
 import java.util.ArrayList;

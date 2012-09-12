@@ -1,6 +1,6 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.framework;
 
-import hs.mediasystem.fs.NameDecoder.Parts.Group;
+import hs.mediasystem.framework.NameDecoder.Parts.Group;
 
 import java.util.ArrayList;
 import java.util.Arrays;

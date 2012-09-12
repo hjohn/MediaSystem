@@ -1,7 +1,7 @@
 package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.util.Location;
+import hs.mediasystem.screens.Location;
 
 public class SelectMediaLocation implements Location {
   private final MediaRoot mediaRoot;

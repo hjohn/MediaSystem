@@ -13,7 +13,7 @@ public interface MediaNodeCellProvider extends Provider<MediaNodeCell> {
   public enum Type {
     HORIZONTAL, VERTICAL, SQUARE;
 
-    private static Ranker<MediaNodeCellProvider> RANKER = new InheritanceDepthRanker<>();
+    private static final Ranker<MediaNodeCellProvider> RANKER = new InheritanceDepthRanker<>();
 
     public ServiceTracker<MediaNodeCellProvider> createTracker(BundleContext bundleContext) {
       return new ServiceTracker<>(bundleContext, MediaNodeCellProvider.class, RANKER, new PropertyEq("type", this));

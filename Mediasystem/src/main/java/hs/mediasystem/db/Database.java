@@ -141,7 +141,6 @@ public class Database {
         throw new DatabaseException(this, "Exception while creating new transaction", e);
       }
 
-      assert this.connection != null;
       assert (this.parent != null && this.savepoint != null) || (this.parent == null && this.savepoint == null);
     }
 

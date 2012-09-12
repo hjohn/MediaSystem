@@ -2,7 +2,7 @@ package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.framework.Media;
-import hs.mediasystem.fs.SourceImageHandle;
+import hs.mediasystem.framework.SourceImageHandle;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;

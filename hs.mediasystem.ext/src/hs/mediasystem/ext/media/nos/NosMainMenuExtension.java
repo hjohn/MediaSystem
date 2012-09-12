@@ -1,6 +1,6 @@
 package hs.mediasystem.ext.media.nos;
 
-import hs.mediasystem.fs.MediaRootType;
+import hs.mediasystem.framework.MediaRootType;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.selectmedia.SelectMediaLocation;

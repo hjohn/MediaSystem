@@ -24,8 +24,8 @@ import java.util.regex.Pattern;
  * <code>System.out.println("[WARNING] Hello World");</code><p>
  */
 public class Log {
-  private static PrintStream OUTPUT_STREAM;
-  private static PrintStream ERROR_STREAM;
+  private static PrintStream outputStream;
+  private static PrintStream errorStream;
 
   @SuppressWarnings("resource")
   public static void initialize(Level level, LinePrinter linePrinter) {
@@ -49,11 +49,11 @@ public class Log {
       };
     }
 
-    OUTPUT_STREAM = System.out;
-    ERROR_STREAM = System.err;
+    outputStream = System.out;
+    errorStream = System.err;
 
-    System.setOut(new PrintStream(new LogStream(OUTPUT_STREAM, Level.FINE, level, finalLinePrinter)));
-    System.setErr(new PrintStream(new LogStream(ERROR_STREAM, Level.SEVERE, level, finalLinePrinter)));
+    System.setOut(new PrintStream(new LogStream(outputStream, Level.FINE, level, finalLinePrinter)));
+    System.setErr(new PrintStream(new LogStream(errorStream, Level.SEVERE, level, finalLinePrinter)));
   }
 
   public static void initialize() {
@@ -96,7 +96,7 @@ public class Log {
         }
       }
       catch(Exception e) {
-        e.printStackTrace(OUTPUT_STREAM);
+        e.printStackTrace(outputStream);
       }
     }
 

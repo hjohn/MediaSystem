@@ -1,4 +1,4 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.util;
 
 import javafx.event.Event;
 import javafx.event.EventType;

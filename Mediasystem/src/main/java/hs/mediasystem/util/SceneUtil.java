@@ -1,6 +1,5 @@
 package hs.mediasystem.util;
 
-import hs.mediasystem.screens.FocusEvent;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;

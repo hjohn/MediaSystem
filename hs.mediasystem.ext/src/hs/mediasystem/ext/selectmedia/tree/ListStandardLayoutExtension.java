@@ -1,6 +1,6 @@
 package hs.mediasystem.ext.selectmedia.tree;
 
-import hs.mediasystem.fs.MediaRootType;
+import hs.mediasystem.framework.MediaRootType;
 import hs.mediasystem.screens.selectmedia.StandardLayout;
 import hs.mediasystem.screens.selectmedia.StandardLayoutExtension;
 

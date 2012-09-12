@@ -1,8 +1,6 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.framework;
 
 import hs.mediasystem.dao.LocalInfo;
-import hs.mediasystem.framework.Decoder;
-import hs.mediasystem.framework.Scanner;
 
 import java.io.IOException;
 import java.nio.file.FileVisitOption;

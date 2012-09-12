@@ -10,10 +10,10 @@ import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.FinishEnrichCallback;
 import hs.mediasystem.entity.InstanceEnricher;
+import hs.mediasystem.framework.EpisodeScanner;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.fs.EpisodeScanner;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;

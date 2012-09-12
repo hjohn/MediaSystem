@@ -8,7 +8,7 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.SettingUpdater;
 import hs.mediasystem.framework.SettingsStore;
-import hs.mediasystem.fs.StandardTitleComparator;
+import hs.mediasystem.framework.StandardTitleComparator;
 import hs.mediasystem.screens.DefaultMediaGroup;
 import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNode;

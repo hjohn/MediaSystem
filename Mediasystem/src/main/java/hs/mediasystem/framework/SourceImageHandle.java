@@ -1,4 +1,4 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.framework;
 
 import hs.mediasystem.dao.Source;
 import hs.mediasystem.util.ImageHandle;

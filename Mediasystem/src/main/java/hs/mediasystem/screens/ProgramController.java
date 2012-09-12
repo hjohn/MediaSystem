@@ -5,8 +5,6 @@ import hs.mediasystem.framework.player.PlayerEvent;
 import hs.mediasystem.framework.player.PlayerEvent.Type;
 import hs.mediasystem.util.Dialog;
 import hs.mediasystem.util.KeyCombinationGroup;
-import hs.mediasystem.util.Location;
-import hs.mediasystem.util.LocationHandler;
 import hs.mediasystem.util.PropertyClassEq;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.SceneUtil;

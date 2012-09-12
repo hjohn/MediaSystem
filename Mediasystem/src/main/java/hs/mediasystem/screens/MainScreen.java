@@ -1,5 +1,7 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.util.FocusEvent;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;

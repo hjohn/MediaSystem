@@ -1,6 +1,6 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.fs.MediaRootType;
+import hs.mediasystem.framework.MediaRootType;
 
 import java.util.Set;
 

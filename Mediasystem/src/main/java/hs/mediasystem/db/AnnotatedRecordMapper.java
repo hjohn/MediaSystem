@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
+public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   private static final Map<Class<?>, AnnotatedRecordMapper<?>> RECORD_MAPPERS = new WeakValueMap<>();
   private static final Comparator<Accessor> ACCESSOR_COMPARATOR = new Comparator<Accessor>() {
     @Override
@@ -239,6 +239,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> T fetch(T instance) {
     Database database;
     Object[] ids;
@@ -264,9 +265,7 @@ public class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     }
 
     try(Transaction transaction = database.beginTransaction()) {
-      @SuppressWarnings("unchecked")
-      T result = (T)transaction.selectUnique(instance.getClass(), whereClause, ids);
-      return result;
+      return (T)transaction.selectUnique(instance.getClass(), whereClause, ids);
     }
   }
 

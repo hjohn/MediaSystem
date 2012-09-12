@@ -1,7 +1,8 @@
-package hs.mediasystem.fs;
+package hs.mediasystem.framework;
 
-import hs.mediasystem.fs.NameDecoder.DecodeResult;
-import hs.mediasystem.fs.NameDecoder.Hint;
+import hs.mediasystem.framework.NameDecoder;
+import hs.mediasystem.framework.NameDecoder.DecodeResult;
+import hs.mediasystem.framework.NameDecoder.Hint;
 
 import java.util.Arrays;
 import java.util.Collection;

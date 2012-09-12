@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.fs.ChronologicalMediaItemComparator;
+import hs.mediasystem.framework.ChronologicalMediaItemComparator;
 
 import java.util.Comparator;
 

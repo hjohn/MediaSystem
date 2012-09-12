@@ -1,6 +1,4 @@
-package hs.mediasystem.util;
-
-import hs.mediasystem.screens.Presentation;
+package hs.mediasystem.screens;
 
 public interface LocationHandler {
   Presentation go(Location location, Presentation current);

@@ -5,7 +5,7 @@ import hs.mediasystem.ext.media.youtube.YouTubeMediaTree.Feed;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.fs.SourceImageHandle;
+import hs.mediasystem.framework.SourceImageHandle;
 
 import java.io.IOException;
 import java.net.URL;
