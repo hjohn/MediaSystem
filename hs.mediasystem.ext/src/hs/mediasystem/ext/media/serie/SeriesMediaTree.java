@@ -12,6 +12,7 @@ import hs.mediasystem.framework.EnricherBuilder;
 import hs.mediasystem.framework.EntityFactory;
 import hs.mediasystem.framework.FinishEnrichCallback;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.persist.PersistQueue;
@@ -24,15 +25,17 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
   private final EnrichCache enrichCache;
   private final PersistQueue persister;
   private final ItemsDao itemsDao;
+  private final MediaItemConfigurator mediaItemConfigurator;
   private final EntityFactory entityFactory;
   private final List<Path> roots;
 
   private List<MediaItem> children;
 
-  public SeriesMediaTree(EnrichCache enrichCache, PersistQueue persister, ItemsDao itemsDao, EntityFactory entityFactory, List<Path> roots) {
+  public SeriesMediaTree(EnrichCache enrichCache, PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory entityFactory, List<Path> roots) {
     this.enrichCache = enrichCache;
     this.persister = persister;
     this.itemsDao = itemsDao;
+    this.mediaItemConfigurator = mediaItemConfigurator;
     this.entityFactory = entityFactory;
     this.roots = new ArrayList<>(roots);
   }
@@ -50,10 +53,12 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
 
           serie.setEntityFactory(entityFactory);
 
-          SerieItem mediaItem = new SerieItem(SeriesMediaTree.this, localInfo.getUri(), serie, entityFactory, itemsDao);
+          SerieItem mediaItem = new SerieItem(SeriesMediaTree.this, localInfo.getUri(), serie, entityFactory, mediaItemConfigurator, itemsDao);
+
+          mediaItemConfigurator.configure(mediaItem, Activator.TVDB_SERIE_ENRICHER);
 
           InstanceEnricher<Serie, Void> enricher = new EnricherBuilder<Serie, Item>(Item.class)
-            .require(mediaItem.dataMapProperty().get(), Identifier.class)
+            .require(mediaItem.identifier)
             .enrich(new EnrichCallback<Item>() {
               @Override
               public Item enrich(Object... parameters) {

@@ -4,7 +4,6 @@ import hs.mediasystem.beans.BeanUtils;
 import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
-import hs.mediasystem.dao.MediaDataDao;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.db.ConnectionPool;
 import hs.mediasystem.db.DatabaseStatementTranslator;
@@ -16,8 +15,8 @@ import hs.mediasystem.framework.Entity;
 import hs.mediasystem.framework.EntityFactory;
 import hs.mediasystem.framework.EntityProvider;
 import hs.mediasystem.framework.Media;
-import hs.mediasystem.framework.MediaDataEnricher;
 import hs.mediasystem.framework.MediaDataPersister;
+import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.PersisterProvider;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.SettingsStore;
@@ -302,8 +301,8 @@ public class FrontEnd extends Application {
     );
 
     dm.add(dm.createComponent()
-      .setInterface(MediaDataDao.class.getName(), null)
-      .setImplementation(injector.getInstance(MediaDataDao.class))
+      .setInterface(MediaItemConfigurator.class.getName(), null)
+      .setImplementation(injector.getInstance(MediaItemConfigurator.class))
     );
 
     dm.add(dm.createComponent()
@@ -396,8 +395,6 @@ public class FrontEnd extends Application {
         .setRequired(true)
       )
     );
-
-    injector.getInstance(EnrichCache.class).registerEnricher(MediaData.class, injector.getInstance(MediaDataEnricher.class));
 
     controller.showMainScreen();
   }

@@ -1,6 +1,5 @@
 package hs.mediasystem.ext.media.serie;
 
-import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
@@ -10,6 +9,7 @@ import hs.mediasystem.framework.EntityFactory;
 import hs.mediasystem.framework.EntityProvider;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.persist.PersistQueue;
@@ -215,7 +215,7 @@ public class Activator extends DependencyActivatorBase {
         .setRequired(true)
       )
       .add(createServiceDependency()
-        .setService(IdentifierDao.class)
+        .setService(MediaItemConfigurator.class)
         .setRequired(true)
       )
       .add(createServiceDependency()

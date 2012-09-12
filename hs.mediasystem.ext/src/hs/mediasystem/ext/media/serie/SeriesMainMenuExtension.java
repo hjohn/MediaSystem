@@ -1,12 +1,10 @@
 package hs.mediasystem.ext.media.serie;
 
-import hs.mediasystem.dao.Identifier;
-import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.enrich.EnrichCache;
 import hs.mediasystem.framework.EntityFactory;
-import hs.mediasystem.framework.IdentifierEnricher;
+import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.fs.MediaRootType;
 import hs.mediasystem.persist.PersistQueue;
@@ -24,19 +22,14 @@ import javafx.scene.image.Image;
 public class SeriesMainMenuExtension implements MainMenuExtension {
   private volatile EnrichCache enrichCache;
   private volatile PersistQueue persister;
-  private volatile IdentifierDao identifierDao;
   private volatile ItemsDao itemsDao;
+  private volatile MediaItemConfigurator mediaItemConfigurator;
   private volatile EntityFactory entityFactory;
   private volatile SettingsStore settingsStore;
 
   public SeriesMainMenuExtension() {
     StandardView.registerLayout(SeriesMediaTree.class, MediaRootType.SERIES);
     StandardView.registerLayout(SerieItem.class, MediaRootType.SERIE_EPISODES);
-  }
-
-  public void init() {
-    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, Activator.TVDB_SERIE_ENRICHER, Serie.class));
-    enrichCache.registerEnricher(Identifier.class, new IdentifierEnricher(identifierDao, Activator.TVDB_EPISODE_ENRICHER, Episode.class));
   }
 
   @Override
@@ -53,7 +46,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   public void select(final ProgramController controller) {
     ObservableList<Path> paths = settingsStore.getListProperty("MediaSystem:Ext:Series", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
 
-    controller.setLocation(new SelectMediaLocation(new SeriesMediaTree(enrichCache, persister, itemsDao, entityFactory, paths)));
+    controller.setLocation(new SelectMediaLocation(new SeriesMediaTree(enrichCache, persister, itemsDao, mediaItemConfigurator, entityFactory, paths)));
   }
 
   @Override

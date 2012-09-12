@@ -11,6 +11,7 @@ import hs.mediasystem.framework.EnricherBuilder;
 import hs.mediasystem.framework.EntityFactory;
 import hs.mediasystem.framework.FinishEnrichCallback;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.fs.EpisodeScanner;
 
@@ -21,15 +22,17 @@ import java.util.List;
 public class SerieItem extends MediaItem implements MediaRoot {
   private final SeriesMediaTree mediaRoot;
   private final EntityFactory entityFactory;
+  private final MediaItemConfigurator mediaItemConfigurator;
   private final ItemsDao itemsDao;
 
   private List<MediaItem> children;
 
-  public SerieItem(SeriesMediaTree mediaTree, String uri, Serie serie, EntityFactory entityFactory, ItemsDao itemsDao) {
+  public SerieItem(SeriesMediaTree mediaTree, String uri, Serie serie, EntityFactory entityFactory, MediaItemConfigurator mediaItemConfigurator, ItemsDao itemsDao) {
     super(mediaTree, uri, serie);
 
     this.mediaRoot = mediaTree;
     this.entityFactory = entityFactory;
+    this.mediaItemConfigurator = mediaItemConfigurator;
     this.itemsDao = itemsDao;
   }
 
@@ -47,8 +50,10 @@ public class SerieItem extends MediaItem implements MediaRoot {
 
         final MediaItem mediaItem = new MediaItem(getMediaTree(), localInfo.getUri(), episode);
 
+        mediaItemConfigurator.configure(mediaItem, Activator.TVDB_EPISODE_ENRICHER);
+
         InstanceEnricher<Episode, Void> enricher = new EnricherBuilder<Episode, Item>(Item.class)
-            .require(mediaItem.dataMapProperty().get(), Identifier.class)
+            .require(mediaItem.identifier)
             .enrich(new EnrichCallback<Item>() {
               @Override
               public Item enrich(Object... parameters) {
