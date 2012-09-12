@@ -351,7 +351,7 @@ public class VLCPlayer implements Player {
     }
 
     for(TrackDescription spuDescription : mediaPlayer.getSpuDescriptions()) {
-      if(spuDescription.id() > 0) {
+      if(spuDescription.id() >= 0) {
         subtitles.add(new Subtitle(spuDescription.id(), spuDescription.description()));
       }
     }
