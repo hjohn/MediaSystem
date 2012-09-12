@@ -18,6 +18,8 @@ import java.util.Map;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
@@ -88,6 +90,15 @@ public class MediaItem extends Entity<MediaItem> implements EnrichTrigger {
 
       getEnrichCache().addListener(cacheKey, new WeakEnrichmentListener(listener));
     }
+
+    mediaData.addListener(new ChangeListener<MediaData>() {
+      @Override
+      public void changed(ObservableValue<? extends MediaData> observableValue, MediaData old, MediaData current) {
+        if(current != null) {
+          current.setPersister(PersisterProvider.getPersister(MediaData.class));
+        }
+      }
+    });
   }
 
   private void add(Object o) {
