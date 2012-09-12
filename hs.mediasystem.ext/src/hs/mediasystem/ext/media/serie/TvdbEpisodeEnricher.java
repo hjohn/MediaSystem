@@ -32,7 +32,7 @@ public class TvdbEpisodeEnricher implements MediaIdentifier, MediaLoader {
   @Override
   public Identifier identifyItem(final Media<?> media) throws IdentifyException {
     hs.mediasystem.ext.media.serie.Episode episode = (hs.mediasystem.ext.media.serie.Episode)media;
-    Identifier serieMatch = itemIdentifier.identifyItem(episode.serie.get().getMedia());
+    Identifier serieMatch = itemIdentifier.identifyItem(episode.serie.get());
 
     // TODO may need some TVDB caching here, as we're doing this query twice for each episode... and TVDB returns whole seasons I think
     EpisodeSearchResult result = findEpisode(serieMatch.getProviderId().getId(), episode);

@@ -44,7 +44,7 @@ public class SerieItem extends MediaItem implements MediaRoot {
       children = new ArrayList<>();
 
       for(LocalInfo localInfo : scanResults) {
-        final Episode episode = new Episode(this, getTitle() + " " + localInfo.getSeason() + "x" + localInfo.getEpisode(), localInfo.getSeason(), localInfo.getEpisode(), localInfo.getEndEpisode());
+        final Episode episode = new Episode((Serie)this.getMedia(), getTitle() + " " + localInfo.getSeason() + "x" + localInfo.getEpisode(), localInfo.getSeason(), localInfo.getEpisode(), localInfo.getEndEpisode());
 
         episode.setEntityFactory(entityFactory);
 

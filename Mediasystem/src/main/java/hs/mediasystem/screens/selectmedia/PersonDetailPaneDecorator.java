@@ -183,7 +183,7 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
       imageView.setAlignment(Pos.CENTER);
 
       label.getStyleClass().add("cast-name");
-      label.setText(casting.media.get().title.get());
+      label.setText(casting.media.get().titleWithContext.get());
       label.setMinWidth(100);
       label.setMaxWidth(100);
 

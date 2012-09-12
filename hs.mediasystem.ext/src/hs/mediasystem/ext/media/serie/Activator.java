@@ -1,8 +1,10 @@
 package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.dao.Item;
+import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.dao.ProviderId;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.EntityProvider;
@@ -110,7 +112,7 @@ public class Activator extends DependencyActivatorBase {
           if(media instanceof Episode) {
             Episode ep = (Episode)media;
 
-            criteria.put(SubtitleCriteriaProvider.TITLE, ep.serie.get().getTitle());
+            criteria.put(SubtitleCriteriaProvider.TITLE, ep.serie.get().title.get());
             criteria.put(SubtitleCriteriaProvider.SEASON, ep.season.get());
             criteria.put(SubtitleCriteriaProvider.EPISODE, ep.episode.get());
           }
@@ -158,26 +160,28 @@ public class Activator extends DependencyActivatorBase {
       })
     );
 
+    final EntityProvider<Serie> serieEntityProvider = new EntityProvider<Serie>() {
+      @Override
+      public Serie get(Object... parameters) {
+        if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getProviderId().getType().equals("Serie")) {
+          return null;
+        }
+
+        Item item = (Item)parameters[0];
+
+        Serie serie = new Serie(item.getTitle());
+
+        serie.item.set(item);
+
+        return serie;
+      }
+    };
+
     manager.add(createComponent()
       .setInterface(EntityProvider.class.getName(), new Hashtable<String, Object>() {{
         put("mediasystem.class", Media.class);
       }})
-      .setImplementation(new EntityProvider<Serie>() {
-        @Override
-        public Serie get(Object... parameters) {
-          if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getProviderId().getType().equals("Serie")) {
-            return null;
-          }
-
-          Item item = (Item)parameters[0];
-
-          Serie serie = new Serie(item.getTitle());
-
-          serie.item.set(item);
-
-          return serie;
-        }
-      })
+      .setImplementation(serieEntityProvider)
     );
 
     manager.add(createComponent()
@@ -185,6 +189,8 @@ public class Activator extends DependencyActivatorBase {
         put("mediasystem.class", Media.class);
       }})
       .setImplementation(new EntityProvider<Episode>() {
+        private volatile ItemsDao itemsDao;
+
         @Override
         public Episode get(Object... parameters) {
           if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getProviderId().getType().equals("Episode")) {
@@ -193,13 +199,26 @@ public class Activator extends DependencyActivatorBase {
 
           Item item = (Item)parameters[0];
 
-          Episode episode = new Episode(null, item.getTitle(), item.getSeason(), item.getEpisode(), item.getEpisode());
+          try {
+            Item serieItem = itemsDao.loadItem(new ProviderId("Serie", "TVDB", item.getProviderId().getId().split(",")[0]));
 
-          episode.item.set(item);
+            Serie serie = serieEntityProvider.get(serieItem);
+            Episode episode = new Episode(serie, item.getTitle(), item.getSeason(), item.getEpisode(), item.getEpisode());
 
-          return episode;
+            episode.item.set(item);
+
+            return episode;
+          }
+          catch(ItemNotFoundException e) {
+            System.out.println("[FINE] Exception while creating Episode entity: " + e);
+            return null;
+          }
         }
       })
+      .add(createServiceDependency()
+        .setService(ItemsDao.class)
+        .setRequired(true)
+      )
     );
 
     manager.add(createComponent()

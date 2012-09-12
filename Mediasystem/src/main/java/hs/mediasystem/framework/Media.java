@@ -25,6 +25,7 @@ import javafx.collections.ObservableList;
 public class Media<T extends Media<T>> extends Entity<T> {
   public final ObjectProperty<Item> item = object("item");
 
+  public final StringProperty titleWithContext = string();
   public final StringProperty title = string();
   public final StringProperty subtitle = string("");
   public final StringProperty description = string();
@@ -84,6 +85,7 @@ public class Media<T extends Media<T>> extends Entity<T> {
     item.addListener(new ChangeListener<Item>() {
       @Override
       public void changed(ObservableValue<? extends Item> observableValue, Item old, Item current) {
+        titleWithContext.set(current.getTitle());
         title.set(current.getTitle());
         background.set(createImageHandle(current.getBackground(), current, "background"));
         banner.set(createImageHandle(current.getBanner(), current, "banner"));

@@ -1,6 +1,5 @@
 package hs.mediasystem.ext.media.serie;
 
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.screens.selectmedia.DetailPane;
 import hs.mediasystem.screens.selectmedia.MediaDetailPaneDecorator;
 import hs.mediasystem.util.MapBindings;
@@ -16,7 +15,7 @@ public class EpisodeDetailPaneDecorator extends MediaDetailPaneDecorator {
   public EpisodeDetailPaneDecorator(DetailPane.DecoratablePane decoratablePane) {
     super(decoratablePane);
 
-    groupName.bind(MapBindings.selectString(dataProperty(), "serie", "dataMap", Media.class, "title"));
+    groupName.bind(MapBindings.selectString(dataProperty(), "serie", "title"));
   }
 
   @Override
