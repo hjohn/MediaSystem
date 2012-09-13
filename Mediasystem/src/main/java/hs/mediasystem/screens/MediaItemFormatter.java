@@ -57,4 +57,19 @@ public class MediaItemFormatter {
       }
     };
   }
+
+  public static StringBinding formattedDate(final ObservableValue<Date> date) {
+    return new StringBinding() {
+      {
+        bind(date);
+      }
+
+      @Override
+      protected String computeValue() {
+        String releaseTime = date.getValue() == null ? null : DATE_FORMAT.format(date.getValue());
+
+        return releaseTime;
+      }
+    };
+  }
 }

@@ -2,7 +2,9 @@ package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.framework.Casting;
 import hs.mediasystem.util.Events;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -20,6 +22,7 @@ public class CastingsRow extends TilePane {
 
   public final ObjectProperty<ObservableList<Casting>> castings = new SimpleObjectProperty<>();
   public final ObjectProperty<EventHandler<CastingSelectedEvent>> onCastingSelected = new SimpleObjectProperty<>();
+  public final BooleanProperty empty = new SimpleBooleanProperty(true);
 
   private final Type type;
 
@@ -62,6 +65,7 @@ public class CastingsRow extends TilePane {
 
   private void createCastingChildren(ObservableList<? extends Casting> castings) {
     getChildren().clear();
+    empty.set(true);
 
     double castingSize = 100 + getHgap();
 
@@ -69,6 +73,8 @@ public class CastingsRow extends TilePane {
       double space = getWidth() - castingSize;
 
       for(final Casting casting : castings) {
+        empty.set(false);
+
         if(space < 0) {
           break;
         }

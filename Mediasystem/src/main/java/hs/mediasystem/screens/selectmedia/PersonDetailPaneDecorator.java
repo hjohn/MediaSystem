@@ -3,12 +3,17 @@ package hs.mediasystem.screens.selectmedia;
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.Casting;
 import hs.mediasystem.framework.Person;
+import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.selectmedia.CastingsRow.Type;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;
+
+import java.util.Date;
+
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
@@ -16,6 +21,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -27,7 +33,12 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
 
   protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(dataProperty(), "photo");
   protected final AsyncImageProperty poster = new AsyncImageProperty();
+
   protected final ObjectBinding<ObservableList<Casting>> castings = MapBindings.select(dataProperty(), "castings");
+
+  protected final StringBinding birthPlace = MapBindings.selectString(dataProperty(), "birthPlace");
+  protected final StringBinding biography = MapBindings.selectString(dataProperty(), "biography");
+  protected final ObjectBinding<Date> birthDate = MapBindings.select(dataProperty(), "birthDate");
 
   protected final DetailPane.DecoratablePane decoratablePane;
 
@@ -38,7 +49,7 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
 
   @Override
   public void decorate() {
-    // decoratablePane.getStylesheets().add("select-media/person-detail-pane.css");
+    decoratablePane.getStylesheets().add("select-media/person-detail-pane.css");
 
     decoratablePane.add("title-area", 2, new Label() {{
       getStyleClass().add("title");
@@ -56,25 +67,53 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
 
     decoratablePane.add("title-image-area", 1, image);
 
+    decoratablePane.add("description-area", 5, createMiscelaneousFieldsBlock());
     decoratablePane.add("description-area", 6, createBiographyBlock());
 
-    Pane castingsRow = createTitledBlock("APPEARANCES", createCastingsRow(), null);
-    HBox.setHgrow(castingsRow, Priority.ALWAYS);
+    CastingsRow castingsRow = createCastingsRow();
+    Pane titledCastingsRow = createTitledBlock("APPEARANCES", castingsRow, castingsRow.empty.not());
+    HBox.setHgrow(titledCastingsRow, Priority.ALWAYS);
 
-    decoratablePane.add("link-area", 1, castingsRow);
+    decoratablePane.add("link-area", 1, titledCastingsRow);
   }
 
   protected Pane createBiographyBlock() {
-    Node plotField = createBiographyField();
-    VBox.setVgrow(plotField, Priority.ALWAYS);
+    Node biographyField = createBiographyField();
+    VBox.setVgrow(biographyField, Priority.ALWAYS);
 
-    return createTitledBlock("BIOGRAPHY", plotField, dataProperty().get().biography.isNotEqualTo(""));
+    return createTitledBlock("BIOGRAPHY", biographyField, biography.isNotEqualTo(""));
   }
 
   protected Node createBiographyField() {
     return new Label() {{
-      getStyleClass().addAll("field", "plot");
-      textProperty().bind(dataProperty().get().biography);
+      getStyleClass().addAll("field", "biography");
+      textProperty().bind(biography);
+    }};
+  }
+
+  protected Pane createBirthDateBlock() {
+    Label label = new Label() {{
+      getStyleClass().addAll("field", "birthdate");
+      textProperty().bind(MediaItemFormatter.formattedDate(birthDate));
+    }};
+
+    return createTitledBlock("BIRTH DATE", label, birthDate.isNotNull());
+  }
+
+  protected Pane createBirthPlaceBlock() {
+    Label label = new Label() {{
+      getStyleClass().addAll("field", "birthplace");
+      textProperty().bind(birthPlace);
+    }};
+
+    return createTitledBlock("BIRTH PLACE", label, birthPlace.isNotEqualTo(""));
+  }
+
+  protected Pane createMiscelaneousFieldsBlock() {
+    return new FlowPane() {{
+      getStyleClass().add("fields");
+      getChildren().add(createBirthDateBlock());
+      getChildren().add(createBirthPlaceBlock());
     }};
   }
 
@@ -93,7 +132,7 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
     }};
   }
 
-  protected Pane createCastingsRow() {
+  protected CastingsRow createCastingsRow() {
     CastingsRow castingsRow = new CastingsRow(Type.APPEAREANCES);
 
     castingsRow.castings.bind(castings);

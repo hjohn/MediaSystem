@@ -111,13 +111,13 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
     decoratablePane.add("title-image-area", 1, image);
 
     decoratablePane.add("description-area", 6, createPlotBlock());
-
     decoratablePane.add("description-area", 7, createMiscelaneousFieldsBlock());
 
-    Pane castingsRow = createTitledBlock("CAST", createCastingsRow(), null);
-    HBox.setHgrow(castingsRow, Priority.ALWAYS);
+    CastingsRow castingsRow = createCastingsRow();
+    Pane titledCastingsRow = createTitledBlock("CAST", castingsRow, castingsRow.empty.not());
+    HBox.setHgrow(titledCastingsRow, Priority.ALWAYS);
 
-    decoratablePane.add("link-area", 1, castingsRow);
+    decoratablePane.add("link-area", 1, titledCastingsRow);
   }
 
   protected Node createSubtitleField() {
@@ -208,7 +208,7 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
     }};
   }
 
-  protected Pane createCastingsRow() {
+  protected CastingsRow createCastingsRow() {
     CastingsRow castingsRow = new CastingsRow(Type.CAST);
 
     castingsRow.castings.bind(castings);
