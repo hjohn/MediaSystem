@@ -28,7 +28,7 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
   private List<MediaItem> children;
 
   public YouTubeFeed(YouTubeMediaTree mediaTree, String uri, Feed feed, Media<?> media) {
-    super(mediaTree, uri, media);
+    super(uri, media);
 
     this.mediaRoot = mediaTree;
     this.feed = feed;
@@ -77,7 +77,7 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
 
             youTube.image.set(new SourceImageHandle(new URLImageSource(url), "YouTubeMediaTree:/" + videoEntry.getId()));
 
-            children.add(new MediaItem(getMediaTree(), mediaContent.getUrl().replaceAll("https://", "http://"), youTube));
+            children.add(new MediaItem(mediaContent.getUrl().replaceAll("https://", "http://"), youTube));
             break;
           }
         }

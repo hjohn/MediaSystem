@@ -51,7 +51,7 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
 
           movie.setEntityFactory(entityFactory);
 
-          final MediaItem mediaItem = new MediaItem(MoviesMediaTree.this, localInfo.getUri(), movie);
+          final MediaItem mediaItem = new MediaItem(localInfo.getUri(), movie);
 
           mediaItemConfigurator.configure(mediaItem, Activator.TMDB_ENRICHER);
 

@@ -85,7 +85,7 @@ public class EntityTest extends JavaFXTestCase {
   public void shouldUpdateAsynchronously() {
     Movie movie = new Movie();
 
-    final MediaItem mediaItem = new MediaItem(null, "L:\\SomeMovie.mkv", movie);
+    final MediaItem mediaItem = new MediaItem("L:\\SomeMovie.mkv", movie);
 
     mediaItem.identifier.setEnricher(new InstanceEnricher<MediaItem, Identifier>() {
       @Override

@@ -13,15 +13,13 @@ public class MediaItem extends Entity<MediaItem> {
   public final SimpleEntityProperty<Identifier> identifier = entity("identifier");
   public final ObjectProperty<Media<?>> media = object("media");
 
-  private final MediaTree mediaTree;
   private final String uri;
   private final String mediaType;
 
-  public MediaItem(MediaTree mediaTree, String uri, Media<?> media) {
+  public MediaItem(String uri, Media<?> media) {
     assert uri != null;
 
     this.uri = uri;
-    this.mediaTree = mediaTree;
     this.media.set(media);
     this.mediaType = getMedia().getClass().getSimpleName();
 
@@ -61,10 +59,6 @@ public class MediaItem extends Entity<MediaItem> {
 
   public String getUri() {
     return uri;
-  }
-
-  protected MediaTree getMediaTree() {
-    return mediaTree;
   }
 
   public void reloadMetaData() {

@@ -10,7 +10,9 @@ import hs.mediasystem.persist.PersistQueue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,40 +25,34 @@ public class NosMediaTree implements MediaTree, MediaRoot {
 
   private List<MediaItem> children;
 
-  private List<MediaItem> getElements() {
+  private static List<MediaItem> getElements() {
     List<MediaItem> list = new ArrayList<>();
 
     try {
       Document doc = Jsoup.connect(URL).get();
 
+      Map<String, String> videoUrls = new HashMap<>();
+
+      Pattern videoPattern = Pattern.compile("\\$\\(\"#(.*?)\"\\).*?(http://.*?\\.mp4)", Pattern.DOTALL);
+      Matcher matcher = videoPattern.matcher(doc.select("script").html());
+
+      while(matcher.find()) {
+        videoUrls.put(matcher.group(1), matcher.group(2));
+      }
+
       for(Element element : doc.select("a")) {
-        String videoUrl = URL + "/browser/" + element.attr("href");
         String thumbUrl = URL + "/browser/" + element.select("div img").attr("src");
         String title = element.select("div h3").text();
         String meta = element.select("div p").text();
+        String videoUrl = videoUrls.get(element.attr("id"));
 
-        Document vidXml = Jsoup.connect(videoUrl).get();
+        Media<?> media = new Media<>(title, meta, null);
 
-        Pattern pattern = Pattern.compile("http://content.nos.nl/.*?\\.xml");
-        Matcher matcher = pattern.matcher(vidXml.toString());
+        media.image.set(new SourceImageHandle(new URLImageSource(thumbUrl), "NosMediaTree:/" + title));
 
-        if(matcher.find()) {
-          String videoXmlUrl = matcher.group(0);
+        MediaItem mediaItem = new MediaItem(videoUrl, media);
 
-          Document vid = Jsoup.connect(videoXmlUrl).get();
-          Pattern pattern2 = Pattern.compile("http://.*?\\.(flv|mp4)");
-          Matcher matcher2 = pattern2.matcher(vid.toString());
-
-          if(matcher2.find()) {
-            Media<?> media = new Media<>(title, meta, null);
-
-            media.image.set(new SourceImageHandle(new URLImageSource(thumbUrl), "NosMediaTree:/" + title));
-
-            MediaItem mediaItem = new MediaItem(this, matcher2.group(0), media);
-
-            list.add(mediaItem);
-          }
-        }
+        list.add(mediaItem);
       }
     }
     catch(IOException e) {
