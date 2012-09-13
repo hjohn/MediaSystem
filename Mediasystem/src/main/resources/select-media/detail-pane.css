@@ -2,40 +2,10 @@
   -fx-hgap: 20;
 }
 
-.group-name {
-  -fx-font-size: 16pt;
-  -fx-font-weight: bold;
-  -fx-wrap-text: true;
-}
-
 .title {
   -fx-text-fill: -c-text-highlight;
   -fx-font-size: 24pt;
   -fx-font-weight: bold;
-  -fx-wrap-text: true;
-}
-
-.subtitle {
-  -fx-label-padding: 0 0 0 10;
-  -fx-wrap-text: true;
-}
-
-.star-rating {
-  -fx-padding: 5 10 5 0;
-}
-
-.rating {
-  -fx-font-weight: bold; 
-}
-
-.genres {
-  -fx-font-weight: bold;
-  -fx-wrap-text: true;
-  -fx-text-fill: -c-text-highlight;
-}
-
-.plot {
-  -fx-alignment: top-left;
   -fx-wrap-text: true;
 }
 

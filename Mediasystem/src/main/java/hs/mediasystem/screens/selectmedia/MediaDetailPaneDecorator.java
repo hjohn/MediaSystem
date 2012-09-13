@@ -5,6 +5,7 @@ import hs.mediasystem.framework.Casting;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.StarRating;
+import hs.mediasystem.screens.selectmedia.CastingsRow.Type;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;
@@ -18,22 +19,15 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.WeakListChangeListener;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 
 public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
@@ -215,143 +209,16 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
   }
 
   protected Pane createCastingsRow() {
-    final TilePane tilePane = new TilePane();
+    CastingsRow castingsRow = new CastingsRow(Type.CAST);
 
-    tilePane.getStyleClass().add("castings-row");
-
-    tilePane.widthProperty().addListener(new ChangeListener<Number>() {
+    castingsRow.castings.bind(castings);
+    castingsRow.onCastingSelected.set(new EventHandler<CastingSelectedEvent>() {
       @Override
-      public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        createCastingChildren(tilePane, castings.get());
+      public void handle(CastingSelectedEvent event) {
+        decoratablePane.decoratorContentProperty().set(event.getCasting().person.get());
       }
     });
 
-    castings.addListener(new ChangeListener<ObservableList<Casting>>() {
-      private final ListChangeListener<Casting> listChangeListener = new ListChangeListener<Casting>() {
-        @Override
-        public void onChanged(ListChangeListener.Change<? extends Casting> c) {
-          createCastingChildren(tilePane, c.getList());
-        }
-      };
-
-      private final WeakListChangeListener<Casting> weakListChangeListener = new WeakListChangeListener<>(listChangeListener);
-
-      @Override
-      public void changed(ObservableValue<? extends ObservableList<Casting>> observable, ObservableList<Casting> old, ObservableList<Casting> current) {
-        if(old != null) {
-          old.removeListener(weakListChangeListener);
-        }
-
-        if(current != null) {
-          createCastingChildren(tilePane, current);
-
-          current.addListener(weakListChangeListener);
-        }
-      }
-    });
-
-    return tilePane;
-  }
-
-  protected void createCastingChildren(TilePane parent, ObservableList<? extends Casting> castings) {
-    parent.getChildren().clear();
-
-    double castingSize = 100 + parent.getHgap();
-
-    if(castings != null) {
-      double space = parent.getWidth() - castingSize;
-
-      for(final Casting casting : castings) {
-        if(space < 0) {
-          break;
-        }
-
-        if(casting.role.get().equals("Actor")) {
-          CastingImage castingImage = new CastingImage(casting);
-
-          castingImage.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-              decoratablePane.decoratorContentProperty().set(casting.person.get());
-            }
-          });
-
-          parent.getChildren().add(castingImage);
-
-          space -= castingSize;
-        }
-      }
-    }
-  }
-
-  private static final class CastingImage extends Button {
-    public CastingImage(Casting casting) {
-      getStyleClass().add("cast-item");
-
-      VBox vbox = new VBox();
-      ScaledImageView imageView = new ScaledImageView(new Label("?"));
-
-      Label label = new Label();
-
-      AsyncImageProperty photo = new AsyncImageProperty();
-
-      if(casting.person.get().photo.get() != null) {
-        photo.imageHandleProperty().set(casting.person.get().photo.get());
-      }
-
-      imageView.getStyleClass().add("cast-photo");
-      imageView.imageProperty().bind(photo);
-      imageView.setSmooth(true);
-      imageView.setPreserveRatio(true);
-      imageView.setMinHeight(122);
-      imageView.setAlignment(Pos.CENTER);
-
-      label.getStyleClass().add("cast-name");
-      label.setText(casting.person.get().name.get());
-      label.setMinWidth(100);
-      label.setMaxWidth(100);
-
-      vbox.getChildren().addAll(imageView, label);
-
-      if(casting.characterName.get() != null && !casting.characterName.get().trim().isEmpty()) {
-        Label characterNameLabel = new Label();
-
-        characterNameLabel.getStyleClass().add("cast-character-name");
-        characterNameLabel.setText("as " + formattedCharacterName(casting.characterName.get(), 40));
-        characterNameLabel.setMinWidth(100);
-        characterNameLabel.setMaxWidth(100);
-
-        vbox.getChildren().add(characterNameLabel);
-      }
-
-      setGraphic(vbox);
-    }
-
-    private String formattedCharacterName(String rawCharacterName, int cutOffLength) {
-      String characterName = rawCharacterName.replaceAll(" / ", "|");
-      int more = 0;
-
-      for(;;) {
-        int index = characterName.lastIndexOf('|');
-
-        if(index == -1) {
-          return characterName;
-        }
-
-        if(index > cutOffLength) { // too long, cut it off
-          characterName = characterName.substring(0, index).trim();
-          more++;
-        }
-        else {
-          if(more == 0) {
-            characterName = characterName.substring(0, index).trim() + " & " + characterName.substring(index + 1).trim();
-          }
-          else {
-            characterName = characterName.substring(0, index).trim() + " (" + (more + 1) + "\u00a0more)";
-          }
-          return characterName.replaceAll(" *\\| *", ", ");
-        }
-      }
-    }
+    return castingsRow;
   }
 }
