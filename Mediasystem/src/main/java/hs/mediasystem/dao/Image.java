@@ -1,10 +1,11 @@
 package hs.mediasystem.dao;
 
 import hs.mediasystem.db.Column;
+import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.db.Table;
 
 @Table(name = "images")
-public class Image {
+public class Image extends DatabaseObject {
 
   @Column
   private String url;

@@ -1,11 +1,12 @@
 package hs.mediasystem.entity;
 
-import hs.mediasystem.persist.Persister;
+import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.persist.Persistable;
+import hs.mediasystem.persist.Persister;
 
 import java.lang.ref.WeakReference;
 
-public class DefaultPersistable<P> implements Persistable<P> {
+public class DefaultPersistable<P> extends DatabaseObject implements Persistable<P> {
   private WeakReference<Persister<P>> persistTriggerRef;
 
   @Override

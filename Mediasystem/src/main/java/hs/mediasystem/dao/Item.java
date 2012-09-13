@@ -4,6 +4,7 @@ import hs.mediasystem.db.AnnotatedRecordMapper;
 import hs.mediasystem.db.Column;
 import hs.mediasystem.db.DataTypeConverter;
 import hs.mediasystem.db.Database;
+import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
 
@@ -13,7 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 @Table(name = "items")
-public class Item {
+public class Item extends DatabaseObject {
   public static final Comparator<Casting> CASTINGS_BY_INDEX_THEN_CHARACTERNAME = new Comparator<Casting>() {
     @Override
     public int compare(Casting o1, Casting o2) {

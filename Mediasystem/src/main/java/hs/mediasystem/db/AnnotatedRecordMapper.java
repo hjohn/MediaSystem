@@ -198,6 +198,10 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
 
   @Override
   public void invokeAfterLoadStore(T object, Database database) throws DatabaseException {
+    if(object instanceof DatabaseObject) {
+      ((DatabaseObject)object).setDatabase(database);
+    }
+
     if(afterLoadStore != null) {
       try {
         afterLoadStore.invoke(object, database);

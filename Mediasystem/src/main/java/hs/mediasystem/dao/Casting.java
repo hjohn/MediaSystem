@@ -2,10 +2,11 @@ package hs.mediasystem.dao;
 
 import hs.mediasystem.db.AnnotatedRecordMapper;
 import hs.mediasystem.db.Column;
+import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.db.Table;
 
 @Table(name = "castings")
-public class Casting {
+public class Casting extends DatabaseObject {
 
   @Column(name = "persons_id")
   private Person person;

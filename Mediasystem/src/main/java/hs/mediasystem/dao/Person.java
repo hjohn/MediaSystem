@@ -3,6 +3,7 @@ package hs.mediasystem.dao;
 import hs.mediasystem.db.AnnotatedRecordMapper;
 import hs.mediasystem.db.Column;
 import hs.mediasystem.db.Database;
+import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
 
@@ -14,7 +15,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 @Table(name = "persons")
-public class Person {
+public class Person extends DatabaseObject {
 
   @Id
   private Integer id;

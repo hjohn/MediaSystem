@@ -1,13 +1,15 @@
 package hs.mediasystem.dao;
 
+import hs.mediasystem.db.AnnotatedRecordMapper;
 import hs.mediasystem.db.Column;
+import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
 
 import java.util.Date;
 
 @Table(name = "identifiers")
-public class Identifier {
+public class Identifier extends DatabaseObject {
   /**
    * MatchType enum, in order of certainty
    */
@@ -90,6 +92,7 @@ public class Identifier {
   }
 
   public MediaData getMediaData() {
+    mediaData = AnnotatedRecordMapper.fetch(mediaData);
     return mediaData;
   }
 
