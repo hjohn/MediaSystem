@@ -24,7 +24,7 @@ public class MediaData extends DefaultPersistable<MediaData> {
   @Column
   private String uri;
 
-  @Column
+  @Column(name = {"filelength", "filetime", "filecreatetime", "hash", "oshash"})
   private MediaId mediaId;
 
   public String getUri() {
