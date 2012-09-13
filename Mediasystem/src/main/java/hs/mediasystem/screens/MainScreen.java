@@ -13,6 +13,10 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -38,7 +42,7 @@ public class MainScreen extends BorderPane {
 
   private final StackPane menuBox;
 
-  private Button lastSelected;
+  private final ObjectProperty<Button> lastSelected = new SimpleObjectProperty<>();
 
   public MainScreen(final ProgramController controller) {
     final PluginTracker<MainMenuExtension> tracker = new PluginTracker<>(controller.getBundleContext(), MainMenuExtension.class);
@@ -112,7 +116,7 @@ public class MainScreen extends BorderPane {
               handleButtonFocus(focusGained, buttonIndex);
 
               if(focusGained) {
-                lastSelected = button;
+                lastSelected.set(button);
               }
             }
           });
@@ -129,6 +133,20 @@ public class MainScreen extends BorderPane {
           getStyleClass().add("menu-scroll-box");
           getChildren().addAll(buttons);
         }});
+
+        lastSelected.addListener(new ChangeListener<Button>() {
+          @Override
+          public void changed(ObservableValue<? extends Button> observableValue, Button old, Button current) {
+            centerButtonsIfNeeded(current);
+          }
+        });
+
+        menuBox.needsLayoutProperty().addListener(new ChangeListener<Object>() {
+          @Override
+          public void changed(ObservableValue<? extends Object> observableValue, Object old, Object current) {
+            centerButtonsIfNeeded(lastSelected.get());
+          }
+        });
       }
     });
 
@@ -145,8 +163,8 @@ public class MainScreen extends BorderPane {
 
   @Override
   public void requestFocus() {
-    if(lastSelected != null) {
-      lastSelected.requestFocus();
+    if(lastSelected.get() != null) {
+      lastSelected.get().requestFocus();
     }
     else {
       if(!buttons.isEmpty()) {
@@ -155,17 +173,11 @@ public class MainScreen extends BorderPane {
     }
   }
 
-  private void handleButtonFocus(final boolean focused, final int buttonIndex) {
-    if(buttonIndex >= buttons.size()) {
-      return;
-    }
-
-    Button b = buttons.get(buttonIndex);
-
-    if(focused) {
+  private void centerButtonsIfNeeded(Button selectedButton) {
+    if(selectedButton != null) {
       Timeline timeline = new Timeline();
 
-      Point2D buttonCenter = b.localToScene(b.getWidth() / 2, 0);
+      Point2D buttonCenter = selectedButton.localToScene(selectedButton.getWidth() / 2, 0);
       Point2D boxCenter = menuBox.localToScene(menuBox.getLayoutBounds().getWidth() / 2, 0);
       double distanceToCenter = boxCenter.getX() - buttonCenter.getX();
 
@@ -177,6 +189,14 @@ public class MainScreen extends BorderPane {
 
       timeline.play();
     }
+  }
+
+  private void handleButtonFocus(final boolean focused, final int buttonIndex) {
+    if(buttonIndex >= buttons.size()) {
+      return;
+    }
+
+    Button b = buttons.get(buttonIndex);
 
     final Timeline timeline = timelines.get(buttonIndex);
     final StackPane sp = stackPanes.get(buttonIndex);
