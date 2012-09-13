@@ -51,28 +51,29 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
 
       @SuppressWarnings("unchecked")
       Class<DataTypeConverter<Object, Object>> dataTypeConverterClass = (Class<DataTypeConverter<Object, Object>>)(column == null ? DefaultConverter.class : column.converterClass());
-      String[] columnNames = column == null ? null : column.name();
-
-      if(columnNames == null || columnNames.length == 0) {
-        columnNames = new String[] {accessor.getName()};
-      }
-
-      for(int i = 0; i < columnNames.length; i++) {
-        columnNames[i] = columnNames[i].toLowerCase();
-      }
 
       if(id != null && idColumn != null) {
         throw new IllegalStateException("only one @Id annotation allowed: " + cls);
       }
-      else if(id != null) {
-        idColumn = new Column(columnNames, accessor, dataTypeConverterClass);
+      if(accessor.getType().getAnnotation(Embeddable.class) != null) {
+        int embeddableColumnCount = getAnnotatedAccessors(accessor.getType(), null, EmbeddableColumn.class).size();
+
+        if(column == null || column.name() == null || column.name().length != embeddableColumnCount) {
+          throw new IllegalArgumentException("Column annotation for Embeddable field '" + accessor.getName() + "' missing or must specify same number of column names (" + embeddableColumnCount + ") as the embeddable object: " + cls);
+        }
+      }
+
+      Column c = new Column(column, accessor, dataTypeConverterClass);
+
+      if(id != null) {
+        idColumn = c;
       }
       else if(column != null) {
-        columns.add(new Column(columnNames, accessor, dataTypeConverterClass));
+        columns.add(c);
       }
 
       if(isRelation(accessor.getType())) {
-        relations.put(accessor.getType(), columnNames);
+        relations.put(accessor.getType(), c.getNames());
       }
     }
 
@@ -473,9 +474,16 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     private final Accessor accessor;
     private final DataTypeConverter<Object, Object> dataTypeConverter;
 
-    public Column(String[] names, Accessor accessor, Class<DataTypeConverter<Object, Object>> dataTypeConverterClass) {
-      this.names = names;
+    public Column(hs.mediasystem.db.Column column, Accessor accessor, Class<DataTypeConverter<Object, Object>> dataTypeConverterClass) {
       this.accessor = accessor;
+
+      String[] names = column == null ? null : column.name();
+
+      this.names = names == null || names.length == 0 ? new String[] {accessor.getName()} : names;
+
+      for(int i = 0; i < this.names.length; i++) {
+        this.names[i] = this.names[i].toLowerCase();
+      }
 
       try {
         this.dataTypeConverter = dataTypeConverterClass.newInstance();
