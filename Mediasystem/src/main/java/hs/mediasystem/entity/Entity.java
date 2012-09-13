@@ -14,9 +14,11 @@ import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -271,6 +273,24 @@ public class Entity<T> {
 
       @Override
       public int get() {
+        callEnricher();
+        return super.get();
+      }
+    };
+  }
+
+  protected FloatProperty floatProperty() {
+    return new SimpleFloatProperty() {
+      @Override
+      protected void invalidated() {
+        if(persister != null) {
+          persister.queueAsDirty(self());
+          get();
+        }
+      }
+
+      @Override
+      public float get() {
         callEnricher();
         return super.get();
       }
