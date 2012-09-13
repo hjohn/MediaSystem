@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,7 +20,7 @@ import java.util.regex.Pattern;
  *
  * <code>System.out.println("Hello World");</code><p>
  * becomes:<p>
- * <code>[FINE 10-07-2007 10:54:15.274] Hello World&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- com.example.logging.Hello.main(Hello.java:7)<p>
+ * <code>[FINE 10-07-2007 10:54:15.274] Hello World&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- com.example.logging.Hello.main(Hello.java:7)</code><p>
  * Lines can be prefixed with the standard Log Level prefixes found in {@link Level}, for example:<p>
  * <code>System.out.println("[WARNING] Hello World");</code><p>
  */
@@ -33,7 +34,7 @@ public class Log {
 
     if(finalLinePrinter == null) {
       finalLinePrinter = new LinePrinter() {
-        private final DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd HH:mm:ss.SSS");
+        private final DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd HH:mm:ss.SSS", Locale.ROOT);
 
         @Override
         public void print(PrintStream printStream, Level level, String text, String method) {

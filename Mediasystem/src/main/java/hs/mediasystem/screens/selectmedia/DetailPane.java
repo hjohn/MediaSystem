@@ -20,7 +20,7 @@ public abstract class DetailPane extends StackPane {
   private final ObjectProperty<Object> content = new SimpleObjectProperty<>();
   public ObjectProperty<Object> contentProperty() { return content; }
 
-  private final DecoratablePane decoratablePane = new DecoratablePane();
+  private final DecoratablePane decoratablePane = new DecoratablePane(content);
 
   public DetailPane(BundleContext bundleContext) {
     getStylesheets().add("select-media/detail-pane.css");
@@ -64,11 +64,15 @@ public abstract class DetailPane extends StackPane {
    */
   protected abstract void initialize(DecoratablePane decoratablePane);
 
-  public class DecoratablePane extends AreaPane {
+  public static class DecoratablePane extends AreaPane {
     private final ObjectProperty<Object> decoratorContent = new SimpleObjectProperty<>();
     public ObjectProperty<Object> decoratorContentProperty() { return decoratorContent; }
 
-    private final ObjectBinding<Object> finalContent = Bindings.when(decoratorContent.isNull()).then(content).otherwise(decoratorContent);
+    private final ObjectBinding<Object> finalContent;
     public ObjectBinding<Object> finalContentBinding() { return finalContent; }
+
+    public DecoratablePane(ObjectProperty<Object> content) {
+      this.finalContent = Bindings.when(decoratorContent.isNull()).then(content).otherwise(decoratorContent);
+    }
   }
 }

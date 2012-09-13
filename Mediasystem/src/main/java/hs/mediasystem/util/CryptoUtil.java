@@ -62,7 +62,7 @@ public class CryptoUtil {
     byte[] result = new byte[len];
 
     for(int i = 0; i < len; i++) {
-      result[i] = Integer.valueOf(hexString.substring(2 * i, 2 * i + 2), 16).byteValue();
+      result[i] = (byte)Integer.parseInt(hexString.substring(2 * i, 2 * i + 2), 16);
     }
 
     return result;

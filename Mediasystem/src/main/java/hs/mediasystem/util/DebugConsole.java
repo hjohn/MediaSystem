@@ -9,7 +9,7 @@ public class DebugConsole {
   private static final Map<String, CommandCallback> COMMANDS = new HashMap<>();
   private static LineNumberReader reader;
 
-  public static void initialize() {
+  public synchronized static void initialize() {
     if(reader == null) {
       reader = new LineNumberReader(new InputStreamReader(System.in));
 

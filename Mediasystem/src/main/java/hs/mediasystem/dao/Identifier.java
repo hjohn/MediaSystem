@@ -13,27 +13,27 @@ public class Identifier {
    */
   public enum MatchType {
     /**
-     * Matched manually by user
+     * Matched manually by user.
      */
     MANUAL,
 
     /**
-     * Matched directly by a provider specific id (like an imdbid parsed from file name)
+     * Matched directly by a provider specific id (like an imdbid parsed from file name).
      */
     ID,
 
     /**
-     * Matched by a hash calculated over the content of a file
+     * Matched by a hash calculated over the content of a file.
      */
     HASH,
 
     /**
-     * Matched on name and release year
+     * Matched on name and release year.
      */
     NAME_AND_YEAR,
 
     /**
-     * Matched on name only
+     * Matched on name only.
      */
     NAME
   }
