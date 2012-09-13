@@ -12,6 +12,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.IntegerBinding;
+import javafx.beans.binding.LongBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableMap;
@@ -67,6 +68,33 @@ public class MapBindings {
         Object obj = helper.computeValue();
 
         return obj instanceof Number ? ((Number)obj).intValue() : 0;
+      }
+    };
+  }
+
+  public static LongBinding selectLong(final ObservableValue<?> root, final Object... steps) {
+    return new LongBinding() {
+      private final Helper helper;
+
+      {
+        helper = new Helper(this, root, steps);
+      }
+
+      @Override
+      public void dispose() {
+        helper.unregisterListeners();
+      }
+
+      @Override
+      protected void onInvalidating() {
+        helper.unregisterListeners();
+      }
+
+      @Override
+      protected long computeValue() {
+        Object obj = helper.computeValue();
+
+        return obj instanceof Number ? ((Number)obj).longValue() : 0;
       }
     };
   }
