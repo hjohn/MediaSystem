@@ -87,7 +87,7 @@ public class Activator extends DependencyActivatorBase {
         @Override
         public Map<String, Object> getCriteria(MediaItem mediaItem) {
           Media<?> media = mediaItem.getMedia();
-          MediaData mediaData = mediaItem.get(MediaData.class);
+          MediaData mediaData = mediaItem.mediaData.get();
 
           Map<String, Object> criteria = new HashMap<>();
 

@@ -1,7 +1,6 @@
 package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.beans.AsyncImageProperty;
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeCell;
@@ -42,9 +41,9 @@ public class BannerCell extends HBox implements MediaNodeCell {
       final AsyncImageProperty asyncImageProperty = new AsyncImageProperty();
       final StringProperty titleProperty = new SimpleStringProperty();
 
-      ObjectBinding<ImageHandle> banner = MapBindings.select(mediaNode.dataMapProperty(), Media.class, "banner");
+      ObjectBinding<ImageHandle> banner = MapBindings.select(mediaNode.media, "banner");
 
-      binder.bind(titleProperty, MapBindings.selectString(mediaNode.dataMapProperty(), Media.class, "title"));
+      binder.bind(titleProperty, MapBindings.selectString(mediaNode.media, "title"));
       binder.bind(asyncImageProperty.imageHandleProperty(), banner);
 
       title.minHeightProperty().bind(minWidthProperty().multiply(140).divide(758));

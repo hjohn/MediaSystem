@@ -16,8 +16,8 @@ public class MediaItemFormatter {
 
   public static StringBinding releaseYearBinding(final MediaNode node) {
     return new StringBinding() {
-      final ObjectBinding<Date> selectReleaseDate = MapBindings.select(node.dataMapProperty(), Media.class, "releaseDate");
-      final ObjectBinding<Integer> selectReleaseYear = MapBindings.select(node.dataMapProperty(), Media.class, "releaseYear");
+      final ObjectBinding<Date> selectReleaseDate = MapBindings.select(node.media, "releaseDate");
+      final ObjectBinding<Integer> selectReleaseYear = MapBindings.select(node.media, "releaseYear");
 
       {
         bind(selectReleaseDate, selectReleaseYear);

@@ -1,6 +1,5 @@
 package hs.mediasystem.screens.selectmedia;
 
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.util.GridPaneUtil;
@@ -40,7 +39,7 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
     final StackPane listPaneContainer = new StackPane();
     final DetailPane detailPane = createDetailPane(bundleContext);
 
-    detailPane.contentProperty().bind(MapBindings.select(listPane.mediaNodeBinding(), "dataMap", Media.class));
+    detailPane.contentProperty().bind(MapBindings.select(listPane.mediaNodeBinding(), "media"));
 
     listPaneContainer.getStyleClass().add("box-content");
     detailPane.getStyleClass().add("box-content");

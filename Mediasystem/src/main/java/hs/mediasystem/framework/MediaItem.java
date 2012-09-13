@@ -4,41 +4,25 @@ import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.entity.Entity;
 import hs.mediasystem.entity.SimpleEntityProperty;
-import hs.mediasystem.persist.Persistable;
-import hs.mediasystem.persist.Persister;
-
-import java.util.HashMap;
-
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableMap;
 
 public class MediaItem extends Entity<MediaItem> {
   public final SimpleEntityProperty<MediaData> mediaData = entity("mediaData");
   public final SimpleEntityProperty<Identifier> identifier = entity("identifier");
-
-  private final ObservableMap<Class<?>, Object> data = FXCollections.observableMap(new HashMap<Class<?>, Object>());
-
-  private final ObjectProperty<ObservableMap<Class<?>, Object>> dataMap = new SimpleObjectProperty<>(data);
-  public ObjectProperty<ObservableMap<Class<?>, Object>> dataMapProperty() { return dataMap; }
+  public final ObjectProperty<Media<?>> media = object("media");
 
   private final MediaTree mediaTree;
   private final String uri;
   private final String mediaType;
 
-  public MediaItem(MediaTree mediaTree, String uri, Object... data) {
+  public MediaItem(MediaTree mediaTree, String uri, Media<?> media) {
     assert uri != null;
 
     this.uri = uri;
     this.mediaTree = mediaTree;
-
-    for(Object o : data) {
-      add(o);
-    }
-
+    this.media.set(media);
     this.mediaType = getMedia().getClass().getSimpleName();
 
     mediaData.addListener(new ChangeListener<MediaData>() {
@@ -51,31 +35,16 @@ public class MediaItem extends Entity<MediaItem> {
     });
   }
 
-  private void add(Object o) {
-    if(o instanceof Persistable) {
-      @SuppressWarnings("unchecked")
-      Persister<Object> persister = (Persister<Object>)PersisterProvider.getPersister(o.getClass());
-      @SuppressWarnings("unchecked")
-      Persistable<Object> persistable = (Persistable<Object>)o;
-      persistable.setPersister(persister);
-    }
-
-    Class<? extends Object> cls = o.getClass();
-    do {
-      data.put(cls, o);
-      cls = cls.getSuperclass();
-    } while(cls != null);
-  }
-
-  public <T> T get(Class<T> cls) {
-    @SuppressWarnings("unchecked")
-    T t = (T)data.get(cls);
-
-    return t;
+  /**
+   * @param cls used for type specification only
+   */
+  @SuppressWarnings("unchecked")
+  public <T extends Media<T>> T get(Class<T> cls) {
+    return (T)getMedia();
   }
 
   public Media<?> getMedia() {
-    return get(Media.class);
+    return media.get();
   }
 
   public String getTitle() {

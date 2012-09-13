@@ -1,7 +1,6 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.beans.AsyncImageProperty;
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.Player;
@@ -53,7 +52,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
 
   private final GridPane detailsOverlay = GridPaneUtil.create(new double[] {5, 20, 5, 65, 5}, new double[] {45, 50, 5});
 
-  private final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaItem, "dataMap", Media.class, "image");
+  private final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaItem, "media", "image");
   private final AsyncImageProperty poster = new AsyncImageProperty();
 
   private final PlaybackInfoBorders borders = new PlaybackInfoBorders();
@@ -115,12 +114,12 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
         getChildren().add(new VBox() {{
           HBox.setHgrow(this, Priority.ALWAYS);
           getChildren().add(new Label() {{
-            textProperty().bind(MapBindings.selectString(mediaItem, "dataMap", Media.class, "title"));
+            textProperty().bind(MapBindings.selectString(mediaItem, "media", "title"));
             getStyleClass().add("video-title");
             setEffect(SpecialEffects.createNeonEffect(64));
           }});
           getChildren().add(new Label() {{
-            textProperty().bind(MapBindings.selectString(mediaItem, "dataMap", Media.class, "subtitle"));
+            textProperty().bind(MapBindings.selectString(mediaItem, "media", "subtitle"));
             getStyleClass().add("video-subtitle");
           }});
         }});

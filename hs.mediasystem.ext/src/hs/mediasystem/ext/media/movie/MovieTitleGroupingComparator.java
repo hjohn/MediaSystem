@@ -22,8 +22,8 @@ public class MovieTitleGroupingComparator implements Comparator<MediaItem> {
       result = Integer.compare(s1, s2);
 
       if(result == 0) {
-        Media<?> media1 = o1.get(Media.class);
-        Media<?> media2 = o2.get(Media.class);
+        Media<?> media1 = o1.getMedia();
+        Media<?> media2 = o2.getMedia();
 
         result = media1.subtitle.get().compareTo(media2.subtitle.get());
       }

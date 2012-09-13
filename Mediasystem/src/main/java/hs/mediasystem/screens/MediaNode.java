@@ -17,13 +17,11 @@ import javafx.util.Callback;
 
 public class MediaNode {
   public final SimpleEntityProperty<MediaData> mediaData;
+  public final ObjectProperty<Media<?>> media = new SimpleObjectProperty<>();
 
   private MediaItem mediaItem;
 
   public MediaItem getMediaItem() { return mediaItem; }
-
-  private final ObjectProperty<ObservableMap<Class<?>, Object>> dataMap;
-  public ObjectProperty<ObservableMap<Class<?>, Object>> dataMapProperty() { return dataMap; }
 
   private final String id;
   private final String shortTitle;
@@ -39,7 +37,7 @@ public class MediaNode {
     this.id = mediaItem.getId();
     this.mediaItem = mediaItem;
     this.mediaData = mediaItem.mediaData;
-    this.dataMap = mediaItem.dataMapProperty();
+    this.media.set(mediaItem.getMedia());
 
     this.shortTitle = "";
     this.isLeaf = true;
@@ -53,7 +51,6 @@ public class MediaNode {
     assert !id.contains(":");
 
     ObservableMap<Class<?>, Object> data = FXCollections.observableHashMap();
-    this.dataMap = new SimpleObjectProperty<>(data);
 
     data.put(Media.class, media);
 
@@ -61,6 +58,7 @@ public class MediaNode {
     this.mediaData = new SimpleEntityProperty<>(this, "mediaData");
     this.showTopLevelExpanded = false;
     this.shortTitle = shortTitle == null ? media.title.get() : shortTitle;
+    this.media.set(media);
 
     this.isLeaf = false;
     this.dataType = Media.class;
@@ -180,7 +178,7 @@ public class MediaNode {
   }
 
   public Media<?> getMedia() {
-    return (Media<?>)dataMap.get().get(Media.class);
+    return media.get();
   }
 
   @Override

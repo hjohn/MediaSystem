@@ -11,8 +11,8 @@ public class ChronologicalMediaItemComparator implements Comparator<MediaItem> {
 
   @Override
   public int compare(MediaItem o1, MediaItem o2) {
-    Media<?> m1 = o1.get(Media.class);
-    Media<?> m2 = o2.get(Media.class);
+    Media<?> m1 = o1.getMedia();
+    Media<?> m2 = o2.getMedia();
     Date d1 = m1.releaseDate.get() == null ? MIN_DATE : m1.releaseDate.get();
     Date d2 = m2.releaseDate.get() == null ? MIN_DATE : m2.releaseDate.get();
 
