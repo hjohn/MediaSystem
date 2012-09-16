@@ -1,7 +1,11 @@
 
 .root {
-  -c-base: rgb(173, 216, 230);
+  /* -c-(base|text|border|fill|bg)[-group][-description] */
   
+  -c-base: rgb(173, 216, 230);
+  -c-base-50: rgba(173, 216, 230, 0.5);
+  -c-base-25: rgba(173, 216, 230, 0.75);
+
   -c-text: -c-base;
   -c-text-highlight: derive(-c-base, +75%);
   -c-text-focused: derive(-c-base, +75%);
@@ -9,16 +13,18 @@
   -c-text-watermark: rgba(173, 216, 230, 0.1);
   
   -c-shadow-highlight: derive(-c-base, -50%);
-  
-  -c-border-highlight: -c-text-highlight;
+
+  -c-border-tab: derive(-c-base, -50%);
+  -c-border-highlight: derive(-c-base, +75%);
   -c-border-dialog: -c-base;
-  
+
   -c-fill-dark: derive(-c-base, -75%);
 
   -c-star: yellow;
   -c-star-disabled: gray;
 
   -c-bg-dialog: rgba(173, 216, 230, 0.2);
+  -c-bg-dialog-highlight: derive(-c-base-25, -75%);
   -c-bg-transparent: rgba(0, 0, 0, 0.66);
 
   color-main: -c-base;
@@ -160,3 +166,37 @@
   -fx-stroke: -c-star-disabled;
 }
 
+.tab-pane {
+  -fx-skin: "hs.mediasystem.HackedTabPaneSkin";
+}
+
+.tab-pane .tab-header-area .tab-header-background {
+   -fx-background-color: transparent;
+}
+
+.tab-pane .tab-content-area {
+  -fx-border-color: -c-border-tab;
+  -fx-border-width: 1 1 1 1;
+  -fx-background-color: -c-bg-dialog-highlight;
+  -fx-padding: 10 10 10 10;
+}
+
+.tab {
+  -fx-border-color: derive(-c-border-tab, -33%);
+  -fx-border-width: 1 1 0 1;
+  -fx-border-radius: 5 5 0 0;
+  -fx-background-color: derive(-c-bg-dialog-highlight, -33%);
+}
+
+.tab:selected {
+  -fx-border-color: -c-border-tab;
+  -fx-background-color: -c-bg-dialog-highlight;
+}
+
+.tab .tab-label {
+  -fx-text-fill: -c-text;
+}
+
+.tab:selected .tab-label {
+  -fx-text-fill: -c-text-focused;
+}
