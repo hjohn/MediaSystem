@@ -1,7 +1,9 @@
 package hs.mediasystem.framework;
 
 import hs.mediasystem.dao.Item;
+import hs.mediasystem.dao.ProviderId;
 import hs.mediasystem.dao.Source;
+import hs.mediasystem.db.Database.Transaction;
 import hs.mediasystem.entity.EnrichCallback;
 import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.Entity;
@@ -80,6 +82,40 @@ public class Media<T extends Media<T>> extends Entity<T> {
     })
     .build()
   );
+
+  public final ObjectProperty<ObservableList<Identifier>> identifiers = list(new EnricherBuilder<T, List<Identifier>>(List.class)
+    .require(item)
+    .enrich(new EnrichCallback<List<Identifier>>() {
+      @Override
+      public List<Identifier> enrich(Object... parameters) {
+        List<Identifier> results = new ArrayList<>();
+        Item item = (Item)parameters[0];
+
+        try(Transaction transaction = item.getDatabasse().beginTransaction()) {
+          ProviderId providerId = item.getProviderId();
+
+          for(hs.mediasystem.dao.Identifier identifier : transaction.select(hs.mediasystem.dao.Identifier.class, "mediatype=? AND provider=? AND providerid=?", providerId.getType(), providerId.getProvider(), providerId.getId())) {
+            Identifier i = new Identifier();
+
+            i.dbIdentifier.set(identifier);
+            i.mediaData.set(new MediaData(identifier.getMediaData()));
+
+            results.add(i);
+          }
+        }
+
+        return results;
+      }
+    })
+    .finish(new FinishEnrichCallback<List<Identifier>>() {
+      @Override
+      public void update(List<Identifier> result) {
+        identifiers.set(FXCollections.observableList(result));
+      }
+    })
+    .build()
+  );
+
 
   public Media(String initialTitle, String initialSubtitle, Integer initialReleaseYear) {
     title.set(initialTitle == null ? "" : initialTitle);
