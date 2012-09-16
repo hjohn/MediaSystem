@@ -10,10 +10,10 @@ import javafx.beans.value.ObservableValue;
 
 public class Movie extends Media<Movie> {
   public final ObjectProperty<Integer> sequence = new SimpleObjectProperty<>();
-  public final StringProperty language = string();
-  public final StringProperty tagLine = string();
-  public final StringProperty imdbNumber = string();
-  public final StringProperty groupTitle = string();
+  public final StringProperty language = stringProperty();
+  public final StringProperty tagLine = stringProperty();
+  public final StringProperty imdbNumber = stringProperty();
+  public final StringProperty groupTitle = stringProperty();
 
   public Movie(String groupTitle, Integer sequence, String subtitle, Integer releaseYear, String imdb) {
     super(createTitle(groupTitle, sequence), subtitle, releaseYear);

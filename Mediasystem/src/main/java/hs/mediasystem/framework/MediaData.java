@@ -11,7 +11,7 @@ import javafx.beans.value.ObservableValue;
 public class MediaData extends Entity<MediaData> {
   public final ObjectProperty<hs.mediasystem.dao.MediaData> dbMediaData = object("dbMediaData");
 
-  public final StringProperty uri = string();
+  public final StringProperty uri = stringProperty();
   public final LongProperty fileLength = longProperty();
   public final BooleanProperty viewed = booleanProperty();
 

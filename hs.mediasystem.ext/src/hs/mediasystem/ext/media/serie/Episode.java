@@ -13,7 +13,7 @@ public class Episode extends Media<Episode> {
   public final ObjectProperty<Integer> season = object("season");
   public final ObjectProperty<Integer> episode = object("episode");
   public final ObjectProperty<Integer> endEpisode = object("endEpisode");
-  public final StringProperty episodeRange = string();
+  public final StringProperty episodeRange = stringProperty();
 
   public Episode(final Serie serie, String episodeName, final Integer season, final Integer episode, final Integer endEpisode) {
     super(episodeName == null ? createTitle(serie, season, episode, endEpisode) : episodeName);

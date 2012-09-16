@@ -20,9 +20,9 @@ import javafx.collections.ObservableList;
 public class Person extends Entity<Person> {
   public final ObjectProperty<hs.mediasystem.dao.Person> personRecord = object("personRecord");
 
-  public final StringProperty name = string();
-  public final StringProperty birthPlace = string();
-  public final StringProperty biography = string();
+  public final StringProperty name = stringProperty();
+  public final StringProperty birthPlace = stringProperty();
+  public final StringProperty biography = stringProperty();
   public final ObjectProperty<Date> birthDate = object("birthDate");
   public final ObjectProperty<ImageHandle> photo = object("photo");
 

@@ -4,10 +4,10 @@ import hs.mediasystem.framework.Media;
 import javafx.beans.property.StringProperty;
 
 public class Movie extends Media<Movie> {
-  public final StringProperty uri = string();
-  public final StringProperty name = string();
-  public final StringProperty year = string();
-  public final StringProperty id = string();
-  public final StringProperty season = string();
-  public final StringProperty episode = string();
+  public final StringProperty uri = stringProperty();
+  public final StringProperty name = stringProperty();
+  public final StringProperty year = stringProperty();
+  public final StringProperty id = stringProperty();
+  public final StringProperty season = stringProperty();
+  public final StringProperty episode = stringProperty();
 }

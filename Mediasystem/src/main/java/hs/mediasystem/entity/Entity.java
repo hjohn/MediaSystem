@@ -247,7 +247,7 @@ public class Entity<T> {
     };
   }
 
-  protected StringProperty string(String initialValue) {
+  protected StringProperty stringProperty(String initialValue) {
     return new SimpleStringProperty(initialValue) {
       @Override
       protected void invalidated() {
@@ -264,11 +264,11 @@ public class Entity<T> {
     };
   }
 
-  protected StringProperty string() {
-    return string(null);
+  protected StringProperty stringProperty() {
+    return stringProperty(null);
   }
 
-  protected IntegerProperty integer() {
+  protected IntegerProperty integerProperty() {
     return new SimpleIntegerProperty() {
       @Override
       protected void invalidated() {

@@ -28,15 +28,15 @@ import javafx.collections.ObservableList;
 public class Media<T extends Media<T>> extends Entity<T> {
   public final ObjectProperty<Item> item = object("item");
 
-  public final StringProperty titleWithContext = string();
-  public final StringProperty title = string();
-  public final StringProperty subtitle = string("");
-  public final StringProperty description = string();
+  public final StringProperty titleWithContext = stringProperty();
+  public final StringProperty title = stringProperty();
+  public final StringProperty subtitle = stringProperty("");
+  public final StringProperty description = stringProperty();
   public final ObjectProperty<Date> releaseDate = object("releaseDate");
   public final ObjectProperty<Integer> releaseYear = new SimpleObjectProperty<>();
   public final ObjectProperty<String[]> genres = object("genres");
   public final DoubleProperty rating = doubleProperty();
-  public final IntegerProperty runtime = integer();
+  public final IntegerProperty runtime = integerProperty();
 
   public final ObjectProperty<ImageHandle> image = object("image");
   public final ObjectProperty<ImageHandle> background = object("background");
