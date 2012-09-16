@@ -27,6 +27,14 @@ public class VLCPlayerFactory implements PlayerFactory {
     if(main != null) {
       NativeLibrary.addSearchPath("libvlc", main.getDefault("libvlcSearchPath", "c:/program files/VideoLAN/VLC"));
     }
+    else {
+      if(System.getProperty("os.arch").equals("x86")) {
+        NativeLibrary.addSearchPath("libvlc", "c:/program files (x86)/VideoLAN/VLC");
+      }
+      else {
+        NativeLibrary.addSearchPath("libvlc", "c:/program files/VideoLAN/VLC");
+      }
+    }
 
     List<String> args = new ArrayList<>();
     Section vlcArgsSection = ini.getSection("vlc.args");
