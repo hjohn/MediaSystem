@@ -9,10 +9,12 @@ import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;
 import hs.mediasystem.util.SpecialEffects;
+import hs.mediasystem.util.StringBinding;
 import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
@@ -112,14 +114,19 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
       setId("video-overlay_info");
       setBottom(new HBox() {{
         getChildren().add(new VBox() {{
+          final StringBinding title = MapBindings.selectString(mediaItem, "media", "title");
+          final StringBinding serieTitle = MapBindings.selectString(mediaItem, "media", "serie", "title");
+          final StringBinding subtitle = MapBindings.selectString(mediaItem, "media", "subtitle");
+
           HBox.setHgrow(this, Priority.ALWAYS);
           getChildren().add(new Label() {{
-            textProperty().bind(MapBindings.selectString(mediaItem, "media", "title"));
+
+            textProperty().bind(Bindings.when(serieTitle.isNotNull()).then(serieTitle).otherwise(title));
             getStyleClass().add("video-title");
             setEffect(SpecialEffects.createNeonEffect(64));
           }});
           getChildren().add(new Label() {{
-            textProperty().bind(MapBindings.selectString(mediaItem, "media", "subtitle"));
+            textProperty().bind(Bindings.when(serieTitle.isNotNull()).then(title).otherwise(subtitle));
             getStyleClass().add("video-subtitle");
           }});
         }});
