@@ -43,6 +43,8 @@ public class SceneUtil {
         if(newValue != null) {
           newValue.getStyleClass().add("focused");
           newValue.fireEvent(new FocusEvent(true));
+
+          System.out.println("[INFO] Focus set to: " + newValue);
         }
       }
     });
