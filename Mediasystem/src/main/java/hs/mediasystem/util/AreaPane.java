@@ -11,8 +11,8 @@ import javafx.scene.layout.StackPane;
 public class AreaPane extends StackPane {
   private final Map<Node, Double> orderMap = new WeakHashMap<>();
 
-  public boolean add(String where, double order, Node node) {
-    Pane pane = (Pane)lookup("#" + where);
+  public boolean add(String areaName, double order, Node node) {
+    Pane pane = (Pane)lookup("#" + areaName);
 
     if(pane == null) {
       return false;
@@ -33,5 +33,9 @@ public class AreaPane extends StackPane {
     orderMap.put(node, order);
 
     return true;
+  }
+
+  public boolean hasArea(String areaName) {
+    return lookup("#" + areaName) != null;
   }
 }
