@@ -324,42 +324,9 @@ public class SelectMediaPresentation implements Presentation {
           setId("action-area");
           setSpacing(2);
         }}, 2, 0);
-
-//        final Object root = rootProperty().get();
-////        final MediaItem mediaItem = mediaNode.getMediaItem();
-//
-//        if(mediaItem != null) {
-//          final MediaData mediaData = mediaItem.get(MediaData.class);
-//
-//          if(mediaData != null) {
-//            add("action-area", 1, new OptionCheckBox("Viewed") {{
-//              getStyleClass().add("initial-focus");
-//              selectedProperty().bindBidirectional(mediaData.viewedProperty());
-//            }});
-//          }
-//
-//          add("action-area", 2, new OptionButton("Reload Meta Data") {{
-//            getStyleClass().add("initial-focus");
-//            setOnAction(new EventHandler<ActionEvent>() {
-//              @Override
-//              public void handle(ActionEvent event) {
-//                System.out.println("[INFO] SelectMedia: 'Reload meta data' selected for: " + mediaItem);
-//
-//                mediaItem.reloadMetaData();
-//
-//                Media media = mediaItem.get(Media.class);
-//
-//                ImageCache.expunge(media.getBanner());
-//                ImageCache.expunge(media.getImage());
-//                ImageCache.expunge(media.getBackground());
-//              }
-//            });
-//          }});
-//        }
       }
     };
 
-    System.out.println(">>> Created detailPane, set to: " + mediaNode.getMedia());
     detailPane.contentProperty().set(mediaNode.getMedia());
 
     DialogPane dialogPane = new DialogPane() {
