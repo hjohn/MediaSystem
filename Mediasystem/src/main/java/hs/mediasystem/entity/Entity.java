@@ -13,11 +13,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -215,12 +217,15 @@ public class Entity<T> {
 
       @Override
       public P get() {
-        if(getEnricher() != null && !enricherCalled) {
+        P value = super.get();
+
+        if(value == null && getEnricher() != null && !enricherCalled) {
           enricherCalled = true;
 
           submit(true, new EnrichTask<>(self(), getEnricher()));
         }
-        return super.get();
+
+        return value;
       }
     };
   }
@@ -293,6 +298,24 @@ public class Entity<T> {
 
       @Override
       public long get() {
+        callEnricher();
+        return super.get();
+      }
+    };
+  }
+
+  protected BooleanProperty booleanProperty() {
+    return new SimpleBooleanProperty() {
+      @Override
+      protected void invalidated() {
+        if(persister != null) {
+          persister.queueAsDirty(self());
+          get();
+        }
+      }
+
+      @Override
+      public boolean get() {
         callEnricher();
         return super.get();
       }
