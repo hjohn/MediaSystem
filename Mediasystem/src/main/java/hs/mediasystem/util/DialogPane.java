@@ -105,8 +105,5 @@ public class DialogPane extends StackPane implements Dialog {
     if(initialFocusNode != null) {
       initialFocusNode.requestFocus();
     }
-    else {
-      getChildren().get(0).requestFocus();
-    }
   }
 }
