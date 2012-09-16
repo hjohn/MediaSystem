@@ -68,4 +68,10 @@
 
 .field {
   -fx-text-fill: -c-text-highlight;
+  -fx-wrap-text: true;
+}
+
+.tab {
+  -fx-padding: 0 10 0 10;
+  -fx-font-weight: bold;
 }
