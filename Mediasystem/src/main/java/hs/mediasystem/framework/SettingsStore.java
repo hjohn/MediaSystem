@@ -10,7 +10,9 @@ import java.util.Map;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -84,6 +86,15 @@ public class SettingsStore {
     });
 
     return booleanProperty;
+  }
+
+  public <T> ObjectProperty<T> getProperty(String system, PersistLevel level, String key, final StringConverter<T> stringConverter) {
+    final StringProperty valueProperty = getValueProperty(system, level, key);
+    final ObjectProperty<T> property = new SimpleObjectProperty<>(stringConverter.fromString(valueProperty.get()));
+
+    valueProperty.bindBidirectional(property, stringConverter);
+
+    return property;
   }
 
   public <T> ObservableList<T> getListProperty(String system, PersistLevel level, String key, final StringConverter<T> stringConverter) {
