@@ -48,7 +48,7 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
   }
 
   @Override
-  public void decorate() {
+  public void decorate(boolean interactive) {
     decoratablePane.getStylesheets().add("select-media/person-detail-pane.css");
 
     decoratablePane.add("title-area", 2, new Label() {{
@@ -70,7 +70,7 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
     decoratablePane.add("description-area", 5, createMiscelaneousFieldsBlock());
     decoratablePane.add("description-area", 6, createBiographyBlock());
 
-    CastingsRow castingsRow = createCastingsRow();
+    CastingsRow castingsRow = createCastingsRow(interactive);
     Pane titledCastingsRow = createTitledBlock("APPEARANCES", castingsRow, castingsRow.empty.not());
     HBox.setHgrow(titledCastingsRow, Priority.ALWAYS);
 
@@ -132,8 +132,8 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
     }};
   }
 
-  protected CastingsRow createCastingsRow() {
-    CastingsRow castingsRow = new CastingsRow(Type.APPEAREANCES);
+  protected CastingsRow createCastingsRow(boolean interactive) {
+    CastingsRow castingsRow = new CastingsRow(Type.APPEAREANCES, interactive);
 
     castingsRow.castings.bind(castings);
     castingsRow.onCastingSelected.set(new EventHandler<CastingSelectedEvent>() {

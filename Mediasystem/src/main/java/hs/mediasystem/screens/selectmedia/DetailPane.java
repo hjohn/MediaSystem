@@ -22,9 +22,11 @@ public abstract class DetailPane extends StackPane {
 
   private final DecoratablePane decoratablePane = new DecoratablePane(content);
 
-  public DetailPane(BundleContext bundleContext) {
+  public DetailPane(BundleContext bundleContext, final boolean interactive) {
     getStylesheets().add("select-media/detail-pane.css");
     getStyleClass().add("detail-pane");
+
+    setMouseTransparent(!interactive);
 
     detailPaneDecoratorFactoryTracker = new ServiceTracker<>(bundleContext, DetailPaneDecoratorFactory.class, new InheritanceDepthRanker<DetailPaneDecoratorFactory>());
 
@@ -51,7 +53,7 @@ public abstract class DetailPane extends StackPane {
           DetailPane.this.initialize(decoratablePane);
 
           decorator.dataProperty().set(current);
-          decorator.decorate();
+          decorator.decorate(interactive);
         }
       }
     });

@@ -94,7 +94,7 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
   }
 
   @Override
-  public void decorate() {
+  public void decorate(boolean interactive) {
     decoratablePane.getStylesheets().add("select-media/media-detail-pane.css");
 
     decoratablePane.add("title-area", 1, new Label() {{
@@ -127,7 +127,7 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
     decoratablePane.add("description-area", 6, createPlotBlock());
     decoratablePane.add("description-area", 7, createMiscelaneousFieldsBlock(createReleaseDateBlock(), createRuntimeBlock()));
 
-    CastingsRow castingsRow = createCastingsRow();
+    CastingsRow castingsRow = createCastingsRow(interactive);
     Pane titledCastingsRow = createTitledBlock("CAST", castingsRow, castingsRow.empty.not());
     HBox.setHgrow(titledCastingsRow, Priority.ALWAYS);
 
@@ -241,8 +241,8 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
     }};
   }
 
-  protected CastingsRow createCastingsRow() {
-    CastingsRow castingsRow = new CastingsRow(Type.CAST);
+  protected CastingsRow createCastingsRow(boolean interactive) {
+    CastingsRow castingsRow = new CastingsRow(Type.CAST, interactive);
 
     castingsRow.castings.bind(castings);
     castingsRow.onCastingSelected.set(new EventHandler<CastingSelectedEvent>() {

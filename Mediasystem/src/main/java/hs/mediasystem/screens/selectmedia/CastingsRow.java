@@ -25,9 +25,11 @@ public class CastingsRow extends TilePane {
   public final BooleanProperty empty = new SimpleBooleanProperty(true);
 
   private final Type type;
+  private final boolean interactive;
 
-  public CastingsRow(Type type) {
+  public CastingsRow(Type type, boolean interactive) {
     this.type = type;
+    this.interactive = interactive;
 
     getStyleClass().add("castings-row");
 
@@ -81,6 +83,8 @@ public class CastingsRow extends TilePane {
 
         if(casting.role.get().equals("Actor")) {
           CastingImage castingImage = new CastingImage();
+
+          castingImage.setFocusTraversable(interactive);
 
           if(type == Type.CAST) {
             castingImage.title.bind(casting.person.get().name);

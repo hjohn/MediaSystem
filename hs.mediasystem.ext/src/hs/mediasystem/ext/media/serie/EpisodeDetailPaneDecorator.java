@@ -19,8 +19,8 @@ public class EpisodeDetailPaneDecorator extends MediaDetailPaneDecorator {
   }
 
   @Override
-  public void decorate() {
-    super.decorate();
+  public void decorate(boolean interactive) {
+    super.decorate(interactive);
 
     decoratablePane.getStylesheets().add("select-media/episode-detail-pane.css");  // TODO move to bundle when possible
 

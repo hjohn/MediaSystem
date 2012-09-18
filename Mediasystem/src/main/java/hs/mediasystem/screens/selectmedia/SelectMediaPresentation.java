@@ -287,7 +287,7 @@ public class SelectMediaPresentation implements Presentation {
   public ObjectProperty<MediaGroup> groupSetProperty() { return groupSet; }
 
   private DialogPane createInformationDialog(final MediaNode mediaNode) {
-    final DetailPane detailPane = new DetailPane(bundleContext) {
+    final DetailPane detailPane = new DetailPane(bundleContext, true) {
       {
         getStylesheets().add("controls.css");
       }
