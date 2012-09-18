@@ -39,6 +39,7 @@ import hs.mediasystem.screens.PluginTracker;
 import hs.mediasystem.screens.Presentation;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.Setting;
+import hs.mediasystem.screens.SettingGroup;
 import hs.mediasystem.screens.StandardCell;
 import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.Option;
@@ -201,17 +202,22 @@ public class FrontEnd extends Application {
       }
     };
 
-    waitFor(PlayerFactory.class);
-
     final Injector injector = Guice.createInjector(module);
+
+    DependencyManager dm = new DependencyManager(framework.getBundleContext());
+
+    dm.add(dm.createComponent()
+      .setInterface(SettingsStore.class.getName(), null)
+      .setImplementation(injector.getInstance(SettingsStore.class))
+    );
+
+    waitFor(PlayerFactory.class);
 
     DatabaseUpdater updater = injector.getInstance(DatabaseUpdater.class);
 
     updater.updateDatabase();
 
     PersisterProvider.register(MediaData.class, injector.getInstance(MediaDataPersister.class));
-
-    DependencyManager dm = new DependencyManager(framework.getBundleContext());
 
     System.out.println("Registering components...");
 
@@ -301,11 +307,6 @@ public class FrontEnd extends Application {
     );
 
     dm.add(dm.createComponent()
-      .setInterface(SettingsStore.class.getName(), null)
-      .setImplementation(injector.getInstance(SettingsStore.class))
-    );
-
-    dm.add(dm.createComponent()
       .setInterface(MediaNodeCellProvider.class.getName(), new Hashtable<String, Object>() {{
         put("mediasystem.class", Media.class);
         put("type", MediaNodeCellProvider.Type.HORIZONTAL);
@@ -316,6 +317,11 @@ public class FrontEnd extends Application {
           return new StandardCell();
         }
       })
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(Setting.class.getName(), null)
+      .setImplementation(new SettingGroup(framework.getBundleContext(), "video", "Video", 0))
     );
 
     dm.add(dm.createComponent()
