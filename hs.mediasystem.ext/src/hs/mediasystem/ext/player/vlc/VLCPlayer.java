@@ -40,8 +40,11 @@ import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.TrackDescription;
+import uk.co.caprica.vlcj.player.direct.BufferFormat;
+import uk.co.caprica.vlcj.player.direct.BufferFormatCallback;
 import uk.co.caprica.vlcj.player.direct.DirectMediaPlayer;
 import uk.co.caprica.vlcj.player.direct.RenderCallback;
+import uk.co.caprica.vlcj.player.direct.format.RV32BufferFormat;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 import com.sun.jna.Memory;
@@ -50,9 +53,6 @@ public class VLCPlayer implements Player {
   public enum Mode {
     SEPERATE_WINDOW, CANVAS
   }
-
-  private static final int WIDTH = 1920;
-  private static final int HEIGHT = 1080;
 
   private final MediaPlayer mediaPlayer;
   private final Object canvas;
@@ -84,18 +84,29 @@ public class VLCPlayer implements Player {
       this.mediaPlayer = mp;
     }
     else {
-      javafx.scene.canvas.Canvas canvas = new javafx.scene.canvas.Canvas(WIDTH, HEIGHT);
+      final javafx.scene.canvas.Canvas canvas = new javafx.scene.canvas.Canvas(16, 16);
 
       final PixelWriter pixelWriter = canvas.getGraphicsContext2D().getPixelWriter();
       final WritablePixelFormat<ByteBuffer> byteBgraInstance = PixelFormat.getByteBgraPreInstance();
 
-      DirectMediaPlayer mp = factory.newDirectMediaPlayer("RV32", WIDTH, HEIGHT, WIDTH * 4, new RenderCallback() {
-        @Override
-        public void display(Memory memory) {
-          ByteBuffer byteBuffer = memory.getByteBuffer(0, memory.size());
-          pixelWriter.setPixels(0, 0, WIDTH, HEIGHT, byteBgraInstance, byteBuffer, WIDTH * 4);
+      DirectMediaPlayer mp = factory.newDirectMediaPlayer(
+        new BufferFormatCallback() {
+          @Override
+          public BufferFormat getBufferFormat(int width, int height) {
+            canvas.setWidth(width);
+            canvas.setHeight(height);
+
+            return new RV32BufferFormat(width, height);
+          }
+        },
+        new RenderCallback() {
+          @Override
+          public void display(DirectMediaPlayer mp, Memory[] memory, BufferFormat bufferFormat) {
+            ByteBuffer byteBuffer = memory[0].getByteBuffer(0, memory[0].size());
+            pixelWriter.setPixels(0, 0, bufferFormat.getWidth(), bufferFormat.getHeight(), byteBgraInstance, byteBuffer, bufferFormat.getPitches()[0]);
+          }
         }
-      });
+      );
 
       this.canvas = canvas;
       this.mediaPlayer = mp;
@@ -126,8 +137,8 @@ public class VLCPlayer implements Player {
       }
 
       @Override
-      public void mediaChanged(MediaPlayer mediaPlayer) {
-        System.out.println("[FINE] VLCPlayer: Event[mediaChanged]");
+      public void mediaChanged(MediaPlayer mediaPlayer, libvlc_media_t media, String mrl) {
+        System.out.println("[FINE] VLCPlayer: Event[mediaChanged] '" + mrl + "': " + media);
       }
 
       @Override
