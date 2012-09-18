@@ -9,11 +9,11 @@ public class PathStringConverter extends StringConverter<Path> {
 
   @Override
   public Path fromString(String s) {
-    return Paths.get(s);
+    return s == null ? null : Paths.get(s);
   }
 
   @Override
   public String toString(Path path) {
-    return path.toString();
+    return path == null ? null : path.toString();
   }
 }
