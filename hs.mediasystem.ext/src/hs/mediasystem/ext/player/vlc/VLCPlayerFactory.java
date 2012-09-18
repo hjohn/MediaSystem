@@ -1,17 +1,26 @@
 package hs.mediasystem.ext.player.vlc;
 
+import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.ext.player.vlc.VLCPlayer.Mode;
+import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.PlayerFactory;
+import hs.mediasystem.util.PathStringConverter;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
+import javafx.beans.property.ObjectProperty;
 
 import com.sun.jna.NativeLibrary;
 
 public class VLCPlayerFactory implements PlayerFactory {
+  private volatile SettingsStore settingsStore;
+
   private final String name;
   private final Mode mode;
 
@@ -22,19 +31,18 @@ public class VLCPlayerFactory implements PlayerFactory {
 
   @Override
   public Player create(Ini ini) {
-    Section main = ini.getSection("vlc");
+    ObjectProperty<Path> libVlcPathProperty = settingsStore.getProperty("MediaSystem:Ext:Player:VLC", PersistLevel.PERMANENT, "LibVLCPath", new PathStringConverter());
 
-    if(main != null) {
-      NativeLibrary.addSearchPath("libvlc", main.getDefault("libvlcSearchPath", "c:/program files/VideoLAN/VLC"));
-    }
-    else {
+    if(libVlcPathProperty.get() == null) {
       if(System.getProperty("os.arch").equals("x86")) {
-        NativeLibrary.addSearchPath("libvlc", "c:/program files (x86)/VideoLAN/VLC");
+        libVlcPathProperty.set(Paths.get("c:/program files (x86)/VideoLAN/VLC"));
       }
       else {
-        NativeLibrary.addSearchPath("libvlc", "c:/program files/VideoLAN/VLC");
+        libVlcPathProperty.set(Paths.get("c:/program files/VideoLAN/VLC"));
       }
     }
+
+    NativeLibrary.addSearchPath("libvlc", libVlcPathProperty.get().toString());
 
     List<String> args = new ArrayList<>();
     Section vlcArgsSection = ini.getSection("vlc.args");
