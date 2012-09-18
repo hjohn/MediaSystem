@@ -21,26 +21,18 @@ public class PathListOption extends OptionGroup {
       public List<Option> get() {
         List<Option> options = new ArrayList<>();
 
-        options.add(new OptionGroup("Add folder", new Provider<List<Option>>() {
+        SimpleObjectProperty<Path> selectedPath = new SimpleObjectProperty<>();
+
+        selectedPath.addListener(new ChangeListener<Path>() {
           @Override
-          public List<Option> get() {
-            List<Option> options = new ArrayList<>();
-            SimpleObjectProperty<Path> selectedPath = new SimpleObjectProperty<>();
-
-            selectedPath.addListener(new ChangeListener<Path>() {
-              @Override
-              public void changed(ObservableValue<? extends Path> observable, Path old, Path current) {
-                if(!paths.contains(current)) {
-                  paths.add(current);
-                }
-              }
-            });
-
-            options.add(new PathSelectOption("Select folder", selectedPath, PathSelectOption.ONLY_DIRECTORIES_FILTER));
-
-            return options;
+          public void changed(ObservableValue<? extends Path> observable, Path old, Path current) {
+            if(!paths.contains(current)) {
+              paths.add(current);
+            }
           }
-        }));
+        });
+
+        options.add(new PathOption("Add folder", selectedPath, PathSelectOption.ONLY_DIRECTORIES_FILTER));
 
         SimpleObjectProperty<Path> folderToDelete = new SimpleObjectProperty<>();
 
