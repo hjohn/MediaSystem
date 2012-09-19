@@ -29,7 +29,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.input.KeyCode;
@@ -83,7 +82,7 @@ public class ProgramController {
   private final InformationBorder informationBorder;
   private final BundleContext bundleContext;
 
-  private Canvas videoCanvas;
+  private Node videoCanvas;
 
   @Inject
   public ProgramController(Ini ini, BundleContext bundleContext, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder) {
@@ -98,8 +97,8 @@ public class ProgramController {
 
     Object displayComponent = playerPresentation == null ? null : playerPresentation.getPlayer().getDisplayComponent();
 
-    if(displayComponent instanceof Canvas) {
-      videoCanvas = (Canvas)displayComponent;
+    if(displayComponent instanceof Node) {
+      videoCanvas = (Node)displayComponent;
       videoPane.setCenter(videoCanvas);
     }
 
@@ -282,7 +281,7 @@ public class ProgramController {
     }
 
     if(videoCanvas != null) {
-      videoCanvas.getGraphicsContext2D().clearRect(0, 0, videoCanvas.getWidth(), videoCanvas.getHeight());
+      //videoCanvas.getGraphicsContext2D().clearRect(0, 0, videoCanvas.getWidth(), videoCanvas.getHeight());
       videoCanvas.setVisible(type == Location.Type.PLAYBACK);
     }
 
