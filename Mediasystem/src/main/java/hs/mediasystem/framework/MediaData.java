@@ -31,5 +31,6 @@ public class MediaData extends Entity<MediaData> {
     });
 
     this.dbMediaData.set(dbMediaData);
+    this.setPersister(PersisterProvider.getPersister(MediaData.class));
   }
 }

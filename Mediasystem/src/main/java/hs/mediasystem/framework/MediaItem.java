@@ -5,8 +5,6 @@ import hs.mediasystem.entity.SimpleEntityProperty;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 
 public class MediaItem extends Entity<MediaItem> {
   public final SimpleEntityProperty<MediaData> mediaData = entity("mediaData");
@@ -54,15 +52,6 @@ public class MediaItem extends Entity<MediaItem> {
 
     this.media.set(mediaParameter);
     this.mediaType = getMedia().getClass().getSimpleName();
-
-    mediaData.addListener(new ChangeListener<MediaData>() {
-      @Override
-      public void changed(ObservableValue<? extends MediaData> observableValue, MediaData old, MediaData current) {
-        if(current != null) {
-          current.setPersister(PersisterProvider.getPersister(MediaData.class));
-        }
-      }
-    });
   }
 
   public MediaItem(String uri, String title, Media<?> media) {
