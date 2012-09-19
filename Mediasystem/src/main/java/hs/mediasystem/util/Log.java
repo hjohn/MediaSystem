@@ -132,7 +132,7 @@ public class Log {
       for(int i = 0; i < elements.length; i++) {
         String frame = elements[i].toString();
 
-        if(frame.startsWith("java.io.PrintStream.println(") || frame.startsWith("java.util.logging.Logger.")) {
+        if(frame.startsWith("java.io.PrintStream.println(") || frame.startsWith("java.io.PrintStream.printf(") || frame.startsWith("java.util.logging.Logger.")) {
           foundLogSystem = true;
         }
         else if(foundLogSystem) {
