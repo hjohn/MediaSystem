@@ -362,7 +362,18 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
 
           createTitledBlock("MATCH ACCURACY", new Label() {{
             getStyleClass().add("field");
-            textProperty().bind(identifier.matchAccuracy.multiply(100).asString("%3.0f%%"));
+            textProperty().bind(new StringBinding() {
+              {
+                bind(identifier.matchAccuracy);
+              }
+
+              @Override
+              protected String computeValue() {
+                Float matchAccuracy = identifier.matchAccuracy.get();
+
+                return matchAccuracy == null ? "" : String.format("%3.0f%%", matchAccuracy * 100);
+              }
+            });
           }}, null)
         ));
 

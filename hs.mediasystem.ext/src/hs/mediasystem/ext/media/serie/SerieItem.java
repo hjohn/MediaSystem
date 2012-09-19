@@ -57,7 +57,7 @@ public class SerieItem extends MediaItem implements MediaRoot {
             .enrich(new EnrichCallback<Item>() {
               @Override
               public Item enrich(Object... parameters) {
-                Identifier identifier = (Identifier)parameters[0];
+                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).dbIdentifier.get();
 
                 if(identifier.getProviderId() != null) {
                   try {
@@ -75,7 +75,7 @@ public class SerieItem extends MediaItem implements MediaRoot {
             .enrich(new EnrichCallback<Item>() {
               @Override
               public Item enrich(Object... parameters) {
-                Identifier identifier = (Identifier)parameters[0];
+                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).dbIdentifier.get();
 
                 if(identifier.getProviderId() != null) {
                   try {

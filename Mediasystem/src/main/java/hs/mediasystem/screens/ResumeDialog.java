@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.util.DialogStage;
 import hs.mediasystem.util.SceneUtil;
@@ -65,15 +65,15 @@ public class ResumeDialog extends DialogStage {
   private void foundMediaData(final MediaData mediaData) {
     timeline.stop();
 
-    if(mediaData.getResumePosition() > 0) {
+    if(mediaData.resumePosition.get() > 0) {
       resumePositionFound = true;
 
       root.getChildren().clear();
-      root.getChildren().add(new Button("Resume from " + SizeFormatter.SECONDS_AS_POSITION.format(mediaData.getResumePosition())) {{
+      root.getChildren().add(new Button("Resume from " + SizeFormatter.SECONDS_AS_POSITION.format(mediaData.resumePosition.get())) {{
         setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent event) {
-            resumePosition = mediaData.getResumePosition();
+            resumePosition = mediaData.resumePosition.get();
             close();
           }
         });

@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.dao.MediaData;
+import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
@@ -183,12 +183,12 @@ public class PlaybackOverlayPresentation implements Presentation {
       long length = playerPresentation.getLength();
 
       if(length > 0) {
-        long timeViewed = totalTimeViewed + mediaData.getResumePosition() * 1000L;
+        long timeViewed = totalTimeViewed + mediaData.resumePosition.get() * 1000L;
 
         if(timeViewed >= length * 9 / 10) {  // 90% viewed?
           System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
 
-          mediaData.viewedProperty().set(true);
+          mediaData.viewed.set(true);
         }
 
         if(totalTimeViewed > 30 * 1000) {
@@ -201,7 +201,7 @@ public class PlaybackOverlayPresentation implements Presentation {
             resumePosition = position;
           }
 
-          mediaData.resumePositionProperty().set((int)(resumePosition / 1000));
+          mediaData.resumePosition.set((int)(resumePosition / 1000));
         }
       }
     }

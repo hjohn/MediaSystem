@@ -7,11 +7,6 @@ import hs.mediasystem.entity.DefaultPersistable;
 
 import java.util.Date;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-
 @Table(name = "mediadata")
 public class MediaData extends DefaultPersistable<MediaData> {
 
@@ -27,6 +22,12 @@ public class MediaData extends DefaultPersistable<MediaData> {
   @Column(name = {"filelength", "filetime", "filecreatetime", "hash", "oshash"})
   private MediaId mediaId;
 
+  @Column
+  private int resumePosition;
+
+  @Column
+  private boolean viewed;
+
   public String getUri() {
     return uri;
   }
@@ -35,52 +36,20 @@ public class MediaData extends DefaultPersistable<MediaData> {
     this.uri = uri;
   }
 
-  private final BooleanProperty viewed = new SimpleBooleanProperty() {
-//    @Override
-//    public boolean get() {
-//      queueForEnrichment();
-//      return super.get();
-//    }
-
-    @Override
-    protected void invalidated() {
-      queueAsDirty();
-      get();
-    }
-  };
-  public BooleanProperty viewedProperty() { return viewed; }
-
-  @Column
   public boolean isViewed() {
-    return viewed.get();
+    return viewed;
   }
 
   public void setViewed(boolean viewed) {
-    this.viewed.set(viewed);
+    this.viewed = viewed;
   }
 
-  private final IntegerProperty resumePosition = new SimpleIntegerProperty() {
-//    @Override
-//    public int get() {
-//      queueForEnrichment();
-//      return super.get();
-//    }
-
-    @Override
-    protected void invalidated() {
-      queueAsDirty();
-      get();
-    }
-  };
-  public IntegerProperty resumePositionProperty() { return resumePosition; }
-
-  @Column
   public int getResumePosition() {
-    return resumePosition.get();
+    return resumePosition;
   }
 
   public void setResumePosition(int resumePosition) {
-    this.resumePosition.set(resumePosition);
+    this.resumePosition = resumePosition;
   }
 
   public Integer getId() {

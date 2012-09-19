@@ -1,7 +1,5 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.dao.Identifier;
-import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.entity.Entity;
 import hs.mediasystem.entity.SimpleEntityProperty;
 import javafx.beans.binding.StringBinding;

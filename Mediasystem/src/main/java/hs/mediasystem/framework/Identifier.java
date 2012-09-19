@@ -7,7 +7,6 @@ import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.Entity;
 import hs.mediasystem.entity.FinishEnrichCallback;
 import hs.mediasystem.entity.SimpleEntityProperty;
-import javafx.beans.property.FloatProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -17,12 +16,14 @@ public class Identifier extends Entity<Identifier> {
 
   public final ObjectProperty<ProviderId> providerId = object("providerId");
   public final ObjectProperty<MatchType> matchType = object("matchType");
-  public final FloatProperty matchAccuracy = floatProperty();
+  public final ObjectProperty<Float> matchAccuracy = object("matchAccuracy");
 
   public final SimpleEntityProperty<MediaData> mediaData = entity("mediaData");
 
-  public Identifier() {
-    dbIdentifier.addListener(new ChangeListener<hs.mediasystem.dao.Identifier>() {
+  public Identifier(hs.mediasystem.dao.Identifier dbIdentifier) {
+    assert dbIdentifier != null;
+
+    this.dbIdentifier.addListener(new ChangeListener<hs.mediasystem.dao.Identifier>() {
       @Override
       public void changed(ObservableValue<? extends hs.mediasystem.dao.Identifier> observableValue, hs.mediasystem.dao.Identifier old, hs.mediasystem.dao.Identifier current) {
         providerId.set(current.getProviderId());
@@ -32,7 +33,7 @@ public class Identifier extends Entity<Identifier> {
     });
 
     mediaData.setEnricher(new EnricherBuilder<Identifier, MediaData>(MediaData.class)
-      .require(dbIdentifier)
+      .require(this.dbIdentifier)
       .enrich(new EnrichCallback<MediaData>() {
         @Override
         public MediaData enrich(Object... parameters) {
@@ -50,5 +51,7 @@ public class Identifier extends Entity<Identifier> {
       })
       .build()
     );
+
+    this.dbIdentifier.set(dbIdentifier);
   }
 }

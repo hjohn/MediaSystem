@@ -1,8 +1,6 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.IdentifierDao;
-import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.dao.MediaDataDao;
 import hs.mediasystem.dao.MediaId;
 import hs.mediasystem.entity.EnrichCallback;
@@ -28,25 +26,25 @@ public class MediaItemConfigurator {
       .enrich(new EnrichCallback<MediaData>() {
         @Override
         public MediaData enrich(Object... parameters) {
-          MediaData mediaData = mediaDataDao.getMediaDataByUri(mediaItem.getUri());
+          hs.mediasystem.dao.MediaData dbMediaData = mediaDataDao.getMediaDataByUri(mediaItem.getUri());
 
-          if(mediaData == null) {
+          if(dbMediaData == null) {
             MediaId mediaId = MediaDataDao.createMediaId(mediaItem.getUri());
 
-            mediaData = mediaDataDao.getMediaDataByHash(mediaId.getHash());
+            dbMediaData = mediaDataDao.getMediaDataByHash(mediaId.getHash());
 
-            if(mediaData == null) {
-              mediaData = new MediaData();
+            if(dbMediaData == null) {
+              dbMediaData = new hs.mediasystem.dao.MediaData();
             }
 
-            mediaData.setUri(mediaItem.getUri());  // replace uri, as it didn't match anymore
-            mediaData.setMediaId(mediaId);  // replace mediaId, even though hash matches, to update the other values just in case
-            mediaData.setLastUpdated(new Date());
+            dbMediaData.setUri(mediaItem.getUri());  // replace uri, as it didn't match anymore
+            dbMediaData.setMediaId(mediaId);  // replace mediaId, even though hash matches, to update the other values just in case
+            dbMediaData.setLastUpdated(new Date());
 
-            mediaDataDao.storeMediaData(mediaData);
+            mediaDataDao.storeMediaData(dbMediaData);
           }
 
-          return mediaData;
+          return new MediaData(dbMediaData);
         }
       })
       .finish(new FinishEnrichCallback<MediaData>() {
@@ -65,7 +63,7 @@ public class MediaItemConfigurator {
         public Identifier enrich(Object... parameters) {
           MediaData mediaData = (MediaData)parameters[0];
 
-          Identifier identifier = identifierDao.getIdentifierByMediaDataId(mediaData.getId());
+          hs.mediasystem.dao.Identifier dbIdentifier = identifierDao.getIdentifierByMediaDataId(mediaData.dbMediaData.get().getId());
 
           /*
            * It's possible this Identifier is an empty placeholder to prevent attempts at identifying a Media every time it
@@ -73,11 +71,11 @@ public class MediaItemConfigurator {
            * identification should be re-attempted.  To trigger this, null is returned.
            */
 
-          if(identifier != null && identifier.getProviderId() == null && identifier.getLastUpdated().getTime() < System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000) {
+          if(dbIdentifier != null && dbIdentifier.getProviderId() == null && dbIdentifier.getLastUpdated().getTime() < System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000) {
             return null;
           }
 
-          return identifier;
+          return dbIdentifier == null ? null : new Identifier(dbIdentifier);
         }
       })
       .enrich(new EnrichCallback<Identifier>() {
@@ -85,27 +83,27 @@ public class MediaItemConfigurator {
         public Identifier enrich(Object... parameters) {
           MediaData mediaData = (MediaData)parameters[0];
 
-          Identifier identifier = null;
+          hs.mediasystem.dao.Identifier dbIdentifier = null;
 
           try {
-            identifier = mediaIdentifier.identifyItem(mediaItem.getMedia());
+            dbIdentifier = mediaIdentifier.identifyItem(mediaItem.getMedia());
           }
           catch(IdentifyException e) {
-            identifier = new Identifier();
+            dbIdentifier = new hs.mediasystem.dao.Identifier();
           }
 
-          identifier.setMediaData(mediaData);
-          identifier.setLastUpdated(new Date());
+          dbIdentifier.setMediaData(mediaData.dbMediaData.get());
+          dbIdentifier.setLastUpdated(new Date());
 
-          Identifier existingIdentifier = identifierDao.getIdentifierByMediaDataId(mediaData.getId());
+          hs.mediasystem.dao.Identifier existingIdentifier = identifierDao.getIdentifierByMediaDataId(mediaData.dbMediaData.get().getId());
 
           if(existingIdentifier != null) {
-            identifier.setId(existingIdentifier.getId());
+            dbIdentifier.setId(existingIdentifier.getId());
           }
 
-          identifierDao.storeIdentifier(identifier);
+          identifierDao.storeIdentifier(dbIdentifier);
 
-          return identifier;
+          return new Identifier(dbIdentifier);
         }
       })
       .finish(new FinishEnrichCallback<Identifier>() {

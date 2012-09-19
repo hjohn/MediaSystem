@@ -95,9 +95,8 @@ public class Media<T extends Media<T>> extends Entity<T> {
           ProviderId providerId = item.getProviderId();
 
           for(hs.mediasystem.dao.Identifier identifier : transaction.select(hs.mediasystem.dao.Identifier.class, "mediatype=? AND provider=? AND providerid=?", providerId.getType(), providerId.getProvider(), providerId.getId())) {
-            Identifier i = new Identifier();
+            Identifier i = new Identifier(identifier);
 
-            i.dbIdentifier.set(identifier);
             i.mediaData.set(new MediaData(identifier.getMediaData()));
 
             results.add(i);

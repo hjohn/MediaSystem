@@ -1,6 +1,5 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.dao.MediaDataDao;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.persist.PersistTask;
@@ -23,7 +22,12 @@ public class MediaDataPersister implements Persister<MediaData> {
     queue.queueAsDirty(mediaData, new PersistTask() {
       @Override
       public void persist() {
-        mediaDataDao.updateMediaData(mediaData);
+        hs.mediasystem.dao.MediaData dbMediaData = mediaData.dbMediaData.get();
+
+        dbMediaData.setResumePosition(mediaData.resumePosition.get());
+        dbMediaData.setViewed(mediaData.viewed.get());
+
+        mediaDataDao.updateMediaData(dbMediaData);
       }
     });
   }

@@ -3,12 +3,12 @@ package hs.mediasystem.ext.media.serie;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.ItemsDao;
-import hs.mediasystem.dao.MediaData;
 import hs.mediasystem.dao.ProviderId;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.EntityProvider;
 import hs.mediasystem.framework.Media;
+import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.SettingsStore;
@@ -118,8 +118,8 @@ public class Activator extends DependencyActivatorBase {
           }
 
           if(mediaData != null) {
-            criteria.put(SubtitleCriteriaProvider.OPEN_SUBTITLES_HASH, mediaData.getMediaId().getOsHash());
-            criteria.put(SubtitleCriteriaProvider.FILE_LENGTH, mediaData.getMediaId().getFileLength());
+            criteria.put(SubtitleCriteriaProvider.OPEN_SUBTITLES_HASH, mediaData.osHash.get());
+            criteria.put(SubtitleCriteriaProvider.FILE_LENGTH, mediaData.fileLength.get());
           }
 
           return criteria;

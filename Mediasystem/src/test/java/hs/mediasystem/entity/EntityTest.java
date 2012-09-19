@@ -3,12 +3,11 @@ package hs.mediasystem.entity;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import hs.mediasystem.dao.Identifier;
 import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ProviderId;
-import hs.mediasystem.entity.InstanceEnricher;
 import hs.mediasystem.framework.Casting;
+import hs.mediasystem.framework.Identifier;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.Person;
 import hs.mediasystem.test.JavaFXTestCase;
@@ -90,7 +89,7 @@ public class EntityTest extends JavaFXTestCase {
     mediaItem.identifier.setEnricher(new InstanceEnricher<MediaItem, Identifier>() {
       @Override
       public Identifier enrich(MediaItem parent) {
-        return new Identifier(new ProviderId("MOVIE", "TMDB", "12256"), MatchType.HASH, 1.0f);
+        return new Identifier(new hs.mediasystem.dao.Identifier(new ProviderId("MOVIE", "TMDB", "12256"), MatchType.HASH, 1.0f));
       }
 
       @Override
