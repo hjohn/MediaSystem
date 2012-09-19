@@ -114,19 +114,19 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
       setId("video-overlay_info");
       setBottom(new HBox() {{
         getChildren().add(new VBox() {{
-          final StringBinding title = MapBindings.selectString(mediaItem, "media", "title");
-          final StringBinding serieTitle = MapBindings.selectString(mediaItem, "media", "serie", "title");
-          final StringBinding subtitle = MapBindings.selectString(mediaItem, "media", "subtitle");
+          final StringBinding serieName = MapBindings.selectString(mediaItem, "serieName");
+          final StringBinding title = MapBindings.selectString(mediaItem, "title");
+          final StringBinding subtitle = MapBindings.selectString(mediaItem, "subtitle");
 
           HBox.setHgrow(this, Priority.ALWAYS);
           getChildren().add(new Label() {{
 
-            textProperty().bind(Bindings.when(serieTitle.isNotNull()).then(serieTitle).otherwise(title));
+            textProperty().bind(Bindings.when(serieName.isNotNull()).then(serieName).otherwise(title));
             getStyleClass().add("video-title");
             setEffect(SpecialEffects.createNeonEffect(64));
           }});
           getChildren().add(new Label() {{
-            textProperty().bind(Bindings.when(serieTitle.isNotNull()).then(title).otherwise(subtitle));
+            textProperty().bind(Bindings.when(serieName.isNotNull()).then(title).otherwise(subtitle));
             getStyleClass().add("video-subtitle");
           }});
         }});

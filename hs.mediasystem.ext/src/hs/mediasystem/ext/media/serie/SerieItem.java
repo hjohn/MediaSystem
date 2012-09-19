@@ -28,7 +28,7 @@ public class SerieItem extends MediaItem implements MediaRoot {
   private List<MediaItem> children;
 
   public SerieItem(SeriesMediaTree mediaTree, String uri, Serie serie, EntityFactory entityFactory, MediaItemConfigurator mediaItemConfigurator, ItemsDao itemsDao) {
-    super(uri, serie);
+    super(uri, serie.title.get(), serie);
 
     this.mediaRoot = mediaTree;
     this.entityFactory = entityFactory;
@@ -48,7 +48,7 @@ public class SerieItem extends MediaItem implements MediaRoot {
 
         episode.setEntityFactory(entityFactory);
 
-        final MediaItem mediaItem = new MediaItem(localInfo.getUri(), episode);
+        final MediaItem mediaItem = new MediaItem(localInfo.getUri(), getMedia().title.get(), null, localInfo.getSeason() + "x" + localInfo.getEpisode(), null, episode);
 
         mediaItemConfigurator.configure(mediaItem, Activator.TVDB_EPISODE_ENRICHER);
 
