@@ -37,7 +37,6 @@ public class Identifier extends Entity<Identifier> {
       .enrich(new EnrichCallback<MediaData>() {
         @Override
         public MediaData enrich(Object... parameters) {
-          System.out.println(">>> MediaData enricher was triggers for " + this);
           hs.mediasystem.dao.Identifier dbIdentifier = (hs.mediasystem.dao.Identifier)parameters[0];
 
           return new MediaData(dbIdentifier.getMediaData());
