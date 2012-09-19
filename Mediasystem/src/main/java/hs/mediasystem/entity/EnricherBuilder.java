@@ -1,11 +1,9 @@
 package hs.mediasystem.entity;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
 import javafx.beans.property.Property;
-import javafx.collections.ObservableMap;
 
 public class EnricherBuilder<T, P> {
   private final Class<?> endResultClass;
@@ -20,12 +18,6 @@ public class EnricherBuilder<T, P> {
 
   public <R> EnricherBuilder<T, P> require(Property<R> property) {
     requirements.add(new Requirement<T>(property));
-
-    return this;
-  }
-
-  public <K, V> EnricherBuilder<T, P> require(final ObservableMap<K, V> property, final K key) {
-    requirements.add(new Requirement<T>(property, key));
 
     return this;
   }
