@@ -3,7 +3,7 @@ package hs.mediasystem.db;
 public class DatabaseObject {
   private Database database;
 
-  public Database getDatabasse() {
+  public Database getDatabase() {
     return database;
   }
 
