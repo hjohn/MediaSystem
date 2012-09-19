@@ -1,7 +1,7 @@
 package hs.mediasystem.db;
 
 @Table(name = "cars")
-public class TestCar {
+public class TestCar extends DatabaseObject {
 
   @Id
   @Column(name = {"countryCode", "licensePlate"})

@@ -47,16 +47,9 @@ public class Database {
     return fetcher.fetch(parent);
   }
 
-  private static Database instance;
-
-  public static Database getAssociatedDatabase(@SuppressWarnings("unused") Class<?> cls) {
-    return instance;
-  }
-
   @Inject
   public Database(Provider<Connection> connectionProvider) {
     this.connectionProvider = connectionProvider;
-    instance = this;  // TODO dirty
   }
 
   private static final ThreadLocal<Transaction> CURRENT_TRANSACTION = new ThreadLocal<>();
@@ -112,7 +105,7 @@ public class Database {
     private final Savepoint savepoint;
     private final long id;
 
-    private final WeakValueMap<String, Object> associatedObjects = new WeakValueMap<>();
+    private final WeakValueMap<String, DatabaseObject> associatedObjects = new WeakValueMap<>();
 
     private int activeNestedTransactions;
     private boolean finished;
@@ -166,14 +159,14 @@ public class Database {
       return cls.getName() + ":" + Arrays.toString(ids);
     }
 
-    public void associate(Object obj) {
+    public void associate(DatabaseObject obj) {
       @SuppressWarnings("unchecked")
-      RecordMapper<Object> recordMapper = (RecordMapper<Object>) getRecordMapper(obj.getClass());
+      RecordMapper<DatabaseObject> recordMapper = (RecordMapper<DatabaseObject>)getRecordMapper(obj.getClass());
 
       associatedObjects.put(createAssociatedObjectId(obj.getClass(), recordMapper.extractIds(obj).values().toArray()), obj);
     }
 
-    public Object findAssociatedObject(Class<?> cls, Object[] ids) {
+    public DatabaseObject findAssociatedObject(Class<?> cls, Object[] ids) {
       return associatedObjects.get(createAssociatedObjectId(cls, ids));
     }
 

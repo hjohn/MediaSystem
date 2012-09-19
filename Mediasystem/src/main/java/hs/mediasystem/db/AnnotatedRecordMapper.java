@@ -234,23 +234,20 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     }
   }
 
-  private static final Map<Object, Database> DATABASES = new HashMap<>();
   private static final Map<Object, Object[]> STUBS = new WeakHashMap<>();
 
-  public void associateStub(Transaction transaction, Object stub, Object[] ids) {
-    synchronized(DATABASES) {
+  public void associateStub(DatabaseObject stub, Object[] ids) {
+    synchronized(STUBS) {
       STUBS.put(stub, ids);
-      DATABASES.put(stub, transaction.getDatabase());
     }
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> T fetch(T instance) {
-    Database database;
+  public static <T extends DatabaseObject> T fetch(T instance) {
+    Database database = instance.getDatabase();
     Object[] ids;
 
-    synchronized(DATABASES) {
-      database = DATABASES.get(instance);
+    synchronized(STUBS) {
       ids = STUBS.get(instance);
     }
 
@@ -274,11 +271,11 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     }
   }
 
-  public static <C> List<C> fetch(Class<C> cls, Object filteredBy) {
-    Database database = Database.getAssociatedDatabase(cls);
+  public static <C> List<C> fetch(Class<C> cls, DatabaseObject filteredBy) {
+    Database database = filteredBy.getDatabase();
 
     @SuppressWarnings("unchecked")
-    AnnotatedRecordMapper<Object> parentMapper = (AnnotatedRecordMapper<Object>)create(filteredBy.getClass());
+    AnnotatedRecordMapper<DatabaseObject> parentMapper = (AnnotatedRecordMapper<DatabaseObject>)create(filteredBy.getClass());
     AnnotatedRecordMapper<?> mapper = create(cls);
 
     List<String> relationColumnNames = mapper.getRelationColumnNames(filteredBy.getClass());
@@ -569,11 +566,12 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
             idValues[i] = map.get(names[i]);
           }
 
-          Object associatedObject = transaction.findAssociatedObject(getType(), idValues);
+          DatabaseObject associatedObject = transaction.findAssociatedObject(getType(), idValues);
 
           if(associatedObject == null) {
-            associatedObject = getType().newInstance();
-            associateStub(transaction, associatedObject, idValues);
+            associatedObject = (DatabaseObject)getType().newInstance();
+            associatedObject.setDatabase(transaction.getDatabase());
+            associateStub(associatedObject, idValues);
           }
 
           return associatedObject;

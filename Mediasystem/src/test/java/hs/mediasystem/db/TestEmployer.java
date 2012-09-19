@@ -1,7 +1,7 @@
 package hs.mediasystem.db;
 
 @Table(name = "employers")
-public class TestEmployer {
+public class TestEmployer extends DatabaseObject {
 
   @Id
   private Integer id;
