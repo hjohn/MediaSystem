@@ -12,7 +12,7 @@ import javax.inject.Singleton;
 
 @Singleton
 public class PersistQueue {
-  private final Map<Persistable<?>, ScheduledFuture<?>> futures = new HashMap<>();
+  private final Map<Object, ScheduledFuture<?>> futures = new HashMap<>();
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
   public PersistQueue() {
@@ -39,7 +39,7 @@ public class PersistQueue {
     });
   }
 
-  public void queueAsDirty(final Persistable<?> persistable, final PersistTask task) {
+  public void queueAsDirty(final Object persistable, final PersistTask task) {
     synchronized(futures) {
       ScheduledFuture<?> future = futures.get(persistable);
 
