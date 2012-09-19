@@ -72,7 +72,7 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
   }
 
   private static DetailPane createDetailPane(BundleContext bundleContext) {
-    return new DetailPane(bundleContext) {
+    return new DetailPane(bundleContext, false) {
       @Override
       protected void initialize(DecoratablePane decoratablePane) {
         decoratablePane.getChildren().add(new BorderPane() {{
