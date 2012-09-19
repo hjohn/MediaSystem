@@ -26,11 +26,11 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
   private final List<Path> roots;
   private final ItemsDao itemsDao;
   private final MediaItemConfigurator mediaItemConfigurator;
-  private final EntityFactory entityFactory;
+  private final EntityFactory<?> entityFactory;
 
   private List<MediaItem> children;
 
-  public MoviesMediaTree(PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory entityFactory, List<Path> roots) {
+  public MoviesMediaTree(PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory<?> entityFactory, List<Path> roots) {
     this.persister = persister;
     this.itemsDao = itemsDao;
     this.mediaItemConfigurator = mediaItemConfigurator;
@@ -60,7 +60,7 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
             .enrich(new EnrichCallback<Item>() {
               @Override
               public Item enrich(Object... parameters) {
-                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).dbIdentifier.get();
+                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
                 if(identifier.getProviderId() != null) {
                   try {
@@ -77,7 +77,7 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
             .enrich(new EnrichCallback<Item>() {
               @Override
               public Item enrich(Object... parameters) {
-                Identifier identifier = (Identifier)parameters[0];
+                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
                 if(identifier.getProviderId() != null) {
                   try {

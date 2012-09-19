@@ -22,7 +22,7 @@ public class MediaDataPersister implements Persister<MediaData> {
     queue.queueAsDirty(mediaData, new PersistTask() {
       @Override
       public void persist() {
-        hs.mediasystem.dao.MediaData dbMediaData = mediaData.dbMediaData.get();
+        hs.mediasystem.dao.MediaData dbMediaData = mediaData.getKey();
 
         dbMediaData.setResumePosition(mediaData.resumePosition.get());
         dbMediaData.setViewed(mediaData.viewed.get());

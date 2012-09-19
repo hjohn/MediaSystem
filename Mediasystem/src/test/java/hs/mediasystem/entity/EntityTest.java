@@ -34,7 +34,7 @@ public class EntityTest extends JavaFXTestCase {
         c.characterName.set("Alice");
         c.index.set(1);
         c.role.set("actor");
-        c.person.set(new Person());
+        c.person.set(new Person("Jane Doe", null, null, null, null));
       }
     };
 
@@ -54,7 +54,7 @@ public class EntityTest extends JavaFXTestCase {
 
   @Test
   public void shouldEnrichWhenAccessed() {
-    Person person = new Person();
+    Person person = new Person(null, null, null, null, null);
 
     person.setEnricher(personEnricher);
 
@@ -62,11 +62,6 @@ public class EntityTest extends JavaFXTestCase {
     sleep(200);
     assertEquals("John Doe", person.name.get());
     assertEquals("Amsterdam", person.birthPlace.get());
-  }
-
-  @Test
-  public void shouldEnrichListWhenAccessed() {
-
   }
 
   @Test
@@ -89,7 +84,7 @@ public class EntityTest extends JavaFXTestCase {
     mediaItem.identifier.setEnricher(new InstanceEnricher<MediaItem, Identifier>() {
       @Override
       public Identifier enrich(MediaItem parent) {
-        return new Identifier(new hs.mediasystem.dao.Identifier(new ProviderId("MOVIE", "TMDB", "12256"), MatchType.HASH, 1.0f));
+        return new Identifier(new ProviderId("MOVIE", "TMDB", "12256"), MatchType.HASH, 1.0f);
       }
 
       @Override

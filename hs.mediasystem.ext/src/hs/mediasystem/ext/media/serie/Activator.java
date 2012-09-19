@@ -11,6 +11,7 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
+import hs.mediasystem.framework.MediaProvider;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.persist.PersistQueue;
@@ -160,20 +161,14 @@ public class Activator extends DependencyActivatorBase {
       })
     );
 
-    final EntityProvider<Serie> serieEntityProvider = new EntityProvider<Serie>() {
+    final EntityProvider<Item, Serie> serieEntityProvider = new MediaProvider<Serie>() {
       @Override
-      public Serie get(Object... parameters) {
-        if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getProviderId().getType().equals("Serie")) {
+      protected Serie createMedia(Item item) {
+        if(!item.getProviderId().getType().equals("Serie")) {
           return null;
         }
 
-        Item item = (Item)parameters[0];
-
-        Serie serie = new Serie(item.getTitle());
-
-        serie.item.set(item);
-
-        return serie;
+        return new Serie(item.getTitle());
       }
     };
 
@@ -188,16 +183,14 @@ public class Activator extends DependencyActivatorBase {
       .setInterface(EntityProvider.class.getName(), new Hashtable<String, Object>() {{
         put("mediasystem.class", Media.class);
       }})
-      .setImplementation(new EntityProvider<Episode>() {
+      .setImplementation(new MediaProvider<Episode>() {
         private volatile ItemsDao itemsDao;
 
         @Override
-        public Episode get(Object... parameters) {
-          if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getProviderId().getType().equals("Episode")) {
+        protected Episode createMedia(Item item) {
+          if(!item.getProviderId().getType().equals("Episode")) {
             return null;
           }
-
-          Item item = (Item)parameters[0];
 
           try {
             Item serieItem = itemsDao.loadItem(new ProviderId("Serie", "TVDB", item.getProviderId().getId().split(",")[0]));

@@ -1,81 +1,29 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.entity.EnrichCallback;
-import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.Entity;
-import hs.mediasystem.entity.FinishEnrichCallback;
+import hs.mediasystem.entity.SimpleEntityProperty;
 import hs.mediasystem.util.ImageHandle;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class Person extends Entity<Person> {
-  public final ObjectProperty<hs.mediasystem.dao.Person> personRecord = object("personRecord");
-
   public final StringProperty name = stringProperty();
   public final StringProperty birthPlace = stringProperty();
   public final StringProperty biography = stringProperty();
   public final ObjectProperty<Date> birthDate = object("birthDate");
   public final ObjectProperty<ImageHandle> photo = object("photo");
 
-  public final ObjectProperty<ObservableList<Casting>> castings = list(new EnricherBuilder<Person, List<Casting>>(List.class)
-    .require(personRecord)
-    .enrich(new EnrichCallback<List<Casting>>() {
-      @Override
-      public List<Casting> enrich(Object... parameters) {
-        hs.mediasystem.dao.Person person = (hs.mediasystem.dao.Person)parameters[0];
+  public final SimpleEntityProperty<ObservableList<Casting>> castings = entity("castings");
 
-        List<hs.mediasystem.dao.Casting> castings = person.getCastings();
-        List<Casting> result = new ArrayList<>();
-
-        for(final hs.mediasystem.dao.Casting casting : castings) {
-          Casting c = new Casting();
-
-          c.media.set(create(Media.class, casting.getItem()));
-          c.person.set(Person.this);
-          c.characterName.set(casting.getCharacterName());
-          c.index.set(casting.getIndex());
-          c.role.set(casting.getRole());
-
-          result.add(c);
-        }
-
-        return result;
-      }
-    })
-    .finish(new FinishEnrichCallback<List<Casting>>() {
-      @Override
-      public void update(List<Casting> result) {
-        castings.set(FXCollections.observableList(result));
-      }
-    })
-    .build()
-  );
-
-  public Person() {
-    personRecord.addListener(new ChangeListener<hs.mediasystem.dao.Person>() {
-      @Override
-      public void changed(ObservableValue<? extends hs.mediasystem.dao.Person> observableValue, hs.mediasystem.dao.Person old, hs.mediasystem.dao.Person current) {
-        name.set(current.getName());
-        birthPlace.set(current.getBirthPlace());
-        biography.set(current.getBiography());
-        birthDate.set(current.getBirthDate());
-
-        if(current.getPhoto() != null) {
-          photo.set(new SourceImageHandle(current.getPhoto(), "Person:/" + current.getName()));
-        }
-        else {
-          photo.set(null);
-        }
-      }
-    });
+  public Person(String name, String birthPlace, String biography, Date birthDate, ImageHandle photo) {
+    this.name.set(name);
+    this.birthPlace.set(birthPlace);
+    this.biography.set(biography);
+    this.birthDate.set(birthDate);
+    this.photo.set(photo);
   }
 }

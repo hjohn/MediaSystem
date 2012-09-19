@@ -24,12 +24,12 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
   private final PersistQueue persister;
   private final ItemsDao itemsDao;
   private final MediaItemConfigurator mediaItemConfigurator;
-  private final EntityFactory entityFactory;
+  private final EntityFactory<?> entityFactory;
   private final List<Path> roots;
 
   private List<MediaItem> children;
 
-  public SeriesMediaTree(PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory entityFactory, List<Path> roots) {
+  public SeriesMediaTree(PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory<?> entityFactory, List<Path> roots) {
     this.persister = persister;
     this.itemsDao = itemsDao;
     this.mediaItemConfigurator = mediaItemConfigurator;
@@ -59,7 +59,7 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
             .enrich(new EnrichCallback<Item>() {
               @Override
               public Item enrich(Object... parameters) {
-                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).dbIdentifier.get();
+                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
                 if(identifier.getProviderId() != null) {
                   try {
@@ -76,7 +76,7 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
             .enrich(new EnrichCallback<Item>() {
               @Override
               public Item enrich(Object... parameters) {
-                Identifier identifier = (Identifier)parameters[0];
+                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
                 if(identifier.getProviderId() != null) {
                   try {

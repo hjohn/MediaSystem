@@ -5,19 +5,24 @@ import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.db.ConnectionPool;
+import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.db.DatabaseStatementTranslator;
 import hs.mediasystem.db.DatabaseUpdater;
 import hs.mediasystem.db.SimpleConnectionPoolDataSource;
 import hs.mediasystem.db.SimpleDatabaseStatementTranslator;
-import hs.mediasystem.entity.Entity;
+import hs.mediasystem.entity.CachingEntityFactory;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.EntityProvider;
+import hs.mediasystem.framework.Identifier;
+import hs.mediasystem.framework.IdentifierProvider;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaDataPersister;
+import hs.mediasystem.framework.MediaDataProvider;
 import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.PersisterProvider;
 import hs.mediasystem.framework.Person;
+import hs.mediasystem.framework.PersonProvider;
 import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.player.PlayerFactory;
@@ -54,9 +59,7 @@ import hs.mediasystem.screens.selectmedia.SelectMediaPresentationProvider;
 import hs.mediasystem.screens.selectmedia.SelectMediaView;
 import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.util.DuoWindowSceneManager;
-import hs.mediasystem.util.PropertyEq;
 import hs.mediasystem.util.SceneManager;
-import hs.mediasystem.util.ServiceTracker;
 import hs.mediasystem.util.StringBinding;
 import hs.mediasystem.util.TaskExecutor;
 import hs.mediasystem.util.ini.Ini;
@@ -138,7 +141,8 @@ public class FrontEnd extends Application {
 
     Module module = new AbstractModule() {
       private PlayerPresentation playerPresentation;
-      PluginTracker<MainMenuExtension> mainMenuExtensions = new PluginTracker<>(framework.getBundleContext(), MainMenuExtension.class);
+      private PluginTracker<MainMenuExtension> mainMenuExtensions = new PluginTracker<>(framework.getBundleContext(), MainMenuExtension.class);
+      private EntityFactory<DatabaseObject> entityFactory = new CachingEntityFactory(framework.getBundleContext());
 
       @Override
       protected void configure() {
@@ -197,8 +201,13 @@ public class FrontEnd extends Application {
       }
 
       @Provides
-      public DatabaseStatementTranslator providerDatabaseStatementTranslator() {
+      public DatabaseStatementTranslator providesDatabaseStatementTranslator() {
         return translator;
+      }
+
+      @Provides
+      public EntityFactory<DatabaseObject> providesEntityFactory() {
+        return entityFactory;
       }
     };
 
@@ -222,39 +231,29 @@ public class FrontEnd extends Application {
     System.out.println("Registering components...");
 
     dm.add(dm.createComponent()
+      .setInterface(EntityProvider.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", Identifier.class);
+      }})
+      .setImplementation(new IdentifierProvider())
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(EntityProvider.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", MediaData.class);
+      }})
+      .setImplementation(new MediaDataProvider())
+    );
+
+    dm.add(dm.createComponent()
+      .setInterface(EntityProvider.class.getName(), new Hashtable<String, Object>() {{
+        put("mediasystem.class", Person.class);
+      }})
+      .setImplementation(new PersonProvider())
+    );
+
+    dm.add(dm.createComponent()
       .setInterface(EntityFactory.class.getName(), null)
-      .setImplementation(new EntityFactory() {
-        private final ServiceTracker<EntityProvider<?>> tracker = new ServiceTracker<>(framework.getBundleContext(), EntityProvider.class);
-
-        @Override
-        public <T extends Entity<?>> T create(Class<T> cls, Object... parameters) {
-          List<EntityProvider<?>> services = tracker.getServices(new PropertyEq("mediasystem.class", cls));
-
-          for(EntityProvider<?> provider : services) {
-            @SuppressWarnings("unchecked")
-            T result = (T)provider.get(parameters);
-
-            if(result != null) {
-              result.setEntityFactory(this);
-
-              return result;
-            }
-          }
-
-          try {
-            T result = cls.newInstance();
-
-            result.setEntityFactory(this);
-
-            return result;
-          }
-          catch(InstantiationException | IllegalAccessException e) {
-            // Not interested
-          }
-
-          return null;
-        }
-      })
+      .setImplementation(new CachingEntityFactory(framework.getBundleContext()))
     );
 
     dm.add(dm.createComponent()

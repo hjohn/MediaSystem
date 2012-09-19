@@ -3,8 +3,10 @@ package hs.mediasystem.framework;
 import hs.mediasystem.dao.IdentifierDao;
 import hs.mediasystem.dao.MediaDataDao;
 import hs.mediasystem.dao.MediaId;
+import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.entity.EnrichCallback;
 import hs.mediasystem.entity.EnricherBuilder;
+import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.FinishEnrichCallback;
 
 import java.util.Date;
@@ -14,11 +16,13 @@ import javax.inject.Inject;
 public class MediaItemConfigurator {
   private final IdentifierDao identifierDao;
   private final MediaDataDao mediaDataDao;
+  private final EntityFactory<DatabaseObject> entityFactory;
 
   @Inject
-  public MediaItemConfigurator(IdentifierDao identifierDao, MediaDataDao mediaDataDao) {
+  public MediaItemConfigurator(IdentifierDao identifierDao, MediaDataDao mediaDataDao, EntityFactory<DatabaseObject> entityFactory) {
     this.identifierDao = identifierDao;
     this.mediaDataDao = mediaDataDao;
+    this.entityFactory = entityFactory;
   }
 
   public void configure(final MediaItem mediaItem, final MediaIdentifier mediaIdentifier) {
@@ -44,7 +48,7 @@ public class MediaItemConfigurator {
             mediaDataDao.storeMediaData(dbMediaData);
           }
 
-          return new MediaData(dbMediaData);
+          return entityFactory.create(MediaData.class, dbMediaData);
         }
       })
       .finish(new FinishEnrichCallback<MediaData>() {
@@ -63,7 +67,8 @@ public class MediaItemConfigurator {
         public Identifier enrich(Object... parameters) {
           MediaData mediaData = (MediaData)parameters[0];
 
-          hs.mediasystem.dao.Identifier dbIdentifier = identifierDao.getIdentifierByMediaDataId(mediaData.dbMediaData.get().getId());
+          hs.mediasystem.dao.MediaData associatedKey = entityFactory.getAssociatedKey(mediaData);
+          hs.mediasystem.dao.Identifier dbIdentifier = identifierDao.getIdentifierByMediaDataId(associatedKey.getId());
 
           /*
            * It's possible this Identifier is an empty placeholder to prevent attempts at identifying a Media every time it
@@ -75,7 +80,7 @@ public class MediaItemConfigurator {
             return null;
           }
 
-          return dbIdentifier == null ? null : new Identifier(dbIdentifier);
+          return dbIdentifier == null ? null : entityFactory.create(Identifier.class, dbIdentifier);
         }
       })
       .enrich(new EnrichCallback<Identifier>() {
@@ -92,10 +97,12 @@ public class MediaItemConfigurator {
             dbIdentifier = new hs.mediasystem.dao.Identifier();
           }
 
-          dbIdentifier.setMediaData(mediaData.dbMediaData.get());
+          hs.mediasystem.dao.MediaData associatedKey = entityFactory.getAssociatedKey(mediaData);
+
+          dbIdentifier.setMediaData(associatedKey);
           dbIdentifier.setLastUpdated(new Date());
 
-          hs.mediasystem.dao.Identifier existingIdentifier = identifierDao.getIdentifierByMediaDataId(mediaData.dbMediaData.get().getId());
+          hs.mediasystem.dao.Identifier existingIdentifier = identifierDao.getIdentifierByMediaDataId(associatedKey.getId());
 
           if(existingIdentifier != null) {
             dbIdentifier.setId(existingIdentifier.getId());
@@ -103,7 +110,7 @@ public class MediaItemConfigurator {
 
           identifierDao.storeIdentifier(dbIdentifier);
 
-          return new Identifier(dbIdentifier);
+          return entityFactory.create(Identifier.class, dbIdentifier);
         }
       })
       .finish(new FinishEnrichCallback<Identifier>() {

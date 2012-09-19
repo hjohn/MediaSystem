@@ -98,22 +98,31 @@ public class Entity<T> {
     }
   }
 
-  private EntityFactory factory;
+  private EntityFactory<Object> factory;
 
   private InstanceEnricher<T, Object> enricher;
   private Persister<T> persister;
   private boolean enricherCalled;
 
-  public void setEntityFactory(EntityFactory factory) {
-    this.factory = factory;
+  @SuppressWarnings("unchecked")
+  public void setEntityFactory(EntityFactory<?> factory) {
+    this.factory = (EntityFactory<Object>)factory;
   }
 
-  public <C extends Entity<?>> C create(Class<C> cls, Object... parameters) {
+  public <C extends Entity<?>> C create(Class<C> cls, Object key) {
     if(factory == null) {
       throw new RuntimeException("No EntityFactory set for: " + this);
     }
 
-    return factory.create(cls, parameters);
+    return factory.create(cls, key);
+  }
+
+  public <K> K getKey() {
+    if(factory == null) {
+      throw new RuntimeException("No EntityFactory set for: " + this);
+    }
+
+    return factory.getAssociatedKey(this);
   }
 
   @SuppressWarnings("unchecked")

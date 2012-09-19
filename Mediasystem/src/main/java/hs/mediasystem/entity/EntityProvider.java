@@ -1,5 +1,5 @@
 package hs.mediasystem.entity;
 
-public interface EntityProvider<T> {
-  T get(Object... parameters);
+public interface EntityProvider<K, T> {
+  T get(K key);
 }

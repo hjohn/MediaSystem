@@ -21,13 +21,13 @@ import java.util.List;
 
 public class SerieItem extends MediaItem implements MediaRoot {
   private final SeriesMediaTree mediaRoot;
-  private final EntityFactory entityFactory;
+  private final EntityFactory<?> entityFactory;
   private final MediaItemConfigurator mediaItemConfigurator;
   private final ItemsDao itemsDao;
 
   private List<MediaItem> children;
 
-  public SerieItem(SeriesMediaTree mediaTree, String uri, Serie serie, EntityFactory entityFactory, MediaItemConfigurator mediaItemConfigurator, ItemsDao itemsDao) {
+  public SerieItem(SeriesMediaTree mediaTree, String uri, Serie serie, EntityFactory<?> entityFactory, MediaItemConfigurator mediaItemConfigurator, ItemsDao itemsDao) {
     super(uri, serie.title.get(), serie);
 
     this.mediaRoot = mediaTree;
@@ -57,7 +57,7 @@ public class SerieItem extends MediaItem implements MediaRoot {
             .enrich(new EnrichCallback<Item>() {
               @Override
               public Item enrich(Object... parameters) {
-                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).dbIdentifier.get();
+                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
                 if(identifier.getProviderId() != null) {
                   try {
@@ -75,7 +75,7 @@ public class SerieItem extends MediaItem implements MediaRoot {
             .enrich(new EnrichCallback<Item>() {
               @Override
               public Item enrich(Object... parameters) {
-                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).dbIdentifier.get();
+                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
                 if(identifier.getProviderId() != null) {
                   try {

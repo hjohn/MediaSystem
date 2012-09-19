@@ -56,9 +56,7 @@ public class Media<T extends Media<T>> extends Entity<T> {
         List<Casting> result = new ArrayList<>();
 
         for(final hs.mediasystem.dao.Casting casting : castings) {
-          Person p = create(Person.class);
-
-          p.personRecord.set(casting.getPerson());
+          Person p = create(Person.class, casting.getPerson());
 
           Casting c = new Casting();
 
@@ -95,9 +93,9 @@ public class Media<T extends Media<T>> extends Entity<T> {
           ProviderId providerId = item.getProviderId();
 
           for(hs.mediasystem.dao.Identifier identifier : transaction.select(hs.mediasystem.dao.Identifier.class, "mediatype=? AND provider=? AND providerid=?", providerId.getType(), providerId.getProvider(), providerId.getId())) {
-            Identifier i = new Identifier(identifier);
+            Identifier i = create(Identifier.class, identifier);
 
-            i.mediaData.set(new MediaData(identifier.getMediaData()));
+            i.mediaData.set(create(MediaData.class, identifier.getMediaData()));
 
             results.add(i);
           }

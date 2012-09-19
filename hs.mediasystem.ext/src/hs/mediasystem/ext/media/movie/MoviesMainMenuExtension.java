@@ -22,7 +22,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
   private volatile PersistQueue persister;
   private volatile MediaItemConfigurator mediaItemConfigurator;
   private volatile ItemsDao itemsDao;
-  private volatile EntityFactory entityFactory;
+  private volatile EntityFactory<?> entityFactory;
   private volatile SettingsStore settingsStore;
 
   public MoviesMainMenuExtension() {

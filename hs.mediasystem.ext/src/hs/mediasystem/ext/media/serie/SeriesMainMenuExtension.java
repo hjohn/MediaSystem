@@ -22,7 +22,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   private volatile PersistQueue persister;
   private volatile ItemsDao itemsDao;
   private volatile MediaItemConfigurator mediaItemConfigurator;
-  private volatile EntityFactory entityFactory;
+  private volatile EntityFactory<?> entityFactory;
   private volatile SettingsStore settingsStore;
 
   public SeriesMainMenuExtension() {

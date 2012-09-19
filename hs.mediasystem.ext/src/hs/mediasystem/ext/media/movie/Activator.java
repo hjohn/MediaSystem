@@ -10,6 +10,7 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
+import hs.mediasystem.framework.MediaProvider;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.persist.PersistQueue;
@@ -133,14 +134,12 @@ public class Activator extends DependencyActivatorBase {
       .setInterface(EntityProvider.class.getName(), new Hashtable<String, Object>() {{
         put("mediasystem.class", Media.class);
       }})
-      .setImplementation(new EntityProvider<Movie>() {
+      .setImplementation(new MediaProvider<Movie>() {
         @Override
-        public Movie get(Object... parameters) {
-          if(parameters.length != 1 || !(parameters[0] instanceof Item) || !((Item)parameters[0]).getProviderId().getType().equals("Movie")) {
+        protected Movie createMedia(Item item) {
+          if(!item.getProviderId().getType().equals("Movie")) {
             return null;
           }
-
-          Item item = (Item)parameters[0];
 
           Movie movie = new Movie(item.getTitle(), item.getEpisode(), "", null, item.getImdbId());
 
