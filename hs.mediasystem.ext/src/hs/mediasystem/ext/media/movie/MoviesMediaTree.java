@@ -10,7 +10,6 @@ import hs.mediasystem.entity.EnrichCallback;
 import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.FinishEnrichCallback;
-import hs.mediasystem.entity.InstanceEnricher;
 import hs.mediasystem.framework.EpisodeScanner;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
@@ -56,7 +55,7 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
 
           mediaItemConfigurator.configure(mediaItem, Activator.TMDB_ENRICHER);
 
-          InstanceEnricher<MediaItem, Void> enricher = new EnricherBuilder<MediaItem, Movie>(Movie.class)
+          mediaItem.media.setEnricher(new EnricherBuilder<MediaItem, Movie>(Movie.class)
             .require(mediaItem.identifier)
             .enrich(new EnrichCallback<Movie>() {
               @Override
@@ -104,9 +103,8 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
                 mediaItem.media.set(result);
               }
             })
-            .build();
-
-          mediaItem.media.setEnricher(enricher);
+            .build()
+          );
 
           children.add(mediaItem);
         }

@@ -141,11 +141,14 @@ public class Activator extends DependencyActivatorBase {
             return null;
           }
 
-          Movie movie = new Movie(item.getTitle(), item.getEpisode(), "", null, item.getImdbId());
+          return new Movie(item.getTitle(), item.getEpisode(), "", null, item.getImdbId());
+        }
 
-          movie.item.set(item);
-
-          return movie;
+        @Override
+        protected void configureMedia(Movie media, Item item) {
+          media.language.set(item.getLanguage());
+          media.tagLine.set(item.getTagline());
+          media.imdbNumber.set(item.getImdbId());
         }
       })
     );

@@ -13,6 +13,7 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.MediaProvider;
 import hs.mediasystem.framework.SettingsStore;
+import hs.mediasystem.framework.SourceImageHandle;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.AbstractSetting;
@@ -170,6 +171,12 @@ public class Activator extends DependencyActivatorBase {
 
         return new Serie(item.getTitle());
       }
+
+      @Override
+      protected void configureMedia(Serie media, Item item) {
+        // TODO Auto-generated method stub
+
+      }
     };
 
     manager.add(createComponent()
@@ -194,18 +201,19 @@ public class Activator extends DependencyActivatorBase {
 
           try {
             Item serieItem = itemsDao.loadItem(new ProviderId("Serie", "TVDB", item.getProviderId().getId().split(",")[0]));
-
             Serie serie = serieEntityProvider.get(serieItem);
-            Episode episode = new Episode(serie, item.getTitle(), item.getSeason(), item.getEpisode(), item.getEpisode());
 
-            episode.item.set(item);
-
-            return episode;
+            return new Episode(serie, item.getTitle(), item.getSeason(), item.getEpisode(), item.getEpisode());
           }
           catch(ItemNotFoundException e) {
             System.out.println("[FINE] Exception while creating Episode entity: " + e);
             return null;
           }
+        }
+
+        @Override
+        protected void configureMedia(Episode media, Item item) {
+          media.background.set(item.getBackground() == null ? media.serie.get().background.get() : new SourceImageHandle(item.getBackground(), "Episode:/background/" + item.getId()));
         }
       })
       .add(createServiceDependency()

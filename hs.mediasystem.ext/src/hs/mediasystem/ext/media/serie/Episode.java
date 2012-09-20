@@ -1,12 +1,8 @@
 package hs.mediasystem.ext.media.serie;
 
-import hs.mediasystem.dao.Item;
 import hs.mediasystem.framework.Media;
-import hs.mediasystem.framework.SourceImageHandle;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 
 public class Episode extends Media<Episode> {
   public final ObjectProperty<Serie> serie = object("serie");
@@ -26,16 +22,7 @@ public class Episode extends Media<Episode> {
     this.episode.set(episode);
     this.endEpisode.set(endEpisode);
     this.episodeRange.set(createEpisodeNumber(episode, endEpisode));
-
-    item.addListener(new ChangeListener<Item>() {
-      @Override
-      public void changed(ObservableValue<? extends Item> observableValue, Item old, Item current) {
-        String title = createTitle(serie, season, episode, endEpisode);
-
-        titleWithContext.set(title);
-        background.set(current.getBackground() == null ? serie.background.get() : new SourceImageHandle(current.getBackground(), "Episode:/" + title));
-      }
-    });
+    this.titleWithContext.set(createTitle(serie, season, episode, endEpisode));
   }
 
   private static String createTitle(Serie serie, Integer season, Integer episode, Integer endEpisode) {

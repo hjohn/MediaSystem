@@ -10,7 +10,6 @@ import hs.mediasystem.entity.EnrichCallback;
 import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.FinishEnrichCallback;
-import hs.mediasystem.entity.InstanceEnricher;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
@@ -52,7 +51,7 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
 
           mediaItemConfigurator.configure(mediaItem, Activator.TVDB_SERIE_ENRICHER);
 
-          InstanceEnricher<MediaItem, Void> enricher = new EnricherBuilder<MediaItem, Serie>(Serie.class)
+          mediaItem.media.setEnricher(new EnricherBuilder<MediaItem, Serie>(Serie.class)
             .require(mediaItem.identifier)
             .enrich(new EnrichCallback<Serie>() {
               @Override
@@ -100,9 +99,8 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
                 mediaItem.media.set(result);
               }
             })
-            .build();
-
-          mediaItem.media.setEnricher(enricher);
+            .build()
+          );
 
           children.add(mediaItem);
         }

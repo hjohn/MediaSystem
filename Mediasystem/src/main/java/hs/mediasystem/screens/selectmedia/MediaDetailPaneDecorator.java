@@ -257,6 +257,11 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
 
   private void generateMediaTabs(final TabPane tabPane, ObservableList<Identifier> current) {
     tabPane.getTabs().clear();
+
+    if(current == null) {
+      return;
+    }
+
     int copyCount = 1;
 
     for(final Identifier identifier : current) {

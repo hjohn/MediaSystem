@@ -10,7 +10,6 @@ import hs.mediasystem.entity.EnrichCallback;
 import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.FinishEnrichCallback;
-import hs.mediasystem.entity.InstanceEnricher;
 import hs.mediasystem.framework.EpisodeScanner;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
@@ -46,10 +45,6 @@ public class SerieItem extends MediaItem implements MediaRoot {
       children = new ArrayList<>();
 
       for(LocalInfo localInfo : scanResults) {
-//        final Episode episode = new Episode((Serie)this.getMedia(), getTitle() + " " + localInfo.getSeason() + "x" + localInfo.getEpisode(), localInfo.getSeason(), localInfo.getEpisode(), localInfo.getEndEpisode());
-//
-//        episode.setEntityFactory(entityFactory);
-
         final MediaItem mediaItem = new MediaItem(localInfo.getUri(), getMedia().title.get(), null, localInfo.getSeason() + "x" + localInfo.getEpisode(), null, Episode.class);
 
         mediaItem.properties.put("serie", this);
@@ -60,58 +55,57 @@ public class SerieItem extends MediaItem implements MediaRoot {
 
         mediaItemConfigurator.configure(mediaItem, Activator.TVDB_EPISODE_ENRICHER);
 
-        InstanceEnricher<MediaItem, Void> enricher = new EnricherBuilder<MediaItem, Episode>(Episode.class)
-            .require(mediaItem.identifier)
-            .enrich(new EnrichCallback<Episode>() {
-              @Override
-              public Episode enrich(Object... parameters) {
-                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
+        mediaItem.media.setEnricher(new EnricherBuilder<MediaItem, Episode>(Episode.class)
+          .require(mediaItem.identifier)
+          .enrich(new EnrichCallback<Episode>() {
+            @Override
+            public Episode enrich(Object... parameters) {
+              Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
-                if(identifier.getProviderId() != null) {
-                  try {
-                    // FIXME should check version after loading, and bypasscache
-                    return (Episode)entityFactory.create(Media.class, itemsDao.loadItem(identifier.getProviderId()));
-                  }
-                  catch(ItemNotFoundException e) {
-                    return null;
-                  }
+              if(identifier.getProviderId() != null) {
+                try {
+                  // FIXME should check version after loading, and bypasscache
+                  return (Episode)entityFactory.create(Media.class, itemsDao.loadItem(identifier.getProviderId()));
                 }
-
-                return null;
-              }
-            })
-            .enrich(new EnrichCallback<Episode>() {
-              @Override
-              public Episode enrich(Object... parameters) {
-                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
-
-                if(identifier.getProviderId() != null) {
-                  try {
-                    Item item = Activator.TVDB_EPISODE_ENRICHER.loadItem(identifier.getProviderId());
-
-                    if(item != null) {
-                      itemsDao.storeItem(item);  // FIXME should also update if version or bypasscache problem
-                    }
-
-                    return (Episode)entityFactory.create(Media.class, item);
-                  }
-                  catch(ItemNotFoundException e) {
-                    System.out.println("[FINE] Item not found (in Database or TVDB): " + identifier.getProviderId());
-                  }
+                catch(ItemNotFoundException e) {
+                  return null;
                 }
-
-                return null;
               }
-            })
-            .finish(new FinishEnrichCallback<Episode>() {
-              @Override
-              public void update(Episode result) {
-                mediaItem.media.set(result);
-              }
-            })
-            .build();
 
-        mediaItem.media.setEnricher(enricher);
+              return null;
+            }
+          })
+          .enrich(new EnrichCallback<Episode>() {
+            @Override
+            public Episode enrich(Object... parameters) {
+              Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
+
+              if(identifier.getProviderId() != null) {
+                try {
+                  Item item = Activator.TVDB_EPISODE_ENRICHER.loadItem(identifier.getProviderId());
+
+                  if(item != null) {
+                    itemsDao.storeItem(item);  // FIXME should also update if version or bypasscache problem
+                  }
+
+                  return (Episode)entityFactory.create(Media.class, item);
+                }
+                catch(ItemNotFoundException e) {
+                  System.out.println("[FINE] Item not found (in Database or TVDB): " + identifier.getProviderId());
+                }
+              }
+
+              return null;
+            }
+          })
+          .finish(new FinishEnrichCallback<Episode>() {
+            @Override
+            public void update(Episode result) {
+              mediaItem.media.set(result);
+            }
+          })
+          .build()
+        );
 
         children.add(mediaItem);
       }

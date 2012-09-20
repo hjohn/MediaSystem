@@ -114,8 +114,6 @@ public class EntityTest extends JavaFXTestCase {
           item.setRating(2.0f);
           item.setGenres(new String[] {"Action", "Adventure"});
           item.setPlot("A couple go underground and find true love");
-
-          m.item.set(item);
         }
       }
     });
