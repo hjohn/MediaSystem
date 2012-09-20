@@ -8,7 +8,7 @@ import hs.subtitle.DefaultThreadFactory;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -29,8 +29,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class Entity<T> {
-  private static final ThreadPoolExecutor PRIMARY_EXECUTOR = new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-  private static final ThreadPoolExecutor SECONDARY_EXECUTOR = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+  private static final ThreadPoolExecutor PRIMARY_EXECUTOR = new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new PriorityBlockingQueue<Runnable>());
+  private static final ThreadPoolExecutor SECONDARY_EXECUTOR = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new PriorityBlockingQueue<Runnable>());
 
   private static final Map<EnrichmentRunnable, String> PRIMARY_TASKS = new WeakHashMap<>();
   private static final Map<EnrichmentRunnable, String> SECONDARY_TASKS = new WeakHashMap<>();
@@ -126,7 +126,7 @@ public class Entity<T> {
 
   public static class EnrichTask<T, R> extends EnrichmentRunnable {
     public EnrichTask(final T parent, final InstanceEnricher<T, R> enricher) {
-      super(new Runnable() {
+      super(0, new Runnable() {
         @Override
         public void run() {
           final R result = enricher.enrich(parent);

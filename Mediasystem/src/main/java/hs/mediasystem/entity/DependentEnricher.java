@@ -12,6 +12,7 @@ public class DependentEnricher<T, P> implements InstanceEnricher<T, Void> {
   private final List<EnrichCallback<P>> callbacks;
   private final FinishEnrichCallback<P> finishCallback;
   private final Class<?> endResultClass;
+  private final int priority;
 
   private Object[] state = new String[] {"INACTIVE", null, null};
 
@@ -21,6 +22,20 @@ public class DependentEnricher<T, P> implements InstanceEnricher<T, Void> {
     this.finishCallback = finishCallback;
     this.callbacks = new ArrayList<>(callbacks);
     this.requirements = new ArrayList<>(Arrays.asList(requirements));
+
+    int p = 1;
+
+    for(Requirement<T> requirement : requirements) {
+      p++;
+
+      InstanceEnricher<Object, ?> enricher = requirement.getProperty().getEnricher();
+
+      if(enricher != null) {
+        p += enricher.getPriority();
+      }
+    }
+
+    this.priority = p;
   }
 
   @Override
@@ -33,8 +48,6 @@ public class DependentEnricher<T, P> implements InstanceEnricher<T, Void> {
         for(Requirement<T> requirement : requirements) {
           requirement.attachListener(DependentEnricher.this, parent);
         }
-
-        System.out.printf("Entity [LISTENERS]: %-20s REQ: %s BEAN: %s\n", endResultClass.getSimpleName(), requirements, parent);
       }
     });
 
@@ -46,7 +59,7 @@ public class DependentEnricher<T, P> implements InstanceEnricher<T, Void> {
     final Object[] parameters = new Object[requirements.size()];
     int index = 0;
 
-    System.out.printf("Entity [CHECK_REQ]: %-20s REQ: %s BEAN: %s\n", endResultClass.getSimpleName(), requirements, parent);
+    System.out.printf("Entity [CHECK_REQ][+%d]: %-20s REQ: %s BEAN: %s\n", priority, endResultClass.getSimpleName(), requirements, parent);
 
     for(Requirement<T> requirement : requirements) {
       Object value = requirement.getValue();
@@ -59,11 +72,16 @@ public class DependentEnricher<T, P> implements InstanceEnricher<T, Void> {
       parameters[index++] = value;
     }
 
-    System.out.printf("Entity [REQ_MET  ]: %-20s VALUES: %s BEAN: %s\n", endResultClass.getSimpleName(), Arrays.toString(parameters), parent);
+    System.out.printf("Entity [REQ_MET  ][+%d]: %-20s VALUES: %s BEAN: %s\n", priority, endResultClass.getSimpleName(), Arrays.toString(parameters), parent);
 
     final Iterator<EnrichCallback<P>> iterator = callbacks.iterator();
 
     submit(iterator, parameters, parent);
+  }
+
+  @Override
+  public int getPriority() {
+    return priority;
   }
 
   private void submit(final Iterator<EnrichCallback<P>> iterator, final Object[] parameters, final T parent) {
@@ -71,11 +89,13 @@ public class DependentEnricher<T, P> implements InstanceEnricher<T, Void> {
 
     state = new Object[] {"ACTIVE", null, parent};
 
-    boolean primary = callback.equals(callbacks.get(0));
+    final int index = callbacks.indexOf(callback);
 
-    Entity.submit(primary, new EnrichmentRunnable(new Runnable() {
+    Entity.submit(index == 0, new EnrichmentRunnable(priority, new Runnable() {
       @Override
       public void run() {
+        System.out.printf("Entity [RUNNING-%d][+%d]: %-20s REQ: %s BEAN: %s\n", index, priority, endResultClass.getSimpleName(), requirements, parent);
+
         final P result = callback.enrich(parameters);
 
         if(result == null && iterator.hasNext()) {
@@ -87,7 +107,7 @@ public class DependentEnricher<T, P> implements InstanceEnricher<T, Void> {
             public void run() {
               state = new Object[] {"FINISHING", null, parent};
 
-              System.out.printf("Entity [COMPLETED]: %-20s RESULT: %s BEAN: %s\n", endResultClass.getSimpleName(), result, parent);
+              System.out.printf("Entity [COMPLETED][+%d]: %-20s RESULT: %s BEAN: %s\n", priority, endResultClass.getSimpleName(), result, parent);
 
               finishCallback.update(result);
 

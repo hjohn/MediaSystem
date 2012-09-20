@@ -1,13 +1,21 @@
 package hs.mediasystem.entity;
 
-public class EnrichmentRunnable implements Runnable {
+import java.util.concurrent.atomic.AtomicLong;
+
+public class EnrichmentRunnable implements Runnable, Comparable<EnrichmentRunnable> {
+  private static final AtomicLong INSTANCE_COUNTER = new AtomicLong(0);
+
   private final Runnable runnable;
+  private final int priority;
+  private final long instanceNumber;
 
   private String state = "INACTIVE";
   private String threadName;
 
-  public EnrichmentRunnable(Runnable runnable) {
+  public EnrichmentRunnable(int priority, Runnable runnable) {
+    this.priority = priority;
     this.runnable = runnable;
+    this.instanceNumber = INSTANCE_COUNTER.incrementAndGet();
   }
 
   @Override
@@ -33,5 +41,16 @@ public class EnrichmentRunnable implements Runnable {
     }
 
     return builder.toString();
+  }
+
+  @Override
+  public int compareTo(EnrichmentRunnable o) {
+    int result = Integer.compare(o.priority, priority);  // higher priority first
+
+    if(result == 0) {
+      Long.compare(o.instanceNumber, instanceNumber);  // newer instance first (LIFO)
+    }
+
+    return result;
   }
 }
