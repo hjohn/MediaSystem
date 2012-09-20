@@ -1,19 +1,18 @@
 package hs.mediasystem.entity;
 
-import javafx.beans.Observable;
+import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 public class Requirement<T> {
-  private final Observable observable;
+  private final Property<Object> property;
 
-  public Requirement(Observable observable) {
-    this.observable = observable;
+  public Requirement(Property<Object> property) {
+    this.property = property;
   }
 
-  @SuppressWarnings("unchecked")
   public void attachListener(final InstanceEnricher<T, Void> enricher, final T parent) {
-    ((ObservableValue<Object>)observable).addListener(new ChangeListener<Object>() {
+    property.addListener(new ChangeListener<Object>() {
       @Override
       public void changed(ObservableValue<? extends Object> observableValue, Object old, Object current) {
         enricher.update(parent, null);
@@ -21,13 +20,12 @@ public class Requirement<T> {
     });
   }
 
-  @SuppressWarnings("unchecked")
   public Object getValue() {
-    return ((ObservableValue<Object>)observable).getValue();
+    return property.getValue();
   }
 
   @Override
   public String toString() {
-    return "Requirement(" + observable + ")";
+    return "Requirement(" + property.getName() + ")";
   }
 }

@@ -16,8 +16,9 @@ public class EnricherBuilder<T, P> {
     this.endResultClass = endResultClass;
   }
 
+  @SuppressWarnings("unchecked")
   public <R> EnricherBuilder<T, P> require(Property<R> property) {
-    requirements.add(new Requirement<T>(property));
+    requirements.add(new Requirement<T>((Property<Object>)property));
 
     return this;
   }
