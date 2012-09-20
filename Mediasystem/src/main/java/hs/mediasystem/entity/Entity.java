@@ -99,10 +99,7 @@ public class Entity<T> {
   }
 
   private EntityFactory<Object> factory;
-
-  private InstanceEnricher<T, Object> enricher;
   private Persister<T> persister;
-  private boolean enricherCalled;
 
   @SuppressWarnings("unchecked")
   public void setEntityFactory(EntityFactory<?> factory) {
@@ -125,23 +122,8 @@ public class Entity<T> {
     return factory.getAssociatedKey(this);
   }
 
-  @SuppressWarnings("unchecked")
-  public void setEnricher(InstanceEnricher<T, ? extends Object> enricher) {
-    this.enricher = (InstanceEnricher<T, Object>)enricher;
-  }
-
   public void setPersister(Persister<T> persister) {
     this.persister = persister;
-  }
-
-  private synchronized <P> P callEnricher(P value) {
-    if(value == null && enricher != null && !enricherCalled) {
-      enricherCalled = true;
-
-      submit(true, new EnrichTask<>(self(), enricher));
-    }
-
-    return value;
   }
 
   public static class EnrichTask<T, R> extends EnrichmentRunnable {
@@ -162,10 +144,6 @@ public class Entity<T> {
 
       Entity.registerEnricher(enricher);
     }
-  }
-
-  private synchronized <P> void callEnricher() {
-    callEnricher(null);
   }
 
   @SuppressWarnings("unchecked")
@@ -248,11 +226,6 @@ public class Entity<T> {
           get();
         }
       }
-
-      @Override
-      public P get() {
-        return callEnricher(super.get());
-      }
     };
   }
 
@@ -264,11 +237,6 @@ public class Entity<T> {
           persister.queueAsDirty(self());
           get();
         }
-      }
-
-      @Override
-      public String get() {
-        return callEnricher(super.get());
       }
     };
   }
@@ -286,12 +254,6 @@ public class Entity<T> {
           get();
         }
       }
-
-      @Override
-      public int get() {
-        callEnricher();
-        return super.get();
-      }
     };
   }
 
@@ -303,12 +265,6 @@ public class Entity<T> {
           persister.queueAsDirty(self());
           get();
         }
-      }
-
-      @Override
-      public long get() {
-        callEnricher();
-        return super.get();
       }
     };
   }
@@ -322,12 +278,6 @@ public class Entity<T> {
           get();
         }
       }
-
-      @Override
-      public boolean get() {
-        callEnricher();
-        return super.get();
-      }
     };
   }
 
@@ -340,12 +290,6 @@ public class Entity<T> {
           get();
         }
       }
-
-      @Override
-      public float get() {
-        callEnricher();
-        return super.get();
-      }
     };
   }
 
@@ -357,12 +301,6 @@ public class Entity<T> {
           persister.queueAsDirty(self());
           get();
         }
-      }
-
-      @Override
-      public double get() {
-        callEnricher();
-        return super.get();
       }
     };
   }
