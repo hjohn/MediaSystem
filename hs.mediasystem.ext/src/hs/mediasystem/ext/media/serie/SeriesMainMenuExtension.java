@@ -2,6 +2,7 @@ package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.Setting.PersistLevel;
+import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.MediaRootType;
@@ -22,7 +23,7 @@ public class SeriesMainMenuExtension implements MainMenuExtension {
   private volatile PersistQueue persister;
   private volatile ItemsDao itemsDao;
   private volatile MediaItemConfigurator mediaItemConfigurator;
-  private volatile EntityFactory<?> entityFactory;
+  private volatile EntityFactory<DatabaseObject> entityFactory;
   private volatile SettingsStore settingsStore;
 
   public SeriesMainMenuExtension() {

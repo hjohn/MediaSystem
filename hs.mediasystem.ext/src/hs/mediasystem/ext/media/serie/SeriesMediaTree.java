@@ -5,11 +5,13 @@ import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.LocalInfo;
+import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.entity.EnrichCallback;
 import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.FinishEnrichCallback;
 import hs.mediasystem.entity.InstanceEnricher;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.MediaRoot;
@@ -24,12 +26,12 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
   private final PersistQueue persister;
   private final ItemsDao itemsDao;
   private final MediaItemConfigurator mediaItemConfigurator;
-  private final EntityFactory<?> entityFactory;
+  private final EntityFactory<DatabaseObject> entityFactory;
   private final List<Path> roots;
 
   private List<MediaItem> children;
 
-  public SeriesMediaTree(PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory<?> entityFactory, List<Path> roots) {
+  public SeriesMediaTree(PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory<DatabaseObject> entityFactory, List<Path> roots) {
     this.persister = persister;
     this.itemsDao = itemsDao;
     this.mediaItemConfigurator = mediaItemConfigurator;
@@ -46,24 +48,20 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
         List<LocalInfo> scanResults = new SerieScanner().scan(root);
 
         for(LocalInfo localInfo : scanResults) {
-          final Serie serie = new Serie(localInfo.getTitle());
-
-          serie.setEntityFactory(entityFactory);
-
-          SerieItem mediaItem = new SerieItem(SeriesMediaTree.this, localInfo.getUri(), serie, entityFactory, mediaItemConfigurator, itemsDao);
+          final SerieItem mediaItem = new SerieItem(SeriesMediaTree.this, localInfo.getUri(), localInfo.getTitle(), entityFactory, mediaItemConfigurator, itemsDao);
 
           mediaItemConfigurator.configure(mediaItem, Activator.TVDB_SERIE_ENRICHER);
 
-          InstanceEnricher<Serie, Void> enricher = new EnricherBuilder<Serie, Item>(Item.class)
+          InstanceEnricher<MediaItem, Void> enricher = new EnricherBuilder<MediaItem, Serie>(Serie.class)
             .require(mediaItem.identifier)
-            .enrich(new EnrichCallback<Item>() {
+            .enrich(new EnrichCallback<Serie>() {
               @Override
-              public Item enrich(Object... parameters) {
+              public Serie enrich(Object... parameters) {
                 Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
                 if(identifier.getProviderId() != null) {
                   try {
-                    return itemsDao.loadItem(identifier.getProviderId());
+                    return (Serie)entityFactory.create(Media.class, itemsDao.loadItem(identifier.getProviderId()));
                   }
                   catch(ItemNotFoundException e) {
                     return null;
@@ -73,9 +71,9 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
                 return null;
               }
             })
-            .enrich(new EnrichCallback<Item>() {
+            .enrich(new EnrichCallback<Serie>() {
               @Override
-              public Item enrich(Object... parameters) {
+              public Serie enrich(Object... parameters) {
                 Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
                 if(identifier.getProviderId() != null) {
@@ -86,7 +84,7 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
                       itemsDao.storeItem(item);  // FIXME should also update if version or bypasscache problem
                     }
 
-                    return item;
+                    return (Serie)entityFactory.create(Media.class, item);
                   }
                   catch(ItemNotFoundException e) {
                     System.out.println("[FINE] Item not found (in Database or TVDB): " + identifier.getProviderId());
@@ -96,15 +94,15 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
                 return null;
               }
             })
-            .finish(new FinishEnrichCallback<Item>() {
+            .finish(new FinishEnrichCallback<Serie>() {
               @Override
-              public void update(Item result) {
-                serie.item.set(result);
+              public void update(Serie result) {
+                mediaItem.media.set(result);
               }
             })
             .build();
 
-          serie.setEnricher(enricher);
+          mediaItem.media.setEnricher(enricher);
 
           children.add(mediaItem);
         }

@@ -5,12 +5,14 @@ import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.LocalInfo;
+import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.entity.EnrichCallback;
 import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.FinishEnrichCallback;
 import hs.mediasystem.entity.InstanceEnricher;
 import hs.mediasystem.framework.EpisodeScanner;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.MediaRoot;
@@ -26,11 +28,11 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
   private final List<Path> roots;
   private final ItemsDao itemsDao;
   private final MediaItemConfigurator mediaItemConfigurator;
-  private final EntityFactory<?> entityFactory;
+  private final EntityFactory<DatabaseObject> entityFactory;
 
   private List<MediaItem> children;
 
-  public MoviesMediaTree(PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory<?> entityFactory, List<Path> roots) {
+  public MoviesMediaTree(PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory<DatabaseObject> entityFactory, List<Path> roots) {
     this.persister = persister;
     this.itemsDao = itemsDao;
     this.mediaItemConfigurator = mediaItemConfigurator;
@@ -47,24 +49,23 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
         List<LocalInfo> scanResults = new EpisodeScanner(new MovieDecoder(), 1).scan(root);
 
         for(final LocalInfo localInfo : scanResults) {
-          final Movie movie = new Movie(localInfo.getTitle(), localInfo.getEpisode(), localInfo.getSubtitle(), localInfo.getReleaseYear(), localInfo.getCode());
+          final MediaItem mediaItem = new MediaItem(localInfo.getUri(), null, localInfo.getTitle(), localInfo.getEpisode() == null ? null : "" + localInfo.getEpisode(), localInfo.getSubtitle(), Movie.class);
 
-          movie.setEntityFactory(entityFactory);
-
-          final MediaItem mediaItem = new MediaItem(localInfo.getUri(), null, localInfo.getTitle(), "" + localInfo.getEpisode(), localInfo.getSubtitle(), movie);
+          mediaItem.properties.put("releaseYear", localInfo.getReleaseYear());
+          mediaItem.properties.put("imdbNumber", localInfo.getCode());
 
           mediaItemConfigurator.configure(mediaItem, Activator.TMDB_ENRICHER);
 
-          InstanceEnricher<Movie, Void> enricher = new EnricherBuilder<Movie, Item>(Item.class)
+          InstanceEnricher<MediaItem, Void> enricher = new EnricherBuilder<MediaItem, Movie>(Movie.class)
             .require(mediaItem.identifier)
-            .enrich(new EnrichCallback<Item>() {
+            .enrich(new EnrichCallback<Movie>() {
               @Override
-              public Item enrich(Object... parameters) {
+              public Movie enrich(Object... parameters) {
                 Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
                 if(identifier.getProviderId() != null) {
                   try {
-                    return itemsDao.loadItem(identifier.getProviderId());
+                    return (Movie)entityFactory.create(Media.class, itemsDao.loadItem(identifier.getProviderId()));
                   }
                   catch(ItemNotFoundException e) {
                     return null;
@@ -74,9 +75,9 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
                 return null;
               }
             })
-            .enrich(new EnrichCallback<Item>() {
+            .enrich(new EnrichCallback<Movie>() {
               @Override
-              public Item enrich(Object... parameters) {
+              public Movie enrich(Object... parameters) {
                 Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
                 if(identifier.getProviderId() != null) {
@@ -87,7 +88,7 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
                       itemsDao.storeItem(item);  // FIXME should also update if version or bypasscache problem
                     }
 
-                    return item;
+                    return (Movie)entityFactory.create(Media.class, item);
                   }
                   catch(ItemNotFoundException e) {
                     System.out.println("[FINE] Item not found (in Database or TMDB): " + identifier.getProviderId());
@@ -97,15 +98,15 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
                 return null;
               }
             })
-            .finish(new FinishEnrichCallback<Item>() {
+            .finish(new FinishEnrichCallback<Movie>() {
               @Override
-              public void update(Item result) {
-                movie.item.set(result);
+              public void update(Movie result) {
+                mediaItem.media.set(result);
               }
             })
             .build();
 
-          movie.setEnricher(enricher);
+          mediaItem.media.setEnricher(enricher);
 
           children.add(mediaItem);
         }

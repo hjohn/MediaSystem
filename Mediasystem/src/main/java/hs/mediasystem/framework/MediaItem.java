@@ -3,13 +3,14 @@ package hs.mediasystem.framework;
 import hs.mediasystem.entity.Entity;
 import hs.mediasystem.entity.SimpleEntityProperty;
 import javafx.beans.binding.StringBinding;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 
 public class MediaItem extends Entity<MediaItem> {
   public final SimpleEntityProperty<MediaData> mediaData = entity("mediaData");
   public final SimpleEntityProperty<Identifier> identifier = entity("identifier");
-  public final ObjectProperty<Media<?>> media = object("media");
+  public final SimpleEntityProperty<Media<?>> media = entity("media");
 
   public final StringProperty serieName = stringProperty();
   public final StringProperty title = stringProperty();
@@ -22,16 +23,21 @@ public class MediaItem extends Entity<MediaItem> {
   public final StringProperty streamTitle = stringProperty();
 
   private final String uri;
-  private final String mediaType;
+  private final Class<?> dataType;
+  public final ObservableMap<String, Object> properties = FXCollections.observableHashMap();
 
-  public MediaItem(String uri, String serieName, String extractedTitle, String extractedSequence, String subtitle, Media<?> mediaParameter) {
+  public MediaItem(String uri, String serieName, String extractedTitle, String extractedSequence, String subtitle, Class<?> dataType) {
     assert uri != null;
+    assert extractedSequence == null || !extractedSequence.equals("null");
 
     this.uri = uri;
+    this.dataType = dataType;
 
     this.streamTitle.set(extractedTitle);
 
     this.serieName.set(serieName);
+    this.sequence.set(extractedSequence);
+    this.subtitle.set(subtitle);
     this.title.bind(new StringBinding() {
       {
         bind(streamTitle);
@@ -47,15 +53,10 @@ public class MediaItem extends Entity<MediaItem> {
         return media.get() == null ? sequence.get() : media.get().title.get();
       }
     });
-    this.sequence.set(extractedSequence);
-    this.subtitle.set(subtitle);
-
-    this.media.set(mediaParameter);
-    this.mediaType = getMedia().getClass().getSimpleName();
   }
 
-  public MediaItem(String uri, String title, Media<?> media) {
-    this(uri, null, title, null, null, media);
+  public MediaItem(String uri, String title, Class<?> dataType) {
+    this(uri, null, title, null, null, dataType);
   }
 
   /**
@@ -71,11 +72,11 @@ public class MediaItem extends Entity<MediaItem> {
   }
 
   public String getTitle() {
-    return getMedia().title.get();
+    return title.get();
   }
 
-  public String getMediaType() {
-    return mediaType;
+  public Class<?> getDataType() {
+    return dataType;
   }
 
   public String getId() {
@@ -111,6 +112,6 @@ public class MediaItem extends Entity<MediaItem> {
 
   @Override
   public String toString() {
-    return "MediaItem[" + getMediaType() + ": '" + getMedia().title.get() + "' uri='" + uri +"']";
+    return "MediaItem['" + title.get() + "' uri='" + uri +"']";
   }
 }

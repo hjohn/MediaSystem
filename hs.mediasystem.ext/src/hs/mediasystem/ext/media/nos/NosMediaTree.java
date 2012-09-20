@@ -50,7 +50,9 @@ public class NosMediaTree implements MediaTree, MediaRoot {
 
         media.image.set(new SourceImageHandle(new URLImageSource(thumbUrl), "NosMediaTree:/" + title));
 
-        MediaItem mediaItem = new MediaItem(videoUrl, title, media);
+        MediaItem mediaItem = new MediaItem(videoUrl, title, Media.class);
+
+        mediaItem.media.set(media);
 
         list.add(mediaItem);
       }

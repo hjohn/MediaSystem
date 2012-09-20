@@ -91,7 +91,7 @@ public class MediaItemConfigurator {
           hs.mediasystem.dao.Identifier dbIdentifier = null;
 
           try {
-            dbIdentifier = mediaIdentifier.identifyItem(mediaItem.getMedia());
+            dbIdentifier = mediaIdentifier.identifyItem(mediaItem);
           }
           catch(IdentifyException e) {
             dbIdentifier = new hs.mediasystem.dao.Identifier();

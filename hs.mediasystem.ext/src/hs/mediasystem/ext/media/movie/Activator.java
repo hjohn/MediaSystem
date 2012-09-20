@@ -118,7 +118,7 @@ public class Activator extends DependencyActivatorBase {
       .setImplementation(new DefaultMediaGroup("alpha-group-title", "Alphabetically, grouped by Title", new MovieGrouper(), MovieTitleGroupingComparator.INSTANCE, false, false) {
         @Override
         public Media<?> createMediaFromFirstItem(MediaItem item) {
-          return new Media<>(item.getTitle(), null, item.getMedia().releaseYear.get());
+          return new Media<>(item.getTitle(), null, null);
         }
       })
     );

@@ -7,11 +7,9 @@ public class MovieGrouper implements Grouper<MediaItem> {
 
   @Override
   public Object getGroup(MediaItem item) {
-    Movie movie = item.get(Movie.class);
-
-    if(movie.sequence.get() != null) {
-      return movie.groupTitle.get();
+    if(item.sequence.get() != null) {
+      return item.title.get();
     }
-    return movie.groupTitle.get() + "/" + movie.releaseYear.get();
+    return item.getUri();
   }
 }

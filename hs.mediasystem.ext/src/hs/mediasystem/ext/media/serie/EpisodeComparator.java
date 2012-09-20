@@ -9,23 +9,22 @@ public class EpisodeComparator implements Comparator<MediaItem> {
 
   @Override
   public int compare(MediaItem o1, MediaItem o2) {
-    Episode ep1 = o1.get(Episode.class);
-    Episode ep2 = o2.get(Episode.class);
+    Integer s1 = (Integer)o1.properties.get("season");
+    Integer s2 = (Integer)o2.properties.get("season");
 
-    int s1 = ep1 == null || ep1.season.get() == null || ep1.season.get() == 0 ? Integer.MAX_VALUE : ep1.season.get();
-    int s2 = ep2 == null || ep2.season.get() == null || ep2.season.get() == 0 ? Integer.MAX_VALUE : ep2.season.get();
+    s1 = s1 == null ? Integer.MAX_VALUE : s1;
+    s2 = s2 == null ? Integer.MAX_VALUE : s2;
 
     int result = Integer.compare(s1, s2);
 
     if(result == 0) {
-      int e1 = ep1 == null || ep1.episode.get() == null ? Integer.MAX_VALUE : ep1.episode.get();
-      int e2 = ep2 == null || ep2.episode.get() == null ? Integer.MAX_VALUE : ep2.episode.get();
+      Integer e1 = (Integer)o1.properties.get("episodeNumber");
+      Integer e2 = (Integer)o2.properties.get("episodeNumber");
+
+      e1 = e1 == null ? Integer.MAX_VALUE : e1;
+      e2 = e2 == null ? Integer.MAX_VALUE : e2;
 
       result = Integer.compare(e1, e2);
-
-      if(result == 0) {
-        result = o1.getTitle().compareTo(o2.getTitle());
-      }
     }
 
     return result;

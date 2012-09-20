@@ -8,8 +8,8 @@ import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
 import hs.mediasystem.dao.ProviderId;
 import hs.mediasystem.framework.IdentifyException;
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaIdentifier;
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaLoader;
 import hs.mediasystem.util.CryptoUtil;
 
@@ -25,14 +25,14 @@ public class TvdbSerieEnricher implements MediaIdentifier, MediaLoader {
   static final TheTVDB TVDB = new TheTVDB(CryptoUtil.decrypt("E6A6CF878B4A6200A66E31AED48627CE83A778EBD28200A031F035F4209B61A4", "-MediaSystem-"));
 
   @Override
-  public Identifier identifyItem(final Media<?> media) throws IdentifyException {
+  public Identifier identifyItem(final MediaItem mediaItem) throws IdentifyException {
     synchronized(TheTVDB.class) {
-      List<Series> results = TVDB.searchSeries(media.title.get(), "en");
+      List<Series> results = TVDB.searchSeries(mediaItem.title.get(), "en");
 
-      System.out.println("TVDB results for '" + media.title.get() + "': " + results);
+      System.out.println("TVDB results for '" + mediaItem.title.get() + "': " + results);
 
       if(results.isEmpty()) {
-        throw new IdentifyException("Cannot identify Serie with name: " + media.title.get());
+        throw new IdentifyException("Cannot identify Serie with name: " + mediaItem.title.get());
       }
 
       return new Identifier(new ProviderId("Serie", "TVDB", results.get(0).getId()), MatchType.NAME, 1.0f);

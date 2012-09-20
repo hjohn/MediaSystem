@@ -147,14 +147,14 @@ public class Activator extends DependencyActivatorBase {
       .setImplementation(new DefaultMediaGroup("episodeNumber-group-season", "Season", new SeasonGrouper(), EpisodeComparator.INSTANCE, true, true) {
         @Override
         public Media<?> createMediaFromFirstItem(MediaItem item) {
-          Integer season = item.get(Episode.class).season.get();
+          Integer season = (Integer)item.properties.get("season");
 
           return new Media<>(season == null || season == 0 ? "Specials" : "Season " + season);
         }
 
         @Override
         public String getShortTitle(MediaItem item) {
-          Integer season = item.get(Episode.class).season.get();
+          Integer season = (Integer)item.properties.get("season");
 
           return season == null || season == 0 ? "Sp." : "" + season;
         }

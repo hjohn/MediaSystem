@@ -11,17 +11,25 @@ import java.util.List;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.util.Callback;
 
 public class MediaNode {
   public final SimpleEntityProperty<MediaData> mediaData;
-  public final ObjectProperty<Media<?>> media = new SimpleObjectProperty<>();
+  public final SimpleEntityProperty<Media<?>> media;
 
   private MediaItem mediaItem;
 
   public MediaItem getMediaItem() { return mediaItem; }
+
+  public final StringProperty serieName;
+  public final StringProperty title;
+  public final StringProperty sequence;
+  public final StringProperty subtitle;
+  public final ObjectProperty<ObservableMap<String, Object>> properties;
 
   private final String id;
   private final String shortTitle;
@@ -36,12 +44,17 @@ public class MediaNode {
 
     this.id = mediaItem.getId();
     this.mediaItem = mediaItem;
+    this.serieName = mediaItem.serieName;
+    this.title = mediaItem.title;
+    this.sequence = mediaItem.sequence;
+    this.subtitle = mediaItem.subtitle;
     this.mediaData = mediaItem.mediaData;
-    this.media.set(mediaItem.getMedia());
+    this.media = mediaItem.media;
+    this.properties = new SimpleObjectProperty<>(mediaItem.properties);
 
     this.shortTitle = "";
     this.isLeaf = true;
-    this.dataType = mediaItem.getMedia().getClass();
+    this.dataType = mediaItem.getDataType();
     this.showTopLevelExpanded = false;
   }
 
@@ -49,6 +62,13 @@ public class MediaNode {
     assert id != null;
     assert !id.contains("/");
     assert !id.contains(":");
+
+    this.serieName = new SimpleStringProperty();
+    this.title = new SimpleStringProperty(media.title.get());
+    this.sequence = new SimpleStringProperty();
+    this.subtitle = new SimpleStringProperty();
+    ObservableMap<String, Object> observableHashMap = FXCollections.observableHashMap();
+    this.properties =  new SimpleObjectProperty<>(observableHashMap);
 
     ObservableMap<Class<?>, Object> data = FXCollections.observableHashMap();
 
@@ -58,6 +78,7 @@ public class MediaNode {
     this.mediaData = new SimpleEntityProperty<>(this, "mediaData");
     this.showTopLevelExpanded = false;
     this.shortTitle = shortTitle == null ? media.title.get() : shortTitle;
+    this.media = new SimpleEntityProperty<>(this, "media");
     this.media.set(media);
 
     this.isLeaf = false;

@@ -8,8 +8,8 @@ import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
 import hs.mediasystem.dao.ProviderId;
 import hs.mediasystem.framework.IdentifyException;
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaIdentifier;
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaLoader;
 import hs.mediasystem.util.CryptoUtil;
 import hs.mediasystem.util.Levenshtein;
@@ -49,21 +49,20 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
   }
 
   @Override
-  public Identifier identifyItem(Media<?> media) throws IdentifyException {
+  public Identifier identifyItem(MediaItem mediaItem) throws IdentifyException {
     synchronized(TheMovieDb.class) {
-      Movie movie = (Movie)media;
-
-      String title = movie.groupTitle.get();
-      String subtitle = movie.subtitle.get();
-      Integer year = movie.releaseYear.get();
-      int seq = movie.sequence.get() == null ? 1 : movie.sequence.get();
+      String title = mediaItem.title.get();
+      String subtitle = mediaItem.subtitle.get() == null ? "" : mediaItem.subtitle.get();
+      String imdb = (String)mediaItem.properties.get("imdbNumber");
+      Integer year = (Integer)mediaItem.properties.get("releaseYear");
+      int seq = Integer.parseInt(mediaItem.sequence.get() == null ? "1" : mediaItem.sequence.get());
       int tmdbMovieId = -1;
 
       try {
         float matchAccuracy = 1.0f;
         MatchType matchType = MatchType.ID;
 
-        if(movie.imdbNumber.get() == null) {
+        if(imdb == null) {
           TreeSet<Score> scores = new TreeSet<>(new Comparator<Score>() {
             @Override
             public int compare(Score o1, Score o2) {
@@ -126,7 +125,7 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
           }
         }
         else {
-          final MovieDb movieDb = getTMDB().getMovieInfoImdb(movie.imdbNumber.get(), "en");
+          final MovieDb movieDb = getTMDB().getMovieInfoImdb(imdb, "en");
 
           if(movieDb != null) {
             tmdbMovieId = movieDb.getId();
@@ -134,13 +133,13 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
         }
 
         if(tmdbMovieId != -1) {
-          return new Identifier(new ProviderId(media.getClass().getSimpleName(), "TMDB", Integer.toString(tmdbMovieId)), matchType, matchAccuracy);
+          return new Identifier(new ProviderId(mediaItem.getDataType().getSimpleName(), "TMDB", Integer.toString(tmdbMovieId)), matchType, matchAccuracy);
         }
 
-        throw new IdentifyException(media);
+        throw new IdentifyException(mediaItem);
       }
       catch(MovieDbException e) {
-        throw new IdentifyException(media, e);
+        throw new IdentifyException(mediaItem, e);
       }
     }
   }

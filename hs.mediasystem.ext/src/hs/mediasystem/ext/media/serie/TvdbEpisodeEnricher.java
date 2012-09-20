@@ -8,8 +8,8 @@ import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.Person;
 import hs.mediasystem.dao.ProviderId;
 import hs.mediasystem.framework.IdentifyException;
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaIdentifier;
+import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaLoader;
 import hs.mediasystem.util.Levenshtein;
 
@@ -30,18 +30,18 @@ public class TvdbEpisodeEnricher implements MediaIdentifier, MediaLoader {
   }
 
   @Override
-  public Identifier identifyItem(final Media<?> media) throws IdentifyException {
-    hs.mediasystem.ext.media.serie.Episode episode = (hs.mediasystem.ext.media.serie.Episode)media;
-    Identifier serieMatch = itemIdentifier.identifyItem(episode.serie.get());
+  public Identifier identifyItem(final MediaItem mediaItem) throws IdentifyException {
+    MediaItem serie = (MediaItem)mediaItem.properties.get("serie");
+    Identifier serieMatch = itemIdentifier.identifyItem(serie);
 
     // TODO may need some TVDB caching here, as we're doing this query twice for each episode... and TVDB returns whole seasons I think
-    EpisodeSearchResult result = findEpisode(serieMatch.getProviderId().getId(), episode);
+    EpisodeSearchResult result = findEpisode(serieMatch.getProviderId().getId(), mediaItem);
 
     if(result == null) {
-      throw new IdentifyException("unable to find episode with serieId " + serieMatch.getProviderId() + " and " + episode);
+      throw new IdentifyException("unable to find episode with serieId " + serieMatch.getProviderId() + " and " + mediaItem);
     }
 
-    return new Identifier(new ProviderId(media.getClass().getSimpleName(), "TVDB", serieMatch.getProviderId().getId() + "," + result.episode.getId()), result.matchType, result.matchAccuracy);  // TODO better would be episode id -- this is done here for specials, with season 0 and a nonsense episode number
+    return new Identifier(new ProviderId(mediaItem.getDataType().getSimpleName(), "TVDB", serieMatch.getProviderId().getId() + "," + result.episode.getId()), result.matchType, result.matchAccuracy);  // TODO better would be episode id -- this is done here for specials, with season 0 and a nonsense episode number
   }
 
   @Override
@@ -98,15 +98,17 @@ public class TvdbEpisodeEnricher implements MediaIdentifier, MediaLoader {
     return item;
   }
 
-  private static EpisodeSearchResult findEpisode(String serieId, hs.mediasystem.ext.media.serie.Episode ep) {
+  private static EpisodeSearchResult findEpisode(String serieId, MediaItem ep) {
     synchronized(TheTVDB.class) {
       EpisodeSearchResult result = null;
+      Integer season = (Integer)ep.properties.get("season");
+      Integer episodeNumber = (Integer)ep.properties.get("episodeNumber");
 
-      if(ep.season.get() == null) {
+      if(season == null) {
         result = selectBestMatchByTitle(TvdbSerieEnricher.TVDB, serieId, ep.title.get());
       }
       else {
-        Episode episode = TvdbSerieEnricher.TVDB.getEpisode(serieId, ep.season.get(), ep.episode.get(), "en");
+        Episode episode = TvdbSerieEnricher.TVDB.getEpisode(serieId, season, episodeNumber, "en");
 
         if(episode != null) {
           result = new EpisodeSearchResult(episode, MatchType.ID, 1.0f);

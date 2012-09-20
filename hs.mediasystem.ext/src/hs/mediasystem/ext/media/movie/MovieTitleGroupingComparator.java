@@ -1,6 +1,5 @@
 package hs.mediasystem.ext.media.movie;
 
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 
 import java.util.Comparator;
@@ -13,19 +12,16 @@ public class MovieTitleGroupingComparator implements Comparator<MediaItem> {
     int result = o1.getTitle().compareTo(o2.getTitle());
 
     if(result == 0) {
-      Movie m1 = o1.get(Movie.class);
-      Movie m2 = o2.get(Movie.class);
-
-      Integer s1 = m1 == null || m1.sequence.get() == null ? 0 : m1.sequence.get();
-      Integer s2 = m2 == null || m2.sequence.get() == null ? 0 : m2.sequence.get();
+      Integer s1 = Integer.parseInt(o1.sequence.get() == null ? "0" : o1.sequence.get());
+      Integer s2 = Integer.parseInt(o2.sequence.get() == null ? "0" : o2.sequence.get());
 
       result = Integer.compare(s1, s2);
 
       if(result == 0) {
-        Media<?> media1 = o1.getMedia();
-        Media<?> media2 = o2.getMedia();
+        String sub1 = o1.subtitle.get() == null ? "" : o1.subtitle.get();
+        String sub2 = o2.subtitle.get() == null ? "" : o2.subtitle.get();
 
-        result = media1.subtitle.get().compareTo(media2.subtitle.get());
+        result = sub1.compareTo(sub2);
       }
     }
 
