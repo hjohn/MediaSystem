@@ -27,8 +27,6 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class Entity<T> {
   private static final ThreadPoolExecutor PRIMARY_EXECUTOR = new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
@@ -149,45 +147,6 @@ public class Entity<T> {
   @SuppressWarnings("unchecked")
   private T self() {
     return (T)this;
-  }
-
-  protected <P, R> ObjectProperty<ObservableList<P>> list(final InstanceEnricher<T, R> enricher) {
-    final ObservableList<P> observableArrayList = FXCollections.observableArrayList();
-
-    return new SimpleObjectProperty<ObservableList<P>>(observableArrayList) {
-      private boolean enricherCalled;
-
-      @Override
-      protected void invalidated() {
-        if(persister != null) {
-          persister.queueAsDirty(self());
-          get();
-        }
-      }
-
-      @Override
-      public ObservableList<P> get() {
-        if(enricher != null && !enricherCalled) {
-          enricherCalled = true;
-
-          PRIMARY_EXECUTOR.execute(new Runnable() {
-            @Override
-            public void run() {
-              final R result = enricher.enrich(self());
-
-              Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                  enricher.update(self(), result);
-                }
-              });
-            }
-          });
-        }
-
-        return super.get();
-      }
-    };
   }
 
   protected <P> SimpleEntityProperty<P> entity(String name) {
