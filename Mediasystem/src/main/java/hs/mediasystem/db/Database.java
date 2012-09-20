@@ -66,12 +66,10 @@ public class Database {
     CURRENT_TRANSACTION.set(CURRENT_TRANSACTION.get().parent);
   }
 
-  private static void setParameters(Map<String, Object> columns, PreparedStatement statement) throws SQLException {
+  private static void setParameters(List<Object> parameterValues, PreparedStatement statement) throws SQLException {
     int parameterIndex = 1;
 
-    for(String key : columns.keySet()) {
-      Object value = columns.get(key);
-
+    for(Object value : parameterValues) {
       if(value instanceof Date) {
         statement.setTimestamp(parameterIndex++, new Timestamp(((Date)value).getTime()));
       }
@@ -360,15 +358,18 @@ public class Database {
 
       StringBuilder fields = new StringBuilder();
       StringBuilder values = new StringBuilder();
+      List<Object> parameterValues = new ArrayList<>();
 
-      for(String key : parameters.keySet()) {
+      for(Map.Entry<String, Object> entry : parameters.entrySet()) {
         if(fields.length() > 0) {
           fields.append(",");
           values.append(",");
         }
 
-        fields.append(key);
+        fields.append(entry.getKey());
         values.append("?");
+
+        parameterValues.add(entry.getValue());
       }
 
       String sql = "INSERT INTO " + tableName + " (" + fields.toString() + ") VALUES (" + values.toString() + ")";
@@ -376,7 +377,7 @@ public class Database {
       LOG.fine(this + ": " + sql + ": " + parameters);
 
       try(PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-        setParameters(parameters, statement);
+        setParameters(parameterValues, statement);
 
         statement.execute();
 
@@ -401,14 +402,17 @@ public class Database {
       ensureNotFinished();
 
       StringBuilder set = new StringBuilder();
+      List<Object> parameterValues = new ArrayList<>();
 
-      for(String key : values.keySet()) {
+      for(Map.Entry<String, Object> entry : values.entrySet()) {
         if(set.length() > 0) {
           set.append(",");
         }
 
-        set.append(key);
+        set.append(entry.getKey());
         set.append("=?");
+
+        parameterValues.add(entry.getValue());
       }
 
       String sql = "UPDATE " + tableName + " SET " + set.toString() + " WHERE " + whereCondition;
@@ -416,7 +420,7 @@ public class Database {
       LOG.fine(this + ": " + sql + ": " + Arrays.toString(parameters) + ": " + values);
 
       try(PreparedStatement statement = connection.prepareStatement(sql)) {
-        setParameters(values, statement);
+        setParameters(parameterValues, statement);
         int parameterIndex = values.size() + 1;
 
         for(Object o : parameters) {
