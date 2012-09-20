@@ -75,13 +75,13 @@ public class CastingsRow extends TilePane {
       double space = getWidth() - castingSize;
 
       for(final Casting casting : castings) {
-        empty.set(false);
-
-        if(space < 0) {
-          break;
-        }
-
         if(casting.role.get().equals("Actor")) {
+          empty.set(false);
+
+          if(space < 0) {
+            break;
+          }
+
           CastingImage castingImage = new CastingImage();
 
           castingImage.setFocusTraversable(interactive);
