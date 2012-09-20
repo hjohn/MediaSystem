@@ -3,8 +3,6 @@ package hs.mediasystem.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.beans.property.Property;
-
 public class EnricherBuilder<T, P> {
   private final Class<?> endResultClass;
 
@@ -16,9 +14,8 @@ public class EnricherBuilder<T, P> {
     this.endResultClass = endResultClass;
   }
 
-  @SuppressWarnings("unchecked")
-  public <R> EnricherBuilder<T, P> require(Property<R> property) {
-    requirements.add(new Requirement<T>((Property<Object>)property));
+  public <R> EnricherBuilder<T, P> require(SimpleEntityProperty<R> property) {
+    requirements.add(new Requirement<T>(property));
 
     return this;
   }

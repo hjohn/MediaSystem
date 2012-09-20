@@ -1,14 +1,14 @@
 package hs.mediasystem.entity;
 
-import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 public class Requirement<T> {
-  private final Property<Object> property;
+  private final SimpleEntityProperty<Object> property;
 
-  public Requirement(Property<Object> property) {
-    this.property = property;
+  @SuppressWarnings("unchecked")
+  public Requirement(SimpleEntityProperty<?> property) {
+    this.property = (SimpleEntityProperty<Object>)property;
   }
 
   public void attachListener(final InstanceEnricher<T, Void> enricher, final T parent) {
@@ -18,6 +18,10 @@ public class Requirement<T> {
         enricher.update(parent, null);
       }
     });
+  }
+
+  public SimpleEntityProperty<?> getProperty() {
+    return property;
   }
 
   public Object getValue() {
