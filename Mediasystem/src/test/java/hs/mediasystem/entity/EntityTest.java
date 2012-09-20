@@ -4,122 +4,39 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import hs.mediasystem.dao.Identifier.MatchType;
-import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ProviderId;
-import hs.mediasystem.framework.Casting;
 import hs.mediasystem.framework.Identifier;
-import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.Person;
+import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.test.JavaFXTestCase;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 
-import org.junit.Before;
 import org.junit.Test;
 
 public class EntityTest extends JavaFXTestCase {
-  private InstanceEnricher<Casting, Void> castingEnricher;
-  private InstanceEnricher<Person, Void> personEnricher;
-
-  @Before
-  public void before() {
-    castingEnricher = new InstanceEnricher<Casting, Void>() {
-      @Override
-      public Void enrich(Casting c) {
-        return null;
-      }
-
-      @Override
-      public void update(Casting c, Void result) {
-        c.characterName.set("Alice");
-        c.index.set(1);
-        c.role.set("actor");
-        c.person.set(new Person("Jane Doe", null, null, null, null));
-      }
-    };
-
-    personEnricher = new InstanceEnricher<Person, Void>() {
-      @Override
-      public Void enrich(Person p) {
-        return null;
-      }
-
-      @Override
-      public void update(Person p, Void result) {
-        p.name.set("John Doe");
-        p.birthPlace.set("Amsterdam");
-      }
-    };
-  }
-
-  @Test
-  public void shouldEnrichWhenAccessed() {
-    Person person = new Person(null, null, null, null, null);
-
-    person.setEnricher(personEnricher);
-
-    assertNull(person.name.get());
-    sleep(200);
-    assertEquals("John Doe", person.name.get());
-    assertEquals("Amsterdam", person.birthPlace.get());
-  }
 
   @Test
   public void shouldEnrichEntityWhenAccessed() {
-    Casting casting = new Casting();
+    final Identifier identifier = new Identifier(new ProviderId("Movie", "TMDB", "1"), MatchType.ID, 1.0f);
 
-    casting.setEnricher(castingEnricher);
-
-    assertNull(casting.person.get());
-    sleep(200);
-    assertNotNull(casting.person.get());
-  }
-
-  @Test
-  public void shouldUpdateAsynchronously() {
-    Movie movie = new Movie();
-
-    final MediaItem mediaItem = new MediaItem("L:\\SomeMovie.mkv", "Some Movie", Movie.class);
-
-    mediaItem.identifier.setEnricher(new InstanceEnricher<MediaItem, Identifier>() {
-      @Override
-      public Identifier enrich(MediaItem parent) {
-        return new Identifier(new ProviderId("MOVIE", "TMDB", "12256"), MatchType.HASH, 1.0f);
-      }
-
-      @Override
-      public void update(MediaItem parent, Identifier result) {
-        parent.identifier.set(result);
-      }
-    });
-
-    movie.setEnricher(new InstanceEnricher<Movie, Identifier>() {
-      @Override
-      public Identifier enrich(final Movie m) {
-        mediaItem.identifier.addListener(new ChangeListener<Identifier>() {
-          @Override
-          public void changed(ObservableValue<? extends Identifier> observableValue, Identifier old, Identifier current) {
-            update(m, current);
-          }
-        });
-
-        return mediaItem.identifier.get();
-      }
-
-      @Override
-      public void update(Movie m, Identifier identifier) {
-        if(identifier != null) {
-          Item item = new Item();
-
-          item.setRating(2.0f);
-          item.setGenres(new String[] {"Action", "Adventure"});
-          item.setPlot("A couple go underground and find true love");
+    identifier.mediaData.setEnricher(new EnricherBuilder<Identifier, MediaData>(MediaData.class)
+      .enrich(new EnrichCallback<MediaData>() {
+        @Override
+        public MediaData enrich(Object... parameters) {
+          return new MediaData("http://somewhere", 1000, null, 0, false);
         }
-      }
-    });
+      })
+      .finish(new FinishEnrichCallback<MediaData>() {
+        @Override
+        public void update(MediaData result) {
+          identifier.mediaData.set(result);
+        }
+      })
+      .build()
+    );
 
-    assertNull(mediaItem.getMedia().description.get());
+    assertNull(identifier.mediaData.get());
     sleep(200);
-    assertEquals("A couple go underground and find true love", mediaItem.getMedia().description.get());
+    assertNotNull(identifier.mediaData.get());
+    assertEquals(1000L, identifier.mediaData.get().fileLength.get());
+    assertEquals("http://somewhere", identifier.mediaData.get().uri.get());
   }
 }
