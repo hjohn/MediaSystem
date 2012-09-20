@@ -255,6 +255,10 @@ public class MapBindings {
     @SuppressWarnings("unchecked")
     public ObservableValue<?> getObservableValue(Object bean) {
       try {
+        if(bean instanceof ObservableMap) {
+          return Bindings.valueAt((ObservableMap<Object, ?>)bean, name);
+        }
+
         if(name instanceof String) {
           if(method == null && field == null) {
             try {
@@ -268,7 +272,7 @@ public class MapBindings {
           return method != null ? (ObservableValue<?>)method.invoke(bean) : (ObservableValue<?>)field.get(bean);
         }
 
-        return Bindings.valueAt((ObservableMap<Object, ?>)bean, name);
+        throw new IllegalArgumentException("expected string: " + name);
       }
       catch(NoSuchFieldException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
         e.printStackTrace();
