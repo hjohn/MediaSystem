@@ -54,10 +54,12 @@ public abstract class Timer implements Runnable {
     removeShutdownHook();
 
     // stop executor
-    executor.shutdownNow();
+    if(executor != null) {
+      executor.shutdownNow();
 
-    scheduledFuture = null;
-    executor = null;
+      scheduledFuture = null;
+      executor = null;
+    }
   }
 
   private synchronized void addShutdownHook() {

@@ -1,6 +1,7 @@
 package hs.mediasystem.db;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.Iterator;
@@ -198,7 +199,9 @@ public class ConnectionPool implements AutoCloseable {
     }
 
     try {
-      connection.prepareStatement("SELECT 1").execute();
+      try(PreparedStatement statement = connection.prepareStatement("SELECT 1")) {
+        statement.execute();
+      }
       return true;
     }
     catch(SQLException e) {

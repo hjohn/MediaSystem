@@ -5,10 +5,7 @@ import hs.mediasystem.db.Database.Transaction;
 import hs.mediasystem.db.Record;
 import hs.mediasystem.util.WeakValueMap;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-
-import javax.inject.Provider;
 
 public final class DatabaseUrlSource implements Source<byte[]> {
   private static final WeakValueMap<String, DatabaseUrlSource> INSTANCES = new WeakValueMap<>();
@@ -22,7 +19,7 @@ public final class DatabaseUrlSource implements Source<byte[]> {
   /**
    * Constructs a new instance of this class, or returns null if url was null.
    *
-   * @param connectionProvider a {@link Connection} {@link Provider}
+   * @param database a {@link Database}
    * @param url a url which serves as key
    * @throws SQLException when a database problem occurs
    */
@@ -102,7 +99,7 @@ public final class DatabaseUrlSource implements Source<byte[]> {
   }
 
   @Override
-  public boolean isLocal() {
+  public synchronized boolean isLocal() {
     return isStoredInDatabase();
   }
 }
