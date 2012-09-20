@@ -34,7 +34,7 @@ public class EntityTest extends JavaFXTestCase {
     );
 
     assertNull(identifier.mediaData.get());
-    sleep(200);
+    sleep(500);
     assertNotNull(identifier.mediaData.get());
     assertEquals(1000L, identifier.mediaData.get().fileLength.get());
     assertEquals("http://somewhere", identifier.mediaData.get().uri.get());
