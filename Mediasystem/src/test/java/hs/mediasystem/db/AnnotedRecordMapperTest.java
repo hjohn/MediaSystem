@@ -1,9 +1,13 @@
 package hs.mediasystem.db;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -77,11 +81,13 @@ public class AnnotedRecordMapperTest {
   public void shouldApplyRelationUsingStub() {
     employeeMapper.applyValues(transaction, testEmployee, new HashMap<String, Object>() {{
       put("id", 2);
+      put("fired", true);
       put("name", "John Doe");
       put("employers_id", 101);
     }});
 
     assertEquals(new Integer(2), testEmployee.getId());
+    assertTrue(testEmployee.isFired());
     assertEquals("John Doe", testEmployee.getName());
     assertEquals(TestEmployer.class, testEmployee.getEmployer().getClass());
   }
@@ -94,11 +100,13 @@ public class AnnotedRecordMapperTest {
 
     employeeMapper.applyValues(transaction, testEmployee, new HashMap<String, Object>() {{
       put("id", 2);
+      put("fired", false);
       put("name", "John Doe");
       put("employers_id", 102);
     }});
 
     assertEquals(new Integer(2), testEmployee.getId());
+    assertFalse(testEmployee.isFired());
     assertEquals("John Doe", testEmployee.getName());
     assertEquals(testEmployer, testEmployee.getEmployer());
   }
@@ -151,5 +159,79 @@ public class AnnotedRecordMapperTest {
     assertEquals("Australian Martini", testCar.getBrand());
     assertEquals("1", testCar.getModel());
     assertEquals(testEmployee, testCar.getOwner());
+  }
+
+  @Test
+  public void shouldFetch() {
+    when(transaction.select(TestEmployee.class, "employers_id=?", 500)).thenReturn(new ArrayList<TestEmployee>() {{
+      add(new TestEmployee("Anna"));
+      add(new TestEmployee("Bea"));
+    }});
+
+    TestEmployer employer = new TestEmployer();
+
+    employer.setDatabase(database);
+    employer.setId(500);
+
+    List<TestEmployee> results = AnnotatedRecordMapper.fetch(TestEmployee.class, employer);
+
+    assertEquals(2, results.size());
+    assertEquals("Anna", results.get(0).getName());
+    assertEquals("Bea", results.get(1).getName());
+  }
+
+  @Test
+  public void shouldReturnNoResultsWhenCallingFetchWithParentThatHasNoId() {
+    TestEmployer employer = new TestEmployer();
+
+    List<TestEmployee> results = AnnotatedRecordMapper.fetch(TestEmployee.class, employer);
+
+    assertEquals(0, results.size());
+  }
+
+  @Test(expected = MappingException.class)
+  public void shouldRejectClassWithDuplicateColumnSpecification() {
+    @Table(name = "bad")
+    class TestBadObjectWithDuplicateColumnSpecification extends DatabaseObject {
+      @Column
+      private int field;
+
+      private String someOtherField;
+
+      @Column
+      public String getField() {
+        return someOtherField;
+      }
+
+      @SuppressWarnings("unused")
+      public void setField(String field) {
+        this.someOtherField = field;
+      }
+    }
+
+    AnnotatedRecordMapper.create(TestBadObjectWithDuplicateColumnSpecification.class);
+  }
+
+  @Test(expected = MappingException.class)
+  public void shouldRejectClassWithMissingTableAnnotation() {
+    class TestBadObjectWithMissingTableAnnotation extends DatabaseObject {
+      @Column
+      private int field;
+    }
+
+    AnnotatedRecordMapper.create(TestBadObjectWithMissingTableAnnotation.class);
+  }
+
+  @Test(expected = MappingException.class)
+  public void shouldRejectClassWithMissingSetters() {
+    @Table(name = "bad")
+    class TestBadObjectWithMissingSetters extends DatabaseObject {
+      @Column
+      public int getField() {
+        return 0;
+      }
+    }
+
+    AnnotatedRecordMapper.create(TestBadObjectWithMissingSetters.class);
   }
 }
