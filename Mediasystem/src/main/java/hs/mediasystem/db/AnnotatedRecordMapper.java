@@ -18,13 +18,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   private static final Map<Class<?>, AnnotatedRecordMapper<?>> RECORD_MAPPERS = new WeakValueMap<>();
-  private static final Comparator<Accessor> ACCESSOR_COMPARATOR = new Comparator<Accessor>() {
+  private static final Comparator<Accessor> EMBEDDABLE_INDEX_ORDER = new Comparator<Accessor>() {
     @Override
     public int compare(Accessor o1, Accessor o2) {
       return Integer.compare(o1.getAnnotation(EmbeddableColumn.class).value(), o2.getAnnotation(EmbeddableColumn.class).value());
@@ -38,8 +39,12 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   private Column idColumn;
   private MethodHandle afterLoadStore;
 
-  private AnnotatedRecordMapper(Class<T> cls) {
+  private AnnotatedRecordMapper(final Class<T> cls) {
     Table table = cls.getAnnotation(Table.class);
+
+    if(table == null) {
+      throw new MappingException("Type is missing @Table annotation: " + cls);
+    }
 
     tableName = table.name();
 
@@ -76,6 +81,30 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
         relations.put(accessor.getType(), c.getNames());
       }
     }
+
+    Collections.sort(columns, new Comparator<Column>() {
+      @Override
+      public int compare(Column o1, Column o2) {
+        String[] names1 = o1.getNames();
+        String[] names2 = o2.getNames();
+
+        int result = Integer.compare(names1.length, names2.length);
+
+        if(result == 0) {
+          for(int i = 0; i < names1.length; i++) {
+            result = names1[i].compareTo(names2[i]);
+
+            if(result != 0) {
+              return result;
+            }
+          }
+
+          throw new MappingException("Columns cannot share the same set of fields (" + o1 + ") and (" + o2 + "): " + cls);
+        }
+
+        return result;
+      }
+    });
 
     try {
       afterLoadStore = MethodHandles.lookup().findVirtual(cls, "afterLoadStore", MethodType.methodType(void.class, Database.class));
@@ -114,16 +143,6 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     return relationColumnNames;
   }
 
-  public List<String> getColumnNames() {
-    List<String> columnNames = new ArrayList<>();
-
-    for(Column column : columns) {
-      columnNames.addAll(Arrays.asList(column.getNames()));
-    }
-
-    return columnNames;
-  }
-
   public List<String> getIdColumnNames() {
     return new ArrayList<>(Arrays.asList(idColumn.getNames()));
   }
@@ -139,7 +158,7 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   }
 
   public Object[] getEmbeddedFields(Object embeddedInstance) {
-    List<Accessor> accessors = getAnnotatedAccessors(embeddedInstance.getClass(), ACCESSOR_COMPARATOR, EmbeddableColumn.class);
+    List<Accessor> accessors = getAnnotatedAccessors(embeddedInstance.getClass(), EMBEDDABLE_INDEX_ORDER, EmbeddableColumn.class);
 
     Object[] values = new Object[accessors.size()];
     int index = 0;
@@ -153,7 +172,7 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
 
   @Override
   public Map<String, Object> extractValues(T object) {
-    Map<String, Object> values = new HashMap<>();
+    Map<String, Object> values = new LinkedHashMap<>();
 
     for(Column column : columns) {
       column.toStorageType(column.getAccessor().get(object), values);
@@ -164,7 +183,7 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
 
   @Override
   public Map<String, Object> extractIds(T object) {
-    Map<String, Object> values = new HashMap<>();
+    Map<String, Object> values = new LinkedHashMap<>();
 
     Object[] ids = getIds(object);
 
@@ -333,16 +352,6 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     return accessors;
   }
 
-  public static String getAccessibleObjectName(AccessibleObject accessibleObject) {
-    if(accessibleObject instanceof Field) {
-      return ((Field)accessibleObject).getName();
-    }
-
-    Method method = (Method)accessibleObject;
-
-    return getBaseNameFromGetter(method);
-  }
-
   protected static String getBaseNameFromGetter(Method method) {
     String methodName = method.getName();
 
@@ -370,7 +379,7 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
       return new MethodAccessor(method, writeMethod);
     }
     catch(NoSuchMethodException | SecurityException e) {
-      throw new RuntimeException(e);
+      throw new MappingException("Missing setter for " + method + ": " + method.getDeclaringClass(), e);
     }
   }
 
