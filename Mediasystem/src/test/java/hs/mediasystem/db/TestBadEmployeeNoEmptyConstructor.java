@@ -1,14 +1,13 @@
 package hs.mediasystem.db;
 
-import java.util.Date;
-
 @Table(name = "employees")
-public class TestEmployee extends DatabaseObject {
+public class TestBadEmployeeNoEmptyConstructor extends DatabaseObject {
   public enum Hours {PART_TIME, FULL_TIME}
 
   @Id
   private Integer id;
 
+  @Column
   private String name;
 
   @Column(name = "employers_id")
@@ -17,19 +16,8 @@ public class TestEmployee extends DatabaseObject {
   @Column
   private Hours hours;
 
-  private boolean fired;
-
-  private Date lastLoad;
-
-  public TestEmployee() {
-  }
-
-  public TestEmployee(String name) {
+  public TestBadEmployeeNoEmptyConstructor(String name) {
     this.name = name;
-  }
-
-  public void afterLoadStore(@SuppressWarnings("unused") Database database) {
-    setLastLoad(new Date(2));
   }
 
   public Integer getId() {
@@ -40,7 +28,6 @@ public class TestEmployee extends DatabaseObject {
     this.id = id;
   }
 
-  @Column
   public String getName() {
     return name;
   }
@@ -63,22 +50,5 @@ public class TestEmployee extends DatabaseObject {
 
   public void setHours(Hours hours) {
     this.hours = hours;
-  }
-
-  @Column
-  public boolean isFired() {
-    return fired;
-  }
-
-  public void setFired(boolean fired) {
-    this.fired = fired;
-  }
-
-  public Date getLastLoad() {
-    return lastLoad;
-  }
-
-  public void setLastLoad(Date lastLoad) {
-    this.lastLoad = lastLoad;
   }
 }

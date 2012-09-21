@@ -281,7 +281,7 @@ public class Database {
           return records;
         }
         catch(IllegalAccessException | InstantiationException e) {
-          throw new RuntimeException(e);
+          throw new DatabaseException(this, "Unable to instantiate class: " + cls, e);
         }
       }
       catch(SQLException e) {

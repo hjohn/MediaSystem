@@ -5,6 +5,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import hs.mediasystem.db.Database.Transaction;
+import hs.mediasystem.db.TestEmployee.Hours;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,8 +35,10 @@ public class DatabaseTest {
   @Mock private Connection connection;
   @Mock private Savepoint savepoint;
   @Mock private PreparedStatement statement;
-  @Mock private ResultSet resultSet;
-  @Mock private ResultSetMetaData resultSetMetaData;
+  @Mock private ResultSet employeeResultSet;
+  @Mock private ResultSet generatedKeysResultSet;
+  @Mock private ResultSetMetaData employeeResultSetMetaData;
+  @Mock private ResultSetMetaData generatedKeysResultSetMetaData;
 
   @Before
   public void before() throws SQLException {
@@ -45,14 +48,30 @@ public class DatabaseTest {
     when(connection.prepareStatement(Matchers.anyString())).thenReturn(statement);
     when(connection.prepareStatement(Matchers.anyString(), Matchers.anyInt())).thenReturn(statement);
 
-    when(statement.getGeneratedKeys()).thenReturn(resultSet);
+    when(statement.executeQuery()).thenReturn(employeeResultSet);
+    when(statement.executeUpdate()).thenReturn(1);
 
-    when(resultSet.next()).thenReturn(true).thenReturn(false);
-    when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
-    when(resultSet.getObject(1)).thenReturn(1001);
+    when(employeeResultSet.getMetaData()).thenReturn(employeeResultSetMetaData);
+    when(employeeResultSet.next()).thenReturn(true).thenReturn(false);
+    when(employeeResultSet.getObject(1)).thenReturn(1001);
+    when(employeeResultSet.getObject(2)).thenReturn(false);
+    when(employeeResultSet.getObject(3)).thenReturn("Database Joe");
+    when(employeeResultSet.getObject(4)).thenReturn("PART_TIME");
 
-    when(resultSetMetaData.getColumnCount()).thenReturn(1);
-    when(resultSetMetaData.getColumnName(1)).thenReturn("id");
+    when(employeeResultSetMetaData.getColumnCount()).thenReturn(4);
+    when(employeeResultSetMetaData.getColumnName(1)).thenReturn("id");
+    when(employeeResultSetMetaData.getColumnName(2)).thenReturn("fired");
+    when(employeeResultSetMetaData.getColumnName(3)).thenReturn("name");
+    when(employeeResultSetMetaData.getColumnName(4)).thenReturn("hours");
+
+    when(statement.getGeneratedKeys()).thenReturn(generatedKeysResultSet);
+
+    when(generatedKeysResultSet.next()).thenReturn(true).thenReturn(false);
+    when(generatedKeysResultSet.getMetaData()).thenReturn(generatedKeysResultSetMetaData);
+    when(generatedKeysResultSet.getObject(1)).thenReturn(1001);
+
+    when(generatedKeysResultSetMetaData.getColumnCount()).thenReturn(1);
+    when(generatedKeysResultSetMetaData.getColumnName(1)).thenReturn("id");
 
     connectionProvider = new Provider<Connection>() {
       @Override
@@ -127,7 +146,7 @@ public class DatabaseTest {
   }
 
   @Test
-  public void shouldInsertRowAndReturnedGeneratedKey() throws SQLException {
+  public void shouldInsertRowAndReturnGeneratedKey() throws SQLException {
     try(Transaction transaction = database.beginTransaction()) {
       Object key = transaction.insert("items", new LinkedHashMap<String, Object>() {{
         put("childcount", 2);
@@ -155,6 +174,101 @@ public class DatabaseTest {
     verify(statement).setObject(1, 2);
     verify(statement).setTimestamp(2, new Timestamp(DATE.getTime()));
     verify(statement).setObject(3, 15);
+  }
+
+  @Test
+  public void shouldSelectRow() throws SQLException {
+    try(Transaction transaction = database.beginTransaction()) {
+      Record record = transaction.selectUnique("*", "employees", "id=?", 1001);
+
+      assertEquals(new Integer(1001), record.getInteger("id"));
+      assertEquals("PART_TIME", record.getString("hours"));
+      assertEquals("Database Joe", record.getString("name"));
+    }
+
+    verify(connection).prepareStatement("SELECT * FROM employees WHERE id=?");
+    verify(statement).setObject(1, 1001);
+  }
+
+  @Test(expected = DatabaseException.class)
+  public void shouldThrowDatabaseExceptionWhenSelectFails() throws SQLException {
+    when(statement.executeQuery()).thenThrow(new SQLException());
+
+    try(Transaction transaction = database.beginTransaction()) {
+      transaction.selectUnique("*", "employees", "id=?", 1001);
+    }
+  }
+
+  @Test
+  public void shouldInsertObjectAndSetId() throws SQLException {
+    TestEmployee testEmployee = new TestEmployee();
+
+    testEmployee.setName("John Doe");
+    testEmployee.setHours(Hours.FULL_TIME);
+
+    try(Transaction transaction = database.beginTransaction()) {
+      transaction.insert(testEmployee);
+    }
+
+    assertEquals(new Integer(1001), testEmployee.getId());
+    verify(connection).prepareStatement("INSERT INTO employees (employers_id,fired,hours,name) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+    verify(statement).setObject(1, null);
+    verify(statement).setObject(2, false);
+    verify(statement).setObject(3, "FULL_TIME");
+    verify(statement).setObject(4, "John Doe");
+  }
+
+  @Test
+  public void shouldUpdateObject() throws SQLException {
+    TestEmployee testEmployee = new TestEmployee();
+
+    testEmployee.setName("John Doe");
+    testEmployee.setHours(Hours.FULL_TIME);
+
+    try(Transaction transaction = database.beginTransaction()) {
+      transaction.update(testEmployee);
+    }
+
+    verify(connection).prepareStatement("UPDATE employees SET employers_id=?,fired=?,hours=?,name=? WHERE id = ?");
+    verify(statement).setObject(1, null);
+    verify(statement).setObject(2, false);
+    verify(statement).setObject(3, "FULL_TIME");
+    verify(statement).setObject(4, "John Doe");
+  }
+
+  @Test
+  public void shouldSelectObjectAndInvokeAfterLoadStore() throws SQLException {
+    try(Transaction transaction = database.beginTransaction()) {
+      TestEmployee employee = transaction.selectUnique(TestEmployee.class, "id=?", 1001);
+
+      assertEquals(new Integer(1001), employee.getId());
+      assertEquals(Hours.PART_TIME, employee.getHours());
+      assertEquals("Database Joe", employee.getName());
+      assertEquals(new Date(2), employee.getLastLoad());
+    }
+
+    verify(connection).prepareStatement("SELECT * FROM employees WHERE id=?");
+    verify(statement).setObject(1, 1001);
+  }
+
+  @Test(expected = DatabaseException.class)
+  public void shouldThrowExceptionWhenSelectObjectClassIsMissingEmptyConstructor() {
+    try(Transaction transaction = database.beginTransaction()) {
+      transaction.selectUnique(TestBadEmployeeNoEmptyConstructor.class, "id=?", 1001);
+    }
+  }
+
+  @Test
+  public void shouldDeleteRows() throws SQLException {
+    try(Transaction transaction = database.beginTransaction()) {
+      int deleteCount = transaction.delete("mediadata", "uri = ? OR hash = ?", "TEST_URI", "TEST_HASH");
+
+      assertEquals(1, deleteCount);
+    }
+
+    verify(connection).prepareStatement("DELETE FROM mediadata WHERE uri = ? OR hash = ?");
+    verify(statement).setObject(1, "TEST_URI");
+    verify(statement).setObject(2, "TEST_HASH");
   }
 
   @Test
