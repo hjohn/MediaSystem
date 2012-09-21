@@ -77,7 +77,7 @@ public abstract class MediaProvider<T extends Media<T>> implements EntityProvide
         public List<Identifier> enrich(Object... parameters) {
           List<Identifier> results = new ArrayList<>();
 
-          try(Transaction transaction = item.getDatabase().beginTransaction()) {
+          try(Transaction transaction = item.getDatabase().beginReadOnlyTransaction()) {
             ProviderId providerId = item.getProviderId();
 
             for(hs.mediasystem.dao.Identifier identifier : transaction.select(hs.mediasystem.dao.Identifier.class, "mediatype=? AND provider=? AND providerid=?", providerId.getType(), providerId.getProvider(), providerId.getId())) {

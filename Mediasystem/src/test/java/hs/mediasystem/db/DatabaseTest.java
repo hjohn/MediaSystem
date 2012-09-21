@@ -145,6 +145,13 @@ public class DatabaseTest {
     }
   }
 
+  @Test(expected = DatabaseException.class)
+  public void shouldNotAllowWriteOperationsWithinReadOnlyTransactions() {
+    try(Transaction transaction = database.beginReadOnlyTransaction()) {
+      transaction.insert(new TestEmployee());
+    }
+  }
+
   @Test
   public void shouldInsertRowAndReturnGeneratedKey() throws SQLException {
     try(Transaction transaction = database.beginTransaction()) {

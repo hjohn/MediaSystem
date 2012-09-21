@@ -16,7 +16,7 @@ public class IdentifierDao {
   }
 
   public Identifier getIdentifierByMediaDataId(int id) {
-    try(Transaction transaction = database.beginTransaction()) {
+    try(Transaction transaction = database.beginReadOnlyTransaction()) {
       return transaction.selectUnique(Identifier.class, "mediadata_id = ?", id);
     }
   }

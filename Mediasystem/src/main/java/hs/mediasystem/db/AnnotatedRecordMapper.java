@@ -285,7 +285,7 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
       whereClause += fieldName + "=?";
     }
 
-    try(Transaction transaction = database.beginTransaction()) {
+    try(Transaction transaction = database.beginReadOnlyTransaction()) {
       return (T)transaction.selectUnique(instance.getClass(), whereClause, ids);
     }
   }
@@ -313,7 +313,7 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
       }
     }
 
-    try(Transaction transaction = database.beginTransaction()) {
+    try(Transaction transaction = database.beginReadOnlyTransaction()) {
       transaction.associate(filteredBy);
 
       return transaction.select(cls, relationExpression, parameters);

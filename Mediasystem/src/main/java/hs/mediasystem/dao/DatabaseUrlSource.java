@@ -47,7 +47,7 @@ public final class DatabaseUrlSource implements Source<byte[]> {
     this.database = database;
     this.url = url;
 
-    try(Transaction transaction = database.beginTransaction()) {
+    try(Transaction transaction = database.beginReadOnlyTransaction()) {
       Record record = transaction.selectUnique("url", "images", "url = ?", url);
 
       this.source = record == null ? new URLImageSource(url) : null;
@@ -78,7 +78,7 @@ public final class DatabaseUrlSource implements Source<byte[]> {
   private byte[] getData() {
     System.out.println("[FINE] DatabaseImageSource.getData() - Loading data '" + url + "'");
 
-    try(Transaction transaction = database.beginTransaction()) {
+    try(Transaction transaction = database.beginReadOnlyTransaction()) {
       Image image = transaction.selectUnique(Image.class, "url = ?", url);
 
       if(image != null) {

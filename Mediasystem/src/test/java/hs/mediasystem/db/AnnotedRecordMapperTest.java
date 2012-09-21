@@ -43,6 +43,7 @@ public class AnnotedRecordMapperTest {
 
     when(transaction.getDatabase()).thenReturn(database);
     when(database.beginTransaction()).thenReturn(transaction);
+    when(database.beginReadOnlyTransaction()).thenReturn(transaction);
   }
 
   @Test

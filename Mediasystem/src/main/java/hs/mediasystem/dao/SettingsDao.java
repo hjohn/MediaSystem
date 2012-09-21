@@ -18,7 +18,7 @@ public class SettingsDao {
   }
 
   public List<Setting> getAllSettings() {
-    try(Transaction transaction = database.beginTransaction()) {
+    try(Transaction transaction = database.beginReadOnlyTransaction()) {
       return transaction.select(Setting.class, null);
     }
   }

@@ -38,7 +38,15 @@ public class Database {
   }
 
   public Transaction beginTransaction() throws DatabaseException {
-    Transaction transaction = new Transaction(CURRENT_TRANSACTION.get());
+    return beginTransaction(false);
+  }
+
+  public Transaction beginReadOnlyTransaction() throws DatabaseException {
+    return beginTransaction(true);
+  }
+
+  private Transaction beginTransaction(boolean readOnly) {
+    Transaction transaction = new Transaction(CURRENT_TRANSACTION.get(), readOnly);
 
     CURRENT_TRANSACTION.set(transaction);
 
@@ -83,14 +91,16 @@ public class Database {
     private final Connection connection;
     private final Savepoint savepoint;
     private final long id;
+    private final boolean readOnly;
 
     private final WeakValueMap<String, DatabaseObject> associatedObjects = new WeakValueMap<>();
 
     private int activeNestedTransactions;
     private boolean finished;
 
-    Transaction(Transaction parent) throws DatabaseException {
+    Transaction(Transaction parent, boolean readOnly) throws DatabaseException {
       this.parent = parent;
+      this.readOnly = readOnly;
       this.id = ++uniqueIdentifier;
 
       try {
@@ -131,6 +141,12 @@ public class Database {
     private void ensureNotFinished() {
       if(finished) {
         throw new IllegalStateException(this + ": Transaction already ended");
+      }
+    }
+
+    private void ensureNotReadOnly() {
+      if(readOnly) {
+        throw new DatabaseException(this, "Transaction is read only");
       }
     }
 
@@ -336,6 +352,7 @@ public class Database {
 
     public synchronized Object insert(String tableName, Map<String, Object> parameters) throws DatabaseException {
       ensureNotFinished();
+      ensureNotReadOnly();
 
       StringBuilder fields = new StringBuilder();
       StringBuilder values = new StringBuilder();
@@ -381,6 +398,7 @@ public class Database {
 
     public synchronized int update(String tableName, Map<String, Object> values, String whereCondition, Object... parameters) throws DatabaseException {
       ensureNotFinished();
+      ensureNotReadOnly();
 
       StringBuilder set = new StringBuilder();
       List<Object> parameterValues = new ArrayList<>();
@@ -417,6 +435,7 @@ public class Database {
 
     public synchronized int delete(String tableName, String whereCondition, Object... parameters) throws DatabaseException {
       ensureNotFinished();
+      ensureNotReadOnly();
 
       String sql = "DELETE FROM " + tableName + " WHERE " + whereCondition;
 
@@ -438,6 +457,7 @@ public class Database {
 
     public synchronized int deleteChildren(String tableName, String parentTableName, long parentId) throws DatabaseException {
       ensureNotFinished();
+      ensureNotReadOnly();
 
       String sql = "DELETE FROM " + tableName + " WHERE " + parentTableName + "_id = ?";
 
@@ -524,7 +544,12 @@ public class Database {
     @Override
     public void close() {
       if(!finished) {
-        rollback();
+        if(readOnly) {
+          commit();
+        }
+        else {
+          rollback();
+        }
       }
     }
   }

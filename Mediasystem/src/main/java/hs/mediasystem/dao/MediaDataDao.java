@@ -22,13 +22,13 @@ public class MediaDataDao {
   }
 
   public MediaData getMediaDataByUri(String uri) {
-    try(Transaction transaction = database.beginTransaction()) {
+    try(Transaction transaction = database.beginReadOnlyTransaction()) {
       return transaction.selectUnique(MediaData.class, "uri=?", uri);
     }
   }
 
   public MediaData getMediaDataByHash(byte[] hash) {
-    try(Transaction transaction = database.beginTransaction()) {
+    try(Transaction transaction = database.beginReadOnlyTransaction()) {
       return transaction.selectUnique(MediaData.class, "hash=?", hash);
     }
   }

@@ -129,7 +129,7 @@ public class InformationBorder extends HBox {
           memText.setText(SizeFormatter.BYTES_THREE_SIGNIFICANT.format(usedMemory) + "/" + SizeFormatter.BYTES_THREE_SIGNIFICANT.format(totalMemory));
 
           if(databaseSizeUpdateCounter-- == 0) {
-            try(Transaction transaction = database.beginTransaction()) {
+            try(Transaction transaction = database.beginReadOnlyTransaction()) {
               databaseSize.setText(SizeFormatter.BYTES_THREE_SIGNIFICANT.format(transaction.getDatabaseSize()));
               databaseSizeUpdateCounter = 60;
             }

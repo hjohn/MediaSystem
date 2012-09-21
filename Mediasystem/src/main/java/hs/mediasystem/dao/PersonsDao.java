@@ -14,7 +14,7 @@ public class PersonsDao {
   }
 
   public Person findByName(String name) {
-    try(Transaction transaction = database.beginTransaction()) {
+    try(Transaction transaction = database.beginReadOnlyTransaction()) {
       return transaction.selectUnique(Person.class, "name = ?", name);
     }
   }
