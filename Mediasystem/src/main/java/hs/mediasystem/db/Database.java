@@ -24,35 +24,18 @@ import javax.inject.Singleton;
 
 @Singleton
 public class Database {
-  private static final Map<Class<? extends Fetcher<?, ?>>, Fetcher<?, ?>> FETCHERS = new HashMap<>();
   private static final Logger LOG = Logger.getLogger(Database.class.getName());
+  private static final ThreadLocal<Transaction> CURRENT_TRANSACTION = new ThreadLocal<>();
+  private static final Map<Class<?>, RecordMapper<?>> RECORD_MAPPERS = new HashMap<>();
 
   private static long uniqueIdentifier;
 
   private final Provider<Connection> connectionProvider;
 
-  @SuppressWarnings("unchecked")
-  public static void registerFetcher(Fetcher<?, ?> fetcher) {
-    FETCHERS.put((Class<? extends Fetcher<?, ?>>)fetcher.getClass(), fetcher);
-  }
-
-  public static <P, C> List<C> fetch(P parent, Class<?> cls) {
-    @SuppressWarnings("unchecked")
-    Fetcher<P, C> fetcher = (Fetcher<P, C>)FETCHERS.get(cls);
-
-    if(fetcher == null) {
-      throw new IllegalArgumentException("Fetcher not registered: " + cls);
-    }
-
-    return fetcher.fetch(parent);
-  }
-
   @Inject
   public Database(Provider<Connection> connectionProvider) {
     this.connectionProvider = connectionProvider;
   }
-
-  private static final ThreadLocal<Transaction> CURRENT_TRANSACTION = new ThreadLocal<>();
 
   public Transaction beginTransaction() throws DatabaseException {
     Transaction transaction = new Transaction(CURRENT_TRANSACTION.get());
@@ -81,8 +64,6 @@ public class Database {
       }
     }
   }
-
-  private static final Map<Class<?>, RecordMapper<?>> RECORD_MAPPERS = new HashMap<>();
 
   public <T> RecordMapper<T> getRecordMapper(Class<T> cls) {
     @SuppressWarnings("unchecked")

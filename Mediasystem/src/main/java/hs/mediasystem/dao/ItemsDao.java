@@ -15,8 +15,6 @@ public class ItemsDao {
   public ItemsDao(Database database, PersonsDao personsDao) {
     this.database = database;
     this.personsDao = personsDao;
-
-    Database.registerFetcher(new CastingsFetcher(database));
   }
 
   public Item loadItem(final ProviderId providerId) throws ItemNotFoundException {
