@@ -11,14 +11,17 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-
 @Table(name = "persons")
 public class Person extends DatabaseObject {
 
   @Id
   private Integer id;
+
+  @Column
+  private String name;
+
+  @Column
+  private String biography;
 
   @Column
   private String birthPlace;
@@ -45,15 +48,21 @@ public class Person extends DatabaseObject {
     this.id = id;
   }
 
-  private final StringProperty name = new SimpleStringProperty();
-  public StringProperty nameProperty() { return name; }
-  @Column public String getName() { return this.name.get(); }
-  public void setName(String name) { this.name.set(name); }
+  public String getName() {
+    return name;
+  }
 
-  private final StringProperty biography = new SimpleStringProperty();
-  public StringProperty biographyProperty() { return biography; }
-  @Column public String getBiography() { return this.biography.get(); }
-  public void setBiography(String biography) { this.biography.set(biography); }
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getBiography() {
+    return biography;
+  }
+
+  public void setBiography(String biography) {
+    this.biography = biography;
+  }
 
   public String getPhotoURL() {
     return photoURL;
