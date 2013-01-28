@@ -2,6 +2,7 @@ package hs.mediasystem.screens.selectmedia;
 
 import hs.mediasystem.framework.Casting;
 import hs.mediasystem.util.Events;
+import hs.mediasystem.util.WeakBinder;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -65,6 +66,8 @@ public class CastingsRow extends TilePane {
     });
   }
 
+  private final WeakBinder binder = new WeakBinder();
+
   private void createCastingChildren(ObservableList<? extends Casting> castings) {
     getChildren().clear();
     empty.set(true);
@@ -87,14 +90,15 @@ public class CastingsRow extends TilePane {
           castingImage.setFocusTraversable(interactive);
 
           if(type == Type.CAST) {
-            castingImage.title.bind(casting.person.get().name);
-            castingImage.image.bind(casting.person.get().photo);
+            binder.bind(castingImage.title, casting.person.get().name);
+            binder.bind(castingImage.image, casting.person.get().photo);
           }
           else {
-            castingImage.title.bind(casting.media.get().titleWithContext);
-            castingImage.image.bind(casting.media.get().image);
+            binder.bind(castingImage.title, casting.media.get().titleWithContext);
+            binder.bind(castingImage.image, casting.media.get().image);
           }
-          castingImage.characterName.bind(casting.characterName);
+
+          binder.bind(castingImage.characterName, casting.characterName);
 
           castingImage.setOnAction(new EventHandler<ActionEvent>() {
             @Override
