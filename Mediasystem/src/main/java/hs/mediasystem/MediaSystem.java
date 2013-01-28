@@ -1,45 +1,59 @@
 package hs.mediasystem;
 
-// TODO Changes to subtitles for VLC player
-// TODO Changes for fullscreen display
+// TODO Rename Providers to indicate they are usng the database
+// TODO Empty big detail pane, leads to NPE when pressing back
+// TODO FinishEnrichCallback seems the same everywhere... if not needed can also make better logging
+// TODO Persisters might be able to become part of Provider...
+// TODO If we change Setting to work with Entity.. then DefaultPersistable can be killed + Setting dao can be returned to normal
+
+// TODO Serie without banner doesn't display anything anymoreiu
+// TODO Movie recommendations
+// TODO Get Biography/Birthdate information always from TMDB
+
+// TODO Possible to navigate to empty cell at bottom right in two column banner pane
+// TODO Series view, tabs, recently watched...
+
+// TODO Think about title/subtitle/collections not being part of Item...
+
+// TODO [Trivial] [Considering] CLEANUP-AFTER-REFACTOR: Add version check
+// TODO [Trivial] Make better use of BundleContext in ProgramController (by classes that have a reference to ProgramController)
+// TODO [Easy] Make default screen number configureable using a Setting --> perhaps just save position automatically (after CTRL-ALT-S press)
+
+// TODO [DetailPane] [Easy] Add Play button in Big Info screen
+// TODO [DetailPane] CLEANUP-AFTER-REFACTOR: Add bypasscache -> need reload meta data option back first
+
+// TODO [Trivial] [Considering] Perhaps rename MediaItem to MediaStream class, to make it more clear it represents local/remote streams -- Media class is for Meta Data only, no local data at all
+// TODO CLEANUP-AFTER-REFACTOR: Tasks should display on Task Overlay -> yes...
+// TODO How to order Person->Movie castings? -> Hard to keep it sorted with Comparator as Items might still not be loaded...
+
+// TODO [DetailPane] Make Castings Row a scrollable control
+// TODO [DetailPane] Files with a db-entry should have Media.class, and those without shouldn't; DetailPanes should be created for these two situations seperately, as well as Cells
+// TODO [DetailPane] [Trivial] [Considering] Make (actor photo) focus more clearly visible (animation perhaps)
+// TODO [DetailPane] Movie Collections should show something fancy on their detail pane, or at the very least display a proper background (Collection view, count, list of items, picture of latest/first (or both), stacked pictures)
+
+// TODO [Trivial] [Considering] Changes for fullscreen display that were lost when switching branches
+// TODO Locations should support specific highlighting of an item (it may be possible to also put the last-selected code in there)
+// TODO Sort out packages
+// TODO Controller.play() might be replaceable with Location
+
 // TODO Move stylesheets to bundles
-
-// TODO 1) Introduce Navigation events... Back being most important
-// TODO 2) Let screens decide for themselves what 'back' means, no navigator
-// TODO 3) Keep screens in memory detached when navigating deeper (from select-media to play for example)
-// TODO 4) Make it possible to navigate directly to a screen position (like jumping to a specific Episode from Movies) -- possible when there's no navigators
-// TODO 5) Related to 4, back won't go back to where you came from, back goes up in hierarchy... always.
-
-// TODO 1) Make Actor a scrollable, highlightable, selectable control
-// TODO 2) When actor selected show full list of every movie/episode they played in
-// TODO 3) Selecting from aformentioned list should take you to information pane of movie/episode, this might be tricky if it involves switching provider kind (serie->movie and vice versa)
-// TODO 4) Add Play button
-
 // TODO Possibly allow focus in multi-line text and actors boxes, for page navigation (dots below the control show number of pages and active page)
-
 // TODO Introduce back + navigation + select events ; look at navigation in DialogPane... use navigator or use custom backspace handler
 
-// TODO Completely remove dependency on mediasystem.ini (unless configuring a db)
 // TODO Create downloadable jar
 
-// TODO Further testing with Derby to see if it is stable
-// TODO Cells in TreeView sometimes become super wide after switching screens (to different resolutions)
-// TODO Change pause/mute overlays
-// TODO PathSelectOption: Start at last selected path
+// TODO [Bug] Cells in TreeView sometimes become super wide after switching screens (to different resolutions)
+// TODO [Easy] [Considering] Change pause/mute overlays
+// TODO [Easy] PathSelectOption: Start at last selected path
+// TODO [Easy] BannerListPane and other ListPane really should externalize the cell provider to remove bundlecontext
 
-// TODO BannerListPane and other ListPane really should externalize the cell provider to remove bundlecontext
-
-// TODO Movie Collections should show something fancy on their detail pane, or at the very least display a proper background (Collection view, count, list of items, picture of latest/first (or both), stacked pictures)
-
-// TODO Store scroll position (requires hacking skin)
+// TODO [Considering] Store scroll position (requires hacking skin)
 
 // TODO Banner view -- change layout to get bigger banners -> DEPENDS ON: provider specific detail panes -> perhaps provide detail panes of varying sizes (1/2, 1/3, 1/4)
-// TODO Option screen, re-highlight last used option
+// TODO [Easy] Option screen: re-highlight last used option
 
 // Big stuff:
-// TODO Add Information Pane (big version of Detail Pane)
 // TODO Movie gallery layout ext (cover flow)
-// TODO Linking of Actors between different movies, so one can see where else a certain actor played
 // TODO Resume functionality
 //      - Look into SettingsStore PersistLevel system; determine useability for storing settings per video (like resume)
 //      - Make subtitles more persistent by storing them with file (or simply in db?) required if you want to show same sub again after resuming
@@ -48,25 +62,20 @@ package hs.mediasystem;
 // TODO Improved Special Handling, including real specials and just bonus stuff
 
 // OSGI:
-// TODO Reloading of Bundles fails, needs a fix
+// TODO [Bug] Reloading of Bundles fails, needs a fix
 // TODO Externalize more of the services being registered in FrontEnd
 
 // Other:
-// TODO Rename Filter to TabGroup -- or refactor completely to use RadioButton API
+// TODO [Easy] [Considering] Rename Filter to TabGroup -- or refactor completely to use RadioButton API
 // TODO Subtitle Provider Podnapisi
-// TODO [Option Dialog] Separators for Dialog Screen
-// TODO [Select Media] Filtering possibilities (Action movies, Recent movies, etc)
-// TODO [PlaybackOverlay] For Episodes, in playback screen title should be serie name
+// TODO [SelectMedia] Filtering possibilities (Action movies, Recent movies, etc)
 
 // Low priority:
 // TODO Some form of remote control support / Lirc support --> EventGhost makes this unnecessary, keyboard control suffices
 
 // Possible Configuration Options:
 // - Default Screen number
-// - Movie paths
-// - Serie paths
 // - Default player
-// - Debug mem bar
 // - Default visibility of info bar on playback screen
 
 // Considerations:
@@ -83,6 +92,7 @@ package hs.mediasystem;
 
 // General Annoyances:
 // - Creating a new Stage and displaying it when app does not have focus causing Windows to flash the taskbar button (does this too for switching between transparent and non-transparent stage... perhaps transparent performance is acceptable now...?)
+// - Derby: Problem with savepoints getting rolled back DERBY-5545/DERBY-5921 --> "solved" now by commiting read only transactions by default
 
 // -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails
 
@@ -236,22 +246,27 @@ package hs.mediasystem;
 import hs.mediasystem.util.Log;
 import hs.mediasystem.util.Log.LinePrinter;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 
 import javafx.application.Application;
 
 public class MediaSystem {
-  public static void main(String[] args) {
+  public static void main(String[] args) throws SecurityException, FileNotFoundException, IOException {
     ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
 
     Log.initialize(new LinePrinter() {
-      private final int methodColumn = 120;
-      private final int methodTabStop = 24;
+      private static final int METHOD_COLUMN = 120;
+      private static final int METHOD_TAB_STOP = 24;
+
       private final long startTime = System.currentTimeMillis();
-      private final String pad = String.format("%" + methodColumn + "s", "");
+      private final String pad = String.format("%" + METHOD_COLUMN + "s", "");
       private final Map<Level, String> levelMap = new HashMap<Level, String>() {{
         put(Level.SEVERE, "!");
         put(Level.WARNING, "?");
@@ -264,7 +279,7 @@ public class MediaSystem {
 
       @Override
       public void print(PrintStream printStream, Level level, String textParm, String method) {
-        if(method.startsWith(" -- uk.co.caprica.vlcj.binding.Info.<init>")) {
+        if(method.startsWith(" -- uk.co.caprica.vlcj.Info.<init>")) {
           return;
         }
 
@@ -273,7 +288,7 @@ public class MediaSystem {
         StringBuilder builder = new StringBuilder();
         long sinceStart = System.currentTimeMillis() - startTime;
 
-        boolean stackTrace = method.startsWith(" -- java.lang.Throwable$WrappedPrintStream.println(Throwable.");
+        boolean stackTrace = method.startsWith(" -- java.lang.Throwable$WrappedPrintStream.println(");
         boolean stackTraceHeader = stackTrace && !text.startsWith("Caused by:") && !text.startsWith("\t");
 
         if(stackTraceHeader) {
@@ -282,18 +297,17 @@ public class MediaSystem {
         }
 
         if(!stackTrace) {
-          builder.append(String.format("%9.3f %s\u2502 ", ((double)sinceStart) / 1000, translateLevel(level)));
+          builder.append(String.format("%1s%9.3f\u2502%02x\u2502 ", translateLevel(level), ((double)sinceStart) / 1000, Thread.currentThread().getId()));
         }
         builder.append(text);
 
-        if(builder.length() < methodColumn) {
-          builder.append(pad.substring(0, methodColumn - builder.length()));
-        }
-        else {
-          builder.append(pad.substring(0, methodTabStop - builder.length() % methodTabStop));
-        }
-
         if(!stackTrace && !stackTraceHeader) {
+          if(builder.length() < METHOD_COLUMN) {
+            builder.append(pad.substring(0, METHOD_COLUMN - builder.length()));
+          }
+          else {
+            builder.append(pad.substring(0, METHOD_TAB_STOP - builder.length() % METHOD_TAB_STOP));
+          }
           builder.append(method);
         }
         builder.append("\r\n");
@@ -306,8 +320,15 @@ public class MediaSystem {
       }
     });
 
-//    System.setProperty("prism.verbose", "true");
+    try(FileInputStream stream = new FileInputStream("logging.properties")) {
+      LogManager.getLogManager().readConfiguration(stream);
+    }
+    catch(FileNotFoundException e) {
+      System.out.println("[INFO] File 'logging.properties' not found, using defaults");
+    }
+
     System.setProperty("prism.lcdtext", "false");
+//    System.setProperty("prism.verbose", "true");
 //    System.setProperty("prism.dirtyopts", "false");
 
     Application.launch(FrontEnd.class, args);
