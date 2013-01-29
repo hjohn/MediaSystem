@@ -6,11 +6,11 @@ import javafx.event.EventHandler;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.SkinBase;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyEvent;
 
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
-import com.sun.javafx.scene.control.skin.SkinBase;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
 
 /**

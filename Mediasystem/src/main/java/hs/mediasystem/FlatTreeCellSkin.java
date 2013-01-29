@@ -17,8 +17,9 @@ public class FlatTreeCellSkin extends CellSkinBase<TreeCell<?>, TreeCellBehavior
     super(paramTreeCell, new TreeCellBehavior(paramTreeCell));
   }
 
+
   @Override
-  protected void layoutChildren() {
+  protected void layoutChildren(double x, double y, double w, double h) {
     TreeItem<?> localTreeItem = ((TreeCell<?>)getSkinnable()).getTreeItem();
     if(localTreeItem == null) {
       return;
@@ -29,10 +30,10 @@ public class FlatTreeCellSkin extends CellSkinBase<TreeCell<?>, TreeCellBehavior
       return;
     }
 
-    double left = getInsets().getLeft();
-    double top = getInsets().getTop();
-    double width = getWidth() - (getInsets().getLeft() + getInsets().getRight());
-    double height = getHeight() - (getInsets().getTop() + getInsets().getBottom());
+    double left = leftPadding();
+    double top = topPadding();
+    double width = w - (leftPadding() + rightPadding());
+    double height = h - (topPadding() + bottomPadding());
 
     int i = TreeView.getNodeLevel(((TreeCell<?>)getSkinnable()).getTreeItem());
     if(!(localTreeView.isShowRoot())) {
