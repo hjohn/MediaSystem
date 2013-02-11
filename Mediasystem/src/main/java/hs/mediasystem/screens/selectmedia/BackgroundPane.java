@@ -1,5 +1,7 @@
 package hs.mediasystem.screens.selectmedia;
 
+import java.io.ByteArrayInputStream;
+
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.util.ImageHandle;
@@ -23,6 +25,7 @@ import javafx.util.Duration;
 
 public class BackgroundPane extends StackPane {
   private static final Duration SETTLE_DURATION = Duration.millis(200);
+  private static final Image EMPTY_IMAGE = new Image(new ByteArrayInputStream(new byte[0]));
 
   private final ObjectProperty<MediaNode> mediaNode = new SimpleObjectProperty<>();
   public ObjectProperty<MediaNode> mediaNodeProperty() { return mediaNode; }
@@ -59,7 +62,13 @@ public class BackgroundPane extends StackPane {
        */
 
       if(isBackgroundChanged()) {
-        newBackground.set(wantedBackground.get());
+        Image image = wantedBackground.get();
+
+        if(image == null) {
+          image = EMPTY_IMAGE;  // WORKAROUND for ImageViews being unable to handle null properly
+        }
+
+        newBackground.set(image);
       }
       else {
         timeline.stop();

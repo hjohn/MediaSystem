@@ -33,6 +33,8 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
   private boolean taskQueued;
 
   public AsyncImageProperty() {
+    set(NULL_IMAGE);  // WORKAROUND for JavaFX Jira Issue RT-23974; should be null, but that causes an Exception in ImageView code
+
     imageHandle.addListener(new ChangeListener<ImageHandle>() {
       @Override
       public void changed(ObservableValue<? extends ImageHandle> observable, ImageHandle oldValue, ImageHandle value) {
@@ -56,7 +58,7 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
           @Override
           public void run() {
             try {
-              Image image = null;
+              Image image = NULL_IMAGE;
 
               try {
                 image = ImageCache.loadImageUptoMaxSize(imageHandle, 1920, 1200);
