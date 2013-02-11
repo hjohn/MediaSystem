@@ -6,7 +6,7 @@
 .menu-scroll-box .button {
   -fx-content-display: top;
   -fx-text-fill: color-blue-70;
-  -fx-font-size: 24pt;
+  -fx-font-size: 24px;
   -fx-background-color: transparent;
 }
 

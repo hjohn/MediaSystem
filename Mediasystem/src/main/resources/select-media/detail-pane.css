@@ -4,7 +4,7 @@
 
 .title {
   -fx-text-fill: -c-text-highlight;
-  -fx-font-size: 24pt;
+  -fx-font-size: 24px;
   -fx-font-weight: bold;
   -fx-wrap-text: true;
 }
@@ -33,7 +33,7 @@
 }
 
 .cast-photo .place-holder {
-  -fx-font-size: 90pt;
+  -fx-font-size: 90px;
   -fx-font-weight: bold;
   -fx-text-fill: -c-text-watermark;
 }
@@ -43,14 +43,14 @@
   -fx-alignment: center;
   -fx-text-alignment: center;
   -fx-font-weight: bold;
-  -fx-font-size: 11pt;
+  -fx-font-size: 11px;
   -fx-wrap-text: true;
 }
 
 .cast-character-name {
   -fx-alignment: center;
   -fx-text-alignment: center;
-  -fx-font-size: 11pt;
+  -fx-font-size: 11px;
   -fx-wrap-text: true;
   -fx-text-fill: -c-text-highlight;
 }
@@ -60,7 +60,7 @@
 }
 
 .header {
-  -fx-font-size: 13pt;
+  -fx-font-size: 13px;
   -fx-font-weight: bold;
   -fx-text-fill: -c-text-unobtrusive;
   -fx-label-padding: 20 0 0 0;

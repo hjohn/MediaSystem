@@ -1,7 +1,7 @@
 .elements {
   -fx-background-color: color-content-background;
   -fx-background-radius: 0 0 8 0;
-  -fx-font-size: 13pt;
+  -fx-font-size: 13px;
   -fx-font-weight: bold;
 }
 
@@ -39,7 +39,7 @@
 
 .program-name .center {
   -fx-label-padding: 0 2 0 1;
-  -fx-font-size: 12pt;
+  -fx-font-size: 12px;
   -fx-font-weight: bold;
   -fx-font-style: italic;
   -fx-scale-x: 2.0;

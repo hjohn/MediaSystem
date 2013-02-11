@@ -50,7 +50,7 @@
   color-black-75: rgba(0, 0, 0, 0.75);
   
   -fx-font-family: "Arial";
-  -fx-font-size: 16pt;
+  -fx-font-size: 16px;
   -fx-font-weight: normal;
 }
 
@@ -80,12 +80,8 @@
 /*
  * List & Tree styles
  */
-
-.list-cell:even, .tree-cell:even, .table-cell:even {
-  -fx-background-color: transparent;
-}
-
-.list-cell:odd, .tree-cell:odd, .table-cell:odd {
+ 
+.list-cell:even, .tree-cell:even, .table-cell:even, .list-cell:odd, .tree-cell:odd, .table-cell:odd{
   -fx-background-color: transparent;
 }
 
@@ -96,6 +92,7 @@
 .list-cell, .tree-cell, .option-cell {
   -fx-background-color: transparent;
 
+  -fx-padding: 1px;
   -fx-border-color: linear-gradient(to right, transparent, color-blue-20 15%, color-blue-20 85%, transparent);
   -fx-border-width: 1;
   -fx-border-insets: 1;

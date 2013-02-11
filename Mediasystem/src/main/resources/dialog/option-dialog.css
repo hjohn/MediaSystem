@@ -1,6 +1,6 @@
 
 .dialog {
-  -fx-font-size: 18pt;
+  -fx-font-size: 18px;
   -fx-font-weight: bold;
 }
 
@@ -13,13 +13,13 @@
 }
 
 .detail {
-  -fx-font-size: 14pt;
+  -fx-font-size: 14px;
   
   -fx-alignment: center-right;
 }
 
 .title {
-  -fx-font-size: 24pt; 
+  -fx-font-size: 24px; 
   -fx-font-weight: bold;
   
   -fx-alignment: center;

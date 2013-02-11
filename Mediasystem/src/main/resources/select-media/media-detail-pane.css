@@ -1,5 +1,5 @@
 .group-name {
-  -fx-font-size: 16pt;
+  -fx-font-size: 16px;
   -fx-font-weight: bold;
   -fx-wrap-text: true;
 }

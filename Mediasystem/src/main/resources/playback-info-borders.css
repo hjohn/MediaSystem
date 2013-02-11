@@ -1,6 +1,6 @@
 .label {
   -fx-font-weight: bold;
-  -fx-font-size: 18pt; 
+  -fx-font-size: 18px; 
 }
 
 .time.label, .position.label {

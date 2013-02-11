@@ -9,7 +9,7 @@
 }
 
 .title {
-  -fx-font: bold 18pt "Arial";
+  -fx-font: bold 18px "Arial";
   -fx-wrap-text: true;
 }
 
