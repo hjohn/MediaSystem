@@ -49,10 +49,6 @@
   -fx-hgap: 5;
 }
 
-.tree-cell {
-  -fx-skin: "hs.mediasystem.FlatTreeCellSkin";
-}
-
 .seasons .label {
   -fx-text-fill: color-focused-text;
   -fx-label-padding: 5 10 5 10;

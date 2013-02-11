@@ -54,6 +54,14 @@
   -fx-font-weight: normal;
 }
 
+.tree-view {
+  -fx-skin: "hs.mediasystem.controls.TreeViewSkin";
+}
+
+.tree-cell {
+  -fx-skin: "hs.mediasystem.controls.TreeCellSkin";
+}
+
 .scroll-pane {
   -fx-background-color: transparent;
 }
