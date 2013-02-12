@@ -61,7 +61,11 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
               Image image = NULL_IMAGE;
 
               try {
-                image = ImageCache.loadImageUptoMaxSize(imageHandle, 1920, 1200);
+                Image newImage = ImageCache.loadImageUptoMaxSize(imageHandle, 1920, 1200);
+
+                if(newImage != null) {
+                  image = newImage;  // WORKAROUND for JavaFX Jira Issue RT-23974; should be null, but that causes an Exception in ImageView code
+                }
               }
               catch(Exception e) {
                 System.out.println("[WARN] AsyncImageProperty - Exception while loading " + imageHandle + " in background: " + e);
