@@ -2,8 +2,13 @@ package hs.mediasystem.controls;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -62,6 +67,11 @@ import com.sun.javafx.scene.control.skin.BehaviorSkinBase;
 
 
 public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehavior<T>>  {
+  private final Set<TreeCell<T>> usedCells = new HashSet<>();
+  private final List<TreeCell<T>> reusableCells = new ArrayList<>();
+
+  private int maximumCells = 100;
+
   private TreeCell<T> firstFullyVisibleCell;
   private TreeCell<T> lastFullyVisibleCell;
   private double targetCellOffset = 0.5;
@@ -72,10 +82,7 @@ public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehav
 //    getSkinnable().addEventHandler(ScrollToEvent.)
 
     getBehavior().setOnFocusPreviousRow(new Runnable() {
-        @Override
-        public void run() {
-
-        }
+        @Override public void run() { }
     });
     getBehavior().setOnFocusNextRow(new Runnable() {
         @Override public void run() { }
@@ -93,10 +100,6 @@ public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehav
             targetCellOffset = 0;
             getSkinnable().requestLayout();
           }
-          else {
-            //targetCellOffset = computeTargetCellOffset(lastFullyVisibleCell);
-            //getSkinnable().getFocusModel().focus(lastFullyVisibleCell.getIndex());
-          }
 
           return lastFullyVisibleCell.getIndex();
         }
@@ -107,9 +110,6 @@ public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehav
           if(firstFullyVisibleCell.isFocused()) {
             targetCellOffset = 1;
             getSkinnable().requestLayout();
-          }
-          else {
-            //getSkinnable().getFocusModel().focus(firstFullyVisibleCell.getIndex());
           }
 
           return firstFullyVisibleCell.getIndex();
@@ -145,18 +145,10 @@ public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehav
 
           System.out.println(">>> targetCellOffset = " + targetCellOffset + "; index = " + index + "; lastFullyVisibleCell = " + lastFullyVisibleCell.getIndex() + " -> " + lastFullyVisibleCell.getTreeItem());
         }
-
-//        if(current != null) {
-//          getTreeCell(current).updateSelected(true);
-//        }
-//        if(old != null) {
-//          getTreeCell(old).updateSelected(false);
-//        }
       }
     });
   }
 
-  private final Map<TreeItem<T>, TreeCell<T>> treeCells = new HashMap<>();
 
   private double computeTargetCellOffset(TreeCell<T> cell) {
     double cellCenter = cell.getLayoutY() - getSkinnable().getInsets().getTop() + cell.getHeight() / 2;
@@ -166,16 +158,24 @@ public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehav
     return cellCenter / (getSkinnable().getHeight() - getSkinnable().getInsets().getTop() - getSkinnable().getInsets().getBottom());
   }
 
+  private final Map<TreeItem<T>, TreeCell<T>> treeCells = new HashMap<>();
+
   private TreeCell<T> getTreeCell(TreeItem<T> item) {
     TreeCell<T> cell = treeCells.get(item);
 
     if(cell == null) {
-      cell = createCell();
-//      cell.setManaged(false);
+      if(reusableCells.isEmpty()) {
+        cell = createCell();
+      }
+      else {
+        cell = reusableCells.remove(reusableCells.size() - 1);
+      }
+
       cell.updateTreeItem(item);
-//      cell.updateSelected(true);
       treeCells.put(item, cell);
     }
+
+    usedCells.add(cell);
 
     return cell;
   }
@@ -255,8 +255,31 @@ public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehav
     return 20;
   }
 
+  private void markAllCellsUnused() {
+    usedCells.clear();
+  }
+
+  private void discardUnusedCells() {
+    Iterator<TreeCell<T>> iterator = treeCells.values().iterator();
+
+    while(iterator.hasNext()) {
+      TreeCell<T> cell = iterator.next();
+
+      if(!usedCells.contains(cell)) {
+        iterator.remove();
+        cell.updateIndex(-1);  // TODO do more here to empty cell, updateItem, updateTreeItem, etc.
+        reusableCells.add(cell);
+      }
+    }
+
+    if(reusableCells.size() >= maximumCells) {
+      reusableCells.subList(maximumCells, reusableCells.size()).clear();
+    }
+  }
+
   @Override
   protected void layoutChildren(double x, double y, double w, double h) {
+    markAllCellsUnused();
     getChildren().clear();
 
     getSkinnable().setClip(new Rectangle(x, y, w, h));
@@ -352,6 +375,8 @@ public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehav
 
       firstItem = next(firstItem);
     }
+
+    discardUnusedCells();
   }
 
   public TreeCell<T> createCell() {
