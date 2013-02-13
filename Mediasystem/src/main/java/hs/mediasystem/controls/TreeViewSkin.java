@@ -1,7 +1,5 @@
 package hs.mediasystem.controls;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +11,9 @@ import java.util.Set;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.control.ScrollToEvent;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -79,7 +79,12 @@ public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehav
   public TreeViewSkin(TreeView<T> treeView) {
     super(treeView, new TreeViewBehavior<T>(treeView));
 
-//    getSkinnable().addEventHandler(ScrollToEvent.)
+    getSkinnable().addEventHandler(ScrollToEvent.SCROLL_TO_TOP_INDEX, new EventHandler<ScrollToEvent<Integer>>() {
+      @Override
+      public void handle(ScrollToEvent<Integer> event) {
+        targetCellOffset = 0.5;
+      }
+    });
 
     getBehavior().setOnFocusPreviousRow(new Runnable() {
         @Override public void run() { }
@@ -348,30 +353,18 @@ public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehav
         getChildren().add(cell);
       }
 
-      try {
-        Method method = javafx.scene.control.Cell.class.getDeclaredMethod("updateItem", Object.class, boolean.class);
+      cell.updateIndex(index++);
+      double ch = cell.prefHeight(-1);
+      cell.resizeRelocate(x, startY, w, ch);
 
-        method.setAccessible(true);
-        method.invoke(cell, firstItem.getValue(), false);
-
-        double ch = cell.prefHeight(-1);
-        cell.resizeRelocate(x, startY, w, ch);
-        cell.updateIndex(index++);
-
-        if(startY >= 0 && firstFullyVisibleCell == null) {
-          firstFullyVisibleCell = cell;
-        }
-        if(startY - y + ch <= h) {
-          lastFullyVisibleCell = cell;
-        }
-
-        // cell.setMinSize(w, ch);
-        //cell.setPrefSize(w, ch);
-        startY += ch;
+      if(startY >= 0 && firstFullyVisibleCell == null) {
+        firstFullyVisibleCell = cell;
       }
-      catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-        throw new RuntimeException(e);
+      if(startY - y + ch <= h) {
+        lastFullyVisibleCell = cell;
       }
+
+      startY += ch;
 
       firstItem = next(firstItem);
     }

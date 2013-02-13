@@ -58,6 +58,7 @@
   -fx-skin: "hs.mediasystem.controls.TreeViewSkin";
 }
 
+/* WORKAROUND for RT-28390: NPE in TreeCellSkin when TreeCell disclosureNode is set to null */
 .tree-cell {
   -fx-skin: "hs.mediasystem.controls.TreeCellSkin";
 }
