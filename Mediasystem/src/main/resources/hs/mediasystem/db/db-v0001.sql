@@ -19,7 +19,7 @@ CREATE TABLE items (
   episode integer,
   releasedate date,
   releaseyear integer,
-  plot varchar(2000),
+  plot varchar(8000),
   imdbid varchar(20),
   rating real,
   runtime integer,
