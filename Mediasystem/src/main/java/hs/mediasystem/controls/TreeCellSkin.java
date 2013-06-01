@@ -6,9 +6,9 @@ import com.sun.javafx.scene.control.behavior.TreeCellBehavior;
 import com.sun.javafx.scene.control.skin.CellSkinBase;
 
 // WORKAROUND for RT-28390: NPE in TreeCellSkin when TreeCell disclosureNode is set to null
-public class TreeCellSkin extends CellSkinBase<TreeCell<?>, TreeCellBehavior> {
+public class TreeCellSkin<T> extends CellSkinBase<TreeCell<T>, TreeCellBehavior<T>> {
 
-  public TreeCellSkin(TreeCell<?> treeCell) {
-    super(treeCell, new TreeCellBehavior(treeCell));
+  public TreeCellSkin(TreeCell<T> treeCell) {
+    super(treeCell, new TreeCellBehavior<>(treeCell));
   }
 }

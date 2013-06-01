@@ -12,16 +12,15 @@ import hs.mediasystem.screens.optiondialog.NumericOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.OptionDialogPane;
 import hs.mediasystem.screens.optiondialog.OptionGroup;
-import hs.mediasystem.util.PropertyClassEq;
-import hs.mediasystem.util.PropertyEq;
-import hs.mediasystem.util.ServiceTracker;
 import hs.mediasystem.util.StringBinding;
 import hs.mediasystem.util.StringConverter;
 import hs.subtitle.SubtitleDescriptor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -37,8 +36,6 @@ import javafx.scene.input.KeyEvent;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import org.osgi.framework.BundleContext;
 
 public class PlaybackOverlayPresentation implements Presentation {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
@@ -56,20 +53,21 @@ public class PlaybackOverlayPresentation implements Presentation {
   private final MediaItem mediaItem;
 
   private final ObjectProperty<SubtitleDescriptor> selectedSubtitleForDownload = new SimpleObjectProperty<>();
+  private final Set<SubtitleProvider> subtitleProviders;
+  private final Set<SubtitleCriteriaProvider> subtitleCriteriaProviders;
 
   private long totalTimeViewed = 0;
 
   @Inject
-  public PlaybackOverlayPresentation(BundleContext bundleContext, final ProgramController controller, final PlayerPresentation playerPresentation, final PlaybackOverlayView view) {
+  public PlaybackOverlayPresentation(Set<SubtitleProvider> subtitleProviders, Set<SubtitleCriteriaProvider> subtitleCriteriaProviders, final ProgramController controller, final PlayerPresentation playerPresentation, final PlaybackOverlayView view) {
+    this.subtitleProviders = subtitleProviders;
+    this.subtitleCriteriaProviders = subtitleCriteriaProviders;
     this.playerPresentation = playerPresentation;
     this.view = view;
     this.mediaItem = controller.getCurrentMediaItem();
 
     final Player player = playerPresentation.getPlayer();
     final PlayerBindings playerBindings = new PlayerBindings(view.playerProperty());
-
-    final ServiceTracker<SubtitleProvider> subtitleProviderTracker = new ServiceTracker<>(bundleContext, SubtitleProvider.class);
-    final ServiceTracker<SubtitleCriteriaProvider> subtitleCriteriaProviderTracker = new ServiceTracker<>(bundleContext, SubtitleCriteriaProvider.class);
 
     view.mediaItemProperty().set(mediaItem);
     view.playerProperty().set(player);
@@ -102,8 +100,8 @@ public class PlaybackOverlayPresentation implements Presentation {
               @Override
               public List<Option> get() {
                 return new ArrayList<Option>() {{
-                  final SubtitleSelector subtitleSelector = new SubtitleSelector(subtitleProviderTracker.getServices(SUBTITLE_PROVIDER_COMPARATOR, new PropertyEq("mediatype", "movie")));
-                  final SubtitleCriteriaProvider subtitleCriteriaProvider = subtitleCriteriaProviderTracker.getService(new PropertyClassEq("mediasystem.class", mediaItem.getMedia().getClass()));
+                  final SubtitleSelector subtitleSelector = new SubtitleSelector(findSubtitleProviders("movie"));
+                  final SubtitleCriteriaProvider subtitleCriteriaProvider = findSubtitleCriteriaProvider(mediaItem.getMedia().getClass());
 
                   subtitleSelector.query(subtitleCriteriaProvider.getCriteria(mediaItem));
 
@@ -168,6 +166,30 @@ public class PlaybackOverlayPresentation implements Presentation {
         }
       }
     });
+  }
+
+  private List<SubtitleProvider> findSubtitleProviders(String mediaType) {
+    List<SubtitleProvider> matchingSubtitleProviders = new ArrayList<>();
+
+    for(SubtitleProvider provider : subtitleProviders) {
+      if(provider.getMediaTypes().contains(mediaType)) {
+        matchingSubtitleProviders.add(provider);
+      }
+    }
+
+    Collections.sort(matchingSubtitleProviders, SUBTITLE_PROVIDER_COMPARATOR);
+
+    return matchingSubtitleProviders;
+  }
+
+  private SubtitleCriteriaProvider findSubtitleCriteriaProvider(Class<?> cls) {
+    for(SubtitleCriteriaProvider provider : subtitleCriteriaProviders) {
+      if(provider.getMediaType().equals(cls)) {
+        return provider;
+      }
+    }
+
+    return null;
   }
 
   @Override

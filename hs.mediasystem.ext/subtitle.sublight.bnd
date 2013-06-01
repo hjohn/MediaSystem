@@ -1,4 +1,0 @@
-Private-Package: hs.mediasystem.ext.subtitle.sublight
-Bundle-Activator: hs.mediasystem.ext.subtitle.sublight.Activator
-Include-Resource: lib/sublight-ws.jar
-Bundle-ClassPath: ., sublight-ws.jar

@@ -12,4 +12,5 @@ public interface SubtitleCriteriaProvider {
   static final String FILE_LENGTH = "long:fileLength";
 
   Map<String, Object> getCriteria(MediaItem mediaItem);
+  Class<?> getMediaType();
 }

@@ -11,9 +11,7 @@ import java.util.Set;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.control.ScrollToEvent;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -79,12 +77,12 @@ public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehav
   public TreeViewSkin(TreeView<T> treeView) {
     super(treeView, new TreeViewBehavior<T>(treeView));
 
-    getSkinnable().addEventHandler(ScrollToEvent.SCROLL_TO_TOP_INDEX, new EventHandler<ScrollToEvent<Integer>>() {
-      @Override
-      public void handle(ScrollToEvent<Integer> event) {
-        targetCellOffset = 0.5;
-      }
-    });
+//    getSkinnable().addEventHandler(ScrollToEvent.SCROLL_TO_TOP_INDEX, new EventHandler<ScrollToEvent<Integer>>() {
+//      @Override
+//      public void handle(ScrollToEvent<Integer> event) {
+//        targetCellOffset = 0.5;
+//      }
+//    });
 
     getBehavior().setOnFocusPreviousRow(new Runnable() {
         @Override public void run() { }
@@ -255,10 +253,10 @@ public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehav
     return index;
   }
 
-  @Override
-  protected double computePrefHeight(double width) {
-    return 20;
-  }
+//  @Override
+//  protected double computePrefHeight(double width) {
+//    return 20;
+//  }
 
   private void markAllCellsUnused() {
     usedCells.clear();

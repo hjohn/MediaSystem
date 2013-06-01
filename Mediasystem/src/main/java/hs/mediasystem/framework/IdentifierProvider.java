@@ -32,4 +32,9 @@ public class IdentifierProvider implements EntityProvider<hs.mediasystem.dao.Ide
 
     return identifier;
   }
+
+  @Override
+  public Class<?> getType() {
+    return Identifier.class;
+  }
 }

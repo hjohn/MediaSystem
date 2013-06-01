@@ -17,7 +17,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -33,6 +32,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
+import javax.inject.Inject;
+
 public class MainScreen extends BorderPane {
   private final List<Button> buttons = new ArrayList<>();
   private final List<StackPane> stackPanes = new ArrayList<>();
@@ -44,15 +45,16 @@ public class MainScreen extends BorderPane {
 
   private final ObjectProperty<Button> lastSelected = new SimpleObjectProperty<>();
 
-  public MainScreen(final ProgramController controller) {
-    final PluginTracker<MainMenuExtension> tracker = new PluginTracker<>(controller.getBundleContext(), MainMenuExtension.class);
+  @Inject
+  public MainScreen(final ProgramController controller, Set<MainMenuExtension> mainMenuExtensions) {
+//    final PluginTracker<MainMenuExtension> tracker = new PluginTracker<>(controller.getBundleContext(), MainMenuExtension.class);
     getStylesheets().add("main-screen.css");
 
     menuBox = new StackPane();
 
-    tracker.getPlugins().addListener(new ListChangeListener<MainMenuExtension>() {
-      @Override
-      public void onChanged(ListChangeListener.Change<? extends MainMenuExtension> event) {
+//    tracker.getPlugins().addListener(new ListChangeListener<MainMenuExtension>() {
+//      @Override
+//      public void onChanged(ListChangeListener.Change<? extends MainMenuExtension> event) {
         for(Timeline timeline : timelines) {
           timeline.stop();
         }
@@ -65,6 +67,7 @@ public class MainScreen extends BorderPane {
         stackPanes.clear();
         buttons.clear();
 
+        // TODO sort the menu!
         final Set<MainMenuExtension> extensions = new TreeSet<>(new Comparator<MainMenuExtension>() {
           @Override
           public int compare(MainMenuExtension o1, MainMenuExtension o2) {
@@ -72,9 +75,9 @@ public class MainScreen extends BorderPane {
           }
         });
 
-        extensions.addAll(tracker.getPlugins());
+        //extensions.addAll(tracker.getPlugins());
 
-        for(final MainMenuExtension mainMenuExtension : extensions) {
+        for(final MainMenuExtension mainMenuExtension : mainMenuExtensions) {
           final Button b = new Button(mainMenuExtension.getTitle()) {{
             setGraphic(new ImageView(mainMenuExtension.getImage()));
             setOnAction(new EventHandler<ActionEvent>() {
@@ -90,7 +93,7 @@ public class MainScreen extends BorderPane {
           stackPanes.add(new StackPane() {{
             for(int i = 0; i < 5; i++) {
               getChildren().add(new Circle(20) {{
-                double angle = 360 / extensions.size() * buttons.size();
+                double angle = 360 / mainMenuExtensions.size() * buttons.size();
 
                 setFill(Color.hsb(rnd.nextDouble() * 180 + angle, 1.0, 0.45, 0.2));
                 setScaleX(5.0);
@@ -147,8 +150,8 @@ public class MainScreen extends BorderPane {
             centerButtonsIfNeeded(lastSelected.get());
           }
         });
-      }
-    });
+//      }
+//    });
 
     StackPane stackPane = new StackPane();
 

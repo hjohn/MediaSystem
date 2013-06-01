@@ -8,12 +8,12 @@ import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.util.GridPaneUtil;
-import hs.mediasystem.util.ServiceTracker;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -31,8 +31,6 @@ import javafx.util.StringConverter;
 
 import javax.inject.Inject;
 
-import org.osgi.framework.BundleContext;
-
 public class StandardView extends StackPane implements SelectMediaView {
 
   private final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected = new SimpleObjectProperty<>();
@@ -44,18 +42,19 @@ public class StandardView extends StackPane implements SelectMediaView {
   private final ReadOnlyObjectWrapper<MediaNode> focusedNode = new ReadOnlyObjectWrapper<>();
   @Override public ReadOnlyObjectProperty<MediaNode> focusedNodeProperty() { return focusedNode.getReadOnlyProperty(); }
 
-  private final ServiceTracker<StandardLayoutExtension> standardLayoutExtensionTracker;
   private final BackgroundPane backgroundPane = new BackgroundPane();
   private final SettingUpdater<StandardLayoutExtension> settingUpdater;
 
   private final ObjectProperty<StandardLayoutExtension> layoutExtension = new SimpleObjectProperty<>();
 
+  private final Set<StandardLayoutExtension> standardLayoutExtensions;
+
   private MediaNode currentRoot;
   private StandardLayout layout;
 
   @Inject
-  public StandardView(SettingsStore settingsStore, BundleContext bundleContext) {
-    standardLayoutExtensionTracker = new ServiceTracker<>(bundleContext, StandardLayoutExtension.class);
+  public StandardView(SettingsStore settingsStore, Set<StandardLayoutExtension> standardLayoutExtensions) {
+    this.standardLayoutExtensions = standardLayoutExtensions;
 
     getStylesheets().add("select-media/duo-pane-select-media-view.css");
 
@@ -173,7 +172,7 @@ public class StandardView extends StackPane implements SelectMediaView {
 
     MediaRootType rootType = TYPES.get(root.getClass());
 
-    for(StandardLayoutExtension extension : standardLayoutExtensionTracker.getServices()) {
+    for(StandardLayoutExtension extension : standardLayoutExtensions) {
       if(extension.getSupportedMediaRootTypes().contains(rootType)) {
         availableLayoutExtensions.add(extension);
       }

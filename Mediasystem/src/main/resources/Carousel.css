@@ -1,0 +1,59 @@
+.tree-view {
+  -fx-skin: "hs.mediasystem.controls.RayCarouselSkin";
+}
+
+.carousel {
+/*   -fx-border-width: 2px; */
+/*   -fx-border-color: green; */
+  
+  -fx-background-color: linear-gradient(to bottom, black 0%, black 50%, grey 51%, black);
+}
+
+
+
+
+.tree-cell, .tree-cell:focused, .tree-cell:odd, .tree-cell:even {
+  -fx-border-insets: 0px;
+  -fx-border-width: 0px;
+  -fx-border-color: cyan;
+  -fx-background-color: red;
+  -fx-background-insets: 0px;
+  -fx-padding: 0px;
+}
+
+.tree-cell, .carousel .tree-cell {
+  -fx-skin: "hs.mediasystem.controls.TreeCellSkin";
+}
+
+
+.carousel .tree-cell {
+  
+  
+}
+
+
+/* .tree-view .tree-cell, .tree-cell:focused, .tree-cell:odd, .tree-cell:even { */
+/*   -fx-border-insets: 0px; */
+/*   -fx-border-width: 4px; */
+/*   -fx-border-color: cyan; */
+/*   -fx-background-color: red; */
+/*   -fx-background-insets: 0px; */
+/*   -fx-padding: 0px; */
+/* } */
+
+/* .carousel .tree-cell:focused, .carousel .tree-cell, .carousel .tree-cell:empty, .carousel .tree-cell:odd, .carousel .tree-cell:even { */
+/*   -fx-border-insets: 0px; */
+/*   -fx-border-width: 0px; */
+/*   -fx-background-color: yellow; */
+/*   -fx-background-insets: 0px; */
+/*   -fx-padding: 0px; */
+/* } */
+
+.carousel .label {
+  -fx-border-width: 0px;
+  -fx-border-insets: 0px;
+  -fx-background-color: green;
+  -fx-background-insets: 0px;
+  -fx-padding: 0px;
+  -fx-graphic-text-gap: 0px;
+}

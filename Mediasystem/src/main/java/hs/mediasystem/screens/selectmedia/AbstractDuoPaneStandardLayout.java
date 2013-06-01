@@ -1,5 +1,7 @@
 package hs.mediasystem.screens.selectmedia;
 
+import java.util.Set;
+
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.util.GridPaneUtil;
@@ -19,12 +21,10 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-import org.osgi.framework.BundleContext;
-
 public abstract class AbstractDuoPaneStandardLayout extends StackPane implements StandardLayout {
   private final ListPane listPane;
 
-  public AbstractDuoPaneStandardLayout(BundleContext bundleContext, final ListPane listPane) {
+  public AbstractDuoPaneStandardLayout(final ListPane listPane, Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories) {
     this.listPane = listPane;
 
     final GridPane root = GridPaneUtil.create(new double[] {100}, new double[] {17, 75, 8});
@@ -37,7 +37,7 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
     panelGroup.setEffect(new Reflection(5, 0.025, 0.25, 0.0));
 
     final StackPane listPaneContainer = new StackPane();
-    final DetailPane detailPane = createDetailPane(bundleContext);
+    final DetailPane detailPane = createDetailPane(detailPaneDecoratorFactories);
 
     detailPane.contentProperty().bind(MapBindings.select(listPane.mediaNodeBinding(), "media"));
 
@@ -71,8 +71,8 @@ public abstract class AbstractDuoPaneStandardLayout extends StackPane implements
     getChildren().add(root);
   }
 
-  private static DetailPane createDetailPane(BundleContext bundleContext) {
-    return new DetailPane(bundleContext, false) {
+  private static DetailPane createDetailPane(Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories) {
+    return new DetailPane(detailPaneDecoratorFactories, false) {
       @Override
       protected void initialize(DecoratablePane decoratablePane) {
         decoratablePane.getChildren().add(new BorderPane() {{

@@ -3,12 +3,15 @@ package hs.mediasystem.screens;
 import java.nio.file.Path;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
 
 public class PlayerPresentation {
   private final Player player;
 
+  @Inject
   public PlayerPresentation(Player player) {
     this.player = player;
   }

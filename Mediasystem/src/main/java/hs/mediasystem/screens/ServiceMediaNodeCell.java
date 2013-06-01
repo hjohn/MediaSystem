@@ -1,17 +1,18 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.util.PropertyClassEq;
-import hs.mediasystem.util.ServiceTracker;
+import java.util.Set;
+
 import javafx.scene.layout.Region;
 
 public class ServiceMediaNodeCell {
-  private final ServiceTracker<MediaNodeCellProvider> cellProviderTracker;
+  private final Set<MediaNodeCellProvider> mediaNodeCellProviders;
 
   private Class<?> currentDataType;
   private MediaNodeCell mediaNodeCell;
 
-  public ServiceMediaNodeCell(ServiceTracker<MediaNodeCellProvider> cellProviderTracker) {
-    this.cellProviderTracker = cellProviderTracker;
+  public ServiceMediaNodeCell(Set<MediaNodeCellProvider> mediaNodeCellProviders) {
+    System.out.println(">>> Created ServiceMediaNodeCell with " + mediaNodeCellProviders.size() + " providers: " + mediaNodeCellProviders);
+    this.mediaNodeCellProviders = mediaNodeCellProviders;
   }
 
   public void configureGraphic(MediaNode node) {
@@ -24,7 +25,7 @@ public class ServiceMediaNodeCell {
 
       if(!dataType.equals(currentDataType)) {
         currentDataType = dataType;
-        mediaNodeCell = cellProviderTracker.getService(new PropertyClassEq("mediasystem.class", dataType)).get();
+        mediaNodeCell = findMediaNodeCell(dataType);
       }
 
       mediaNodeCell.attach(node);
@@ -33,6 +34,32 @@ public class ServiceMediaNodeCell {
       mediaNodeCell = null;
       currentDataType = null;
     }
+  }
+
+  private MediaNodeCell findMediaNodeCell(Class<?> cls) {
+    int bestInheritanceDepth = -1;
+    MediaNodeCellProvider bestProvider = null;
+
+    for(MediaNodeCellProvider provider : mediaNodeCellProviders) {
+      int inheritanceDepth = getInheritanceDepth(provider.getMediaType());
+
+      if(provider.getMediaType().isAssignableFrom(cls) && inheritanceDepth > bestInheritanceDepth) {
+        bestProvider = provider;
+        bestInheritanceDepth = inheritanceDepth;
+      }
+    }
+
+    return bestProvider == null ? null : bestProvider.get();
+  }
+
+  private int getInheritanceDepth(Class<?> cls) {
+    int depth = 0;
+
+    while((cls = cls.getSuperclass()) != null) {
+      depth++;
+    }
+
+    return depth;
   }
 
   public Region getGraphic() {

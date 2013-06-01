@@ -90,7 +90,7 @@ public class MediaNode {
   private Callback<MediaRoot, List<MediaNode>> childrenCallback;
 
   public MediaNode(MediaRoot mediaRoot, boolean showTopLevelExpanded, Callback<MediaRoot, List<MediaNode>> childrenCallback) {
-    this(mediaRoot.getId(), new Media<>(mediaRoot.getRootName()), null);
+    this(mediaRoot.getId(), new SpecialItem(mediaRoot.getRootName()), null);
 
     this.mediaRoot = mediaRoot;
     this.showTopLevelExpanded = showTopLevelExpanded;
@@ -205,5 +205,12 @@ public class MediaNode {
   @Override
   public String toString() {
     return "MediaNode[id='" + id + "']";
+  }
+
+  public static class SpecialItem extends Media<SpecialItem> {
+
+    public SpecialItem(String rootName) {
+      super(rootName);
+    }
   }
 }

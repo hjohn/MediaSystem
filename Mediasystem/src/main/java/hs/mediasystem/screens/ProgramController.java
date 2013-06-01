@@ -2,15 +2,15 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.player.PlayerEvent;
-import hs.mediasystem.framework.player.PlayerEvent.Type;
 import hs.mediasystem.util.Dialog;
 import hs.mediasystem.util.KeyCombinationGroup;
-import hs.mediasystem.util.PropertyClassEq;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.SceneUtil;
-import hs.mediasystem.util.ServiceTracker;
 import hs.mediasystem.util.annotation.Nullable;
 import hs.mediasystem.util.ini.Ini;
+
+import java.util.Set;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -44,9 +44,8 @@ import javafx.stage.Screen;
 import javafx.util.Duration;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
-
-import org.osgi.framework.BundleContext;
 
 @Singleton
 public class ProgramController {
@@ -80,17 +79,17 @@ public class ProgramController {
   }};
 
   private final InformationBorder informationBorder;
-  private final BundleContext bundleContext;
+  private final Provider<Set<LocationHandler>> locationHandlersProvider;
 
   private Node videoCanvas;
 
   @Inject
-  public ProgramController(Ini ini, BundleContext bundleContext, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder) {
+  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder, Provider<Set<LocationHandler>> locationHandlersProvider) {
     this.ini = ini;
-    this.bundleContext = bundleContext;
     this.sceneManager = sceneManager;
     this.playerPresentation = playerPresentation;
     this.informationBorder = informationBorder;
+    this.locationHandlersProvider = locationHandlersProvider;
     this.scene = SceneUtil.createScene(sceneRoot);
 
     sceneRoot.getChildren().addAll(videoPane, contentBorderPane, informationBorderPane, messageBorderPane);
@@ -224,8 +223,6 @@ public class ProgramController {
       }
     });
 
-    final ServiceTracker<LocationHandler> locationHandlerTracker = new ServiceTracker<>(bundleContext, LocationHandler.class);
-
     location.addListener(new ChangeListener<Location>() {
       @Override
       public void changed(ObservableValue<? extends Location> observable, Location old, Location current) {
@@ -233,7 +230,8 @@ public class ProgramController {
 
         Presentation oldPresentation = activePresentation;
 
-        LocationHandler locationHandler = locationHandlerTracker.getService(new PropertyClassEq("mediasystem.class", current.getClass()));
+        LocationHandler locationHandler = findLocationHandler(current.getClass());
+          //  locationHandlerTracker.getService(new PropertyClassEq("mediasystem.class", current.getClass()));
 
         if(locationHandler == null) {
           throw new RuntimeException("No LocationHandler found for: " + current.getClass());
@@ -261,8 +259,14 @@ public class ProgramController {
   public void setLocation(Location location) { this.location.set(location); }
   public ObjectProperty<Location> locationProperty() { return location; }
 
-  public BundleContext getBundleContext() {
-    return bundleContext;
+  private LocationHandler findLocationHandler(Class<?> cls) {
+    for(LocationHandler locationHandler : locationHandlersProvider.get()) {
+      if(locationHandler.getLocationType().equals(cls)) {
+        return locationHandler;
+      }
+    }
+
+    return null;
   }
 
   public Ini getIni() {
@@ -361,7 +365,7 @@ public class ProgramController {
     playerPresentation.getPlayer().onPlayerEvent().set(new EventHandler<PlayerEvent>() {
       @Override
       public void handle(PlayerEvent event) {
-        if(event.getType() == Type.FINISHED) {
+        if(event.getType() == PlayerEvent.Type.FINISHED) {
           Platform.runLater(new Runnable() {
             @Override
             public void run() {

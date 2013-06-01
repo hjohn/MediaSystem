@@ -1,6 +1,0 @@
-Private-Package: hs.mediasystem.ext.player.vlc
-Bundle-Activator: hs.mediasystem.ext.player.vlc.Activator
-Include-Resource: lib/vlcj-2.2.0-20120909.074345-1.jar, lib/jna-3.4.0.jar
-Bundle-ClassPath: ., vlcj-2.2.0-20120909.074345-1.jar, jna-3.4.0.jar
-Import-Package: !com.sun.jna.platform.*,\
-	*

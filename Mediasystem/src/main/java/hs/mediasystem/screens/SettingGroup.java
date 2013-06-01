@@ -2,16 +2,14 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.OptionGroup;
-import hs.mediasystem.util.PropertyEq;
-import hs.mediasystem.util.ServiceTracker;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Provider;
-
-import org.osgi.framework.BundleContext;
 
 public class SettingGroup implements Setting {
   private static final Comparator<Setting> SETTING_COMPARATOR = new Comparator<Setting>() {
@@ -28,16 +26,15 @@ public class SettingGroup implements Setting {
   };
 
   private final String id;
+  private final String parentId;
   private final String title;
   private final double order;
-  private final ServiceTracker<Setting> childSettingTracker;
 
-  public SettingGroup(BundleContext bundleContext, String id, String title, double order) {
+  public SettingGroup(String id, String parentId, String title, double order) {
     this.id = id;
+    this.parentId = parentId;
     this.title = title;
     this.order = order;
-
-    childSettingTracker = new ServiceTracker<>(bundleContext, Setting.class, SETTING_COMPARATOR, new PropertyEq("parentId", id));
   }
 
   @Override
@@ -46,25 +43,40 @@ public class SettingGroup implements Setting {
   }
 
   @Override
+  public String getParentId() {
+    return parentId;
+  }
+
+  @Override
   public double order() {
     return order;
   }
 
   @Override
-  public OptionGroup createOption() {
+  public OptionGroup createOption(final Set<Setting> settings) {
     return new OptionGroup(title, new Provider<List<Option>>() {
       @Override
       public List<Option> get() {
-        return createChildOptions();
+        return createChildOptions(settings);
       }
     });
   }
 
-  private List<Option> createChildOptions() {
+  private List<Option> createChildOptions(Set<Setting> settings) {
+    List<Setting> matchedSettings = new ArrayList<>();
+
+    for(Setting setting : settings) {
+      if((getId() == null && setting.getParentId() == null) || (getId() != null && getId().equals(setting.getParentId()))) {
+        matchedSettings.add(setting);
+      }
+    }
+
+    Collections.sort(matchedSettings, SETTING_COMPARATOR);
+
     List<Option> options = new ArrayList<>();
 
-    for(final Setting setting : childSettingTracker.getServices()) {
-      options.add(setting.createOption());
+    for(final Setting setting : matchedSettings) {
+      options.add(setting.createOption(settings));
     }
 
     return options;

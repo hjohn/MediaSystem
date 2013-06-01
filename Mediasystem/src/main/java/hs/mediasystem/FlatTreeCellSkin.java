@@ -7,14 +7,14 @@ import javafx.scene.control.TreeView;
 import com.sun.javafx.scene.control.behavior.TreeCellBehavior;
 import com.sun.javafx.scene.control.skin.CellSkinBase;
 
-public class FlatTreeCellSkin extends CellSkinBase<TreeCell<?>, TreeCellBehavior> {
+public class FlatTreeCellSkin<T> extends CellSkinBase<TreeCell<T>, TreeCellBehavior<T>> {
 
   public final double getIndent() {
     return 20;
   }
 
-  public FlatTreeCellSkin(TreeCell<?> paramTreeCell) {
-    super(paramTreeCell, new TreeCellBehavior(paramTreeCell));
+  public FlatTreeCellSkin(TreeCell<T> paramTreeCell) {
+    super(paramTreeCell, new TreeCellBehavior<>(paramTreeCell));
   }
 
 
@@ -30,10 +30,10 @@ public class FlatTreeCellSkin extends CellSkinBase<TreeCell<?>, TreeCellBehavior
       return;
     }
 
-    double left = leftPadding();
-    double top = topPadding();
-    double width = w - (leftPadding() + rightPadding());
-    double height = h - (topPadding() + bottomPadding());
+    double left = leftLabelPadding();
+    double top = topLabelPadding();
+    double width = w - (leftLabelPadding() + rightLabelPadding());
+    double height = h - (topLabelPadding() + bottomLabelPadding());
 
     int i = TreeView.getNodeLevel(((TreeCell<?>)getSkinnable()).getTreeItem());
     if(!(localTreeView.isShowRoot())) {

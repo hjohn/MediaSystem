@@ -47,4 +47,9 @@ public class PersonProvider implements EntityProvider<hs.mediasystem.dao.Person,
 
     return person;
   }
+
+  @Override
+  public Class<?> getType() {
+    return Person.class;
+  }
 }

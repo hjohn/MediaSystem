@@ -20,8 +20,6 @@ import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.OptionDialogPane;
 import hs.mediasystem.util.DialogPane;
 import hs.mediasystem.util.GridPaneUtil;
-import hs.mediasystem.util.PropertyEq;
-import hs.mediasystem.util.ServiceTracker;
 import hs.mediasystem.util.StringBinding;
 
 import java.util.ArrayList;
@@ -29,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -54,26 +53,20 @@ import javafx.util.StringConverter;
 
 import javax.inject.Inject;
 
-import org.osgi.framework.BundleContext;
-
 public class SelectMediaPresentation implements Presentation {
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
 
-  private final ServiceTracker<MediaGroup> mediaGroupTracker;
   private final SettingUpdater<MediaGroup> mediaGroupSettingUpdater;
-  private final BundleContext bundleContext;
   private final ProgramController controller;
+  private final Set<MediaGroup> mediaGroups;
 
   private SelectMediaView view;
 
-
   @Inject
-  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final SettingsStore settingsStore, BundleContext bundleContext) {
+  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final SettingsStore settingsStore, Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories, Set<MediaGroup> mediaGroups) {
     this.controller = controller;
-    this.bundleContext = bundleContext;
     this.view = view;
-
-    mediaGroupTracker = new ServiceTracker<>(bundleContext, MediaGroup.class);
+    this.mediaGroups = mediaGroups;
 
     view.onNodeSelected().set(new EventHandler<MediaNodeEvent>() {
       @Override
@@ -91,7 +84,7 @@ public class SelectMediaPresentation implements Presentation {
     view.onNodeAlternateSelect().set(new EventHandler<MediaNodeEvent>() {
       @Override
       public void handle(MediaNodeEvent event) {
-        controller.showDialog(createInformationDialog(event.getMediaNode()));
+        controller.showDialog(createInformationDialog(event.getMediaNode(), detailPaneDecoratorFactories));
 
         event.consume();
       }
@@ -187,10 +180,15 @@ public class SelectMediaPresentation implements Presentation {
   private void setTreeRoot(final MediaRoot root) {
     currentRoot = root;
 
-    List<MediaGroup> mediaGroups = mediaGroupTracker.getServices(new PropertyEq(MediaGroup.Constants.MEDIA_ROOT_CLASS.name(), root.getClass()));
+    List<MediaGroup> mediaGroups = findMatchingMediaGroup(root.getClass());
 
     if(mediaGroups.isEmpty()) {
-      mediaGroups.add(new DefaultMediaGroup("alpha", "Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
+      mediaGroups.add(new DefaultMediaGroup("alpha", "Alphabetically", null, StandardTitleComparator.INSTANCE, false, false) {
+        @Override
+        public Class<? extends MediaRoot> getMediaRootType() {
+          return null;
+        }
+      });
     }
 
     Collections.sort(mediaGroups, new Comparator<MediaGroup>() {
@@ -206,6 +204,18 @@ public class SelectMediaPresentation implements Presentation {
     MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSetsProperty().get(0));
 
     groupSetProperty().set(selectedMediaGroup);
+  }
+
+  private List<MediaGroup> findMatchingMediaGroup(Class<?> cls) {
+    List<MediaGroup> matchingMediaGroups = new ArrayList<>();
+
+    for(MediaGroup mediaGroup : mediaGroups) {
+      if(mediaGroup.getMediaRootType().equals(cls)) {
+        matchingMediaGroups.add(mediaGroup);
+      }
+    }
+
+    return matchingMediaGroups;
   }
 
   public void setMediaTree(final MediaRoot mediaRoot) {
@@ -242,7 +252,7 @@ public class SelectMediaPresentation implements Presentation {
           Media<?> media = mediaGroup.createMediaFromFirstItem(group.get(0));
           String shortTitle = mediaGroup.getShortTitle(group.get(0));
 
-          Media<?> groupMedia = new Media<>(null);
+          Media<?> groupMedia = new GroupItem();
           groupMedia.title.set(media.title.get());
           MediaNode groupNode = new MediaNode(mediaGroup.getId() + "[" + media.title.get() + "]", groupMedia, shortTitle);
 
@@ -286,8 +296,8 @@ public class SelectMediaPresentation implements Presentation {
   private final ObjectProperty<MediaGroup> groupSet = new SimpleObjectProperty<>();
   public ObjectProperty<MediaGroup> groupSetProperty() { return groupSet; }
 
-  private DialogPane createInformationDialog(final MediaNode mediaNode) {
-    final DetailPane detailPane = new DetailPane(bundleContext, true) {
+  private DialogPane createInformationDialog(final MediaNode mediaNode, Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories) {
+    final DetailPane detailPane = new DetailPane(detailPaneDecoratorFactories, true) { // TODO provider detailPaneDecoratorFactories!
       {
         getStylesheets().add("controls.css");
       }
@@ -345,5 +355,8 @@ public class SelectMediaPresentation implements Presentation {
 
   @Override
   public void dispose() {
+  }
+
+  public static class GroupItem extends Media<GroupItem> {
   }
 }

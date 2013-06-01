@@ -2,25 +2,28 @@ package hs.mediasystem.entity;
 
 import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.db.RecordMapper;
-import hs.mediasystem.util.PropertyEq;
-import hs.mediasystem.util.ServiceTracker;
 import hs.mediasystem.util.WeakValueMap;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.osgi.framework.BundleContext;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class CachingEntityFactory implements EntityFactory<DatabaseObject> {
   private static final Map<Class<?>, WeakValueMap<Object, Entity<?>>> INSTANCES = new HashMap<>();
   private static final Map<Class<?>, WeakHashMap<Entity<?>, DatabaseObject>> KEYS = new HashMap<>();
 
-  private final ServiceTracker<EntityProvider<DatabaseObject, ?>> tracker;
+  private final Set<EntityProvider<DatabaseObject, ?>> entityProviders;
 
-  public CachingEntityFactory(BundleContext bundleContext) {
-    tracker = new ServiceTracker<>(bundleContext, EntityProvider.class);
+  @Inject
+  public CachingEntityFactory(Set<EntityProvider<DatabaseObject, ?>> entityProviders) {
+    System.out.println(">>> CachingEntityFactory: Created, " + entityProviders);
+    this.entityProviders = entityProviders;
   }
 
   @SuppressWarnings("unchecked")
@@ -41,9 +44,9 @@ public class CachingEntityFactory implements EntityFactory<DatabaseObject> {
         }
       }
 
-      List<EntityProvider<DatabaseObject, ?>> services = tracker.getServices(new PropertyEq("mediasystem.class", cls));
+     // List<EntityProvider<DatabaseObject, ?>> services = tracker.getServices(new PropertyEq("mediasystem.class", cls));
 
-      for(EntityProvider<DatabaseObject, ?> provider : services) {
+      for(EntityProvider<DatabaseObject, ?> provider : findEntityProviders(cls)) {
         T result = (T)provider.get(dbObject);
 
         if(result != null) {
@@ -71,6 +74,20 @@ public class CachingEntityFactory implements EntityFactory<DatabaseObject> {
 
       return null;
     }
+  }
+
+  public Set<EntityProvider<DatabaseObject, ?>> findEntityProviders(Class<?> cls) {
+    Set<EntityProvider<DatabaseObject, ?>> matchingEntityProviders = new HashSet<>();
+
+    for(EntityProvider<DatabaseObject, ?> entityProvider : entityProviders) {
+      System.out.println("CEP: " + entityProvider.getType() + " vs " + cls + " == " + entityProvider.getType().equals(cls));
+
+      if(entityProvider.getType().equals(cls)) {
+        matchingEntityProviders.add(entityProvider);
+      }
+    }
+
+    return matchingEntityProviders;
   }
 
   @SuppressWarnings("unchecked")
