@@ -99,6 +99,8 @@ public class FrontEnd extends Application {
 
     final Injector injector = new Injector(new JustInTimeDiscoveryPolicy());
 
+    injector.registerInstance(injector);
+
     injector.register(new Provider<Connection>() {
       @Override
       public Connection get() {
