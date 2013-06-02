@@ -186,7 +186,6 @@ public class SelectMediaPresentation implements Presentation {
     List<MediaGroup> mediaGroups = new ArrayList<>(injector.getInstances(MediaGroup.class, new Matcher() {
       @Override
       public boolean matches(Class<?> cls) {
-        System.out.println(">>> " + cls);
         return root.getClass().equals(cls.getAnnotation(MediaRootType.class).value());
       }
     }));
