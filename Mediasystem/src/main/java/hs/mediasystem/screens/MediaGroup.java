@@ -3,7 +3,6 @@ package hs.mediasystem.screens;
 import hs.mediasystem.framework.Grouper;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.MediaRoot;
 
 import java.util.Comparator;
 
@@ -20,6 +19,4 @@ public interface MediaGroup {
 
   boolean isAllowedSingleItemGroups();
   boolean showTopLevelExpanded();
-
-  Class<? extends MediaRoot> getMediaRootType();
 }

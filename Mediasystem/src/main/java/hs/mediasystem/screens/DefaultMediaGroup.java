@@ -6,7 +6,7 @@ import hs.mediasystem.framework.MediaItem;
 
 import java.util.Comparator;
 
-public abstract class DefaultMediaGroup implements MediaGroup {
+public class DefaultMediaGroup implements MediaGroup {
   private final String id;
   private final String title;
   private final Grouper<MediaItem> grouper;

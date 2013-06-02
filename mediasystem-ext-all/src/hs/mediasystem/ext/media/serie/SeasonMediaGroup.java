@@ -1,13 +1,13 @@
 package hs.mediasystem.ext.media.serie;
 
-import javax.inject.Named;
-
+import hs.mediasystem.MediaRootType;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.screens.DefaultMediaGroup;
 
-@Named
+import javax.inject.Named;
+
+@Named @MediaRootType(SerieItem.class)
 public class SeasonMediaGroup extends DefaultMediaGroup {
 
   public SeasonMediaGroup() {
@@ -32,10 +32,5 @@ public class SeasonMediaGroup extends DefaultMediaGroup {
     public Season(String title) {
       super(title);
     }
-  }
-
-  @Override
-  public Class<? extends MediaRoot> getMediaRootType() {
-    return SerieItem.class;
   }
 }

@@ -1,5 +1,8 @@
 package hs.mediasystem.screens.selectmedia;
 
+import hs.ddif.Injector;
+import hs.ddif.Matcher;
+import hs.mediasystem.MediaRootType;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.framework.Grouper;
 import hs.mediasystem.framework.Groups;
@@ -58,15 +61,15 @@ public class SelectMediaPresentation implements Presentation {
 
   private final SettingUpdater<MediaGroup> mediaGroupSettingUpdater;
   private final ProgramController controller;
-  private final Set<MediaGroup> mediaGroups;
+  private final Injector injector;
 
   private SelectMediaView view;
 
   @Inject
-  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final SettingsStore settingsStore, Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories, Set<MediaGroup> mediaGroups) {
+  public SelectMediaPresentation(final ProgramController controller, final SelectMediaView view, final SettingsStore settingsStore, Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories, Injector injector) {
     this.controller = controller;
     this.view = view;
-    this.mediaGroups = mediaGroups;
+    this.injector = injector;
 
     view.onNodeSelected().set(new EventHandler<MediaNodeEvent>() {
       @Override
@@ -180,15 +183,16 @@ public class SelectMediaPresentation implements Presentation {
   private void setTreeRoot(final MediaRoot root) {
     currentRoot = root;
 
-    List<MediaGroup> mediaGroups = findMatchingMediaGroup(root.getClass());
+    List<MediaGroup> mediaGroups = new ArrayList<>(injector.getInstances(MediaGroup.class, new Matcher() {
+      @Override
+      public boolean matches(Class<?> cls) {
+        System.out.println(">>> " + cls);
+        return root.getClass().equals(cls.getAnnotation(MediaRootType.class).value());
+      }
+    }));
 
     if(mediaGroups.isEmpty()) {
-      mediaGroups.add(new DefaultMediaGroup("alpha", "Alphabetically", null, StandardTitleComparator.INSTANCE, false, false) {
-        @Override
-        public Class<? extends MediaRoot> getMediaRootType() {
-          return null;
-        }
-      });
+      mediaGroups.add(new DefaultMediaGroup("alpha", "Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
     }
 
     Collections.sort(mediaGroups, new Comparator<MediaGroup>() {
@@ -204,18 +208,6 @@ public class SelectMediaPresentation implements Presentation {
     MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSetsProperty().get(0));
 
     groupSetProperty().set(selectedMediaGroup);
-  }
-
-  private List<MediaGroup> findMatchingMediaGroup(Class<?> cls) {
-    List<MediaGroup> matchingMediaGroups = new ArrayList<>();
-
-    for(MediaGroup mediaGroup : mediaGroups) {
-      if(mediaGroup.getMediaRootType().equals(cls)) {
-        matchingMediaGroups.add(mediaGroup);
-      }
-    }
-
-    return matchingMediaGroups;
   }
 
   public void setMediaTree(final MediaRoot mediaRoot) {
