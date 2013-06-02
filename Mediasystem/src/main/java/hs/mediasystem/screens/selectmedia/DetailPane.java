@@ -22,9 +22,8 @@ public abstract class DetailPane extends StackPane {
   private final Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories;
 
   public DetailPane(Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories, final boolean interactive) {
-    System.out.println(">>> Created DetailPane with " + detailPaneDecoratorFactories.size() + ": " + detailPaneDecoratorFactories);
-
     this.detailPaneDecoratorFactories = detailPaneDecoratorFactories;
+
     getStylesheets().add("select-media/detail-pane.css");
     getStyleClass().add("detail-pane");
 
@@ -44,7 +43,7 @@ public abstract class DetailPane extends StackPane {
       public void changed(ObservableValue<? extends Object> observable, Object old, Object current) {
         if(current != null) {
           DetailPaneDecoratorFactory factory = findDetailPaneDecoratorFactory(current.getClass());
-System.out.println(">>> Chosen " + factory.getType() + ", " + factory);
+
           @SuppressWarnings("unchecked")
           DetailPaneDecorator<Object> decorator = (DetailPaneDecorator<Object>)factory.create(decoratablePane);
 

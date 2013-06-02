@@ -78,14 +78,11 @@ public class TreeListPane extends BorderPane implements ListPane {
 
   private final Provider<Set<MediaNodeCellProvider>> mediaNodeCellsProvider;
 
-  //private final ServiceTracker<MediaNodeCellProvider> mediaNodeCellProviderTracker;
-
   @Inject
   public TreeListPane(Provider<Set<MediaNodeCellProvider>> mediaNodeCellsProvider) {
     this.mediaNodeCellsProvider = mediaNodeCellsProvider;
-    getStylesheets().add("select-media/tree-list-pane.css");
 
-    //mediaNodeCellProviderTracker = MediaNodeCellProvider.Type.HORIZONTAL.createTracker(bundleContext);
+    getStylesheets().add("select-media/tree-list-pane.css");
 
     treeView.setEditable(false);
     treeView.setShowRoot(false);

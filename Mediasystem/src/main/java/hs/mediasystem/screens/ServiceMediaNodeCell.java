@@ -11,7 +11,6 @@ public class ServiceMediaNodeCell {
   private MediaNodeCell mediaNodeCell;
 
   public ServiceMediaNodeCell(Set<MediaNodeCellProvider> mediaNodeCellProviders) {
-    System.out.println(">>> Created ServiceMediaNodeCell with " + mediaNodeCellProviders.size() + " providers: " + mediaNodeCellProviders);
     this.mediaNodeCellProviders = mediaNodeCellProviders;
   }
 
