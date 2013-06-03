@@ -3,11 +3,10 @@ package hs.mediasystem.screens;
 import hs.mediasystem.util.FocusEvent;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
-import java.util.TreeSet;
 
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -46,112 +45,103 @@ public class MainScreen extends BorderPane {
   private final ObjectProperty<Button> lastSelected = new SimpleObjectProperty<>();
 
   @Inject
-  public MainScreen(final ProgramController controller, Set<MainMenuExtension> mainMenuExtensions) {
-//    final PluginTracker<MainMenuExtension> tracker = new PluginTracker<>(controller.getBundleContext(), MainMenuExtension.class);
+  public MainScreen(final ProgramController controller, List<MainMenuExtension> mainMenuExtensions) {
     getStylesheets().add("main-screen.css");
 
     menuBox = new StackPane();
 
-//    tracker.getPlugins().addListener(new ListChangeListener<MainMenuExtension>() {
-//      @Override
-//      public void onChanged(ListChangeListener.Change<? extends MainMenuExtension> event) {
-        for(Timeline timeline : timelines) {
-          timeline.stop();
-        }
-        for(Timeline timeline : timelines2) {
-          timeline.stop();
-        }
+    for(Timeline timeline : timelines) {
+      timeline.stop();
+    }
+    for(Timeline timeline : timelines2) {
+      timeline.stop();
+    }
 
-        timelines.clear();
-        timelines2.clear();
-        stackPanes.clear();
-        buttons.clear();
+    timelines.clear();
+    timelines2.clear();
+    stackPanes.clear();
+    buttons.clear();
 
-        // TODO sort the menu!
-        final Set<MainMenuExtension> extensions = new TreeSet<>(new Comparator<MainMenuExtension>() {
+    Collections.sort(mainMenuExtensions, new Comparator<MainMenuExtension>() {
+      @Override
+      public int compare(MainMenuExtension o1, MainMenuExtension o2) {
+        return Double.compare(o1.order(), o2.order());
+      }
+    });
+
+    for(final MainMenuExtension mainMenuExtension : mainMenuExtensions) {
+      final Button b = new Button(mainMenuExtension.getTitle()) {{
+        setGraphic(new ImageView(mainMenuExtension.getImage()));
+        setOnAction(new EventHandler<ActionEvent>() {
           @Override
-          public int compare(MainMenuExtension o1, MainMenuExtension o2) {
-            return Double.compare(o1.order(), o2.order());
+          public void handle(ActionEvent event) {
+            mainMenuExtension.select(controller);
           }
         });
+      }};
 
-        //extensions.addAll(tracker.getPlugins());
+      timelines.add(new Timeline());
+      timelines2.add(new Timeline());
+      stackPanes.add(new StackPane() {{
+        for(int i = 0; i < 5; i++) {
+          getChildren().add(new Circle(20) {{
+            double angle = 360 / mainMenuExtensions.size() * buttons.size();
 
-        for(final MainMenuExtension mainMenuExtension : mainMenuExtensions) {
-          final Button b = new Button(mainMenuExtension.getTitle()) {{
-            setGraphic(new ImageView(mainMenuExtension.getImage()));
-            setOnAction(new EventHandler<ActionEvent>() {
-              @Override
-              public void handle(ActionEvent event) {
-                mainMenuExtension.select(controller);
-              }
-            });
-          }};
-
-          timelines.add(new Timeline());
-          timelines2.add(new Timeline());
-          stackPanes.add(new StackPane() {{
-            for(int i = 0; i < 5; i++) {
-              getChildren().add(new Circle(20) {{
-                double angle = 360 / mainMenuExtensions.size() * buttons.size();
-
-                setFill(Color.hsb(rnd.nextDouble() * 180 + angle, 1.0, 0.45, 0.2));
-                setScaleX(5.0);
-                setTranslateX((rnd.nextDouble() - 0.5) * 80);
-                setTranslateY((rnd.nextDouble() - 0.5) * 20 + 10);
-              }});
-            }
-            setEffect(new BoxBlur(10, 10, 3));
+            setFill(Color.hsb(rnd.nextDouble() * 180 + angle, 1.0, 0.45, 0.2));
+            setScaleX(5.0);
+            setTranslateX((rnd.nextDouble() - 0.5) * 80);
+            setTranslateY((rnd.nextDouble() - 0.5) * 20 + 10);
           }});
-          buttons.add(b);
         }
+        setEffect(new BoxBlur(10, 10, 3));
+      }});
+      buttons.add(b);
+    }
 
-        for(int i = 0; i < buttons.size(); i++) {
-          final Button button = buttons.get(i);
-          final StackPane sp = stackPanes.get(i);
-          final int buttonIndex = i;
+    for(int i = 0; i < buttons.size(); i++) {
+      final Button button = buttons.get(i);
+      final StackPane sp = stackPanes.get(i);
+      final int buttonIndex = i;
 
-          button.addEventHandler(FocusEvent.ANY, new EventHandler<FocusEvent>() {
-            @Override
-            public void handle(FocusEvent event) {
-              boolean focusGained = event.getEventType().equals(FocusEvent.FOCUS_GAINED);
+      button.addEventHandler(FocusEvent.ANY, new EventHandler<FocusEvent>() {
+        @Override
+        public void handle(FocusEvent event) {
+          boolean focusGained = event.getEventType().equals(FocusEvent.FOCUS_GAINED);
 
-              handleButtonFocus(focusGained, buttonIndex);
+          handleButtonFocus(focusGained, buttonIndex);
 
-              if(focusGained) {
-                lastSelected.set(button);
-              }
-            }
-          });
-          sp.minWidthProperty().bind(button.widthProperty());
+          if(focusGained) {
+            lastSelected.set(button);
+          }
         }
+      });
+      sp.minWidthProperty().bind(button.widthProperty());
+    }
 
-        menuBox.getChildren().clear();
+    menuBox.getChildren().clear();
 
-        menuBox.getChildren().add(new HBox() {{
-          getStyleClass().add("menu-scroll-box");
-          getChildren().addAll(stackPanes);
-        }});
-        menuBox.getChildren().add(new HBox() {{
-          getStyleClass().add("menu-scroll-box");
-          getChildren().addAll(buttons);
-        }});
+    menuBox.getChildren().add(new HBox() {{
+      getStyleClass().add("menu-scroll-box");
+      getChildren().addAll(stackPanes);
+    }});
+    menuBox.getChildren().add(new HBox() {{
+      getStyleClass().add("menu-scroll-box");
+      getChildren().addAll(buttons);
+    }});
 
-        lastSelected.addListener(new ChangeListener<Button>() {
-          @Override
-          public void changed(ObservableValue<? extends Button> observableValue, Button old, Button current) {
-            centerButtonsIfNeeded(current);
-          }
-        });
+    lastSelected.addListener(new ChangeListener<Button>() {
+      @Override
+      public void changed(ObservableValue<? extends Button> observableValue, Button old, Button current) {
+        centerButtonsIfNeeded(current);
+      }
+    });
 
-        menuBox.needsLayoutProperty().addListener(new ChangeListener<Object>() {
-          @Override
-          public void changed(ObservableValue<? extends Object> observableValue, Object old, Object current) {
-            centerButtonsIfNeeded(lastSelected.get());
-          }
-        });
-//      }
-//    });
+    menuBox.needsLayoutProperty().addListener(new ChangeListener<Object>() {
+      @Override
+      public void changed(ObservableValue<? extends Object> observableValue, Object old, Object current) {
+        centerButtonsIfNeeded(lastSelected.get());
+      }
+    });
 
     StackPane stackPane = new StackPane();
 
