@@ -80,8 +80,6 @@ public class CachingEntityFactory implements EntityFactory<DatabaseObject> {
     Set<EntityProvider<DatabaseObject, ?>> matchingEntityProviders = new HashSet<>();
 
     for(EntityProvider<DatabaseObject, ?> entityProvider : entityProviders) {
-      System.out.println("CEP: " + entityProvider.getType() + " vs " + cls + " == " + entityProvider.getType().equals(cls));
-
       if(entityProvider.getType().equals(cls)) {
         matchingEntityProviders.add(entityProvider);
       }
