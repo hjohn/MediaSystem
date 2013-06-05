@@ -14,6 +14,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.layout.TilePane;
 
 public class CastingsRow extends TilePane {
@@ -57,9 +58,9 @@ public class CastingsRow extends TilePane {
           old.removeListener(weakListChangeListener);
         }
 
-        if(current != null) {
-          createCastingChildren(current);
+        createCastingChildren(current);
 
+        if(current != null) {
           current.addListener(weakListChangeListener);
         }
       }
@@ -69,8 +70,21 @@ public class CastingsRow extends TilePane {
   private final WeakBinder binder = new WeakBinder();
 
   private void createCastingChildren(ObservableList<? extends Casting> castings) {
+
+    /*
+     * Cleanup old children (setting the image to null reduces the chance that an unneeded image is loaded in the background):
+     */
+
+    for(Node node : getChildren()) {
+      ((CastingImage)node).image.set(null);
+    }
+
     getChildren().clear();
     empty.set(true);
+
+    /*
+     * Create new children:
+     */
 
     double castingSize = 100 + getHgap();
 
