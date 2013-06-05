@@ -89,8 +89,6 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
   protected final DetailPane.DecoratablePane decoratablePane;
 
   public MediaDetailPaneDecorator(DetailPane.DecoratablePane decoratablePane) {
-    System.out.println(">>> MediaDetailPaneDecorator created!");
-
     this.decoratablePane = decoratablePane;
     poster.imageHandleProperty().bind(posterHandle);
   }
