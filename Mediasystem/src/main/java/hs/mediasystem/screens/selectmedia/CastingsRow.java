@@ -19,7 +19,7 @@ import javafx.scene.layout.TilePane;
 
 public class CastingsRow extends TilePane {
   public enum Type {
-    CAST, APPEAREANCES;
+    CAST, APPEARANCES;
   }
 
   public final ObjectProperty<ObservableList<Casting>> castings = new SimpleObjectProperty<>();

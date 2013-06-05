@@ -133,7 +133,7 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
   }
 
   protected CastingsRow createCastingsRow(boolean interactive) {
-    CastingsRow castingsRow = new CastingsRow(Type.APPEAREANCES, interactive);
+    CastingsRow castingsRow = new CastingsRow(Type.APPEARANCES, interactive);
 
     castingsRow.castings.bind(castings);
     castingsRow.onCastingSelected.set(new EventHandler<CastingSelectedEvent>() {
