@@ -13,13 +13,13 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.StackPane;
 
 public abstract class DetailPane extends StackPane {
- // private final ServiceTracker<DetailPaneDecoratorFactory> detailPaneDecoratorFactoryTracker;
-
   private final ObjectProperty<Object> content = new SimpleObjectProperty<>();
   public ObjectProperty<Object> contentProperty() { return content; }
 
   private final DecoratablePane decoratablePane = new DecoratablePane(content);
   private final Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories;
+
+  private DetailPaneDecorator<Object> currentDetailPaneDecorator;
 
   public DetailPane(Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories, final boolean interactive) {
     this.detailPaneDecoratorFactories = detailPaneDecoratorFactories;
@@ -29,11 +29,14 @@ public abstract class DetailPane extends StackPane {
 
     setMouseTransparent(!interactive);
 
-   // detailPaneDecoratorFactoryTracker = new ServiceTracker<>(bundleContext, DetailPaneDecoratorFactory.class, new InheritanceDepthRanker<DetailPaneDecoratorFactory>());
-
     content.addListener(new ChangeListener<Object>() {
       @Override
       public void changed(ObservableValue<? extends Object> observable, Object old, Object current) {
+
+        /*
+         * Reset decoratable pane to show default content:
+         */
+
         decoratablePane.decoratorContent.set(null);
       }
     });
@@ -41,11 +44,15 @@ public abstract class DetailPane extends StackPane {
     decoratablePane.finalContent.addListener(new ChangeListener<Object>() {
       @Override
       public void changed(ObservableValue<? extends Object> observable, Object old, Object current) {
+        if(currentDetailPaneDecorator != null) {
+          currentDetailPaneDecorator.dataProperty().set(null);
+          currentDetailPaneDecorator = null;
+        }
+
         if(current != null) {
           DetailPaneDecoratorFactory factory = findDetailPaneDecoratorFactory(current.getClass());
 
-          @SuppressWarnings("unchecked")
-          DetailPaneDecorator<Object> decorator = (DetailPaneDecorator<Object>)factory.create(decoratablePane);
+          currentDetailPaneDecorator = (DetailPaneDecorator<Object>)factory.create(decoratablePane);
 
           decoratablePane.getStylesheets().clear();
           decoratablePane.getStyleClass().clear();
@@ -53,8 +60,8 @@ public abstract class DetailPane extends StackPane {
 
           DetailPane.this.initialize(decoratablePane);
 
-          decorator.dataProperty().set(current);
-          decorator.decorate(interactive);
+          currentDetailPaneDecorator.dataProperty().set(current);
+          currentDetailPaneDecorator.decorate(interactive);
         }
       }
     });
@@ -79,9 +86,10 @@ public abstract class DetailPane extends StackPane {
   }
 
   private int getInheritanceDepth(Class<?> cls) {
+    Class<?> parent = cls;
     int depth = 0;
 
-    while((cls = cls.getSuperclass()) != null) {
+    while((parent = parent.getSuperclass()) != null) {
       depth++;
     }
 
@@ -94,6 +102,13 @@ public abstract class DetailPane extends StackPane {
    */
   protected abstract void initialize(DecoratablePane decoratablePane);
 
+  /**
+   * Extension of AreaPane that allows the final content to be overriden by user
+   * interaction.  Normally it will display the linked content, but if decoratorContent
+   * is set (for example because of a selection made), this will be shown instead.
+   *
+   * TODO this does not seem to be related specifically to this subclass... why is it here?
+   */
   public static class DecoratablePane extends AreaPane {
     private final ObjectProperty<Object> decoratorContent = new SimpleObjectProperty<>();
     public ObjectProperty<Object> decoratorContentProperty() { return decoratorContent; }
