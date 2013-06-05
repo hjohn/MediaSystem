@@ -5,6 +5,7 @@ import hs.mediasystem.util.ImageHandle;
 import hs.subtitle.DefaultThreadFactory;
 
 import java.io.ByteArrayInputStream;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -29,10 +30,15 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
   }
 
   private final ObjectProperty<ImageHandle> imageHandle = new SimpleObjectProperty<>();
+  public ObjectProperty<ImageHandle> imageHandleProperty() { return imageHandle; }
+
+  private final long settlingNanos;
 
   private boolean taskQueued;
 
-  public AsyncImageProperty() {
+  public AsyncImageProperty(long settlingNanos) {
+    this.settlingNanos = settlingNanos;
+
     set(NULL_IMAGE);  // WORKAROUND for JavaFX Jira Issue RT-23974; should be null, but that causes an Exception in ImageView code
 
     imageHandle.addListener(new ChangeListener<ImageHandle>() {
@@ -43,8 +49,8 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
     });
   }
 
-  public ObjectProperty<ImageHandle> imageHandleProperty() {
-    return imageHandle;
+  public AsyncImageProperty() {
+    this(200 * 1000 * 1000L);
   }
 
   private void loadImageInBackground(final ImageHandle imageHandle) {
@@ -52,50 +58,89 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
 
     synchronized(FAST_EXECUTOR) {
       if(!taskQueued && imageHandle != null) {
+        taskQueued = true;
+
         Executor chosenExecutor = imageHandle.isFastSource() ? FAST_EXECUTOR : SLOW_EXECUTOR;
 
-        chosenExecutor.execute(new Runnable() {
+        chosenExecutor.execute(new BackgroundLoader(this, imageHandle, System.nanoTime() + settlingNanos));
+      }
+    }
+  }
+
+  static final class BackgroundLoader implements Runnable {
+    private final ImageHandle imageHandle;
+    private final WeakReference<AsyncImageProperty> asyncImagePropertyReference;
+    private final long loadAfterNanos;
+
+    private BackgroundLoader(AsyncImageProperty asyncImageProperty, ImageHandle imageHandle, long loadAfterNanos) {
+      this.loadAfterNanos = loadAfterNanos;
+      this.asyncImagePropertyReference = new WeakReference<>(asyncImageProperty);
+      this.imageHandle = imageHandle;
+    }
+
+    @Override
+    public void run() {
+      sleepUntil(loadAfterNanos);
+
+      final AsyncImageProperty asyncImagePropery = asyncImagePropertyReference.get();
+
+      if(asyncImagePropery == null) {
+        return;
+      }
+
+      try {
+        Image image = NULL_IMAGE;
+
+        if(imageHandle.equals(asyncImagePropery.imageHandle.get())) {
+          try {
+            Image newImage = ImageCache.loadImageUptoMaxSize(imageHandle, 1920, 1200);
+
+            if(newImage != null) {
+              image = newImage;  // WORKAROUND for JavaFX Jira Issue RT-23974; should be null, but that causes an Exception in ImageView code
+            }
+          }
+          catch(Exception e) {
+            System.out.println("[WARN] AsyncImageProperty - Exception while loading " + imageHandle + " in background: " + e);
+            e.printStackTrace(System.out);
+          }
+        }
+
+        final Image finalImage = image;
+
+        Platform.runLater(new Runnable() {
           @Override
           public void run() {
-            try {
-              Image image = NULL_IMAGE;
+            asyncImagePropery.set(finalImage);
 
-              try {
-                Image newImage = ImageCache.loadImageUptoMaxSize(imageHandle, 1920, 1200);
+            ImageHandle handle = asyncImagePropery.imageHandle.get();
 
-                if(newImage != null) {
-                  image = newImage;  // WORKAROUND for JavaFX Jira Issue RT-23974; should be null, but that causes an Exception in ImageView code
-                }
-              }
-              catch(Exception e) {
-                System.out.println("[WARN] AsyncImageProperty - Exception while loading " + imageHandle + " in background: " + e);
-                e.printStackTrace(System.out);
-              }
-
-              final Image finalImage = image;
-
-              Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                  set(finalImage);
-
-                  ImageHandle handle = AsyncImageProperty.this.imageHandle.get();
-
-                  if(handle == null || !handle.equals(imageHandle)) {
-                    loadImageInBackground(handle);
-                  }
-                }
-              });
-            }
-            finally {
-              synchronized(FAST_EXECUTOR) {
-                taskQueued = false;
-              }
+            if(handle == null || !handle.equals(imageHandle)) {
+              asyncImagePropery.loadImageInBackground(handle);
             }
           }
         });
+      }
+      finally {
+        synchronized(FAST_EXECUTOR) {
+          asyncImagePropery.taskQueued = false;
+        }
+      }
+    }
 
-        taskQueued = true;
+    private static void sleepUntil(long nanos) {
+      for(;;) {
+        long nanosLeft = nanos - System.nanoTime();
+
+        if(nanosLeft <= 0) {
+          break;
+        }
+
+        try {
+          Thread.sleep(nanosLeft / (1000 * 1000) + 1);
+        }
+        catch(InterruptedException e) {
+          // Ignore
+        }
       }
     }
   }
