@@ -6,6 +6,7 @@ import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -67,6 +68,7 @@ public class MediaNode {
     this.title = new SimpleStringProperty(media.title.get());
     this.sequence = new SimpleStringProperty();
     this.subtitle = new SimpleStringProperty();
+    this.children = new ArrayList<>();
     ObservableMap<String, Object> observableHashMap = FXCollections.observableHashMap();
     this.properties =  new SimpleObjectProperty<>(observableHashMap);
 
@@ -92,6 +94,7 @@ public class MediaNode {
   public MediaNode(MediaRoot mediaRoot, boolean showTopLevelExpanded, Callback<MediaRoot, List<MediaNode>> childrenCallback) {
     this(mediaRoot.getId(), new SpecialItem(mediaRoot.getRootName()), null);
 
+    this.children = null;  // TODO Overrides other constructor... beautify
     this.mediaRoot = mediaRoot;
     this.showTopLevelExpanded = showTopLevelExpanded;
     this.childrenCallback = childrenCallback;
@@ -119,6 +122,15 @@ public class MediaNode {
 
   public int indexOf(MediaNode child) {
     return getChildren().indexOf(child);
+  }
+
+  public void addChild(MediaNode child) {
+    if(child.parent != null) {
+      throw new IllegalStateException("cannot add child twice: " + child);
+    }
+
+    child.parent = this;
+    children.add(child);
   }
 
   public void setChildren(List<MediaNode> children) {

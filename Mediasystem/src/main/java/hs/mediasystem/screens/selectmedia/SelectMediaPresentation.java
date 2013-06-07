@@ -1,18 +1,17 @@
 package hs.mediasystem.screens.selectmedia;
 
+import hs.ddif.AnnotationDescriptor;
 import hs.ddif.Injector;
-import hs.ddif.Matcher;
+import hs.ddif.Value;
 import hs.mediasystem.MediaRootType;
 import hs.mediasystem.dao.Setting.PersistLevel;
-import hs.mediasystem.framework.Grouper;
-import hs.mediasystem.framework.Groups;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.SettingUpdater;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.StandardTitleComparator;
-import hs.mediasystem.screens.DefaultMediaGroup;
+import hs.mediasystem.screens.AbstractMediaGroup;
 import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
@@ -26,7 +25,6 @@ import hs.mediasystem.util.GridPaneUtil;
 import hs.mediasystem.util.StringBinding;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -183,15 +181,22 @@ public class SelectMediaPresentation implements Presentation {
   private void setTreeRoot(final MediaRoot root) {
     currentRoot = root;
 
-    List<MediaGroup> mediaGroups = new ArrayList<>(injector.getInstances(MediaGroup.class, new Matcher() {
-      @Override
-      public boolean matches(Class<?> cls) {
-        return root.getClass().equals(cls.getAnnotation(MediaRootType.class).value());
-      }
-    }));
+    List<MediaGroup> mediaGroups = new ArrayList<>(injector.getInstances(MediaGroup.class, AnnotationDescriptor.describe(MediaRootType.class, new Value("value", root.getClass()))));
 
     if(mediaGroups.isEmpty()) {
-      mediaGroups.add(new DefaultMediaGroup("alpha", "Alphabetically", null, StandardTitleComparator.INSTANCE, false, false));
+      mediaGroups.add(new AbstractMediaGroup("alpha", "Alphabetically", false) {
+        @Override
+        public List<MediaNode> getMediaNodes(List<? extends MediaItem> mediaItems) {
+          Collections.sort(mediaItems, StandardTitleComparator.INSTANCE);
+          List<MediaNode> nodes = new ArrayList<>();
+
+          for(MediaItem mediaItem : mediaItems) {
+            nodes.add(new MediaNode(mediaItem));
+          }
+
+          return nodes;
+        }
+      });
     }
 
     Collections.sort(mediaGroups, new Comparator<MediaGroup>() {
@@ -229,45 +234,7 @@ public class SelectMediaPresentation implements Presentation {
   }
 
   private List<MediaNode> applyGroup(List<? extends MediaItem> children, MediaGroup mediaGroup) {
-    Collections.sort(children, mediaGroup.getSortComparator());
-    Grouper<MediaItem> grouper = mediaGroup.getGrouper();
-    List<MediaNode> output = new ArrayList<>();
-
-    if(grouper != null) {
-      Collection<List<MediaItem>> groupedItems = Groups.group(children, grouper);
-
-      for(List<MediaItem> group : groupedItems) {
-        if(group.size() > 1 || mediaGroup.isAllowedSingleItemGroups()) {
-          Collections.sort(group, mediaGroup.getSortComparator());
-
-          Media<?> media = mediaGroup.createMediaFromFirstItem(group.get(0));
-          String shortTitle = mediaGroup.getShortTitle(group.get(0));
-
-          Media<?> groupMedia = new GroupItem();
-          groupMedia.title.set(media.title.get());
-          MediaNode groupNode = new MediaNode(mediaGroup.getId() + "[" + media.title.get() + "]", groupMedia, shortTitle);
-
-          List<MediaNode> nodeChildren = new ArrayList<>();
-
-          for(MediaItem item : group) {
-            nodeChildren.add(new MediaNode(item));
-          }
-
-          groupNode.setChildren(nodeChildren);
-          output.add(groupNode);
-        }
-        else {
-          output.add(new MediaNode(group.get(0)));
-        }
-      }
-    }
-    else {
-      for(MediaItem mediaItem : children) {
-        output.add(new MediaNode(mediaItem));
-      }
-    }
-
-    return output;
+    return mediaGroup.getMediaNodes(children);
   }
 
   public MediaNode createRootNode(MediaRoot root) {
