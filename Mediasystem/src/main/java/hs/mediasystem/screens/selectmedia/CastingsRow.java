@@ -3,6 +3,10 @@ package hs.mediasystem.screens.selectmedia;
 import hs.mediasystem.framework.Casting;
 import hs.mediasystem.util.Events;
 import hs.mediasystem.util.WeakBinder;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -79,8 +83,7 @@ public class CastingsRow extends TilePane {
       ((CastingImage)node).image.set(null);
     }
 
-    getChildren().clear();
-    empty.set(true);
+    List<CastingImage> castingImages = new ArrayList<>();
 
     /*
      * Create new children:
@@ -93,12 +96,6 @@ public class CastingsRow extends TilePane {
 
       for(final Casting casting : castings) {
         if(casting.role.get().equals("Actor")) {
-          empty.set(false);
-
-          if(space < 0) {
-            break;
-          }
-
           CastingImage castingImage = new CastingImage();
 
           castingImage.setFocusTraversable(interactive);
@@ -121,11 +118,18 @@ public class CastingsRow extends TilePane {
             }
           });
 
-          getChildren().add(castingImage);
+          castingImages.add(castingImage);
 
           space -= castingSize;
+
+          if(space < 0) {
+            break;
+          }
         }
       }
     }
+
+    this.empty.set(castingImages.isEmpty());
+    getChildren().setAll(castingImages);
   }
 }
