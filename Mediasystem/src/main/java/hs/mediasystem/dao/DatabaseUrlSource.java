@@ -12,8 +12,9 @@ public final class DatabaseUrlSource implements Source<byte[]> {
 
   private final Database database;
   private final String url;
-  private final Source<byte[]> source;
 
+  private Source<byte[]> source;
+  private boolean checkedSource;
   private boolean triedSource;
 
   /**
@@ -46,16 +47,26 @@ public final class DatabaseUrlSource implements Source<byte[]> {
 
     this.database = database;
     this.url = url;
+  }
+
+  private Source<byte[]> getSource() {
+    if(checkedSource) {
+      return source;
+    }
+
+    checkedSource = true;
 
     try(Transaction transaction = database.beginReadOnlyTransaction()) {
       Record record = transaction.selectUnique("url", "images", "url = ?", url);
 
-      this.source = record == null ? new URLImageSource(url) : null;
+      source = record == null ? new URLImageSource(url) : null;
     }
+
+    return source;
   }
 
   private boolean isStoredInDatabase() {
-    return source == null || triedSource;
+    return getSource() == null || triedSource;
   }
 
   @Override
@@ -63,7 +74,7 @@ public final class DatabaseUrlSource implements Source<byte[]> {
     if(!isStoredInDatabase()) {
       triedSource = true;
 
-      byte[] data = source.get();
+      byte[] data = getSource().get();
 
       if(data != null) {
         storeData(data);
