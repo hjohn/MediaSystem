@@ -2,6 +2,7 @@ package hs.mediasystem.ext.media.movie;
 
 import hs.mediasystem.MediaRootType;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.screens.AbstractMediaGroup;
 import hs.mediasystem.screens.MediaNode;
 
@@ -19,7 +20,7 @@ public class AlphaMediaGroup extends AbstractMediaGroup {
   }
 
   @Override
-  public List<MediaNode> getMediaNodes(List<? extends MediaItem> mediaItems) {
+  public List<MediaNode> getMediaNodes(MediaRoot mediaRoot, List<? extends MediaItem> mediaItems) {
     Collections.sort(mediaItems, MovieTitleGroupingComparator.INSTANCE);
     List<MediaNode> nodes = new ArrayList<>();
 

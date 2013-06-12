@@ -57,9 +57,13 @@ public class MediaNode {
     this.isLeaf = true;
     this.dataType = mediaItem.getDataType();
     this.showTopLevelExpanded = false;
+
+    if(mediaItem instanceof MediaRoot) {
+      this.mediaRoot = (MediaRoot)mediaItem;
+    }
   }
 
-  public MediaNode(String id, Media<?> media, String shortTitle) {
+  public MediaNode(String id, Media<?> media, String shortTitle, boolean isLeaf) {
     assert id != null;
     assert !id.contains("/");
     assert !id.contains(":");
@@ -83,18 +87,25 @@ public class MediaNode {
     this.media = new SimpleEntityProperty<>(this, "media");
     this.media.set(media);
 
-    this.isLeaf = false;
+    this.isLeaf = isLeaf;
     this.dataType = Media.class;
+  }
+
+  public MediaNode(String id, Media<?> media, String shortTitle) {
+    this(id, media, shortTitle, false);
   }
 
   private MediaRoot mediaRoot;
   private final Class<?> dataType;
   private Callback<MediaRoot, List<MediaNode>> childrenCallback;
 
-  public MediaNode(MediaRoot mediaRoot, boolean showTopLevelExpanded, Callback<MediaRoot, List<MediaNode>> childrenCallback) {
-    this(mediaRoot.getId(), new SpecialItem(mediaRoot.getRootName()), null);
+  public MediaNode(MediaRoot mediaRoot, boolean showTopLevelExpanded, boolean isLeaf, Callback<MediaRoot, List<MediaNode>> childrenCallback) {
+    this(mediaRoot.getId(), new SpecialItem(mediaRoot.getRootName()), null, isLeaf);
 
-    this.children = null;  // TODO Overrides other constructor... beautify
+    if(childrenCallback != null) {
+      this.children = null;  // TODO Overrides other constructor... beautify
+    }
+
     this.mediaRoot = mediaRoot;
     this.showTopLevelExpanded = showTopLevelExpanded;
     this.childrenCallback = childrenCallback;

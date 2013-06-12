@@ -72,8 +72,8 @@ public class SelectMediaPresentation implements Presentation {
     view.onNodeSelected().set(new EventHandler<MediaNodeEvent>() {
       @Override
       public void handle(MediaNodeEvent event) {
-        if(event.getMediaNode().getMediaItem() instanceof MediaRoot) {
-          controller.setLocation(new SelectMediaLocation((MediaRoot)event.getMediaNode().getMediaItem()));
+        if(event.getMediaNode().getMediaRoot() != null) {
+          controller.setLocation(new SelectMediaLocation(event.getMediaNode().getMediaRoot()));
         }
         else {
           controller.play(event.getMediaNode().getMediaItem());
@@ -186,7 +186,7 @@ public class SelectMediaPresentation implements Presentation {
     if(mediaGroups.isEmpty()) {
       mediaGroups.add(new AbstractMediaGroup("alpha", "Alphabetically", false) {
         @Override
-        public List<MediaNode> getMediaNodes(List<? extends MediaItem> mediaItems) {
+        public List<MediaNode> getMediaNodes(MediaRoot mediaRoot, List<? extends MediaItem> mediaItems) {
           Collections.sort(mediaItems, StandardTitleComparator.INSTANCE);
           List<MediaNode> nodes = new ArrayList<>();
 
@@ -228,19 +228,19 @@ public class SelectMediaPresentation implements Presentation {
 
     MediaGroup mediaGroup = groupSet.get();
 
-    output.addAll(applyGroup(children, mediaGroup));
+    output.addAll(applyGroup(children, mediaRoot, mediaGroup));
 
     return output;
   }
 
-  private List<MediaNode> applyGroup(List<? extends MediaItem> children, MediaGroup mediaGroup) {
-    return mediaGroup.getMediaNodes(children);
+  private List<MediaNode> applyGroup(List<? extends MediaItem> children, MediaRoot mediaRoot, MediaGroup mediaGroup) {
+    return mediaGroup.getMediaNodes(mediaRoot, children);
   }
 
   public MediaNode createRootNode(MediaRoot root) {
     MediaGroup mediaGroup = groupSet.get();
 
-    return new MediaNode(root, mediaGroup.showTopLevelExpanded(), new Callback<MediaRoot, List<MediaNode>>() {
+    return new MediaNode(root, mediaGroup.showTopLevelExpanded(), false, new Callback<MediaRoot, List<MediaNode>>() {
       @Override
       public List<MediaNode> call(MediaRoot mediaRoot) {
         return getChildren(mediaRoot);

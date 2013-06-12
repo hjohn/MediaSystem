@@ -3,6 +3,7 @@ package hs.mediasystem.ext.media.serie;
 import hs.mediasystem.MediaRootType;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.screens.AbstractMediaGroup;
 import hs.mediasystem.screens.MediaNode;
 
@@ -38,7 +39,7 @@ public class SeasonMediaGroup extends AbstractMediaGroup {
   }
 
   @Override
-  public List<MediaNode> getMediaNodes(List<? extends MediaItem> mediaItems) {
+  public List<MediaNode> getMediaNodes(MediaRoot mediaRoot, List<? extends MediaItem> mediaItems) {
     Collections.sort(mediaItems, EpisodeComparator.INSTANCE);
     List<MediaNode> nodes = new ArrayList<>();
     String previousSeasonName = null;

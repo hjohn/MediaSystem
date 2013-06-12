@@ -1,6 +1,7 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.MediaRoot;
 
 import java.util.List;
 
@@ -10,5 +11,5 @@ public interface MediaGroup {
 
   boolean showTopLevelExpanded();
 
-  List<MediaNode> getMediaNodes(List<? extends MediaItem> mediaItems);
+  List<MediaNode> getMediaNodes(MediaRoot mediaRoot, List<? extends MediaItem> mediaItems);
 }
