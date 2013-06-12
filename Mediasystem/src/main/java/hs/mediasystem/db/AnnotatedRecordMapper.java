@@ -206,7 +206,20 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   }
 
   @Override
-  public void applyValues(Transaction transaction, T object, Map<String, Object> map) {
+  public List<String> getColumnNames() {
+    List<String> columnNames = new ArrayList<>(getIdColumnNames());
+
+    for(Column column : columns) {
+      for(String name : column.getNames()) {
+        columnNames.add(name);
+      }
+    }
+
+    return columnNames;
+  }
+
+  @Override
+  public void applyValues(Transaction transaction, Object object, Map<String, Object> map) {
     for(Column column : columns) {
       column.getAccessor().set(object, column.toJavaType(map, transaction));
     }
@@ -217,7 +230,7 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
   }
 
   @Override
-  public void invokeAfterLoadStore(T object, Database database) throws DatabaseException {
+  public void invokeAfterLoadStore(Object object, Database database) throws DatabaseException {
     if(object instanceof DatabaseObject) {
       ((DatabaseObject)object).setDatabase(database);
     }

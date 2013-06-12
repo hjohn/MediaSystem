@@ -286,6 +286,86 @@ public class Database {
       }
     }
 
+    public synchronized <T> List<Object[]> select(Class<?>[] classes, String[] aliases, String from, String whereCondition, Object... parameters) throws DatabaseException {
+      ensureNotFinished();
+
+      StringBuilder fields = new StringBuilder();
+
+      for(int j = 0; j < classes.length; j++) {
+        Class<?> cls = classes[j];
+        RecordMapper<?> recordMapper = getRecordMapper(cls);
+
+        for(String columnName : recordMapper.getColumnNames()) {
+          if(fields.length() > 0) {
+            fields.append(", ");
+          }
+          fields.append(aliases[j]).append(".").append(columnName).append(" AS ").append(recordMapper.getTableName()).append("_").append(columnName);
+        }
+      }
+
+      String sql = "SELECT " + fields + " FROM " + from + (whereCondition == null ? "" : " WHERE " + whereCondition);
+
+      LOG.fine(this + ": " + sql + ": " + Arrays.toString(parameters));
+
+      try(PreparedStatement statement = connection.prepareStatement(sql)) {
+        int parameterIndex = 1;
+
+        for(Object o : parameters) {
+          statement.setObject(parameterIndex++, o);
+        }
+
+        try(ResultSet rs = statement.executeQuery()) {
+          List<Object[]> records = new ArrayList<>();
+          ResultSetMetaData metaData = rs.getMetaData();
+
+          while(rs.next()) {
+            Object[] tuple = new Object[classes.length];
+
+            for(int j = 0; j < classes.length; j++) {
+              Class<?> cls = classes[j];
+              RecordMapper<?> recordMapper = getRecordMapper(cls);
+              Map<String, Object> values = new HashMap<>();
+              String prefix = recordMapper.getTableName() + "_";
+              boolean hasNonNullField = false;
+
+              for(int i = 1; i <= metaData.getColumnCount(); i++) {
+                String columnName = metaData.getColumnName(i).toLowerCase();
+
+                if(columnName.startsWith(prefix)) {
+                  Object value = rs.getObject(i);
+
+                  if(value != null) {
+                    hasNonNullField = true;
+                  }
+
+                  values.put(columnName.substring(prefix.length()), value);
+                }
+              }
+
+              if(hasNonNullField) {
+                Object record = cls.newInstance();
+
+                recordMapper.applyValues(this, record, values);
+                recordMapper.invokeAfterLoadStore(record, Database.this);  // TODO can probably be merged with applyValues now
+
+                tuple[j] = record;
+              }
+            }
+
+            records.add(tuple);
+          }
+
+          return records;
+        }
+        catch(IllegalAccessException | InstantiationException e) {
+          throw new DatabaseException(this, "Unable to instantiate class", e);
+        }
+      }
+      catch(SQLException e) {
+        throw new DatabaseException(this, sql + ": " + Arrays.toString(parameters), e);
+      }
+    }
+
     public synchronized <T> void merge(T obj) throws DatabaseException {
       @SuppressWarnings("unchecked")
       RecordMapper<T> recordMapper = (RecordMapper<T>)getRecordMapper(obj.getClass());
