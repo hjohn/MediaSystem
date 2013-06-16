@@ -3,6 +3,8 @@ package hs.mediasystem.dao;
 import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Database.Transaction;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -30,6 +32,18 @@ public class ItemsDao {
       }
 
       return item;
+    }
+  }
+
+  public List<Object[]> loadFullItems(String uriPrefix) {
+    try(Transaction transaction = database.beginReadOnlyTransaction()) {
+      return transaction.select(
+        new Class[] {MediaData.class, Identifier.class, Item.class},
+        new String[] {"d", "i", "m"},
+        "MediaData d LEFT JOIN Identifiers i ON d.id = i.mediadata_id LEFT JOIN Items m ON m.type = i.mediatype and m.provider = i.provider and m.providerid = i.providerid",
+        "d.uri LIKE ?",
+        (uriPrefix + "\\%").replaceAll("\\\\", "\\\\\\\\")
+      );
     }
   }
 
