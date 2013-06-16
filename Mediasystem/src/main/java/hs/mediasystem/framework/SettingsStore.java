@@ -40,6 +40,7 @@ public class SettingsStore {
   }
 
   public void storeSetting(String system, PersistLevel level, String key, String value) {
+    System.out.println("[FINE] SettingsStore#storeSetting - " + system + " + " + key + " <= " + value);
     getValueProperty(system, level, key).set(value);
   }
 
