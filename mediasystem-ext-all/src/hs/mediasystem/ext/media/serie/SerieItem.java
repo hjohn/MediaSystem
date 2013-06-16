@@ -18,7 +18,10 @@ import hs.mediasystem.framework.MediaRoot;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SerieItem extends MediaItem implements MediaRoot {
   private static final TvdbEpisodeEnricher TVDB_EPISODE_ENRICHER = new TvdbEpisodeEnricher(SeriesMediaTree.TVDB_SERIE_ENRICHER);
@@ -131,4 +134,26 @@ public class SerieItem extends MediaItem implements MediaRoot {
     return mediaRoot;
   }
 
+  private static final Map<String, Object> MEDIA_PROPERTIES = new HashMap<>();
+
+  static {
+    MEDIA_PROPERTIES.put("image.poster", null);
+    MEDIA_PROPERTIES.put("image.poster.aspectRatios", new double[] {16.0 / 9.0, 4.0 / 3.0});
+    MEDIA_PROPERTIES.put("image.poster.hasIdentifyingTitle", false);
+
+    MEDIA_PROPERTIES.put("image.background", null);
+    MEDIA_PROPERTIES.put("image.background.aspectRatios", new double[] {2.0 / 3.0, 4.0 / 3.0});
+    MEDIA_PROPERTIES.put("image.background.hasIdentifyingTitle", false);
+    MEDIA_PROPERTIES.put("image.background.fromParent", true);
+
+    MEDIA_PROPERTIES.put("image.banner", null);
+    MEDIA_PROPERTIES.put("image.banner.aspectRatios", new double[] {6.0 / 1.0});
+    MEDIA_PROPERTIES.put("image.banner.hasIdentifyingTitle", true);
+    MEDIA_PROPERTIES.put("image.banner.fromParent", true);
+  }
+
+  @Override
+  public Map<String, Object> getMediaProperties() {
+    return Collections.unmodifiableMap(MEDIA_PROPERTIES);
+  }
 }

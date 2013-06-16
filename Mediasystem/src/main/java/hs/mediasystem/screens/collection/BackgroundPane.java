@@ -1,4 +1,4 @@
-package hs.mediasystem.screens.selectmedia;
+package hs.mediasystem.screens.collection;
 
 import java.io.ByteArrayInputStream;
 

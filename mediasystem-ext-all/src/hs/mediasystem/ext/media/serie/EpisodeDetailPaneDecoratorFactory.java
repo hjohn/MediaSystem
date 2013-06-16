@@ -2,9 +2,9 @@ package hs.mediasystem.ext.media.serie;
 
 import javax.inject.Named;
 
-import hs.mediasystem.screens.selectmedia.DetailPane.DecoratablePane;
-import hs.mediasystem.screens.selectmedia.DetailPaneDecorator;
-import hs.mediasystem.screens.selectmedia.DetailPaneDecoratorFactory;
+import hs.mediasystem.screens.collection.DetailPaneDecorator;
+import hs.mediasystem.screens.collection.DetailPaneDecoratorFactory;
+import hs.mediasystem.screens.collection.AbstractDetailPane.DecoratablePane;
 
 @Named
 public class EpisodeDetailPaneDecoratorFactory implements DetailPaneDecoratorFactory {
@@ -18,5 +18,4 @@ public class EpisodeDetailPaneDecoratorFactory implements DetailPaneDecoratorFac
   public Class<?> getType() {
     return Episode.class;
   }
-
 }

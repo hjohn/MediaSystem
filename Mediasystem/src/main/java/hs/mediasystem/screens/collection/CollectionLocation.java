@@ -1,12 +1,12 @@
-package hs.mediasystem.screens.selectmedia;
+package hs.mediasystem.screens.collection;
 
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.screens.Location;
 
-public class SelectMediaLocation implements Location {
+public class CollectionLocation implements Location {
   private final MediaRoot mediaRoot;
 
-  public SelectMediaLocation(MediaRoot mediaRoot) {
+  public CollectionLocation(MediaRoot mediaRoot) {
     this.mediaRoot = mediaRoot;
   }
 
@@ -33,7 +33,7 @@ public class SelectMediaLocation implements Location {
   public Location getParent() {
     MediaRoot parent = mediaRoot.getParent();
 
-    return parent == null ? null : new SelectMediaLocation(parent);
+    return parent == null ? null : new CollectionLocation(parent);
   }
 
   @Override

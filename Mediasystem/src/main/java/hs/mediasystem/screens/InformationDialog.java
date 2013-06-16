@@ -18,7 +18,7 @@ public class InformationDialog extends DialogStage {
 
   public InformationDialog(String text) {
     root.getStylesheets().add("default.css");
-    root.getStylesheets().add("select-media/resume-dialog.css");
+    root.getStylesheets().add("collection/resume-dialog.css");  // TODO ho-hum, different css maybe?
     root.getStyleClass().add("resume-dialog");
     root.getChildren().add(new Label(text));
     root.setFillWidth(true);

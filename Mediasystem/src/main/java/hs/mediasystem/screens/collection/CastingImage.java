@@ -1,4 +1,4 @@
-package hs.mediasystem.screens.selectmedia;
+package hs.mediasystem.screens.collection;
 
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.util.ImageHandle;

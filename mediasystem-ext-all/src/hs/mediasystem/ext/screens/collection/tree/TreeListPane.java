@@ -1,11 +1,10 @@
-package hs.mediasystem.ext.selectmedia.tree;
+package hs.mediasystem.ext.screens.collection.tree;
 
 import hs.mediasystem.screens.Filter;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.ServiceMediaNodeCell;
-import hs.mediasystem.screens.selectmedia.ListPane;
 import hs.mediasystem.util.Events;
 
 import java.util.ArrayList;
@@ -13,10 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import javafx.application.Platform;
-import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -41,36 +37,18 @@ import javafx.util.Callback;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class TreeListPane extends BorderPane implements ListPane {
+public class TreeListPane extends BorderPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
   private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
   private static final KeyCombination LEFT = new KeyCodeCombination(KeyCode.LEFT);
   private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
 
-  private final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected() { return onNodeSelected; }
-
-  private final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect() { return onNodeAlternateSelect; }
-
-  private final ReadOnlyObjectWrapper<MediaNode> focusedNode = new ReadOnlyObjectWrapper<>();
-  @Override public ReadOnlyObjectProperty<MediaNode> focusedNodeProperty() { return focusedNode.getReadOnlyProperty(); }
+  public final ObjectProperty<MediaNode> rootMediaNode = new SimpleObjectProperty<>();
+  public final ObjectProperty<MediaNode> focusedMediaNode = new SimpleObjectProperty<>();
+  public final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected = new SimpleObjectProperty<>();
+  public final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect = new SimpleObjectProperty<>();
 
   private final TreeView<MediaNode> treeView = new TreeView<>();
-
-  private final ObjectBinding<MediaNode> mediaNode = new ObjectBinding<MediaNode>() {
-    {
-      bind(treeView.getFocusModel().focusedItemProperty());
-    }
-
-    @Override
-    protected MediaNode computeValue() {
-      TreeItem<MediaNode> focusedItem = treeView.getFocusModel().getFocusedItem();
-
-      return focusedItem != null ? focusedItem.getValue() : null;
-    }
-  };
-  @Override public ObjectBinding<MediaNode> mediaNodeBinding() { return mediaNode; }
 
   private final Filter filter = new Filter() {{
     getStyleClass().add("seasons");
@@ -82,7 +60,21 @@ public class TreeListPane extends BorderPane implements ListPane {
   public TreeListPane(Provider<Set<MediaNodeCellProvider>> mediaNodeCellsProvider) {
     this.mediaNodeCellsProvider = mediaNodeCellsProvider;
 
-    getStylesheets().add("select-media/tree-list-pane.css");
+    focusedMediaNode.addListener(new ChangeListener<MediaNode>() {
+      @Override
+      public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
+        setSelectedNode(current);
+      }
+    });
+
+    treeView.getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<MediaNode>>() {
+      @Override
+      public void changed(ObservableValue<? extends TreeItem<MediaNode>> observable, TreeItem<MediaNode> old, TreeItem<MediaNode> current) {
+        focusedMediaNode.set(current == null ? null : current.getValue());
+      }
+    });
+
+    getStylesheets().add("collection/tree-list-pane.css");
 
     treeView.setEditable(false);
     treeView.setShowRoot(false);
@@ -108,10 +100,12 @@ public class TreeListPane extends BorderPane implements ListPane {
       public void handle(KeyEvent event) {
         if(LEFT.match(event)) {
           filter.activatePrevious();
+          treeView.getFocusModel().focus(0);
           event.consume();
         }
         else if(RIGHT.match(event)) {
           filter.activateNext();
+          treeView.getFocusModel().focus(0);
           event.consume();
         }
         else {
@@ -144,12 +138,11 @@ public class TreeListPane extends BorderPane implements ListPane {
       }
     });
 
-    treeView.getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<MediaNode>>() {
+    rootMediaNode.addListener(new ChangeListener<MediaNode>() {
       @Override
-      public void changed(ObservableValue<? extends TreeItem<MediaNode>> observable, TreeItem<MediaNode> old, TreeItem<MediaNode> current) {
-        if(current != null) {
-          focusedNode.set(current.getValue());
-        }
+      public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
+        setRoot(current);
+        setSelectedNode(focusedMediaNode.get());
       }
     });
 
@@ -157,16 +150,8 @@ public class TreeListPane extends BorderPane implements ListPane {
     setCenter(treeView);
   }
 
-  private MediaNode root;
-
-  @Override
-  public MediaNode getRoot() {
-    return root;
-  }
-
-  @Override
-  public void setRoot(final MediaNode root) {
-    this.root = root;
+  private void setRoot(final MediaNode root) {
+    System.out.println(">>> setRoot : " + root);
 
     treeView.setCellFactory(new Callback<TreeView<MediaNode>, TreeCell<MediaNode>>() {
       @Override
@@ -207,9 +192,9 @@ public class TreeListPane extends BorderPane implements ListPane {
 
   private void refilter() {
     MediaNodeTreeItem group = (MediaNodeTreeItem)filter.activeProperty().get().getUserData();
-    treeView.getFocusModel().focus(-1);  // WORKAROUND: If focus index was same as before, even if root was changed, focused item is NOT updated
+    //treeView.getFocusModel().focus(-1);  // WORKAROUND: If focus index was same as before, even if root was changed, focused item is NOT updated
     treeView.setRoot(group);
-    treeView.getFocusModel().focus(0);
+   // treeView.getFocusModel().focus(0);
   }
 
   private final class MediaNodeTreeItem extends TreeItem<MediaNode> {
@@ -269,24 +254,26 @@ public class TreeListPane extends BorderPane implements ListPane {
     }
   }
 
-  @Override
-  public MediaNode getSelectedNode() {
-    TreeItem<MediaNode> focusedItem = treeView.getFocusModel().getFocusedItem();
+  private void setSelectedNode(MediaNode mediaNode) {
+    System.out.println(">>> setSelectedNode : " + mediaNode);
+    TreeItem<MediaNode> focusedTreeItem = treeView.getFocusModel().getFocusedItem();
 
-    return focusedItem == null ? null : focusedItem.getValue();
-  }
-
-  @Override
-  public void setSelectedNode(MediaNode mediaNode) {
-    treeView.getFocusModel().focus(-1);  // WORKAROUND: If focus index was same as before, even if root was changed, focused item is NOT updated
-
-    if(mediaNode == null) {
-      if(!filter.getChildren().isEmpty()) {
-        filter.activeProperty().set(filter.getChildren().get(0));
-      }
-      treeView.getFocusModel().focus(0);
+    if(mediaNode != null && focusedTreeItem != null && mediaNode.equals(focusedTreeItem.getValue())) {
+      System.out.println(">>> setSelectedNode: exiting early");
+      return;
     }
-    else {
+
+    System.out.println(">>> setSelectedNode : searching");
+
+//    treeView.getFocusModel().focus(-1);  // WORKAROUND: If focus index was same as before, even if root was changed, focused item is NOT updated
+
+    if(mediaNode != null) {
+//      if(!filter.getChildren().isEmpty()) {
+//        filter.activeProperty().set(filter.getChildren().get(0));
+//      }
+//      treeView.getFocusModel().focus(0);
+//    }
+//    else {
       List<MediaNode> stack = new ArrayList<>();
 
       stack.add(mediaNode);

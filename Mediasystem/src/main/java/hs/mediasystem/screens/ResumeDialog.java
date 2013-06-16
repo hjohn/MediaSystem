@@ -45,7 +45,7 @@ public class ResumeDialog extends DialogStage {
 
     setScene(SceneUtil.createScene(root));
 
-    root.getStylesheets().add("select-media/resume-dialog.css");
+    root.getStylesheets().add("collection/resume-dialog.css");
     root.getStyleClass().add("resume-dialog");
     root.getChildren().add(new ProgressIndicator());
     root.setFillWidth(true);

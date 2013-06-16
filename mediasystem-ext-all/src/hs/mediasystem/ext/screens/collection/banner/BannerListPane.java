@@ -1,10 +1,9 @@
-package hs.mediasystem.ext.selectmedia.banner;
+package hs.mediasystem.ext.screens.collection.banner;
 
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.ServiceMediaNodeCell;
-import hs.mediasystem.screens.selectmedia.ListPane;
 import hs.mediasystem.util.Events;
 
 import java.util.Set;
@@ -12,10 +11,7 @@ import java.util.Set;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -40,21 +36,17 @@ import javafx.util.Callback;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class BannerListPane extends BorderPane implements ListPane {
+public class BannerListPane extends BorderPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
   private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
 
+  public final ObjectProperty<MediaNode> rootMediaNode = new SimpleObjectProperty<>();
+  public final ObjectProperty<MediaNode> focusedMediaNode = new SimpleObjectProperty<>();
+  public final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected = new SimpleObjectProperty<>();
+  public final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect = new SimpleObjectProperty<>();
+
   private final TableColumn<DuoMediaNode, MediaNode> leftColumn = new TableColumn<>("Left");
   private final TableColumn<DuoMediaNode, MediaNode> rightColumn = new TableColumn<>("Right");
-
-  private final ObjectProperty<EventHandler<MediaNodeEvent>> onItemSelected = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected() { return onItemSelected; }
-
-  private final ObjectProperty<EventHandler<MediaNodeEvent>> onItemAlternateSelect = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect() { return onItemAlternateSelect; }
-
-  private final ReadOnlyObjectWrapper<MediaNode> focusedNode = new ReadOnlyObjectWrapper<>();
-  @Override public ReadOnlyObjectProperty<MediaNode> focusedNodeProperty() { return focusedNode.getReadOnlyProperty(); }
 
   private final TableView<DuoMediaNode> tableView = new TableView<DuoMediaNode>() {{
     getColumns().add(leftColumn);
@@ -102,26 +94,27 @@ public class BannerListPane extends BorderPane implements ListPane {
     rightColumn.setCellValueFactory(new PropertyValueFactory<DuoMediaNode, MediaNode>("right"));
   }};
 
-  private final ObjectBinding<MediaNode> mediaNode = new ObjectBinding<MediaNode>() {
-    {
-      bind(tableView.getFocusModel().focusedCellProperty());
-    }
-
-    @Override
-    protected MediaNode computeValue() {
-      return getFocusedMediaNode();
-    }
-  };
-  @Override public ObjectBinding<MediaNode> mediaNodeBinding() { return mediaNode; }
-
   private final Provider<Set<MediaNodeCellProvider>> mediaNodeCellProvidersProvider;
 
   @Inject
   public BannerListPane(Provider<Set<MediaNodeCellProvider>> mediaNodeCellProvidersProvider) {
     this.mediaNodeCellProvidersProvider = mediaNodeCellProvidersProvider;
-    getStylesheets().add("select-media/banner-list-pane.css");
 
-//    mediaNodeCellProviderTracker = MediaNodeCellProvider.Type.HORIZONTAL.createTracker(bundleContext);
+    getStylesheets().add("collection/banner-list-pane.css");
+
+    focusedMediaNode.addListener(new ChangeListener<MediaNode>() {
+      @Override
+      public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
+        setSelectedNode(current);
+      }
+    });
+
+    tableView.getFocusModel().focusedCellProperty().addListener(new InvalidationListener() {
+      @Override
+      public void invalidated(Observable observable) {
+        focusedMediaNode.set(getFocusedMediaNode());
+      }
+    });
 
     tableView.setEditable(false);
 
@@ -135,7 +128,7 @@ public class BannerListPane extends BorderPane implements ListPane {
             itemSelected(event, focusedNode);
           }
           else if(event.getButton() == MouseButton.SECONDARY && event.getClickCount() == 1) {
-            Events.dispatchEvent(onItemAlternateSelect, new MediaNodeEvent(focusedNode), event);
+            Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(focusedNode), event);
           }
         }
       }
@@ -151,33 +144,23 @@ public class BannerListPane extends BorderPane implements ListPane {
             itemSelected(event, focusedNode);
           }
           else if(KEY_I.match(event)) {
-            Events.dispatchEvent(onItemAlternateSelect, new MediaNodeEvent(focusedNode), event);
+            Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(focusedNode), event);
           }
         }
       }
     });
 
-    tableView.getFocusModel().focusedCellProperty().addListener(new InvalidationListener() {
+    rootMediaNode.addListener(new ChangeListener<MediaNode>() {
       @Override
-      public void invalidated(Observable observable) {
-        focusedNode.set(getFocusedMediaNode());
+      public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
+        setRoot(current);
       }
     });
 
     setCenter(tableView);
   }
 
-  private MediaNode root;
-
-  @Override
-  public MediaNode getRoot() {
-    return root;
-  }
-
-  @Override
-  public void setRoot(final MediaNode root) {
-    this.root = root;
-
+  private void setRoot(final MediaNode root) {
     tableView.getItems().clear();
     DuoMediaNode duoMediaNode = null;
 
@@ -200,7 +183,7 @@ public class BannerListPane extends BorderPane implements ListPane {
   }
 
   private void itemSelected(Event event, MediaNode focusedNode) {
-    Events.dispatchEvent(onItemSelected, new MediaNodeEvent(focusedNode), event);
+    Events.dispatchEvent(onNodeSelected, new MediaNodeEvent(focusedNode), event);
   }
 
   private MediaNode getFocusedMediaNode() {
@@ -250,13 +233,13 @@ public class BannerListPane extends BorderPane implements ListPane {
     public MediaNode getRight() { return right.get(); }
   }
 
-  @Override
-  public MediaNode getSelectedNode() {
-    return getFocusedMediaNode();
-  }
+  private void setSelectedNode(MediaNode mediaNode) {
+    MediaNode focusedMediaNode = getFocusedMediaNode();
 
-  @Override
-  public void setSelectedNode(MediaNode mediaNode) {
+    if(mediaNode != null && mediaNode.equals(focusedMediaNode)) {
+      return;
+    }
+
     if(tableView.getItems().size() > 0) {
       int index = mediaNode == null ? 0 : mediaNode.getParent().indexOf(mediaNode);
 

@@ -1,21 +1,14 @@
 package hs.mediasystem.ext.media.youtube;
 
-import javax.inject.Named;
-
-import hs.mediasystem.framework.MediaRootType;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.ProgramController;
-import hs.mediasystem.screens.selectmedia.SelectMediaLocation;
-import hs.mediasystem.screens.selectmedia.StandardView;
+import hs.mediasystem.screens.collection.CollectionLocation;
 import javafx.scene.image.Image;
+
+import javax.inject.Named;
 
 @Named
 public class YouTubeMainMenuExtension implements MainMenuExtension {
-
-  public YouTubeMainMenuExtension() {
-    StandardView.registerLayout(YouTubeMediaTree.class, MediaRootType.MOVIES);
-    StandardView.registerLayout(YouTubeFeed.class, MediaRootType.MOVIES);
-  }
 
   @Override
   public String getTitle() {
@@ -29,7 +22,7 @@ public class YouTubeMainMenuExtension implements MainMenuExtension {
 
   @Override
   public void select(final ProgramController controller) {
-    controller.setLocation(new SelectMediaLocation(new YouTubeMediaTree()));
+    controller.setLocation(new CollectionLocation(new YouTubeMediaTree()));
   }
 
   @Override

@@ -1,42 +1,19 @@
 package hs.mediasystem.ext.media.movie;
 
-import hs.mediasystem.dao.ItemsDao;
-import hs.mediasystem.dao.Setting.PersistLevel;
-import hs.mediasystem.db.DatabaseObject;
-import hs.mediasystem.entity.EntityFactory;
-import hs.mediasystem.framework.MediaItemConfigurator;
-import hs.mediasystem.framework.MediaRootType;
-import hs.mediasystem.framework.SettingsStore;
-import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.MainMenuExtension;
 import hs.mediasystem.screens.ProgramController;
-import hs.mediasystem.screens.selectmedia.SelectMediaLocation;
-import hs.mediasystem.screens.selectmedia.StandardView;
-import hs.mediasystem.util.PathStringConverter;
-
-import java.nio.file.Path;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import javafx.collections.ObservableList;
+import hs.mediasystem.screens.collection.CollectionLocation;
 import javafx.scene.image.Image;
 
-@Named
-public class MoviesMainMenuExtension implements MainMenuExtension {
-  @Inject
-  private PersistQueue persister;
-  @Inject
-  private MediaItemConfigurator mediaItemConfigurator;
-  @Inject
-  private ItemsDao itemsDao;
-  @Inject
-  private EntityFactory<DatabaseObject> entityFactory;
-  @Inject
-  private SettingsStore settingsStore;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
-  public MoviesMainMenuExtension() {
-    StandardView.registerLayout(MoviesMediaTree.class, MediaRootType.MOVIES);
+public class MoviesMainMenuExtension implements MainMenuExtension {
+  private final Provider<MoviesMediaTree> moviesMediaTreeProvider;
+
+  @Inject
+  public MoviesMainMenuExtension(Provider<MoviesMediaTree> moviesMediaTreeProvider) {
+    this.moviesMediaTreeProvider = moviesMediaTreeProvider;
   }
 
   @Override
@@ -51,9 +28,7 @@ public class MoviesMainMenuExtension implements MainMenuExtension {
 
   @Override
   public void select(final ProgramController controller) {
-    ObservableList<Path> paths = settingsStore.getListProperty("MediaSystem:Ext:Movies", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
-
-    controller.setLocation(new SelectMediaLocation(new MoviesMediaTree(persister, itemsDao, mediaItemConfigurator, entityFactory, paths)));
+    controller.setLocation(new CollectionLocation(moviesMediaTreeProvider.get()));
   }
 
   @Override

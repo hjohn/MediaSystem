@@ -99,8 +99,8 @@ public class MediaNode {
   private final Class<?> dataType;
   private Callback<MediaRoot, List<MediaNode>> childrenCallback;
 
-  public MediaNode(MediaRoot mediaRoot, boolean showTopLevelExpanded, boolean isLeaf, Callback<MediaRoot, List<MediaNode>> childrenCallback) {
-    this(mediaRoot.getId(), new SpecialItem(mediaRoot.getRootName()), null, isLeaf);
+  public MediaNode(MediaRoot mediaRoot, String idSuffix, boolean showTopLevelExpanded, boolean isLeaf, Callback<MediaRoot, List<MediaNode>> childrenCallback) {
+    this(mediaRoot.getId() + idSuffix, new SpecialItem(mediaRoot.getRootName()), null, isLeaf);
 
     if(childrenCallback != null) {
       this.children = null;  // TODO Overrides other constructor... beautify

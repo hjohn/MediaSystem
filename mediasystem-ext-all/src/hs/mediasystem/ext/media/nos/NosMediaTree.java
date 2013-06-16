@@ -10,16 +10,20 @@ import hs.mediasystem.persist.PersistQueue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Named;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+@Named
 public class NosMediaTree implements MediaTree, MediaRoot {
   private static final String URL = "http://tv.nos.nl";
 
@@ -91,6 +95,19 @@ public class NosMediaTree implements MediaTree, MediaRoot {
   @Override
   public MediaRoot getParent() {
     return null;
+  }
+
+  private static final Map<String, Object> MEDIA_PROPERTIES = new HashMap<>();
+
+  static {
+    MEDIA_PROPERTIES.put("image.poster", null);
+    MEDIA_PROPERTIES.put("image.poster.aspectRatios", new double[] {16.0 / 9.0, 4.0 / 3.0});
+    MEDIA_PROPERTIES.put("image.poster.hasIdentifyingTitle", false);
+  }
+
+  @Override
+  public Map<String, Object> getMediaProperties() {
+    return Collections.unmodifiableMap(MEDIA_PROPERTIES);
   }
 
   public static class NosItem extends Media<NosItem> {

@@ -37,16 +37,16 @@ import hs.mediasystem.screens.Presentation;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SettingGroup;
 import hs.mediasystem.screens.StandardCell;
+import hs.mediasystem.screens.collection.CollectionLocation;
+import hs.mediasystem.screens.collection.CollectionPresentation;
+import hs.mediasystem.screens.collection.CollectionView;
+import hs.mediasystem.screens.collection.DetailPaneDecorator;
+import hs.mediasystem.screens.collection.DetailPaneDecoratorFactory;
+import hs.mediasystem.screens.collection.MediaDetailPaneDecorator;
+import hs.mediasystem.screens.collection.PersonDetailPaneDecorator;
+import hs.mediasystem.screens.collection.AbstractDetailPane.DecoratablePane;
 import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.Option;
-import hs.mediasystem.screens.selectmedia.DetailPane.DecoratablePane;
-import hs.mediasystem.screens.selectmedia.DetailPaneDecorator;
-import hs.mediasystem.screens.selectmedia.DetailPaneDecoratorFactory;
-import hs.mediasystem.screens.selectmedia.MediaDetailPaneDecorator;
-import hs.mediasystem.screens.selectmedia.PersonDetailPaneDecorator;
-import hs.mediasystem.screens.selectmedia.SelectMediaLocation;
-import hs.mediasystem.screens.selectmedia.SelectMediaPresentation;
-import hs.mediasystem.screens.selectmedia.StandardView;
 import hs.mediasystem.util.DuoWindowSceneManager;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.StringBinding;
@@ -143,8 +143,7 @@ public class FrontEnd extends Application {
       }
     });
 
-    injector.register(StandardView.class);  // Implicit
-   // injector.register(SelectMediaPresentation.class);  // Implicit
+    injector.register(CollectionView.class);  // Implicit
 
     injector.registerInstance(new IdentifierProvider());
     injector.registerInstance(new MediaDataProvider());
@@ -247,16 +246,16 @@ public class FrontEnd extends Application {
     injector.registerInstance(new LocationHandler() {
       @Override
       public Presentation go(Location location, Presentation current) {
-        SelectMediaPresentation presentation = current instanceof SelectMediaPresentation ? (SelectMediaPresentation)current : injector.getInstance(SelectMediaPresentation.class);
+        CollectionPresentation presentation = current instanceof CollectionPresentation ? (CollectionPresentation)current : injector.getInstance(CollectionPresentation.class);
 
-        presentation.setMediaTree(((SelectMediaLocation)location).getMediaRoot());
+        presentation.setMediaRoot(((CollectionLocation)location).getMediaRoot());
 
         return presentation;
       }
 
       @Override
       public Class<? extends Location> getLocationType() {
-        return SelectMediaLocation.class;
+        return CollectionLocation.class;
       }
     });
 

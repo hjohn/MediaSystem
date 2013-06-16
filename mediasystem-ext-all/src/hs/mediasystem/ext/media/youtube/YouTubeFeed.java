@@ -10,8 +10,11 @@ import hs.mediasystem.framework.SourceImageHandle;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gdata.client.youtube.YouTubeService;
 import com.google.gdata.data.media.mediarss.MediaThumbnail;
@@ -109,5 +112,18 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
   @Override
   public MediaRoot getParent() {
     return mediaRoot;
+  }
+
+  private static final Map<String, Object> MEDIA_PROPERTIES = new HashMap<>();
+
+  static {
+    MEDIA_PROPERTIES.put("image.poster", null);
+    MEDIA_PROPERTIES.put("image.poster.aspectRatios", new double[] {16.0 / 9.0, 4.0 / 3.0});
+    MEDIA_PROPERTIES.put("image.poster.hasIdentifyingTitle", false);
+  }
+
+  @Override
+  public Map<String, Object> getMediaProperties() {
+    return Collections.unmodifiableMap(MEDIA_PROPERTIES);
   }
 }

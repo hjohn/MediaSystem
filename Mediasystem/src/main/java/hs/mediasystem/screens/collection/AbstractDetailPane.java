@@ -1,4 +1,4 @@
-package hs.mediasystem.screens.selectmedia;
+package hs.mediasystem.screens.collection;
 
 import hs.mediasystem.util.AreaPane;
 
@@ -6,28 +6,30 @@ import java.util.Set;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.StackPane;
 
-public abstract class DetailPane extends StackPane {
-  private final ObjectProperty<Object> content = new SimpleObjectProperty<>();
-  public ObjectProperty<Object> contentProperty() { return content; }
+public abstract class AbstractDetailPane extends StackPane {
+  public final ObjectProperty<Object> content = new SimpleObjectProperty<>();
+  public final BooleanProperty interactive = new SimpleBooleanProperty(false);
 
   private final DecoratablePane decoratablePane = new DecoratablePane(content);
   private final Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories;
 
   private DetailPaneDecorator<Object> currentDetailPaneDecorator;
 
-  public DetailPane(Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories, final boolean interactive) {
+  public AbstractDetailPane(Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories) {
     this.detailPaneDecoratorFactories = detailPaneDecoratorFactories;
 
-    getStylesheets().add("select-media/detail-pane.css");
+    getStylesheets().add("collection/detail-pane.css");
     getStyleClass().add("detail-pane");
 
-    setMouseTransparent(!interactive);
+    mouseTransparentProperty().bind(interactive.not());
 
     content.addListener(new ChangeListener<Object>() {
       @Override
@@ -58,10 +60,10 @@ public abstract class DetailPane extends StackPane {
           decoratablePane.getStyleClass().clear();
           decoratablePane.getChildren().clear();
 
-          DetailPane.this.initialize(decoratablePane);
+          AbstractDetailPane.this.initialize(decoratablePane);
 
           currentDetailPaneDecorator.dataProperty().set(current);
-          currentDetailPaneDecorator.decorate(interactive);
+          currentDetailPaneDecorator.decorate(interactive.get());  // TODO this is static, while mouseTransparent is dynamic
         }
       }
     });

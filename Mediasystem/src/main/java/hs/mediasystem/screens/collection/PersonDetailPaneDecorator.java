@@ -1,10 +1,10 @@
-package hs.mediasystem.screens.selectmedia;
+package hs.mediasystem.screens.collection;
 
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.Casting;
 import hs.mediasystem.framework.Person;
 import hs.mediasystem.screens.MediaItemFormatter;
-import hs.mediasystem.screens.selectmedia.CastingsRow.Type;
+import hs.mediasystem.screens.collection.CastingsRow.Type;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;
@@ -40,16 +40,16 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
   protected final StringBinding biography = MapBindings.selectString(dataProperty(), "biography");
   protected final ObjectBinding<Date> birthDate = MapBindings.select(dataProperty(), "birthDate");
 
-  protected final DetailPane.DecoratablePane decoratablePane;
+  protected final AbstractDetailPane.DecoratablePane decoratablePane;
 
-  public PersonDetailPaneDecorator(DetailPane.DecoratablePane decoratablePane) {
+  public PersonDetailPaneDecorator(AbstractDetailPane.DecoratablePane decoratablePane) {
     this.decoratablePane = decoratablePane;
     poster.imageHandleProperty().bind(posterHandle);
   }
 
   @Override
   public void decorate(boolean interactive) {
-    decoratablePane.getStylesheets().add("select-media/person-detail-pane.css");
+    decoratablePane.getStylesheets().add("collection/person-detail-pane.css");
 
     decoratablePane.add("title-area", 2, new Label() {{
       getStyleClass().add("title");

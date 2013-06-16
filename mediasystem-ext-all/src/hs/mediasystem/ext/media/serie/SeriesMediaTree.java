@@ -5,6 +5,7 @@ import hs.mediasystem.dao.Item;
 import hs.mediasystem.dao.ItemNotFoundException;
 import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.LocalInfo;
+import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.db.DatabaseObject;
 import hs.mediasystem.entity.EnrichCallback;
 import hs.mediasystem.entity.EnricherBuilder;
@@ -15,11 +16,20 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
+import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.persist.PersistQueue;
+import hs.mediasystem.util.PathStringConverter;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import javafx.collections.ObservableList;
 
 public class SeriesMediaTree implements MediaTree, MediaRoot {
   public static final TvdbSerieEnricher TVDB_SERIE_ENRICHER = new TvdbSerieEnricher();
@@ -32,12 +42,16 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
 
   private List<MediaItem> children;
 
-  public SeriesMediaTree(PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory<DatabaseObject> entityFactory, List<Path> roots) {
+  @Inject
+  public SeriesMediaTree(PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory<DatabaseObject> entityFactory, SettingsStore settingsStore) {
     this.persister = persister;
     this.itemsDao = itemsDao;
     this.mediaItemConfigurator = mediaItemConfigurator;
     this.entityFactory = entityFactory;
-    this.roots = new ArrayList<>(roots);
+
+    ObservableList<Path> paths = settingsStore.getListProperty("MediaSystem:Ext:Series", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
+
+    this.roots = new ArrayList<>(paths);
   }
 
   @Override
@@ -130,5 +144,26 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
   @Override
   public MediaRoot getParent() {
     return null;
+  }
+
+  private static final Map<String, Object> MEDIA_PROPERTIES = new HashMap<>();
+
+  static {
+    MEDIA_PROPERTIES.put("image.poster", null);
+    MEDIA_PROPERTIES.put("image.poster.aspectRatios", new double[] {2.0 / 3.0});
+    MEDIA_PROPERTIES.put("image.poster.hasIdentifyingTitle", true);
+
+    MEDIA_PROPERTIES.put("image.background", null);
+    MEDIA_PROPERTIES.put("image.background.aspectRatios", new double[] {16.0 / 9.0, 4.0 / 3.0});
+    MEDIA_PROPERTIES.put("image.background.hasIdentifyingTitle", false);
+
+    MEDIA_PROPERTIES.put("image.banner", null);
+    MEDIA_PROPERTIES.put("image.banner.aspectRatios", new double[] {6.0 / 1.0});
+    MEDIA_PROPERTIES.put("image.banner.hasIdentifyingTitle", true);
+  }
+
+  @Override
+  public Map<String, Object> getMediaProperties() {
+    return Collections.unmodifiableMap(MEDIA_PROPERTIES);
   }
 }

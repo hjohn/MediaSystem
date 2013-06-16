@@ -7,8 +7,14 @@ import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.persist.PersistQueue;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.inject.Named;
+
+@Named
 public class YouTubeMediaTree implements MediaTree, MediaRoot {
   private static final List<Feed> FEEDS = new ArrayList<>();
 
@@ -77,8 +83,14 @@ public class YouTubeMediaTree implements MediaTree, MediaRoot {
     return null;
   }
 
-  public static class YouTubeFeedItem extends Media<YouTubeFeedItem> {
+  private static final Map<String, Object> MEDIA_PROPERTIES = new HashMap<>();
 
+  @Override
+  public Map<String, Object> getMediaProperties() {
+    return Collections.unmodifiableMap(MEDIA_PROPERTIES);
+  }
+
+  static class YouTubeFeedItem extends Media<YouTubeFeedItem> {
     public YouTubeFeedItem(String name) {
       super(name);
     }

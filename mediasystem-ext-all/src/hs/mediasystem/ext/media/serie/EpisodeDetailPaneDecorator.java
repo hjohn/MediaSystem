@@ -1,7 +1,7 @@
 package hs.mediasystem.ext.media.serie;
 
-import hs.mediasystem.screens.selectmedia.DetailPane;
-import hs.mediasystem.screens.selectmedia.MediaDetailPaneDecorator;
+import hs.mediasystem.screens.collection.AbstractDetailPane;
+import hs.mediasystem.screens.collection.MediaDetailPaneDecorator;
 import hs.mediasystem.util.MapBindings;
 import javafx.beans.binding.StringBinding;
 import javafx.scene.control.Label;
@@ -12,7 +12,7 @@ public class EpisodeDetailPaneDecorator extends MediaDetailPaneDecorator {
   protected final StringBinding season = MapBindings.selectInteger(dataProperty(), "season").asString();
   protected final StringBinding episode = MapBindings.selectString(dataProperty(), "episodeRange");
 
-  public EpisodeDetailPaneDecorator(DetailPane.DecoratablePane decoratablePane) {
+  public EpisodeDetailPaneDecorator(AbstractDetailPane.DecoratablePane decoratablePane) {
     super(decoratablePane);
 
     groupName.bind(MapBindings.selectString(dataProperty(), "serie", "title"));
@@ -22,7 +22,7 @@ public class EpisodeDetailPaneDecorator extends MediaDetailPaneDecorator {
   public void decorate(boolean interactive) {
     super.decorate(interactive);
 
-    decoratablePane.getStylesheets().add("select-media/episode-detail-pane.css");  // TODO move to bundle when possible
+    decoratablePane.getStylesheets().add("collection/episode-detail-pane.css");  // TODO move to bundle when possible
 
     decoratablePane.add("title-area", 10, createSeasonEpisodeBlock());
   }

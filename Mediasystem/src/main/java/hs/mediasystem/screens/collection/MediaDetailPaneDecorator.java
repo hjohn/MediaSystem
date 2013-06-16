@@ -1,4 +1,4 @@
-package hs.mediasystem.screens.selectmedia;
+package hs.mediasystem.screens.collection;
 
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.Casting;
@@ -6,9 +6,9 @@ import hs.mediasystem.framework.Identifier;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.StarRating;
+import hs.mediasystem.screens.collection.CastingsRow.Type;
 import hs.mediasystem.screens.optiondialog.OptionButton;
 import hs.mediasystem.screens.optiondialog.OptionCheckBox;
-import hs.mediasystem.screens.selectmedia.CastingsRow.Type;
 import hs.mediasystem.util.HackedTab;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
@@ -86,16 +86,16 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
     }
   };
 
-  protected final DetailPane.DecoratablePane decoratablePane;
+  protected final AbstractDetailPane.DecoratablePane decoratablePane;
 
-  public MediaDetailPaneDecorator(DetailPane.DecoratablePane decoratablePane) {
+  public MediaDetailPaneDecorator(AbstractDetailPane.DecoratablePane decoratablePane) {
     this.decoratablePane = decoratablePane;
     poster.imageHandleProperty().bind(posterHandle);
   }
 
   @Override
   public void decorate(boolean interactive) {
-    decoratablePane.getStylesheets().add("select-media/media-detail-pane.css");
+    decoratablePane.getStylesheets().add("collection/media-detail-pane.css");
 
     decoratablePane.add("title-area", 1, new Label() {{
       getStyleClass().add("group-name");
@@ -391,7 +391,7 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
             setOnAction(new EventHandler<ActionEvent>() {
               @Override
               public void handle(ActionEvent event) {
-                System.out.println("[INFO] SelectMedia: 'Reload meta data' selected for: " + identifier);
+                System.out.println("[INFO] Collection: 'Reload meta data' selected for: " + identifier);
 
 //                mediaItem.reloadMetaData();
 //
