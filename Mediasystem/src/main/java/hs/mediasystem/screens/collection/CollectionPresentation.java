@@ -180,7 +180,7 @@ public class CollectionPresentation implements Presentation {
   public MediaNode createRootNode(MediaRoot root) {
     MediaGroup mediaGroup = groupSet.get();
 
-    return new MediaNode(root, "[" + mediaGroup.getId() + "]", mediaGroup.showTopLevelExpanded(), false, mediaGroup);
+    return new MediaNode(root, "[" + mediaGroup.getId() + "]", null, mediaGroup.showTopLevelExpanded(), false, mediaGroup);
   }
 
   @Override

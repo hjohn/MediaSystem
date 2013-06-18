@@ -35,7 +35,9 @@ public class MediaNode {
   private final String id;
   private final String shortTitle;
   private final boolean isLeaf;
+  private final Class<?> dataType;
 
+  private MediaRoot mediaRoot;
   private MediaNode parent;
   private List<MediaNode> children;
   private boolean showTopLevelExpanded;
@@ -63,16 +65,23 @@ public class MediaNode {
     }
   }
 
-  public MediaNode(String id, Media<?> media, String shortTitle, boolean isLeaf) {
+  public MediaNode(MediaRoot mediaRoot, String idSuffix, String shortTitle, boolean showTopLevelExpanded, boolean isLeaf, MediaGroup mediaGroup) {
+    String id = mediaRoot.getId() + idSuffix;
+    Media<?> media = new SpecialItem(mediaRoot.getRootName());
+
     assert id != null;
     assert !id.contains("/");
     assert !id.contains(":");
+
+    this.mediaGroup = mediaGroup;
+
+    this.mediaRoot = mediaRoot;
+    this.showTopLevelExpanded = showTopLevelExpanded;
 
     this.serieName = new SimpleStringProperty();
     this.title = new SimpleStringProperty(media.title.get());
     this.sequence = new SimpleStringProperty();
     this.subtitle = new SimpleStringProperty();
-    this.children = new ArrayList<>();
     ObservableMap<String, Object> observableHashMap = FXCollections.observableHashMap();
     this.properties =  new SimpleObjectProperty<>(observableHashMap);
 
@@ -89,23 +98,6 @@ public class MediaNode {
 
     this.isLeaf = isLeaf;
     this.dataType = Media.class;
-  }
-
-  public MediaNode(String id, Media<?> media, String shortTitle) {
-    this(id, media, shortTitle, false);
-  }
-
-  private MediaRoot mediaRoot;
-  private final Class<?> dataType;
-
-  public MediaNode(MediaRoot mediaRoot, String idSuffix, boolean showTopLevelExpanded, boolean isLeaf, MediaGroup mediaGroup) {
-    this(mediaRoot.getId() + idSuffix, new SpecialItem(mediaRoot.getRootName()), null, isLeaf);
-
-    this.mediaGroup = mediaGroup;
-    this.children = null;  // TODO Overrides other constructor... beautify
-
-    this.mediaRoot = mediaRoot;
-    this.showTopLevelExpanded = showTopLevelExpanded;
   }
 
   public MediaRoot getMediaRoot() {
@@ -132,16 +124,7 @@ public class MediaNode {
     return getChildren().indexOf(child);
   }
 
-  public void addChild(MediaNode child) {
-    if(child.parent != null) {
-      throw new IllegalStateException("cannot add child twice: " + child);
-    }
-
-    child.parent = this;
-    children.add(child);
-  }
-
-  public void setChildren(List<MediaNode> children) {
+  private void setChildren(List<MediaNode> children) {
     for(MediaNode child : children) {
       if(child.parent != null) {
         throw new IllegalStateException("cannot add child twice: " + child);
@@ -175,7 +158,7 @@ public class MediaNode {
       List<MediaNode> children = new ArrayList<>();
 
       if(mediaRoot != null) {
-        List<? extends MediaItem> mediaItems = mediaRoot.getItems();
+        List<? extends MediaItem> mediaItems = new ArrayList<>(mediaRoot.getItems());
 
         if(mediaGroup != null) {
           children.addAll(mediaGroup.getMediaNodes(mediaRoot, mediaItems));
@@ -237,7 +220,6 @@ public class MediaNode {
   }
 
   public static class SpecialItem extends Media<SpecialItem> {
-
     public SpecialItem(String rootName) {
       super(rootName);
     }

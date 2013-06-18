@@ -1,6 +1,7 @@
 package hs.mediasystem.ext.media.movie;
 
 import hs.mediasystem.MediaRootType;
+import hs.mediasystem.framework.ListMediaRoot;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.screens.AbstractMediaGroup;
@@ -20,9 +21,10 @@ public class AlphaGroupByTitleMediaGroup extends AbstractMediaGroup {
   }
 
   @Override
-  public List<MediaNode> getMediaNodes(MediaRoot mediaRoot, List<? extends MediaItem> mediaItems) {
+  public List<MediaNode> getMediaNodes(MediaRoot parentMediaRoot, List<? extends MediaItem> mediaItems) {
     Collections.sort(mediaItems, MovieTitleGroupingComparator.INSTANCE);
     List<MediaNode> nodes = new ArrayList<>();
+    ListMediaRoot currentMediaRoot = null;
 
     for(MediaItem mediaItem : mediaItems) {
       MediaNode previousNode = nodes.isEmpty() ? null : nodes.get(nodes.size() - 1);
@@ -33,20 +35,23 @@ public class AlphaGroupByTitleMediaGroup extends AbstractMediaGroup {
        */
 
       if(previousNode != null && mediaItem.getTitle().equals(previousNode.title.get())) {
-        if(!(previousNode.getMedia() instanceof MovieGroup)) {
-          MediaNode groupNode = new MediaNode("alpha-group-title[" + mediaItem.getTitle() + "]", new MovieGroup(mediaItem.getTitle()), null);
+        if(currentMediaRoot == null) {
+          currentMediaRoot = new ListMediaRoot(parentMediaRoot, "alpha-group-title[" + mediaItem.getTitle() + "]", mediaItem.getTitle());
+
+          MediaNode groupNode = new MediaNode(currentMediaRoot, "", null, false, false, null);
 
           nodes.set(nodes.size() - 1, groupNode);
 
-          groupNode.addChild(previousNode);
+          currentMediaRoot.add(previousNode.getMediaItem());
 
           previousNode = groupNode;
         }
 
-        previousNode.addChild(new MediaNode(mediaItem));
+        currentMediaRoot.add(mediaItem);
       }
       else {
         nodes.add(new MediaNode(mediaItem));
+        currentMediaRoot = null;
       }
     }
 
