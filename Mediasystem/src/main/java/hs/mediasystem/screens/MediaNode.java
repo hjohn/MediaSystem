@@ -16,12 +16,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
-import javafx.util.Callback;
 
 public class MediaNode {
   public final SimpleEntityProperty<MediaData> mediaData;
   public final SimpleEntityProperty<Media<?>> media;
 
+  private MediaGroup mediaGroup;
   private MediaItem mediaItem;
 
   public MediaItem getMediaItem() { return mediaItem; }
@@ -97,18 +97,15 @@ public class MediaNode {
 
   private MediaRoot mediaRoot;
   private final Class<?> dataType;
-  private Callback<MediaRoot, List<MediaNode>> childrenCallback;
 
-  public MediaNode(MediaRoot mediaRoot, String idSuffix, boolean showTopLevelExpanded, boolean isLeaf, Callback<MediaRoot, List<MediaNode>> childrenCallback) {
+  public MediaNode(MediaRoot mediaRoot, String idSuffix, boolean showTopLevelExpanded, boolean isLeaf, MediaGroup mediaGroup) {
     this(mediaRoot.getId() + idSuffix, new SpecialItem(mediaRoot.getRootName()), null, isLeaf);
 
-    if(childrenCallback != null) {
-      this.children = null;  // TODO Overrides other constructor... beautify
-    }
+    this.mediaGroup = mediaGroup;
+    this.children = null;  // TODO Overrides other constructor... beautify
 
     this.mediaRoot = mediaRoot;
     this.showTopLevelExpanded = showTopLevelExpanded;
-    this.childrenCallback = childrenCallback;
   }
 
   public MediaRoot getMediaRoot() {
@@ -175,13 +172,22 @@ public class MediaNode {
 
   public List<MediaNode> getChildren() {
     if(children == null) {
-      if(mediaRoot == null) {
-        List<MediaNode> emptyList = Collections.emptyList();
-        setChildren(emptyList);
+      List<MediaNode> children = new ArrayList<>();
+
+      if(mediaRoot != null) {
+        List<? extends MediaItem> mediaItems = mediaRoot.getItems();
+
+        if(mediaGroup != null) {
+          children.addAll(mediaGroup.getMediaNodes(mediaRoot, mediaItems));
+        }
+        else {
+          for(MediaItem mediaItem : mediaItems) {
+            children.add(new MediaNode(mediaItem));
+          }
+        }
       }
-      else {
-        setChildren(childrenCallback.call(mediaRoot));
-      }
+
+      setChildren(children);
     }
 
     return Collections.unmodifiableList(children);

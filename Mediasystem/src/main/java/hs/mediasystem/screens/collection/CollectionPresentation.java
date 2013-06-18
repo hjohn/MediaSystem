@@ -38,7 +38,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
 
 import javax.inject.Inject;
@@ -68,13 +67,10 @@ public class CollectionPresentation implements Presentation {
     groupSet.addListener(new InvalidationListener() {
       @Override
       public void invalidated(Observable observable) {
-        System.out.println("7");
         final MediaNode mediaNode = createRootNode(currentRoot);
-        System.out.println("8");
 
         view.focusedMediaNode.set(null);
         view.rootMediaNode.set(mediaNode);
-        System.out.println("9");
 
         Platform.runLater(new Runnable() {
           @Override
@@ -94,7 +90,7 @@ public class CollectionPresentation implements Presentation {
                 nodeToSelect = mediaNode.getChildren().get(0);
               }
             }
-System.out.println(">>> setSelectedNode trigger by CollectionPresentation");
+
             view.focusedMediaNode.set(nodeToSelect);
           }
         });
@@ -140,7 +136,7 @@ System.out.println(">>> setSelectedNode trigger by CollectionPresentation");
     currentRoot = root;
 
     List<MediaGroup> mediaGroups = new ArrayList<>(injector.getInstances(MediaGroup.class, AnnotationDescriptor.describe(MediaRootType.class, new Value("value", root.getClass()))));
-System.out.println("1");
+
     if(mediaGroups.isEmpty()) {
       mediaGroups.add(new AbstractMediaGroup("alpha", "Alphabetically", false) {
         @Override
@@ -156,7 +152,6 @@ System.out.println("1");
         }
       });
     }
-    System.out.println("2");
 
     Collections.sort(mediaGroups, new Comparator<MediaGroup>() {
       @Override
@@ -165,23 +160,13 @@ System.out.println("1");
       }
     });
 
-    System.out.println("3");
-
     availableGroupSets.setAll(mediaGroups);
-
-    System.out.println("4");
 
     mediaGroupSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, createKey("SortGroup"));
 
-    System.out.println("5");
-
     MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSets.get(0));
 
-    System.out.println("6");
-
     groupSet.set(selectedMediaGroup);
-
-    System.out.println("Done setTreeRoot");
   }
 
   public void setMediaRoot(final MediaRoot mediaRoot) {
@@ -192,30 +177,10 @@ System.out.println("1");
     return prefix + ":" + controller.getLocation().getId();
   }
 
-  private List<MediaNode> getChildren(MediaRoot mediaRoot) {
-    List<? extends MediaItem> children = mediaRoot.getItems();
-    List<MediaNode> output = new ArrayList<>();
-
-    MediaGroup mediaGroup = groupSet.get();
-
-    output.addAll(applyGroup(children, mediaRoot, mediaGroup));
-
-    return output;
-  }
-
-  private List<MediaNode> applyGroup(List<? extends MediaItem> children, MediaRoot mediaRoot, MediaGroup mediaGroup) {
-    return mediaGroup.getMediaNodes(mediaRoot, children);
-  }
-
   public MediaNode createRootNode(MediaRoot root) {
     MediaGroup mediaGroup = groupSet.get();
 
-    return new MediaNode(root, "[" + mediaGroup.getId() + "]", mediaGroup.showTopLevelExpanded(), false, new Callback<MediaRoot, List<MediaNode>>() {
-      @Override
-      public List<MediaNode> call(MediaRoot mediaRoot) {
-        return getChildren(mediaRoot);
-      }
-    });
+    return new MediaNode(root, "[" + mediaGroup.getId() + "]", mediaGroup.showTopLevelExpanded(), false, mediaGroup);
   }
 
   @Override
