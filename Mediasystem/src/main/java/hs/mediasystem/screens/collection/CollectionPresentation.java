@@ -83,11 +83,17 @@ public class CollectionPresentation implements Presentation {
             }
 
             if(nodeToSelect == null) {
-              if(groupSet.get().showTopLevelExpanded()) {
-                nodeToSelect = mediaNode.getChildren().get(0).getChildren().get(0);
-              }
-              else {
-                nodeToSelect = mediaNode.getChildren().get(0);
+              List<MediaNode> children = mediaNode.getChildren();
+
+              if(!children.isEmpty()) {
+                if(groupSet.get().showTopLevelExpanded()) {
+                  if(!children.get(0).getChildren().isEmpty()) {
+                    nodeToSelect = children.get(0).getChildren().get(0);
+                  }
+                }
+                else {
+                  nodeToSelect = children.get(0);
+                }
               }
             }
 
