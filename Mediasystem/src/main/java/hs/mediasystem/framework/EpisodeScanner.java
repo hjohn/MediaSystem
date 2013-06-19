@@ -30,11 +30,11 @@ public class EpisodeScanner implements Scanner<LocalInfo> {
   }
 
   @Override
-  public List<LocalInfo> scan(Path rootPath) {
+  public List<LocalInfo> scan(Path scanPath) {
     try {
       final List<LocalInfo> results = new ArrayList<>();
 
-      Files.walkFileTree(rootPath, FOLLOW_LINKS, maxDepth, new SimpleFileVisitor<Path>() {
+      Files.walkFileTree(scanPath, FOLLOW_LINKS, maxDepth, new SimpleFileVisitor<Path>() {
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
           if(!attrs.isDirectory() && file.getFileName().toString().matches(EXTENSION_PATTERN.pattern())) {
@@ -54,7 +54,7 @@ public class EpisodeScanner implements Scanner<LocalInfo> {
       return results;
     }
     catch(IOException e) {
-      throw new RuntimeException(e);
+      throw new ScanException("Problem scanning \"" + scanPath + "\": " + e.getMessage(), e);
     }
   }
 }

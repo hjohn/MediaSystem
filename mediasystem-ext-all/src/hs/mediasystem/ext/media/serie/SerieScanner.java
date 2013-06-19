@@ -1,6 +1,7 @@
 package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.dao.LocalInfo;
+import hs.mediasystem.framework.ScanException;
 import hs.mediasystem.framework.Scanner;
 
 import java.io.IOException;
@@ -43,7 +44,7 @@ public class SerieScanner implements Scanner<LocalInfo> {
       return results;
     }
     catch(IOException e) {
-      throw new RuntimeException(e);
+      throw new ScanException("Problem scanning \"" + scanPath + "\": " + e.getMessage(), e);
     }
   }
 }
