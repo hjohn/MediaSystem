@@ -13,6 +13,7 @@ import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.FinishEnrichCallback;
 import hs.mediasystem.framework.EpisodeScanner;
+import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
@@ -29,12 +30,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import javafx.collections.ObservableList;
+
+import javax.inject.Inject;
 
 public class MoviesMediaTree implements MediaTree, MediaRoot {
   private static final TmdbMovieEnricher TMDB_ENRICHER = new TmdbMovieEnricher();
+  private static final Id ID = new Id("movieRoot");
 
   private final PersistQueue persister;
   private final List<Path> roots;
@@ -161,8 +163,8 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
   }
 
   @Override
-  public String getId() {
-    return "movieRoot";
+  public Id getId() {
+    return ID;
   }
 
   @Override

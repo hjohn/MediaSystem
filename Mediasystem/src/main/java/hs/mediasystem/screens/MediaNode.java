@@ -45,7 +45,7 @@ public class MediaNode {
   public MediaNode(MediaItem mediaItem) {
     assert mediaItem != null;
 
-    this.id = mediaItem.getId();
+    this.id = "mediaItem[" + mediaItem.getUri() + "]";
     this.mediaItem = mediaItem;
     this.serieName = mediaItem.serieName;
     this.title = mediaItem.title;
@@ -65,11 +65,10 @@ public class MediaNode {
     }
   }
 
-  public MediaNode(MediaRoot mediaRoot, String idSuffix, String shortTitle, boolean showTopLevelExpanded, boolean isLeaf, MediaGroup mediaGroup) {
-    String id = mediaRoot.getId() + idSuffix;
+  public MediaNode(MediaRoot mediaRoot, String shortTitle, boolean showTopLevelExpanded, boolean isLeaf, MediaGroup mediaGroup) {
+    String id = mediaRoot.getId().toString() + "[" + (mediaGroup != null ? mediaGroup.getId() : mediaRoot.getRootName()) + "]";
     Media<?> media = new SpecialItem(mediaRoot.getRootName());
 
-    assert id != null;
     assert !id.contains("/");
     assert !id.contains(":");
 

@@ -2,6 +2,7 @@ package hs.mediasystem.ext.media.youtube;
 
 import hs.mediasystem.dao.URLImageSource;
 import hs.mediasystem.ext.media.youtube.YouTubeMediaTree.Feed;
+import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
@@ -25,6 +26,8 @@ import com.google.gdata.data.youtube.YouTubeMediaGroup;
 import com.google.gdata.util.ServiceException;
 
 public class YouTubeFeed extends MediaItem implements MediaRoot {
+  private static final Id ID = new Id("youTubeFeed");
+
   private final Feed feed;
   private final YouTubeMediaTree mediaRoot;
 
@@ -105,8 +108,8 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
   }
 
   @Override
-  public String getId() {
-    return "youtubeFeed[" + feed.getName() + "]";
+  public Id getId() {
+    return ID;
   }
 
   @Override

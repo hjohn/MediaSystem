@@ -79,10 +79,6 @@ public class MediaItem extends Entity<MediaItem> {
     return dataType;
   }
 
-  public String getId() {
-    return uri;
-  }
-
   public String getUri() {
     return uri;
   }

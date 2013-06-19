@@ -1,6 +1,7 @@
 package hs.mediasystem.ext.media.movie;
 
 import hs.mediasystem.MediaRootType;
+import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.ListMediaRoot;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
@@ -36,9 +37,9 @@ public class AlphaGroupByTitleMediaGroup extends AbstractMediaGroup {
 
       if(previousNode != null && mediaItem.getTitle().equals(previousNode.title.get())) {
         if(currentMediaRoot == null) {
-          currentMediaRoot = new ListMediaRoot(parentMediaRoot, "alpha-group-title[" + mediaItem.getTitle() + "]", mediaItem.getTitle());
+          currentMediaRoot = new ListMediaRoot(parentMediaRoot, new Id("titleGroup"), mediaItem.getTitle());
 
-          MediaNode groupNode = new MediaNode(currentMediaRoot, "", null, false, false, null);
+          MediaNode groupNode = new MediaNode(currentMediaRoot, null, false, false, null);
 
           nodes.set(nodes.size() - 1, groupNode);
 

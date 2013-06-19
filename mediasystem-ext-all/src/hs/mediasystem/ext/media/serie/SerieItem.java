@@ -11,6 +11,7 @@ import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.FinishEnrichCallback;
 import hs.mediasystem.framework.EpisodeScanner;
+import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
@@ -30,12 +31,14 @@ public class SerieItem extends MediaItem implements MediaRoot {
   private final EntityFactory<DatabaseObject> entityFactory;
   private final MediaItemConfigurator mediaItemConfigurator;
   private final ItemsDao itemsDao;
+  private final Id id;
 
   private List<MediaItem> children;
 
   public SerieItem(SeriesMediaTree mediaTree, String uri, String serieTitle, EntityFactory<DatabaseObject> entityFactory, MediaItemConfigurator mediaItemConfigurator, ItemsDao itemsDao) {
     super(uri, serieTitle, Serie.class);
 
+    this.id = new Id("serie");
     this.mediaRoot = mediaTree;
     this.entityFactory = entityFactory;
     this.mediaItemConfigurator = mediaItemConfigurator;
@@ -125,8 +128,8 @@ public class SerieItem extends MediaItem implements MediaRoot {
   }
 
   @Override
-  public String getId() {
-    return "serie[" + getTitle() + "]";
+  public Id getId() {
+    return id;
   }
 
   @Override

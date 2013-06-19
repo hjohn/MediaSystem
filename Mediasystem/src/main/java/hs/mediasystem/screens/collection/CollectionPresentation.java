@@ -75,14 +75,14 @@ public class CollectionPresentation implements Presentation {
         Platform.runLater(new Runnable() {
           @Override
           public void run() {
-            String id = settingsStore.getSetting("MediaSystem:Collection", createKey("LastSelected"));
+            String id = settingsStore.getSetting("MediaSystem:Collection", currentRoot.getId().toString("LastSelected", currentRoot.getRootName()));
             MediaNode nodeToSelect = null;
-            System.out.println("Runlater");
 
             if(id != null) {
               nodeToSelect = mediaNode.findMediaNode(id);
             }
-            else {
+
+            if(nodeToSelect == null) {
               if(groupSet.get().showTopLevelExpanded()) {
                 nodeToSelect = mediaNode.getChildren().get(0).getChildren().get(0);
               }
@@ -101,7 +101,7 @@ public class CollectionPresentation implements Presentation {
       @Override
       public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
         if(current != null) {
-          settingsStore.storeSetting("MediaSystem:Collection", PersistLevel.TEMPORARY, createKey("LastSelected"), current.getId());
+          settingsStore.storeSetting("MediaSystem:Collection", PersistLevel.TEMPORARY, currentRoot.getId().toString("LastSelected", currentRoot.getRootName()), current.getId());
         }
       }
     });
@@ -162,7 +162,7 @@ public class CollectionPresentation implements Presentation {
 
     availableGroupSets.setAll(mediaGroups);
 
-    mediaGroupSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, createKey("SortGroup"));
+    mediaGroupSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, currentRoot.getId().toString("SortGroup"));
 
     MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSets.get(0));
 
@@ -173,14 +173,11 @@ public class CollectionPresentation implements Presentation {
     setTreeRoot(mediaRoot);
   }
 
-  private String createKey(String prefix) {
-    return prefix + ":" + controller.getLocation().getId();
-  }
-
+  // TODO RootNode is a stupid concept, there is really no root node needed -- items should just be an obervablelist -- this will simplify MediaNode code as well
   public MediaNode createRootNode(MediaRoot root) {
     MediaGroup mediaGroup = groupSet.get();
 
-    return new MediaNode(root, "[" + mediaGroup.getId() + "]", null, mediaGroup.showTopLevelExpanded(), false, mediaGroup);
+    return new MediaNode(root, null, mediaGroup.showTopLevelExpanded(), false, mediaGroup);
   }
 
   @Override

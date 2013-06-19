@@ -4,7 +4,14 @@ import java.util.List;
 import java.util.Map;
 
 public interface MediaRoot {
-  String getId();
+
+  /**
+   * Returns an Id which identifies this type of MediaRoot.
+   *
+   * @return an Id which identifies this type of MediaRoot
+   */
+  Id getId();
+
   String getRootName();
   List<? extends MediaItem> getItems();
   MediaRoot getParent();

@@ -92,12 +92,13 @@ public class CollectionView extends StackPane {
       }
     });
 
+    // TODO move setting load/save code into presentation
     rootMediaNode.addListener(new ChangeListener<MediaNode>() {
       @Override
       public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
         determineValidLayoutConfs(current.getMediaRoot());
 
-        settingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, "View:" + current.getMediaRoot().getId());
+        settingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, current.getMediaRoot().getId().toString("View"));
 
         CollectionSelectorLayoutConf lastSelectedLayoutConf = settingUpdater.getStoredValue(layoutConfs.get(0));
 

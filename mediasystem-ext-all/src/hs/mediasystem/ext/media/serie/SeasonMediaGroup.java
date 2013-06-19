@@ -1,6 +1,7 @@
 package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.MediaRootType;
+import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.ListMediaRoot;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
@@ -53,9 +54,9 @@ public class SeasonMediaGroup extends AbstractMediaGroup {
         seasonNode = nodes.get(nodes.size() - 1);
       }
       else {
-        ListMediaRoot mediaRoot = new ListMediaRoot(parentMediaRoot, "episodeNumber-group-season[" + seasonName + "]", seasonName);
+        ListMediaRoot mediaRoot = new ListMediaRoot(parentMediaRoot, new Id("season"), seasonName);
 
-        seasonNode = new MediaNode(mediaRoot, "", determineShortSeasonName(mediaItem), true, false, null);
+        seasonNode = new MediaNode(mediaRoot, determineShortSeasonName(mediaItem), true, false, null);
 
         nodes.add(seasonNode);
       }

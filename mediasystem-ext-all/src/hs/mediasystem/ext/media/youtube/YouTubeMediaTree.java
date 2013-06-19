@@ -1,5 +1,6 @@
 package hs.mediasystem.ext.media.youtube;
 
+import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
@@ -16,6 +17,7 @@ import javax.inject.Named;
 
 @Named
 public class YouTubeMediaTree implements MediaTree, MediaRoot {
+  private static final Id ID = new Id("youTubeRoot");
   private static final List<Feed> FEEDS = new ArrayList<>();
 
   static {
@@ -74,8 +76,8 @@ public class YouTubeMediaTree implements MediaTree, MediaRoot {
   }
 
   @Override
-  public String getId() {
-    return "youtubeRoot";
+  public Id getId() {
+    return ID;
   }
 
   @Override

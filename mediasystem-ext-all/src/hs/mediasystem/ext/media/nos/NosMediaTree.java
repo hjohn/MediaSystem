@@ -1,6 +1,7 @@
 package hs.mediasystem.ext.media.nos;
 
 import hs.mediasystem.dao.URLImageSource;
+import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
@@ -25,6 +26,7 @@ import org.jsoup.nodes.Element;
 
 @Named
 public class NosMediaTree implements MediaTree, MediaRoot {
+  private static final Id ID = new Id("nosRoot");
   private static final String URL = "http://tv.nos.nl";
 
   private List<MediaItem> children;
@@ -88,8 +90,8 @@ public class NosMediaTree implements MediaTree, MediaRoot {
   }
 
   @Override
-  public String getId() {
-    return "nosRoot";
+  public Id getId() {
+    return ID;
   }
 
   @Override

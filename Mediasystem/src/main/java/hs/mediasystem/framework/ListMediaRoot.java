@@ -12,10 +12,10 @@ import java.util.Map;
 public class ListMediaRoot implements MediaRoot {
   private final List<MediaItem> items = new ArrayList<>();
   private final MediaRoot parent;
-  private final String id;
+  private final Id id;
   private final String rootName;
 
-  public ListMediaRoot(MediaRoot parent, String id, String rootName) {
+  public ListMediaRoot(MediaRoot parent, Id id, String rootName) {
     this.parent = parent;
     this.id = id;
     this.rootName = rootName;
@@ -26,7 +26,7 @@ public class ListMediaRoot implements MediaRoot {
   }
 
   @Override
-  public String getId() {
+  public Id getId() {
     return id;
   }
 

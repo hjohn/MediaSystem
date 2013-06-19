@@ -12,7 +12,7 @@ public class CollectionLocation implements Location {
 
   @Override
   public String getId() {
-    return mediaRoot.getId();
+    return mediaRoot.getId().toString();
   }
 
   @Override

@@ -11,6 +11,7 @@ import hs.mediasystem.entity.EnrichCallback;
 import hs.mediasystem.entity.EnricherBuilder;
 import hs.mediasystem.entity.EntityFactory;
 import hs.mediasystem.entity.FinishEnrichCallback;
+import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
@@ -27,12 +28,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import javafx.collections.ObservableList;
+
+import javax.inject.Inject;
 
 public class SeriesMediaTree implements MediaTree, MediaRoot {
   public static final TvdbSerieEnricher TVDB_SERIE_ENRICHER = new TvdbSerieEnricher();
+
+  private static final Id ID = new Id("serieRoot");
 
   private final PersistQueue persister;
   private final ItemsDao itemsDao;
@@ -137,8 +140,8 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
   }
 
   @Override
-  public String getId() {
-    return "serieRoot";
+  public Id getId() {
+    return ID;
   }
 
   @Override
