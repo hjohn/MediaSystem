@@ -36,11 +36,11 @@ public class MediaNode {
   private final String shortTitle;
   private final boolean isLeaf;
   private final Class<?> dataType;
+  private final boolean showTopLevelExpanded;
 
   private MediaRoot mediaRoot;
   private MediaNode parent;
   private List<MediaNode> children;
-  private boolean showTopLevelExpanded;
 
   public MediaNode(MediaItem mediaItem) {
     assert mediaItem != null;
@@ -90,7 +90,6 @@ public class MediaNode {
 
     this.id = id;
     this.mediaData = new SimpleEntityProperty<>(this, "mediaData");
-    this.showTopLevelExpanded = false;
     this.shortTitle = shortTitle == null ? media.title.get() : shortTitle;
     this.media = new SimpleEntityProperty<>(this, "media");
     this.media.set(media);
