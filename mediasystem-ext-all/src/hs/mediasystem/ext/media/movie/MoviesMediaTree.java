@@ -19,6 +19,7 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
+import hs.mediasystem.framework.ScanException;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.util.PathStringConverter;
@@ -64,87 +65,93 @@ public class MoviesMediaTree implements MediaTree, MediaRoot {
       children = new ArrayList<>();
 
       for(Path root : roots) {
-        List<LocalInfo> scanResults = new EpisodeScanner(new MovieDecoder(), 1).scan(root);
-        List<Object[]> fullItems = itemsDao.loadFullItems(root.toString());
+        try {
+          List<LocalInfo> scanResults = new EpisodeScanner(new MovieDecoder(), 1).scan(root);
+          List<Object[]> fullItems = itemsDao.loadFullItems(root.toString());
 
-        for(final LocalInfo localInfo : scanResults) {
-          final MediaItem mediaItem = new MediaItem(localInfo.getUri(), null, localInfo.getTitle(), localInfo.getEpisode() == null ? null : "" + localInfo.getEpisode(), localInfo.getSubtitle(), Movie.class);
+          for(final LocalInfo localInfo : scanResults) {
+            final MediaItem mediaItem = new MediaItem(localInfo.getUri(), null, localInfo.getTitle(), localInfo.getEpisode() == null ? null : "" + localInfo.getEpisode(), localInfo.getSubtitle(), Movie.class);
 
-          mediaItem.properties.put("releaseYear", localInfo.getReleaseYear());
-          mediaItem.properties.put("imdbNumber", localInfo.getCode());
+            mediaItem.properties.put("releaseYear", localInfo.getReleaseYear());
+            mediaItem.properties.put("imdbNumber", localInfo.getCode());
 
-          for(Object[] objects : fullItems) {
-            MediaData mediaData = (MediaData)objects[0];
+            for(Object[] objects : fullItems) {
+              MediaData mediaData = (MediaData)objects[0];
 
-            if(mediaData.getUri().equals(localInfo.getUri())) {
-              mediaItem.mediaData.set(entityFactory.create(hs.mediasystem.framework.MediaData.class, mediaData));
+              if(mediaData.getUri().equals(localInfo.getUri())) {
+                mediaItem.mediaData.set(entityFactory.create(hs.mediasystem.framework.MediaData.class, mediaData));
 
-              if(objects[1] != null) {
-                mediaItem.identifier.set(entityFactory.create(hs.mediasystem.framework.Identifier.class, (Identifier)objects[1]));
+                if(objects[1] != null) {
+                  mediaItem.identifier.set(entityFactory.create(hs.mediasystem.framework.Identifier.class, (Identifier)objects[1]));
 
-                if(objects[2] != null) {
-                  mediaItem.media.set(entityFactory.create(Media.class, (Item)objects[2]));
+                  if(objects[2] != null) {
+                    mediaItem.media.set(entityFactory.create(Media.class, (Item)objects[2]));
+                  }
                 }
-              }
 
-              break;
+                break;
+              }
             }
-          }
 
-          mediaItemConfigurator.configure(mediaItem, TMDB_ENRICHER);
+            mediaItemConfigurator.configure(mediaItem, TMDB_ENRICHER);
 
-          mediaItem.media.setEnricher(new EnricherBuilder<MediaItem, Movie>(Movie.class)
-            .require(mediaItem.identifier)
-            .enrich(new EnrichCallback<Movie>() {
-              @Override
-              public Movie enrich(Object... parameters) {
-                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
+            mediaItem.media.setEnricher(new EnricherBuilder<MediaItem, Movie>(Movie.class)
+              .require(mediaItem.identifier)
+              .enrich(new EnrichCallback<Movie>() {
+                @Override
+                public Movie enrich(Object... parameters) {
+                  Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
-                if(identifier.getProviderId() != null) {
-                  try {
-                    return (Movie)entityFactory.create(Media.class, itemsDao.loadItem(identifier.getProviderId()));
-                  }
-                  catch(ItemNotFoundException e) {
-                    return null;
-                  }
-                }
-
-                return null;
-              }
-            })
-            .enrich(new EnrichCallback<Movie>() {
-              @Override
-              public Movie enrich(Object... parameters) {
-                Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
-
-                if(identifier.getProviderId() != null) {
-                  try {
-                    Item item = TMDB_ENRICHER.loadItem(identifier.getProviderId());
-
-                    if(item != null) {
-                      itemsDao.storeItem(item);  // FIXME should also update if version or bypasscache problem
+                  if(identifier.getProviderId() != null) {
+                    try {
+                      return (Movie)entityFactory.create(Media.class, itemsDao.loadItem(identifier.getProviderId()));
                     }
+                    catch(ItemNotFoundException e) {
+                      return null;
+                    }
+                  }
 
-                    return (Movie)entityFactory.create(Media.class, item);
-                  }
-                  catch(ItemNotFoundException e) {
-                    System.out.println("[FINE] Item not found (in Database or TMDB): " + identifier.getProviderId());
-                  }
+                  return null;
                 }
+              })
+              .enrich(new EnrichCallback<Movie>() {
+                @Override
+                public Movie enrich(Object... parameters) {
+                  Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
 
-                return null;
-              }
-            })
-            .finish(new FinishEnrichCallback<Movie>() {
-              @Override
-              public void update(Movie result) {
-                mediaItem.media.set(result);
-              }
-            })
-            .build()
-          );
+                  if(identifier.getProviderId() != null) {
+                    try {
+                      Item item = TMDB_ENRICHER.loadItem(identifier.getProviderId());
 
-          children.add(mediaItem);
+                      if(item != null) {
+                        itemsDao.storeItem(item);  // FIXME should also update if version or bypasscache problem
+                      }
+
+                      return (Movie)entityFactory.create(Media.class, item);
+                    }
+                    catch(ItemNotFoundException e) {
+                      System.out.println("[FINE] Item not found (in Database or TMDB): " + identifier.getProviderId());
+                    }
+                  }
+
+                  return null;
+                }
+              })
+              .finish(new FinishEnrichCallback<Movie>() {
+                @Override
+                public void update(Movie result) {
+                  mediaItem.media.set(result);
+                }
+              })
+              .build()
+            );
+
+            children.add(mediaItem);
+          }
+        }
+        catch(ScanException e) {
+          System.err.println("[WARN] MoviesMediaTree: " + e.getMessage());  // TODO add to some high level user error reporting facility
+          e.printStackTrace();
         }
       }
     }
