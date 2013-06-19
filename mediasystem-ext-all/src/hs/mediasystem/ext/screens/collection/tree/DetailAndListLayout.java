@@ -1,10 +1,10 @@
 package hs.mediasystem.ext.screens.collection.tree;
 
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.screens.collection.CollectionSelectorLayoutConf;
+import hs.mediasystem.screens.collection.CollectionSelectorLayout;
 import hs.mediasystem.screens.collection.CollectionSelectorPresentation;
 import hs.mediasystem.screens.collection.AbstractDetailPane;
-import hs.mediasystem.screens.collection.DuoPaneCollectionSelectorLayout;
+import hs.mediasystem.screens.collection.DuoPaneCollectionSelector;
 import hs.mediasystem.screens.collection.SmallDetailPane;
 import hs.mediasystem.util.MapBindings;
 import javafx.scene.Node;
@@ -12,12 +12,12 @@ import javafx.scene.Node;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class DetailAndListLayoutConf implements CollectionSelectorLayoutConf {
+public class DetailAndListLayout implements CollectionSelectorLayout {
   private final Provider<TreeListPane> treeListPaneProvider;
   private final Provider<SmallDetailPane> detailPaneProvider;
 
   @Inject
-  public DetailAndListLayoutConf(Provider<TreeListPane> treeListPaneProvider, Provider<SmallDetailPane> detailPaneProvider) {
+  public DetailAndListLayout(Provider<TreeListPane> treeListPaneProvider, Provider<SmallDetailPane> detailPaneProvider) {
     this.treeListPaneProvider = treeListPaneProvider;
     this.detailPaneProvider = detailPaneProvider;
   }
@@ -39,7 +39,7 @@ public class DetailAndListLayoutConf implements CollectionSelectorLayoutConf {
 
   @Override
   public Node create(CollectionSelectorPresentation presentation) {
-    DuoPaneCollectionSelectorLayout layout = new DuoPaneCollectionSelectorLayout();
+    DuoPaneCollectionSelector layout = new DuoPaneCollectionSelector();
 
     TreeListPane listPane = treeListPaneProvider.get();
     AbstractDetailPane detailPane = detailPaneProvider.get();

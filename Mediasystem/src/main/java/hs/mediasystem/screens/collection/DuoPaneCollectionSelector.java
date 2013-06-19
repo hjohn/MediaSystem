@@ -9,11 +9,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
-public class DuoPaneCollectionSelectorLayout extends StackPane {
+public class DuoPaneCollectionSelector extends StackPane {
   private final StackPane left = new StackPane();
   private final StackPane right = new StackPane();
 
-  public DuoPaneCollectionSelectorLayout() {
+  public DuoPaneCollectionSelector() {
     final GridPane root = GridPaneUtil.create(new double[] {100}, new double[] {17, 75, 8});
     final GridPane panelGroup = GridPaneUtil.create(new double[] {50, 50}, new double[] {100});
 

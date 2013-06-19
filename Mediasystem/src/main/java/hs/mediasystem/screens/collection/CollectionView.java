@@ -37,22 +37,22 @@ import javax.inject.Provider;
 public class CollectionView extends StackPane {
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
 
-  public final ObjectProperty<CollectionSelectorLayoutConf> layoutConf = new SimpleObjectProperty<>();
+  public final ObjectProperty<CollectionSelectorLayout> layout = new SimpleObjectProperty<>();
   public final ObjectProperty<MediaNode> rootMediaNode = new SimpleObjectProperty<>();
   public final ObjectProperty<MediaNode> focusedMediaNode = new SimpleObjectProperty<>();
   public final ObjectProperty<EventHandler<ActionEvent>> onOptionsSelect = new SimpleObjectProperty<>();
-  public final ObservableList<CollectionSelectorLayoutConf> suitableLayoutConfs = FXCollections.observableArrayList();
+  public final ObservableList<CollectionSelectorLayout> suitableLayouts = FXCollections.observableArrayList();
 
   private final BackgroundPane backgroundPane = new BackgroundPane();
-  private final SettingUpdater<CollectionSelectorLayoutConf> settingUpdater;
+  private final SettingUpdater<CollectionSelectorLayout> settingUpdater;
   private final StackPane collectionSelectorPane = new StackPane();
-  private final List<CollectionSelectorLayoutConf> allLayoutConfs;
+  private final List<CollectionSelectorLayout> allLayouts;
 
   private CollectionSelectorPresentation currentCollectionSelectorPresentation;
 
   @Inject
-  public CollectionView(SettingsStore settingsStore, final Provider<CollectionSelectorPresentation> collectionSelectorPresentationProvider, List<CollectionSelectorLayoutConf> layoutConfs) {
-    this.allLayoutConfs = layoutConfs;
+  public CollectionView(SettingsStore settingsStore, final Provider<CollectionSelectorPresentation> collectionSelectorPresentationProvider, List<CollectionSelectorLayout> layouts) {
+    this.allLayouts = layouts;
 
     getStylesheets().add("collection/collection-view.css");
 
@@ -76,9 +76,9 @@ public class CollectionView extends StackPane {
 
     backgroundPane.mediaNodeProperty().bind(focusedMediaNode);
 
-    layoutConf.addListener(new ChangeListener<CollectionSelectorLayoutConf>() {
+    layout.addListener(new ChangeListener<CollectionSelectorLayout>() {
       @Override
-      public void changed(ObservableValue<? extends CollectionSelectorLayoutConf> observableValue, CollectionSelectorLayoutConf oldLayoutConf, CollectionSelectorLayoutConf layoutConf) {
+      public void changed(ObservableValue<? extends CollectionSelectorLayout> observableValue, CollectionSelectorLayout oldLayout, CollectionSelectorLayout layout) {
         if(currentCollectionSelectorPresentation != null) {
           currentCollectionSelectorPresentation.focusedMediaNode.unbindBidirectional(focusedMediaNode);
         }
@@ -88,7 +88,7 @@ public class CollectionView extends StackPane {
         currentCollectionSelectorPresentation.rootMediaNode.set(rootMediaNode.get());
         currentCollectionSelectorPresentation.focusedMediaNode.bindBidirectional(focusedMediaNode);
 
-        collectionSelectorPane.getChildren().setAll(layoutConf.create(currentCollectionSelectorPresentation));
+        collectionSelectorPane.getChildren().setAll(layout.create(currentCollectionSelectorPresentation));
       }
     });
 
@@ -96,26 +96,26 @@ public class CollectionView extends StackPane {
     rootMediaNode.addListener(new ChangeListener<MediaNode>() {
       @Override
       public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
-        determineValidLayoutConfs(current.getMediaRoot());
+        determineValidLayouts(current.getMediaRoot());
 
         settingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, current.getMediaRoot().getId().toString("View"));
 
-        CollectionSelectorLayoutConf lastSelectedLayoutConf = settingUpdater.getStoredValue(layoutConfs.get(0));
+        CollectionSelectorLayout lastSelectedLayout = settingUpdater.getStoredValue(layouts.get(0));
 
-        if(!lastSelectedLayoutConf.equals(layoutConf.get())) {
-          layoutConf.set(lastSelectedLayoutConf);
+        if(!lastSelectedLayout.equals(layout.get())) {
+          layout.set(lastSelectedLayout);
         }
 
         currentCollectionSelectorPresentation.rootMediaNode.set(current);
       }
     });
 
-    settingUpdater = new SettingUpdater<>(settingsStore, new StringConverter<CollectionSelectorLayoutConf>() {
+    settingUpdater = new SettingUpdater<>(settingsStore, new StringConverter<CollectionSelectorLayout>() {
       @Override
-      public CollectionSelectorLayoutConf fromString(String id) {
-        for(CollectionSelectorLayoutConf layoutConf : layoutConfs) {
-          if(layoutConf.getId().equals(id)) {
-            return layoutConf;
+      public CollectionSelectorLayout fromString(String id) {
+        for(CollectionSelectorLayout layout : layouts) {
+          if(layout.getId().equals(id)) {
+            return layout;
           }
         }
 
@@ -123,12 +123,12 @@ public class CollectionView extends StackPane {
       }
 
       @Override
-      public String toString(CollectionSelectorLayoutConf layoutConf) {
-        return layoutConf.getId();
+      public String toString(CollectionSelectorLayout layout) {
+        return layout.getId();
       }
     });
 
-    layoutConf.addListener(settingUpdater);
+    layout.addListener(settingUpdater);
   }
 
   @Override
@@ -138,18 +138,18 @@ public class CollectionView extends StackPane {
     }
   }
 
-  private void determineValidLayoutConfs(MediaRoot root) {
-    suitableLayoutConfs.clear();
+  private void determineValidLayouts(MediaRoot root) {
+    suitableLayouts.clear();
 
-    for(CollectionSelectorLayoutConf layoutConf : allLayoutConfs) {
-      if(layoutConf.isSuitableFor(root)) {
-        suitableLayoutConfs.add(layoutConf);
+    for(CollectionSelectorLayout layout : allLayouts) {
+      if(layout.isSuitableFor(root)) {
+        suitableLayouts.add(layout);
       }
     }
 
-    Collections.sort(suitableLayoutConfs, new Comparator<CollectionSelectorLayoutConf>() {
+    Collections.sort(suitableLayouts, new Comparator<CollectionSelectorLayout>() {
       @Override
-      public int compare(CollectionSelectorLayoutConf o1, CollectionSelectorLayoutConf o2) {
+      public int compare(CollectionSelectorLayout o1, CollectionSelectorLayout o2) {
         return o1.getTitle().compareTo(o2.getTitle());
       }
     });

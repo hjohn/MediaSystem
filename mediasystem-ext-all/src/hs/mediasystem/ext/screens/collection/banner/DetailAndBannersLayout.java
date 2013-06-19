@@ -1,10 +1,10 @@
-package hs.mediasystem.ext.screens.collection.tree;
+package hs.mediasystem.ext.screens.collection.banner;
 
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.screens.collection.CollectionSelectorLayoutConf;
+import hs.mediasystem.screens.collection.CollectionSelectorLayout;
 import hs.mediasystem.screens.collection.CollectionSelectorPresentation;
 import hs.mediasystem.screens.collection.AbstractDetailPane;
-import hs.mediasystem.screens.collection.DuoPaneCollectionSelectorLayout;
+import hs.mediasystem.screens.collection.DuoPaneCollectionSelector;
 import hs.mediasystem.screens.collection.SmallDetailPane;
 import hs.mediasystem.util.MapBindings;
 import javafx.scene.Node;
@@ -12,24 +12,24 @@ import javafx.scene.Node;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class ListAndDetailLayoutConf implements CollectionSelectorLayoutConf {
-  private final Provider<TreeListPane> treeListPaneProvider;
+public class DetailAndBannersLayout implements CollectionSelectorLayout {
+  private final Provider<BannerListPane> bannerListPaneProvider;
   private final Provider<SmallDetailPane> detailPaneProvider;
 
   @Inject
-  public ListAndDetailLayoutConf(Provider<TreeListPane> treeListPaneProvider, Provider<SmallDetailPane> detailPaneProvider) {
-    this.treeListPaneProvider = treeListPaneProvider;
+  public DetailAndBannersLayout(Provider<BannerListPane> bannerListPaneProvider, Provider<SmallDetailPane> detailPaneProvider) {
+    this.bannerListPaneProvider = bannerListPaneProvider;
     this.detailPaneProvider = detailPaneProvider;
   }
 
   @Override
   public String getId() {
-    return "listAndDetail";
+    return "detailAndBanners";
   }
 
   @Override
   public String getTitle() {
-    return "List and Detail";
+    return "Detail and Banners";
   }
 
   @Override
@@ -39,9 +39,9 @@ public class ListAndDetailLayoutConf implements CollectionSelectorLayoutConf {
 
   @Override
   public Node create(CollectionSelectorPresentation presentation) {
-    DuoPaneCollectionSelectorLayout layout = new DuoPaneCollectionSelectorLayout();
+    DuoPaneCollectionSelector layout = new DuoPaneCollectionSelector();
 
-    TreeListPane listPane = treeListPaneProvider.get();
+    BannerListPane listPane = bannerListPaneProvider.get();
     AbstractDetailPane detailPane = detailPaneProvider.get();
 
     detailPane.content.bind(MapBindings.select(presentation.focusedMediaNode, "media"));
@@ -51,8 +51,8 @@ public class ListAndDetailLayoutConf implements CollectionSelectorLayoutConf {
     listPane.onNodeSelected.set(presentation.onSelect);
     listPane.onNodeAlternateSelect.set(presentation.onInfoSelect);
 
-    layout.placeLeft(listPane);
-    layout.placeRight(detailPane);
+    layout.placeLeft(detailPane);
+    layout.placeRight(listPane);
 
     presentation.defaultInputFocus.set(listPane);
 

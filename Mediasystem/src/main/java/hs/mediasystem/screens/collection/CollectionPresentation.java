@@ -45,7 +45,7 @@ import javax.inject.Inject;
 public class CollectionPresentation implements Presentation {
   public final ObservableList<MediaGroup> availableGroupSets = FXCollections.observableArrayList();
   public final ObjectProperty<MediaGroup> groupSet = new SimpleObjectProperty<>();
-  public final ObjectProperty<CollectionSelectorLayoutConf> layoutConf = new SimpleObjectProperty<>();
+  public final ObjectProperty<CollectionSelectorLayout> layout = new SimpleObjectProperty<>();
 
   public final EventHandler<ActionEvent> onOptionsSelect = new OptionsSelectEventHandler();
 
@@ -195,10 +195,10 @@ public class CollectionPresentation implements Presentation {
             return groupSet.get().getTitle();
           }
         }),
-        new ListOption<>("View", view.layoutConf, view.suitableLayoutConfs, new StringBinding(view.layoutConf) {
+        new ListOption<>("View", view.layout, view.suitableLayouts, new StringBinding(view.layout) {
           @Override
           protected String computeValue() {
-            return view.layoutConf.get().getTitle();
+            return view.layout.get().getTitle();
           }
         })
       );
