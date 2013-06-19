@@ -1,9 +1,6 @@
 package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.MediaRootType;
-import hs.mediasystem.framework.Id;
-import hs.mediasystem.framework.ListMediaRoot;
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.screens.AbstractMediaGroup;
@@ -20,12 +17,6 @@ public class SeasonMediaGroup extends AbstractMediaGroup {
 
   public SeasonMediaGroup() {
     super("episodeNumber-group-season", "Season", true);
-  }
-
-  public static class Season extends Media<Season> {
-    public Season(String title) {
-      super(title);
-    }
   }
 
   private static String determineSeasonName(MediaItem item) {
@@ -54,14 +45,14 @@ public class SeasonMediaGroup extends AbstractMediaGroup {
         seasonNode = nodes.get(nodes.size() - 1);
       }
       else {
-        ListMediaRoot mediaRoot = new ListMediaRoot(parentMediaRoot, new Id("season"), seasonName);
+        Season mediaRoot = new Season(parentMediaRoot, seasonName);
 
         seasonNode = new MediaNode(mediaRoot, determineShortSeasonName(mediaItem), true, false, null);
 
         nodes.add(seasonNode);
       }
 
-      ((ListMediaRoot)seasonNode.getMediaRoot()).add(mediaItem);
+      ((Season)seasonNode.getMediaRoot()).add(mediaItem);
 
       previousSeasonName = seasonName;
     }
