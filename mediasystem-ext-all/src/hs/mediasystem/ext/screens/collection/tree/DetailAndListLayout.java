@@ -39,7 +39,7 @@ public class DetailAndListLayout implements CollectionSelectorLayout {
 
   @Override
   public Node create(CollectionSelectorPresentation presentation) {
-    DuoPaneCollectionSelector layout = new DuoPaneCollectionSelector();
+    DuoPaneCollectionSelector pane = new DuoPaneCollectionSelector();
 
     TreeListPane listPane = treeListPaneProvider.get();
     AbstractDetailPane detailPane = detailPaneProvider.get();
@@ -51,11 +51,11 @@ public class DetailAndListLayout implements CollectionSelectorLayout {
     listPane.onNodeSelected.set(presentation.onSelect);
     listPane.onNodeAlternateSelect.set(presentation.onInfoSelect);
 
-    layout.placeLeft(detailPane);
-    layout.placeRight(listPane);
+    pane.placeLeft(detailPane);
+    pane.placeRight(listPane);
 
     presentation.defaultInputFocus.set(listPane);
 
-    return layout;
+    return pane;
   }
 }
