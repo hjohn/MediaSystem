@@ -16,7 +16,7 @@ import javax.inject.Named;
 public class EpisodeMediaGroup extends AbstractMediaGroup {
 
   public EpisodeMediaGroup() {
-    super("episodeNumber", "Episode", true);
+    super("episodeNumber", "Episode", false);
   }
 
   @Override
