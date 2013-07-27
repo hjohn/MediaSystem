@@ -108,13 +108,27 @@ public class ProgramController {
     messageBorderPane.setMouseTransparent(true);
     messageBorderPane.setRight(new Group(messagePane));
 
-    scene.addEventHandler(NavigationEvent.NAVIGATION_BACK, new EventHandler<NavigationEvent>() {
+    scene.addEventHandler(NavigationEvent.NAVIGATION_ANCESTOR, new EventHandler<NavigationEvent>() {
       @Override
       public void handle(NavigationEvent event) {
-        Location parent = getLocation().getParent();
+        if(event.getEventType() == NavigationEvent.NAVIGATION_BACK) {
+          Location parent = getLocation().getParent();
 
-        setLocation(parent == null ? MAIN_SCREEN_LOCATION : parent);
-        event.consume();
+          setLocation(parent == null ? MAIN_SCREEN_LOCATION : parent);
+          event.consume();
+        }
+        else if(playerPresentation != null && getActiveScreen().getClass() == PlaybackOverlayPane.class) {
+          playerPresentation.getPlayer().onPlayerEvent().set(null);
+
+          setLocation(getLocation().getParent());
+
+          informationBorder.setVisible(true);
+
+          playerPresentation.stop();
+          sceneManager.disposePlayerRoot();
+
+          subtitleDownloadService.cancel();
+        }
       }
     });
 
@@ -140,7 +154,7 @@ public class ProgramController {
           KeyCode code = event.getCode();
 
           if(KEY_S.match(event)) {
-            stop();
+            scene.getFocusOwner().fireEvent(new NavigationEvent(NavigationEvent.NAVIGATION_EXIT));
             event.consume();
           }
           if(playerPresentation != null) {
@@ -369,7 +383,7 @@ public class ProgramController {
           Platform.runLater(new Runnable() {
             @Override
             public void run() {
-              stop();
+              scene.getFocusOwner().fireEvent(new NavigationEvent(NavigationEvent.NAVIGATION_EXIT));
             }
           });
           event.consume();
@@ -383,19 +397,6 @@ public class ProgramController {
     setLocation(new PlaybackLocation(getLocation()));
 
     informationBorder.setVisible(false);
-  }
-
-  public synchronized void stop() {
-    playerPresentation.getPlayer().onPlayerEvent().set(null);
-
-    setLocation(getLocation().getParent());
-
-    informationBorder.setVisible(true);
-
-    playerPresentation.stop();
-    sceneManager.disposePlayerRoot();
-
-    subtitleDownloadService.cancel();
   }
 
   public SubtitleDownloadService getSubtitleDownloadService() {

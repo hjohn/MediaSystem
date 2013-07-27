@@ -1,5 +1,6 @@
 package hs.mediasystem.util;
 
+import hs.mediasystem.screens.NavigationEvent;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -8,17 +9,11 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.effect.ColorAdjust;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class DialogPane extends StackPane implements Dialog {
-  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
-
   private final StackPane stackPane = new StackPane();
 
   private Stage owner;
@@ -28,12 +23,13 @@ public class DialogPane extends StackPane implements Dialog {
     getStylesheets().add("dialog/dialog.css");
     getStyleClass().add("dialog");
 
-    setOnKeyPressed(new EventHandler<KeyEvent>() {
+    addEventHandler(NavigationEvent.NAVIGATION_ANCESTOR, new EventHandler<NavigationEvent>() {
       @Override
-      public void handle(KeyEvent event) {
-        if(BACK_SPACE.match(event)) {
+      public void handle(NavigationEvent event) {
+        close();
+
+        if(event.getEventType() == NavigationEvent.NAVIGATION_BACK) {
           event.consume();
-          close();
         }
       }
     });
