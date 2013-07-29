@@ -45,7 +45,7 @@ import javax.inject.Inject;
 public class CollectionPresentation implements Presentation {
   public final ObservableList<MediaGroup> availableGroupSets = FXCollections.observableArrayList();
   public final ObjectProperty<MediaGroup> groupSet = new SimpleObjectProperty<>();
-  public final ObjectProperty<CollectionSelectorLayout> layout = new SimpleObjectProperty<>();
+  public final ObjectProperty<Layout<MediaRoot, CollectionSelectorPresentation>> layout = new SimpleObjectProperty<>();
 
   public final EventHandler<ActionEvent> onOptionsSelect = new OptionsSelectEventHandler();
 
