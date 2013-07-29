@@ -15,6 +15,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -29,6 +31,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.input.KeyCode;
@@ -81,7 +84,27 @@ public class ProgramController {
   private final InformationBorder informationBorder;
   private final Provider<Set<LocationHandler>> locationHandlersProvider;
 
-  private Node videoCanvas;
+  private Canvas videoCanvas;
+
+  private final InvalidationListener videoSizeInvalidationListener = new InvalidationListener() {
+    @Override
+    public void invalidated(Observable observable) {
+      if(videoCanvas != null) {
+        double scaleX = videoPane.getWidth() / videoCanvas.getWidth();
+        double scaleY = videoPane.getHeight() / videoCanvas.getHeight();
+
+        if(scaleX > scaleY) {
+          scaleX = scaleY;
+        }
+        else {
+          scaleY = scaleX;
+        }
+
+        videoCanvas.setScaleX(scaleX);
+        videoCanvas.setScaleY(scaleY);
+      }
+    }
+  };
 
   @Inject
   public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder, Provider<Set<LocationHandler>> locationHandlersProvider) {
@@ -96,9 +119,14 @@ public class ProgramController {
 
     Object displayComponent = playerPresentation == null ? null : playerPresentation.getPlayer().getDisplayComponent();
 
-    if(displayComponent instanceof Node) {
-      videoCanvas = (Node)displayComponent;
+    if(displayComponent instanceof Canvas) {
+      videoCanvas = (Canvas)displayComponent;
       videoPane.setCenter(videoCanvas);
+
+      videoCanvas.widthProperty().addListener(videoSizeInvalidationListener);
+      videoCanvas.heightProperty().addListener(videoSizeInvalidationListener);
+      videoPane.widthProperty().addListener(videoSizeInvalidationListener);
+      videoPane.heightProperty().addListener(videoSizeInvalidationListener);
     }
 
     sceneManager.setScene(scene);
