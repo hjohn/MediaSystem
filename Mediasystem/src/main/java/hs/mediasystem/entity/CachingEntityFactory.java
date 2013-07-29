@@ -18,10 +18,10 @@ public class CachingEntityFactory implements EntityFactory<DatabaseObject> {
   private static final Map<Class<?>, WeakValueMap<Object, Entity<?>>> INSTANCES = new HashMap<>();
   private static final Map<Class<?>, WeakHashMap<Entity<?>, DatabaseObject>> KEYS = new HashMap<>();
 
-  private final Set<EntityProvider<DatabaseObject, ?>> entityProviders;
+  private final Set<EntityProvider<? extends DatabaseObject, ?>> entityProviders;
 
   @Inject
-  public CachingEntityFactory(Set<EntityProvider<DatabaseObject, ?>> entityProviders) {
+  public CachingEntityFactory(Set<EntityProvider<? extends DatabaseObject, ?>> entityProviders) {
     System.out.println(">>> CachingEntityFactory: Created, " + entityProviders);
     this.entityProviders = entityProviders;
   }
@@ -43,8 +43,6 @@ public class CachingEntityFactory implements EntityFactory<DatabaseObject> {
           return (T)entity;
         }
       }
-
-     // List<EntityProvider<DatabaseObject, ?>> services = tracker.getServices(new PropertyEq("mediasystem.class", cls));
 
       for(EntityProvider<DatabaseObject, ?> provider : findEntityProviders(cls)) {
         T result = (T)provider.get(dbObject);
@@ -76,12 +74,13 @@ public class CachingEntityFactory implements EntityFactory<DatabaseObject> {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public Set<EntityProvider<DatabaseObject, ?>> findEntityProviders(Class<?> cls) {
     Set<EntityProvider<DatabaseObject, ?>> matchingEntityProviders = new HashSet<>();
 
-    for(EntityProvider<DatabaseObject, ?> entityProvider : entityProviders) {
+    for(EntityProvider<? extends DatabaseObject, ?> entityProvider : entityProviders) {
       if(entityProvider.getType().equals(cls)) {
-        matchingEntityProviders.add(entityProvider);
+        matchingEntityProviders.add((EntityProvider<DatabaseObject, ?>)entityProvider);
       }
     }
 
