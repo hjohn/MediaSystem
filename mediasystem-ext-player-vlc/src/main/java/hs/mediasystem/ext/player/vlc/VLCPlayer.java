@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
@@ -92,18 +93,31 @@ public class VLCPlayer implements Player {
       DirectMediaPlayer mp = factory.newDirectMediaPlayer(
         new BufferFormatCallback() {
           @Override
-          public BufferFormat getBufferFormat(int width, int height) {
-            canvas.setWidth(width);
-            canvas.setHeight(height);
+          public BufferFormat getBufferFormat(final int width, final int height) {
+            System.out.println("[FINE] VLCPlayer: Buffer size changed to " + width + "x" + height);
+
+            Platform.runLater(new Runnable() {
+              @Override
+              public void run() {
+                canvas.setWidth(width);
+                canvas.setHeight(height);
+              }
+            });
 
             return new RV32BufferFormat(width, height);
           }
         },
         new RenderCallback() {
           @Override
-          public void display(DirectMediaPlayer mp, Memory[] memory, BufferFormat bufferFormat) {
-            ByteBuffer byteBuffer = memory[0].getByteBuffer(0, memory[0].size());
-            pixelWriter.setPixels(0, 0, bufferFormat.getWidth(), bufferFormat.getHeight(), byteBgraInstance, byteBuffer, bufferFormat.getPitches()[0]);
+          public void display(DirectMediaPlayer mp, Memory[] memory, final BufferFormat bufferFormat) {
+            final ByteBuffer byteBuffer = memory[0].getByteBuffer(0, memory[0].size());
+
+            Platform.runLater(new Runnable() {
+              @Override
+              public void run() {
+                pixelWriter.setPixels(0, 0, bufferFormat.getWidth(), bufferFormat.getHeight(), byteBgraInstance, byteBuffer, bufferFormat.getPitches()[0]);
+              }
+            });
           }
         }
       );
@@ -113,7 +127,7 @@ public class VLCPlayer implements Player {
     }
 
     mediaPlayer.addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
-      private AtomicInteger ignoreFinish = new AtomicInteger();
+      private final AtomicInteger ignoreFinish = new AtomicInteger();
       private boolean videoAdjusted;
 
       @Override
