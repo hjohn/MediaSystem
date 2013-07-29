@@ -84,6 +84,8 @@ public class FrontEnd extends Application {
   public void start(Stage primaryStage) throws MalformedURLException {
     System.out.println("javafx.runtime.version: " + System.getProperties().get("javafx.runtime.version"));
 
+    setUserAgentStylesheet(STYLESHEET_CASPIAN);
+
     Section generalSection = INI.getSection("general");
     int screenNumber = generalSection == null ? 0 : Integer.parseInt(generalSection.getDefault("screen", "0"));
 
