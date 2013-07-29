@@ -19,9 +19,13 @@
   -fx-alignment: center-right;
 }
 
+.tree-view {
+  -fx-fixed-cell-size: 48;
+}
+
 .viewed-indicator {
   -fx-font-size: 20px;
-  -fx-label-padding: 9 15 9 0;  /* the extra padding for top/bottom makes this the highest element which forces all cells to be the same height */
+  -fx-label-padding: 0 15 0 0;
 }
 
 .collection-text .count {

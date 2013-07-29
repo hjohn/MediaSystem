@@ -22,7 +22,7 @@ public class EpisodeDetailPaneDecorator extends MediaDetailPaneDecorator {
   public void decorate(boolean interactive) {
     super.decorate(interactive);
 
-    decoratablePane.getStylesheets().add("collection/episode-detail-pane.css");  // TODO move to bundle when possible
+    decoratablePane.getStylesheets().add(getClass().getResource("episode-detail-pane-decorator.css").toExternalForm());
 
     decoratablePane.add("title-area", 10, createSeasonEpisodeBlock());
   }

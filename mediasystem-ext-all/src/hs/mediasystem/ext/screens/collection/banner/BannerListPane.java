@@ -100,7 +100,7 @@ public class BannerListPane extends BorderPane {
   public BannerListPane(Provider<Set<MediaNodeCellProvider>> mediaNodeCellProvidersProvider) {
     this.mediaNodeCellProvidersProvider = mediaNodeCellProvidersProvider;
 
-    getStylesheets().add("collection/banner-list-pane.css");
+    getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
 
     focusedMediaNode.addListener(new ChangeListener<MediaNode>() {
       @Override

@@ -74,7 +74,7 @@ public class TreeListPane extends BorderPane {
       }
     });
 
-    getStylesheets().add("collection/tree-list-pane.css");
+    getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
 
     treeView.setEditable(false);
     treeView.setShowRoot(false);
