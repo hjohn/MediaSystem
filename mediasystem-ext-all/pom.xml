@@ -14,6 +14,7 @@
         <directory>src</directory>
         <includes>
           <include>**/*.png</include>
+          <include>**/*.css</include>
         </includes>
       </resource>
     </resources>
