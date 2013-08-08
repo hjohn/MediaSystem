@@ -90,6 +90,8 @@ public class ProgramController {
     @Override
     public void invalidated(Observable observable) {
       if(videoCanvas != null) {
+        System.out.println("[FINE] ProgramController: CanvasSize: " + videoCanvas.getWidth() + "x" + videoCanvas.getHeight() + " PaneSize: " + videoPane.getWidth() + "x" + videoPane.getHeight());
+
         double scaleX = videoPane.getWidth() / videoCanvas.getWidth();
         double scaleY = videoPane.getHeight() / videoCanvas.getHeight();
 
@@ -102,6 +104,7 @@ public class ProgramController {
 
         videoCanvas.setScaleX(scaleX);
         videoCanvas.setScaleY(scaleY);
+        videoCanvas.relocate((videoPane.getWidth() - videoCanvas.getWidth()) / 2, (videoPane.getHeight() - videoCanvas.getHeight()) / 2);
       }
     }
   };
@@ -122,6 +125,7 @@ public class ProgramController {
     if(displayComponent instanceof Canvas) {
       videoCanvas = (Canvas)displayComponent;
       videoPane.setCenter(videoCanvas);
+      videoCanvas.setManaged(false);
 
       videoCanvas.widthProperty().addListener(videoSizeInvalidationListener);
       videoCanvas.heightProperty().addListener(videoSizeInvalidationListener);
