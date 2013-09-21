@@ -32,15 +32,46 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 /**
- * Container Pane for managing the various layouts that can be used for displaying a collection of media.
+ * Provides the View part of the Collection screen.
+ *
+ * The CollectionView provides a standard area with a background and a small bottom border in which
+ * information about a collection can be shown.  How the collection is shown is determined by the
+ * current layout.  The CollectionView manages these layouts and provides controls for choosing one.<p>
+ *
+ * Provided properties and events:
+ * - the collection root under which the media items to be displayed are located
+ * - the currently focused media item
+ * - an event handler triggered when the options action is selected
  */
 public class CollectionView extends StackPane {
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
 
-  public final ObjectProperty<Layout<MediaRoot, CollectionSelectorPresentation>> layout = new SimpleObjectProperty<>();
+  /**
+   * The collection root under which the media items to be displayed are located.
+   */
   public final ObjectProperty<MediaNode> rootMediaNode = new SimpleObjectProperty<>();
+
+  /**
+   * The currently focused media node.
+   */
   public final ObjectProperty<MediaNode> focusedMediaNode = new SimpleObjectProperty<>();
+
+  /**
+   * Triggered when the options action is selected.
+   */
   public final ObjectProperty<EventHandler<ActionEvent>> onOptionsSelect = new SimpleObjectProperty<>();
+
+  /*
+   * TODO the layout properties are accessed externally, but I donot think they should be as they are view specific -- another "CollectionView" for example could be constructed to not use layouts at all for example
+   */
+  /**
+   * The current active layout.
+   */
+  public final ObjectProperty<Layout<MediaRoot, CollectionSelectorPresentation>> layout = new SimpleObjectProperty<>();
+
+  /**
+   * A list of suitable layouts.
+   */
   public final ObservableList<Layout<MediaRoot, CollectionSelectorPresentation>> suitableLayouts = FXCollections.observableArrayList();
 
   private final BackgroundPane backgroundPane = new BackgroundPane();
