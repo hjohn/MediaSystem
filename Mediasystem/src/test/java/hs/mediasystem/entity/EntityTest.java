@@ -7,14 +7,18 @@ import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.dao.ProviderId;
 import hs.mediasystem.framework.Identifier;
 import hs.mediasystem.framework.MediaData;
-import hs.mediasystem.test.JavaFXTestCase;
+import hs.mediasystem.test.JavaFXRunningRule;
 
+import org.junit.Rule;
 import org.junit.Test;
 
-public class EntityTest extends JavaFXTestCase {
+public class EntityTest {
+
+  @Rule
+  public final JavaFXRunningRule jfxRunningRule = new JavaFXRunningRule();
 
   @Test
-  public void shouldEnrichEntityWhenAccessed() {
+  public void shouldEnrichEntityWhenAccessed() throws InterruptedException {
     final Identifier identifier = new Identifier(new ProviderId("Movie", "TMDB", "1"), MatchType.ID, 1.0f);
 
     identifier.mediaData.setEnricher(new EnricherBuilder<Identifier, MediaData>(MediaData.class)
@@ -34,7 +38,9 @@ public class EntityTest extends JavaFXTestCase {
     );
 
     assertNull(identifier.mediaData.get());
-    sleep(500);
+
+    Thread.sleep(500);
+
     assertNotNull(identifier.mediaData.get());
     assertEquals(1000L, identifier.mediaData.get().fileLength.get());
     assertEquals("http://somewhere", identifier.mediaData.get().uri.get());
