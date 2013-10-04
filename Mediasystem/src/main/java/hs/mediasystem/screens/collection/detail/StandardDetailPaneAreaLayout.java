@@ -1,26 +1,18 @@
-package hs.mediasystem.screens.collection;
+package hs.mediasystem.screens.collection.detail;
 
+import hs.mediasystem.screens.AreaLayout;
+import hs.mediasystem.util.AreaPane;
 import hs.mediasystem.util.GridPaneUtil;
-
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-public class SmallDetailPane extends AbstractDetailPane {
-
-  @Inject
-  public SmallDetailPane(Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories) {
-    super(detailPaneDecoratorFactories);
-  }
+public class StandardDetailPaneAreaLayout implements AreaLayout {
 
   @Override
-  protected void initialize(DecoratablePane decoratablePane) {
-    decoratablePane.getChildren().add(new BorderPane() {{
+  public void layout(AreaPane areaPane) {
+    areaPane.getChildren().add(new BorderPane() {{
       setTop(new VBox() {{
         setId("title-area");
       }});

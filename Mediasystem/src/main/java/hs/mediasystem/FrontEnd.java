@@ -17,7 +17,6 @@ import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaDataPersister;
 import hs.mediasystem.framework.MediaDataProvider;
 import hs.mediasystem.framework.PersisterProvider;
-import hs.mediasystem.framework.Person;
 import hs.mediasystem.framework.PersonProvider;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.player.Player;
@@ -40,11 +39,8 @@ import hs.mediasystem.screens.StandardCell;
 import hs.mediasystem.screens.collection.CollectionLocation;
 import hs.mediasystem.screens.collection.CollectionPresentation;
 import hs.mediasystem.screens.collection.CollectionView;
-import hs.mediasystem.screens.collection.DetailPaneDecorator;
-import hs.mediasystem.screens.collection.DetailPaneDecoratorFactory;
-import hs.mediasystem.screens.collection.MediaDetailPaneDecorator;
-import hs.mediasystem.screens.collection.PersonDetailPaneDecorator;
-import hs.mediasystem.screens.collection.AbstractDetailPane.DecoratablePane;
+import hs.mediasystem.screens.collection.detail.MediaLayout;
+import hs.mediasystem.screens.collection.detail.PersonLayout;
 import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.util.DuoWindowSceneManager;
@@ -168,29 +164,8 @@ public class FrontEnd extends Application {
 
     PersisterProvider.register(MediaData.class, injector.getInstance(MediaDataPersister.class));
 
-    injector.registerInstance(new DetailPaneDecoratorFactory() {
-      @Override
-      public Class<?> getType() {
-        return Media.class;
-      }
-
-      @Override
-      public DetailPaneDecorator<?> create(DecoratablePane decoratablePane) {
-        return new MediaDetailPaneDecorator(decoratablePane);
-      }
-    });
-
-    injector.registerInstance(new DetailPaneDecoratorFactory() {
-      @Override
-      public Class<?> getType() {
-        return Person.class;
-      }
-
-      @Override
-      public DetailPaneDecorator<?> create(DecoratablePane decoratablePane) {
-        return new PersonDetailPaneDecorator(decoratablePane);
-      }
-    });
+    injector.registerInstance(new MediaLayout());
+    injector.registerInstance(new PersonLayout());
 
     injector.registerInstance(new MediaNodeCellProvider() {
       @Override

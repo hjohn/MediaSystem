@@ -1,10 +1,12 @@
-package hs.mediasystem.screens.collection;
+package hs.mediasystem.screens.collection.detail;
 
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.Casting;
 import hs.mediasystem.framework.Person;
+import hs.mediasystem.screens.AreaLayout;
 import hs.mediasystem.screens.MediaItemFormatter;
-import hs.mediasystem.screens.collection.CastingsRow.Type;
+import hs.mediasystem.screens.collection.detail.CastingsRow.Type;
+import hs.mediasystem.util.Events;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;
@@ -14,8 +16,6 @@ import java.util.Date;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -27,33 +27,39 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
-  private final ObjectProperty<Person> data = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<Person> dataProperty() { return data; }
-
-  protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(dataProperty(), "photo");
+/**
+ * DetailPane for showing information about a Person.
+ */
+public class PersonDetailPane extends DetailPane<Person> {
+  protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(content, "photo");
   protected final AsyncImageProperty poster = new AsyncImageProperty();
 
-  protected final ObjectBinding<ObservableList<Casting>> castings = MapBindings.select(dataProperty(), "castings");
+  protected final ObjectBinding<ObservableList<Casting>> castings = MapBindings.select(content, "castings");
 
-  protected final StringBinding birthPlace = MapBindings.selectString(dataProperty(), "birthPlace");
-  protected final StringBinding biography = MapBindings.selectString(dataProperty(), "biography");
-  protected final ObjectBinding<Date> birthDate = MapBindings.select(dataProperty(), "birthDate");
+  protected final StringBinding birthPlace = MapBindings.selectString(content, "birthPlace");
+  protected final StringBinding biography = MapBindings.selectString(content, "biography");
+  protected final ObjectBinding<Date> birthDate = MapBindings.select(content, "birthDate");
 
-  protected final AbstractDetailPane.DecoratablePane decoratablePane;
+  public static PersonDetailPane create(AreaLayout areaLayout, boolean interactive) {
+    PersonDetailPane pane = new PersonDetailPane(areaLayout);
 
-  public PersonDetailPaneDecorator(AbstractDetailPane.DecoratablePane decoratablePane) {
-    this.decoratablePane = decoratablePane;
+    pane.postConstruct(interactive);
+
+    return pane;
+  }
+
+  protected PersonDetailPane(AreaLayout areaLayout) {
+    super(areaLayout);
+
     poster.imageHandleProperty().bind(posterHandle);
   }
 
-  @Override
-  public void decorate(boolean interactive) {
-    decoratablePane.getStylesheets().add("collection/person-detail-pane.css");
+  protected void postConstruct(boolean interactive) {
+    getStylesheets().add("collection/person-detail-pane.css");
 
-    decoratablePane.add("title-area", 2, new Label() {{
+    add("title-area", 2, new Label() {{
       getStyleClass().add("title");
-      textProperty().bind(dataProperty().get().name);
+      textProperty().bind(MapBindings.selectString(content, "name"));
     }});
 
     ScaledImageView image = new ScaledImageView() {{
@@ -65,16 +71,16 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
     }};
     VBox.setVgrow(image, Priority.ALWAYS);
 
-    decoratablePane.add("title-image-area", 1, image);
+    add("title-image-area", 1, image);
 
-    decoratablePane.add("description-area", 5, createMiscelaneousFieldsBlock());
-    decoratablePane.add("description-area", 6, createBiographyBlock());
+    add("description-area", 5, createMiscelaneousFieldsBlock());
+    add("description-area", 6, createBiographyBlock());
 
     CastingsRow castingsRow = createCastingsRow(interactive);
     Pane titledCastingsRow = createTitledBlock("APPEARANCES", castingsRow, castingsRow.empty.not());
     HBox.setHgrow(titledCastingsRow, Priority.ALWAYS);
 
-    decoratablePane.add("link-area", 1, titledCastingsRow);
+    add("link-area", 1, titledCastingsRow);
   }
 
   protected Pane createBiographyBlock() {
@@ -139,7 +145,7 @@ public class PersonDetailPaneDecorator implements DetailPaneDecorator<Person> {
     castingsRow.onCastingSelected.set(new EventHandler<CastingSelectedEvent>() {
       @Override
       public void handle(CastingSelectedEvent event) {
-        decoratablePane.decoratorContentProperty().set(event.getCasting().media.get());
+        Events.dispatchEvent(onNavigate, new DetailNavigationEvent(event.getCasting().media.get()), event);
       }
     });
 

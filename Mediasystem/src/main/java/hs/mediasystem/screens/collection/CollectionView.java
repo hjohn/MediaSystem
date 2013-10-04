@@ -4,7 +4,9 @@ import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.SettingUpdater;
 import hs.mediasystem.framework.SettingsStore;
+import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.MediaNode;
+import hs.mediasystem.screens.UserLayout;
 import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
 
@@ -67,22 +69,22 @@ public class CollectionView extends StackPane {
   /**
    * The current active layout.
    */
-  public final ObjectProperty<Layout<MediaRoot, CollectionSelectorPresentation>> layout = new SimpleObjectProperty<>();
+  public final ObjectProperty<UserLayout<MediaRoot, CollectionSelectorPresentation>> layout = new SimpleObjectProperty<>();
 
   /**
    * A list of suitable layouts.
    */
-  public final ObservableList<Layout<MediaRoot, CollectionSelectorPresentation>> suitableLayouts = FXCollections.observableArrayList();
+  public final ObservableList<UserLayout<MediaRoot, CollectionSelectorPresentation>> suitableLayouts = FXCollections.observableArrayList();
 
   private final BackgroundPane backgroundPane = new BackgroundPane();
-  private final SettingUpdater<Layout<MediaRoot, CollectionSelectorPresentation>> settingUpdater;
+  private final SettingUpdater<UserLayout<MediaRoot, CollectionSelectorPresentation>> settingUpdater;
   private final StackPane collectionSelectorPane = new StackPane();
-  private final List<Layout<MediaRoot, CollectionSelectorPresentation>> allLayouts;
+  private final List<UserLayout<MediaRoot, CollectionSelectorPresentation>> allLayouts;
 
   private CollectionSelectorPresentation currentCollectionSelectorPresentation;
 
   @Inject
-  public CollectionView(SettingsStore settingsStore, final Provider<CollectionSelectorPresentation> collectionSelectorPresentationProvider, List<Layout<MediaRoot, CollectionSelectorPresentation>> layouts) {
+  public CollectionView(SettingsStore settingsStore, final Provider<CollectionSelectorPresentation> collectionSelectorPresentationProvider, List<UserLayout<MediaRoot, CollectionSelectorPresentation>> layouts) {
     this.allLayouts = layouts;
 
     getStylesheets().add("collection/collection-view.css");
@@ -131,7 +133,7 @@ public class CollectionView extends StackPane {
 
         settingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, current.getMediaRoot().getId().toString("View"));
 
-        Layout<MediaRoot, CollectionSelectorPresentation> lastSelectedLayout = settingUpdater.getStoredValue(layouts.get(0));
+        UserLayout<MediaRoot, CollectionSelectorPresentation> lastSelectedLayout = settingUpdater.getStoredValue(layouts.get(0));
 
         if(!lastSelectedLayout.equals(layout.get())) {
           layout.set(lastSelectedLayout);
@@ -141,10 +143,10 @@ public class CollectionView extends StackPane {
       }
     });
 
-    settingUpdater = new SettingUpdater<>(settingsStore, new StringConverter<Layout<MediaRoot, CollectionSelectorPresentation>>() {
+    settingUpdater = new SettingUpdater<>(settingsStore, new StringConverter<UserLayout<MediaRoot, CollectionSelectorPresentation>>() {
       @Override
-      public Layout<MediaRoot, CollectionSelectorPresentation> fromString(String id) {
-        for(Layout<MediaRoot, CollectionSelectorPresentation> layout : layouts) {
+      public UserLayout<MediaRoot, CollectionSelectorPresentation> fromString(String id) {
+        for(UserLayout<MediaRoot, CollectionSelectorPresentation> layout : layouts) {
           if(layout.getId().equals(id)) {
             return layout;
           }
@@ -154,7 +156,7 @@ public class CollectionView extends StackPane {
       }
 
       @Override
-      public String toString(Layout<MediaRoot, CollectionSelectorPresentation> layout) {
+      public String toString(UserLayout<MediaRoot, CollectionSelectorPresentation> layout) {
         return layout.getId();
       }
     });
@@ -170,17 +172,11 @@ public class CollectionView extends StackPane {
   }
 
   private void determineValidLayouts(MediaRoot root) {
-    suitableLayouts.clear();
+    suitableLayouts.setAll(Layout.findAllSuitableLayouts(allLayouts, root.getClass()));
 
-    for(Layout<MediaRoot, CollectionSelectorPresentation> layout : allLayouts) {
-      if(layout.isSuitableFor(root)) {
-        suitableLayouts.add(layout);
-      }
-    }
-
-    Collections.sort(suitableLayouts, new Comparator<Layout<MediaRoot, CollectionSelectorPresentation>>() {
+    Collections.sort(suitableLayouts, new Comparator<UserLayout<MediaRoot, CollectionSelectorPresentation>>() {
       @Override
-      public int compare(Layout<MediaRoot, CollectionSelectorPresentation> o1, Layout<MediaRoot, CollectionSelectorPresentation> o2) {
+      public int compare(UserLayout<MediaRoot, CollectionSelectorPresentation> o1, UserLayout<MediaRoot, CollectionSelectorPresentation> o2) {
         return o1.getTitle().compareTo(o2.getTitle());
       }
     });

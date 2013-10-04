@@ -1,8 +1,13 @@
 package hs.mediasystem.screens.collection;
 
+import hs.mediasystem.screens.AreaLayout;
+import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.ProgramController;
+import hs.mediasystem.screens.collection.detail.DetailPanePresentation;
+import hs.mediasystem.screens.collection.detail.DetailView;
+import hs.mediasystem.util.AreaPane;
 import hs.mediasystem.util.DialogPane;
 import hs.mediasystem.util.GridPaneUtil;
 
@@ -28,23 +33,18 @@ public class CollectionSelectorPresentation {
   public final EventHandler<MediaNodeEvent> onInfoSelect = new InfoEventHandler();
 
   private final ProgramController controller;
-  private final Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories;
+  private final Set<Layout<? extends Object, DetailPanePresentation>> layouts;
 
   @Inject
-  public CollectionSelectorPresentation(ProgramController controller, Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories) {
+  public CollectionSelectorPresentation(ProgramController controller, Set<Layout<? extends Object, DetailPanePresentation>> layouts) {
     this.controller = controller;
-    this.detailPaneDecoratorFactories = detailPaneDecoratorFactories;
+    this.layouts = layouts;
   }
 
-  private DialogPane createInformationDialog(final MediaNode mediaNode, Set<DetailPaneDecoratorFactory> detailPaneDecoratorFactories) {
-    final AbstractDetailPane detailPane = new AbstractDetailPane(detailPaneDecoratorFactories) { // TODO provider detailPaneDecoratorFactories!
-      {
-        interactive.set(true);
-        getStylesheets().add("controls.css");
-      }
-
+  private DialogPane createInformationDialog(final MediaNode mediaNode, Set<Layout<? extends Object, DetailPanePresentation>> layouts) {
+    DetailView detailPane = new DetailView(layouts, true, new AreaLayout() {
       @Override
-      protected void initialize(DecoratablePane decoratablePane) {
+      public void layout(AreaPane areaPane) {
         BorderPane borderPane = new BorderPane();
         GridPane gridPane = GridPaneUtil.create(new double[] {33, 34, 33}, new double[] {100});
         gridPane.setHgap(20);
@@ -52,7 +52,7 @@ public class CollectionSelectorPresentation {
         HBox hbox = new HBox();
         hbox.setId("link-area");
 
-        decoratablePane.getChildren().add(borderPane);
+        areaPane.getChildren().add(borderPane);
 
         borderPane.setCenter(gridPane);
         borderPane.setBottom(hbox);
@@ -76,9 +76,9 @@ public class CollectionSelectorPresentation {
           setSpacing(2);
         }}, 2, 0);
       }
-    };
+    });
 
-    detailPane.content.set(mediaNode.getMedia());
+    detailPane.content.set(mediaNode);
 
     DialogPane dialogPane = new DialogPane() {
       @Override
@@ -110,7 +110,7 @@ public class CollectionSelectorPresentation {
   class InfoEventHandler implements EventHandler<MediaNodeEvent> {
     @Override
     public void handle(MediaNodeEvent event) {
-      controller.showDialog(createInformationDialog(event.getMediaNode(), detailPaneDecoratorFactories));
+      controller.showDialog(createInformationDialog(event.getMediaNode(), layouts));
 
       event.consume();
     }

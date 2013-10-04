@@ -1,4 +1,4 @@
-package hs.mediasystem.screens.collection;
+package hs.mediasystem.screens.collection.detail;
 
 import hs.mediasystem.framework.Casting;
 import javafx.event.Event;
@@ -9,6 +9,7 @@ public class CastingSelectedEvent extends Event {
 
   public CastingSelectedEvent(Casting casting) {
     super(EventType.ROOT);
+
     this.casting = casting;
   }
 

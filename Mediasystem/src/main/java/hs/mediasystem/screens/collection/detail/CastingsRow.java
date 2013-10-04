@@ -1,4 +1,4 @@
-package hs.mediasystem.screens.collection;
+package hs.mediasystem.screens.collection.detail;
 
 import hs.mediasystem.framework.Casting;
 import hs.mediasystem.util.Events;

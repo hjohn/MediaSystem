@@ -1,14 +1,16 @@
-package hs.mediasystem.screens.collection;
+package hs.mediasystem.screens.collection.detail;
 
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.Casting;
 import hs.mediasystem.framework.Identifier;
 import hs.mediasystem.framework.Media;
+import hs.mediasystem.screens.AreaLayout;
 import hs.mediasystem.screens.MediaItemFormatter;
 import hs.mediasystem.screens.StarRating;
-import hs.mediasystem.screens.collection.CastingsRow.Type;
+import hs.mediasystem.screens.collection.detail.CastingsRow.Type;
 import hs.mediasystem.screens.optiondialog.OptionButton;
 import hs.mediasystem.screens.optiondialog.OptionCheckBox;
+import hs.mediasystem.util.Events;
 import hs.mediasystem.util.HackedTab;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
@@ -21,8 +23,6 @@ import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.LongBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -43,25 +43,21 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
-  private final ObjectProperty<Media<?>> data = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<Media<?>> dataProperty() { return data; }
-
-  protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(dataProperty(), "image");
-
+public class MediaDetailPane extends DetailPane<Media<?>> {
+  protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(content, "image");
   protected final AsyncImageProperty poster = new AsyncImageProperty();
 
   protected final StringProperty groupName = new SimpleStringProperty();
-  protected final StringBinding title = MapBindings.selectString(dataProperty(), "title");
-  protected final StringBinding subtitle = MapBindings.selectString(dataProperty(), "subtitle");
-  protected final StringBinding releaseTime = MediaItemFormatter.releaseTimeBinding(dataProperty());
-  protected final StringBinding plot = MapBindings.selectString(dataProperty(), "description");
-  protected final DoubleBinding rating = MapBindings.selectDouble(dataProperty(), "rating");
-  protected final IntegerBinding runtime = MapBindings.selectInteger(dataProperty(), "runtime");
-  protected final ObjectBinding<ObservableList<Casting>> castings = MapBindings.select(dataProperty(), "castings");
-  protected final ObjectBinding<ObservableList<Identifier>> identifiers = MapBindings.select(dataProperty(), "identifiers");
+  protected final StringBinding title = MapBindings.selectString(content, "title");
+  protected final StringBinding subtitle = MapBindings.selectString(content, "subtitle");
+  protected final StringBinding releaseTime = MediaItemFormatter.releaseTimeBinding(content);
+  protected final StringBinding plot = MapBindings.selectString(content, "description");
+  protected final DoubleBinding rating = MapBindings.selectDouble(content, "rating");
+  protected final IntegerBinding runtime = MapBindings.selectInteger(content, "runtime");
+  protected final ObjectBinding<ObservableList<Casting>> castings = MapBindings.select(content, "castings");
+  protected final ObjectBinding<ObservableList<Identifier>> identifiers = MapBindings.select(content, "identifiers");
   protected final StringBinding genres = new StringBinding() {
-    final ObjectBinding<String[]> selectGenres = MapBindings.select(dataProperty(), "genres");
+    final ObjectBinding<String[]> selectGenres = MapBindings.select(content, "genres");
 
     {
       bind(selectGenres);
@@ -86,32 +82,38 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
     }
   };
 
-  protected final AbstractDetailPane.DecoratablePane decoratablePane;
+  public static MediaDetailPane create(AreaLayout areaLayout, boolean interactive) {
+    MediaDetailPane pane = new MediaDetailPane(areaLayout);
 
-  public MediaDetailPaneDecorator(AbstractDetailPane.DecoratablePane decoratablePane) {
-    this.decoratablePane = decoratablePane;
+    pane.postConstruct(interactive);
+
+    return pane;
+  }
+
+  protected MediaDetailPane(AreaLayout areaLayout) {
+    super(areaLayout);
+
     poster.imageHandleProperty().bind(posterHandle);
   }
 
-  @Override
-  public void decorate(boolean interactive) {
-    decoratablePane.getStylesheets().add("collection/media-detail-pane.css");
+  protected void postConstruct(boolean interactive) {
+    getStylesheets().add("collection/media-detail-pane.css");
 
-    decoratablePane.add("title-area", 1, new Label() {{
+    add("title-area", 1, new Label() {{
       getStyleClass().add("group-name");
       textProperty().bind(groupName);
       managedProperty().bind(groupName.isNotEqualTo(""));
       visibleProperty().bind(groupName.isNotEqualTo(""));
     }});
 
-    decoratablePane.add("title-area", 2, new Label() {{
+    add("title-area", 2, new Label() {{
       getStyleClass().add("title");
       textProperty().bind(title);
     }});
 
-    decoratablePane.add("title-area", 3, createSubtitleField());
-    decoratablePane.add("title-area", 4, createRating());
-    decoratablePane.add("title-area", 5, createGenresField());
+    add("title-area", 3, createSubtitleField());
+    add("title-area", 4, createRating());
+    add("title-area", 5, createGenresField());
 
     ScaledImageView image = new ScaledImageView() {{
       getStyleClass().add("poster-image");
@@ -122,24 +124,24 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
     }};
     VBox.setVgrow(image, Priority.ALWAYS);
 
-    decoratablePane.add("title-image-area", 1, image);
+    add("title-image-area", 1, image);
 
-    decoratablePane.add("description-area", 6, createPlotBlock());
-    decoratablePane.add("description-area", 7, createMiscelaneousFieldsBlock(createReleaseDateBlock(), createRuntimeBlock()));
+    add("description-area", 6, createPlotBlock());
+    add("description-area", 7, createMiscelaneousFieldsBlock(createReleaseDateBlock(), createRuntimeBlock()));
 
     CastingsRow castingsRow = createCastingsRow(interactive);
     Pane titledCastingsRow = createTitledBlock("CAST", castingsRow, castingsRow.empty.not());
     HBox.setHgrow(titledCastingsRow, Priority.ALWAYS);
 
-    decoratablePane.add("link-area", 1, titledCastingsRow);
+    add("link-area", 1, titledCastingsRow);
 
-    if(decoratablePane.hasArea("action-area")) {
+    if(hasArea("action-area")) {
       final TabPane tabPane = new TabPane();
 
       tabPane.setSide(Side.BOTTOM);
       tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
-      decoratablePane.add("action-area", 1, createTitledBlock("COPIES", tabPane, null));
+      add("action-area", 1, createTitledBlock("COPIES", tabPane, null));
 
       identifiers.addListener(new ChangeListener<ObservableList<Identifier>>() {
         @Override
@@ -248,7 +250,7 @@ public class MediaDetailPaneDecorator implements DetailPaneDecorator<Media<?>> {
     castingsRow.onCastingSelected.set(new EventHandler<CastingSelectedEvent>() {
       @Override
       public void handle(CastingSelectedEvent event) {
-        decoratablePane.decoratorContentProperty().set(event.getCasting().person.get());
+        Events.dispatchEvent(onNavigate, new DetailNavigationEvent(event.getCasting().person.get()), event);
       }
     });
 
