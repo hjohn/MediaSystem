@@ -266,7 +266,6 @@ public class ProgramController {
     for(PropertyDescriptor<?> descriptor : propertyDescriptors) {
       for(Action<?> action : descriptor.getActions()) {
         if(action.getId().equals("groupSet.increase")) {
-          System.out.println(">>> !!! Putting Action for groupSet.increase");
           addKeyMapping(CollectionPresentation.class, new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), action);
         }
         if(action.getId().equals("playback.volume.decrease(5%)")) {
@@ -361,12 +360,10 @@ public class ProgramController {
     Map<KeyCombination, Action<?>> actionsByKeyCombination = actionsByKeyCombinationByPresentation.get(presentation.getClass());
 
     if(actionsByKeyCombination != null) {
-      System.out.println(">>> Found " + actionsByKeyCombination.size() + " key combinations for presentation " + presentation.getClass());
       for(KeyCombination keyCombination : actionsByKeyCombination.keySet()) {
         if(keyCombination.match(event)) {
           @SuppressWarnings("unchecked")
           Action<Object> action = (Action<Object>)actionsByKeyCombination.get(keyCombination);
-          System.out.println(">>> Found matching key combination for " + keyCombination + ", executing action: " + action);
 
           action.perform(presentation);
           return true;
