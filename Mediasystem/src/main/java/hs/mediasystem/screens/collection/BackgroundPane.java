@@ -34,8 +34,8 @@ public class BackgroundPane extends StackPane {
 
   private final AsyncImageProperty wantedBackground = new AsyncImageProperty();
 
-  private final ObjectProperty<Image> background = new SimpleObjectProperty<>();
-  private final ObjectProperty<Image> newBackground = new SimpleObjectProperty<>();
+  private final ObjectProperty<Image> background = new SimpleObjectProperty<>(EMPTY_IMAGE);
+  private final ObjectProperty<Image> newBackground = new SimpleObjectProperty<>(EMPTY_IMAGE);
 
   private final ScaledImageView backgroundImageView = new ScaledImageView() {{
     imageProperty().bind(background);
