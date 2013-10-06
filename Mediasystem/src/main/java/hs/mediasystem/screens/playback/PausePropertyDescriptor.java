@@ -1,4 +1,4 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.playback;
 
 import hs.mediasystem.framework.actions.Action;
 import hs.mediasystem.framework.actions.PropertyDescriptor;
@@ -6,41 +6,24 @@ import hs.mediasystem.framework.actions.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BrightnessPropertyDescriptor implements PropertyDescriptor<PlayerPresentation> {
+public class PausePropertyDescriptor implements PropertyDescriptor<PlayerPresentation> {
   private static final List<Action<PlayerPresentation>> ACTIONS = new ArrayList<>();
 
   static {
     ACTIONS.add(new Action<PlayerPresentation>() {
       @Override
       public String getId() {
-        return "playback.brightness.decrease(5%)";
+        return "playback.pause";
       }
 
       @Override
       public String getDescription() {
-        return "Decrease Brightness by 5%";
+        return "Toggle Playback Pause";
       }
 
       @Override
       public void perform(PlayerPresentation presentation) {
-        presentation.changeBrightness(-0.05f);
-      }
-    });
-
-    ACTIONS.add(new Action<PlayerPresentation>() {
-      @Override
-      public String getId() {
-        return "playback.brightness.increase(5%)";
-      }
-
-      @Override
-      public String getDescription() {
-        return "Increase Brightness by 5%";
-      }
-
-      @Override
-      public void perform(PlayerPresentation presentation) {
-        presentation.changeBrightness(0.05f);
+        presentation.pause();
       }
     });
   }

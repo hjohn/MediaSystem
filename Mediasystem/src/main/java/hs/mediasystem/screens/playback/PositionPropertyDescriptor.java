@@ -1,4 +1,4 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.playback;
 
 import hs.mediasystem.framework.actions.Action;
 import hs.mediasystem.framework.actions.PropertyDescriptor;

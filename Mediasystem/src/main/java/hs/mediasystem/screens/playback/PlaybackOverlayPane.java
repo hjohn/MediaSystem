@@ -1,4 +1,4 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.playback;
 
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.MediaItem;

@@ -1,4 +1,4 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.playback;
 
 import hs.mediasystem.framework.actions.Action;
 import hs.mediasystem.framework.actions.PropertyDescriptor;
@@ -6,41 +6,41 @@ import hs.mediasystem.framework.actions.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SubtitleDelayPropertyDescriptor implements PropertyDescriptor<PlayerPresentation> {
+public class RatePropertyDescriptor implements PropertyDescriptor<PlayerPresentation> {
   private static final List<Action<PlayerPresentation>> ACTIONS = new ArrayList<>();
 
   static {
     ACTIONS.add(new Action<PlayerPresentation>() {
       @Override
       public String getId() {
-        return "playback.subtitleDelay.decrease(100ms)";
+        return "playback.rate.decrease(10%)";
       }
 
       @Override
       public String getDescription() {
-        return "Decrease Subtitle Delay by 100 milliseconds";
+        return "Decrease Playback Rate by 10%";
       }
 
       @Override
       public void perform(PlayerPresentation presentation) {
-        presentation.changeSubtitleDelay(-100);
+        presentation.changeRate(-0.1f);
       }
     });
 
     ACTIONS.add(new Action<PlayerPresentation>() {
       @Override
       public String getId() {
-        return "playback.subtitleDelay.increase(100ms)";
+        return "playback.rate.increase(10%)";
       }
 
       @Override
       public String getDescription() {
-        return "Increase Subtitle Delay by 100 milliseconds";
+        return "Increase Playback Rate by 10%";
       }
 
       @Override
       public void perform(PlayerPresentation presentation) {
-        presentation.changeSubtitleDelay(100);
+        presentation.changeRate(0.1f);
       }
     });
   }

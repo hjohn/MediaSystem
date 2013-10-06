@@ -1,5 +1,6 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.playback;
 
+import hs.mediasystem.screens.Location;
 
 public class PlaybackLocation implements Location {
   private final Location parent;

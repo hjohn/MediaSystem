@@ -1,4 +1,4 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.playback;
 
 import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaItem;
@@ -6,6 +6,8 @@ import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.Player;
+import hs.mediasystem.screens.Presentation;
+import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.ListViewOption;
 import hs.mediasystem.screens.optiondialog.NumericOption;
@@ -101,7 +103,7 @@ public class PlaybackOverlayPresentation implements Presentation {
               public List<Option> get() {
                 return new ArrayList<Option>() {{
                   final SubtitleSelector subtitleSelector = new SubtitleSelector(findSubtitleProviders("movie"));
-                  final SubtitleCriteriaProvider subtitleCriteriaProvider = findSubtitleCriteriaProvider(mediaItem.getMedia().getClass());
+                  final SubtitleCriteriaProvider subtitleCriteriaProvider = findSubtitleCriteriaProvider(mediaItem.getMedia().getClass());  // TODO NPE, getMedia() can be null when not identified (when downloading subs)
 
                   subtitleSelector.query(subtitleCriteriaProvider.getCriteria(mediaItem));
 
