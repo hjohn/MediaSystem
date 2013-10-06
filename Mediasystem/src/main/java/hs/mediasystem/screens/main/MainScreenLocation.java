@@ -1,5 +1,6 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.main;
 
+import hs.mediasystem.screens.Location;
 
 public class MainScreenLocation implements Location {
 

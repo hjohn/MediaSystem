@@ -5,6 +5,7 @@ import hs.mediasystem.framework.actions.Action;
 import hs.mediasystem.framework.actions.PropertyDescriptor;
 import hs.mediasystem.framework.player.PlayerEvent;
 import hs.mediasystem.screens.collection.CollectionPresentation;
+import hs.mediasystem.screens.main.MainScreenLocation;
 import hs.mediasystem.screens.playback.PlaybackLocation;
 import hs.mediasystem.screens.playback.PlaybackOverlayPane;
 import hs.mediasystem.screens.playback.PlayerPresentation;

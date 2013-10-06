@@ -1,5 +1,6 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.main;
 
+import hs.mediasystem.screens.Presentation;
 import javafx.scene.Node;
 
 import javax.inject.Inject;

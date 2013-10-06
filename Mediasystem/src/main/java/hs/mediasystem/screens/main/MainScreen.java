@@ -1,5 +1,7 @@
-package hs.mediasystem.screens;
+package hs.mediasystem.screens.main;
 
+import hs.mediasystem.screens.MainMenuExtension;
+import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.util.FocusEvent;
 
 import java.util.ArrayList;
