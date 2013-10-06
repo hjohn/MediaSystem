@@ -22,6 +22,7 @@ import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.screens.AbstractSetting;
+import hs.mediasystem.screens.BrightnessPropertyDescriptor;
 import hs.mediasystem.screens.Location;
 import hs.mediasystem.screens.LocationHandler;
 import hs.mediasystem.screens.MainScreenLocation;
@@ -29,16 +30,23 @@ import hs.mediasystem.screens.MainScreenPresentation;
 import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.MessagePaneTaskExecutor;
+import hs.mediasystem.screens.MutePropertyDescriptor;
+import hs.mediasystem.screens.PausePropertyDescriptor;
 import hs.mediasystem.screens.PlaybackLocation;
 import hs.mediasystem.screens.PlaybackOverlayPane;
 import hs.mediasystem.screens.PlaybackOverlayPresentation;
+import hs.mediasystem.screens.PositionPropertyDescriptor;
 import hs.mediasystem.screens.Presentation;
 import hs.mediasystem.screens.ProgramController;
+import hs.mediasystem.screens.RatePropertyDescriptor;
 import hs.mediasystem.screens.SettingGroup;
 import hs.mediasystem.screens.StandardCell;
+import hs.mediasystem.screens.SubtitleDelayPropertyDescriptor;
+import hs.mediasystem.screens.VolumePropertyDescriptor;
 import hs.mediasystem.screens.collection.CollectionLocation;
 import hs.mediasystem.screens.collection.CollectionPresentation;
 import hs.mediasystem.screens.collection.CollectionView;
+import hs.mediasystem.screens.collection.GroupSetPropertyDescriptor;
 import hs.mediasystem.screens.collection.detail.MediaLayout;
 import hs.mediasystem.screens.collection.detail.PersonLayout;
 import hs.mediasystem.screens.optiondialog.BooleanOption;
@@ -98,6 +106,15 @@ public class FrontEnd extends Application {
     final Injector injector = new Injector(new JustInTimeDiscoveryPolicy());
 
     injector.registerInstance(injector);
+    injector.register(GroupSetPropertyDescriptor.class);
+
+    injector.register(BrightnessPropertyDescriptor.class);
+    injector.register(MutePropertyDescriptor.class);
+    injector.register(PausePropertyDescriptor.class);
+    injector.register(RatePropertyDescriptor.class);
+    injector.register(SubtitleDelayPropertyDescriptor.class);
+    injector.register(PositionPropertyDescriptor.class);
+    injector.register(VolumePropertyDescriptor.class);
 
     injector.register(new Provider<Connection>() {
       @Override

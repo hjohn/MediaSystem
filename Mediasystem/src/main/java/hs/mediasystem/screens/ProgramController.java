@@ -1,7 +1,10 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.actions.Action;
+import hs.mediasystem.framework.actions.PropertyDescriptor;
 import hs.mediasystem.framework.player.PlayerEvent;
+import hs.mediasystem.screens.collection.CollectionPresentation;
 import hs.mediasystem.util.Dialog;
 import hs.mediasystem.util.KeyCombinationGroup;
 import hs.mediasystem.util.SceneManager;
@@ -9,6 +12,8 @@ import hs.mediasystem.util.SceneUtil;
 import hs.mediasystem.util.annotation.Nullable;
 import hs.mediasystem.util.ini.Ini;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javafx.animation.KeyFrame;
@@ -27,6 +32,7 @@ import javafx.concurrent.Worker;
 import javafx.concurrent.Worker.State;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.event.EventTarget;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -83,8 +89,17 @@ public class ProgramController {
 
   private final InformationBorder informationBorder;
   private final Provider<Set<LocationHandler>> locationHandlersProvider;
+  private final Set<PropertyDescriptor<?>> propertyDescriptors;
 
+  private final Map<Class<?>, Map<KeyCombination, Action<?>>> actionsByKeyCombinationByPresentation = new HashMap<>();
   private Canvas videoCanvas;
+
+  private Presentation activePresentation;
+  
+  private final ObjectProperty<Location> location = new SimpleObjectProperty<>();
+  public Location getLocation() { return location.get(); }
+  public void setLocation(Location location) { this.location.set(location); }
+  public ObjectProperty<Location> locationProperty() { return location; }
 
   private final InvalidationListener videoSizeInvalidationListener = new InvalidationListener() {
     @Override
@@ -110,12 +125,13 @@ public class ProgramController {
   };
 
   @Inject
-  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder, Provider<Set<LocationHandler>> locationHandlersProvider) {
+  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder, Provider<Set<LocationHandler>> locationHandlersProvider, Set<PropertyDescriptor<?>> propertyDescriptors) {
     this.ini = ini;
     this.sceneManager = sceneManager;
     this.playerPresentation = playerPresentation;
     this.informationBorder = informationBorder;
     this.locationHandlersProvider = locationHandlersProvider;
+    this.propertyDescriptors = propertyDescriptors;
     this.scene = SceneUtil.createScene(sceneRoot);
 
     sceneRoot.getChildren().addAll(videoPane, contentBorderPane, informationBorderPane, messageBorderPane);
@@ -132,6 +148,8 @@ public class ProgramController {
       videoPane.widthProperty().addListener(videoSizeInvalidationListener);
       videoPane.heightProperty().addListener(videoSizeInvalidationListener);
     }
+
+    initializeKeyMappings();
 
     sceneManager.setScene(scene);
 
@@ -181,72 +199,18 @@ public class ProgramController {
           }
 
           sceneManager.setScreenNumber(screenNumber);
+          event.consume();
         }
         else if(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
-          KeyCode code = event.getCode();
-
           if(KEY_S.match(event)) {
             scene.getFocusOwner().fireEvent(new NavigationEvent(NavigationEvent.NAVIGATION_EXIT));
             event.consume();
           }
-          if(playerPresentation != null) {
-            if(code == KeyCode.SPACE) {
-              playerPresentation.pause();
-              event.consume();
-            }
-            else if(FUNC_JUMP_BACKWARD_SMALL.match(event)) {
-              playerPresentation.move(-10 * 1000);
-              event.consume();
-            }
-            else if(FUNC_JUMP_FORWARD_SMALL.match(event)) {
-              playerPresentation.move(10 * 1000);
-              event.consume();
-            }
-            else if(FUNC_JUMP_BACKWARD.match(event)) {
-              playerPresentation.move(-60 * 1000);
-              event.consume();
-            }
-            else if(FUNC_JUMP_FORWARD.match(event)) {
-              playerPresentation.move(60 * 1000);
-              event.consume();
-            }
-            else if(code == KeyCode.M) {
-              playerPresentation.mute();
-              event.consume();
-            }
-            else if(code == KeyCode.DIGIT9) {
-              playerPresentation.changeVolume(-5);
-              event.consume();
-            }
-            else if(code == KeyCode.DIGIT0) {
-              playerPresentation.changeVolume(5);
-              event.consume();
-            }
-            else if(code == KeyCode.DIGIT1) {
-              playerPresentation.changeBrightness(-0.05f);
-              event.consume();
-            }
-            else if(code == KeyCode.DIGIT2) {
-              playerPresentation.changeBrightness(0.05f);
-              event.consume();
-            }
-            else if(code == KeyCode.Z) {
-              playerPresentation.changeSubtitleDelay(-100);
-              event.consume();
-            }
-            else if(code == KeyCode.X) {
-              playerPresentation.changeSubtitleDelay(100);
-              event.consume();
-            }
-            else if(KEY_OPEN_BRACKET.match(event)) {
-              playerPresentation.changeRate(-0.1f);
-              event.consume();
-            }
-            else if(KEY_CLOSE_BRACKET.match(event)) {
-              playerPresentation.changeRate(0.1f);
-              event.consume();
-            }
-          }
+
+        }
+
+        if(!event.isConsumed()) {
+          handleUserDefinedKeys(event);
         }
       }
     });
@@ -298,12 +262,120 @@ public class ProgramController {
     });
   }
 
-  private Presentation activePresentation;
+  private void initializeKeyMappings() {
+    for(PropertyDescriptor<?> descriptor : propertyDescriptors) {
+      for(Action<?> action : descriptor.getActions()) {
+        if(action.getId().equals("groupSet.increase")) {
+          System.out.println(">>> !!! Putting Action for groupSet.increase");
+          addKeyMapping(CollectionPresentation.class, new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), action);
+        }
+        if(action.getId().equals("playback.volume.decrease(5%)")) {
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT9), action);
+        }
+        if(action.getId().equals("playback.volume.increase(5%)")) {
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT0), action);
+        }
+        if(action.getId().equals("playback.mute")) {
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.M), action);
+        }
+        if(action.getId().equals("playback.pause")) {
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.SPACE), action);
+        }
+        if(action.getId().equals("playback.position.backward(10s)")) {
+          addKeyMapping(PlayerPresentation.class, FUNC_JUMP_BACKWARD_SMALL, action);
+        }
+        if(action.getId().equals("playback.position.forward(10s)")) {
+          addKeyMapping(PlayerPresentation.class, FUNC_JUMP_FORWARD_SMALL, action);
+        }
+        if(action.getId().equals("playback.position.backward(60s)")) {
+          addKeyMapping(PlayerPresentation.class, FUNC_JUMP_BACKWARD, action);
+        }
+        if(action.getId().equals("playback.position.forward(60s)")) {
+          addKeyMapping(PlayerPresentation.class, FUNC_JUMP_FORWARD, action);
+        }
+        if(action.getId().equals("playback.brightness.decrease(5%)")) {
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT1), action);
+        }
+        if(action.getId().equals("playback.brightness.increase(5%)")) {
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT2), action);
+        }
+        if(action.getId().equals("playback.subtitleDelay.decrease(100ms)")) {
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.Z), action);
+        }
+        if(action.getId().equals("playback.subtitleDelay.increase(100ms)")) {
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.X), action);
+        }
+        if(action.getId().equals("playback.rate.decrease(10%)")) {
+          addKeyMapping(PlayerPresentation.class, KEY_OPEN_BRACKET, action);
+        }
+        if(action.getId().equals("playback.rate.increase(10%)")) {
+          addKeyMapping(PlayerPresentation.class, KEY_CLOSE_BRACKET, action);
+        }
+      }
+    }
+  }
 
-  private final ObjectProperty<Location> location = new SimpleObjectProperty<>();
-  public Location getLocation() { return location.get(); }
-  public void setLocation(Location location) { this.location.set(location); }
-  public ObjectProperty<Location> locationProperty() { return location; }
+  private void addKeyMapping(Class<?> presentationClass, KeyCombination keyCombination, Action<?> action) {
+    Map<KeyCombination, Action<?>> actionsByKeyCombination = actionsByKeyCombinationByPresentation.get(presentationClass);
+
+    if(actionsByKeyCombination == null) {
+      actionsByKeyCombination = new HashMap<>();
+      actionsByKeyCombinationByPresentation.put(presentationClass, actionsByKeyCombination);
+    }
+
+    actionsByKeyCombination.put(keyCombination, action);
+  }
+
+  private void handleUserDefinedKeys(KeyEvent event) {
+
+    /*
+     * Handling of user defined key combinations:
+     * - Check up the chain from the event target to find relevant presentations
+     * - Check each presentation in turn for potential actions
+     */
+
+    EventTarget currentEventChainNode = event.getTarget();
+
+    while(currentEventChainNode != null) {
+      if(currentEventChainNode instanceof PresentationPane) {
+        PresentationPane pane = (PresentationPane)currentEventChainNode;
+        Object presentation = pane.getPresentation();
+
+        if(handleUserDefinedKeysForPresentation(event, presentation)) {
+          return;
+        }
+      }
+
+      currentEventChainNode = currentEventChainNode instanceof Node ? ((Node)currentEventChainNode).getParent() : null;
+    }
+
+    if(handleUserDefinedKeysForPresentation(event, activePresentation)) {
+      return;
+    }
+
+    handleUserDefinedKeysForPresentation(event, playerPresentation);
+  }
+
+  private boolean handleUserDefinedKeysForPresentation(KeyEvent event, Object presentation) {
+    System.out.println("Handling user defined key... " + event);
+    Map<KeyCombination, Action<?>> actionsByKeyCombination = actionsByKeyCombinationByPresentation.get(presentation.getClass());
+
+    if(actionsByKeyCombination != null) {
+      System.out.println(">>> Found " + actionsByKeyCombination.size() + " key combinations for presentation " + presentation.getClass());
+      for(KeyCombination keyCombination : actionsByKeyCombination.keySet()) {
+        if(keyCombination.match(event)) {
+          @SuppressWarnings("unchecked")
+          Action<Object> action = (Action<Object>)actionsByKeyCombination.get(keyCombination);
+          System.out.println(">>> Found matching key combination for " + keyCombination + ", executing action: " + action);
+
+          action.perform(presentation);
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
 
   private LocationHandler findLocationHandler(Class<?> cls) {
     for(LocationHandler locationHandler : locationHandlersProvider.get()) {

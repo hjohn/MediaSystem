@@ -6,6 +6,7 @@ import hs.mediasystem.framework.SettingUpdater;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.MediaNode;
+import hs.mediasystem.screens.PresentationPane;
 import hs.mediasystem.screens.UserLayout;
 import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
@@ -45,7 +46,7 @@ import javax.inject.Provider;
  * - the currently focused media item
  * - an event handler triggered when the options action is selected
  */
-public class CollectionView extends StackPane {
+public class CollectionView extends PresentationPane {
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
 
   /**
@@ -162,6 +163,11 @@ public class CollectionView extends StackPane {
     });
 
     layout.addListener(settingUpdater);
+  }
+
+  @Override
+  public Object getPresentation() {
+    return currentCollectionSelectorPresentation;
   }
 
   @Override
