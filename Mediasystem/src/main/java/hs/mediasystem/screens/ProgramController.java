@@ -6,7 +6,6 @@ import hs.mediasystem.framework.actions.PropertyDescriptor;
 import hs.mediasystem.framework.player.PlayerEvent;
 import hs.mediasystem.screens.collection.CollectionPresentation;
 import hs.mediasystem.util.Dialog;
-import hs.mediasystem.util.KeyCombinationGroup;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.SceneUtil;
 import hs.mediasystem.util.annotation.Nullable;
@@ -63,10 +62,6 @@ public class ProgramController {
   private static final KeyCombination KEY_CTRL_ALT_S = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN);
   private static final KeyCombination KEY_OPEN_BRACKET = new KeyCodeCombination(KeyCode.OPEN_BRACKET);
   private static final KeyCombination KEY_CLOSE_BRACKET = new KeyCodeCombination(KeyCode.CLOSE_BRACKET);
-  private static final KeyCombination FUNC_JUMP_FORWARD_SMALL = new KeyCombinationGroup(new KeyCodeCombination(KeyCode.RIGHT), new KeyCodeCombination(KeyCode.NUMPAD6));
-  private static final KeyCombination FUNC_JUMP_BACKWARD_SMALL = new KeyCombinationGroup(new KeyCodeCombination(KeyCode.LEFT), new KeyCodeCombination(KeyCode.NUMPAD4));
-  private static final KeyCombination FUNC_JUMP_FORWARD = new KeyCombinationGroup(new KeyCodeCombination(KeyCode.UP), new KeyCodeCombination(KeyCode.NUMPAD8));
-  private static final KeyCombination FUNC_JUMP_BACKWARD = new KeyCombinationGroup(new KeyCodeCombination(KeyCode.DOWN), new KeyCodeCombination(KeyCode.NUMPAD2));
 
   private static final MainScreenLocation MAIN_SCREEN_LOCATION = new MainScreenLocation();
 
@@ -281,16 +276,20 @@ public class ProgramController {
           addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.SPACE), action);
         }
         if(action.getId().equals("playback.position.backward(10s)")) {
-          addKeyMapping(PlayerPresentation.class, FUNC_JUMP_BACKWARD_SMALL, action);
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.LEFT), action);
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD4), action);
         }
         if(action.getId().equals("playback.position.forward(10s)")) {
-          addKeyMapping(PlayerPresentation.class, FUNC_JUMP_FORWARD_SMALL, action);
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.RIGHT), action);
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD6), action);
         }
         if(action.getId().equals("playback.position.backward(60s)")) {
-          addKeyMapping(PlayerPresentation.class, FUNC_JUMP_BACKWARD, action);
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DOWN), action);
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD2), action);
         }
         if(action.getId().equals("playback.position.forward(60s)")) {
-          addKeyMapping(PlayerPresentation.class, FUNC_JUMP_FORWARD, action);
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.UP), action);
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD8), action);
         }
         if(action.getId().equals("playback.brightness.decrease(5%)")) {
           addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT1), action);
