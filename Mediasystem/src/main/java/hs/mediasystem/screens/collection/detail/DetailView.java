@@ -46,6 +46,7 @@ public class DetailView extends StackPane {
   };
 
   private DetailPanePresentation currentPresentation;
+  private Layout<? extends Object, DetailPanePresentation> currentLayout;
 
   /**
    * Constructs a new instance of this class.
@@ -82,23 +83,32 @@ public class DetailView extends StackPane {
     finalContent.addListener(new ChangeListener<Object>() {
       @Override
       public void changed(ObservableValue<? extends Object> observableValue, Object old, Object current) {
+        Layout<? extends Object, DetailPanePresentation> layout = current == null ? null : Layout.findMostSuitableLayout(layouts, current.getClass());
+
+        /*
+         * View only needs replacing when layout is a different one.  Existing views
+         * will be updated automatically through their binding with the presentation.
+         */
+
+        if(layout != null && layout.equals(currentLayout)) {
+          return;
+        }
+
+        currentLayout = layout;
+
         if(currentPresentation != null) {
           currentPresentation.content.unbindBidirectional(finalContent);
           currentPresentation = null;
         }
 
-        if(current != null) {
-          Layout<? extends Object, DetailPanePresentation> layout = Layout.findMostSuitableLayout(layouts, current.getClass());
+        if(currentLayout != null) {
+          currentPresentation = new DetailPanePresentation(areaLayout, interactive);
+          currentPresentation.content.bindBidirectional(finalContent);
 
-          if(layout != null) {
-            currentPresentation = new DetailPanePresentation(areaLayout, interactive);
-            currentPresentation.content.bindBidirectional(finalContent);
-
-            getChildren().setAll(layout.create(currentPresentation));
-          }
-          else {
-            getChildren().setAll(new Label("Unable to display information for: " + current));
-          }
+          getChildren().setAll(currentLayout.create(currentPresentation));
+        }
+        else {
+          getChildren().setAll(new Label("Unable to display information for: " + current));
         }
       }
     });
