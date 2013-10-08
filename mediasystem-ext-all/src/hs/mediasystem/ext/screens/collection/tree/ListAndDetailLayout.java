@@ -15,7 +15,7 @@ import javafx.scene.Node;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class ListAndDetailLayout implements Layout<MediaRoot, CollectionSelectorPresentation> {
+public class ListAndDetailLayout implements UserLayout<MediaRoot, CollectionSelectorPresentation> {
   private final Provider<TreeListPane> treeListPaneProvider;
   private final Set<Layout<? extends Object, DetailPanePresentation>> layouts;
 
@@ -23,6 +23,16 @@ public class ListAndDetailLayout implements Layout<MediaRoot, CollectionSelector
   public ListAndDetailLayout(Provider<TreeListPane> treeListPaneProvider, Set<Layout<? extends Object, DetailPanePresentation>> layouts) {
     this.treeListPaneProvider = treeListPaneProvider;
     this.layouts = layouts;
+  }
+
+  @Override
+  public String getId() {
+    return "listAndDetail";
+  }
+
+  @Override
+  public String getTitle() {
+    return "List and Detail";
   }
 
   @Override
