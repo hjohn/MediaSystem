@@ -164,6 +164,8 @@ public class PlaybackOverlayPresentation implements Presentation {
 
           if(diff < 1000) {
             totalTimeViewed += diff;
+
+            updatePositionAndViewed();
           }
         }
       }
@@ -201,6 +203,9 @@ public class PlaybackOverlayPresentation implements Presentation {
 
   @Override
   public void dispose() {
+  }
+
+  public void updatePositionAndViewed() {
     MediaData mediaData = mediaItem.mediaData.get();
 
     if(mediaData != null) {
@@ -209,23 +214,25 @@ public class PlaybackOverlayPresentation implements Presentation {
       if(length > 0) {
         long timeViewed = totalTimeViewed + mediaData.resumePosition.get() * 1000L;
 
-        if(timeViewed >= length * 9 / 10) {  // 90% viewed?
-          System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Marking as viewed: " + mediaItem);
+        if(!mediaData.viewed.get() && timeViewed >= length * 9 / 10) {  // 90% viewed?
+          System.out.println("[CONFIG] PlaybackOverlayPresentation - Marking as viewed: " + mediaItem);
 
           mediaData.viewed.set(true);
         }
 
         if(totalTimeViewed > 30 * 1000) {
-          long resumePosition = 0;
+          int resumePosition = 0;
           long position = playerPresentation.getPosition();
 
           if(position > 30 * 1000 && position < length * 9 / 10) {
-            System.out.println("[CONFIG] ProgramController.play(...).new Destination() {...}.outro() - Setting resume position to " + position + " ms: " + mediaItem);
-
-            resumePosition = position;
+            resumePosition = (int)(position / 1000);
           }
 
-          mediaData.resumePosition.set((int)(resumePosition / 1000));
+          if(Math.abs(mediaData.resumePosition.get() - resumePosition) > 10) {
+            System.out.println("[CONFIG] PlaybackOverlayPresentation - Setting resume position to " + position + " ms: " + mediaItem);
+
+            mediaData.resumePosition.set(resumePosition);
+          }
         }
       }
     }
