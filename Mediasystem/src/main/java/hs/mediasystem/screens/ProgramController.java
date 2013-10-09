@@ -265,7 +265,7 @@ public class ProgramController {
   private void initializeKeyMappings() {
     for(PropertyDescriptor<?> descriptor : propertyDescriptors) {
       for(Action<?> action : descriptor.getActions()) {
-        if(action.getId().equals("groupSet.increase")) {
+        if(action.getId().equals("groupSet.next")) {
           addKeyMapping(CollectionPresentation.class, new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), action);
         }
         if(action.getId().equals("playback.volume.decrease(5%)")) {

@@ -16,7 +16,7 @@ public class GroupSetPropertyDescriptor implements PropertyDescriptor<Collection
     ACTIONS.add(new Action<CollectionPresentation>() {
       @Override
       public String getId() {
-        return "groupSet.decrease";
+        return "groupSet.previous";
       }
 
       @Override
@@ -39,7 +39,7 @@ public class GroupSetPropertyDescriptor implements PropertyDescriptor<Collection
     ACTIONS.add(new Action<CollectionPresentation>() {
       @Override
       public String getId() {
-        return "groupSet.increase";
+        return "groupSet.next";
       }
 
       @Override
@@ -74,31 +74,4 @@ public class GroupSetPropertyDescriptor implements PropertyDescriptor<Collection
   public List<Action<CollectionPresentation>> getActions() {
     return ACTIONS;
   }
-
-  /*
-
-    Settings:
-    playback KEY_PLUS volume increase
-    playback KEY_MINUS volume decrease
-
-    KEY_PLUS -> "playback.volume.increase"
-    KEY_MINUS -> "playback.volume.decrease"
-
-
-   increase -> +5
-   decrease -> -5
-
-
-  new ActionFactory("increase", "Next Presentation") {
-    public Action create(P presentation) {
-      return new Action() {
-        presentation.groupSet++;
-      };
-    }
-  }
-
-   *
-   */
-
-
 }
