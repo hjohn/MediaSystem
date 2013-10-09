@@ -285,35 +285,37 @@ public class TreeListPane extends BorderPane {
       stack.remove(0);
       TreeItem<MediaNode> root = treeView.getRoot();
 
-      stack:
-      for(MediaNode node : stack) {
-        for(Node n : filter.getChildren()) {
-          if(((MediaNodeTreeItem)n.getUserData()).getValue().equals(node)) {
-            filter.activeProperty().set(n);
-            root = treeView.getRoot();
-            continue stack;
-          }
-        }
-
-        root.setExpanded(true);
-
-        root = findTreeItem(root, node);
-
-        if(root == null) {
-          break;
-        }
-      }
-
       if(root != null) {
-        final int index = treeView.getRow(root);
-        treeView.getFocusModel().focus(index);
-
-        Platform.runLater(new Runnable() {
-          @Override
-          public void run() {
-            treeView.scrollTo(index);
+        stack:
+        for(MediaNode node : stack) {
+          for(Node n : filter.getChildren()) {
+            if(((MediaNodeTreeItem)n.getUserData()).getValue().equals(node)) {
+              filter.activeProperty().set(n);
+              root = treeView.getRoot();
+              continue stack;
+            }
           }
-        });
+
+          root.setExpanded(true);
+
+          root = findTreeItem(root, node);
+
+          if(root == null) {
+            break;
+          }
+        }
+
+        if(root != null) {
+          final int index = treeView.getRow(root);
+          treeView.getFocusModel().focus(index);
+
+          Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+              treeView.scrollTo(index);
+            }
+          });
+        }
       }
     }
   }
