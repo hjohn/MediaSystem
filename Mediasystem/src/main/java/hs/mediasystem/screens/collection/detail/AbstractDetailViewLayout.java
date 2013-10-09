@@ -24,7 +24,12 @@ public abstract class AbstractDetailViewLayout<C> implements Layout<C, DetailPan
   protected abstract DetailPane<C> createDetailPane(DetailPanePresentation presentation);
 
   @Override
-  public final Node create(DetailPanePresentation presentation) {
+  public DetailPanePresentation createPresentation() {
+    return new DetailPanePresentation();
+  }
+
+  @Override
+  public final Node createView(DetailPanePresentation presentation) {
     DetailPane<C> detailPane = createDetailPane(presentation);
 
     Listeners.bind(presentation.content, new ChangeListener<Object>() {

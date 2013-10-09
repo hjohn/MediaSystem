@@ -8,6 +8,7 @@ import hs.mediasystem.screens.collection.CollectionPresentation;
 import hs.mediasystem.screens.main.MainScreenLocation;
 import hs.mediasystem.screens.playback.PlaybackLocation;
 import hs.mediasystem.screens.playback.PlaybackOverlayPane;
+import hs.mediasystem.screens.playback.PlaybackOverlayPresentation;
 import hs.mediasystem.screens.playback.PlayerPresentation;
 import hs.mediasystem.screens.playback.SubtitleDownloadService;
 import hs.mediasystem.util.Dialog;
@@ -88,14 +89,11 @@ public class ProgramController {
   }};
 
   private final InformationBorder informationBorder;
-  private final Provider<Set<LocationHandler>> locationHandlersProvider;
   private final Set<PropertyDescriptor<?>> propertyDescriptors;
 
   private final Map<Class<?>, Map<KeyCombination, Action<?>>> actionsByKeyCombinationByPresentation = new HashMap<>();
   private Canvas videoCanvas;
 
-  private Presentation activePresentation;
-  
   private final ObjectProperty<Location> location = new SimpleObjectProperty<>();
   public Location getLocation() { return location.get(); }
   public void setLocation(Location location) { this.location.set(location); }
@@ -124,13 +122,15 @@ public class ProgramController {
     }
   };
 
+  private Layout<? extends Location, MainLocationPresentation> currentLayout;
+  private MainLocationPresentation activePresentation;
+
   @Inject
-  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder, Provider<Set<LocationHandler>> locationHandlersProvider, Set<PropertyDescriptor<?>> propertyDescriptors) {
+  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder, Provider<Set<Layout<? extends Location, ? extends MainLocationPresentation>>> mainLocationLayoutsProvider, Set<PropertyDescriptor<?>> propertyDescriptors) {
     this.ini = ini;
     this.sceneManager = sceneManager;
     this.playerPresentation = playerPresentation;
     this.informationBorder = informationBorder;
-    this.locationHandlersProvider = locationHandlersProvider;
     this.propertyDescriptors = propertyDescriptors;
     this.scene = SceneUtil.createScene(sceneRoot);
 
@@ -238,26 +238,29 @@ public class ProgramController {
       public void changed(ObservableValue<? extends Location> observable, Location old, Location current) {
         System.out.println("[INFO] Changing Location" + (old == null ? "" : " from " + old.getId()) + " to " + current.getId());
 
-        Presentation oldPresentation = activePresentation;
-
-        LocationHandler locationHandler = findLocationHandler(current.getClass());
-          //  locationHandlerTracker.getService(new PropertyClassEq("mediasystem.class", current.getClass()));
-
-        if(locationHandler == null) {
-          throw new RuntimeException("No LocationHandler found for: " + current.getClass());
-        }
-
-        activePresentation = locationHandler.go(current, activePresentation);
-
-        if(!activePresentation.equals(oldPresentation)) {
-          displayOnStage(activePresentation.getView(), current.getType());
-
-          if(oldPresentation != null) {
-            oldPresentation.dispose();
-          }
-        }
+        @SuppressWarnings("unchecked")
+        Layout<? extends Location, MainLocationPresentation> layout = (Layout<? extends Location, MainLocationPresentation>)Layout.findMostSuitableLayout(mainLocationLayoutsProvider.get(), current.getClass());
 
         ProgramController.this.informationBorder.breadCrumbProperty().set(current.getBreadCrumb());
+
+        if(layout != null && layout.equals(currentLayout)) {
+          return;
+        }
+
+        currentLayout = layout;
+
+        if(activePresentation != null) {
+          activePresentation.location.unbindBidirectional(location);
+          activePresentation.dispose();
+          activePresentation = null;
+        }
+
+        if(currentLayout != null) {
+          activePresentation = currentLayout.createPresentation();
+          activePresentation.location.bindBidirectional(location);
+
+          displayOnStage(currentLayout.createView(activePresentation), current.getType());
+        }
       }
     });
   }
@@ -313,6 +316,12 @@ public class ProgramController {
         }
         if(action.getId().equals("playback.rate.increase(10%)")) {
           addKeyMapping(PlayerPresentation.class, KEY_CLOSE_BRACKET, action);
+        }
+        if(action.getId().equals("playback.subtitle.next")) {
+          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.J), action);
+        }
+        if(action.getId().equals("playback.overlay.visibility")) {
+          addKeyMapping(PlaybackOverlayPresentation.class, new KeyCodeCombination(KeyCode.I), action);
         }
       }
     }
@@ -376,16 +385,6 @@ public class ProgramController {
     }
 
     return false;
-  }
-
-  private LocationHandler findLocationHandler(Class<?> cls) {
-    for(LocationHandler locationHandler : locationHandlersProvider.get()) {
-      if(locationHandler.getLocationType().equals(cls)) {
-        return locationHandler;
-      }
-    }
-
-    return null;
   }
 
   public Ini getIni() {
@@ -499,7 +498,7 @@ public class ProgramController {
     playerPresentation.play(mediaItem.getUri(), positionMillis);
     currentMediaItem = mediaItem;
 
-    setLocation(new PlaybackLocation(getLocation()));
+    setLocation(new PlaybackLocation(getLocation(), positionMillis));
 
     informationBorder.setVisible(false);
   }

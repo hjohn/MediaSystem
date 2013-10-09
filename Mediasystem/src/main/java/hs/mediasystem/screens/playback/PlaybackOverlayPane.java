@@ -2,8 +2,8 @@ package hs.mediasystem.screens.playback;
 
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.player.Player;
+import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
@@ -17,7 +17,9 @@ import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -32,6 +34,10 @@ import javafx.scene.control.Label;
 import javafx.scene.effect.Blend;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Reflection;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -43,12 +49,18 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
-public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayView {
-  private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<MediaItem> mediaItemProperty() { return mediaItem; }
+public class PlaybackOverlayPane extends StackPane {
+  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
+  private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
 
-  private final ObjectProperty<Player> player = new SimpleObjectProperty<>();
-  @Override public ObjectProperty<Player> playerProperty() { return player; }
+  public final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
+  public final ObjectProperty<Player> player = new SimpleObjectProperty<>();
+  public final BooleanProperty overlayVisible = new SimpleBooleanProperty(true);
+
+  /**
+   * Triggered when options is chosen.
+   */
+  public final ObjectProperty<EventHandler<ActionEvent>> onOptionsSelect = new SimpleObjectProperty<>();
 
   private final PlayerBindings playerBindings = new PlayerBindings(player);
 
@@ -57,7 +69,7 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
   private final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaItem, "media", "image");
   private final AsyncImageProperty poster = new AsyncImageProperty();
 
-  private final PlaybackInfoBorders borders = new PlaybackInfoBorders();
+  private final PlaybackInfoBorders borders = new PlaybackInfoBorders(playerBindings);
 
   private final VBox playbackStateOverlay = new VBox() {{
     getStyleClass().add("content-box");
@@ -92,10 +104,28 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
       }
     });
 
+    overlayVisible.addListener(new ChangeListener<Boolean>() {
+      @Override
+      public void changed(ObservableValue<? extends Boolean> observableValue, Boolean old, Boolean current) {
+        borders.setLabelVisible(current.booleanValue());
+      }
+    });
+
+    addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+      @Override
+      public void handle(KeyEvent event) {
+        if(BACK_SPACE.match(event)) {
+          event.consume();
+        }
+        else if(KEY_O.match(event)) {
+          Events.dispatchEvent(onOptionsSelect, new ActionEvent(), event);
+        }
+      }
+    });
+
     setFocusTraversable(true);
 
     borders.mediaItemProperty().bind(mediaItem);
-    borders.playerProperty().bind(player);
 
     detailsOverlay.setId("video-overlay");
     detailsOverlay.add(new ScaledImageView() {{
@@ -190,11 +220,6 @@ public class PlaybackOverlayPane extends StackPane implements PlaybackOverlayVie
         getStyleClass().add("pause-shape");
       }});
     }});
-  }
-
-  @Override
-  public void toggleVisibility() {
-    borders.setLabelVisible(!borders.isLabelVisible());
   }
 
   public void showOSD() {

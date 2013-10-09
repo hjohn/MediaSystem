@@ -2,11 +2,10 @@ package hs.mediasystem.screens.playback;
 
 import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.PlaybackOverlayView;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.Player;
-import hs.mediasystem.screens.Presentation;
+import hs.mediasystem.screens.MainLocationPresentation;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.ListViewOption;
@@ -24,25 +23,21 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.LongBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.event.EventHandler;
-import javafx.scene.Node;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
+import javafx.event.ActionEvent;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class PlaybackOverlayPresentation implements Presentation {
-  private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
-  private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
-
+public class PlaybackOverlayPresentation extends MainLocationPresentation {
   private static final Comparator<SubtitleProvider> SUBTITLE_PROVIDER_COMPARATOR = new Comparator<SubtitleProvider>() {
     @Override
     public int compare(SubtitleProvider o1, SubtitleProvider o2) {
@@ -50,93 +45,85 @@ public class PlaybackOverlayPresentation implements Presentation {
     }
   };
 
-  private final PlaybackOverlayView view;
-  private final PlayerPresentation playerPresentation;
-  private final MediaItem mediaItem;
+  public final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
+  public final ObjectProperty<Player> player = new SimpleObjectProperty<>();
+  public final BooleanProperty overlayVisible = new SimpleBooleanProperty(true);
+
+  // TODO this binding is ugly, but it prevents a permanent reference to Player...
+  private final LongBinding position = Bindings.selectLong(player, "position");
 
   private final ObjectProperty<SubtitleDescriptor> selectedSubtitleForDownload = new SimpleObjectProperty<>();
   private final Set<SubtitleProvider> subtitleProviders;
   private final Set<SubtitleCriteriaProvider> subtitleCriteriaProviders;
-
-  private long totalTimeViewed = 0;
+  private final PlayerBindings playerBindings = new PlayerBindings(player);
 
   @Inject
-  public PlaybackOverlayPresentation(Set<SubtitleProvider> subtitleProviders, Set<SubtitleCriteriaProvider> subtitleCriteriaProviders, final ProgramController controller, final PlayerPresentation playerPresentation, final PlaybackOverlayView view) {
+  public PlaybackOverlayPresentation(Set<SubtitleProvider> subtitleProviders, Set<SubtitleCriteriaProvider> subtitleCriteriaProviders, final ProgramController controller, final PlayerPresentation playerPresentation) {
+    super(controller);
+
+    this.player.set(playerPresentation.getPlayer());
+    this.mediaItem.set(controller.getCurrentMediaItem());
+
     this.subtitleProviders = subtitleProviders;
     this.subtitleCriteriaProviders = subtitleCriteriaProviders;
-    this.playerPresentation = playerPresentation;
-    this.view = view;
-    this.mediaItem = controller.getCurrentMediaItem();
 
-    final Player player = playerPresentation.getPlayer();
-    final PlayerBindings playerBindings = new PlayerBindings(view.playerProperty());
+    position.addListener(new ChangeListener<Number>() {
+      private long totalTimeViewed;
+      private long timeViewedSinceLastSkip;
 
-    view.mediaItemProperty().set(mediaItem);
-    view.playerProperty().set(player);
-
-    getView().setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
-      public void handle(KeyEvent event) {
-        KeyCode code = event.getCode();
+      public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number value) {
+        long old = oldValue.longValue();
+        long current = value.longValue();
 
-        if(code == KeyCode.J) {
-          playerPresentation.nextSubtitle();
-          event.consume();
+        if(old < current) {
+          long diff = current - old;
+
+          if(diff > 0 && diff < 4000) {
+            totalTimeViewed += diff;
+            timeViewedSinceLastSkip += diff;
+
+            updatePositionAndViewed();
+          }
+
+          if(Math.abs(diff) >= 4000) {
+            timeViewedSinceLastSkip = 0;
+          }
         }
-        else if(KEY_I.match(event)) {
-          view.toggleVisibility();
-        }
-        else if(BACK_SPACE.match(event)) {
-          event.consume();
-        }
-        else if(code == KeyCode.O) {
-          List<Option> options = FXCollections.observableArrayList(
-            new NumericOption(player.volumeProperty(), "Volume", 1, 0, 100, playerBindings.formattedVolume),
-            new ListOption<>("Subtitle", player.subtitleProperty(), player.getSubtitles(), playerBindings.formattedSubtitle),
-            new ListOption<>("Audio Track", player.audioTrackProperty(), player.getAudioTracks(), playerBindings.formattedAudioTrack),
-            new NumericOption(player.rateProperty(), "Playback Speed", 0.1, 0.1, 4.0, playerBindings.formattedRate),
-            new NumericOption(player.audioDelayProperty(), "Audio Delay", 100, -1200000, 1200000, playerBindings.formattedAudioDelay),
-            new NumericOption(player.subtitleDelayProperty(), "Subtitle Delay", 100, -1200000, 1200000, playerBindings.formattedSubtitleDelay),
-            new NumericOption(player.brightnessProperty(), "Brightness Adjustment", 0.01, 0, 2, playerBindings.formattedBrightness),
-            new OptionGroup("Download subtitle...", new Provider<List<Option>>() {
-              @Override
-              public List<Option> get() {
-                return new ArrayList<Option>() {{
-                  final SubtitleSelector subtitleSelector = new SubtitleSelector(findSubtitleProviders("movie"));
-                  final SubtitleCriteriaProvider subtitleCriteriaProvider = findSubtitleCriteriaProvider(mediaItem.getMedia().getClass());  // TODO NPE, getMedia() can be null when not identified (when downloading subs)
+      }
 
-                  subtitleSelector.query(subtitleCriteriaProvider.getCriteria(mediaItem));
+      private void updatePositionAndViewed() {
+        Player player = PlaybackOverlayPresentation.this.player.get();
+        MediaData mediaData = mediaItem.get().mediaData.get();
 
-                  subtitleSelector.subtitleProviderProperty().addListener(new ChangeListener<SubtitleProvider>() {
-                    @Override
-                    public void changed(ObservableValue<? extends SubtitleProvider> observableValue, SubtitleProvider oldValue, SubtitleProvider newValue) {
-                      subtitleSelector.query(subtitleCriteriaProvider.getCriteria(mediaItem));
-                    }
-                  });
+        if(mediaData != null) {
+          long length = player.getLength();
 
-                  ListOption<SubtitleProvider> provider = new ListOption<>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringBinding(subtitleSelector.subtitleProviderProperty()) {
-                    @Override
-                    protected String computeValue() {
-                      return subtitleSelector.subtitleProviderProperty().get().getName();
-                    }
-                  });
+          if(length > 0) {
+            // TODO PlaybackLocation could be used to facilite skipping, not just the initial start position.  So skipping etc can be accomplished by location; however careful that for the same media initial resume position must be preserved for proper "viewed" calculation.
+            long timeViewed = totalTimeViewed + ((PlaybackLocation)location.get()).getStartMillis();
 
-                  provider.getBottomLabel().textProperty().bind(subtitleSelector.statusTextProperty());
+            if(!mediaData.viewed.get() && timeViewed >= length * 9 / 10) {  // 90% viewed?
+              System.out.println("[CONFIG] PlaybackOverlayPresentation - Marking as viewed: " + mediaItem.get());
 
-                  add(provider);
-                  add(new ListViewOption<>("Subtitles for Download", selectedSubtitleForDownload, subtitleSelector.getSubtitles(), new StringConverter<SubtitleDescriptor>() {
-                    @Override
-                    public String toString(SubtitleDescriptor descriptor) {
-                      return descriptor.getMatchType().name() + ": " + descriptor.getName() + " (" + descriptor.getLanguageName() + ") [" + descriptor.getType() + "]";
-                    }
-                  }));
-                }};
+              mediaData.viewed.set(true);
+            }
+
+            if(timeViewedSinceLastSkip > 30 * 1000) {
+              int resumePosition = 0;
+              long position = player.getPosition();
+
+              if(position > 30 * 1000 && position < length * 9 / 10) {
+                resumePosition = (int)(position / 1000);
               }
-            })
-          );
 
-          controller.showDialog(new OptionDialogPane("Video - Options", options));
-          event.consume();
+              if(Math.abs(mediaData.resumePosition.get() - resumePosition) > 10) {
+                System.out.println("[CONFIG] PlaybackOverlayPresentation - Setting resume position to " + position + " ms: " + mediaItem.get());
+
+                mediaData.resumePosition.set(resumePosition);
+              }
+            }
+          }
         }
       }
     });
@@ -152,24 +139,63 @@ public class PlaybackOverlayPresentation implements Presentation {
         }
       }
     });
+  }
 
-    playerPresentation.getPlayer().positionProperty().addListener(new ChangeListener<Number>() {
-      @Override
-      public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number value) {
-        long old = oldValue.longValue();
-        long current = value.longValue();
+  @Override
+  protected void dispose() {
+    player.set(null);
+  }
 
-        if(old < current) {
-          long diff = current - old;
+  public void handleOptionsSelectEvent(ActionEvent event) {
+    Player player = this.player.get();
 
-          if(diff < 1000) {
-            totalTimeViewed += diff;
+    List<Option> options = FXCollections.observableArrayList(
+      new NumericOption(player.volumeProperty(), "Volume", 1, 0, 100, playerBindings.formattedVolume),
+      new ListOption<>("Subtitle", player.subtitleProperty(), player.getSubtitles(), playerBindings.formattedSubtitle),
+      new ListOption<>("Audio Track", player.audioTrackProperty(), player.getAudioTracks(), playerBindings.formattedAudioTrack),
+      new NumericOption(player.rateProperty(), "Playback Speed", 0.1, 0.1, 4.0, playerBindings.formattedRate),
+      new NumericOption(player.audioDelayProperty(), "Audio Delay", 100, -1200000, 1200000, playerBindings.formattedAudioDelay),
+      new NumericOption(player.subtitleDelayProperty(), "Subtitle Delay", 100, -1200000, 1200000, playerBindings.formattedSubtitleDelay),
+      new NumericOption(player.brightnessProperty(), "Brightness Adjustment", 0.01, 0, 2, playerBindings.formattedBrightness),
+      new OptionGroup("Download subtitle...", new Provider<List<Option>>() {
+        @Override
+        public List<Option> get() {
+          return new ArrayList<Option>() {{
+            final SubtitleSelector subtitleSelector = new SubtitleSelector(findSubtitleProviders("movie"));
+            final SubtitleCriteriaProvider subtitleCriteriaProvider = findSubtitleCriteriaProvider(mediaItem.get().getMedia().getClass());  // TODO NPE, getMedia() can be null when not identified (when downloading subs)
 
-            updatePositionAndViewed();
-          }
+            subtitleSelector.query(subtitleCriteriaProvider.getCriteria(mediaItem.get()));
+
+            subtitleSelector.subtitleProviderProperty().addListener(new ChangeListener<SubtitleProvider>() {
+              @Override
+              public void changed(ObservableValue<? extends SubtitleProvider> observableValue, SubtitleProvider oldValue, SubtitleProvider newValue) {
+                subtitleSelector.query(subtitleCriteriaProvider.getCriteria(mediaItem.get()));
+              }
+            });
+
+            ListOption<SubtitleProvider> provider = new ListOption<>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringBinding(subtitleSelector.subtitleProviderProperty()) {
+              @Override
+              protected String computeValue() {
+                return subtitleSelector.subtitleProviderProperty().get().getName();
+              }
+            });
+
+            provider.getBottomLabel().textProperty().bind(subtitleSelector.statusTextProperty());
+
+            add(provider);
+            add(new ListViewOption<>("Subtitles for Download", selectedSubtitleForDownload, subtitleSelector.getSubtitles(), new StringConverter<SubtitleDescriptor>() {
+              @Override
+              public String toString(SubtitleDescriptor descriptor) {
+                return descriptor.getMatchType().name() + ": " + descriptor.getName() + " (" + descriptor.getLanguageName() + ") [" + descriptor.getType() + "]";
+              }
+            }));
+          }};
         }
-      }
-    });
+      })
+    );
+
+    getProgramController().showDialog(new OptionDialogPane("Video - Options", options));
+    event.consume();
   }
 
   private List<SubtitleProvider> findSubtitleProviders(String mediaType) {
@@ -194,47 +220,5 @@ public class PlaybackOverlayPresentation implements Presentation {
     }
 
     return null;
-  }
-
-  @Override
-  public Node getView() {
-    return (Node)view;
-  }
-
-  @Override
-  public void dispose() {
-  }
-
-  public void updatePositionAndViewed() {
-    MediaData mediaData = mediaItem.mediaData.get();
-
-    if(mediaData != null) {
-      long length = playerPresentation.getLength();
-
-      if(length > 0) {
-        long timeViewed = totalTimeViewed + mediaData.resumePosition.get() * 1000L;
-
-        if(!mediaData.viewed.get() && timeViewed >= length * 9 / 10) {  // 90% viewed?
-          System.out.println("[CONFIG] PlaybackOverlayPresentation - Marking as viewed: " + mediaItem);
-
-          mediaData.viewed.set(true);
-        }
-
-        if(totalTimeViewed > 30 * 1000) {
-          int resumePosition = 0;
-          long position = playerPresentation.getPosition();
-
-          if(position > 30 * 1000 && position < length * 9 / 10) {
-            resumePosition = (int)(position / 1000);
-          }
-
-          if(Math.abs(mediaData.resumePosition.get() - resumePosition) > 10) {
-            System.out.println("[CONFIG] PlaybackOverlayPresentation - Setting resume position to " + position + " ms: " + mediaItem);
-
-            mediaData.resumePosition.set(resumePosition);
-          }
-        }
-      }
-    }
   }
 }

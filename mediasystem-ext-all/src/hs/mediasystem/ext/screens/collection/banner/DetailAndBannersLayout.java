@@ -18,10 +18,12 @@ import javax.inject.Provider;
 
 public class DetailAndBannersLayout implements UserLayout<MediaRoot, CollectionSelectorPresentation> {
   private final Provider<BannerListPane> bannerListPaneProvider;
-  private final Set<Layout<? extends Object, DetailPanePresentation>> layouts;
+  private final Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts;
+  private final Provider<CollectionSelectorPresentation> presentationProvider;
 
   @Inject
-  public DetailAndBannersLayout(Provider<BannerListPane> bannerListPaneProvider, Set<Layout<? extends Object, DetailPanePresentation>> layouts) {
+  public DetailAndBannersLayout(Provider<CollectionSelectorPresentation> presentationProvider, Provider<BannerListPane> bannerListPaneProvider, Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts) {
+    this.presentationProvider = presentationProvider;
     this.bannerListPaneProvider = bannerListPaneProvider;
     this.layouts = layouts;
   }
@@ -42,7 +44,12 @@ public class DetailAndBannersLayout implements UserLayout<MediaRoot, CollectionS
   }
 
   @Override
-  public Node create(CollectionSelectorPresentation presentation) {
+  public CollectionSelectorPresentation createPresentation() {
+    return presentationProvider.get();
+  }
+
+  @Override
+  public Node createView(CollectionSelectorPresentation presentation) {
     DuoPaneCollectionSelector pane = new DuoPaneCollectionSelector();
 
     BannerListPane listPane = bannerListPaneProvider.get();
@@ -52,7 +59,7 @@ public class DetailAndBannersLayout implements UserLayout<MediaRoot, CollectionS
 
     listPane.rootMediaNode.bindBidirectional(presentation.rootMediaNode);
     listPane.focusedMediaNode.bindBidirectional(presentation.focusedMediaNode);
-    listPane.onNodeSelected.set(presentation.onSelect);
+    listPane.onNodeSelected.bindBidirectional(presentation.onSelect);
     listPane.onNodeAlternateSelect.set(presentation.onInfoSelect);
 
     pane.placeLeft(detailPane);

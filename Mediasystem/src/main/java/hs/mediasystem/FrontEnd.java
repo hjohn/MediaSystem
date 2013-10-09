@@ -22,34 +22,29 @@ import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.screens.AbstractSetting;
-import hs.mediasystem.screens.Location;
-import hs.mediasystem.screens.LocationHandler;
 import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.MessagePaneTaskExecutor;
-import hs.mediasystem.screens.Presentation;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SettingGroup;
 import hs.mediasystem.screens.StandardCell;
-import hs.mediasystem.screens.collection.CollectionLocation;
-import hs.mediasystem.screens.collection.CollectionPresentation;
-import hs.mediasystem.screens.collection.CollectionView;
+import hs.mediasystem.screens.collection.CollectionLayout;
 import hs.mediasystem.screens.collection.GroupSetPropertyDescriptor;
 import hs.mediasystem.screens.collection.detail.MediaLayout;
 import hs.mediasystem.screens.collection.detail.PersonLayout;
-import hs.mediasystem.screens.main.MainScreenLocation;
-import hs.mediasystem.screens.main.MainScreenPresentation;
+import hs.mediasystem.screens.main.MainScreenLayout;
 import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.playback.BrightnessPropertyDescriptor;
 import hs.mediasystem.screens.playback.MutePropertyDescriptor;
+import hs.mediasystem.screens.playback.OverlayVisibilityPropertyDescriptor;
 import hs.mediasystem.screens.playback.PausePropertyDescriptor;
-import hs.mediasystem.screens.playback.PlaybackLocation;
+import hs.mediasystem.screens.playback.PlaybackLayout;
 import hs.mediasystem.screens.playback.PlaybackOverlayPane;
-import hs.mediasystem.screens.playback.PlaybackOverlayPresentation;
 import hs.mediasystem.screens.playback.PositionPropertyDescriptor;
 import hs.mediasystem.screens.playback.RatePropertyDescriptor;
 import hs.mediasystem.screens.playback.SubtitleDelayPropertyDescriptor;
+import hs.mediasystem.screens.playback.SubtitlePropertyDescriptor;
 import hs.mediasystem.screens.playback.VolumePropertyDescriptor;
 import hs.mediasystem.util.DuoWindowSceneManager;
 import hs.mediasystem.util.SceneManager;
@@ -108,10 +103,13 @@ public class FrontEnd extends Application {
     injector.registerInstance(injector);
     injector.register(GroupSetPropertyDescriptor.class);
 
+    injector.register(OverlayVisibilityPropertyDescriptor.class);
+
     injector.register(BrightnessPropertyDescriptor.class);
     injector.register(MutePropertyDescriptor.class);
     injector.register(PausePropertyDescriptor.class);
     injector.register(RatePropertyDescriptor.class);
+    injector.register(SubtitlePropertyDescriptor.class);
     injector.register(SubtitleDelayPropertyDescriptor.class);
     injector.register(PositionPropertyDescriptor.class);
     injector.register(VolumePropertyDescriptor.class);
@@ -157,8 +155,6 @@ public class FrontEnd extends Application {
         return INI;
       }
     });
-
-    injector.register(CollectionView.class);  // Implicit
 
     injector.registerInstance(new IdentifierProvider());
     injector.registerInstance(new MediaDataProvider());
@@ -225,45 +221,9 @@ public class FrontEnd extends Application {
 
     injector.register(PlaybackOverlayPane.class);
 
-    injector.registerInstance(new LocationHandler() {
-      @Override
-      public Presentation go(Location location, Presentation current) {
-        return injector.getInstance(MainScreenPresentation.class);
-      }
-
-      @Override
-      public Class<? extends Location> getLocationType() {
-        return MainScreenLocation.class;
-      }
-    });
-
-    injector.registerInstance(new LocationHandler() {
-      @Override
-      public Presentation go(Location location, Presentation current) {
-        CollectionPresentation presentation = current instanceof CollectionPresentation ? (CollectionPresentation)current : injector.getInstance(CollectionPresentation.class);
-
-        presentation.setMediaRoot(((CollectionLocation)location).getMediaRoot());
-
-        return presentation;
-      }
-
-      @Override
-      public Class<? extends Location> getLocationType() {
-        return CollectionLocation.class;
-      }
-    });
-
-    injector.registerInstance(new LocationHandler() {
-      @Override
-      public Presentation go(Location location, Presentation current) {
-        return injector.getInstance(PlaybackOverlayPresentation.class);
-      }
-
-      @Override
-      public Class<? extends Location> getLocationType() {
-        return PlaybackLocation.class;
-      }
-    });
+    injector.register(PlaybackLayout.class);
+    injector.register(MainScreenLayout.class);
+    injector.register(CollectionLayout.class);
 
     injector.getInstance(MessagePaneTaskExecutor.class);  // TODO Initalizes it and registers it with ProgramController, silly way of doing it, fix
 

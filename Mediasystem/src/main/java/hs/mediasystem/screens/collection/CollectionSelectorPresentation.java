@@ -29,19 +29,19 @@ public class CollectionSelectorPresentation {
   public final ObjectProperty<MediaNode> rootMediaNode = new SimpleObjectProperty<>();
   public final ObjectProperty<Node> defaultInputFocus = new SimpleObjectProperty<>();
 
-  public final EventHandler<MediaNodeEvent> onSelect = new SelectEventHandler();
-  public final EventHandler<MediaNodeEvent> onInfoSelect = new InfoEventHandler();
+  public final ObjectProperty<EventHandler<MediaNodeEvent>> onSelect = new SimpleObjectProperty<>();
+  public final EventHandler<MediaNodeEvent> onInfoSelect = new InfoEventHandler();  // TODO ugly
 
   private final ProgramController controller;
-  private final Set<Layout<? extends Object, DetailPanePresentation>> layouts;
+  private final Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts;
 
   @Inject
-  public CollectionSelectorPresentation(ProgramController controller, Set<Layout<? extends Object, DetailPanePresentation>> layouts) {
+  public CollectionSelectorPresentation(ProgramController controller, Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts) {
     this.controller = controller;
     this.layouts = layouts;
   }
 
-  private DialogPane createInformationDialog(final MediaNode mediaNode, Set<Layout<? extends Object, DetailPanePresentation>> layouts) {
+  private DialogPane createInformationDialog(final MediaNode mediaNode, Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts) {
     DetailView detailPane = new DetailView(layouts, true, new AreaLayout() {
       @Override
       public void layout(AreaPane areaPane) {
@@ -92,19 +92,6 @@ public class CollectionSelectorPresentation {
     dialogPane.getChildren().add(detailPane);
 
     return dialogPane;
-  }
-
-  class SelectEventHandler implements EventHandler<MediaNodeEvent> {
-    @Override
-    public void handle(MediaNodeEvent event) {
-      if(event.getMediaNode().getMediaRoot() != null) {
-        controller.setLocation(new CollectionLocation(event.getMediaNode().getMediaRoot()));
-      }
-      else {
-        controller.play(event.getMediaNode().getMediaItem());
-      }
-      event.consume();
-    }
   }
 
   class InfoEventHandler implements EventHandler<MediaNodeEvent> {

@@ -1,26 +1,23 @@
 package hs.mediasystem.screens.collection;
 
-import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.framework.SettingUpdater;
-import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.screens.Layout;
+import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNode;
+import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.PresentationPane;
 import hs.mediasystem.screens.UserLayout;
 import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyCode;
@@ -29,22 +26,20 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.util.StringConverter;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
- * Provides the View part of the Collection screen.
- *
  * The CollectionView provides a standard area with a background and a small bottom border in which
- * information about a collection can be shown.  How the collection is shown is determined by the
- * current layout.  The CollectionView manages these layouts and provides controls for choosing one.<p>
+ * information about a collection of media can be shown.  How the collection is shown is determined by
+ * the current layout.<p>
  *
- * Provided properties and events:
- * - the collection root under which the media items to be displayed are located
+ * Provided properties, events and methods:
+ * - the MediaRoot under which the media items to be displayed are located
  * - the currently focused media item
- * - an event handler triggered when the options action is selected
+ * - the layout to use
+ * - the group set to use
+ * - an event handler triggered when a node is selected
+ * - an event handler triggered when options is chosen
+ * - a method for selecting a node by id
  */
 public class CollectionView extends PresentationPane {
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
@@ -52,7 +47,7 @@ public class CollectionView extends PresentationPane {
   /**
    * The collection root under which the media items to be displayed are located.
    */
-  public final ObjectProperty<MediaNode> rootMediaNode = new SimpleObjectProperty<>();
+  public final ObjectProperty<MediaRoot> mediaRoot = new SimpleObjectProperty<>();
 
   /**
    * The currently focused media node.
@@ -60,34 +55,32 @@ public class CollectionView extends PresentationPane {
   public final ObjectProperty<MediaNode> focusedMediaNode = new SimpleObjectProperty<>();
 
   /**
-   * Triggered when the options action is selected.
-   */
-  public final ObjectProperty<EventHandler<ActionEvent>> onOptionsSelect = new SimpleObjectProperty<>();
-
-  /*
-   * TODO the layout properties are accessed externally, but I donot think they should be as they are view specific -- another "CollectionView" for example could be constructed to not use layouts at all for example
-   */
-  /**
    * The current active layout.
    */
   public final ObjectProperty<UserLayout<MediaRoot, CollectionSelectorPresentation>> layout = new SimpleObjectProperty<>();
 
   /**
-   * A list of suitable layouts.
+   * The current active group set.
    */
-  public final ObservableList<UserLayout<MediaRoot, CollectionSelectorPresentation>> suitableLayouts = FXCollections.observableArrayList();
+  public final ObjectProperty<MediaGroup> groupSet = new SimpleObjectProperty<>();
+
+  /**
+   * Triggered when a MediaNode is selected.
+   */
+  public final ObjectProperty<EventHandler<MediaNodeEvent>> onSelect = new SimpleObjectProperty<>();
+
+  /**
+   * Triggered when options is chosen.
+   */
+  public final ObjectProperty<EventHandler<ActionEvent>> onOptionsSelect = new SimpleObjectProperty<>();
 
   private final BackgroundPane backgroundPane = new BackgroundPane();
-  private final SettingUpdater<UserLayout<MediaRoot, CollectionSelectorPresentation>> settingUpdater;
   private final StackPane collectionSelectorPane = new StackPane();
-  private final List<UserLayout<MediaRoot, CollectionSelectorPresentation>> allLayouts;
+  private final ObjectProperty<MediaNode> rootMediaNode = new SimpleObjectProperty<>();
 
   private CollectionSelectorPresentation currentCollectionSelectorPresentation;
 
-  @Inject
-  public CollectionView(SettingsStore settingsStore, final Provider<CollectionSelectorPresentation> collectionSelectorPresentationProvider, List<UserLayout<MediaRoot, CollectionSelectorPresentation>> layouts) {
-    this.allLayouts = layouts;
-
+  public CollectionView() {
     getStylesheets().add("collection/collection-view.css");
 
     GridPane stage = GridPaneUtil.create(new double[] {100}, new double[] {90, 10});
@@ -110,59 +103,52 @@ public class CollectionView extends PresentationPane {
 
     backgroundPane.mediaNodeProperty().bind(focusedMediaNode);
 
+    /*
+     * Listener for layout changes.  When the layout changes a new child presentation must be bound to this
+     * view.  This presentation is then used in turn together with the layout to construct a new child view
+     * that is set as part of this view.
+     */
+
     layout.addListener(new ChangeListener<Layout<MediaRoot, CollectionSelectorPresentation>>() {
       @Override
       public void changed(ObservableValue<? extends Layout<MediaRoot, CollectionSelectorPresentation>> observableValue, Layout<MediaRoot, CollectionSelectorPresentation> oldLayout, Layout<MediaRoot, CollectionSelectorPresentation> layout) {
+        System.out.println(">>> Layout changed to : " + layout);
         if(currentCollectionSelectorPresentation != null) {
           currentCollectionSelectorPresentation.focusedMediaNode.unbindBidirectional(focusedMediaNode);
+          currentCollectionSelectorPresentation.onSelect.unbindBidirectional(onSelect);
+          currentCollectionSelectorPresentation.rootMediaNode.unbindBidirectional(rootMediaNode);
         }
 
-        currentCollectionSelectorPresentation = collectionSelectorPresentationProvider.get();
+        currentCollectionSelectorPresentation = layout.createPresentation();
 
-        currentCollectionSelectorPresentation.rootMediaNode.set(rootMediaNode.get());
+        currentCollectionSelectorPresentation.rootMediaNode.bindBidirectional(rootMediaNode);
         currentCollectionSelectorPresentation.focusedMediaNode.bindBidirectional(focusedMediaNode);
+        currentCollectionSelectorPresentation.onSelect.bindBidirectional(onSelect);
 
-        collectionSelectorPane.getChildren().setAll(layout.create(currentCollectionSelectorPresentation));
+        collectionSelectorPane.getChildren().setAll(layout.createView(currentCollectionSelectorPresentation));
       }
     });
 
-    // TODO move setting load/save code into presentation
-    rootMediaNode.addListener(new ChangeListener<MediaNode>() {
+    /*
+     * Listeners for changes that require rootMediaNode to be updated
+     */
+
+    InvalidationListener rootMediaNodeUpdater = new InvalidationListener() {
       @Override
-      public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
-        determineValidLayouts(current.getMediaRoot());
+      public void invalidated(Observable observable) {
+        MediaGroup mediaGroup = groupSet.get();
 
-        settingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, current.getMediaRoot().getId().toString("View"));
+        if(mediaGroup != null && mediaRoot.get() != null) {
+          // TODO RootNode is a stupid concept, there is really no root node needed -- items should just be an obervablelist -- this will simplify MediaNode code as well
+          MediaNode root = new MediaNode(mediaRoot.get(), null, mediaGroup.showTopLevelExpanded(), false, mediaGroup);
 
-        UserLayout<MediaRoot, CollectionSelectorPresentation> lastSelectedLayout = settingUpdater.getStoredValue(layouts.get(0));
-
-        if(!lastSelectedLayout.equals(layout.get())) {
-          layout.set(lastSelectedLayout);
+          rootMediaNode.set(root);
         }
-
-        currentCollectionSelectorPresentation.rootMediaNode.set(current);
       }
-    });
+    };
 
-    settingUpdater = new SettingUpdater<>(settingsStore, new StringConverter<UserLayout<MediaRoot, CollectionSelectorPresentation>>() {
-      @Override
-      public UserLayout<MediaRoot, CollectionSelectorPresentation> fromString(String id) {
-        for(UserLayout<MediaRoot, CollectionSelectorPresentation> layout : layouts) {
-          if(layout.getId().equals(id)) {
-            return layout;
-          }
-        }
-
-        return null;
-      }
-
-      @Override
-      public String toString(UserLayout<MediaRoot, CollectionSelectorPresentation> layout) {
-        return layout.getId();
-      }
-    });
-
-    layout.addListener(settingUpdater);
+    mediaRoot.addListener(rootMediaNodeUpdater);
+    groupSet.addListener(rootMediaNodeUpdater);
   }
 
   @Override
@@ -177,14 +163,28 @@ public class CollectionView extends PresentationPane {
     }
   }
 
-  private void determineValidLayouts(MediaRoot root) {
-    suitableLayouts.setAll(Layout.findAllSuitableLayouts(allLayouts, root.getClass()));
+  public void selectMediaNodeById(String id) {
+    MediaNode nodeToSelect = null;
 
-    Collections.sort(suitableLayouts, new Comparator<UserLayout<MediaRoot, CollectionSelectorPresentation>>() {
-      @Override
-      public int compare(UserLayout<MediaRoot, CollectionSelectorPresentation> o1, UserLayout<MediaRoot, CollectionSelectorPresentation> o2) {
-        return o1.getTitle().compareTo(o2.getTitle());
+    if(id != null) {
+      nodeToSelect = rootMediaNode.get().findMediaNode(id);
+    }
+
+    if(nodeToSelect == null) {
+      List<MediaNode> children = rootMediaNode.get().getChildren();
+
+      if(!children.isEmpty()) {
+        if(groupSet.get().showTopLevelExpanded()) {
+          if(!children.get(0).getChildren().isEmpty()) {
+            nodeToSelect = children.get(0).getChildren().get(0);
+          }
+        }
+        else {
+          nodeToSelect = children.get(0);
+        }
       }
-    });
+    }
+
+    focusedMediaNode.set(nodeToSelect);
   }
 }

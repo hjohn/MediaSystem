@@ -5,7 +5,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import hs.mediasystem.entity.Movie;
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.MediaNode;
@@ -36,10 +35,11 @@ public class DetailPaneViewTest {
     MockitoAnnotations.initMocks(this);
 
     Mockito.<Class<?>>when(layout.getContentClass()).thenReturn(Object.class);
-    when(layout.create(any(DetailPanePresentation.class))).thenReturn(new Button());
+    when(layout.createPresentation()).thenReturn(new DetailPanePresentation());
+    when(layout.createView(any(DetailPanePresentation.class))).thenReturn(new Button());
 
     this.view = new DetailView(
-      new HashSet<Layout<? extends Object, DetailPanePresentation>>() {{
+      new HashSet<Layout<? extends Object, ? extends DetailPanePresentation>>() {{
         add(layout);
       }},
       false,
@@ -57,14 +57,6 @@ public class DetailPaneViewTest {
 
     view.content.set(new MediaNode(mediaItem));
 
-    verify(layout, times(1)).create(any(DetailPanePresentation.class));
-
-    /*
-     * Check if changing media also results in a new layout being created:
-     */
-
-    mediaItem.media.set(new Media<MediaNode.SpecialItem>());
-
-    verify(layout, times(2)).create(any(DetailPanePresentation.class));
+    verify(layout, times(1)).createView(any(DetailPanePresentation.class));
   }
 }

@@ -55,7 +55,7 @@ public class DetailView extends StackPane {
    * @param interactive whether the view allows user interaction
    * @param areaLayout an AreaLayout providing the base layout of the view area
    */
-  public DetailView(Set<Layout<? extends Object, DetailPanePresentation>> layouts, boolean interactive, AreaLayout areaLayout) {
+  public DetailView(Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts, boolean interactive, AreaLayout areaLayout) {
 
     /*
      * Change listener on content to update derivedMedia in case the MediaNode set in the content property is unidentified.
@@ -83,7 +83,8 @@ public class DetailView extends StackPane {
     finalContent.addListener(new ChangeListener<Object>() {
       @Override
       public void changed(ObservableValue<? extends Object> observableValue, Object old, Object current) {
-        Layout<? extends Object, DetailPanePresentation> layout = current == null ? null : Layout.findMostSuitableLayout(layouts, current.getClass());
+        @SuppressWarnings("unchecked")
+        Layout<? extends Object, DetailPanePresentation> layout = (Layout<? extends Object, DetailPanePresentation>)(current == null ? null : Layout.findMostSuitableLayout(layouts, current.getClass()));
 
         /*
          * View only needs replacing when layout is a different one.  Existing views
@@ -102,10 +103,13 @@ public class DetailView extends StackPane {
         }
 
         if(currentLayout != null) {
-          currentPresentation = new DetailPanePresentation(areaLayout, interactive);
+          currentPresentation = currentLayout.createPresentation();
+
+          currentPresentation.setAreaLayout(areaLayout);
+          currentPresentation.setInteractive(interactive);
           currentPresentation.content.bindBidirectional(finalContent);
 
-          getChildren().setAll(currentLayout.create(currentPresentation));
+          getChildren().setAll(currentLayout.createView(currentPresentation));
         }
         else {
           getChildren().setAll(new Label("Unable to display information for: " + current));

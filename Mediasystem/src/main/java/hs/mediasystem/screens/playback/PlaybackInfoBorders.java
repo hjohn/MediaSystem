@@ -2,7 +2,6 @@ package hs.mediasystem.screens.playback;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.player.AudioTrack;
-import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.Subtitle;
 import hs.mediasystem.util.GridPaneUtil;
 import hs.mediasystem.util.RangeBar;
@@ -39,33 +38,32 @@ public class PlaybackInfoBorders extends StackPane {
   private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
   public ObjectProperty<MediaItem> mediaItemProperty() { return mediaItem; }
 
-  private final ObjectProperty<Player> player = new SimpleObjectProperty<>();
-  public ObjectProperty<Player> playerProperty() { return player; }
-
-  private final PlayerBindings playerBindings = new PlayerBindings(player);
   private final StringProperty formattedTime = new SimpleStringProperty();
 
   private final StackPane leftOSDPane = new StackPane();
   private final StackPane centerOSDPane = new StackPane();
   private final StackPane rightOSDPane = new StackPane();
 
-  private final Label positionLabel = new Label() {{
-    getStyleClass().add("position");
-    GridPane.setHalignment(this, HPos.LEFT);
-    GridPane.setValignment(this, VPos.BOTTOM);
-    textProperty().bind(Bindings.concat(playerBindings.formattedPosition, " / ", playerBindings.formattedLength));
-  }};
+  private final Label positionLabel;
+  private final Label timeLabel;
 
-  private final Label timeLabel = new Label() {{
-    getStyleClass().add("time");
-    GridPane.setHalignment(this, HPos.RIGHT);
-    GridPane.setValignment(this, VPos.BOTTOM);
-    textProperty().bind(formattedTime);
-  }};
-
-  public PlaybackInfoBorders() {
+  public PlaybackInfoBorders(PlayerBindings playerBindings) {
     getStylesheets().add("playback-info-borders.css");
     getStyleClass().add("grid");
+
+    positionLabel = new Label() {{
+      getStyleClass().add("position");
+      GridPane.setHalignment(this, HPos.LEFT);
+      GridPane.setValignment(this, VPos.BOTTOM);
+      textProperty().bind(Bindings.concat(playerBindings.formattedPosition, " / ", playerBindings.formattedLength));
+    }};
+
+    timeLabel = new Label() {{
+      getStyleClass().add("time");
+      GridPane.setHalignment(this, HPos.RIGHT);
+      GridPane.setValignment(this, VPos.BOTTOM);
+      textProperty().bind(formattedTime);
+    }};
 
     final GridPane grid = GridPaneUtil.create(new double[] {0.5, 3, 26, 7.5, 26, 7.5, 26, 3, 0.5}, new double[] {50, 45, 4.5, 0.5});
 

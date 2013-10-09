@@ -2,6 +2,7 @@ package hs.mediasystem.ext.screens.collection.tree;
 
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.screens.Layout;
+import hs.mediasystem.screens.UserLayout;
 import hs.mediasystem.screens.collection.CollectionSelectorPresentation;
 import hs.mediasystem.screens.collection.DuoPaneCollectionSelector;
 import hs.mediasystem.screens.collection.detail.DetailPanePresentation;
@@ -17,10 +18,12 @@ import javax.inject.Provider;
 
 public class ListAndDetailLayout implements UserLayout<MediaRoot, CollectionSelectorPresentation> {
   private final Provider<TreeListPane> treeListPaneProvider;
-  private final Set<Layout<? extends Object, DetailPanePresentation>> layouts;
+  private final Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts;
+  private final Provider<CollectionSelectorPresentation> presentationProvider;
 
   @Inject
-  public ListAndDetailLayout(Provider<TreeListPane> treeListPaneProvider, Set<Layout<? extends Object, DetailPanePresentation>> layouts) {
+  public ListAndDetailLayout(Provider<CollectionSelectorPresentation> presentationProvider, Provider<TreeListPane> treeListPaneProvider, Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts) {
+    this.presentationProvider = presentationProvider;
     this.treeListPaneProvider = treeListPaneProvider;
     this.layouts = layouts;
   }
@@ -41,7 +44,12 @@ public class ListAndDetailLayout implements UserLayout<MediaRoot, CollectionSele
   }
 
   @Override
-  public Node create(CollectionSelectorPresentation presentation) {
+  public CollectionSelectorPresentation createPresentation() {
+    return presentationProvider.get();
+  }
+
+  @Override
+  public Node createView(CollectionSelectorPresentation presentation) {
     DuoPaneCollectionSelector pane = new DuoPaneCollectionSelector();
 
     TreeListPane listPane = treeListPaneProvider.get();
@@ -51,7 +59,7 @@ public class ListAndDetailLayout implements UserLayout<MediaRoot, CollectionSele
 
     listPane.rootMediaNode.bindBidirectional(presentation.rootMediaNode);
     listPane.focusedMediaNode.bindBidirectional(presentation.focusedMediaNode);
-    listPane.onNodeSelected.set(presentation.onSelect);
+    listPane.onNodeSelected.bindBidirectional(presentation.onSelect);
     listPane.onNodeAlternateSelect.set(presentation.onInfoSelect);
 
     pane.placeLeft(listPane);

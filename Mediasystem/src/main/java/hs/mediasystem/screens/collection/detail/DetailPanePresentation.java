@@ -17,19 +17,22 @@ import javafx.beans.property.SimpleObjectProperty;
 public class DetailPanePresentation {
   public final ObjectProperty<Object> content = new SimpleObjectProperty<>();
 
-  private final AreaLayout areaLayout;
-  private final boolean interactive;
-
-  public DetailPanePresentation(AreaLayout areaLayout, boolean interactive) {
-    this.areaLayout = areaLayout;
-    this.interactive = interactive;
-  }
+  private AreaLayout areaLayout;
+  private boolean interactive;
 
   public boolean isInteractive() {
     return interactive;
   }
 
+  public void setInteractive(boolean interactive) {
+    this.interactive = interactive;
+  }
+
   public AreaLayout getAreaLayout() {
     return areaLayout;
+  }
+
+  public void setAreaLayout(AreaLayout areaLayout) {
+    this.areaLayout = areaLayout;
   }
 }

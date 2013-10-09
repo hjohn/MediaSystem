@@ -30,13 +30,20 @@ public interface Layout<C, P> {
   Class<?> getContentClass();
 
   /**
+   * Creates a new presentation for use with this Layout.
+   *
+   * @return a new presentation for use with this Layout
+   */
+  P createPresentation();
+
+  /**
    * Creates a view attached to the given presentation.  The view returned will interact
    * with the presentation and react to changes in it.
    *
    * @param presentation a presentation to attach to
    * @return a view attached to the given presentation
    */
-  Node create(P presentation);
+  Node createView(P presentation);
 
   /**
    * Finds all suitable layouts given a collection of layouts and the class of the content
@@ -66,11 +73,11 @@ public interface Layout<C, P> {
    * @param contentClass a class of content
    * @return the most suitable layout
    */
-  public static <C, P> Layout<? extends C, P> findMostSuitableLayout(Collection<Layout<? extends C, P>> layouts, Class<?> contentClass) {
+  public static <C, P> Layout<? extends C, ? extends P> findMostSuitableLayout(Collection<Layout<? extends C, ? extends P>> layouts, Class<?> contentClass) {
     int bestInheritanceDepth = -1;
-    Layout<? extends C, P> bestLayout = null;
+    Layout<? extends C, ? extends P> bestLayout = null;
 
-    for(Layout<? extends C, P> layout : layouts) {
+    for(Layout<? extends C, ? extends P> layout : layouts) {
       int inheritanceDepth = Layout.getInheritanceDepth(layout.getContentClass());
 
       if(layout.getContentClass().isAssignableFrom(contentClass) && inheritanceDepth > bestInheritanceDepth) {

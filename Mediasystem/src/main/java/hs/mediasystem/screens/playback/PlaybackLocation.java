@@ -4,9 +4,11 @@ import hs.mediasystem.screens.Location;
 
 public class PlaybackLocation implements Location {
   private final Location parent;
+  private final long startMillis;
 
-  public PlaybackLocation(Location parent) {
+  public PlaybackLocation(Location parent, long startMillis) {
     this.parent = parent;
+    this.startMillis = startMillis;
   }
 
   @Override
@@ -27,6 +29,10 @@ public class PlaybackLocation implements Location {
   @Override
   public Type getType() {
     return Type.PLAYBACK;
+  }
+
+  public long getStartMillis() {
+    return startMillis;
   }
 
   @Override

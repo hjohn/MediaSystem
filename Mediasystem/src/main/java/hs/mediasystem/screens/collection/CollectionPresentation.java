@@ -5,17 +5,20 @@ import hs.ddif.Injector;
 import hs.ddif.Value;
 import hs.mediasystem.MediaRootType;
 import hs.mediasystem.dao.Setting.PersistLevel;
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.SettingUpdater;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.StandardTitleComparator;
 import hs.mediasystem.screens.AbstractMediaGroup;
+import hs.mediasystem.screens.Layout;
+import hs.mediasystem.screens.Location;
+import hs.mediasystem.screens.MainLocationPresentation;
 import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNode;
-import hs.mediasystem.screens.Presentation;
+import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.ProgramController;
+import hs.mediasystem.screens.UserLayout;
 import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.OptionDialogPane;
@@ -26,9 +29,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -36,183 +36,234 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.util.StringConverter;
 
 import javax.inject.Inject;
 
-public class CollectionPresentation implements Presentation {
-  public final ObservableList<MediaGroup> availableGroupSets = FXCollections.observableArrayList();
+public class CollectionPresentation extends MainLocationPresentation {
+
+  /**
+   * The collection root under which the media items to be displayed are located.
+   */
+  public final ObjectProperty<MediaRoot> mediaRoot = new SimpleObjectProperty<>();
+
+  /**
+   * The current active layout.
+   */
+  public final ObjectProperty<UserLayout<MediaRoot, CollectionSelectorPresentation>> layout = new SimpleObjectProperty<>();
+
+  /**
+   * All suitable layouts that are available to choose from.
+   */
+  public final ObservableList<UserLayout<MediaRoot, CollectionSelectorPresentation>> suitableLayouts = FXCollections.observableArrayList();
+
+  /**
+   * The current active group set.
+   */
   public final ObjectProperty<MediaGroup> groupSet = new SimpleObjectProperty<>();
 
-  public final EventHandler<ActionEvent> onOptionsSelect = new OptionsSelectEventHandler();
+  /**
+   * All available group sets that are available to choose from.
+   */
+  public final ObservableList<MediaGroup> availableGroupSets = FXCollections.observableArrayList();
 
-  private final SettingUpdater<MediaGroup> mediaGroupSettingUpdater;
-  private final ProgramController controller;
-  private final CollectionView view;
-  private final Injector injector;
-
-  private MediaRoot currentRoot;
+  private final List<UserLayout<MediaRoot, CollectionSelectorPresentation>> layouts;
 
   @Inject
-  public CollectionPresentation(final ProgramController controller, final CollectionView view, final SettingsStore settingsStore, Injector injector) {
-    this.controller = controller;
-    this.view = view;
-    this.injector = injector;
+  public CollectionPresentation(ProgramController programController, SettingsStore settingsStore, Injector injector, List<UserLayout<MediaRoot, CollectionSelectorPresentation>> layouts) {
+    super(programController);
 
-    view.onOptionsSelect.set(onOptionsSelect);
+    this.layouts = layouts;
 
-    groupSet.addListener(new InvalidationListener() {
-      @Override
-      public void invalidated(Observable observable) {
-        final MediaNode mediaNode = createRootNode(currentRoot);
+    /*
+     * Create and register setting updaters for layout and groupSet properties.
+     */
 
-        view.focusedMediaNode.set(null);
-        view.rootMediaNode.set(mediaNode);
+    SettingUpdater<UserLayout<MediaRoot, CollectionSelectorPresentation>> userLayoutSettingUpdater = new SettingUpdater<>(settingsStore, new UserLayoutStringConverter());
+    SettingUpdater<MediaGroup> mediaGroupSettingUpdater = new SettingUpdater<>(settingsStore, new MediaGroupStringConverter(availableGroupSets));
 
-        Platform.runLater(new Runnable() {
-          @Override
-          public void run() {
-            String id = settingsStore.getSetting("MediaSystem:Collection", currentRoot.getId().toString("LastSelected", currentRoot.getRootName()));
-            MediaNode nodeToSelect = null;
-
-            if(id != null) {
-              nodeToSelect = mediaNode.findMediaNode(id);
-            }
-
-            if(nodeToSelect == null) {
-              List<MediaNode> children = mediaNode.getChildren();
-
-              if(!children.isEmpty()) {
-                if(groupSet.get().showTopLevelExpanded()) {
-                  if(!children.get(0).getChildren().isEmpty()) {
-                    nodeToSelect = children.get(0).getChildren().get(0);
-                  }
-                }
-                else {
-                  nodeToSelect = children.get(0);
-                }
-              }
-            }
-
-            view.focusedMediaNode.set(nodeToSelect);
-          }
-        });
-      }
-    });
-
-    view.focusedMediaNode.addListener(new ChangeListener<MediaNode>() {
-      @Override
-      public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
-        if(current != null) {
-          settingsStore.storeSetting("MediaSystem:Collection", PersistLevel.TEMPORARY, currentRoot.getId().toString("LastSelected", currentRoot.getRootName()), current.getId());
-        }
-      }
-    });
-
-    mediaGroupSettingUpdater = new SettingUpdater<>(settingsStore, new StringConverter<MediaGroup>() {
-      @Override
-      public MediaGroup fromString(String id) {
-        for(MediaGroup mediaGroup : availableGroupSets) {
-          if(mediaGroup.getId().equals(id)) {
-            return mediaGroup;
-          }
-        }
-
-        return null;
-      }
-
-      @Override
-      public String toString(MediaGroup mediaGroup) {
-        return mediaGroup.getId();
-      }
-    });
-
+    layout.addListener(userLayoutSettingUpdater);
     groupSet.addListener(mediaGroupSettingUpdater);
-  }
 
-  @Override
-  public Node getView() {
-    return view;
-  }
+    /*
+     * Add Location listener to update the underlying view with a new MediaRoot.
+     */
 
-  private void setTreeRoot(final MediaRoot root) {
-    currentRoot = root;
+    location.addListener(new ChangeListener<Location>() {
+      @Override
+      public void changed(ObservableValue<? extends Location> observableValue, Location old, Location current) {
+        if(current instanceof CollectionLocation) {
+          CollectionLocation collectionLocation = (CollectionLocation)current;
+          MediaRoot mediaRoot = collectionLocation.getMediaRoot();
 
-    List<MediaGroup> mediaGroups = new ArrayList<>(injector.getInstances(MediaGroup.class, AnnotationDescriptor.describe(MediaRootType.class, new Value("value", root.getClass()))));
+          CollectionPresentation.this.mediaRoot.set(mediaRoot);
 
-    if(mediaGroups.isEmpty()) {
-      mediaGroups.add(new AbstractMediaGroup("alpha", "Alphabetically", false) {
-        @Override
-        public List<MediaNode> getMediaNodes(MediaRoot mediaRoot, List<? extends MediaItem> mediaItems) {
-          Collections.sort(mediaItems, StandardTitleComparator.INSTANCE);
-          List<MediaNode> nodes = new ArrayList<>();
+          /*
+           * Update suitable layouts and sort them.
+           */
 
-          for(MediaItem mediaItem : mediaItems) {
-            nodes.add(new MediaNode(mediaItem));
+          suitableLayouts.setAll(Layout.findAllSuitableLayouts(layouts, mediaRoot.getClass()));
+
+          Collections.sort(suitableLayouts, new Comparator<UserLayout<MediaRoot, CollectionSelectorPresentation>>() {
+            @Override
+            public int compare(UserLayout<MediaRoot, CollectionSelectorPresentation> o1, UserLayout<MediaRoot, CollectionSelectorPresentation> o2) {
+              return o1.getTitle().compareTo(o2.getTitle());
+            }
+          });
+
+          /*
+           * Change setting name for userLayoutSettingUpdater as each MediaRoot has its own Layout setting.
+           */
+
+          userLayoutSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, mediaRoot.getId().toString("View"));
+
+          /*
+           * Restore the last selected Layout for this MediaRoot.
+           */
+
+          UserLayout<MediaRoot, CollectionSelectorPresentation> lastSelectedLayout = userLayoutSettingUpdater.getStoredValue(layouts.get(0));
+
+          if(!lastSelectedLayout.equals(layout.get())) {
+            layout.set(lastSelectedLayout);
           }
 
-          return nodes;
-        }
-      });
-    }
+          /*
+           * Update available group sets and sort them.
+           */
 
-    Collections.sort(mediaGroups, new Comparator<MediaGroup>() {
-      @Override
-      public int compare(MediaGroup o1, MediaGroup o2) {
-        return o1.getTitle().compareTo(o2.getTitle());
+          List<MediaGroup> mediaGroups = new ArrayList<>(injector.getInstances(MediaGroup.class, AnnotationDescriptor.describe(MediaRootType.class, new Value("value", mediaRoot.getClass()))));
+
+          if(mediaGroups.isEmpty()) {
+
+            /*
+             * Provide a default if none are found.
+             */
+
+            mediaGroups.add(new AbstractMediaGroup("alpha", "Alphabetically", false) {
+              @Override
+              public List<MediaNode> getMediaNodes(MediaRoot mediaRoot, List<? extends MediaItem> mediaItems) {
+                Collections.sort(mediaItems, StandardTitleComparator.INSTANCE);
+                List<MediaNode> nodes = new ArrayList<>();
+
+                for(MediaItem mediaItem : mediaItems) {
+                  nodes.add(new MediaNode(mediaItem));
+                }
+
+                return nodes;
+              }
+            });
+          }
+
+          Collections.sort(mediaGroups, new Comparator<MediaGroup>() {
+            @Override
+            public int compare(MediaGroup o1, MediaGroup o2) {
+              return o1.getTitle().compareTo(o2.getTitle());
+            }
+          });
+
+          availableGroupSets.setAll(mediaGroups);
+
+          /*
+           * Change setting name for mediaGroupSettingUpdater as each MediaRoot has its own MediaGroup setting.
+           */
+
+          mediaGroupSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, mediaRoot.getId().toString("SortGroup"));
+
+          /*
+           * Restore the last selected MediaGroup for this MediaRoot.
+           */
+
+          MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSets.get(0));
+
+          groupSet.set(selectedMediaGroup);
+        }
       }
     });
-
-    availableGroupSets.setAll(mediaGroups);
-
-    mediaGroupSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, currentRoot.getId().toString("SortGroup"));
-
-    MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSets.get(0));
-
-    groupSet.set(selectedMediaGroup);
   }
 
-  public void setMediaRoot(final MediaRoot mediaRoot) {
-    setTreeRoot(mediaRoot);
+  /**
+   * EventHandler for when a MediaNode is selected.  This will trigger either
+   * a drill down or playback depending on the type of node.
+   */
+  public void handleMediaNodeSelectEvent(MediaNodeEvent event) {
+    if(event.getMediaNode().getMediaRoot() != null) {
+      getProgramController().setLocation(new CollectionLocation(event.getMediaNode().getMediaRoot()));
+    }
+    else {
+      getProgramController().play(event.getMediaNode().getMediaItem());
+    }
+    event.consume();
   }
 
-  // TODO RootNode is a stupid concept, there is really no root node needed -- items should just be an obervablelist -- this will simplify MediaNode code as well
-  public MediaNode createRootNode(MediaRoot root) {
-    MediaGroup mediaGroup = groupSet.get();
+  /**
+   * EventHandler for showing the Options dialog.
+   */
+  public void handleOptionsSelectEvent(ActionEvent event) {
+    @SuppressWarnings("unchecked")
+    List<? extends Option> options = FXCollections.observableArrayList(
+      new ListOption<>("Sorting/Grouping", groupSet, availableGroupSets, new StringBinding(groupSet) {
+        @Override
+        protected String computeValue() {
+          return groupSet.get().getTitle();
+        }
+      }),
+      new ListOption<>("View", layout, suitableLayouts, new StringBinding(layout) {
+        @Override
+        protected String computeValue() {
+          return layout.get().getTitle();
+        }
+      })
+    );
 
-    return new MediaNode(root, null, mediaGroup.showTopLevelExpanded(), false, mediaGroup);
+    getProgramController().showDialog(new OptionDialogPane("Media - Options", options));
+    event.consume();
   }
 
-  @Override
-  public void dispose() {
-  }
+  /**
+   * Converter for storing the MediaGroup as a Setting
+   */
+  class MediaGroupStringConverter extends StringConverter<MediaGroup> {
+    private final ObservableList<MediaGroup> availableGroupSets;
 
-  class OptionsSelectEventHandler implements EventHandler<ActionEvent> {
+    public MediaGroupStringConverter(ObservableList<MediaGroup> availableGroupSets) {
+      this.availableGroupSets = availableGroupSets;
+    }
+
     @Override
-    public void handle(ActionEvent event) {
-      @SuppressWarnings("unchecked")
-      List<? extends Option> options = FXCollections.observableArrayList(
-        new ListOption<>("Sorting/Grouping", groupSet, availableGroupSets, new StringBinding(groupSet) {
-          @Override
-          protected String computeValue() {
-            return groupSet.get().getTitle();
-          }
-        }),
-        new ListOption<>("View", view.layout, view.suitableLayouts, new StringBinding(view.layout) {
-          @Override
-          protected String computeValue() {
-            return view.layout.get().getTitle();
-          }
-        })
-      );
+    public MediaGroup fromString(String id) {
+      for(MediaGroup mediaGroup : availableGroupSets) {
+        if(mediaGroup.getId().equals(id)) {
+          return mediaGroup;
+        }
+      }
 
-      controller.showDialog(new OptionDialogPane("Media - Options", options));
-      event.consume();
+      return null;
+    }
+
+    @Override
+    public String toString(MediaGroup mediaGroup) {
+      return mediaGroup.getId();
     }
   }
 
-  static class GroupItem extends Media<GroupItem> {
+  /**
+   * Converter for storing the UserLayout as a Setting
+   */
+  class UserLayoutStringConverter extends StringConverter<UserLayout<MediaRoot, CollectionSelectorPresentation>> {
+    @Override
+    public UserLayout<MediaRoot, CollectionSelectorPresentation> fromString(String id) {
+      for(UserLayout<MediaRoot, CollectionSelectorPresentation> layout : layouts) {
+        if(layout.getId().equals(id)) {
+          return layout;
+        }
+      }
+
+      return null;
+    }
+
+    @Override
+    public String toString(UserLayout<MediaRoot, CollectionSelectorPresentation> layout) {
+      return layout.getId();
+    }
   }
 }
