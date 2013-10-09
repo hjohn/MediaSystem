@@ -15,7 +15,7 @@ public class Listeners {
    * @param observableValue an ObservableValue instance
    * @param changeListener a ChangeListener
    */
-  public static void bind(ObservableValue<?> observableValue, ChangeListener<Object> changeListener) {
+  public static <T> void bind(ObservableValue<T> observableValue, ChangeListener<T> changeListener) {
     observableValue.addListener(changeListener);
 
     changeListener.changed(observableValue, observableValue.getValue(), observableValue.getValue());
