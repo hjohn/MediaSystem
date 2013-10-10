@@ -38,7 +38,7 @@ public class PlaybackLayout implements Layout<Location, PlaybackOverlayPresentat
     view.player.bindBidirectional(presentation.player);
     view.overlayVisible.bindBidirectional(presentation.overlayVisible);
 
-    view.onOptionsSelect.set(new EventHandler<ActionEvent>() {  // TODO METHOD_REFERENCE
+    view.onOptionsSelect.set(new EventHandler<ActionEvent>() {  // WORKAROUND METHOD_REFERENCE
       @Override
       public void handle(ActionEvent event) {
         presentation.handleOptionsSelectEvent(event);

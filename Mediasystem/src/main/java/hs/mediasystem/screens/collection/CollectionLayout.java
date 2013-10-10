@@ -67,14 +67,14 @@ public class CollectionLayout implements Layout<Location, CollectionPresentation
     view.layout.bindBidirectional(presentation.layout);
     view.groupSet.bindBidirectional(presentation.groupSet);
 
-    view.onSelect.set(new EventHandler<MediaNodeEvent>() {  // TODO METHOD_REFERENCE
+    view.onSelect.set(new EventHandler<MediaNodeEvent>() {  // WORKAROUND METHOD_REFERENCE
       @Override
       public void handle(MediaNodeEvent event) {
         presentation.handleMediaNodeSelectEvent(event);
       }
     });
 
-    view.onOptionsSelect.set(new EventHandler<ActionEvent>() {  // TODO METHOD_REFERENCE
+    view.onOptionsSelect.set(new EventHandler<ActionEvent>() {  // WORKAROUND METHOD_REFERENCE
       @Override
       public void handle(ActionEvent event) {
         presentation.handleOptionsSelectEvent(event);
