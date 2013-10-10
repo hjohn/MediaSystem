@@ -84,7 +84,7 @@ public class MediaItem extends Entity<MediaItem> {
   }
 
   public void reloadMetaData() {
-    //  getEnrichCache().reload(cacheKey); FIXME
+    //  getEnrichCache().reload(cacheKey); TODO Fix option to reload metadata
   }
 
   @Override
