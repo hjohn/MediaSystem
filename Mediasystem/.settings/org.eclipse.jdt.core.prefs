@@ -102,5 +102,5 @@ org.eclipse.jdt.core.compiler.problem.unusedWarningToken=warning
 org.eclipse.jdt.core.compiler.problem.varargsArgumentNeedCast=warning
 org.eclipse.jdt.core.compiler.source=1.8
 org.eclipse.jdt.core.compiler.taskCaseSensitive=enabled
-org.eclipse.jdt.core.compiler.taskPriorities=NORMAL,HIGH,LOW
-org.eclipse.jdt.core.compiler.taskTags=TODO,FIXME,WORKAROUND
+org.eclipse.jdt.core.compiler.taskPriorities=NORMAL,HIGH,LOW,LOW
+org.eclipse.jdt.core.compiler.taskTags=TODO,FIXME,WORKAROUND,TASK
