@@ -42,7 +42,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.input.KeyCode;
@@ -92,7 +91,8 @@ public class ProgramController {
   private final Set<PropertyDescriptor<?>> propertyDescriptors;
 
   private final Map<Class<?>, Map<KeyCombination, Action<?>>> actionsByKeyCombinationByPresentation = new HashMap<>();
-  private Canvas videoCanvas;
+
+  private ResizableWritableImageView videoCanvas;
 
   private final ObjectProperty<Location> location = new SimpleObjectProperty<>();
   public Location getLocation() { return location.get(); }
@@ -138,8 +138,8 @@ public class ProgramController {
 
     Object displayComponent = playerPresentation == null ? null : playerPresentation.getPlayer().getDisplayComponent();
 
-    if(displayComponent instanceof Canvas) {
-      videoCanvas = (Canvas)displayComponent;
+    if(displayComponent instanceof ResizableWritableImageView) {
+      videoCanvas = (ResizableWritableImageView)displayComponent;
       videoPane.setCenter(videoCanvas);
       videoCanvas.setManaged(false);
 

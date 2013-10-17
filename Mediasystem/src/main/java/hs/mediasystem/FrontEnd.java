@@ -34,6 +34,7 @@ import hs.mediasystem.screens.collection.detail.MediaLayout;
 import hs.mediasystem.screens.collection.detail.PersonLayout;
 import hs.mediasystem.screens.main.MainScreenLayout;
 import hs.mediasystem.screens.optiondialog.BooleanOption;
+import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.playback.BrightnessPropertyDescriptor;
 import hs.mediasystem.screens.playback.MutePropertyDescriptor;
@@ -60,19 +61,33 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
 import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
-import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.sql.ConnectionPoolDataSource;
 
 public class FrontEnd extends Application {
+  private static final Comparator<PlayerFactory> PLAYER_FACTORY_COMPARATOR = new Comparator<PlayerFactory>() {
+    @Override
+    public int compare(PlayerFactory o1, PlayerFactory o2) {
+      return o1.getName().compareTo(o2.getName());
+    }
+  };
+
   private static final Ini INI = new Ini(new File("mediasystem.ini"));
 
   private SceneManager sceneManager;
@@ -125,17 +140,35 @@ public class FrontEnd extends Application {
 
     pluginManager.loadPluginAndScan(new File("../mediasystem-ext-player-vlc/target/mediasystem-ext-player-vlc-1.0.0-SNAPSHOT.jar").toURI().toURL());
 
+    ObjectProperty<PlayerFactory> selectedPlayerFactory = injector.getInstance(SettingsStore.class).getProperty("MediaSystem:Video", Setting.PersistLevel.PERMANENT, "Player", new StringConverter<PlayerFactory>() {
+      @Override
+      public PlayerFactory fromString(String text) {
+        List<PlayerFactory> instances = new ArrayList<>(injector.getInstances(PlayerFactory.class));
+
+        for(PlayerFactory playerFactory : instances) {
+          if(playerFactory.getClass().getName().equals(text)) {
+            return playerFactory;
+          }
+        }
+
+        Collections.sort(instances, PLAYER_FACTORY_COMPARATOR);
+
+        return instances.get(0);
+      }
+
+      @Override
+      public String toString(PlayerFactory factory) {
+        return factory.getClass().getName();
+      }
+    });
+
     injector.register(new Provider<Player>() {
-      @Inject  // TODO can this work?
-      private PlayerFactory playerFactory;
       private Player player;
 
       @Override
       public Player get() {
         if(player == null) {
-          Set<PlayerFactory> playerFactories = injector.getInstances(PlayerFactory.class);
-
-          player = playerFactories.iterator().next().create(INI);
+          player = selectedPlayerFactory.get().create(INI);
         }
 
         return player;
@@ -198,6 +231,22 @@ public class FrontEnd extends Application {
     });
 
     injector.registerInstance(new SettingGroup("video", null, "Video", 0));
+
+    injector.registerInstance(new AbstractSetting("video.player", "video", 0) {
+      @Override
+      public Option createOption(Set<hs.mediasystem.screens.Setting> settings) {
+        ObservableList<PlayerFactory> playerFactories = FXCollections.observableArrayList(injector.getInstances(PlayerFactory.class));
+
+        Collections.sort(playerFactories, PLAYER_FACTORY_COMPARATOR);
+
+        return new ListOption<>("Player", selectedPlayerFactory, playerFactories, new StringBinding(selectedPlayerFactory) {
+          @Override
+          protected String computeValue() {
+            return selectedPlayerFactory.get().getName();
+          }
+        });
+      }
+    });
 
     injector.registerInstance(new AbstractSetting("information-bar.debug-mem", null, 0) {
       @Override

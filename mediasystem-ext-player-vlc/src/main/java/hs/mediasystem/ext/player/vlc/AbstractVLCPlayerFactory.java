@@ -14,22 +14,19 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import javafx.beans.property.ObjectProperty;
 
 import com.sun.jna.NativeLibrary;
 
-public class VLCPlayerFactory implements PlayerFactory {
+public abstract class AbstractVLCPlayerFactory implements PlayerFactory {
   private final SettingsStore settingsStore;
   private final String name;
   private final Mode mode;
 
-  @Inject
-  public VLCPlayerFactory(SettingsStore settingsStore) { // TODO: String name, Mode mode -- create 2nd factory for the other mode
+  public AbstractVLCPlayerFactory(SettingsStore settingsStore, String name, Mode mode) {
     this.settingsStore = settingsStore;
-    this.name = "VLC (seperate window)";
-    this.mode = Mode.SEPERATE_WINDOW;
+    this.name = name;
+    this.mode = mode;
   }
 
   @Override

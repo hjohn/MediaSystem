@@ -12,6 +12,7 @@ import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.PlayerEvent;
 import hs.mediasystem.framework.player.PlayerEvent.Type;
 import hs.mediasystem.framework.player.Subtitle;
+import hs.mediasystem.screens.ResizableWritableImageView;
 import hs.mediasystem.util.Events;
 
 import java.awt.Canvas;
@@ -58,6 +59,8 @@ public class VLCPlayer implements Player {
   private final MediaPlayer mediaPlayer;
   private final Object canvas;
 
+  private PixelWriter pixelWriter;
+
   public VLCPlayer(Mode mode, String... args) {
     List<String> arguments = new ArrayList<>(Arrays.asList(args));
 
@@ -65,6 +68,7 @@ public class VLCPlayer implements Player {
     arguments.add("--no-snapshot-preview");
     arguments.add("--input-fast-seek");
     arguments.add("--no-video-title-show");
+    arguments.add("--disable-screensaver");
     arguments.add("--network-caching");
     arguments.add("3000");
     arguments.add("--quiet");
@@ -85,10 +89,10 @@ public class VLCPlayer implements Player {
       this.mediaPlayer = mp;
     }
     else {
-      final javafx.scene.canvas.Canvas canvas = new javafx.scene.canvas.Canvas(16, 16);
-
-      final PixelWriter pixelWriter = canvas.getGraphicsContext2D().getPixelWriter();
+      final ResizableWritableImageView canvas = new ResizableWritableImageView(16, 16);
       final WritablePixelFormat<ByteBuffer> byteBgraInstance = PixelFormat.getByteBgraPreInstance();
+
+      pixelWriter = canvas.getPixelWriter();
 
       DirectMediaPlayer mp = factory.newDirectMediaPlayer(
         new BufferFormatCallback() {
@@ -99,8 +103,8 @@ public class VLCPlayer implements Player {
             Platform.runLater(new Runnable() {
               @Override
               public void run() {
-                canvas.setWidth(width);
-                canvas.setHeight(height);
+                canvas.resize(width, height);
+                pixelWriter = canvas.getPixelWriter();
               }
             });
 
