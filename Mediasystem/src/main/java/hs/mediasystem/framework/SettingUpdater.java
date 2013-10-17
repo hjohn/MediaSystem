@@ -27,6 +27,10 @@ public class SettingUpdater<T> implements ChangeListener<T> {
     return storedValue == null ? defaultValue : storedValue;
   }
 
+  public void clearBackingSetting() {
+    valueProperty = null;
+  }
+
   public void setBackingSetting(String system, PersistLevel level, String key) {
     valueProperty = settingsStore.getValueProperty(system, level, key);
   }
