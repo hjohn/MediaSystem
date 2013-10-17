@@ -16,6 +16,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
 import javafx.scene.effect.BlendMode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -79,6 +81,16 @@ public class InformationBorder extends HBox {
       getStyleClass().add("bar");
       getChildren().addAll(memoryBar, memText);
     }});
+
+    addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent event) {
+        if(event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+          System.out.println("[INFO] Running Garbage Collector...");
+          System.gc();
+        }
+      }
+    });
 
     memText.setBlendMode(BlendMode.DIFFERENCE);
 

@@ -153,7 +153,7 @@ public class ProgramController {
 
     sceneManager.setScene(scene);
 
-    informationBorderPane.setMouseTransparent(true);
+    informationBorderPane.setPickOnBounds(false);
     informationBorderPane.setTop(informationBorder);
     messageBorderPane.setMouseTransparent(true);
     messageBorderPane.setRight(new Group(messagePane));
