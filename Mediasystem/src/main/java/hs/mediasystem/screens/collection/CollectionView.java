@@ -112,20 +112,21 @@ public class CollectionView extends PresentationPane {
     layout.addListener(new ChangeListener<Layout<MediaRoot, CollectionSelectorPresentation>>() {
       @Override
       public void changed(ObservableValue<? extends Layout<MediaRoot, CollectionSelectorPresentation>> observableValue, Layout<MediaRoot, CollectionSelectorPresentation> oldLayout, Layout<MediaRoot, CollectionSelectorPresentation> layout) {
-        System.out.println(">>> Layout changed to : " + layout);
         if(currentCollectionSelectorPresentation != null) {
           currentCollectionSelectorPresentation.focusedMediaNode.unbindBidirectional(focusedMediaNode);
           currentCollectionSelectorPresentation.onSelect.unbindBidirectional(onSelect);
           currentCollectionSelectorPresentation.rootMediaNode.unbindBidirectional(rootMediaNode);
         }
 
-        currentCollectionSelectorPresentation = layout.createPresentation();
+        if(layout != null) {
+          currentCollectionSelectorPresentation = layout.createPresentation();
 
-        currentCollectionSelectorPresentation.rootMediaNode.bindBidirectional(rootMediaNode);
-        currentCollectionSelectorPresentation.focusedMediaNode.bindBidirectional(focusedMediaNode);
-        currentCollectionSelectorPresentation.onSelect.bindBidirectional(onSelect);
+          currentCollectionSelectorPresentation.rootMediaNode.bindBidirectional(rootMediaNode);
+          currentCollectionSelectorPresentation.focusedMediaNode.bindBidirectional(focusedMediaNode);
+          currentCollectionSelectorPresentation.onSelect.bindBidirectional(onSelect);
 
-        collectionSelectorPane.getChildren().setAll(layout.createView(currentCollectionSelectorPresentation));
+          collectionSelectorPane.getChildren().setAll(layout.createView(currentCollectionSelectorPresentation));
+        }
       }
     });
 

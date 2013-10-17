@@ -151,8 +151,6 @@ public class TreeListPane extends BorderPane {
   }
 
   private void setRoot(final MediaNode root) {
-    System.out.println(">>> setRoot : " + root);
-
     treeView.setCellFactory(new Callback<TreeView<MediaNode>, TreeCell<MediaNode>>() {
       @Override
       public TreeCell<MediaNode> call(TreeView<MediaNode> param) {
@@ -192,9 +190,7 @@ public class TreeListPane extends BorderPane {
 
   private void refilter() {
     MediaNodeTreeItem group = (MediaNodeTreeItem)filter.activeProperty().get().getUserData();
-    //treeView.getFocusModel().focus(-1);  // WORKAROUND: If focus index was same as before, even if root was changed, focused item is NOT updated
     treeView.setRoot(group);
-   // treeView.getFocusModel().focus(0);
   }
 
   private final class MediaNodeTreeItem extends TreeItem<MediaNode> {
@@ -254,68 +250,76 @@ public class TreeListPane extends BorderPane {
     }
   }
 
-  private void setSelectedNode(MediaNode mediaNode) {
-    System.out.println(">>> setSelectedNode : " + mediaNode);
+  private void setSelectedNode(MediaNode selectedMediaNode) {
     TreeItem<MediaNode> focusedTreeItem = treeView.getFocusModel().getFocusedItem();
 
-    if(mediaNode != null && focusedTreeItem != null && mediaNode.equals(focusedTreeItem.getValue())) {
-      System.out.println(">>> setSelectedNode: exiting early");
+    if(selectedMediaNode == null || (focusedTreeItem != null && selectedMediaNode.equals(focusedTreeItem.getValue()))) {
       return;
     }
 
-    System.out.println(">>> setSelectedNode : searching");
+    List<MediaNode> stack = new ArrayList<>();
 
-//    treeView.getFocusModel().focus(-1);  // WORKAROUND: If focus index was same as before, even if root was changed, focused item is NOT updated
+    stack.add(selectedMediaNode);
 
-    if(mediaNode != null) {
-//      if(!filter.getChildren().isEmpty()) {
-//        filter.activeProperty().set(filter.getChildren().get(0));
-//      }
-//      treeView.getFocusModel().focus(0);
-//    }
-//    else {
-      List<MediaNode> stack = new ArrayList<>();
+    while(stack.get(0).getParent() != null) {
+      stack.add(0, stack.get(0).getParent());
+    }
 
-      stack.add(mediaNode);
+    stack.remove(0);
 
-      while(stack.get(0).getParent() != null) {
-        stack.add(0, stack.get(0).getParent());
+    /*
+     * First level of the stack matches the filter (if used).  This needs to be set
+     * correctly first to create a new root in the TreeView.
+     */
+
+    if(!filter.getChildren().isEmpty()) {
+      for(Node n : filter.getChildren()) {
+        if(((MediaNodeTreeItem)n.getUserData()).getValue().equals(stack.get(0))) {
+          filter.activeProperty().set(n);
+          stack.remove(0);
+          break;
+        }
+      }
+    }
+
+    /*
+     * Get the TreeView's root, which either existed already or was yet setup by
+     * adjusting the filter.
+     */
+
+    TreeItem<MediaNode> treeItemForSelection = treeView.getRoot();
+
+    if(treeItemForSelection != null) {
+
+      /*
+       * Expand all TreeItem's towards the MediaNode to be selected.
+       */
+
+      for(MediaNode node : stack) {
+        treeItemForSelection.setExpanded(true);
+
+        treeItemForSelection = findTreeItem(treeItemForSelection, node);
+
+        if(treeItemForSelection == null) {
+          break;
+        }
       }
 
-      stack.remove(0);
-      TreeItem<MediaNode> root = treeView.getRoot();
+      /*
+       * If after the search for the MediaNode to be selected we found a matching TreeItem
+       * that can be selected, it will be focused and scrolled to.
+       */
 
-      if(root != null) {
-        stack:
-        for(MediaNode node : stack) {
-          for(Node n : filter.getChildren()) {
-            if(((MediaNodeTreeItem)n.getUserData()).getValue().equals(node)) {
-              filter.activeProperty().set(n);
-              root = treeView.getRoot();
-              continue stack;
-            }
+      if(treeItemForSelection != null) {
+        final int index = treeView.getRow(treeItemForSelection);
+        treeView.getFocusModel().focus(index);
+
+        Platform.runLater(new Runnable() {
+          @Override
+          public void run() {
+            treeView.scrollTo(index);
           }
-
-          root.setExpanded(true);
-
-          root = findTreeItem(root, node);
-
-          if(root == null) {
-            break;
-          }
-        }
-
-        if(root != null) {
-          final int index = treeView.getRow(root);
-          treeView.getFocusModel().focus(index);
-
-          Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-              treeView.scrollTo(index);
-            }
-          });
-        }
+        });
       }
     }
   }
