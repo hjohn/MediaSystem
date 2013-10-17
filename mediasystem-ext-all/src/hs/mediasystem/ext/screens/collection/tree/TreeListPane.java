@@ -38,7 +38,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 public class TreeListPane extends BorderPane {
-  private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
+  private static final KeyCombination SPACE = new KeyCodeCombination(KeyCode.SPACE);
   private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
   private static final KeyCombination LEFT = new KeyCodeCombination(KeyCode.LEFT);
   private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
@@ -112,7 +112,7 @@ public class TreeListPane extends BorderPane {
           TreeItem<MediaNode> focusedItem = treeView.getFocusModel().getFocusedItem();
 
           if(focusedItem != null) {
-            if(ENTER.match(event)) {
+            if(SPACE.match(event)) {
               itemSelected(event, focusedItem);
             }
             else if(KEY_I.match(event)) {
