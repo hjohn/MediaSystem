@@ -2,7 +2,6 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.actions.Action;
-import hs.mediasystem.framework.actions.PropertyDescriptor;
 import hs.mediasystem.framework.player.PlayerEvent;
 import hs.mediasystem.screens.collection.CollectionPresentation;
 import hs.mediasystem.screens.main.MainScreenLocation;
@@ -88,7 +87,6 @@ public class ProgramController {
   }};
 
   private final InformationBorder informationBorder;
-  private final Set<PropertyDescriptor<?>> propertyDescriptors;
 
   private final Map<Class<?>, Map<KeyCombination, Action<?>>> actionsByKeyCombinationByPresentation = new HashMap<>();
 
@@ -126,12 +124,11 @@ public class ProgramController {
   private MainLocationPresentation activePresentation;
 
   @Inject
-  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder, Provider<Set<Layout<? extends Location, ? extends MainLocationPresentation>>> mainLocationLayoutsProvider, Set<PropertyDescriptor<?>> propertyDescriptors) {
+  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder, Provider<Set<Layout<? extends Location, ? extends MainLocationPresentation>>> mainLocationLayoutsProvider) {
     this.ini = ini;
     this.sceneManager = sceneManager;
     this.playerPresentation = playerPresentation;
     this.informationBorder = informationBorder;
-    this.propertyDescriptors = propertyDescriptors;
     this.scene = SceneUtil.createScene(sceneRoot);
 
     sceneRoot.getChildren().addAll(videoPane, contentBorderPane, informationBorderPane, messageBorderPane);
@@ -265,77 +262,60 @@ public class ProgramController {
     });
   }
 
-  private void initializeKeyMappings() {
-    for(PropertyDescriptor<?> descriptor : propertyDescriptors) {
-      for(Action<?> action : descriptor.getActions()) {
-        if(action.getId().equals("groupSet.next")) {
-          addKeyMapping(CollectionPresentation.class, new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), action);
-        }
-        if(action.getId().equals("playback.volume.decrease(5%)")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT9), action);
-        }
-        if(action.getId().equals("playback.volume.increase(5%)")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT0), action);
-        }
-        if(action.getId().equals("playback.mute")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.M), action);
-        }
-        if(action.getId().equals("playback.pause")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.SPACE), action);
-        }
-        if(action.getId().equals("playback.position.backward(10s)")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.LEFT), action);
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD4), action);
-        }
-        if(action.getId().equals("playback.position.forward(10s)")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.RIGHT), action);
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD6), action);
-        }
-        if(action.getId().equals("playback.position.backward(60s)")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DOWN), action);
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD2), action);
-        }
-        if(action.getId().equals("playback.position.forward(60s)")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.UP), action);
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD8), action);
-        }
-        if(action.getId().equals("playback.brightness.decrease(5%)")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT1), action);
-        }
-        if(action.getId().equals("playback.brightness.increase(5%)")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT2), action);
-        }
-        if(action.getId().equals("playback.subtitleDelay.decrease(100ms)")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.Z), action);
-        }
-        if(action.getId().equals("playback.subtitleDelay.increase(100ms)")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.X), action);
-        }
-        if(action.getId().equals("playback.rate.decrease(10%)")) {
-          addKeyMapping(PlayerPresentation.class, KEY_OPEN_BRACKET, action);
-        }
-        if(action.getId().equals("playback.rate.increase(10%)")) {
-          addKeyMapping(PlayerPresentation.class, KEY_CLOSE_BRACKET, action);
-        }
-        if(action.getId().equals("playback.subtitle.next")) {
-          addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.J), action);
-        }
-        if(action.getId().equals("playback.overlay.visibility")) {
-          addKeyMapping(PlaybackOverlayPresentation.class, new KeyCodeCombination(KeyCode.I), action);
-        }
-      }
+  @SuppressWarnings("unchecked")
+  private Action<?> findAction(String actionName) {
+    int lastDot = actionName.lastIndexOf('.');
+
+    try {
+      return (Action<?>)Enum.valueOf(Class.forName(actionName.substring(0, lastDot)).asSubclass(Enum.class), actionName.substring(lastDot + 1));
+    }
+    catch(ClassNotFoundException | IllegalArgumentException e) {
+      return null;
     }
   }
 
-  private void addKeyMapping(Class<?> presentationClass, KeyCombination keyCombination, Action<?> action) {
-    Map<KeyCombination, Action<?>> actionsByKeyCombination = actionsByKeyCombinationByPresentation.get(presentationClass);
+  private void initializeKeyMappings() {
+    addKeyMapping(CollectionPresentation.class, new KeyCodeCombination(KeyCode.F), "hs.mediasystem.screens.collection.CollectionActions.FILTER_SHOW_DIALOG");
+    addKeyMapping(CollectionPresentation.class, new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), "hs.mediasystem.screens.collection.CollectionActions.GROUP_SET_NEXT");
 
-    if(actionsByKeyCombination == null) {
-      actionsByKeyCombination = new HashMap<>();
-      actionsByKeyCombinationByPresentation.put(presentationClass, actionsByKeyCombination);
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT9), "hs.mediasystem.screens.playback.PlayerActions.VOLUME_DECREASE");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT0), "hs.mediasystem.screens.playback.PlayerActions.VOLUME_INCREASE");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.M), "hs.mediasystem.screens.playback.PlayerActions.MUTE");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.SPACE), "hs.mediasystem.screens.playback.PlayerActions.PAUSE");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.LEFT), "hs.mediasystem.screens.playback.PlayerActions.SKIP_BACKWARD_10S");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD4), "hs.mediasystem.screens.playback.PlayerActions.SKIP_BACKWARD_10S");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.RIGHT), "hs.mediasystem.screens.playback.PlayerActions.SKIP_FORWARD_10S");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD6), "hs.mediasystem.screens.playback.PlayerActions.SKIP_FORWARD_10S");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DOWN), "hs.mediasystem.screens.playback.PlayerActions.SKIP_BACKWARD_60S");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD2), "hs.mediasystem.screens.playback.PlayerActions.SKIP_BACKWARD_60S");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.UP), "hs.mediasystem.screens.playback.PlayerActions.SKIP_FORWARD_60S");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD8), "hs.mediasystem.screens.playback.PlayerActions.SKIP_FORWARD_60S");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT1), "hs.mediasystem.screens.playback.PlayerActions.BRIGHTNESS_DECREASE");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT2), "hs.mediasystem.screens.playback.PlayerActions.BRIGHTNESS_INCREASE");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.Z), "hs.mediasystem.screens.playback.PlayerActions.SUBTITLE_DELAY_DECREASE");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.X), "hs.mediasystem.screens.playback.PlayerActions.SUBTITLE_DELAY_INCREASE");
+    addKeyMapping(PlayerPresentation.class, KEY_OPEN_BRACKET, "hs.mediasystem.screens.playback.PlayerActions.RATE_DECREASE");
+    addKeyMapping(PlayerPresentation.class, KEY_CLOSE_BRACKET, "hs.mediasystem.screens.playback.PlayerActions.RATE_INCREASE");
+    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.J), "hs.mediasystem.screens.playback.PlayerActions.SUBTITLE_NEXT");
+    addKeyMapping(PlaybackOverlayPresentation.class, new KeyCodeCombination(KeyCode.I), "hs.mediasystem.screens.playback.PlaybackOverlayActions.VISIBILITY");
+  }
+
+  private void addKeyMapping(Class<?> presentationClass, KeyCombination keyCombination, String actionName) {
+    Action<?> action = findAction(actionName);
+
+    if(action == null) {
+      System.out.println("[WARN] Cannot find associated Action for key combination [" + keyCombination + "]: " + actionName);
     }
+    else {
+      Map<KeyCombination, Action<?>> actionsByKeyCombination = actionsByKeyCombinationByPresentation.get(presentationClass);
 
-    actionsByKeyCombination.put(keyCombination, action);
+      if(actionsByKeyCombination == null) {
+        actionsByKeyCombination = new HashMap<>();
+        actionsByKeyCombinationByPresentation.put(presentationClass, actionsByKeyCombination);
+      }
+
+      actionsByKeyCombination.put(keyCombination, action);
+    }
   }
 
   private void handleUserDefinedKeys(KeyEvent event) {

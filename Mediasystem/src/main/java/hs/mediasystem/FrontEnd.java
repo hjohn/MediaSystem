@@ -29,24 +29,14 @@ import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SettingGroup;
 import hs.mediasystem.screens.StandardCell;
 import hs.mediasystem.screens.collection.CollectionLayout;
-import hs.mediasystem.screens.collection.GroupSetPropertyDescriptor;
 import hs.mediasystem.screens.collection.detail.MediaLayout;
 import hs.mediasystem.screens.collection.detail.PersonLayout;
 import hs.mediasystem.screens.main.MainScreenLayout;
 import hs.mediasystem.screens.optiondialog.BooleanOption;
 import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
-import hs.mediasystem.screens.playback.BrightnessPropertyDescriptor;
-import hs.mediasystem.screens.playback.MutePropertyDescriptor;
-import hs.mediasystem.screens.playback.OverlayVisibilityPropertyDescriptor;
-import hs.mediasystem.screens.playback.PausePropertyDescriptor;
 import hs.mediasystem.screens.playback.PlaybackLayout;
 import hs.mediasystem.screens.playback.PlaybackOverlayPane;
-import hs.mediasystem.screens.playback.PositionPropertyDescriptor;
-import hs.mediasystem.screens.playback.RatePropertyDescriptor;
-import hs.mediasystem.screens.playback.SubtitleDelayPropertyDescriptor;
-import hs.mediasystem.screens.playback.SubtitlePropertyDescriptor;
-import hs.mediasystem.screens.playback.VolumePropertyDescriptor;
 import hs.mediasystem.util.DuoWindowSceneManager;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.StringBinding;
@@ -116,18 +106,6 @@ public class FrontEnd extends Application {
     final Injector injector = new Injector(new JustInTimeDiscoveryPolicy());
 
     injector.registerInstance(injector);
-    injector.register(GroupSetPropertyDescriptor.class);
-
-    injector.register(OverlayVisibilityPropertyDescriptor.class);
-
-    injector.register(BrightnessPropertyDescriptor.class);
-    injector.register(MutePropertyDescriptor.class);
-    injector.register(PausePropertyDescriptor.class);
-    injector.register(RatePropertyDescriptor.class);
-    injector.register(SubtitlePropertyDescriptor.class);
-    injector.register(SubtitleDelayPropertyDescriptor.class);
-    injector.register(PositionPropertyDescriptor.class);
-    injector.register(VolumePropertyDescriptor.class);
 
     injector.register(new Provider<Connection>() {
       @Override
