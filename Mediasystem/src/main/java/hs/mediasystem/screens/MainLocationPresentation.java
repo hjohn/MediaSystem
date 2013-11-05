@@ -21,8 +21,4 @@ public class MainLocationPresentation {
   public ProgramController getProgramController() {
     return programController;
   }
-
-  // TODO temporary?  here to be able to dispose of bindings to Player as Player is such a long lived object...
-  protected void dispose() {
-  }
 }

@@ -141,11 +141,6 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation {
     });
   }
 
-  @Override
-  protected void dispose() {
-    player.set(null);
-  }
-
   public void handleOptionsSelectEvent(ActionEvent event) {
     Player player = this.player.get();
 

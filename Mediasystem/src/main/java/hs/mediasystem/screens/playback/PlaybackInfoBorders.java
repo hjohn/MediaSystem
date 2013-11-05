@@ -84,7 +84,15 @@ public class PlaybackInfoBorders extends StackPane {
     );
 
     updater.setCycleCount(Animation.INDEFINITE);
-    updater.play();
+
+    sceneProperty().addListener(o -> {
+      if(getScene() == null) {
+        updater.stop();
+      }
+      else {
+        updater.play();
+      }
+    });
 
     getChildren().add(grid);
 

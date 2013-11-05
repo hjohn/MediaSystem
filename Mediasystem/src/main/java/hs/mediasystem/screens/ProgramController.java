@@ -248,7 +248,6 @@ public class ProgramController {
 
         if(activePresentation != null) {
           activePresentation.location.unbindBidirectional(location);
-          activePresentation.dispose();
           activePresentation = null;
         }
 

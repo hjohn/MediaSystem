@@ -29,7 +29,6 @@ import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.effect.Blend;
 import javafx.scene.effect.DropShadow;
@@ -150,7 +149,6 @@ public class PlaybackOverlayPane extends StackPane {
 
           HBox.setHgrow(this, Priority.ALWAYS);
           getChildren().add(new Label() {{
-
             textProperty().bind(Bindings.when(serieName.isNotNull()).then(serieName).otherwise(title));
             getStyleClass().add("video-title");
             setEffect(SpecialEffects.createNeonEffect(64));
@@ -196,12 +194,12 @@ public class PlaybackOverlayPane extends StackPane {
       add(conditionalStateOverlay, 1, 2);
     }});
 
-    sceneProperty().addListener(new ChangeListener<Scene>() {
-      @Override
-      public void changed(ObservableValue<? extends Scene> observable, Scene oldValue, Scene newValue) {
-        if(newValue != null) {
-          fadeInSustainAndFadeOut.playFromStart();
-        }
+    sceneProperty().addListener(o -> {
+      if(getScene() == null) {
+        fadeInSustainAndFadeOut.stop();
+      }
+      else {
+        fadeInSustainAndFadeOut.playFromStart();
       }
     });
 
