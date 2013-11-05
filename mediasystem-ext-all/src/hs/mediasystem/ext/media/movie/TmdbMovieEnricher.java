@@ -92,27 +92,29 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
             System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - Looking to match: " + searchString + "; year = " + year);
 
             for(MovieDb movieDb : getTMDB().searchMovie(searchString, "en", false)) {
-              MatchType nameMatchType = MatchType.NAME;
-              Integer movieYear = extractYear(DATE_FORMAT.parseOrNull(movieDb.getReleaseDate()));
-              double score = 0;
+              if(movieDb != null) {  // For "Robocop", this apparently can return null in the list??
+                MatchType nameMatchType = MatchType.NAME;
+                Integer movieYear = extractYear(DATE_FORMAT.parseOrNull(movieDb.getReleaseDate()));
+                double score = 0;
 
-              if(year != null && movieYear != null) {
-                if(year.equals(movieYear)) {
-                  nameMatchType = MatchType.NAME_AND_YEAR;
-                  score += 45;
+                if(year != null && movieYear != null) {
+                  if(year.equals(movieYear)) {
+                    nameMatchType = MatchType.NAME_AND_YEAR;
+                    score += 45;
+                  }
+                  else if(Math.abs(year - movieYear) == 1) {
+                    score += 5;
+                  }
                 }
-                else if(Math.abs(year - movieYear) == 1) {
-                  score += 5;
-                }
+
+                double matchScore = Levenshtein.compare(movieDb.getTitle().toLowerCase(), searchString.toLowerCase());
+
+                score += matchScore * 55;
+
+                scores.add(new Score(movieDb, nameMatchType, score));
+                String name = movieDb.getTitle() + (movieDb.getOriginalTitle() != null ? " (" + movieDb.getOriginalTitle() + ")" : "");
+                System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - " + String.format("Match: %5.1f (%4.2f) IMDB: %9s YEAR: %s -- %s", score, matchScore, movieDb.getImdbID(), movieDb.getReleaseDate(), name));
               }
-
-              double matchScore = Levenshtein.compare(movieDb.getTitle().toLowerCase(), searchString.toLowerCase());
-
-              score += matchScore * 55;
-
-              scores.add(new Score(movieDb, nameMatchType, score));
-              String name = movieDb.getTitle() + (movieDb.getOriginalTitle() != null ? " (" + movieDb.getOriginalTitle() + ")" : "");
-              System.out.println("[FINE] TmdbMovieEnricher.identifyItem() - " + String.format("Match: %5.1f (%4.2f) IMDB: %9s YEAR: %s -- %s", score, matchScore, movieDb.getImdbID(), movieDb.getReleaseDate(), name));
             }
 
             if(!scores.isEmpty()) {
