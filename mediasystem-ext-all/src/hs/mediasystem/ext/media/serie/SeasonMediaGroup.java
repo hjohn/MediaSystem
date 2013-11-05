@@ -36,23 +36,18 @@ public class SeasonMediaGroup extends AbstractMediaGroup {
     Collections.sort(mediaItems, EpisodeComparator.INSTANCE);
     List<MediaNode> nodes = new ArrayList<>();
     String previousSeasonName = null;
+    MediaNode seasonNode = null;
 
     for(MediaItem mediaItem : mediaItems) {
       String seasonName = determineSeasonName(mediaItem);
-      MediaNode seasonNode;
 
-      if(seasonName.equals(previousSeasonName)) {
-        seasonNode = nodes.get(nodes.size() - 1);
-      }
-      else {
-        Season mediaRoot = new Season(parentMediaRoot, seasonName);
-
-        seasonNode = new MediaNode(mediaRoot, determineShortSeasonName(mediaItem), true, false, null);
+      if(seasonNode == null || !seasonName.equals(previousSeasonName)) {
+        seasonNode = new MediaNode("season[" + seasonName + "]", seasonName, determineShortSeasonName(mediaItem), false);
 
         nodes.add(seasonNode);
       }
 
-      ((Season)seasonNode.getMediaRoot()).add(mediaItem);
+      seasonNode.add(new MediaNode(mediaItem));
 
       previousSeasonName = seasonName;
     }

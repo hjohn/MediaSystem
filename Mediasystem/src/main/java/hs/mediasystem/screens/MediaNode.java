@@ -65,6 +65,37 @@ public class MediaNode {
     }
   }
 
+  public MediaNode(String id, String title, String shortTitle, boolean isLeaf, List<MediaNode> children) {
+    Media<?> media = new SpecialItem(title);
+
+    assert !id.contains("/");
+    assert !id.contains(":");
+
+    this.children = children == null ? new ArrayList<>() : new ArrayList<>(children);
+    this.mediaItem = null;
+
+    this.serieName = new SimpleStringProperty();
+    this.title = new SimpleStringProperty(title);
+    this.sequence = new SimpleStringProperty();
+    this.subtitle = new SimpleStringProperty();
+    ObservableMap<String, Object> observableHashMap = FXCollections.observableHashMap();
+    this.properties =  new SimpleObjectProperty<>(observableHashMap);
+
+    ObservableMap<Class<?>, Object> data = FXCollections.observableHashMap();
+
+    data.put(Media.class, media);
+
+    this.id = id;
+    this.mediaData = new SimpleEntityProperty<>(this, "mediaData");
+    this.shortTitle = shortTitle == null ? media.title.get() : shortTitle;
+    this.media = new SimpleEntityProperty<>(this, "media");
+    this.media.set(media);
+
+    this.isLeaf = isLeaf;
+    this.dataType = Media.class;
+    this.showTopLevelExpanded = false;
+  }
+
   public MediaNode(MediaRoot mediaRoot, String shortTitle, boolean showTopLevelExpanded, boolean isLeaf, MediaGroup mediaGroup) {
     String id = mediaRoot.getId().toString() + "[" + (mediaGroup != null ? mediaGroup.getId() : mediaRoot.getRootName()) + "]";
     Media<?> media = new SpecialItem(mediaRoot.getRootName());
@@ -116,6 +147,15 @@ public class MediaNode {
 
   public String getShortTitle() {
     return shortTitle;
+  }
+
+  public void add(MediaNode child) {
+    if(child.parent != null) {
+      throw new IllegalStateException("cannot add child twice: " + child);
+    }
+
+    child.parent = this;
+    children.add(child);
   }
 
   public int indexOf(MediaNode child) {
