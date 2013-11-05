@@ -114,7 +114,7 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation {
               long position = player.getPosition();
 
               if(position > 30 * 1000 && position < length * 9 / 10) {
-                resumePosition = (int)(position / 1000);
+                resumePosition = (int)(position / 1000) - 10;
               }
 
               if(Math.abs(mediaData.resumePosition.get() - resumePosition) > 10) {
