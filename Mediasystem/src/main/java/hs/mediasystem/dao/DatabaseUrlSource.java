@@ -87,8 +87,6 @@ public final class DatabaseUrlSource implements Source<byte[]> {
   }
 
   private byte[] getData() {
-    System.out.println("[FINE] DatabaseImageSource.getData() - Loading data '" + url + "'");
-
     try(Transaction transaction = database.beginReadOnlyTransaction()) {
       Image image = transaction.selectUnique(Image.class, "url = ?", url);
 
