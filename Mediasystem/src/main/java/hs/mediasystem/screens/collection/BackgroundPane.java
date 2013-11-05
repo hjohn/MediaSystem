@@ -24,7 +24,7 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
 public class BackgroundPane extends StackPane {
-  private static final Duration SETTLE_DURATION = Duration.millis(200);
+  private static final Duration SETTLE_DURATION = Duration.millis(500);  // TODO this helps "prevent" null images being shown between series and serie switches, but not always... should be resolved on a series/serie level instead
   private static final Image EMPTY_IMAGE = new Image(new ByteArrayInputStream(new byte[0]));
 
   private final ObjectProperty<MediaNode> mediaNode = new SimpleObjectProperty<>();
