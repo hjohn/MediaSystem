@@ -1,5 +1,6 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.util.Dialog;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -10,6 +11,10 @@ public class MainLocationPresentation {
 
   public MainLocationPresentation(ProgramController programController) {
     this.programController = programController;
+  }
+
+  public <R> R showSynchronousDialog(Dialog<R> dialog) {
+    return programController.showSynchronousDialog(dialog);
   }
 
   // TODO temporary
