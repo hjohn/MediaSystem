@@ -4,7 +4,6 @@ import hs.mediasystem.entity.SimpleEntityProperty;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.MediaRoot;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,8 +20,7 @@ public class MediaNode {
   public final SimpleEntityProperty<MediaData> mediaData;
   public final SimpleEntityProperty<Media<?>> media;
 
-  private MediaGroup mediaGroup;
-  private MediaItem mediaItem;
+  private final MediaItem mediaItem;
 
   public MediaItem getMediaItem() { return mediaItem; }
 
@@ -36,11 +34,10 @@ public class MediaNode {
   private final String shortTitle;
   private final boolean isLeaf;
   private final Class<?> dataType;
-  private final boolean showTopLevelExpanded;
 
-  private MediaRoot mediaRoot;
+  private final List<MediaNode> children;
+
   private MediaNode parent;
-  private List<MediaNode> children;
 
   public MediaNode(MediaItem mediaItem) {
     assert mediaItem != null;
@@ -58,11 +55,7 @@ public class MediaNode {
     this.shortTitle = "";
     this.isLeaf = true;
     this.dataType = mediaItem.getDataType();
-    this.showTopLevelExpanded = false;
-
-    if(mediaItem instanceof MediaRoot) {
-      this.mediaRoot = (MediaRoot)mediaItem;
-    }
+    this.children = new ArrayList<>();
   }
 
   public MediaNode(String id, String title, String shortTitle, boolean isLeaf, List<MediaNode> children) {
@@ -93,44 +86,10 @@ public class MediaNode {
 
     this.isLeaf = isLeaf;
     this.dataType = Media.class;
-    this.showTopLevelExpanded = false;
   }
 
-  public MediaNode(MediaRoot mediaRoot, String shortTitle, boolean showTopLevelExpanded, boolean isLeaf, MediaGroup mediaGroup) {
-    String id = mediaRoot.getId().toString() + "[" + (mediaGroup != null ? mediaGroup.getId() : mediaRoot.getRootName()) + "]";
-    Media<?> media = new SpecialItem(mediaRoot.getRootName());
-
-    assert !id.contains("/");
-    assert !id.contains(":");
-
-    this.mediaGroup = mediaGroup;
-
-    this.mediaRoot = mediaRoot;
-    this.showTopLevelExpanded = showTopLevelExpanded;
-
-    this.serieName = new SimpleStringProperty();
-    this.title = new SimpleStringProperty(media.title.get());
-    this.sequence = new SimpleStringProperty();
-    this.subtitle = new SimpleStringProperty();
-    ObservableMap<String, Object> observableHashMap = FXCollections.observableHashMap();
-    this.properties =  new SimpleObjectProperty<>(observableHashMap);
-
-    ObservableMap<Class<?>, Object> data = FXCollections.observableHashMap();
-
-    data.put(Media.class, media);
-
-    this.id = id;
-    this.mediaData = new SimpleEntityProperty<>(this, "mediaData");
-    this.shortTitle = shortTitle == null ? media.title.get() : shortTitle;
-    this.media = new SimpleEntityProperty<>(this, "media");
-    this.media.set(media);
-
-    this.isLeaf = isLeaf;
-    this.dataType = Media.class;
-  }
-
-  public MediaRoot getMediaRoot() {
-    return mediaRoot;
+  public MediaNode(String id, String title, String shortTitle, boolean isLeaf) {
+    this(id, title, shortTitle, isLeaf, null);
   }
 
   public Class<?> getDataType() {
@@ -158,33 +117,16 @@ public class MediaNode {
     children.add(child);
   }
 
-  public int indexOf(MediaNode child) {
-    return getChildren().indexOf(child);
-  }
-
-  private void setChildren(List<MediaNode> children) {
-    for(MediaNode child : children) {
-      if(child.parent != null) {
-        throw new IllegalStateException("cannot add child twice: " + child);
-      }
-
-      child.parent = this;
+  public MediaNode findMediaNodeById(String id) {
+    if(this.id.equalsIgnoreCase(id)) {
+      return this;
     }
 
-    this.children = children;
-  }
+    for(MediaNode node : children) {
+      MediaNode matchingNode = node.findMediaNodeById(id);
 
-  public MediaNode findMediaNode(String id) {
-    for(MediaNode node : getChildren()) {
-      if(node.getId().equalsIgnoreCase(id)) {
-        return node;
-      }
-      else if(!node.isLeaf()) {
-        MediaNode childNode = node.findMediaNode(id);
-
-        if(childNode != null) {
-          return childNode;
-        }
+      if(matchingNode != null) {
+        return matchingNode;
       }
     }
 
@@ -192,25 +134,6 @@ public class MediaNode {
   }
 
   public List<MediaNode> getChildren() {
-    if(children == null) {
-      List<MediaNode> children = new ArrayList<>();
-
-      if(mediaRoot != null) {
-        List<? extends MediaItem> mediaItems = new ArrayList<>(mediaRoot.getItems());
-
-        if(mediaGroup != null) {
-          children.addAll(mediaGroup.getMediaNodes(mediaRoot, mediaItems));
-        }
-        else {
-          for(MediaItem mediaItem : mediaItems) {
-            children.add(new MediaNode(mediaItem));
-          }
-        }
-      }
-
-      setChildren(children);
-    }
-
     return Collections.unmodifiableList(children);
   }
 
@@ -222,11 +145,6 @@ public class MediaNode {
    */
   public boolean isLeaf() {
     return isLeaf;
-  }
-
-  // Whether or not the top most level of the tree should be displayed as tabs
-  public boolean expandTopLevel() {
-    return showTopLevelExpanded;
   }
 
   @Override

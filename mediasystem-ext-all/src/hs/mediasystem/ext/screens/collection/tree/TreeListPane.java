@@ -12,10 +12,16 @@ import java.util.List;
 import java.util.Set;
 
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -43,10 +49,11 @@ public class TreeListPane extends BorderPane {
   private static final KeyCombination LEFT = new KeyCodeCombination(KeyCode.LEFT);
   private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
 
-  public final ObjectProperty<MediaNode> rootMediaNode = new SimpleObjectProperty<>();
+  public final ObservableList<MediaNode> mediaNodes = FXCollections.observableArrayList();
   public final ObjectProperty<MediaNode> focusedMediaNode = new SimpleObjectProperty<>();
   public final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected = new SimpleObjectProperty<>();
   public final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect = new SimpleObjectProperty<>();
+  public final BooleanProperty expandTopLevel = new SimpleBooleanProperty();
 
   private final TreeView<MediaNode> treeView = new TreeView<>();
 
@@ -138,11 +145,17 @@ public class TreeListPane extends BorderPane {
       }
     });
 
-    rootMediaNode.addListener(new ChangeListener<MediaNode>() {
+    expandTopLevel.addListener(new InvalidationListener() {
       @Override
-      public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
-        setRoot(current);
-        setSelectedNode(focusedMediaNode.get());
+      public void invalidated(Observable observable) {
+        buildTree();
+      }
+    });
+
+    mediaNodes.addListener(new ListChangeListener<MediaNode>() {
+      @Override
+      public void onChanged(ListChangeListener.Change<? extends MediaNode> change) {
+        buildTree();
       }
     });
 
@@ -150,7 +163,7 @@ public class TreeListPane extends BorderPane {
     setCenter(treeView);
   }
 
-  private void setRoot(final MediaNode root) {
+  private void buildTree() {
     treeView.setCellFactory(new Callback<TreeView<MediaNode>, TreeCell<MediaNode>>() {
       @Override
       public TreeCell<MediaNode> call(TreeView<MediaNode> param) {
@@ -160,8 +173,8 @@ public class TreeListPane extends BorderPane {
 
     filter.getChildren().clear();
 
-    if(root.expandTopLevel()) {
-      for(MediaNode node : root.getChildren()) {
+    if(expandTopLevel.get()) {
+      for(MediaNode node : mediaNodes) {
         Label label = new Label(node.getShortTitle());
 
         filter.getChildren().add(label);
@@ -169,8 +182,10 @@ public class TreeListPane extends BorderPane {
       }
     }
     else {
-      treeView.setRoot(new MediaNodeTreeItem(root, false));
+      treeView.setRoot(new MediaNodeTreeItem(new MediaNode("root", "root", "root", false, mediaNodes), false));
     }
+
+    setSelectedNode(focusedMediaNode.get());
   }
 
   @Override
@@ -265,8 +280,6 @@ public class TreeListPane extends BorderPane {
       stack.add(0, stack.get(0).getParent());
     }
 
-    stack.remove(0);
-
     /*
      * First level of the stack matches the filter (if used).  This needs to be set
      * correctly first to create a new root in the TreeView.
@@ -283,7 +296,7 @@ public class TreeListPane extends BorderPane {
     }
 
     /*
-     * Get the TreeView's root, which either existed already or was yet setup by
+     * Get the TreeView's root, which either existed already or was just setup by
      * adjusting the filter.
      */
 

@@ -15,6 +15,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.ContentDisplay;
@@ -40,7 +43,7 @@ public class BannerListPane extends BorderPane {
   private static final KeyCombination SPACE = new KeyCodeCombination(KeyCode.SPACE);
   private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
 
-  public final ObjectProperty<MediaNode> rootMediaNode = new SimpleObjectProperty<>();
+  public final ObservableList<MediaNode> mediaNodes = FXCollections.observableArrayList();
   public final ObjectProperty<MediaNode> focusedMediaNode = new SimpleObjectProperty<>();
   public final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected = new SimpleObjectProperty<>();
   public final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect = new SimpleObjectProperty<>();
@@ -150,31 +153,27 @@ public class BannerListPane extends BorderPane {
       }
     });
 
-    rootMediaNode.addListener(new ChangeListener<MediaNode>() {
+    mediaNodes.addListener(new ListChangeListener<MediaNode>() {
       @Override
-      public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
-        setRoot(current);
+      public void onChanged(ListChangeListener.Change<? extends MediaNode> change) {
+        tableView.getItems().clear();
+        DuoMediaNode duoMediaNode = null;
+
+        for(MediaNode node : mediaNodes) {
+          if(duoMediaNode != null) {
+            duoMediaNode.rightProperty().set(node);
+            duoMediaNode = null;
+          }
+          else {
+            duoMediaNode = new DuoMediaNode();
+            duoMediaNode.leftProperty().set(node);
+            tableView.getItems().add(duoMediaNode);
+          }
+        }
       }
     });
 
     setCenter(tableView);
-  }
-
-  private void setRoot(final MediaNode root) {
-    tableView.getItems().clear();
-    DuoMediaNode duoMediaNode = null;
-
-    for(MediaNode node : root.getChildren()) {
-      if(duoMediaNode != null) {
-        duoMediaNode.rightProperty().set(node);
-        duoMediaNode = null;
-      }
-      else {
-        duoMediaNode = new DuoMediaNode();
-        duoMediaNode.leftProperty().set(node);
-        tableView.getItems().add(duoMediaNode);
-      }
-    }
   }
 
   @Override
@@ -241,23 +240,35 @@ public class BannerListPane extends BorderPane {
     }
 
     if(tableView.getItems().size() > 0) {
-      int index = mediaNode == null ? 0 : mediaNode.getParent().indexOf(mediaNode);
+      ObservableList<DuoMediaNode> items = tableView.getItems();
+      TableColumn<DuoMediaNode, MediaNode> column = null;
 
-      if(index == -1) {
-        index = 0;
-      }
+      for(int row = 0; row < items.size(); row++) {
+        DuoMediaNode duoMediaNode = items.get(row);
 
-      final int finalIndex = index;
-
-      tableView.getFocusModel().focus(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
-      tableView.getSelectionModel().select(finalIndex / 2, finalIndex % 2 == 0 ? leftColumn : rightColumn);
-
-      Platform.runLater(new Runnable() {
-        @Override
-        public void run() {
-          tableView.scrollTo(finalIndex / 2);
+        if(duoMediaNode.getLeft().equals(mediaNode)) {
+          column = leftColumn;
         }
-      });
+        else if(duoMediaNode.getRight().equals(mediaNode)) {
+          column = rightColumn;
+        }
+
+        if(column != null) {
+          tableView.getFocusModel().focus(row, column);
+          tableView.getSelectionModel().select(row, column);
+
+          final int finalRow = row;
+
+          Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+              tableView.scrollTo(finalRow);
+            }
+          });
+
+          break;
+        }
+      }
     }
   }
 }

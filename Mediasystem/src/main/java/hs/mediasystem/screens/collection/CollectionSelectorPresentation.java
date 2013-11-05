@@ -13,8 +13,12 @@ import hs.mediasystem.util.GridPaneUtil;
 
 import java.util.Set;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
@@ -26,8 +30,9 @@ import javax.inject.Inject;
 
 public class CollectionSelectorPresentation {
   public final ObjectProperty<MediaNode> focusedMediaNode = new SimpleObjectProperty<>();
-  public final ObjectProperty<MediaNode> rootMediaNode = new SimpleObjectProperty<>();
+  public final ObservableList<MediaNode> mediaNodes = FXCollections.observableArrayList();
   public final ObjectProperty<Node> defaultInputFocus = new SimpleObjectProperty<>();
+  public final BooleanProperty expandTopLevel = new SimpleBooleanProperty();
 
   public final ObjectProperty<EventHandler<MediaNodeEvent>> onSelect = new SimpleObjectProperty<>();
   public final EventHandler<MediaNodeEvent> onInfoSelect = new InfoEventHandler();  // TODO ugly

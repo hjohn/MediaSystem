@@ -11,6 +11,7 @@ import hs.mediasystem.screens.collection.detail.StandardDetailPaneAreaLayout;
 
 import java.util.Set;
 
+import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 
 import javax.inject.Inject;
@@ -57,8 +58,10 @@ public class DetailAndListLayout implements UserLayout<MediaRoot, CollectionSele
 
     detailPane.content.bind(presentation.focusedMediaNode);
 
-    listPane.rootMediaNode.bindBidirectional(presentation.rootMediaNode);
+    Bindings.bindContentBidirectional(listPane.mediaNodes, presentation.mediaNodes);
+
     listPane.focusedMediaNode.bindBidirectional(presentation.focusedMediaNode);
+    listPane.expandTopLevel.bindBidirectional(presentation.expandTopLevel);
     listPane.onNodeSelected.bindBidirectional(presentation.onSelect);
     listPane.onNodeAlternateSelect.set(presentation.onInfoSelect);
 

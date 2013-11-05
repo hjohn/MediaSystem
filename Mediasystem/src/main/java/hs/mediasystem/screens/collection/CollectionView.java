@@ -2,22 +2,21 @@ package hs.mediasystem.screens.collection;
 
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.screens.Layout;
-import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.PresentationPane;
 import hs.mediasystem.screens.UserLayout;
 import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
-
-import java.util.List;
-
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyCode;
@@ -45,9 +44,14 @@ public class CollectionView extends PresentationPane {
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
 
   /**
-   * The collection root under which the media items to be displayed are located.
+   * The MediaNodes to display.
    */
-  public final ObjectProperty<MediaRoot> mediaRoot = new SimpleObjectProperty<>();
+  public final ObservableList<MediaNode> mediaNodes = FXCollections.observableArrayList();
+
+  /**
+   * Whether or not the top level of MediaNodes should be displayed in expanded form.
+   */
+  public final BooleanProperty expandTopLevel = new SimpleBooleanProperty();
 
   /**
    * The currently focused media node.
@@ -58,11 +62,6 @@ public class CollectionView extends PresentationPane {
    * The current active layout.
    */
   public final ObjectProperty<UserLayout<MediaRoot, CollectionSelectorPresentation>> layout = new SimpleObjectProperty<>();
-
-  /**
-   * The current active group set.
-   */
-  public final ObjectProperty<MediaGroup> groupSet = new SimpleObjectProperty<>();
 
   /**
    * Triggered when a MediaNode is selected.
@@ -76,7 +75,6 @@ public class CollectionView extends PresentationPane {
 
   private final BackgroundPane backgroundPane = new BackgroundPane();
   private final StackPane collectionSelectorPane = new StackPane();
-  private final ObjectProperty<MediaNode> rootMediaNode = new SimpleObjectProperty<>();
 
   private CollectionSelectorPresentation currentCollectionSelectorPresentation;
 
@@ -114,42 +112,25 @@ public class CollectionView extends PresentationPane {
       public void changed(ObservableValue<? extends Layout<MediaRoot, CollectionSelectorPresentation>> observableValue, Layout<MediaRoot, CollectionSelectorPresentation> oldLayout, Layout<MediaRoot, CollectionSelectorPresentation> layout) {
         if(currentCollectionSelectorPresentation != null) {
           currentCollectionSelectorPresentation.focusedMediaNode.unbindBidirectional(focusedMediaNode);
+          currentCollectionSelectorPresentation.expandTopLevel.unbindBidirectional(expandTopLevel);
           currentCollectionSelectorPresentation.onSelect.unbindBidirectional(onSelect);
-          currentCollectionSelectorPresentation.rootMediaNode.unbindBidirectional(rootMediaNode);
+
+          Bindings.unbindContent(currentCollectionSelectorPresentation.mediaNodes, mediaNodes);
         }
 
         if(layout != null) {
           currentCollectionSelectorPresentation = layout.createPresentation();
 
-          currentCollectionSelectorPresentation.rootMediaNode.bindBidirectional(rootMediaNode);
+          Bindings.bindContent(currentCollectionSelectorPresentation.mediaNodes, mediaNodes);
+
           currentCollectionSelectorPresentation.focusedMediaNode.bindBidirectional(focusedMediaNode);
+          currentCollectionSelectorPresentation.expandTopLevel.bindBidirectional(expandTopLevel);
           currentCollectionSelectorPresentation.onSelect.bindBidirectional(onSelect);
 
           collectionSelectorPane.getChildren().setAll(layout.createView(currentCollectionSelectorPresentation));
         }
       }
     });
-
-    /*
-     * Listeners for changes that require rootMediaNode to be updated
-     */
-
-    InvalidationListener rootMediaNodeUpdater = new InvalidationListener() {
-      @Override
-      public void invalidated(Observable observable) {
-        MediaGroup mediaGroup = groupSet.get();
-
-        if(mediaGroup != null && mediaRoot.get() != null) {
-          // TODO RootNode is a stupid concept, there is really no root node needed -- items should just be an obervablelist -- this will simplify MediaNode code as well
-          MediaNode root = new MediaNode(mediaRoot.get(), null, mediaGroup.showTopLevelExpanded(), false, mediaGroup);
-
-          rootMediaNode.set(root);
-        }
-      }
-    };
-
-    mediaRoot.addListener(rootMediaNodeUpdater);
-    groupSet.addListener(rootMediaNodeUpdater);
   }
 
   @Override
@@ -168,22 +149,17 @@ public class CollectionView extends PresentationPane {
     MediaNode nodeToSelect = null;
 
     if(id != null) {
-      nodeToSelect = rootMediaNode.get().findMediaNode(id);
-    }
+      for(MediaNode mediaNode : mediaNodes) {
+        nodeToSelect = mediaNode.findMediaNodeById(id);
 
-    if(nodeToSelect == null) {
-      List<MediaNode> children = rootMediaNode.get().getChildren();
-
-      if(!children.isEmpty()) {
-        if(groupSet.get().showTopLevelExpanded()) {
-          if(!children.get(0).getChildren().isEmpty()) {
-            nodeToSelect = children.get(0).getChildren().get(0);
-          }
-        }
-        else {
-          nodeToSelect = children.get(0);
+        if(nodeToSelect != null) {
+          break;
         }
       }
+    }
+
+    if(nodeToSelect == null && !mediaNodes.isEmpty()) {
+      nodeToSelect = mediaNodes.get(0);
     }
 
     focusedMediaNode.set(nodeToSelect);

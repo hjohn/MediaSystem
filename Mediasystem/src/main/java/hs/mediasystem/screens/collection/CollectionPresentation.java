@@ -29,7 +29,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyListProperty;
+import javafx.beans.property.ReadOnlyListWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -41,11 +46,23 @@ import javafx.util.StringConverter;
 import javax.inject.Inject;
 
 public class CollectionPresentation extends MainLocationPresentation {
+  private final ReadOnlyListWrapper<MediaNode> mediaNodesWrapper = new ReadOnlyListWrapper<>(FXCollections.<MediaNode>observableArrayList());
+  private final ReadOnlyBooleanWrapper expandTopLevelWrapper = new ReadOnlyBooleanWrapper();
 
   /**
    * The collection root under which the media items to be displayed are located.
    */
   public final ObjectProperty<MediaRoot> mediaRoot = new SimpleObjectProperty<>();
+
+  /**
+   * The MediaNodes to display.
+   */
+  public final ReadOnlyListProperty<MediaNode> mediaNodes = mediaNodesWrapper.getReadOnlyProperty();
+
+  /**
+   * Whether or not the top level of MediaNodes should be displayed in expanded form.
+   */
+  public final ReadOnlyBooleanProperty expandTopLevel = expandTopLevelWrapper.getReadOnlyProperty();
 
   /**
    * The current active layout.
@@ -94,9 +111,6 @@ public class CollectionPresentation extends MainLocationPresentation {
       public void changed(ObservableValue<? extends Location> observableValue, Location old, Location current) {
         if(current instanceof CollectionLocation) {
           CollectionLocation collectionLocation = (CollectionLocation)current;
-          MediaRoot mediaRoot = collectionLocation.getMediaRoot();
-
-          CollectionPresentation.this.mediaRoot.set(mediaRoot);
 
           /*
            * First clear the current Layout so it will not respond to changes made to the groupSet --
@@ -107,11 +121,13 @@ public class CollectionPresentation extends MainLocationPresentation {
           userLayoutSettingUpdater.clearBackingSetting();  // clear this first otherwise it will try to store the change of layout to null
           layout.set(null);
 
+          mediaRoot.set(collectionLocation.getMediaRoot());
+
           /*
            * Update available group sets and sort them.
            */
 
-          List<MediaGroup> mediaGroups = new ArrayList<>(injector.getInstances(MediaGroup.class, AnnotationDescriptor.describe(MediaRootType.class, new Value("value", mediaRoot.getClass()))));
+          List<MediaGroup> mediaGroups = new ArrayList<>(injector.getInstances(MediaGroup.class, AnnotationDescriptor.describe(MediaRootType.class, new Value("value", collectionLocation.getMediaRoot().getClass()))));
 
           if(mediaGroups.isEmpty()) {
 
@@ -147,7 +163,7 @@ public class CollectionPresentation extends MainLocationPresentation {
            * Change setting name for mediaGroupSettingUpdater as each MediaRoot has its own MediaGroup setting.
            */
 
-          mediaGroupSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, mediaRoot.getId().toString("SortGroup"));
+          mediaGroupSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, mediaRoot.get().getId().toString("SortGroup"));
 
           /*
            * Restore the last selected MediaGroup for this MediaRoot.
@@ -161,7 +177,7 @@ public class CollectionPresentation extends MainLocationPresentation {
            * Update suitable layouts and sort them.
            */
 
-          suitableLayouts.setAll(Layout.findAllSuitableLayouts(layouts, mediaRoot.getClass()));
+          suitableLayouts.setAll(Layout.findAllSuitableLayouts(layouts, mediaRoot.get().getClass()));
 
           Collections.sort(suitableLayouts, new Comparator<UserLayout<MediaRoot, CollectionSelectorPresentation>>() {
             @Override
@@ -174,7 +190,7 @@ public class CollectionPresentation extends MainLocationPresentation {
            * Change setting name for userLayoutSettingUpdater as each MediaRoot has its own Layout setting.
            */
 
-          userLayoutSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, mediaRoot.getId().toString("View"));
+          userLayoutSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, mediaRoot.get().getId().toString("View"));
 
           /*
            * Restore the last selected Layout for this MediaRoot.
@@ -188,6 +204,26 @@ public class CollectionPresentation extends MainLocationPresentation {
         }
       }
     });
+
+    /*
+     * Add invalidation listeners to update media nodes.
+     */
+
+    groupSet.addListener(this::createMediaNodes);
+    inclusionFilter.addListener(this::createMediaNodes);
+  }
+
+  private void createMediaNodes(@SuppressWarnings("unused") Observable observable) {
+    mediaNodesWrapper.clear();
+    expandTopLevelWrapper.set(groupSet.get().showTopLevelExpanded());
+
+    List<MediaItem> filteredItems = new ArrayList<>();
+
+    for(MediaItem mediaItem : mediaRoot.get().getItems()) {
+      filteredItems.add(mediaItem);
+    }
+
+    mediaNodesWrapper.setAll(groupSet.get().getMediaNodes(mediaRoot.get(), filteredItems));
   }
 
   /**
@@ -195,8 +231,8 @@ public class CollectionPresentation extends MainLocationPresentation {
    * a drill down or playback depending on the type of node.
    */
   public void handleMediaNodeSelectEvent(MediaNodeEvent event) {
-    if(event.getMediaNode().getMediaRoot() != null) {
-      getProgramController().setLocation(new CollectionLocation(event.getMediaNode().getMediaRoot()));
+    if(event.getMediaNode().getMediaItem() instanceof MediaRoot) {
+      getProgramController().setLocation(new CollectionLocation((MediaRoot)event.getMediaNode().getMediaItem()));
     }
     else {
       getProgramController().play(event.getMediaNode().getMediaItem());

@@ -5,14 +5,12 @@ import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.Location;
 import hs.mediasystem.screens.MediaNode;
-import hs.mediasystem.screens.MediaNodeEvent;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 
 import javax.inject.Inject;
@@ -45,51 +43,48 @@ public class CollectionLayout implements Layout<Location, CollectionPresentation
     CollectionView view = new CollectionView();
 
     // TODO this listener sets the last selected node after every groupset change...
-    // - it is triggered initially because groupsets are set up (good, although it should not need to be a listener for that -- this is why it must be before groupset is bound)
+    // - [no more] it is triggered initially because groupsets are set up (good, although it should not need to be a listener for that -- this is why it must be before groupset is bound)
     // - it is triggered after every groupset change because the View is too stupid to maintain selection itself (bad)
-    view.groupSet.addListener(new InvalidationListener() {
+
+    presentation.groupSet.addListener(new InvalidationListener() {
       @Override
       public void invalidated(Observable observable) {
-        view.focusedMediaNode.set(null);
-
-        Platform.runLater(new Runnable() {
-          @Override
-          public void run() {
-            String id = settingsStore.getSetting("MediaSystem:Collection", view.mediaRoot.get().getId().toString("LastSelected", view.mediaRoot.get().getRootName()));
-
-            view.selectMediaNodeById(id);
-          }
-        });
+        selectLastSelected(presentation, view);
       }
     });
 
-    view.mediaRoot.bindBidirectional(presentation.mediaRoot);
+    Bindings.bindContentBidirectional(view.mediaNodes, presentation.mediaNodes);
+
     view.layout.bindBidirectional(presentation.layout);
-    view.groupSet.bindBidirectional(presentation.groupSet);
+    view.expandTopLevel.bind(presentation.expandTopLevel);
 
-    view.onSelect.set(new EventHandler<MediaNodeEvent>() {  // WORKAROUND METHOD_REFERENCE
-      @Override
-      public void handle(MediaNodeEvent event) {
-        presentation.handleMediaNodeSelectEvent(event);
-      }
-    });
+    view.onSelect.set(presentation::handleMediaNodeSelectEvent);
+    view.onOptionsSelect.set(presentation::handleOptionsSelectEvent);
 
-    view.onOptionsSelect.set(new EventHandler<ActionEvent>() {  // WORKAROUND METHOD_REFERENCE
-      @Override
-      public void handle(ActionEvent event) {
-        presentation.handleOptionsSelectEvent(event);
-      }
-    });
+    selectLastSelected(presentation, view);
 
     view.focusedMediaNode.addListener(new ChangeListener<MediaNode>() {
       @Override
       public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
         if(current != null) {
-          settingsStore.storeSetting("MediaSystem:Collection", PersistLevel.TEMPORARY, view.mediaRoot.get().getId().toString("LastSelected", view.mediaRoot.get().getRootName()), current.getId());
+          settingsStore.storeSetting("MediaSystem:Collection", PersistLevel.TEMPORARY, presentation.mediaRoot.get().getId().toString("LastSelected", presentation.mediaRoot.get().getRootName()), current.getId());
         }
       }
     });
 
     return view;
+  }
+
+  private void selectLastSelected(CollectionPresentation presentation, CollectionView view) {
+    view.focusedMediaNode.set(null);
+
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+        String id = settingsStore.getSetting("MediaSystem:Collection", presentation.mediaRoot.get().getId().toString("LastSelected", presentation.mediaRoot.get().getRootName()));
+
+        view.selectMediaNodeById(id);
+      }
+    });
   }
 }
