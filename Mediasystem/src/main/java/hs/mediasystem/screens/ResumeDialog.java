@@ -19,7 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
-public class ResumeDialog extends DialogStage {
+public class ResumeDialog extends DialogStage<Void> {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
 
   private final MediaItem mediaItem;

@@ -1,5 +1,7 @@
 package hs.mediasystem.util;
 
+import com.sun.javafx.tk.Toolkit;
+
 import hs.mediasystem.screens.NavigationEvent;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -13,11 +15,12 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-public class DialogPane extends StackPane implements Dialog {
+public class DialogPane<R> extends StackPane implements Dialog<R> {
   private final StackPane stackPane = new StackPane();
 
   private Stage owner;
   private Node oldFocusOwner;
+  private boolean synchronous;
 
   public DialogPane() {
     getStylesheets().add("dialog/dialog.css");
@@ -59,12 +62,20 @@ public class DialogPane extends StackPane implements Dialog {
     parent.setEffect(null);
   }
 
-  @Override
-  public void showDialog(Stage parentStage, boolean synchronous) {
-    if(synchronous) {
-      throw new UnsupportedOperationException();
-    }
+  /**
+   * This method can be overriden to provide the result of this dialog when it is
+   * closed.
+   *
+   * @return the result of this dialog
+   */
+  protected R getResult() {
+    return null;
+  }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public R showDialog(Stage parentStage, boolean synchronous) {
+    this.synchronous = synchronous;
     this.owner = parentStage;
     this.oldFocusOwner = parentStage.getScene().getFocusOwner();
 
@@ -79,6 +90,12 @@ public class DialogPane extends StackPane implements Dialog {
 
     setParentEffect(root);
     requestFocus();
+
+    if(synchronous) {
+      return (R)Toolkit.getToolkit().enterNestedEventLoop(this);
+    }
+
+    return null;
   }
 
   public void close() {
@@ -91,6 +108,10 @@ public class DialogPane extends StackPane implements Dialog {
 
     if(oldFocusOwner != null) {
       oldFocusOwner.requestFocus();
+    }
+
+    if(synchronous) {
+      Toolkit.getToolkit().exitNestedEventLoop(this, getResult());
     }
   }
 

@@ -16,7 +16,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
-public class OptionDialogPane extends DialogPane {
+public class OptionDialogPane extends DialogPane<Void> {
   private static final KeyCombination TAB = new KeyCodeCombination(KeyCode.TAB);
   private static final KeyCombination SHIFT_TAB = new KeyCodeCombination(KeyCode.TAB, KeyCombination.SHIFT_DOWN);
   private static final KeyCombination DOWN = new KeyCodeCombination(KeyCode.DOWN);

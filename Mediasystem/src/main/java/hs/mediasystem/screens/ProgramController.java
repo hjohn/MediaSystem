@@ -505,8 +505,12 @@ public class ProgramController {
     });
   }
 
-  public void showDialog(Dialog dialog) {
+  public void showDialog(Dialog<?> dialog) {
     sceneManager.displayDialog(dialog);
+  }
+
+  public <R> R showSynchronousDialog(Dialog<R> dialog) {
+    return sceneManager.displaySynchronousDialog(dialog);
   }
 
   private static Node createMessage(final Worker<?> worker) {

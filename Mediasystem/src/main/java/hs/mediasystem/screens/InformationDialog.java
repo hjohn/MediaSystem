@@ -11,7 +11,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-public class InformationDialog extends DialogStage {
+public class InformationDialog extends DialogStage<Void> {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
 
   private final VBox root = new VBox();

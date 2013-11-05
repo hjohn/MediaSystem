@@ -12,7 +12,7 @@ import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
-public class DialogStage extends Stage implements Dialog {
+public class DialogStage<R> extends Stage implements Dialog<R> {
 
   public DialogStage() {
     super(StageStyle.TRANSPARENT);
@@ -53,7 +53,7 @@ public class DialogStage extends Stage implements Dialog {
   }
 
   @Override
-  public final void showDialog(final Stage parent, boolean synchronous) {
+  public final R showDialog(final Stage parent, boolean synchronous) {
     initOwner(parent);
 
     setParentEffect(parent);
@@ -72,6 +72,8 @@ public class DialogStage extends Stage implements Dialog {
     else {
       show();
     }
+
+    return null;
   }
 
   protected void onShow() {

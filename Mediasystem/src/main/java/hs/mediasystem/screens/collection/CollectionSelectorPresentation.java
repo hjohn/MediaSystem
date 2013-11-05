@@ -41,7 +41,7 @@ public class CollectionSelectorPresentation {
     this.layouts = layouts;
   }
 
-  private DialogPane createInformationDialog(final MediaNode mediaNode, Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts) {
+  private DialogPane<?> createInformationDialog(final MediaNode mediaNode, Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts) {
     DetailView detailPane = new DetailView(layouts, true, new AreaLayout() {
       @Override
       public void layout(AreaPane areaPane) {
@@ -80,7 +80,7 @@ public class CollectionSelectorPresentation {
 
     detailPane.content.set(mediaNode);
 
-    DialogPane dialogPane = new DialogPane() {
+    DialogPane<?> dialogPane = new DialogPane<Void>() {
       @Override
       public void close() {
         super.close();
