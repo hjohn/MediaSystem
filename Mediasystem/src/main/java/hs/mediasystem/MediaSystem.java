@@ -1,77 +1,77 @@
 package hs.mediasystem;
 
-// TODO Rename Providers to indicate they are usng the database
-// TODO Empty big detail pane, leads to NPE when pressing back
-// TODO FinishEnrichCallback seems the same everywhere... if not needed can also make better logging
-// TODO Persisters might be able to become part of Provider...
-// TODO If we change Setting to work with Entity.. then DefaultPersistable can be killed + Setting dao can be returned to normal
+// TASK Rename Providers to indicate they are usng the database
+// TASK Empty big detail pane, leads to NPE when pressing back
+// TASK FinishEnrichCallback seems the same everywhere... if not needed can also make better logging
+// TASK Persisters might be able to become part of Provider...
+// TASK If we change Setting to work with Entity.. then DefaultPersistable can be killed + Setting dao can be returned to normal
 
-// TODO Serie without banner doesn't display anything anymoreiu
-// TODO Movie recommendations
-// TODO Get Biography/Birthdate information always from TMDB
+// TASK Serie without banner doesn't display anything anymoreiu
+// TASK Movie recommendations
+// TASK Get Biography/Birthdate information always from TMDB
 
-// TODO Possible to navigate to empty cell at bottom right in two column banner pane
-// TODO Series view, tabs, recently watched...
+// TASK Possible to navigate to empty cell at bottom right in two column banner pane
+// TASK Series view, tabs, recently watched...
 
-// TODO Think about title/subtitle/collections not being part of Item...
+// TASK Think about title/subtitle/collections not being part of Item...
 
-// TODO [Trivial] [Considering] CLEANUP-AFTER-REFACTOR: Add version check
-// TODO [Trivial] Make better use of BundleContext in ProgramController (by classes that have a reference to ProgramController)
-// TODO [Easy] Make default screen number configureable using a Setting --> perhaps just save position automatically (after CTRL-ALT-S press)
+// TASK [Trivial] [Considering] CLEANUP-AFTER-REFACTOR: Add version check
+// TASK [Trivial] Make better use of BundleContext in ProgramController (by classes that have a reference to ProgramController)
+// TASK [Easy] Make default screen number configureable using a Setting --> perhaps just save position automatically (after CTRL-ALT-S press)
 
-// TODO [DetailPane] [Easy] Add Play button in Big Info screen
-// TODO [DetailPane] CLEANUP-AFTER-REFACTOR: Add bypasscache -> need reload meta data option back first
+// TASK [DetailPane] [Easy] Add Play button in Big Info screen
+// TASK [DetailPane] CLEANUP-AFTER-REFACTOR: Add bypasscache -> need reload meta data option back first
 
-// TODO [Trivial] [Considering] Perhaps rename MediaItem to MediaStream class, to make it more clear it represents local/remote streams -- Media class is for Meta Data only, no local data at all
-// TODO CLEANUP-AFTER-REFACTOR: Tasks should display on Task Overlay -> yes...
-// TODO How to order Person->Movie castings? -> Hard to keep it sorted with Comparator as Items might still not be loaded...
+// TASK [Trivial] [Considering] Perhaps rename MediaItem to MediaStream class, to make it more clear it represents local/remote streams -- Media class is for Meta Data only, no local data at all
+// TASK CLEANUP-AFTER-REFACTOR: Tasks should display on Task Overlay -> yes...
+// TASK How to order Person->Movie castings? -> Hard to keep it sorted with Comparator as Items might still not be loaded...
 
-// TODO [DetailPane] Make Castings Row a scrollable control
-// TODO [DetailPane] Files with a db-entry should have Media.class, and those without shouldn't; DetailPanes should be created for these two situations seperately, as well as Cells
-// TODO [DetailPane] [Trivial] [Considering] Make (actor photo) focus more clearly visible (animation perhaps)
-// TODO [DetailPane] Movie Collections should show something fancy on their detail pane, or at the very least display a proper background (Collection view, count, list of items, picture of latest/first (or both), stacked pictures)
+// TASK [DetailPane] Make Castings Row a scrollable control
+// TASK [DetailPane] Files with a db-entry should have Media.class, and those without shouldn't; DetailPanes should be created for these two situations seperately, as well as Cells
+// TASK [DetailPane] [Trivial] [Considering] Make (actor photo) focus more clearly visible (animation perhaps)
+// TASK [DetailPane] Movie Collections should show something fancy on their detail pane, or at the very least display a proper background (Collection view, count, list of items, picture of latest/first (or both), stacked pictures)
 
-// TODO [Trivial] [Considering] Changes for fullscreen display that were lost when switching branches
-// TODO Locations should support specific highlighting of an item (it may be possible to also put the last-selected code in there)
-// TODO Sort out packages
-// TODO Controller.play() might be replaceable with Location
+// TASK [Trivial] [Considering] Changes for fullscreen display that were lost when switching branches
+// TASK Locations should support specific highlighting of an item (it may be possible to also put the last-selected code in there)
+// TASK Sort out packages
+// TASK Controller.play() might be replaceable with Location
 
-// TODO Move stylesheets to bundles
-// TODO Possibly allow focus in multi-line text and actors boxes, for page navigation (dots below the control show number of pages and active page)
-// TODO Introduce back + navigation + select events ; look at navigation in DialogPane... use navigator or use custom backspace handler
+// TASK Move stylesheets to bundles
+// TASK Possibly allow focus in multi-line text and actors boxes, for page navigation (dots below the control show number of pages and active page)
+// TASK Introduce back + navigation + select events ; look at navigation in DialogPane... use navigator or use custom backspace handler
 
-// TODO Create downloadable jar
+// TASK Create downloadable jar
 
-// TODO [Bug] Cells in TreeView sometimes become super wide after switching screens (to different resolutions)
-// TODO [Easy] [Considering] Change pause/mute overlays
-// TODO [Easy] PathSelectOption: Start at last selected path
-// TODO [Easy] BannerListPane and other ListPane really should externalize the cell provider to remove bundlecontext
+// TASK [Bug] Cells in TreeView sometimes become super wide after switching screens (to different resolutions)
+// TASK [Easy] [Considering] Change pause/mute overlays
+// TASK [Easy] PathSelectOption: Start at last selected path
+// TASK [Easy] BannerListPane and other ListPane really should externalize the cell provider to remove bundlecontext
 
-// TODO [Considering] Store scroll position (requires hacking skin)
+// TASK [Considering] Store scroll position (requires hacking skin)
 
-// TODO Banner view -- change layout to get bigger banners -> DEPENDS ON: provider specific detail panes -> perhaps provide detail panes of varying sizes (1/2, 1/3, 1/4)
-// TODO [Easy] Option screen: re-highlight last used option
+// TASK Banner view -- change layout to get bigger banners -> DEPENDS ON: provider specific detail panes -> perhaps provide detail panes of varying sizes (1/2, 1/3, 1/4)
+// TASK [Easy] Option screen: re-highlight last used option
 
 // Big stuff:
-// TODO Movie gallery layout ext (cover flow)
-// TODO Resume functionality
+// TASK Movie gallery layout ext (cover flow)
+// TASK Resume functionality
 //      - Look into SettingsStore PersistLevel system; determine useability for storing settings per video (like resume)
 //      - Make subtitles more persistent by storing them with file (or simply in db?) required if you want to show same sub again after resuming
 //      - Add extra fields to MediaData, like subtitle/audio delay, selected subtitle/audio track, that are important when resuming movie
 //      - Actually setting all player parameters to correct positions
-// TODO Improved Special Handling, including real specials and just bonus stuff
+// TASK Improved Special Handling, including real specials and just bonus stuff
 
 // OSGI:
-// TODO [Bug] Reloading of Bundles fails, needs a fix
-// TODO Externalize more of the services being registered in FrontEnd
+// TASK [Bug] Reloading of Bundles fails, needs a fix
+// TASK Externalize more of the services being registered in FrontEnd
 
 // Other:
-// TODO [Easy] [Considering] Rename Filter to TabGroup -- or refactor completely to use RadioButton API
-// TODO Subtitle Provider Podnapisi
-// TODO [SelectMedia] Filtering possibilities (Action movies, Recent movies, etc)
+// TASK [Easy] [Considering] Rename Filter to TabGroup -- or refactor completely to use RadioButton API
+// TASK Subtitle Provider Podnapisi
+// TASK [SelectMedia] Filtering possibilities (Action movies, Recent movies, etc)
 
 // Low priority:
-// TODO Some form of remote control support / Lirc support --> EventGhost makes this unnecessary, keyboard control suffices
+// TASK Some form of remote control support / Lirc support --> EventGhost makes this unnecessary, keyboard control suffices
 
 // Possible Configuration Options:
 // - Default Screen number
@@ -326,6 +326,7 @@ public class MediaSystem {
     catch(FileNotFoundException e) {
       System.out.println("[INFO] File 'logging.properties' not found, using defaults");
     }
+
 
     System.setProperty("prism.lcdtext", "false");
 //    System.setProperty("prism.verbose", "true");
