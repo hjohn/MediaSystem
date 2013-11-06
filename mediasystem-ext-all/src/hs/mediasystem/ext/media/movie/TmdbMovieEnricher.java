@@ -13,15 +13,15 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaLoader;
 import hs.mediasystem.util.CryptoUtil;
 import hs.mediasystem.util.Levenshtein;
-import hs.mediasystem.util.ThreadSafeDateFormat;
 
 import java.net.URL;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalQuery;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -31,7 +31,7 @@ import com.moviejukebox.themoviedb.model.Genre;
 import com.moviejukebox.themoviedb.model.MovieDb;
 
 public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
-  private static final ThreadSafeDateFormat DATE_FORMAT = new ThreadSafeDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+  private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
   private TheMovieDb TMDB;
 
@@ -94,7 +94,7 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
             for(MovieDb movieDb : getTMDB().searchMovie(searchString, "en", false)) {
               if(movieDb != null) {  // For "Robocop", this apparently can return null in the list??
                 MatchType nameMatchType = MatchType.NAME;
-                Integer movieYear = extractYear(DATE_FORMAT.parseOrNull(movieDb.getReleaseDate()));
+                Integer movieYear = extractYear(parseDateOrNull(movieDb.getReleaseDate()));
                 double score = 0;
 
                 if(year != null && movieYear != null) {
@@ -171,7 +171,7 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
         item.setTitle(movie.getTitle());
         item.setPlot(movie.getOverview());
         item.setRating(movie.getVoteAverage());
-        item.setReleaseDate(DATE_FORMAT.parseOrNull(movie.getReleaseDate()));
+        item.setReleaseDate(parseDateOrNull(movie.getReleaseDate()));
         item.setRuntime(movie.getRuntime());
         item.setTagline(movie.getTagline());
         if(!movie.getSpokenLanguages().isEmpty()) {
@@ -256,13 +256,26 @@ public class TmdbMovieEnricher implements MediaIdentifier, MediaLoader {
     }
   }
 
-  private static Integer extractYear(Date date) {
+  private static LocalDate parseDateOrNull(String text) {
+    try {
+      return DATE_TIME_FORMATTER.parse(text, new TemporalQuery<LocalDate>() {
+        @Override
+        public LocalDate queryFrom(TemporalAccessor temporal) {
+          return LocalDate.from(temporal);
+        }
+      });
+    }
+    catch(DateTimeParseException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  private static Integer extractYear(LocalDate date) {
     if(date == null) {
       return null;
     }
 
-    GregorianCalendar gc = new GregorianCalendar();
-    gc.setTime(date);
-    return gc.get(Calendar.YEAR);
+    return date.getYear();
   }
 }

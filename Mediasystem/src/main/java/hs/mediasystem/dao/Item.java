@@ -9,6 +9,7 @@ import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -73,7 +74,7 @@ public class Item extends DatabaseObject {
   private Float rating;
 
   @Column
-  private Date releaseDate;
+  private LocalDate releaseDate;
 
   @Column
   private int runtime;
@@ -191,12 +192,12 @@ public class Item extends DatabaseObject {
     this.rating = rating;
   }
 
-  public Date getReleaseDate() {
-    return releaseDate == null ? null : (Date)releaseDate.clone();
+  public LocalDate getReleaseDate() {
+    return releaseDate;
   }
 
-  public void setReleaseDate(Date releaseDate) {
-    this.releaseDate = releaseDate == null ? null : (Date)releaseDate.clone();
+  public void setReleaseDate(LocalDate releaseDate) {
+    this.releaseDate = releaseDate;
   }
 
   public int getRuntime() {

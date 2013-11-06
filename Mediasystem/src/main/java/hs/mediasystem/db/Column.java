@@ -1,6 +1,5 @@
 package hs.mediasystem.db;
 
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -8,6 +7,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Blob;
+import java.sql.Date;
 import java.sql.SQLException;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -34,6 +34,11 @@ public @interface Column {
           Blob blob = (Blob)input;
 
           return blob.getBytes(1L, (int)blob.length());
+        }
+        else if(input instanceof Date) {
+          Date date = (Date)input;
+
+          return date.toLocalDate();
         }
 
         return input;

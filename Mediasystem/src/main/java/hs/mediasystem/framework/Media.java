@@ -4,7 +4,7 @@ import hs.mediasystem.entity.Entity;
 import hs.mediasystem.entity.SimpleEntityProperty;
 import hs.mediasystem.util.ImageHandle;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -18,7 +18,7 @@ public class Media<T extends Media<T>> extends Entity<T> {
   public final StringProperty title = stringProperty();
   public final StringProperty subtitle = stringProperty("");
   public final StringProperty description = stringProperty();
-  public final ObjectProperty<Date> releaseDate = object("releaseDate");
+  public final ObjectProperty<LocalDate> releaseDate = object("releaseDate");
   public final ObjectProperty<Integer> releaseYear = new SimpleObjectProperty<>();
   public final ObjectProperty<String[]> genres = object("genres");
   public final DoubleProperty rating = doubleProperty();

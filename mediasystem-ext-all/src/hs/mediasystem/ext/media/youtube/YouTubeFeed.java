@@ -10,9 +10,10 @@ import hs.mediasystem.framework.SourceImageHandle;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +67,7 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
             if(videoEntry.getRating() != null) {
               youTube.rating.set(videoEntry.getRating().getAverage() * 2);
             }
-            youTube.releaseDate.set(new Date(videoEntry.getPublished().getValue()));
+            youTube.releaseDate.set(LocalDateTime.ofEpochSecond(videoEntry.getPublished().getValue(), 0, ZoneOffset.ofTotalSeconds(videoEntry.getPublished().getTzShift() * 60)).toLocalDate());
             youTube.runtime.set(mediaGroup.getYouTubeContents().get(0).getDuration() / 60);
 
             List<MediaThumbnail> thumbnails = videoEntry.getMediaGroup().getThumbnails();
