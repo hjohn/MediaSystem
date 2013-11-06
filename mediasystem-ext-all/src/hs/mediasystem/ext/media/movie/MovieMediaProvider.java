@@ -14,7 +14,7 @@ public class MovieMediaProvider extends MediaProvider<Movie> {
       return null;
     }
 
-    return new Movie(item.getTitle(), item.getEpisode(), "", null, item.getImdbId());
+    return new Movie(item.getTitle(), item.getEpisode(), "", item.getImdbId());
   }
 
   @Override

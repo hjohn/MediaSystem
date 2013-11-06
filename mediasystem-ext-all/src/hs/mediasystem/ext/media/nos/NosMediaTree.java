@@ -114,7 +114,7 @@ public class NosMediaTree implements MediaTree, MediaRoot {
 
   public static class NosItem extends Media<NosItem> {
     public NosItem(String title, String meta) {
-      super(title, meta, null);
+      super(title, meta);
     }
   }
 }

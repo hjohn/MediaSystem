@@ -25,7 +25,7 @@ public class MovieSubtitleCriteriaProvider implements SubtitleCriteriaProvider {
     if(media instanceof Movie) {
       Movie movie = (Movie)media;
 
-      criteria.put(SubtitleCriteriaProvider.YEAR, movie.releaseYear.get());
+      criteria.put(SubtitleCriteriaProvider.YEAR, movie.releaseDate.get() == null ? null : movie.releaseDate.get().getYear());
       criteria.put(SubtitleCriteriaProvider.IMDB_ID, movie.imdbNumber.get());
     }
 
