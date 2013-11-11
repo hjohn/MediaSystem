@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -63,6 +64,9 @@ public class Database {
     for(Object value : parameterValues) {
       if(value instanceof Date) {
         statement.setTimestamp(parameterIndex++, new Timestamp(((Date)value).getTime()));
+      }
+      else if(value instanceof LocalDate) {
+        statement.setTimestamp(parameterIndex++, Timestamp.valueOf(((LocalDate)value).atStartOfDay()));
       }
       else if(value instanceof Enum) {
         statement.setObject(parameterIndex++, ((Enum<?>)value).name());
