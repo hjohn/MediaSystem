@@ -259,6 +259,7 @@ public class ProgramController {
           currentLayout = layout;
 
           if(activePresentation != null) {
+            activePresentation.dispose();
             activePresentation = null;
           }
 

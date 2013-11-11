@@ -13,6 +13,13 @@ public class MainLocationPresentation<L extends Location> {
     this.programController = programController;
   }
 
+  /**
+   * Detach this presentation from any external properties.  After this call
+   * the presentation is unusable and will be waiting to be garbage collected.
+   */
+  public void dispose() {
+  }
+
   public <R> R showSynchronousDialog(Dialog<R> dialog) {
     return programController.showSynchronousDialog(dialog);
   }

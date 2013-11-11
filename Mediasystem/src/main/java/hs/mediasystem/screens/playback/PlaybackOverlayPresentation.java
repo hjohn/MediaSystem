@@ -141,6 +141,13 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
     });
   }
 
+  @Override
+  public void dispose() {
+    super.dispose();
+
+    player.set(null);
+  }
+
   public void handleOptionsSelectEvent(ActionEvent event) {
     Player player = this.player.get();
 
