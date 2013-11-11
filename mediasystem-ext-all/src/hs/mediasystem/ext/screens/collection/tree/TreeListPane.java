@@ -96,7 +96,7 @@ public class TreeListPane extends BorderPane {
             itemSelected(event, focusedItem);
           }
           else if(event.getButton() == MouseButton.SECONDARY && event.getClickCount() == 1) {
-            Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(focusedItem.getValue()), event);
+            Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(treeView, focusedItem.getValue()), event);
           }
         }
       }
@@ -123,7 +123,7 @@ public class TreeListPane extends BorderPane {
               itemSelected(event, focusedItem);
             }
             else if(KEY_I.match(event)) {
-              Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(focusedItem.getValue()), event);
+              Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(treeView, focusedItem.getValue()), event);
             }
           }
         }
@@ -195,7 +195,7 @@ public class TreeListPane extends BorderPane {
 
   private void itemSelected(Event event, TreeItem<MediaNode> focusedItem) {
     if(focusedItem.isLeaf()) {
-      Events.dispatchEvent(onNodeSelected, new MediaNodeEvent(focusedItem.getValue()), event);
+      Events.dispatchEvent(onNodeSelected, new MediaNodeEvent(event.getTarget(), focusedItem.getValue()), event);
     }
     else {
       focusedItem.setExpanded(!focusedItem.isExpanded());

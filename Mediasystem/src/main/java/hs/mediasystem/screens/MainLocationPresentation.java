@@ -17,8 +17,7 @@ public class MainLocationPresentation {
     return programController.showSynchronousDialog(dialog);
   }
 
-  // TODO temporary
-  public ProgramController getProgramController() {
-    return programController;
+  public void showDialog(Dialog<?> dialog) {
+    programController.showDialog(dialog);
   }
 }

@@ -131,7 +131,7 @@ public class BannerListPane extends BorderPane {
             itemSelected(event, focusedNode);
           }
           else if(event.getButton() == MouseButton.SECONDARY && event.getClickCount() == 1) {
-            Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(focusedNode), event);
+            Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(tableView, focusedNode), event);
           }
         }
       }
@@ -147,7 +147,7 @@ public class BannerListPane extends BorderPane {
             itemSelected(event, focusedNode);
           }
           else if(KEY_I.match(event)) {
-            Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(focusedNode), event);
+            Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(tableView, focusedNode), event);
           }
         }
       }
@@ -182,7 +182,7 @@ public class BannerListPane extends BorderPane {
   }
 
   private void itemSelected(Event event, MediaNode focusedNode) {
-    Events.dispatchEvent(onNodeSelected, new MediaNodeEvent(focusedNode), event);
+    Events.dispatchEvent(onNodeSelected, new MediaNodeEvent(event.getTarget(), focusedNode), event);
   }
 
   private MediaNode getFocusedMediaNode() {

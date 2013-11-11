@@ -1,13 +1,14 @@
 package hs.mediasystem.screens;
 
 import javafx.event.Event;
+import javafx.event.EventTarget;
 import javafx.event.EventType;
 
 public class MediaNodeEvent extends Event {
   private final MediaNode mediaNode;
 
-  public MediaNodeEvent(MediaNode mediaNode) {
-    super(EventType.ROOT);
+  public MediaNodeEvent(EventTarget eventTarget, MediaNode mediaNode) {
+    super(eventTarget, eventTarget, EventType.ROOT);
     this.mediaNode = mediaNode;
   }
 

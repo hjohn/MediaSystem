@@ -12,7 +12,7 @@ import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.StandardTitleComparator;
 import hs.mediasystem.screens.AbstractMediaGroup;
 import hs.mediasystem.screens.Layout;
-import hs.mediasystem.screens.Location;
+import hs.mediasystem.screens.LocationChangeEvent;
 import hs.mediasystem.screens.MainLocationPresentation;
 import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNode;
@@ -22,6 +22,7 @@ import hs.mediasystem.screens.UserLayout;
 import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.OptionDialogPane;
+import hs.mediasystem.screens.playback.PlaybackLocation;
 import hs.mediasystem.util.StringBinding;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.util.StringConverter;
 
 import javax.inject.Inject;
@@ -232,10 +234,10 @@ public class CollectionPresentation extends MainLocationPresentation {
    */
   public void handleMediaNodeSelectEvent(MediaNodeEvent event) {
     if(event.getMediaNode().getMediaItem() instanceof MediaRoot) {
-      getProgramController().setLocation(new CollectionLocation((MediaRoot)event.getMediaNode().getMediaItem()));
+      Event.fireEvent(event.getTarget(), new LocationChangeEvent(new CollectionLocation((MediaRoot)event.getMediaNode().getMediaItem())));
     }
     else {
-      getProgramController().play(event.getMediaNode().getMediaItem());
+      Event.fireEvent(event.getTarget(), new LocationChangeEvent(new PlaybackLocation(null, event.getMediaNode().getMediaItem(), 0)));
     }
     event.consume();
   }
@@ -260,7 +262,7 @@ public class CollectionPresentation extends MainLocationPresentation {
       })
     );
 
-    getProgramController().showDialog(new OptionDialogPane("Media - Options", options));
+    showDialog(new OptionDialogPane("Media - Options", options));
     event.consume();
   }
 

@@ -189,7 +189,7 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation {
       })
     );
 
-    getProgramController().showDialog(new OptionDialogPane("Video - Options", options));
+    showDialog(new OptionDialogPane("Video - Options", options));
     event.consume();
   }
 

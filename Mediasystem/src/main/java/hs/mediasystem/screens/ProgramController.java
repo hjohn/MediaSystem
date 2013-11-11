@@ -179,6 +179,21 @@ public class ProgramController {
       }
     });
 
+    scene.addEventHandler(LocationChangeEvent.LOCATION_CHANGE, new EventHandler<LocationChangeEvent>() {
+      @Override
+      public void handle(LocationChangeEvent event) {
+        if(event.getLocation() instanceof PlaybackLocation) {
+          // TODO this is a bit hacky, but makes it easy for now to call legacy play() function
+          PlaybackLocation playbackLocation = (PlaybackLocation)event.getLocation();
+
+          play(playbackLocation.getMediaItem());
+        }
+        else {
+          setLocation(event.getLocation());
+        }
+      }
+    });
+
     scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
@@ -424,7 +439,7 @@ public class ProgramController {
     return currentMediaItem;
   }
 
-  public synchronized void play(final MediaItem mediaItem) {
+  private synchronized void play(final MediaItem mediaItem) {
     if(playerPresentation == null) {
       sceneManager.displayDialog(new InformationDialog("No video player was configured.\nUnable to play the selected item."));
       return;
@@ -477,7 +492,7 @@ public class ProgramController {
     playerPresentation.play(mediaItem.getUri(), positionMillis);
     currentMediaItem = mediaItem;
 
-    setLocation(new PlaybackLocation(getLocation(), positionMillis));
+    setLocation(new PlaybackLocation(getLocation(), mediaItem, positionMillis));
 
     informationBorder.setVisible(false);
   }
