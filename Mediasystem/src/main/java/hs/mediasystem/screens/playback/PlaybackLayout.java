@@ -2,8 +2,6 @@ package hs.mediasystem.screens.playback;
 
 import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.Location;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 
 import javax.inject.Inject;
@@ -24,7 +22,6 @@ public class PlaybackLayout implements Layout<Location, PlaybackOverlayPresentat
     return PlaybackLocation.class;
   }
 
-
   @Override
   public PlaybackOverlayPresentation createPresentation() {
     return presentationProvider.get();
@@ -38,12 +35,7 @@ public class PlaybackLayout implements Layout<Location, PlaybackOverlayPresentat
     view.player.bindBidirectional(presentation.player);
     view.overlayVisible.bindBidirectional(presentation.overlayVisible);
 
-    view.onOptionsSelect.set(new EventHandler<ActionEvent>() {  // WORKAROUND METHOD_REFERENCE
-      @Override
-      public void handle(ActionEvent event) {
-        presentation.handleOptionsSelectEvent(event);
-      }
-    });
+    view.onOptionsSelect.set(presentation::handleOptionsSelectEvent);
 
     return view;
   }
