@@ -120,11 +120,11 @@ public class ProgramController {
     }
   };
 
-  private Layout<? extends Location, MainLocationPresentation> currentLayout;
-  private MainLocationPresentation activePresentation;
+  private Layout<? extends Location, MainLocationPresentation<Location>> currentLayout;
+  private MainLocationPresentation<Location> activePresentation;
 
   @Inject
-  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder, Provider<Set<Layout<? extends Location, ? extends MainLocationPresentation>>> mainLocationLayoutsProvider) {
+  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder, Provider<Set<Layout<? extends Location, ? extends MainLocationPresentation<? extends Location>>>> mainLocationLayoutsProvider) {
     this.ini = ini;
     this.sceneManager = sceneManager;
     this.playerPresentation = playerPresentation;
@@ -251,27 +251,25 @@ public class ProgramController {
         System.out.println("[INFO] Changing Location" + (old == null ? "" : " from " + old.getId()) + " to " + current.getId());
 
         @SuppressWarnings("unchecked")
-        Layout<? extends Location, MainLocationPresentation> layout = (Layout<? extends Location, MainLocationPresentation>)Layout.findMostSuitableLayout(mainLocationLayoutsProvider.get(), current.getClass());
+        Layout<? extends Location, MainLocationPresentation<Location>> layout = (Layout<? extends Location, MainLocationPresentation<Location>>)Layout.findMostSuitableLayout(mainLocationLayoutsProvider.get(), current.getClass());
 
         ProgramController.this.informationBorder.breadCrumbProperty().set(current.getBreadCrumb());
 
-        if(layout != null && layout.equals(currentLayout)) {
-          return;
+        if(layout == null || !layout.equals(currentLayout)) {
+          currentLayout = layout;
+
+          if(activePresentation != null) {
+            activePresentation = null;
+          }
+
+          if(currentLayout != null) {
+            activePresentation = currentLayout.createPresentation();
+
+            displayOnStage(currentLayout.createView(activePresentation), current.getType());
+          }
         }
 
-        currentLayout = layout;
-
-        if(activePresentation != null) {
-          activePresentation.location.unbindBidirectional(location);
-          activePresentation = null;
-        }
-
-        if(currentLayout != null) {
-          activePresentation = currentLayout.createPresentation();
-          activePresentation.location.bindBidirectional(location);
-
-          displayOnStage(currentLayout.createView(activePresentation), current.getType());
-        }
+        activePresentation.location.set(location.get());
       }
     });
   }

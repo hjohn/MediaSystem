@@ -47,7 +47,7 @@ import javafx.util.StringConverter;
 
 import javax.inject.Inject;
 
-public class CollectionPresentation extends MainLocationPresentation {
+public class CollectionPresentation extends MainLocationPresentation<CollectionLocation> {
   private final ReadOnlyListWrapper<MediaNode> mediaNodesWrapper = new ReadOnlyListWrapper<>(FXCollections.<MediaNode>observableArrayList());
   private final ReadOnlyBooleanWrapper expandTopLevelWrapper = new ReadOnlyBooleanWrapper();
 
@@ -108,101 +108,98 @@ public class CollectionPresentation extends MainLocationPresentation {
      * Add Location listener to update the underlying view with a new MediaRoot.
      */
 
-    location.addListener(new ChangeListener<Location>() {
+    location.addListener(new ChangeListener<CollectionLocation>() {
       @Override
-      public void changed(ObservableValue<? extends Location> observableValue, Location old, Location current) {
-        if(current instanceof CollectionLocation) {
-          CollectionLocation collectionLocation = (CollectionLocation)current;
+      public void changed(ObservableValue<? extends CollectionLocation> observableValue, CollectionLocation old, CollectionLocation current) {
+
+        /*
+         * First clear the current Layout so it will not respond to changes made to the groupSet --
+         * although this should not cause errors, it does potentially cause a lot of overhead when
+         * the new layout first applies the wrong groupSet before the correct one is set.
+         */
+
+        userLayoutSettingUpdater.clearBackingSetting();  // clear this first otherwise it will try to store the change of layout to null
+        layout.set(null);
+
+        mediaRoot.set(current.getMediaRoot());
+
+        /*
+         * Update available group sets and sort them.
+         */
+
+        List<MediaGroup> mediaGroups = new ArrayList<>(injector.getInstances(MediaGroup.class, AnnotationDescriptor.describe(MediaRootType.class, new Value("value", current.getMediaRoot().getClass()))));
+
+        if(mediaGroups.isEmpty()) {
 
           /*
-           * First clear the current Layout so it will not respond to changes made to the groupSet --
-           * although this should not cause errors, it does potentially cause a lot of overhead when
-           * the new layout first applies the wrong groupSet before the correct one is set.
+           * Provide a default if none are found.
            */
 
-          userLayoutSettingUpdater.clearBackingSetting();  // clear this first otherwise it will try to store the change of layout to null
-          layout.set(null);
+          mediaGroups.add(new AbstractMediaGroup("alpha", "Alphabetically", false) {
+            @Override
+            public List<MediaNode> getMediaNodes(MediaRoot mediaRoot, List<? extends MediaItem> mediaItems) {
+              Collections.sort(mediaItems, StandardTitleComparator.INSTANCE);
+              List<MediaNode> nodes = new ArrayList<>();
 
-          mediaRoot.set(collectionLocation.getMediaRoot());
-
-          /*
-           * Update available group sets and sort them.
-           */
-
-          List<MediaGroup> mediaGroups = new ArrayList<>(injector.getInstances(MediaGroup.class, AnnotationDescriptor.describe(MediaRootType.class, new Value("value", collectionLocation.getMediaRoot().getClass()))));
-
-          if(mediaGroups.isEmpty()) {
-
-            /*
-             * Provide a default if none are found.
-             */
-
-            mediaGroups.add(new AbstractMediaGroup("alpha", "Alphabetically", false) {
-              @Override
-              public List<MediaNode> getMediaNodes(MediaRoot mediaRoot, List<? extends MediaItem> mediaItems) {
-                Collections.sort(mediaItems, StandardTitleComparator.INSTANCE);
-                List<MediaNode> nodes = new ArrayList<>();
-
-                for(MediaItem mediaItem : mediaItems) {
-                  nodes.add(new MediaNode(mediaItem));
-                }
-
-                return nodes;
+              for(MediaItem mediaItem : mediaItems) {
+                nodes.add(new MediaNode(mediaItem));
               }
-            });
-          }
 
-          Collections.sort(mediaGroups, new Comparator<MediaGroup>() {
-            @Override
-            public int compare(MediaGroup o1, MediaGroup o2) {
-              return o1.getTitle().compareTo(o2.getTitle());
+              return nodes;
             }
           });
+        }
 
-          availableGroupSets.setAll(mediaGroups);
-
-          /*
-           * Change setting name for mediaGroupSettingUpdater as each MediaRoot has its own MediaGroup setting.
-           */
-
-          mediaGroupSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, mediaRoot.get().getId().toString("SortGroup"));
-
-          /*
-           * Restore the last selected MediaGroup for this MediaRoot.
-           */
-
-          MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSets.get(0));
-
-          groupSet.set(selectedMediaGroup);
-
-          /*
-           * Update suitable layouts and sort them.
-           */
-
-          suitableLayouts.setAll(Layout.findAllSuitableLayouts(layouts, mediaRoot.get().getClass()));
-
-          Collections.sort(suitableLayouts, new Comparator<UserLayout<MediaRoot, CollectionSelectorPresentation>>() {
-            @Override
-            public int compare(UserLayout<MediaRoot, CollectionSelectorPresentation> o1, UserLayout<MediaRoot, CollectionSelectorPresentation> o2) {
-              return o1.getTitle().compareTo(o2.getTitle());
-            }
-          });
-
-          /*
-           * Change setting name for userLayoutSettingUpdater as each MediaRoot has its own Layout setting.
-           */
-
-          userLayoutSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, mediaRoot.get().getId().toString("View"));
-
-          /*
-           * Restore the last selected Layout for this MediaRoot.
-           */
-
-          UserLayout<MediaRoot, CollectionSelectorPresentation> lastSelectedLayout = userLayoutSettingUpdater.getStoredValue(layouts.get(0));
-
-          if(!lastSelectedLayout.equals(layout.get())) {
-            layout.set(lastSelectedLayout);
+        Collections.sort(mediaGroups, new Comparator<MediaGroup>() {
+          @Override
+          public int compare(MediaGroup o1, MediaGroup o2) {
+            return o1.getTitle().compareTo(o2.getTitle());
           }
+        });
+
+        availableGroupSets.setAll(mediaGroups);
+
+        /*
+         * Change setting name for mediaGroupSettingUpdater as each MediaRoot has its own MediaGroup setting.
+         */
+
+        mediaGroupSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, mediaRoot.get().getId().toString("SortGroup"));
+
+        /*
+         * Restore the last selected MediaGroup for this MediaRoot.
+         */
+
+        MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSets.get(0));
+
+        groupSet.set(selectedMediaGroup);
+
+        /*
+         * Update suitable layouts and sort them.
+         */
+
+        suitableLayouts.setAll(Layout.findAllSuitableLayouts(layouts, mediaRoot.get().getClass()));
+
+        Collections.sort(suitableLayouts, new Comparator<UserLayout<MediaRoot, CollectionSelectorPresentation>>() {
+          @Override
+          public int compare(UserLayout<MediaRoot, CollectionSelectorPresentation> o1, UserLayout<MediaRoot, CollectionSelectorPresentation> o2) {
+            return o1.getTitle().compareTo(o2.getTitle());
+          }
+        });
+
+        /*
+         * Change setting name for userLayoutSettingUpdater as each MediaRoot has its own Layout setting.
+         */
+
+        userLayoutSettingUpdater.setBackingSetting("MediaSystem:Collection", PersistLevel.PERMANENT, mediaRoot.get().getId().toString("View"));
+
+        /*
+         * Restore the last selected Layout for this MediaRoot.
+         */
+
+        UserLayout<MediaRoot, CollectionSelectorPresentation> lastSelectedLayout = userLayoutSettingUpdater.getStoredValue(layouts.get(0));
+
+        if(!lastSelectedLayout.equals(layout.get())) {
+          layout.set(lastSelectedLayout);
         }
       }
     });

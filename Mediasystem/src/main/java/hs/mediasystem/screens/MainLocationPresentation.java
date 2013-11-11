@@ -4,8 +4,8 @@ import hs.mediasystem.util.Dialog;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class MainLocationPresentation {
-  public final ObjectProperty<Location> location = new SimpleObjectProperty<>();
+public class MainLocationPresentation<L extends Location> {
+  public final ObjectProperty<L> location = new SimpleObjectProperty<>();
 
   private final ProgramController programController;
 

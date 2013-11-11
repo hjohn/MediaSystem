@@ -37,7 +37,7 @@ import javafx.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-public class PlaybackOverlayPresentation extends MainLocationPresentation {
+public class PlaybackOverlayPresentation extends MainLocationPresentation<PlaybackLocation> {
   private static final Comparator<SubtitleProvider> SUBTITLE_PROVIDER_COMPARATOR = new Comparator<SubtitleProvider>() {
     @Override
     public int compare(SubtitleProvider o1, SubtitleProvider o2) {
@@ -101,7 +101,7 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation {
 
           if(length > 0) {
             // TODO PlaybackLocation could be used to facilite skipping, not just the initial start position.  So skipping etc can be accomplished by location; however careful that for the same media initial resume position must be preserved for proper "viewed" calculation.
-            long timeViewed = totalTimeViewed + ((PlaybackLocation)location.get()).getStartMillis();
+            long timeViewed = totalTimeViewed + location.get().getStartMillis();
 
             if(!mediaData.viewed.get() && timeViewed >= length * 9 / 10) {  // 90% viewed?
               System.out.println("[CONFIG] PlaybackOverlayPresentation - Marking as viewed: " + mediaItem.get());

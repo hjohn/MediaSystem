@@ -11,7 +11,7 @@ import hs.mediasystem.screens.ProgramController;
 import javafx.scene.Node;
 
 @Singleton
-public class MainScreenLayout implements Layout<Location, MainLocationPresentation> {
+public class MainScreenLayout implements Layout<Location, MainLocationPresentation<Location>> {
   private final Provider<MainScreen> mainScreenProvider;
   private final ProgramController programController;
 
@@ -27,12 +27,12 @@ public class MainScreenLayout implements Layout<Location, MainLocationPresentati
   }
 
   @Override
-  public MainLocationPresentation createPresentation() {
-    return new MainLocationPresentation(programController);
+  public MainLocationPresentation<Location> createPresentation() {
+    return new MainLocationPresentation<>(programController);
   }
 
   @Override
-  public Node createView(MainLocationPresentation presentation) {
+  public Node createView(MainLocationPresentation<Location> presentation) {
     return mainScreenProvider.get();
   }
 }
