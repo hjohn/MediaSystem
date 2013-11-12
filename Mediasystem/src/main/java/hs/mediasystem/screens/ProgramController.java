@@ -444,18 +444,16 @@ public class ProgramController {
       return;
     }
 
-    int resumePosition = 0;
+    Integer resumePosition = 0;
 
     if(mediaItem.mediaData.get() != null) {
       final ResumeDialog resumeDialog = new ResumeDialog(mediaItem);
 
-      sceneManager.displaySynchronousDialog(resumeDialog);
+      resumePosition = sceneManager.displaySynchronousDialog(resumeDialog);
 
-      if(resumeDialog.wasCancelled()) {
+      if(resumePosition == null) {
         return;
       }
-
-      resumePosition = resumeDialog.getResumePosition();
     }
 
     final int finalResumePosition = resumePosition;

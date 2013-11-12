@@ -11,6 +11,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -26,6 +27,8 @@ public class DialogPane<R> extends StackPane implements Dialog<R> {
     getStylesheets().add("dialog/dialog.css");
     getStyleClass().add("dialog");
 
+    setFocusTraversable(true);
+
     addEventHandler(NavigationEvent.NAVIGATION_ANCESTOR, new EventHandler<NavigationEvent>() {
       @Override
       public void handle(NavigationEvent event) {
@@ -36,6 +39,9 @@ public class DialogPane<R> extends StackPane implements Dialog<R> {
         }
       }
     });
+
+    setMaxWidth(Region.USE_PREF_SIZE);
+    setMaxHeight(Region.USE_PREF_SIZE);
   }
 
   protected void setParentEffect(Parent parent) {
@@ -88,6 +94,7 @@ public class DialogPane<R> extends StackPane implements Dialog<R> {
 
     parentStage.getScene().setRoot(stackPane);
 
+    onShow();
     setParentEffect(root);
     requestFocus();
 
@@ -115,12 +122,18 @@ public class DialogPane<R> extends StackPane implements Dialog<R> {
     }
   }
 
+  protected void onShow() {
+  }
+
   @Override
   public void requestFocus() {
     Node initialFocusNode = lookup(".initial-focus");
 
     if(initialFocusNode != null) {
       initialFocusNode.requestFocus();
+    }
+    else {
+      super.requestFocus();
     }
   }
 }
