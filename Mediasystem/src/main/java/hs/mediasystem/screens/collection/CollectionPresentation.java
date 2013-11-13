@@ -26,9 +26,13 @@ import hs.mediasystem.util.StringBinding;
 import hs.mediasystem.util.javafx.Dialogs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
@@ -85,6 +89,11 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
    * All available group sets that are available to choose from.
    */
   public final ObservableList<MediaGroup> availableGroupSets = FXCollections.observableArrayList();
+
+  /**
+   * The filter to apply to the collection.
+   */
+  public final ObjectProperty<InclusionFilter> inclusionFilter = new SimpleObjectProperty<>();
 
   private final List<UserLayout<MediaRoot, CollectionSelectorPresentation>> layouts;
 
@@ -215,9 +224,12 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
     expandTopLevelWrapper.set(groupSet.get().showTopLevelExpanded());
 
     List<MediaItem> filteredItems = new ArrayList<>();
+    InclusionFilter inclusionFilter = this.inclusionFilter.get();
 
     for(MediaItem mediaItem : mediaRoot.get().getItems()) {
-      filteredItems.add(mediaItem);
+      if(inclusionFilter == null || inclusionFilter.test(mediaItem)) {
+        filteredItems.add(mediaItem);
+      }
     }
 
     mediaNodesWrapper.setAll(groupSet.get().getMediaNodes(mediaRoot.get(), filteredItems));
@@ -306,6 +318,110 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
     @Override
     public String toString(UserLayout<MediaRoot, CollectionSelectorPresentation> layout) {
       return layout.getId();
+    }
+  }
+
+  public static class InclusionFilter implements Predicate<MediaItem> {
+    private final Integer afterYear;
+    private final Integer beforeYear;
+    private final boolean includeViewed;
+    private final boolean includeNotViewed;
+    private final Set<String> genres;
+
+    public InclusionFilter(Integer afterYear, Integer beforeYear, boolean includeViewed, boolean includeNotViewed, Set<String> genres) {
+      this.afterYear = afterYear;
+      this.beforeYear = beforeYear;
+      this.includeViewed = includeViewed;
+      this.includeNotViewed = includeNotViewed;
+      this.genres = genres == null ? new HashSet<>() : genres;
+    }
+
+    public Integer getAfterYear() {
+      return afterYear;
+    }
+
+    public Integer getBeforeYear() {
+      return beforeYear;
+    }
+
+    public boolean isIncludeViewed() {
+      return includeViewed;
+    }
+
+    public boolean isIncludeNotViewed() {
+      return includeNotViewed;
+    }
+
+    public Set<String> getGenres() {
+      return Collections.unmodifiableSet(genres);
+    }
+
+    @Override
+    public boolean test(MediaItem mediaItem) {
+      if(!includeViewed || !includeNotViewed) {
+        MediaData mediaData = mediaItem.mediaData.get();
+
+        if(mediaData == null) {
+
+          /*
+           * Asked to filter on Viewed state, but Viewed state is unknown.
+           */
+
+          return false;
+        }
+
+        if(!includeViewed && mediaData.viewed.get()) {
+          return false;
+        }
+
+        if(!includeNotViewed && !mediaData.viewed.get()) {
+          return false;
+        }
+      }
+
+      if(afterYear != null || beforeYear != null) {
+        Media<?> media = mediaItem.media.get();
+
+        if(media == null || media.releaseDate.get() == null) {
+
+          /*
+           * Asked to filter on Year, but Year is unknown.
+           */
+
+          return false;
+        }
+
+        int releaseYear = media.releaseDate.get().getYear();
+        int afterYear = this.afterYear == null ? 0 : this.afterYear;
+        int beforeYear = this.beforeYear == null ? Integer.MAX_VALUE : this.beforeYear;
+
+        if(releaseYear <= afterYear || releaseYear >= beforeYear) {
+          return false;
+        }
+      }
+
+      if(genres != null && !genres.isEmpty()) {
+        Media<?> media = mediaItem.media.get();
+
+        if(media == null || media.genres.get() == null) {
+
+          /*
+           * Asked to filter on Genre, but Genres are unknown.
+           */
+
+          return false;
+        }
+
+        Set<String> mediaGenres = new HashSet<>(Arrays.asList(media.genres.get()));
+
+        for(String genre : genres) {
+          if(!mediaGenres.contains(genre)) {
+            return false;
+          }
+        }
+      }
+
+      return true;
     }
   }
 }
