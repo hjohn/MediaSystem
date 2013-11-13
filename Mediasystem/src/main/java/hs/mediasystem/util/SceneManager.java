@@ -9,7 +9,4 @@ public interface SceneManager {
 
   int getScreenNumber();
   void setScreenNumber(int screenNumber);
-
-  void displayDialog(Dialog<?> dialog);
-  <R> R displaySynchronousDialog(Dialog<R> dialog);
 }

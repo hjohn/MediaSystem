@@ -1,20 +1,20 @@
 package hs.mediasystem.screens.playback;
 
-import hs.mediasystem.framework.actions.Action;
+import hs.mediasystem.framework.actions.PresentationActionEvent;
 
-import java.util.function.Consumer;
+import javafx.event.EventHandler;
 
-public enum PlaybackOverlayActions implements Action<PlaybackOverlayPresentation> {
-  VISIBILITY(presentation -> presentation.overlayVisible.set(!presentation.overlayVisible.get()));
+public enum PlaybackOverlayActions implements EventHandler<PresentationActionEvent<PlaybackOverlayPresentation>> {
+  VISIBILITY(event -> event.getPresentation().overlayVisible.set(!event.getPresentation().overlayVisible.get()));
 
-  private final Consumer<PlaybackOverlayPresentation> action;
+  private final EventHandler<PresentationActionEvent<PlaybackOverlayPresentation>> eventHandler;
 
-  PlaybackOverlayActions(Consumer<PlaybackOverlayPresentation> action) {
-    this.action = action;
+  PlaybackOverlayActions(EventHandler<PresentationActionEvent<PlaybackOverlayPresentation>> eventHandler) {
+    this.eventHandler = eventHandler;
   }
 
   @Override
-  public void perform(PlaybackOverlayPresentation presentation) {
-    action.accept(presentation);
+  public void handle(PresentationActionEvent<PlaybackOverlayPresentation> event) {
+    eventHandler.handle(event);
   }
 }

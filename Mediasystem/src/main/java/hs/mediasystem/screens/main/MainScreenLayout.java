@@ -1,23 +1,20 @@
 package hs.mediasystem.screens.main;
 
+import hs.mediasystem.screens.Layout;
+import hs.mediasystem.screens.Location;
+import hs.mediasystem.screens.MainLocationPresentation;
+import javafx.scene.Node;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import hs.mediasystem.screens.Layout;
-import hs.mediasystem.screens.Location;
-import hs.mediasystem.screens.MainLocationPresentation;
-import hs.mediasystem.screens.ProgramController;
-import javafx.scene.Node;
-
 @Singleton
 public class MainScreenLayout implements Layout<Location, MainLocationPresentation<Location>> {
   private final Provider<MainScreen> mainScreenProvider;
-  private final ProgramController programController;
 
   @Inject
-  public MainScreenLayout(ProgramController programController, Provider<MainScreen> mainScreenProvider) {
-    this.programController = programController;
+  public MainScreenLayout(Provider<MainScreen> mainScreenProvider) {
     this.mainScreenProvider = mainScreenProvider;
   }
 
@@ -28,7 +25,7 @@ public class MainScreenLayout implements Layout<Location, MainLocationPresentati
 
   @Override
   public MainLocationPresentation<Location> createPresentation() {
-    return new MainLocationPresentation<>(programController);
+    return new MainLocationPresentation<>();
   }
 
   @Override

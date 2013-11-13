@@ -5,6 +5,7 @@ import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.Setting;
 import hs.mediasystem.screens.SettingGroup;
 import hs.mediasystem.screens.optiondialog.OptionDialogPane;
+import hs.mediasystem.util.javafx.Dialogs;
 
 import java.util.Set;
 
@@ -40,6 +41,6 @@ public class ConfigMainMenuExtension implements MainMenuExtension {
 
   @Override
   public void select(final ProgramController controller) {
-    controller.showDialog(new OptionDialogPane("Configuration", settingGroup.createOption(settings).getOptions()));
+    Dialogs.show(controller.getScene(), new OptionDialogPane("Configuration", settingGroup.createOption(settings).getOptions()));
   }
 }

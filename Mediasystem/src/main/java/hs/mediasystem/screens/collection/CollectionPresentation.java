@@ -17,13 +17,13 @@ import hs.mediasystem.screens.MainLocationPresentation;
 import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
-import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.UserLayout;
 import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.OptionDialogPane;
 import hs.mediasystem.screens.playback.PlaybackLocation;
 import hs.mediasystem.util.StringBinding;
+import hs.mediasystem.util.javafx.Dialogs;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,9 +89,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
   private final List<UserLayout<MediaRoot, CollectionSelectorPresentation>> layouts;
 
   @Inject
-  public CollectionPresentation(ProgramController programController, SettingsStore settingsStore, Injector injector, List<UserLayout<MediaRoot, CollectionSelectorPresentation>> layouts) {
-    super(programController);
-
+  public CollectionPresentation(SettingsStore settingsStore, Injector injector, List<UserLayout<MediaRoot, CollectionSelectorPresentation>> layouts) {
     this.layouts = layouts;
 
     /*
@@ -259,7 +257,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
       })
     );
 
-    showDialog(new OptionDialogPane("Media - Options", options));
+    Dialogs.show(event, new OptionDialogPane("Media - Options", options));
     event.consume();
   }
 

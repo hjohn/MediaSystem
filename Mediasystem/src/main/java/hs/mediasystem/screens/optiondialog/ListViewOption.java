@@ -113,7 +113,7 @@ public class ListViewOption<T> extends Option {
   }
 
   @Override
-  public boolean select() {
+  public boolean select(Event event) {
     if(property != null) {
       property.set(listView.getFocusModel().getFocusedItem());
     }

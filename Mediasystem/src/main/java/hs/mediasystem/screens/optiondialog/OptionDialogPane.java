@@ -56,7 +56,7 @@ public class OptionDialogPane extends DialogPane<Void> {
             selectedIndex = 0;
           }
           else {
-            if(selectedOption.select()) {
+            if(selectedOption.select(event)) {
               back();
             }
           }

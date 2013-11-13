@@ -55,16 +55,6 @@ public class DuoWindowSceneManager implements SceneManager {
     display();
   }
 
-  private Stage getPrimaryStage() {
-    Paint paint = scene.getFill();
-
-    if(paint instanceof Color && ((Color)paint).getOpacity() == 1.0) {
-      return mainStage;
-    }
-
-    return transparentStage;
-  }
-
   private void display() {
     Paint paint = scene.getFill();
 
@@ -183,15 +173,5 @@ public class DuoWindowSceneManager implements SceneManager {
 
       playerFrame.setBounds(rectangle);
     }
-  }
-
-  @Override
-  public void displayDialog(Dialog<?> dialog) {
-    dialog.showDialog(getPrimaryStage(), false);
-  }
-
-  @Override
-  public <R> R displaySynchronousDialog(Dialog<R> dialog) {
-    return dialog.showDialog(getPrimaryStage(), true);
   }
 }

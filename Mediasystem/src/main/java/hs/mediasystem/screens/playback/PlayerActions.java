@@ -1,10 +1,12 @@
 package hs.mediasystem.screens.playback;
 
-import hs.mediasystem.framework.actions.Action;
+import hs.mediasystem.framework.actions.PresentationActionEvent;
 
 import java.util.function.Consumer;
 
-public enum PlayerActions implements Action<PlayerPresentation> {
+import javafx.event.EventHandler;
+
+public enum PlayerActions implements EventHandler<PresentationActionEvent<PlayerPresentation>> {
   BRIGHTNESS_INCREASE(presentation -> presentation.changeBrightness(0.05f)),
   BRIGHTNESS_DECREASE(presentation -> presentation.changeBrightness(-0.05f)),
   MUTE(presentation -> presentation.mute()),
@@ -28,7 +30,7 @@ public enum PlayerActions implements Action<PlayerPresentation> {
   }
 
   @Override
-  public void perform(PlayerPresentation presentation) {
-    action.accept(presentation);
+  public void handle(PresentationActionEvent<PlayerPresentation> event) {
+    action.accept(event.getPresentation());
   }
 }

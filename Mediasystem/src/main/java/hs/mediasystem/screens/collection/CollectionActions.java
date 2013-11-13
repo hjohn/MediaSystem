@@ -1,17 +1,16 @@
 package hs.mediasystem.screens.collection;
 
-import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.actions.Action;
+import hs.mediasystem.framework.actions.PresentationActionEvent;
 import hs.mediasystem.util.DialogPane;
-
-import java.util.function.Consumer;
-import java.util.function.Predicate;
+import hs.mediasystem.util.javafx.Dialogs;
+import javafx.event.EventHandler;
 
 import javax.inject.Named;
 
 @Named
-public enum CollectionActions implements Action<CollectionPresentation> {
-  GROUP_SET_NEXT(presentation -> {
+public enum CollectionActions implements EventHandler<PresentationActionEvent<CollectionPresentation>> {
+  GROUP_SET_NEXT(event -> {
+    CollectionPresentation presentation = event.getPresentation();
     int index = presentation.availableGroupSets.indexOf(presentation.groupSet.get()) + 1;
 
     if(index >= presentation.availableGroupSets.size()) {
@@ -20,7 +19,8 @@ public enum CollectionActions implements Action<CollectionPresentation> {
 
     presentation.groupSet.set(presentation.availableGroupSets.get(index));
   }),
-  GROUP_SET_PREVIOUS(presentation -> {
+  GROUP_SET_PREVIOUS(event -> {
+    CollectionPresentation presentation = event.getPresentation();
     int index = presentation.availableGroupSets.indexOf(presentation.groupSet.get()) - 1;
 
     if(index < 0) {
@@ -30,14 +30,14 @@ public enum CollectionActions implements Action<CollectionPresentation> {
     presentation.groupSet.set(presentation.availableGroupSets.get(index));
   });
 
-  private final Consumer<CollectionPresentation> action;
+  private final EventHandler<PresentationActionEvent<CollectionPresentation>> eventHandler;
 
-  CollectionActions(Consumer<CollectionPresentation> action) {
-    this.action = action;
+  CollectionActions(EventHandler<PresentationActionEvent<CollectionPresentation>> eventHandler) {
+    this.eventHandler = eventHandler;
   }
 
   @Override
-  public void perform(CollectionPresentation presentation) {
-    action.accept(presentation);
+  public void handle(PresentationActionEvent<CollectionPresentation> event) {
+    eventHandler.handle(event);
   }
 }

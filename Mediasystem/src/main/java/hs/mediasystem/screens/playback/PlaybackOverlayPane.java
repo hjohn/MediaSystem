@@ -117,7 +117,7 @@ public class PlaybackOverlayPane extends StackPane {
           event.consume();
         }
         else if(KEY_O.match(event)) {
-          Events.dispatchEvent(onOptionsSelect, new ActionEvent(), event);
+          Events.dispatchEvent(onOptionsSelect, new ActionEvent(event.getSource(), event.getTarget()), event);
         }
       }
     });

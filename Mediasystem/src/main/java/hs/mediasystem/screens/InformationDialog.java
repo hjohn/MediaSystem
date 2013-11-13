@@ -5,6 +5,11 @@ import javafx.scene.control.Label;
 
 public class InformationDialog extends DialogPane<Void> {
   public InformationDialog(String text) {
-    getChildren().add(new Label(text));
+    Label label = new Label(text);
+
+    label.setFocusTraversable(true);
+    label.setStyle(".initial-focus");
+
+    getChildren().add(label);
   }
 }

@@ -4,12 +4,12 @@ import hs.mediasystem.screens.AreaLayout;
 import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
-import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.collection.detail.DetailPanePresentation;
 import hs.mediasystem.screens.collection.detail.DetailView;
 import hs.mediasystem.util.AreaPane;
 import hs.mediasystem.util.DialogPane;
 import hs.mediasystem.util.GridPaneUtil;
+import hs.mediasystem.util.javafx.Dialogs;
 
 import java.util.Set;
 
@@ -37,12 +37,10 @@ public class CollectionSelectorPresentation {
   public final ObjectProperty<EventHandler<MediaNodeEvent>> onSelect = new SimpleObjectProperty<>();
   public final EventHandler<MediaNodeEvent> onInfoSelect = new InfoEventHandler();  // TODO ugly
 
-  private final ProgramController controller;
   private final Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts;
 
   @Inject
-  public CollectionSelectorPresentation(ProgramController controller, Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts) {
-    this.controller = controller;
+  public CollectionSelectorPresentation(Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts) {
     this.layouts = layouts;
   }
 
@@ -102,8 +100,7 @@ public class CollectionSelectorPresentation {
   class InfoEventHandler implements EventHandler<MediaNodeEvent> {
     @Override
     public void handle(MediaNodeEvent event) {
-      controller.showDialog(createInformationDialog(event.getMediaNode(), layouts));
-
+      Dialogs.show(event, createInformationDialog(event.getMediaNode(), layouts));
       event.consume();
     }
   }

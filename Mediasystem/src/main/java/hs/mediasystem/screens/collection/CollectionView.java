@@ -94,7 +94,7 @@ public class CollectionView extends PresentationPane {
       @Override
       public void handle(KeyEvent event) {
         if(KEY_O.match(event)) {
-          Events.dispatchEvent(onOptionsSelect, new ActionEvent(), event);
+          Events.dispatchEvent(onOptionsSelect, new ActionEvent(event.getSource(), event.getTarget()), event);
         }
       }
     });

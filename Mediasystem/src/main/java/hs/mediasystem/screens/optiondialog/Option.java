@@ -1,5 +1,6 @@
 package hs.mediasystem.screens.optiondialog;
 
+import javafx.event.Event;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -39,7 +40,10 @@ public class Option extends BorderPane {
   public void right() {
   }
 
-  public boolean select() {
+  /**
+   * @param event the event that triggered the select
+   */
+  public boolean select(Event event) {
     return false;
   }
 }

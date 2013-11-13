@@ -35,10 +35,6 @@ public class DefaultSceneManager implements SceneManager {
     display();
   }
 
-  private Stage getPrimaryStage() {
-    return mainStage;
-  }
-
   private void display() {
     mainStage.setScene(scene);
     mainStage.show();
@@ -140,15 +136,5 @@ public class DefaultSceneManager implements SceneManager {
 
       playerFrame.setBounds(rectangle);
     }
-  }
-
-  @Override
-  public void displayDialog(Dialog<?> dialog) {
-    dialog.showDialog(getPrimaryStage(), false);
-  }
-
-  @Override
-  public <R> R displaySynchronousDialog(Dialog<R> dialog) {
-    return dialog.showDialog(getPrimaryStage(), true);
   }
 }

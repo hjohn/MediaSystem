@@ -1,18 +1,19 @@
 package hs.mediasystem.screens.optiondialog;
 
-import hs.mediasystem.util.Callable;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 
 public class ActionOption extends Option {
-  private final Callable<Void> callable;
+  private final EventHandler<? super Event> eventHandler;
 
-  public ActionOption(String description, Callable<Void> callable) {
+  public ActionOption(String description, EventHandler<? super Event> eventHandler) {
     super(description);
-    this.callable = callable;
+    this.eventHandler = eventHandler;
   }
 
   @Override
-  public boolean select() {
-    callable.call();
+  public boolean select(Event event) {
+    eventHandler.handle(event);
     return false;
   }
 }

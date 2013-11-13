@@ -1,7 +1,5 @@
 package hs.mediasystem.util;
 
-import com.sun.javafx.tk.Toolkit;
-
 import hs.mediasystem.screens.NavigationEvent;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -10,24 +8,24 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
-public class DialogPane<R> extends StackPane implements Dialog<R> {
+import com.sun.javafx.tk.Toolkit;
+
+public class DialogPane<R> extends StackPane {
   private final StackPane stackPane = new StackPane();
 
-  private Stage owner;
+  private Scene scene;
   private Node oldFocusOwner;
   private boolean synchronous;
 
   public DialogPane() {
     getStylesheets().add("dialog/dialog.css");
     getStyleClass().add("dialog");
-
-    setFocusTraversable(true);
 
     addEventHandler(NavigationEvent.NAVIGATION_ANCESTOR, new EventHandler<NavigationEvent>() {
       @Override
@@ -79,20 +77,19 @@ public class DialogPane<R> extends StackPane implements Dialog<R> {
   }
 
   @SuppressWarnings("unchecked")
-  @Override
-  public R showDialog(Stage parentStage, boolean synchronous) {
+  public R showDialog(Scene scene, boolean synchronous) {
     this.synchronous = synchronous;
-    this.owner = parentStage;
-    this.oldFocusOwner = parentStage.getScene().getFocusOwner();
+    this.scene = scene;
+    this.oldFocusOwner = scene.getFocusOwner();
 
     StackPane.setMargin(this, new Insets(40, 40, 40, 40));
 
-    Parent root = parentStage.getScene().getRoot();
+    Parent root = scene.getRoot();
 
     stackPane.getChildren().add(root);
     stackPane.getChildren().add(this);
 
-    parentStage.getScene().setRoot(stackPane);
+    scene.setRoot(stackPane);
 
     onShow();
     setParentEffect(root);
@@ -108,10 +105,10 @@ public class DialogPane<R> extends StackPane implements Dialog<R> {
   public void close() {
     Parent originalRoot = (Parent)stackPane.getChildren().remove(0);
 
-    owner.getScene().setRoot(originalRoot);
+    scene.setRoot(originalRoot);
     removeParentEffect(originalRoot);
 
-    owner = null;
+    scene = null;
 
     if(oldFocusOwner != null) {
       oldFocusOwner.requestFocus();
@@ -131,9 +128,6 @@ public class DialogPane<R> extends StackPane implements Dialog<R> {
 
     if(initialFocusNode != null) {
       initialFocusNode.requestFocus();
-    }
-    else {
-      super.requestFocus();
     }
   }
 }

@@ -15,6 +15,7 @@ import hs.mediasystem.screens.optiondialog.OptionDialogPane;
 import hs.mediasystem.screens.optiondialog.OptionGroup;
 import hs.mediasystem.util.StringBinding;
 import hs.mediasystem.util.StringConverter;
+import hs.mediasystem.util.javafx.Dialogs;
 import hs.subtitle.SubtitleDescriptor;
 
 import java.util.ArrayList;
@@ -59,8 +60,6 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
 
   @Inject
   public PlaybackOverlayPresentation(Set<SubtitleProvider> subtitleProviders, Set<SubtitleCriteriaProvider> subtitleCriteriaProviders, final ProgramController controller, final PlayerPresentation playerPresentation) {
-    super(controller);
-
     this.player.set(playerPresentation.getPlayer());
     this.mediaItem.set(controller.getCurrentMediaItem());
 
@@ -196,7 +195,7 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
       })
     );
 
-    showDialog(new OptionDialogPane("Video - Options", options));
+    Dialogs.show(event, new OptionDialogPane("Video - Options", options));
     event.consume();
   }
 

@@ -1,7 +1,7 @@
 package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.actions.Action;
+import hs.mediasystem.framework.actions.PresentationActionEvent;
 import hs.mediasystem.framework.player.PlayerEvent;
 import hs.mediasystem.screens.collection.CollectionPresentation;
 import hs.mediasystem.screens.main.MainScreenLocation;
@@ -10,11 +10,11 @@ import hs.mediasystem.screens.playback.PlaybackOverlayPane;
 import hs.mediasystem.screens.playback.PlaybackOverlayPresentation;
 import hs.mediasystem.screens.playback.PlayerPresentation;
 import hs.mediasystem.screens.playback.SubtitleDownloadService;
-import hs.mediasystem.util.Dialog;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.SceneUtil;
 import hs.mediasystem.util.annotation.Nullable;
 import hs.mediasystem.util.ini.Ini;
+import hs.mediasystem.util.javafx.Dialogs;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -88,7 +88,7 @@ public class ProgramController {
 
   private final InformationBorder informationBorder;
 
-  private final Map<Class<?>, Map<KeyCombination, Action<?>>> actionsByKeyCombinationByPresentation = new HashMap<>();
+  private final Map<Class<?>, Map<KeyCombination, EventHandler<PresentationActionEvent<?>>>> eventHandlersByKeyCombinationByPresentation = new HashMap<>();
 
   private ResizableWritableImageView videoCanvas;
 
@@ -276,11 +276,11 @@ public class ProgramController {
   }
 
   @SuppressWarnings("unchecked")
-  private Action<?> findAction(String actionName) {
-    int lastDot = actionName.lastIndexOf('.');
+  private EventHandler<PresentationActionEvent<?>> findEventHandler(String eventHandlerName) {
+    int lastDot = eventHandlerName.lastIndexOf('.');
 
     try {
-      return (Action<?>)Enum.valueOf(Class.forName(actionName.substring(0, lastDot)).asSubclass(Enum.class), actionName.substring(lastDot + 1));
+      return (EventHandler<PresentationActionEvent<?>>)Enum.valueOf(Class.forName(eventHandlerName.substring(0, lastDot)).asSubclass(Enum.class), eventHandlerName.substring(lastDot + 1));
     }
     catch(ClassNotFoundException | IllegalArgumentException e) {
       return null;
@@ -313,21 +313,21 @@ public class ProgramController {
     addKeyMapping(PlaybackOverlayPresentation.class, new KeyCodeCombination(KeyCode.I), "hs.mediasystem.screens.playback.PlaybackOverlayActions.VISIBILITY");
   }
 
-  private void addKeyMapping(Class<?> presentationClass, KeyCombination keyCombination, String actionName) {
-    Action<?> action = findAction(actionName);
+  private void addKeyMapping(Class<?> presentationClass, KeyCombination keyCombination, String eventHandlerName) {
+    EventHandler<PresentationActionEvent<?>> eventHandler = findEventHandler(eventHandlerName);
 
-    if(action == null) {
-      System.out.println("[WARN] Cannot find associated Action for key combination [" + keyCombination + "]: " + actionName);
+    if(eventHandler == null) {
+      System.out.println("[WARN] Cannot find associated EventHandler for key combination [" + keyCombination + "]: " + eventHandlerName);
     }
     else {
-      Map<KeyCombination, Action<?>> actionsByKeyCombination = actionsByKeyCombinationByPresentation.get(presentationClass);
+      Map<KeyCombination, EventHandler<PresentationActionEvent<?>>> eventHandlersByKeyCombination = eventHandlersByKeyCombinationByPresentation.get(presentationClass);
 
-      if(actionsByKeyCombination == null) {
-        actionsByKeyCombination = new HashMap<>();
-        actionsByKeyCombinationByPresentation.put(presentationClass, actionsByKeyCombination);
+      if(eventHandlersByKeyCombination == null) {
+        eventHandlersByKeyCombination = new HashMap<>();
+        eventHandlersByKeyCombinationByPresentation.put(presentationClass, eventHandlersByKeyCombination);
       }
 
-      actionsByKeyCombination.put(keyCombination, action);
+      eventHandlersByKeyCombination.put(keyCombination, eventHandler);
     }
   }
 
@@ -363,15 +363,14 @@ public class ProgramController {
 
   private boolean handleUserDefinedKeysForPresentation(KeyEvent event, Object presentation) {
     System.out.println("Handling user defined key... " + event);
-    Map<KeyCombination, Action<?>> actionsByKeyCombination = actionsByKeyCombinationByPresentation.get(presentation.getClass());
+    Map<KeyCombination, EventHandler<PresentationActionEvent<?>>> eventHandlersByKeyCombination = eventHandlersByKeyCombinationByPresentation.get(presentation.getClass());
 
-    if(actionsByKeyCombination != null) {
-      for(KeyCombination keyCombination : actionsByKeyCombination.keySet()) {
+    if(eventHandlersByKeyCombination != null) {
+      for(KeyCombination keyCombination : eventHandlersByKeyCombination.keySet()) {
         if(keyCombination.match(event)) {
-          @SuppressWarnings("unchecked")
-          Action<Object> action = (Action<Object>)actionsByKeyCombination.get(keyCombination);
+          EventHandler<PresentationActionEvent<?>> handler = eventHandlersByKeyCombination.get(keyCombination);
 
-          action.perform(presentation);
+          handler.handle(new PresentationActionEvent<>(presentation, event));
           return true;
         }
       }
@@ -382,6 +381,10 @@ public class ProgramController {
 
   public Ini getIni() {
     return ini;
+  }
+
+  public Scene getScene() {
+    return scene;
   }
 
   private void displayOnMainStage(Node node) {
@@ -440,16 +443,14 @@ public class ProgramController {
 
   private synchronized void play(final MediaItem mediaItem) {
     if(playerPresentation == null) {
-      sceneManager.displayDialog(new InformationDialog("No video player was configured.\nUnable to play the selected item."));
+      Dialogs.show(scene, new InformationDialog("No video player was configured.\nUnable to play the selected item."));
       return;
     }
 
     Integer resumePosition = 0;
 
     if(mediaItem.mediaData.get() != null) {
-      final ResumeDialog resumeDialog = new ResumeDialog(mediaItem);
-
-      resumePosition = sceneManager.displaySynchronousDialog(resumeDialog);
+      resumePosition = Dialogs.showAndWait(scene, new ResumeDialog(mediaItem));
 
       if(resumePosition == null) {
         return;
@@ -514,14 +515,6 @@ public class ProgramController {
         }
       }
     });
-  }
-
-  public void showDialog(Dialog<?> dialog) {
-    sceneManager.displayDialog(dialog);
-  }
-
-  public <R> R showSynchronousDialog(Dialog<R> dialog) {
-    return sceneManager.displaySynchronousDialog(dialog);
   }
 
   private static Node createMessage(final Worker<?> worker) {
