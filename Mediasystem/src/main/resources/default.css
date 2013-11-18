@@ -111,18 +111,40 @@
 }
 
 /*
- * List & Tree styles
+ * ListCell, TreeCell and OptionCell: show focused cell 
  */
  
-.list-cell:even, .tree-cell:even, .table-cell:even, .list-cell:odd, .tree-cell:odd, .table-cell:odd{
-  -fx-background-color: transparent;
-}
-
-.list-cell:focused, .tree-cell:focused {
+.list-cell:focused, .tree-cell:focused, .option-cell:focused {
   -fx-background-color: rgba(173, 216, 230, 0.3);
 }
 
-.list-cell, .tree-cell, .option-cell {
+.list-cell:focused .label, .tree-cell:focused .label, .option-cell.focused .label {
+  -fx-text-fill: -c-text-focused;
+}
+
+/*
+ * ListCell, TreeCell and TableCell: remove odd/even styling
+ */
+ 
+.list-cell:even, .tree-cell:even, .table-cell:even, .list-cell:odd, .tree-cell:odd, .table-cell:odd {
+  -fx-background-color: transparent;
+}
+
+/*
+ * ListCell and TreeCell: hide empty cells
+ */
+
+.list-cell:empty, .tree-cell:empty {  
+  -fx-border-color: transparent;
+  -fx-border-width: 1;
+  -fx-border-insets: 1;
+}
+ 
+/*
+ * Styles for .main-list
+ */
+ 
+.main-list .list-cell, .main-list .tree-cell, .main-list .option-cell {
   -fx-background-color: transparent;
 
   -fx-padding: 1px;
@@ -131,13 +153,7 @@
   -fx-border-insets: 1;
 }
 
-.list-cell:empty, .tree-cell:empty {  
-  -fx-border-color: transparent;
-  -fx-border-width: 1;
-  -fx-border-insets: 1;
-}
-
-.list-cell:focused, .tree-cell:focused, .option-cell.focused {
+.main-list .list-cell:focused, .main-list .tree-cell:focused, .main-list .option-cell.focused {
   -fx-background-insets: 1, 1, 1;
   -fx-background-color: radial-gradient(center 25% 0%, radius 25%, color-blue 0%, transparent),
                         radial-gradient(center 75% 100%, radius 25%, color-blue 0%, transparent),
@@ -146,13 +162,12 @@
   -fx-border-width: 1, 1, 1;
   -fx-border-color: radial-gradient(center 25% 0%, radius 25%, color-blue 0%, transparent),
                     radial-gradient(center 75% 100%, radius 25%, color-blue 0%, transparent),
-                    linear-gradient(to right, transparent, color-blue-50 15%, color-blue-50 85%, transparent);
-                    
+                    linear-gradient(to right, transparent, color-blue-50 15%, color-blue-50 85%, transparent);                 
 }
 
-.list-cell:focused .label, .tree-cell:focused .label, .option-cell.focused .label {
-  -fx-text-fill: -c-text-focused;
-}
+/*
+ * Styles for .list
+ */
 
 .list .list-view {
   -fx-border-width: 2;
@@ -169,6 +184,10 @@
   -fx-background-radius: 8 8 0 0;
   -fx-label-padding: 5 20 5 20;
 }
+
+/*
+ * ============
+ */
 
 .scroll-bar {
   -fx-skin: "hs.mediasystem.ScrollBarSkin";

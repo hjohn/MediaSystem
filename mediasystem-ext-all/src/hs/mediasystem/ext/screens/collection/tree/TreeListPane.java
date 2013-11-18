@@ -83,6 +83,7 @@ public class TreeListPane extends BorderPane {
 
     getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
 
+    treeView.getStyleClass().add("main-list");
     treeView.setEditable(false);
     treeView.setShowRoot(false);
 

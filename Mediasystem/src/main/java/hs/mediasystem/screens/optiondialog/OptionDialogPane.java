@@ -34,6 +34,7 @@ public class OptionDialogPane extends DialogPane<Void> {
     getStylesheets().add("dialog/option-dialog.css");
 
     optionList.getStyleClass().add("dialog-list");
+    optionList.getStyleClass().add("main-list");
 
     for(Option option : options) {
       optionList.getChildren().add(option);
