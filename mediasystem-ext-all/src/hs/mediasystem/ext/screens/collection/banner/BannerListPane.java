@@ -40,7 +40,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 public class BannerListPane extends BorderPane {
-  private static final KeyCombination SPACE = new KeyCodeCombination(KeyCode.SPACE);
+  private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
   private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
 
   public final ObservableList<MediaNode> mediaNodes = FXCollections.observableArrayList();
@@ -143,7 +143,7 @@ public class BannerListPane extends BorderPane {
         MediaNode focusedNode = getFocusedMediaNode();
 
         if(focusedNode != null) {
-          if(SPACE.match(event)) {
+          if(ENTER.match(event)) {
             itemSelected(event, focusedNode);
           }
           else if(KEY_I.match(event)) {
