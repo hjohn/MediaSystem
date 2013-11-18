@@ -32,17 +32,3 @@
   -fx-background-radius: 23, 23;
   -fx-background-insets: 1, 1;
 }
-
-.dialog .list-cell {
-  -fx-text-fill: color-blue;
-}
-
-.dialog .list-cell:focused {
-  -fx-text-fill: -c-text-focused;
-}
-
-.dialog .list-view {
-  -fx-background-color: transparent;
-  
-  -fx-font-size: 14px;
-}
