@@ -61,9 +61,6 @@ public class MediaNode {
   public MediaNode(String id, String title, String shortTitle, boolean isLeaf, List<MediaNode> children) {
     Media<?> media = new SpecialItem(title);
 
-    assert !id.contains("/");
-    assert !id.contains(":");
-
     this.children = children == null ? new ArrayList<>() : new ArrayList<>(children);
     this.mediaItem = null;
 
@@ -147,32 +144,13 @@ public class MediaNode {
     return isLeaf;
   }
 
-  @Override
-  public int hashCode() {
-    return id.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if(this == obj) {
-      return true;
-    }
-    if(obj == null || getClass() != obj.getClass()) {
-      return false;
-    }
-
-    MediaNode other = (MediaNode)obj;
-
-    return id.equals(other.id);
-  }
-
   public Media<?> getMedia() {
     return media.get();
   }
 
   @Override
   public String toString() {
-    return "MediaNode[id='" + id + "']";
+    return "MediaNode[id='" + id + "', instance=" + hashCode() + "]";
   }
 
   public static class SpecialItem extends Media<SpecialItem> {

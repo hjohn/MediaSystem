@@ -66,7 +66,14 @@ public class CollectionLayout implements Layout<Location, CollectionPresentation
     view.focusedMediaNode.addListener(new ChangeListener<MediaNode>() {
       @Override
       public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
-        if(current != null) {
+
+        /*
+         * Check if the new node isn't null and that it doesn't have the same id.  Different
+         * MediaNode instances can have the same id, which means some changes in focusedMediaNode
+         * donot require updating the last selected setting.
+         */
+
+        if(current != null && (old == null || !old.getId().equals(current.getId()))) {
           settingsStore.storeSetting("MediaSystem:Collection", PersistLevel.TEMPORARY, presentation.mediaRoot.get().getId().toString("LastSelected", presentation.mediaRoot.get().getRootName()), current.getId());
         }
       }
