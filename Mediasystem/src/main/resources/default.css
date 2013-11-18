@@ -15,6 +15,7 @@
   -c-shadow-highlight: derive(-c-base, -50%);
 
   -c-border-tab: derive(-c-base, -50%);
+  -c-border-control: derive(-c-base, -50%);
   -c-border-highlight: derive(-c-base, +75%);
   -c-border-dialog: -c-base;
 
@@ -26,6 +27,10 @@
   -c-bg-dialog: rgba(173, 216, 230, 0.2);
   -c-bg-dialog-highlight: derive(-c-base-25, -75%);
   -c-bg-transparent: rgba(0, 0, 0, 0.66);
+
+  -c-bg-control: derive(-c-base-25, -75%);
+  -c-bg-combobox-cell: rgba(0, 0, 0, 0.8);
+  -c-bg-combobox-focused-cell: derive(rgba(173, 216, 230, 0.8), -50%);
 
   color-main: -c-base;
   
@@ -54,6 +59,8 @@
   -fx-font-family: "Arial";
   -fx-font-size: 16px;
   -fx-font-weight: normal;
+  
+  -fx-focus-color: rgb(255, 255, 0);
 }
 
 /*
@@ -77,8 +84,13 @@
  * the controls that donot react to this must be made consistent.
  *
  * - Buttons and CheckBoxes respond to ENTER for select/toggle
+ * - ComboBoxes only consume navigation keys when they are showing (dropdown is open)
  */
  
+.combo-box {
+  -fx-skin: "hs.mediasystem.controls.MediaLookComboBoxSkin";
+}
+
 .button {
   -fx-skin: "hs.mediasystem.controls.MediaLookButtonSkin";
 }
@@ -248,4 +260,78 @@
 
 .tab:selected .tab-label {
   -fx-text-fill: -c-text-focused;
+}
+
+/*
+ * ComboBox: MediaLook
+ */
+
+.combo-box {
+  -fx-background-color: -c-bg-control;
+  -fx-border-color: -c-border-control;
+  -fx-border-width: 1;
+}
+
+.combo-box .arrow-button {
+  -fx-background-color: -c-bg-control; 
+  -fx-border-color: transparent, -c-border-control;
+  -fx-border-width: 1, 1;
+  -fx-border-insets: 0, 1;
+}
+
+.combo-box .list-cell {
+  -fx-text-fill: -c-text-highlight;
+}
+
+.combo-box-popup .list-view {
+  -fx-background-color: -c-bg-transparent;   
+  -fx-border-color: -c-border-tab;
+  -fx-border-width: 1 1 1 1;
+}
+
+.combo-box-popup .list-view .list-cell {
+  -fx-text-fill: -c-text;
+}
+
+.combo-box-popup .list-view .list-cell:focused {
+  -fx-background-color: -c-bg-combobox-focused-cell;
+  -fx-text-fill: -c-text-focused;
+}
+
+.combo-box-base > .arrow-button > .arrow {
+  -fx-background-color: -c-border-control;
+}
+
+/*
+ * CheckBox: MediaLook
+ */
+
+.check-box {
+  -fx-text-fill: -c-text;
+}
+
+.check-box > .box {
+  -fx-background-color: -c-bg-control;
+  -fx-background-insets: 0;
+  -fx-background-radius: 0;
+    
+  -fx-border-color: -c-border-control;
+  -fx-border-insets: 0;
+  -fx-border-radius: 0;
+  -fx-border-width: 1;
+}
+
+.check-box:selected > .box > .mark {
+  -fx-background-color: -c-text-highlight;
+}
+
+/*
+ * MediaLook: Focus
+ */
+ 
+.check-box.focused > .box, .combo-box-base.focused {
+  -fx-border-color: -fx-focus-color, -c-border-control;
+  -fx-border-width: 3, 1;
+  -fx-border-insets: -5.4, 0;
+  -fx-border-radius: 5.4, 0;
 }
