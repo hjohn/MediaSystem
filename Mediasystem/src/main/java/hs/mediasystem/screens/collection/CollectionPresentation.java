@@ -220,7 +220,6 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
   }
 
   private void createMediaNodes(@SuppressWarnings("unused") Observable observable) {
-    mediaNodesWrapper.clear();
     expandTopLevelWrapper.set(groupSet.get().showTopLevelExpanded());
 
     List<MediaItem> filteredItems = new ArrayList<>();

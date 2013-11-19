@@ -1,13 +1,11 @@
 package hs.mediasystem.screens.collection;
 
 import hs.mediasystem.dao.Setting.PersistLevel;
+import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.Location;
 import hs.mediasystem.screens.MediaNode;
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -42,17 +40,6 @@ public class CollectionLayout implements Layout<Location, CollectionPresentation
   public Node createView(CollectionPresentation presentation) {
     CollectionView view = new CollectionView();
 
-    // TODO this listener sets the last selected node after every groupset change...
-    // - [no more] it is triggered initially because groupsets are set up (good, although it should not need to be a listener for that -- this is why it must be before groupset is bound)
-    // - it is triggered after every groupset change because the View is too stupid to maintain selection itself (bad)
-
-    presentation.groupSet.addListener(new InvalidationListener() {
-      @Override
-      public void invalidated(Observable observable) {
-        selectLastSelected(presentation, view);
-      }
-    });
-
     Bindings.bindContentBidirectional(view.mediaNodes, presentation.mediaNodes);
 
     view.layout.bindBidirectional(presentation.layout);
@@ -61,7 +48,16 @@ public class CollectionLayout implements Layout<Location, CollectionPresentation
     view.onSelect.set(presentation::handleMediaNodeSelectEvent);
     view.onOptionsSelect.set(presentation::handleOptionsSelectEvent);
 
-    selectLastSelected(presentation, view);
+    presentation.mediaRoot.addListener(new ChangeListener<MediaRoot>() {
+      @Override
+      public void changed(ObservableValue<? extends MediaRoot> observable, MediaRoot old, MediaRoot current) {
+        String id = settingsStore.getSetting("MediaSystem:Collection", presentation.mediaRoot.get().getId().toString("LastSelected", presentation.mediaRoot.get().getRootName()));
+
+        if(id != null) {
+          view.focusedMediaNode.set(new MediaNode(id, null, null, true));
+        }
+      }
+    });
 
     view.focusedMediaNode.addListener(new ChangeListener<MediaNode>() {
       @Override
@@ -80,18 +76,5 @@ public class CollectionLayout implements Layout<Location, CollectionPresentation
     });
 
     return view;
-  }
-
-  private void selectLastSelected(CollectionPresentation presentation, CollectionView view) {
-    view.focusedMediaNode.set(null);
-
-    Platform.runLater(new Runnable() {
-      @Override
-      public void run() {
-        String id = settingsStore.getSetting("MediaSystem:Collection", presentation.mediaRoot.get().getId().toString("LastSelected", presentation.mediaRoot.get().getRootName()));
-
-        view.selectMediaNodeById(id);
-      }
-    });
   }
 }

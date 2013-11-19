@@ -21,7 +21,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -63,6 +62,25 @@ public class TreeListPane extends BorderPane {
 
   private final Provider<Set<MediaNodeCellProvider>> mediaNodeCellsProvider;
 
+  private final InvalidationListener invalidateTreeListener = new InvalidationListener() {
+    @Override
+    public void invalidated(Observable observable) {
+      if(treeValid) {
+        treeValid = false;
+        requestLayout();
+      }
+    }
+  };
+
+  private final ChangeListener<TreeItem<MediaNode>> updateFocusedMediaNode = new ChangeListener<TreeItem<MediaNode>>() {
+    @Override
+    public void changed(ObservableValue<? extends TreeItem<MediaNode>> observable, TreeItem<MediaNode> old, TreeItem<MediaNode> current) {
+      focusedMediaNode.set(current == null ? null : current.getValue());
+    }
+  };
+
+  private boolean treeValid;
+
   @Inject
   public TreeListPane(Provider<Set<MediaNodeCellProvider>> mediaNodeCellsProvider) {
     this.mediaNodeCellsProvider = mediaNodeCellsProvider;
@@ -71,13 +89,6 @@ public class TreeListPane extends BorderPane {
       @Override
       public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
         setSelectedNode(current);
-      }
-    });
-
-    treeView.getFocusModel().focusedItemProperty().addListener(new ChangeListener<TreeItem<MediaNode>>() {
-      @Override
-      public void changed(ObservableValue<? extends TreeItem<MediaNode>> observable, TreeItem<MediaNode> old, TreeItem<MediaNode> current) {
-        focusedMediaNode.set(current == null ? null : current.getValue());
       }
     });
 
@@ -146,25 +157,26 @@ public class TreeListPane extends BorderPane {
       }
     });
 
-    expandTopLevel.addListener(new InvalidationListener() {
-      @Override
-      public void invalidated(Observable observable) {
-        buildTree();
-      }
-    });
-
-    mediaNodes.addListener(new ListChangeListener<MediaNode>() {
-      @Override
-      public void onChanged(ListChangeListener.Change<? extends MediaNode> change) {
-        buildTree();
-      }
-    });
+    expandTopLevel.addListener(invalidateTreeListener);
+    mediaNodes.addListener(invalidateTreeListener);
 
     setTop(filter);
     setCenter(treeView);
   }
 
+  @Override
+  protected double computePrefWidth(double height) {
+    if(!treeValid) {
+      buildTree();
+      treeValid = true;
+    }
+
+    return super.computePrefWidth(height);
+  }
+
   private void buildTree() {
+    treeView.getFocusModel().focusedItemProperty().removeListener(updateFocusedMediaNode);  // prevent focus updates from changing tree root
+
     treeView.setCellFactory(new Callback<TreeView<MediaNode>, TreeCell<MediaNode>>() {
       @Override
       public TreeCell<MediaNode> call(TreeView<MediaNode> param) {
@@ -185,6 +197,8 @@ public class TreeListPane extends BorderPane {
     else {
       treeView.setRoot(new MediaNodeTreeItem(new MediaNode("root", "root", "root", false, mediaNodes), false));
     }
+
+    treeView.getFocusModel().focusedItemProperty().addListener(updateFocusedMediaNode);
 
     setSelectedNode(focusedMediaNode.get());
   }
