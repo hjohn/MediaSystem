@@ -5,11 +5,14 @@ import hs.ddif.Injector;
 import hs.ddif.Value;
 import hs.mediasystem.MediaRootType;
 import hs.mediasystem.dao.Setting.PersistLevel;
+import hs.mediasystem.framework.Media;
+import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.SettingUpdater;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.StandardTitleComparator;
+import hs.mediasystem.framework.actions.PresentationActionEvent;
 import hs.mediasystem.screens.AbstractMediaGroup;
 import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.LocationChangeEvent;
@@ -18,6 +21,7 @@ import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.UserLayout;
+import hs.mediasystem.screens.optiondialog.ActionOption;
 import hs.mediasystem.screens.optiondialog.ListOption;
 import hs.mediasystem.screens.optiondialog.Option;
 import hs.mediasystem.screens.optiondialog.OptionDialogPane;
@@ -47,6 +51,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.util.StringConverter;
 
 import javax.inject.Inject;
@@ -252,7 +257,6 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
    * EventHandler for showing the Options dialog.
    */
   public void handleOptionsSelectEvent(ActionEvent event) {
-    @SuppressWarnings("unchecked")
     List<? extends Option> options = FXCollections.observableArrayList(
       new ListOption<>("Sorting/Grouping", groupSet, availableGroupSets, new StringBinding(groupSet) {
         @Override
@@ -264,6 +268,12 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
         @Override
         protected String computeValue() {
           return layout.get().getTitle();
+        }
+      }),
+      new ActionOption("Filter", new EventHandler<Event>() {
+        @Override
+        public void handle(Event event) {
+          CollectionActions.FILTER_SHOW_DIALOG.handle(new PresentationActionEvent<>(CollectionPresentation.this, event));
         }
       })
     );

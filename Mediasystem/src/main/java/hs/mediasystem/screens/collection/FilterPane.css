@@ -1,0 +1,18 @@
+.filters {
+  -fx-hgap: 10px;
+  -fx-vgap: 10px;
+}
+
+.title {
+  -fx-font-size: 24px; 
+  -fx-font-weight: bold;
+}
+
+.genres {
+  -fx-hgap: 10px;
+  -fx-vgap: 10px;
+}
+
+.released {
+  -fx-spacing: 8px;
+}
