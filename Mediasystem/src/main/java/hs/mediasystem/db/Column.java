@@ -9,6 +9,8 @@ import java.lang.reflect.Method;
 import java.sql.Blob;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
@@ -39,6 +41,13 @@ public @interface Column {
           Date date = (Date)input;
 
           return date.toLocalDate();
+        }
+        else if(input instanceof Timestamp) {
+          Timestamp timestamp = (Timestamp)input;
+
+          if(type.equals(LocalDateTime.class)) {
+            return timestamp.toLocalDateTime();
+          }
         }
 
         return input;
