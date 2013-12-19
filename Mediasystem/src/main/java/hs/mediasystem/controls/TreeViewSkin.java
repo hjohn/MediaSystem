@@ -68,14 +68,14 @@ public class TreeViewSkin<T> extends BehaviorSkinBase<TreeView<T>, TreeViewBehav
   private final Set<TreeCell<T>> usedCells = new HashSet<>();
   private final List<TreeCell<T>> reusableCells = new ArrayList<>();
 
-  private int maximumCells = 100;
+  private final int maximumCells = 100;
 
   private TreeCell<T> firstFullyVisibleCell;
   private TreeCell<T> lastFullyVisibleCell;
   private double targetCellOffset = 0.5;
 
   public TreeViewSkin(TreeView<T> treeView) {
-    super(treeView, new TreeViewBehavior<T>(treeView));
+    super(treeView, new TreeViewBehavior<>(treeView));
 
 //    getSkinnable().addEventHandler(ScrollToEvent.SCROLL_TO_TOP_INDEX, new EventHandler<ScrollToEvent<Integer>>() {
 //      @Override
