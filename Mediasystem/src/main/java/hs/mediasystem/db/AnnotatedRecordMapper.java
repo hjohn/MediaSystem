@@ -563,18 +563,25 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
     public Object toJavaType(Map<String, Object> map, Transaction transaction) {
       try {
         if(isEmbedded()) {
+          List<Accessor> accessors = getAnnotatedAccessors(getType(), EMBEDDABLE_INDEX_ORDER, EmbeddableColumn.class);
+
           Class<?>[] types = new Class<?>[names.length];
           Object[] idValues = new Object[names.length];
+          int nulls = 0;
 
           for(int i = 0; i < names.length; i++) {
             Object value = map.get(names[i]);
 
-            if(value == null) {
-              return null;
-            }
-
-            types[i] = value.getClass();
+            types[i] = accessors.get(i).getType();
             idValues[i] = value;
+
+            if(value == null) {
+              nulls++;
+            }
+          }
+
+          if(nulls == idValues.length) {
+            return null;
           }
 
           Constructor<?> constructor = getType().getConstructor(types);

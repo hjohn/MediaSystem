@@ -21,7 +21,7 @@ public class MediaId {
   @EmbeddableColumn(5)
   private Long osHash;
 
-  public MediaId(Long fileLength, Long fileTime, Long fileCreateTime, byte[] hash, Long osHash) {
+  public MediaId(long fileLength, long fileTime, long fileCreateTime, byte[] hash, Long osHash) {
     this.fileLength = fileLength;
     this.fileTime = fileTime;
     this.fileCreateTime = fileCreateTime;
