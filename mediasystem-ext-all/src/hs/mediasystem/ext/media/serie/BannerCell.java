@@ -21,7 +21,7 @@ public class BannerCell extends HBox implements MediaNodeCell {
   private final WeakBinder binder = new WeakBinder();
 
   private final Label title = new Label() {{
-    setId("selectItem-listCell-title");
+    getStyleClass().add("title");
   }};
 
   public BannerCell() {
