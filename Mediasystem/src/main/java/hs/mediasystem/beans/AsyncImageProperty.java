@@ -4,7 +4,6 @@ import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.ImageHandle;
 import hs.subtitle.DefaultThreadFactory;
 
-import java.io.ByteArrayInputStream;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -21,8 +20,7 @@ import javafx.scene.image.Image;
 public class AsyncImageProperty extends SimpleObjectProperty<Image> {
   private static final ThreadPoolExecutor SLOW_EXECUTOR = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new DefaultThreadFactory("AsyncImageProperty[Slow]", true));
   private static final ThreadPoolExecutor FAST_EXECUTOR = new ThreadPoolExecutor(3, 3, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new DefaultThreadFactory("AsyncImageProperty[Fast]", true));
-
-  private static final Image NULL_IMAGE = new Image(new ByteArrayInputStream(new byte[0]));
+  private static final long NANOS_PER_MS = 1000L * 1000L;
 
   static {
     SLOW_EXECUTOR.allowCoreThreadTimeOut(true);
@@ -36,10 +34,8 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
 
   private boolean taskQueued;
 
-  public AsyncImageProperty(long settlingNanos) {
-    this.settlingNanos = settlingNanos;
-
-    set(NULL_IMAGE);  // WORKAROUND for JavaFX Jira Issue RT-23974; should be null, but that causes an Exception in ImageView code
+  public AsyncImageProperty(long settlingMillis) {
+    this.settlingNanos = settlingMillis * NANOS_PER_MS;
 
     imageHandle.addListener(new ChangeListener<ImageHandle>() {
       @Override
@@ -50,11 +46,11 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
   }
 
   public AsyncImageProperty() {
-    this(200 * 1000 * 1000L);
+    this(500);
   }
 
   private void loadImageInBackground(final ImageHandle imageHandle) {
-    set(NULL_IMAGE);  // WORKAROUND for JavaFX Jira Issue RT-23974; should be null, but that causes an Exception in ImageView code
+    set(null);
 
     synchronized(FAST_EXECUTOR) {
       if(!taskQueued && imageHandle != null) {
@@ -67,12 +63,12 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
     }
   }
 
-  static final class BackgroundLoader implements Runnable {
+  private static final class BackgroundLoader implements Runnable {
     private final ImageHandle imageHandle;
     private final WeakReference<AsyncImageProperty> asyncImagePropertyReference;
     private final long loadAfterNanos;
 
-    private BackgroundLoader(AsyncImageProperty asyncImageProperty, ImageHandle imageHandle, long loadAfterNanos) {
+    BackgroundLoader(AsyncImageProperty asyncImageProperty, ImageHandle imageHandle, long loadAfterNanos) {
       this.loadAfterNanos = loadAfterNanos;
       this.asyncImagePropertyReference = new WeakReference<>(asyncImageProperty);
       this.imageHandle = imageHandle;
@@ -89,15 +85,11 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
       }
 
       try {
-        Image image = NULL_IMAGE;
+        Image image = null;
 
         if(imageHandle.equals(asyncImagePropery.imageHandle.get())) {
           try {
-            Image newImage = ImageCache.loadImageUptoMaxSize(imageHandle, 1920, 1200);
-
-            if(newImage != null) {
-              image = newImage;  // WORKAROUND for JavaFX Jira Issue RT-23974; should be null, but that causes an Exception in ImageView code
-            }
+            image = ImageCache.loadImageUptoMaxSize(imageHandle, 1920, 1200);
           }
           catch(Exception e) {
             System.out.println("[WARN] AsyncImageProperty - Exception while loading " + imageHandle + " in background: " + e);
@@ -136,7 +128,7 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
         }
 
         try {
-          Thread.sleep(nanosLeft / (1000 * 1000) + 1);
+          Thread.sleep(nanosLeft / NANOS_PER_MS + 1);
         }
         catch(InterruptedException e) {
           // Ignore
