@@ -1,5 +1,5 @@
 package hs.mediasystem.persist;
 
-public interface Persister<P> {
+public interface DatabasePersister<P> {
   void queueAsDirty(P persistable);
 }
