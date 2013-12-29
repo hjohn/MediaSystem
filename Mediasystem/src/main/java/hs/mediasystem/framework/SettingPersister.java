@@ -13,12 +13,11 @@ import javax.inject.Inject;
 
 public class SettingPersister implements DatabasePersister<Setting> {
   private final SettingsDao settingsDao;
-  private final PersistQueue queue;
+  private final PersistQueue queue = new PersistQueue(3000);
 
   @Inject
-  public SettingPersister(SettingsDao settingsDao, PersistQueue queue) {
+  public SettingPersister(SettingsDao settingsDao) {
     this.settingsDao = settingsDao;
-    this.queue = queue;
   }
 
   @Override

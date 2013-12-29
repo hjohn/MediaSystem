@@ -14,8 +14,10 @@ import javax.inject.Singleton;
 public class PersistQueue {
   private final Map<Object, ScheduledFuture<?>> futures = new HashMap<>();
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+  private final long settleMillis;
 
-  public PersistQueue() {
+  public PersistQueue(long settleMillis) {
+    this.settleMillis = settleMillis;
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {
@@ -72,7 +74,7 @@ public class PersistQueue {
         }
       };
 
-      futures.put(persistable, scheduler.schedule(runnable, 3, TimeUnit.SECONDS));
+      futures.put(persistable, scheduler.schedule(runnable, settleMillis, TimeUnit.MILLISECONDS));
     }
   }
 }
