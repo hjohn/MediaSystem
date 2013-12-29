@@ -1,7 +1,6 @@
 package hs.mediasystem.ext.player.vlc;
 
 import hs.mediasystem.beans.Accessor;
-import hs.mediasystem.beans.BeanAccessor;
 import hs.mediasystem.beans.BeanBooleanProperty;
 import hs.mediasystem.beans.BeanFloatProperty;
 import hs.mediasystem.beans.BeanIntegerProperty;
@@ -60,6 +59,7 @@ public class VLCPlayer implements Player {
   private final Object canvas;
 
   private PixelWriter pixelWriter;
+  private volatile boolean videoOutputStarted;
 
   public VLCPlayer(Mode mode, String... args) {
     List<String> arguments = new ArrayList<>(Arrays.asList(args));
@@ -165,9 +165,13 @@ public class VLCPlayer implements Player {
       }
 
       @Override
-      public void mediaStateChanged(MediaPlayer mediaPlayer, int newState) {
+      public void mediaStateChanged(final MediaPlayer mediaPlayer, int newState) {
         // IDLE/CLOSE=0, OPENING=1, BUFFERING=2, PLAYING=3, PAUSED=4, STOPPING=5, ENDED=6, ERROR=7
-        System.out.println("[FINE] VLCPlayer: Event[mediaStateChanged]: " + newState);
+        if(newState >= 5) {
+          videoOutputStarted = false;
+        }
+
+        System.out.println("[FINE] VLCPlayer: Event[mediaStateChanged]: " + newState + "; volume=" + volume.get() + " --> " + mediaPlayer.getVolume() + "; mute=" + mediaPlayer.isMute());
 
         pausedProperty.update(newState == 4);
       }
@@ -194,14 +198,19 @@ public class VLCPlayer implements Player {
       }
 
       @Override
-      public void videoOutput(MediaPlayer mediaPlayer, int newCount) {
+      public void videoOutput(final MediaPlayer mediaPlayer, int newCount) {
         System.out.println("VLCPlayer: videoOutput");
-        mediaPlayer.setVolume(mediaPlayer.getVolume());
+
+        mediaPlayer.setVolume(volume.get());
+        mediaPlayer.mute(mutedProperty.get());
+
+        videoOutputStarted = true;
       }
 
       @Override
       public void finished(MediaPlayer mediaPlayer) {
         if(ignoreFinish.get() == 0) {
+          videoOutputStarted = false;
           System.out.println("VLCPlayer: Finished");
           Events.dispatchEvent(onPlayerEvent, new PlayerEvent(Type.FINISHED), null);
         }
@@ -232,7 +241,23 @@ public class VLCPlayer implements Player {
         super.set(value);
       }
     };
-    volume = new BeanIntegerProperty(new BeanAccessor<Integer>(mediaPlayer, "volume"));
+    volume = new BeanIntegerProperty(new Accessor<Integer>() {
+      private int cachedVolume = 100;
+
+      @Override
+      public Integer read() {
+        if(videoOutputStarted) {
+          cachedVolume = mediaPlayer.getVolume();
+        }
+
+        return cachedVolume;
+      }
+
+      @Override
+      public void write(Integer value) {
+        mediaPlayer.setVolume(value);
+      }
+    });
     audioDelay = new BeanIntegerProperty(new Accessor<Integer>() {
       @Override
       public void write(Integer value) {
@@ -258,9 +283,15 @@ public class VLCPlayer implements Player {
     rate = new BeanFloatProperty(mediaPlayer, "rate");
     brightness = new BeanFloatProperty(mediaPlayer, "brightness");
     mutedProperty = new BeanBooleanProperty(new Accessor<Boolean>() {
+      private boolean cachedMuteStatus = false;
+
       @Override
       public Boolean read() {
-        return mediaPlayer.isMute();
+        if(videoOutputStarted) {
+          cachedMuteStatus = mediaPlayer.isMute();
+        }
+
+        return cachedMuteStatus;
       }
 
       @Override
@@ -295,15 +326,21 @@ public class VLCPlayer implements Player {
   }
 
   public Subtitle getSubtitleInternal() {
-    int index = mediaPlayer.getSpu();
+    int id = mediaPlayer.getSpu();
 
-    return index == -1 ? Subtitle.DISABLED : getSubtitles().get(index);
+    for(Subtitle subtitle : getSubtitles()) {
+      if(subtitle.getId() == id) {
+        return subtitle;
+      }
+    }
+
+    return Subtitle.DISABLED;
   }
 
   public void setSubtitleInternal(Subtitle subtitle) {
     System.out.println("[FINE] VLCPlayer.setSubtitleInternal() - Subtitles available: " + getSubtitles());
     System.out.println("[FINE] VLCPlayer.setSubtitleInternal() - Setting subtitle to: " + subtitle + ", index = " + getSubtitles().indexOf(subtitle));
-    mediaPlayer.setSpu(getSubtitles().indexOf(subtitle));
+    mediaPlayer.setSpu(subtitle.getId());
   }
 
   private final ObservableList<Subtitle> subtitles = FXCollections.observableArrayList(Subtitle.DISABLED);
@@ -338,7 +375,6 @@ public class VLCPlayer implements Player {
     rate.update();
     subtitle.update();
     subtitleDelay.update();
-    volume.update();
 
     List<String> arguments = new ArrayList<>();
 

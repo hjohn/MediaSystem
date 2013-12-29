@@ -22,8 +22,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/jna-3.4.0.jar"/>
-	<classpathentry kind="lib" path="lib/vlcj-2.2.0-20120909.074345-1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/MediaSystem"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
