@@ -7,6 +7,7 @@ import hs.subtitle.SubtitleDescriptor;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -139,7 +140,13 @@ public class OpenSubtitlesSubtitleDescriptor implements SubtitleDescriptor {
   public byte[] getSubtitleRawData() throws IOException {
     URL resource = new URL(getProperty(Property.SubDownloadLink));
 
-    try(DataInputStream stream = new DataInputStream(new GZIPInputStream(resource.openStream()))) {
+    URLConnection urlConnection = resource.openConnection();
+
+    urlConnection.setRequestProperty("User-Agent", "MediaSystem");
+
+    System.out.println("[INFO] " + getClass().getName() + ": Downloading: " + resource);
+
+    try(DataInputStream stream = new DataInputStream(new GZIPInputStream(urlConnection.getInputStream()))) {
       byte[] data = new byte[getLength()];
 
       stream.readFully(data);
