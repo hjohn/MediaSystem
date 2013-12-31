@@ -2,6 +2,8 @@ package hs.mediasystem.beans;
 
 import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.ImageHandle;
+import hs.mediasystem.util.Task;
+import hs.mediasystem.util.Task.TaskRunnable;
 import hs.subtitle.DefaultThreadFactory;
 
 import java.lang.ref.WeakReference;
@@ -56,14 +58,24 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
       if(!taskQueued && imageHandle != null) {
         taskQueued = true;
 
-        Executor chosenExecutor = imageHandle.isFastSource() ? FAST_EXECUTOR : SLOW_EXECUTOR;
+        /*
+         * A Task is created here that first determines if the source is fast or slow (which
+         * can take several milliseconds or can even block on a monitor).  The background
+         * loading step is then added to be executed on the fast or slow Executor.
+         */
 
-        chosenExecutor.execute(new BackgroundLoader(this, imageHandle, System.nanoTime() + settlingNanos));
+        Task task = new Task(p -> {
+          Executor chosenExecutor = imageHandle.isFastSource() ? FAST_EXECUTOR : SLOW_EXECUTOR;
+
+          p.addStep(chosenExecutor, new BackgroundLoader(this, imageHandle, System.nanoTime() + settlingNanos));
+        });
+
+        FAST_EXECUTOR.execute(task);
       }
     }
   }
 
-  private static final class BackgroundLoader implements Runnable {
+  private static final class BackgroundLoader implements TaskRunnable {
     private final ImageHandle imageHandle;
     private final WeakReference<AsyncImageProperty> asyncImagePropertyReference;
     private final long loadAfterNanos;
@@ -75,7 +87,7 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
     }
 
     @Override
-    public void run() {
+    public void run(Task currentTask) {
       sleepUntil(loadAfterNanos);
 
       final AsyncImageProperty asyncImagePropery = asyncImagePropertyReference.get();
