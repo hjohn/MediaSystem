@@ -10,17 +10,19 @@ import hs.mediasystem.db.DatabaseStatementTranslator;
 import hs.mediasystem.db.DatabaseUpdater;
 import hs.mediasystem.db.SimpleConnectionPoolDataSource;
 import hs.mediasystem.db.SimpleDatabaseStatementTranslator;
-import hs.mediasystem.entity.CachingEntityFactory;
-import hs.mediasystem.framework.IdentifierProvider;
+import hs.mediasystem.entity.Entity;
+import hs.mediasystem.entity.EntityContext;
+import hs.mediasystem.entity.EntityEnricher;
+import hs.mediasystem.entity.EntityListProvider;
+import hs.mediasystem.entity.EntityPersister;
+import hs.mediasystem.framework.DatabaseCache;
 import hs.mediasystem.framework.Media;
-import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaDataPersister;
-import hs.mediasystem.framework.MediaDataProvider;
-import hs.mediasystem.framework.PersisterProvider;
-import hs.mediasystem.framework.PersonProvider;
+import hs.mediasystem.framework.MediaItemEnricher;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.PlayerFactory;
+import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.AbstractSetting;
 import hs.mediasystem.screens.MediaNodeCell;
 import hs.mediasystem.screens.MediaNodeCellProvider;
@@ -167,13 +169,18 @@ public class FrontEnd extends Application {
       }
     });
 
-    injector.registerInstance(new IdentifierProvider());
-    injector.registerInstance(new MediaDataProvider());
-    injector.registerInstance(new PersonProvider());
+    injector.register(MediaItemEnricher.class);
+    injector.register(MediaDataPersister.class);
 
-    injector.register(CachingEntityFactory.class);
+    injector.register(DatabaseCache.class);
+
+    EntityContext context = new EntityContext(new PersistQueue(3000));
+
+    injector.registerInstance(context);
 
     pluginManager.loadPluginAndScan(new File("../mediasystem-ext-all/target/mediasystem-ext-all-1.0.0-SNAPSHOT.jar").toURI().toURL());
+
+    configureEntityContext(context, injector);
 
     injector.register(new Provider<DatabaseStatementTranslator>() {
       @Override
@@ -185,8 +192,6 @@ public class FrontEnd extends Application {
     DatabaseUpdater updater = injector.getInstance(DatabaseUpdater.class);
 
     updater.updateDatabase();
-
-    PersisterProvider.register(MediaData.class, injector.getInstance(MediaDataPersister.class));
 
     injector.registerInstance(new MediaLayout());
     injector.registerInstance(new PersonLayout());
@@ -261,6 +266,24 @@ public class FrontEnd extends Application {
   public void stop() throws InterruptedException {
     if(pool != null) {
       pool.close();
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private void configureEntityContext(EntityContext context, Injector injector) {
+    for(hs.mediasystem.entity.Enricher<Entity, Object> enricher : injector.getInstances(hs.mediasystem.entity.Enricher.class)) {
+      EntityEnricher entityEnricher = enricher.getClass().getAnnotation(EntityEnricher.class);
+      context.registerEnricher((Class<Entity>)entityEnricher.entityClass(), injector.getInstance(entityEnricher.sourceClass()), entityEnricher.priority(), enricher);
+    }
+
+    for(hs.mediasystem.entity.ListProvider<Entity, ?> provider : injector.getInstances(hs.mediasystem.entity.ListProvider.class)) {
+      EntityListProvider entityListProvider = provider.getClass().getAnnotation(EntityListProvider.class);
+      context.registerListProvider((Class<Entity>)entityListProvider.parentEntityClass(), injector.getInstance(entityListProvider.sourceClass()), (Class<Entity>)entityListProvider.entityClass(), provider);
+    }
+
+    for(hs.mediasystem.persist.Persister<Entity, ?> persister : injector.getInstances(hs.mediasystem.persist.Persister.class)) {
+      EntityPersister entityPersister = persister.getClass().getAnnotation(EntityPersister.class);
+      context.registerPersister((Class<Entity>)entityPersister.entityClass(), injector.getInstance(entityPersister.sourceClass()), persister);
     }
   }
 

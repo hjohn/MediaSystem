@@ -11,7 +11,7 @@ import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.ObjectBinding;
@@ -38,7 +38,7 @@ public class PersonDetailPane extends DetailPane<Person> {
 
   protected final StringBinding birthPlace = MapBindings.selectString(content, "birthPlace");
   protected final StringBinding biography = MapBindings.selectString(content, "biography");
-  protected final ObjectBinding<Date> birthDate = MapBindings.select(content, "birthDate");
+  protected final ObjectBinding<LocalDate> birthDate = MapBindings.select(content, "birthDate");
 
   public static PersonDetailPane create(AreaLayout areaLayout, boolean interactive) {
     PersonDetailPane pane = new PersonDetailPane(areaLayout);
@@ -100,7 +100,7 @@ public class PersonDetailPane extends DetailPane<Person> {
   protected Pane createBirthDateBlock() {
     Label label = new Label() {{
       getStyleClass().addAll("field", "birthdate");
-      textProperty().bind(MediaItemFormatter.formattedDate(birthDate));
+      textProperty().bind(MediaItemFormatter.formattedLocalDate(birthDate));
     }};
 
     return createTitledBlock("BIRTH DATE", label, birthDate.isNotNull());

@@ -33,8 +33,8 @@ public class DetailView extends StackPane {
    */
   public final ObjectProperty<MediaNode> content = new SimpleObjectProperty<>();
 
-  private final ObjectBinding<Media<?>> media = MapBindings.select(content, "media");
-  private final ObjectProperty<Media<?>> derivedMedia = new SimpleObjectProperty<>();
+  private final ObjectBinding<Media> media = MapBindings.select(content, "media");
+  private final ObjectProperty<Media> derivedMedia = new SimpleObjectProperty<>();
 
   private final ObjectProperty<Object> finalContent = new SimpleObjectProperty<>();
 

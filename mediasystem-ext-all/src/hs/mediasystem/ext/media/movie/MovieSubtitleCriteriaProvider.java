@@ -15,7 +15,7 @@ public class MovieSubtitleCriteriaProvider implements SubtitleCriteriaProvider {
 
   @Override
   public Map<String, Object> getCriteria(MediaItem mediaItem) {
-    Media<?> media = mediaItem.getMedia();
+    Media media = mediaItem.getMedia();
     MediaData mediaData = mediaItem.mediaData.get();
 
     Map<String, Object> criteria = new HashMap<>();

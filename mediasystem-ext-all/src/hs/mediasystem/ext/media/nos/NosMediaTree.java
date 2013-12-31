@@ -7,7 +7,6 @@ import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.SourceImageHandle;
-import hs.mediasystem.persist.PersistQueue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class NosMediaTree implements MediaTree, MediaRoot {
         String meta = element.select("div p").text();
         String videoUrl = videoUrls.get(element.attr("id"));
 
-        Media<?> media = new NosItem(title, meta);
+        Media media = new NosItem(title, meta);
 
         media.image.set(new SourceImageHandle(new URLImageSource(thumbUrl), "NosMediaTree:/" + title));
 
@@ -85,11 +84,6 @@ public class NosMediaTree implements MediaTree, MediaRoot {
   }
 
   @Override
-  public PersistQueue getPersister() {
-    return null;
-  }
-
-  @Override
   public Id getId() {
     return ID;
   }
@@ -112,9 +106,9 @@ public class NosMediaTree implements MediaTree, MediaRoot {
     return Collections.unmodifiableMap(MEDIA_PROPERTIES);
   }
 
-  public static class NosItem extends Media<NosItem> {
+  public static class NosItem extends Media {
     public NosItem(String title, String meta) {
-      super(title, meta);
+      setTitles(title, meta);
     }
   }
 }

@@ -5,7 +5,6 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
-import hs.mediasystem.persist.PersistQueue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +56,7 @@ public class YouTubeMediaTree implements MediaTree, MediaRoot {
       children = new ArrayList<>();
 
       for(Feed feed : FEEDS) {
-        Media<?> media = new YouTubeFeedItem(feed.getName());
+        Media media = new YouTubeFeedItem(feed.getName());
         children.add(new YouTubeFeed(YouTubeMediaTree.this, feed.getUrl(), feed, media));
       }
     }
@@ -68,11 +67,6 @@ public class YouTubeMediaTree implements MediaTree, MediaRoot {
   @Override
   public String getRootName() {
     return "YouTube";
-  }
-
-  @Override
-  public PersistQueue getPersister() {
-    return null;
   }
 
   @Override
@@ -92,9 +86,9 @@ public class YouTubeMediaTree implements MediaTree, MediaRoot {
     return Collections.unmodifiableMap(MEDIA_PROPERTIES);
   }
 
-  static class YouTubeFeedItem extends Media<YouTubeFeedItem> {
+  static class YouTubeFeedItem extends Media {
     public YouTubeFeedItem(String name) {
-      super(name);
+      setTitle(name);
     }
   }
 }

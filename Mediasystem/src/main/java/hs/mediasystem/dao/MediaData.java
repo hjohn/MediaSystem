@@ -1,11 +1,13 @@
 package hs.mediasystem.dao;
 
+import hs.mediasystem.db.AnnotatedRecordMapper;
 import hs.mediasystem.db.Column;
 import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
 import hs.mediasystem.entity.DefaultPersistable;
 
 import java.util.Date;
+import java.util.List;
 
 @Table(name = "mediadata")
 public class MediaData extends DefaultPersistable<MediaData> {
@@ -27,6 +29,8 @@ public class MediaData extends DefaultPersistable<MediaData> {
 
   @Column
   private boolean viewed;
+
+  private List<Identifier> identifiers;
 
   public String getUri() {
     return uri;
@@ -74,5 +78,17 @@ public class MediaData extends DefaultPersistable<MediaData> {
 
   public void setLastUpdated(Date lastUpdated) {
     this.lastUpdated = lastUpdated;
+  }
+
+  public boolean areIdentifiersLoaded() {
+    return identifiers != null;
+  }
+
+  public List<Identifier> getIdentifiers() {
+    if(identifiers == null) {
+      identifiers = AnnotatedRecordMapper.fetch(Identifier.class, this);
+    }
+
+    return identifiers;
   }
 }

@@ -1,6 +1,5 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.entity.SimpleEntityProperty;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.MediaItem;
@@ -17,8 +16,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
 public class MediaNode {
-  public final SimpleEntityProperty<MediaData> mediaData;
-  public final SimpleEntityProperty<Media<?>> media;
+  public final ObjectProperty<MediaData> mediaData;
+  public final ObjectProperty<Media> media;
 
   private final MediaItem mediaItem;
 
@@ -59,7 +58,7 @@ public class MediaNode {
   }
 
   public MediaNode(String id, String title, String shortTitle, boolean isLeaf, List<MediaNode> children) {
-    Media<?> media = new SpecialItem(title);
+    Media media = new SpecialItem(title);
 
     this.children = children == null ? new ArrayList<>() : new ArrayList<>(children);
     this.mediaItem = null;
@@ -76,9 +75,9 @@ public class MediaNode {
     data.put(Media.class, media);
 
     this.id = id;
-    this.mediaData = new SimpleEntityProperty<>(this, "mediaData");
+    this.mediaData = new SimpleObjectProperty<>(this, "mediaData");
     this.shortTitle = shortTitle == null ? media.title.get() : shortTitle;
-    this.media = new SimpleEntityProperty<>(this, "media");
+    this.media = new SimpleObjectProperty<>();
     this.media.set(media);
 
     this.isLeaf = isLeaf;
@@ -144,7 +143,7 @@ public class MediaNode {
     return isLeaf;
   }
 
-  public Media<?> getMedia() {
+  public Media getMedia() {
     return media.get();
   }
 
@@ -153,9 +152,9 @@ public class MediaNode {
     return "MediaNode[id='" + id + "', instance=" + hashCode() + "]";
   }
 
-  public static class SpecialItem extends Media<SpecialItem> {
+  public static class SpecialItem extends Media {
     public SpecialItem(String rootName) {
-      super(rootName);
+      setTitle(rootName);
     }
   }
 }

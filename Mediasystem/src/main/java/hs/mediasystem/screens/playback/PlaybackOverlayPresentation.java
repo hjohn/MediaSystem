@@ -53,7 +53,7 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
   // TODO this binding is ugly, but it prevents a permanent reference to Player...
   private final LongBinding position = Bindings.selectLong(player, "position");
 
-  private final ObjectProperty<SubtitleDescriptor> selectedSubtitleForDownload = new SimpleObjectProperty<>();
+  private final ObjectProperty<SubtitleDescriptor> selectedSubtitleForDownload = new SimpleObjectProperty<>(this, "selectedSubtitleForDownload");
   private final Set<SubtitleProvider> subtitleProviders;
   private final Set<SubtitleCriteriaProvider> subtitleCriteriaProviders;
   private final PlayerBindings playerBindings = new PlayerBindings(player);

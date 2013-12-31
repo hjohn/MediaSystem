@@ -389,7 +389,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
       }
 
       if(afterYear != null || beforeYear != null) {
-        Media<?> media = mediaItem.media.get();
+        Media media = mediaItem.media.get();
 
         if(media == null || media.releaseDate.get() == null) {
 
@@ -410,7 +410,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
       }
 
       if(genres != null && !genres.isEmpty()) {
-        Media<?> media = mediaItem.media.get();
+        Media media = mediaItem.media.get();
 
         if(media == null || media.genres.get() == null) {
 

@@ -34,7 +34,7 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
 
   private List<MediaItem> children;
 
-  public YouTubeFeed(YouTubeMediaTree mediaTree, String uri, Feed feed, Media<?> media) {
+  public YouTubeFeed(YouTubeMediaTree mediaTree, String uri, Feed feed, Media media) {
     super(uri, feed.getName(), Media.class);
 
     this.media.set(media);
@@ -102,9 +102,9 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
     return children;
   }
 
-  public static class YouTubeVideo extends Media<YouTubeVideo> {
+  public static class YouTubeVideo extends Media {
     public YouTubeVideo(String title) {
-      super(title);
+      setTitle(title);
     }
   }
 

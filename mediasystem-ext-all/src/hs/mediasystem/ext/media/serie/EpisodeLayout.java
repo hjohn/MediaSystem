@@ -16,7 +16,7 @@ public class EpisodeLayout extends MediaLayout {
   }
 
   @Override
-  protected DetailPane<Media<?>> createDetailPane(DetailPanePresentation presentation) {
+  protected DetailPane<Media> createDetailPane(DetailPanePresentation presentation) {
     return EpisodeDetailPane.create(presentation.getAreaLayout(), presentation.isInteractive());
   }
 }

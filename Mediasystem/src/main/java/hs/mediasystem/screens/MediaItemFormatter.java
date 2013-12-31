@@ -40,7 +40,7 @@ public class MediaItemFormatter {
     };
   }
 
-  public static StringBinding releaseTimeBinding(final ObservableValue<Media<?>> media) {
+  public static StringBinding releaseTimeBinding(final ObservableValue<Media> media) {
     return new StringBinding() {
       final ObjectBinding<LocalDate> selectReleaseDate = MapBindings.select(media, "releaseDate");
 
@@ -64,6 +64,21 @@ public class MediaItemFormatter {
       @Override
       protected String computeValue() {
         String releaseTime = date.getValue() == null ? null : DATE_FORMAT.format(date.getValue());
+
+        return releaseTime;
+      }
+    };
+  }
+
+  public static StringBinding formattedLocalDate(final ObservableValue<LocalDate> date) {
+    return new StringBinding() {
+      {
+        bind(date);
+      }
+
+      @Override
+      protected String computeValue() {
+        String releaseTime = date.getValue() == null ? null : DATE_TIME_FORMATTER.format(date.getValue());
 
         return releaseTime;
       }

@@ -21,20 +21,38 @@ public class MediaDataDao {
     this.database = database;
   }
 
+  public MediaData getMediaData(int id) {
+    return getMediaData("id=?", id);
+  }
+
   public MediaData getMediaDataByUri(String uri) {
-    try(Transaction transaction = database.beginReadOnlyTransaction()) {
-      return transaction.selectUnique(MediaData.class, "uri=?", uri);
-    }
+    return getMediaData("uri=?", uri);
   }
 
   public MediaData getMediaDataByHash(byte[] hash) {
+    return getMediaData("hash=?", hash);
+  }
+
+  private MediaData getMediaData(String whereCondition, Object... parameters) {
     try(Transaction transaction = database.beginReadOnlyTransaction()) {
-      return transaction.selectUnique(MediaData.class, "hash=?", hash);
+      MediaData mediaData = transaction.selectUnique(MediaData.class, whereCondition, parameters);
+
+      if(mediaData != null) {
+        mediaData.getIdentifiers();
+      }
+
+      return mediaData;
     }
   }
 
   public void updateMediaData(MediaData mediaData) {
     try(Transaction transaction = database.beginTransaction()) {
+
+      if(mediaData.areIdentifiersLoaded()) {
+        transaction.deleteChildren("identifiers", "mediadata", mediaData.getId());
+        storeIdentifiers(mediaData, transaction);
+      }
+
       transaction.update(mediaData);
       transaction.commit();
     }
@@ -43,9 +61,17 @@ public class MediaDataDao {
   public void storeMediaData(MediaData mediaData) {
     try(Transaction transaction = database.beginTransaction()) {
       transaction.delete("mediadata", "uri = ? or hash = ?", mediaData.getUri(), mediaData.getMediaId().getHash());
-
       transaction.insert(mediaData);
+
+      storeIdentifiers(mediaData, transaction);
+
       transaction.commit();
+    }
+  }
+
+  private void storeIdentifiers(MediaData mediaData, Transaction transaction) {
+    for(Identifier identifier : mediaData.getIdentifiers()) {
+      transaction.insert(identifier);
     }
   }
 

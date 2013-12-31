@@ -1,0 +1,1 @@
+ALTER TABLE identifiers DROP CONSTRAINT identifiers_mediadata_id;

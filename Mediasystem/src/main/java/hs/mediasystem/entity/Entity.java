@@ -1,24 +1,14 @@
 package hs.mediasystem.entity;
 
-import hs.mediasystem.persist.Persister;
-import hs.mediasystem.util.DebugConsole;
-import hs.mediasystem.util.DebugConsole.CommandCallback;
-import hs.subtitle.DefaultThreadFactory;
+import java.util.function.BiFunction;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleFloatProperty;
@@ -27,239 +17,324 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.ObservableList;
 
-public class Entity<T> {
-  private static final ThreadPoolExecutor PRIMARY_EXECUTOR = new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new PriorityBlockingQueue<Runnable>());
-  private static final ThreadPoolExecutor SECONDARY_EXECUTOR = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new PriorityBlockingQueue<Runnable>());
+public class Entity {
+  private static final EnrichTrigger DEFAULT_ENRICH_TRIGGER = EnrichTrigger.IS_NOT_SET;
 
-  private static final Map<EnrichmentRunnable, String> PRIMARY_TASKS = new WeakHashMap<>();
-  private static final Map<EnrichmentRunnable, String> SECONDARY_TASKS = new WeakHashMap<>();
-  private static final Map<InstanceEnricher<?, ?>, String> ENRICHERS = new WeakHashMap<>();
+  public enum EnrichTrigger {
+    NEVER((v, s) -> false),
+    IS_NULL((v, s) -> v == null),
+    IS_NOT_SET((v, s) -> !s),
+    ALWAYS((v, s) -> true);
 
-  static {
-    PRIMARY_EXECUTOR.setThreadFactory(new DefaultThreadFactory("EntityEnrichPrimary", Thread.NORM_PRIORITY - 2, true));
-    SECONDARY_EXECUTOR.setThreadFactory(new DefaultThreadFactory("EntityEnrichSecondary", Thread.NORM_PRIORITY - 2, true));
+    private final BiFunction<Object, Boolean, Boolean> condition;
 
-    DebugConsole.addCommand("d", new CommandCallback() {
-      @Override
-      public String execute(String name, String parameters) {
-        synchronized(ENRICHERS) {
-          StringBuilder builder = new StringBuilder();
+    EnrichTrigger(BiFunction<Object, Boolean, Boolean> condition) {
+      this.condition = condition;
+    }
 
-          builder.append("Running threads and enrichments:\n");
-
-          builder.append("PRIMARY_EXECUTOR   : active: " + PRIMARY_EXECUTOR.getActiveCount() + "/" + PRIMARY_EXECUTOR.getPoolSize() + "   queued: " + PRIMARY_EXECUTOR.getQueue().size() + "\n");
-
-          for(EnrichmentRunnable runnable : PRIMARY_TASKS.keySet()) {
-            builder.append("- ");
-            builder.append(runnable);
-            builder.append("\n");
-          }
-
-          builder.append("SECONDARY_EXECUTOR : active: " + SECONDARY_EXECUTOR.getActiveCount() + "/" + SECONDARY_EXECUTOR.getPoolSize() + "   queued: " + SECONDARY_EXECUTOR.getQueue().size() + "\n");
-
-          for(EnrichmentRunnable runnable : SECONDARY_TASKS.keySet()) {
-            builder.append("- ");
-            builder.append(runnable);
-            builder.append("\n");
-          }
-
-          builder.append("\n");
-
-          for(InstanceEnricher<?, ?> enricher : ENRICHERS.keySet()) {
-            String text = enricher.toString();
-
-            if(!text.startsWith("INACTIVE")) {
-              builder.append(text + "\n");
-            }
-          }
-
-          return builder.toString();
-        }
-      }
-    });
-  }
-
-  static void submit(boolean primary, EnrichmentRunnable runnable) {
-    synchronized(ENRICHERS) {
-      Executor executor = primary ? PRIMARY_EXECUTOR : SECONDARY_EXECUTOR;
-      Map<EnrichmentRunnable, String> tasks = primary ? PRIMARY_TASKS : SECONDARY_TASKS;
-
-      tasks.put(runnable, "");
-      executor.execute(runnable);
+    public boolean shouldEnrich(Object value, boolean setCalled) {
+      return condition.apply(value, setCalled);
     }
   }
 
-  private static void registerEnricher(InstanceEnricher<?, ?> enricher) {
-    synchronized(ENRICHERS) {
-      ENRICHERS.put(enricher, "");
+  private EntityContext context;
+  private LoadState loadState = LoadState.SPARSE;
+  private boolean queuedForEnrichment;
+
+  void setContext(EntityContext context) {
+    this.context = context;
+  }
+
+  public EntityContext getContext() {
+    return context;
+  }
+
+  public LoadState getLoadState() {
+    return loadState;
+  }
+
+  public void setLoadState(LoadState loadState) {
+    this.loadState = loadState;
+  }
+
+  void clearQueuedForEnrichment() {
+    queuedForEnrichment = false;
+  }
+
+  private void setQueuedForEnrichment() {
+    queuedForEnrichment = true;
+  }
+
+  private boolean isQueuedForEnrichment() {
+    return queuedForEnrichment;
+  }
+
+  private void queueAsDirty(Property<?> property) {
+    if(context != null) {
+      context.queueAsDirty(this, property);
     }
   }
 
-  private EntityFactory<Object> factory;
-  private Persister<T> persister;
+  private void queueForEnrichment(Property<?> property, Object value, boolean setCalled, EnrichTrigger enrichTrigger) {
+    if(context != null && !isQueuedForEnrichment() && enrichTrigger.shouldEnrich(value, setCalled || property.isBound())) {
+      System.out.println("[FINE] Enrich Triggered by access (" + enrichTrigger + ") of: " + getClass().getName() + "." + property.getName());
 
-  @SuppressWarnings("unchecked")
-  public void setEntityFactory(EntityFactory<?> factory) {
-    this.factory = (EntityFactory<Object>)factory;
-  }
+      context.ensureRunsOnUpdateThread();
 
-  public <C extends Entity<?>> C create(Class<C> cls, Object key) {
-    if(factory == null) {
-      throw new RuntimeException("No EntityFactory set for: " + this);
-    }
-
-    return factory.create(cls, key);
-  }
-
-  public <K> K getKey() {
-    if(factory == null) {
-      throw new RuntimeException("No EntityFactory set for: " + this);
-    }
-
-    return factory.getAssociatedKey(this);
-  }
-
-  public void setPersister(Persister<T> persister) {
-    this.persister = persister;
-  }
-
-  public static class EnrichTask<T, R> extends EnrichmentRunnable {
-    public EnrichTask(final T parent, final InstanceEnricher<T, R> enricher) {
-      super(0, new Runnable() {
-        @Override
-        public void run() {
-          final R result = enricher.enrich(parent);
-
-          Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-              enricher.update(parent, result);
-            }
-          });
-        }
-      });
-
-      Entity.registerEnricher(enricher);
+      setQueuedForEnrichment();
+      context.queueForEnrichment(this);
     }
   }
 
-  @SuppressWarnings("unchecked")
-  private T self() {
-    return (T)this;
-  }
-
-  protected <P> SimpleEntityProperty<P> entity(String name) {
-    return new SimpleEntityProperty<P>(this, name) {
-      private boolean enricherCalled;
+  protected <P> ObjectProperty<P> object(String name, EnrichTrigger enrichTrigger) {
+    return new SimpleObjectProperty<P>(this, name) {
+      private boolean setCalled;
 
       @Override
       protected void invalidated() {
-        if(persister != null) {
-          persister.queueAsDirty(self());
-          get();
-        }
+        queueAsDirty(this);
       }
 
       @Override
       public P get() {
         P value = super.get();
-
-        if(value == null && getEnricher() != null && !enricherCalled) {
-          enricherCalled = true;
-
-          submit(true, new EnrichTask<>(self(), getEnricher()));
-        }
-
+        queueForEnrichment(this, value, setCalled, enrichTrigger);
         return value;
+      }
+
+      @Override
+      public void set(P newValue) {
+        setCalled = true;
+        super.set(newValue);
       }
     };
   }
 
   protected <P> ObjectProperty<P> object(String name) {
-    return new SimpleObjectProperty<P>(this, name) {
+    return object(name, DEFAULT_ENRICH_TRIGGER);
+  }
+
+  protected StringProperty stringProperty(String name, String initialValue, EnrichTrigger enrichTrigger) {
+    return new SimpleStringProperty(Entity.this, name, initialValue) {
+      private boolean setCalled;
+
       @Override
       protected void invalidated() {
-        if(persister != null) {
-          persister.queueAsDirty(self());
-          get();
-        }
+        queueAsDirty(this);
+      }
+
+      @Override
+      public String get() {
+        String value = super.get();
+        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        return value;
+      }
+
+      @Override
+      public void set(String newValue) {
+        setCalled = true;
+        super.set(newValue);
       }
     };
   }
 
-  protected StringProperty stringProperty(String initialValue) {
-    return new SimpleStringProperty(initialValue) {
+  protected StringProperty stringProperty(String name, String initialValue) {
+    return stringProperty(name, initialValue, DEFAULT_ENRICH_TRIGGER);
+  }
+
+  protected StringProperty stringProperty(EnrichTrigger enrichTrigger) {
+    return stringProperty(null, null, enrichTrigger);
+  }
+
+  protected StringProperty stringProperty(String name) {
+    return stringProperty(name, null, DEFAULT_ENRICH_TRIGGER);
+  }
+
+//  protected StringProperty stringProperty() {
+//    return stringProperty(null, null, DEFAULT_ENRICH_TRIGGER);
+//  }
+
+  protected IntegerProperty integerProperty(int initialValue, EnrichTrigger enrichTrigger) {
+    return new SimpleIntegerProperty(initialValue) {
+      private boolean setCalled;
+
       @Override
       protected void invalidated() {
-        if(persister != null) {
-          persister.queueAsDirty(self());
-          get();
-        }
+        queueAsDirty(this);
+      }
+
+      @Override
+      public int get() {
+        int value = super.get();
+        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        return value;
+      }
+
+      @Override
+      public void set(int newValue) {
+        setCalled = true;
+        super.set(newValue);
       }
     };
   }
 
-  protected StringProperty stringProperty() {
-    return stringProperty(null);
+  protected IntegerProperty integerProperty(EnrichTrigger enrichTrigger) {
+    return integerProperty(0, enrichTrigger);
   }
 
   protected IntegerProperty integerProperty() {
-    return new SimpleIntegerProperty() {
+    return integerProperty(0, DEFAULT_ENRICH_TRIGGER);
+  }
+
+  protected LongProperty longProperty(long initialValue, EnrichTrigger enrichTrigger) {
+    return new SimpleLongProperty(initialValue) {
+      private boolean setCalled;
+
       @Override
       protected void invalidated() {
-        if(persister != null) {
-          persister.queueAsDirty(self());
-          get();
-        }
+        queueAsDirty(this);
+      }
+
+      @Override
+      public long get() {
+        long value = super.get();
+        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        return value;
+      }
+
+      @Override
+      public void set(long newValue) {
+        setCalled = true;
+        super.set(newValue);
       }
     };
+  }
+
+  protected LongProperty longProperty(EnrichTrigger enrichTrigger) {
+    return longProperty(0L, enrichTrigger);
   }
 
   protected LongProperty longProperty() {
-    return new SimpleLongProperty() {
+    return longProperty(0L, DEFAULT_ENRICH_TRIGGER);
+  }
+
+  protected BooleanProperty booleanProperty(boolean initialValue, EnrichTrigger enrichTrigger) {
+    return new SimpleBooleanProperty(initialValue) {
+      private boolean setCalled;
+
       @Override
       protected void invalidated() {
-        if(persister != null) {
-          persister.queueAsDirty(self());
-          get();
-        }
+        queueAsDirty(this);
+      }
+
+      @Override
+      public boolean get() {
+        boolean value = super.get();
+        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        return value;
+      }
+
+      @Override
+      public void set(boolean newValue) {
+        setCalled = true;
+        super.set(newValue);
       }
     };
+  }
+
+  protected BooleanProperty booleanProperty(EnrichTrigger enrichTrigger) {
+    return booleanProperty(false, enrichTrigger);
   }
 
   protected BooleanProperty booleanProperty() {
-    return new SimpleBooleanProperty() {
+    return booleanProperty(false, DEFAULT_ENRICH_TRIGGER);
+  }
+
+  protected FloatProperty floatProperty(float initialValue, EnrichTrigger enrichTrigger) {
+    return new SimpleFloatProperty(initialValue) {
+      private boolean setCalled;
+
       @Override
       protected void invalidated() {
-        if(persister != null) {
-          persister.queueAsDirty(self());
-          get();
-        }
+        queueAsDirty(this);
+      }
+
+      @Override
+      public float get() {
+        float value = super.get();
+        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        return value;
+      }
+
+      @Override
+      public void set(float newValue) {
+        setCalled = true;
+        super.set(newValue);
       }
     };
+  }
+
+  protected FloatProperty floatProperty(EnrichTrigger enrichTrigger) {
+    return floatProperty(0.0f, enrichTrigger);
   }
 
   protected FloatProperty floatProperty() {
-    return new SimpleFloatProperty() {
+    return floatProperty(0.0f, DEFAULT_ENRICH_TRIGGER);
+  }
+
+  protected DoubleProperty doubleProperty(double initialValue, EnrichTrigger enrichTrigger) {
+    return new SimpleDoubleProperty(initialValue) {
+      private boolean setCalled;
+
       @Override
       protected void invalidated() {
-        if(persister != null) {
-          persister.queueAsDirty(self());
-          get();
-        }
+        queueAsDirty(this);
+      }
+
+      @Override
+      public double get() {
+        double value = super.get();
+        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        return value;
+      }
+
+      @Override
+      public void set(double newValue) {
+        setCalled = true;
+        super.set(newValue);
       }
     };
   }
 
+  protected DoubleProperty doubleProperty(EnrichTrigger enrichTrigger) {
+    return doubleProperty(0.0, enrichTrigger);
+  }
+
   protected DoubleProperty doubleProperty() {
-    return new SimpleDoubleProperty() {
+    return doubleProperty(0.0, DEFAULT_ENRICH_TRIGGER);
+  }
+
+  protected <E extends Entity> ObjectProperty<ObservableList<E>> list(Class<E> itemClass) {
+    return new SimpleObjectProperty<ObservableList<E>>() {
+      private boolean enricherCalled;
+
       @Override
       protected void invalidated() {
-        if(persister != null) {
-          persister.queueAsDirty(self());
-          get();
+        queueAsDirty(this);
+      }
+
+      @Override
+      public ObservableList<E> get() {
+        ObservableList<E> value = super.get();
+
+        if(value == null && !enricherCalled && getContext() != null) {
+          enricherCalled = true;
+          getContext().queueListProvide(Entity.this, itemClass, this);
         }
+
+        return value;
       }
     };
   }

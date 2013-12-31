@@ -3,11 +3,11 @@ package hs.mediasystem.entity;
 import hs.mediasystem.framework.Media;
 import javafx.beans.property.StringProperty;
 
-public class Movie extends Media<Movie> {
-  public final StringProperty uri = stringProperty();
-  public final StringProperty name = stringProperty();
-  public final StringProperty year = stringProperty();
-  public final StringProperty id = stringProperty();
-  public final StringProperty season = stringProperty();
-  public final StringProperty episode = stringProperty();
+public class Movie extends Media {
+  public final StringProperty uri = stringProperty("uri");
+  public final StringProperty name = stringProperty("name");
+  public final StringProperty year = stringProperty("year");
+  public final StringProperty id = stringProperty("id");
+  public final StringProperty season = stringProperty("season");
+  public final StringProperty episode = stringProperty("episode");
 }

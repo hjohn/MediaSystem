@@ -1,25 +1,16 @@
 package hs.mediasystem.ext.media.serie;
 
-import hs.mediasystem.dao.Identifier;
-import hs.mediasystem.dao.Item;
-import hs.mediasystem.dao.ItemNotFoundException;
-import hs.mediasystem.dao.ItemsDao;
 import hs.mediasystem.dao.LocalInfo;
 import hs.mediasystem.dao.Setting.PersistLevel;
-import hs.mediasystem.db.DatabaseObject;
-import hs.mediasystem.entity.EnrichCallback;
-import hs.mediasystem.entity.EnricherBuilder;
-import hs.mediasystem.entity.EntityFactory;
-import hs.mediasystem.entity.FinishEnrichCallback;
+import hs.mediasystem.entity.EntityContext;
+import hs.mediasystem.entity.SourceKey;
+import hs.mediasystem.framework.FileEntitySource;
 import hs.mediasystem.framework.Id;
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.MediaItemConfigurator;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.ScanException;
 import hs.mediasystem.framework.SettingsStore;
-import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.util.PathStringConverter;
 
 import java.nio.file.Path;
@@ -28,30 +19,25 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javafx.collections.ObservableList;
 
 import javax.inject.Inject;
 
 public class SeriesMediaTree implements MediaTree, MediaRoot {
-  public static final TvdbSerieEnricher TVDB_SERIE_ENRICHER = new TvdbSerieEnricher();
-
   private static final Id ID = new Id("serieRoot");
 
-  private final PersistQueue persister;
-  private final ItemsDao itemsDao;
-  private final MediaItemConfigurator mediaItemConfigurator;
-  private final EntityFactory<DatabaseObject> entityFactory;
+  private final FileEntitySource fileEntitySource;
+  private final EntityContext entityContext;
   private final List<Path> roots;
 
   private List<MediaItem> children;
 
   @Inject
-  public SeriesMediaTree(PersistQueue persister, ItemsDao itemsDao, MediaItemConfigurator mediaItemConfigurator, EntityFactory<DatabaseObject> entityFactory, SettingsStore settingsStore) {
-    this.persister = persister;
-    this.itemsDao = itemsDao;
-    this.mediaItemConfigurator = mediaItemConfigurator;
-    this.entityFactory = entityFactory;
+  public SeriesMediaTree(FileEntitySource fileEntitySource, EntityContext entityContext, SettingsStore settingsStore) {
+    this.fileEntitySource = fileEntitySource;
+    this.entityContext = entityContext;
 
     ObservableList<Path> paths = settingsStore.getListProperty("MediaSystem:Ext:Series", PersistLevel.PERMANENT, "Paths", new PathStringConverter());
 
@@ -68,60 +54,15 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
           List<LocalInfo> scanResults = new SerieScanner().scan(root);
 
           for(LocalInfo localInfo : scanResults) {
-            final SerieItem mediaItem = new SerieItem(SeriesMediaTree.this, localInfo.getUri(), localInfo.getTitle(), entityFactory, mediaItemConfigurator, itemsDao);
+            SerieItem mediaItem = entityContext.add(SerieItem.class, new Supplier<SerieItem>() {
+              @Override
+              public SerieItem get() {
+                return new SerieItem(SeriesMediaTree.this, localInfo.getUri(), localInfo.getTitle(), fileEntitySource);
+              }
+            }, new SourceKey(fileEntitySource, localInfo.getUri()));
 
-            mediaItemConfigurator.configure(mediaItem, TVDB_SERIE_ENRICHER);
-
-            mediaItem.media.setEnricher(new EnricherBuilder<MediaItem, Serie>(Serie.class)
-              .require(mediaItem.identifier)
-              .enrich(new EnrichCallback<Serie>() {
-                @Override
-                public Serie enrich(Object... parameters) {
-                  Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
-
-                  if(identifier.getProviderId() != null) {
-                    try {
-                      return (Serie)entityFactory.create(Media.class, itemsDao.loadItem(identifier.getProviderId()));
-                    }
-                    catch(ItemNotFoundException e) {
-                      return null;
-                    }
-                  }
-
-                  return null;
-                }
-              })
-              .enrich(new EnrichCallback<Serie>() {
-                @Override
-                public Serie enrich(Object... parameters) {
-                  Identifier identifier = ((hs.mediasystem.framework.Identifier)parameters[0]).getKey();
-
-                  if(identifier.getProviderId() != null) {
-                    try {
-                      Item item = TVDB_SERIE_ENRICHER.loadItem(identifier.getProviderId());
-
-                      if(item != null) {
-                        itemsDao.storeItem(item);  // FIXME should also update if version or bypasscache problem
-                      }
-
-                      return (Serie)entityFactory.create(Media.class, item);
-                    }
-                    catch(ItemNotFoundException e) {
-                      System.out.println("[FINE] Item not found (in Database or TVDB): " + identifier.getProviderId());
-                    }
-                  }
-
-                  return null;
-                }
-              })
-              .finish(new FinishEnrichCallback<Serie>() {
-                @Override
-                public void update(Serie result) {
-                  mediaItem.media.set(result);
-                }
-              })
-              .build()
-            );
+            mediaItem.properties.put("releaseYear", localInfo.getReleaseYear());
+            mediaItem.properties.put("imdbNumber", localInfo.getCode());
 
             children.add(mediaItem);
           }
@@ -139,11 +80,6 @@ public class SeriesMediaTree implements MediaTree, MediaRoot {
   @Override
   public String getRootName() {
     return "Series";
-  }
-
-  @Override
-  public PersistQueue getPersister() {
-    return persister;
   }
 
   @Override

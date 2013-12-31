@@ -43,7 +43,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-public class MediaDetailPane extends DetailPane<Media<?>> {
+public class MediaDetailPane extends DetailPane<Media> {
   protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(content, "image");
   protected final AsyncImageProperty poster = new AsyncImageProperty();
 

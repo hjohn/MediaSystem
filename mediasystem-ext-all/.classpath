@@ -20,7 +20,6 @@
 	<classpathentry kind="lib" path="lib/commons-codec-1.6.jar"/>
 	<classpathentry kind="lib" path="lib/sublight-ws.jar"/>
 	<classpathentry kind="lib" path="lib/redstone-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/themoviedbapi-3.2-SNAPSHOT-r164.jar" sourcepath="/API-TheMovieDb"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-core-lgpl-1.9.7.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-mapper-lgpl-1.9.7.jar"/>

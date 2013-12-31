@@ -8,8 +8,8 @@ public class ChronologicalMediaItemComparator implements Comparator<MediaItem> {
 
   @Override
   public int compare(MediaItem o1, MediaItem o2) {
-    Media<?> m1 = o1.getMedia();
-    Media<?> m2 = o2.getMedia();
+    Media m1 = o1.getMedia();
+    Media m2 = o2.getMedia();
 
     LocalDate d1 = m1.releaseDate.get() == null ? LocalDate.MIN : m1.releaseDate.get();
     LocalDate d2 = m2.releaseDate.get() == null ? LocalDate.MIN : m2.releaseDate.get();
