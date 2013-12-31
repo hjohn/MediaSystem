@@ -4,7 +4,6 @@ import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.framework.MediaTree;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,7 +14,7 @@ import java.util.Map;
 import javax.inject.Named;
 
 @Named
-public class YouTubeMediaTree implements MediaTree, MediaRoot {
+public class YouTubeMediaTree implements MediaRoot {
   private static final Id ID = new Id("youTubeRoot");
   private static final List<Feed> FEEDS = new ArrayList<>();
 

@@ -8,7 +8,6 @@ import hs.mediasystem.framework.FileEntitySource;
 import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.ScanException;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.util.PathStringConverter;
@@ -25,7 +24,7 @@ import javafx.collections.ObservableList;
 
 import javax.inject.Inject;
 
-public class SeriesMediaTree implements MediaTree, MediaRoot {
+public class SeriesMediaTree implements MediaRoot {
   private static final Id ID = new Id("serieRoot");
 
   private final FileEntitySource fileEntitySource;

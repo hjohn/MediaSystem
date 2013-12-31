@@ -5,7 +5,6 @@ import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.framework.MediaTree;
 import hs.mediasystem.framework.SourceImageHandle;
 
 import java.io.IOException;
@@ -24,7 +23,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 @Named
-public class NosMediaTree implements MediaTree, MediaRoot {
+public class NosMediaTree implements MediaRoot {
   private static final Id ID = new Id("nosRoot");
   private static final String URL = "http://tv.nos.nl";
 
