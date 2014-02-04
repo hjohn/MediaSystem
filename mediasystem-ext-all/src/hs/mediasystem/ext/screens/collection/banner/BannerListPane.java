@@ -249,7 +249,7 @@ public class BannerListPane extends BorderPane {
         if(duoMediaNode.getLeft().equals(mediaNode)) {
           column = leftColumn;
         }
-        else if(duoMediaNode.getRight().equals(mediaNode)) {
+        else if(duoMediaNode.getRight() != null && duoMediaNode.getRight().equals(mediaNode)) {
           column = rightColumn;
         }
 
