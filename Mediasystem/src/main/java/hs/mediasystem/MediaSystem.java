@@ -297,7 +297,10 @@ public class MediaSystem {
         }
 
         if(!stackTrace) {
-          builder.append(String.format("%1s%9.3f\u2502%02x\u2502 ", translateLevel(level), ((double)sinceStart) / 1000, Thread.currentThread().getId()));
+          Runtime runtime = Runtime.getRuntime();
+          long usedMemory = runtime.totalMemory() - runtime.freeMemory();
+
+          builder.append(String.format("%1s%9.3f\u2502%3d\u2502%02x\u2502 ", translateLevel(level), ((double)sinceStart) / 1000, usedMemory / 1024 / 1024, Thread.currentThread().getId()));
         }
         builder.append(text);
 
