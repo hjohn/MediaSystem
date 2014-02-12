@@ -67,10 +67,10 @@ public class SimplePooledConnection implements PooledConnection {
   }
 
   private class ConnectionWrapper implements Connection {
-    private final Connection connection;
+    private final Connection wrappedConnection;
 
     public ConnectionWrapper(Connection connection) {
-      this.connection = connection;
+      this.wrappedConnection = connection;
     }
 
     private void notifyError(SQLException e) {
@@ -93,7 +93,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
       try {
-        return connection.unwrap(iface);
+        return wrappedConnection.unwrap(iface);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -104,7 +104,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
       try {
-        return connection.isWrapperFor(iface);
+        return wrappedConnection.isWrapperFor(iface);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -115,7 +115,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public Statement createStatement() throws SQLException {
       try {
-        return connection.createStatement();
+        return wrappedConnection.createStatement();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -126,7 +126,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
       try {
-        return connection.prepareStatement(sql);
+        return wrappedConnection.prepareStatement(sql);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -137,7 +137,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
       try {
-        return connection.prepareCall(sql);
+        return wrappedConnection.prepareCall(sql);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -148,7 +148,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public String nativeSQL(String sql) throws SQLException {
       try {
-        return connection.nativeSQL(sql);
+        return wrappedConnection.nativeSQL(sql);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -159,7 +159,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
       try {
-        connection.setAutoCommit(autoCommit);
+        wrappedConnection.setAutoCommit(autoCommit);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -170,7 +170,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public boolean getAutoCommit() throws SQLException {
       try {
-        return connection.getAutoCommit();
+        return wrappedConnection.getAutoCommit();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -181,7 +181,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void commit() throws SQLException {
       try {
-        connection.commit();
+        wrappedConnection.commit();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -192,7 +192,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void rollback() throws SQLException {
       try {
-        connection.rollback();
+        wrappedConnection.rollback();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -203,7 +203,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public boolean isClosed() throws SQLException {
       try {
-        return connection.isClosed();
+        return wrappedConnection.isClosed();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -214,7 +214,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
       try {
-        return connection.getMetaData();
+        return wrappedConnection.getMetaData();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -225,7 +225,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void setReadOnly(boolean readOnly) throws SQLException {
       try {
-        connection.setReadOnly(readOnly);
+        wrappedConnection.setReadOnly(readOnly);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -236,7 +236,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public boolean isReadOnly() throws SQLException {
       try {
-        return connection.isReadOnly();
+        return wrappedConnection.isReadOnly();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -247,7 +247,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void setCatalog(String catalog) throws SQLException {
       try {
-        connection.setCatalog(catalog);
+        wrappedConnection.setCatalog(catalog);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -258,7 +258,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public String getCatalog() throws SQLException {
       try {
-        return connection.getCatalog();
+        return wrappedConnection.getCatalog();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -269,7 +269,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void setTransactionIsolation(int level) throws SQLException {
       try {
-        connection.setTransactionIsolation(level);
+        wrappedConnection.setTransactionIsolation(level);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -280,7 +280,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public int getTransactionIsolation() throws SQLException {
       try {
-        return connection.getTransactionIsolation();
+        return wrappedConnection.getTransactionIsolation();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -291,7 +291,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public SQLWarning getWarnings() throws SQLException {
       try {
-        return connection.getWarnings();
+        return wrappedConnection.getWarnings();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -302,7 +302,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void clearWarnings() throws SQLException {
       try {
-        connection.clearWarnings();
+        wrappedConnection.clearWarnings();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -313,7 +313,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
       try {
-        return connection.createStatement(resultSetType, resultSetConcurrency);
+        return wrappedConnection.createStatement(resultSetType, resultSetConcurrency);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -324,7 +324,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
       try {
-        return connection.prepareStatement(sql, resultSetType, resultSetConcurrency);
+        return wrappedConnection.prepareStatement(sql, resultSetType, resultSetConcurrency);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -335,7 +335,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
       try {
-        return connection.prepareCall(sql, resultSetType, resultSetConcurrency);
+        return wrappedConnection.prepareCall(sql, resultSetType, resultSetConcurrency);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -346,7 +346,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public Map<String, Class<?>> getTypeMap() throws SQLException {
       try {
-        return connection.getTypeMap();
+        return wrappedConnection.getTypeMap();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -357,7 +357,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
       try {
-        connection.setTypeMap(map);
+        wrappedConnection.setTypeMap(map);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -368,7 +368,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void setHoldability(int holdability) throws SQLException {
       try {
-        connection.setHoldability(holdability);
+        wrappedConnection.setHoldability(holdability);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -379,7 +379,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public int getHoldability() throws SQLException {
       try {
-        return connection.getHoldability();
+        return wrappedConnection.getHoldability();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -390,7 +390,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public Savepoint setSavepoint() throws SQLException {
       try {
-        return connection.setSavepoint();
+        return wrappedConnection.setSavepoint();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -401,7 +401,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public Savepoint setSavepoint(String name) throws SQLException {
       try {
-        return connection.setSavepoint(name);
+        return wrappedConnection.setSavepoint(name);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -412,7 +412,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void rollback(Savepoint savepoint) throws SQLException {
       try {
-        connection.rollback(savepoint);
+        wrappedConnection.rollback(savepoint);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -423,7 +423,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void releaseSavepoint(Savepoint savepoint) throws SQLException {
       try {
-        connection.releaseSavepoint(savepoint);
+        wrappedConnection.releaseSavepoint(savepoint);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -434,7 +434,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
       try {
-        return connection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
+        return wrappedConnection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -445,7 +445,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
       try {
-        return connection.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+        return wrappedConnection.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -456,7 +456,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
       try {
-        return connection.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+        return wrappedConnection.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -467,7 +467,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
       try {
-        return connection.prepareStatement(sql, autoGeneratedKeys);
+        return wrappedConnection.prepareStatement(sql, autoGeneratedKeys);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -478,7 +478,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
       try {
-        return connection.prepareStatement(sql, columnIndexes);
+        return wrappedConnection.prepareStatement(sql, columnIndexes);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -489,7 +489,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
       try {
-        return connection.prepareStatement(sql, columnNames);
+        return wrappedConnection.prepareStatement(sql, columnNames);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -500,7 +500,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public Clob createClob() throws SQLException {
       try {
-        return connection.createClob();
+        return wrappedConnection.createClob();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -511,7 +511,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public Blob createBlob() throws SQLException {
       try {
-        return connection.createBlob();
+        return wrappedConnection.createBlob();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -522,7 +522,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public NClob createNClob() throws SQLException {
       try {
-        return connection.createNClob();
+        return wrappedConnection.createNClob();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -533,7 +533,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public SQLXML createSQLXML() throws SQLException {
       try {
-        return connection.createSQLXML();
+        return wrappedConnection.createSQLXML();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -544,7 +544,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public boolean isValid(int timeout) throws SQLException {
       try {
-        return connection.isValid(timeout);
+        return wrappedConnection.isValid(timeout);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -554,18 +554,18 @@ public class SimplePooledConnection implements PooledConnection {
 
     @Override
     public void setClientInfo(String name, String value) throws SQLClientInfoException {
-      connection.setClientInfo(name, value);
+      wrappedConnection.setClientInfo(name, value);
     }
 
     @Override
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
-      connection.setClientInfo(properties);
+      wrappedConnection.setClientInfo(properties);
     }
 
     @Override
     public String getClientInfo(String name) throws SQLException {
       try {
-        return connection.getClientInfo(name);
+        return wrappedConnection.getClientInfo(name);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -576,7 +576,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public Properties getClientInfo() throws SQLException {
       try {
-        return connection.getClientInfo();
+        return wrappedConnection.getClientInfo();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -587,7 +587,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
       try {
-        return connection.createArrayOf(typeName, elements);
+        return wrappedConnection.createArrayOf(typeName, elements);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -598,7 +598,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
       try {
-        return connection.createStruct(typeName, attributes);
+        return wrappedConnection.createStruct(typeName, attributes);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -609,7 +609,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void setSchema(String schema) throws SQLException {
       try {
-        connection.setSchema(schema);
+        wrappedConnection.setSchema(schema);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -620,7 +620,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public String getSchema() throws SQLException {
       try {
-        return connection.getSchema();
+        return wrappedConnection.getSchema();
       }
       catch(SQLException e) {
         notifyError(e);
@@ -631,7 +631,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void abort(Executor executor) throws SQLException {
       try {
-        connection.abort(executor);
+        wrappedConnection.abort(executor);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -642,7 +642,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
       try {
-        connection.setNetworkTimeout(executor, milliseconds);
+        wrappedConnection.setNetworkTimeout(executor, milliseconds);
       }
       catch(SQLException e) {
         notifyError(e);
@@ -653,7 +653,7 @@ public class SimplePooledConnection implements PooledConnection {
     @Override
     public int getNetworkTimeout() throws SQLException {
       try {
-        return connection.getNetworkTimeout();
+        return wrappedConnection.getNetworkTimeout();
       }
       catch(SQLException e) {
         notifyError(e);
