@@ -79,7 +79,7 @@ public class TreeListPane extends BorderPane {
     }
   };
 
-  private boolean treeValid;
+  private boolean treeValid = true;
 
   @Inject
   public TreeListPane(Provider<Set<MediaNodeCellProvider>> mediaNodeCellsProvider) {
@@ -201,6 +201,8 @@ public class TreeListPane extends BorderPane {
     treeView.getFocusModel().focusedItemProperty().addListener(updateFocusedMediaNode);
 
     setSelectedNode(focusedMediaNode.get());
+
+    applyCss();
   }
 
   @Override
