@@ -4,8 +4,8 @@ CREATE TABLE identifiers (
   mediadata_id integer NOT NULL REFERENCES mediadata(id) ON DELETE CASCADE,
   lastupdated timestamp NOT NULL,
 
-  mediatype varchar(50),
-  provider varchar(20),
+  mediatype varchar(50) NOT NULL,
+  provider varchar(20) NOT NULL,
   providerid varchar(20),
     
   matchtype varchar(20),
@@ -13,7 +13,7 @@ CREATE TABLE identifiers (
   
   CONSTRAINT identifiers_pk PRIMARY KEY (id),
   CONSTRAINT identifiers_mediadata_id UNIQUE (mediadata_id),
-  CONSTRAINT identifiers_check_cache CHECK ((mediatype IS NULL AND provider IS NULL AND providerid IS NULL AND matchtype IS NULL AND matchaccuracy IS NULL) OR (mediatype IS NOT NULL AND provider IS NOT NULL AND providerid IS NOT NULL AND matchtype IS NOT NULL AND matchaccuracy IS NOT NULL))
+  CONSTRAINT identifiers_check_cache CHECK ((providerid IS NULL AND matchtype IS NULL AND matchaccuracy IS NULL) OR (providerid IS NOT NULL AND matchtype IS NOT NULL AND matchaccuracy IS NOT NULL))
 );
 
 ALTER TABLE mediadata DROP CONSTRAINT mediadata_check_identifier;
