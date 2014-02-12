@@ -280,7 +280,10 @@ public class ProgramController {
     int lastDot = eventHandlerName.lastIndexOf('.');
 
     try {
-      return (EventHandler<PresentationActionEvent<?>>)Enum.valueOf(Class.forName(eventHandlerName.substring(0, lastDot)).asSubclass(Enum.class), eventHandlerName.substring(lastDot + 1));
+      @SuppressWarnings("rawtypes")
+      Class<? extends Enum> enumClass = Class.forName(eventHandlerName.substring(0, lastDot)).asSubclass(Enum.class);
+
+      return (EventHandler<PresentationActionEvent<?>>)Enum.valueOf(enumClass, eventHandlerName.substring(lastDot + 1));
     }
     catch(ClassNotFoundException | IllegalArgumentException e) {
       return null;
