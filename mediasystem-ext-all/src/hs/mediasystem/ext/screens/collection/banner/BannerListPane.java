@@ -1,18 +1,21 @@
 package hs.mediasystem.ext.screens.collection.banner;
 
+import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.screens.MediaNode;
-import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.MediaNodeEvent;
-import hs.mediasystem.screens.ServiceMediaNodeCell;
 import hs.mediasystem.util.Events;
-
-import java.util.Set;
-
+import hs.mediasystem.util.ImageHandle;
+import hs.mediasystem.util.MapBindings;
+import hs.mediasystem.util.WeakBinder;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -21,10 +24,12 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -32,12 +37,13 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 public class BannerListPane extends BorderPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
@@ -97,12 +103,8 @@ public class BannerListPane extends BorderPane {
     rightColumn.setCellValueFactory(new PropertyValueFactory<DuoMediaNode, MediaNode>("right"));
   }};
 
-  private final Provider<Set<MediaNodeCellProvider>> mediaNodeCellProvidersProvider;
-
   @Inject
-  public BannerListPane(Provider<Set<MediaNodeCellProvider>> mediaNodeCellProvidersProvider) {
-    this.mediaNodeCellProvidersProvider = mediaNodeCellProvidersProvider;
-
+  public BannerListPane() {
     getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
 
     focusedMediaNode.addListener(new ChangeListener<MediaNode>() {
@@ -196,29 +198,57 @@ public class BannerListPane extends BorderPane {
   }
 
   private final class MediaNodeTableCell extends TableCell<DuoMediaNode, MediaNode> {
-    private final ServiceMediaNodeCell mediaNodeCell = new ServiceMediaNodeCell(mediaNodeCellProvidersProvider.get());
+    private final WeakBinder binder = new WeakBinder();
     private final int bannerWidth;
+    private final VBox banner;
+
+    private final Label title = new Label() {{
+      getStyleClass().add("title");
+    }};
 
     public MediaNodeTableCell(int bannerWidth) {
       this.bannerWidth = bannerWidth;
 
       setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+
+      banner = new VBox() {{
+        getChildren().add(title);
+        HBox.setHgrow(this, Priority.ALWAYS);
+      }};
     }
 
     @Override
     protected void updateItem(final MediaNode mediaNode, boolean empty) {
       super.updateItem(mediaNode, empty);
 
-      mediaNodeCell.configureGraphic(mediaNode);
+      binder.unbindAll();
 
-      Region node = mediaNodeCell.getGraphic();
-
-      if(node != null) {
-        node.setMinWidth(bannerWidth);
-        node.setMaxWidth(bannerWidth);
+      if(empty) {
+        setGraphic(null);
+        return;
       }
 
-      setGraphic(node);
+      final AsyncImageProperty asyncImageProperty = new AsyncImageProperty();
+      final StringProperty titleProperty = new SimpleStringProperty();
+
+      ObjectBinding<ImageHandle> bannerImageHandle = MapBindings.select(mediaNode.media, "banner");
+
+      binder.bind(titleProperty, MapBindings.selectString(mediaNode.media, "title"));
+      binder.bind(asyncImageProperty.imageHandleProperty(), bannerImageHandle);
+
+      title.minHeightProperty().bind(minWidthProperty().multiply(140).divide(758));
+
+      binder.bind(title.textProperty(), Bindings.when(asyncImageProperty.isNull()).then(titleProperty).otherwise(""));
+      binder.bind(title.graphicProperty(), Bindings.when(asyncImageProperty.isNull()).then((ImageView)null).otherwise(new ImageView() {{
+        imageProperty().bind(asyncImageProperty);
+        setPreserveRatio(true);
+        fitWidthProperty().bind(banner.minWidthProperty());
+      }}));
+
+      banner.setMinWidth(bannerWidth);
+      banner.setMaxWidth(bannerWidth);
+
+      setGraphic(banner);
     }
   }
 
