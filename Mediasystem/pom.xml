@@ -12,7 +12,8 @@
       <groupId>hs.ddif</groupId>
       <artifactId>ddif-core</artifactId>
       <version>1.0.0-SNAPSHOT</version>
-    </dependency>  
+    </dependency>
+    
     <dependency>
       <groupId>postgresql</groupId>
       <artifactId>postgresql</artifactId>
@@ -27,22 +28,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>HTTPClient</groupId>
-      <artifactId>HTTPClient</artifactId>
-      <version>0.3-3</version>
-      <type>jar</type>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <version>1.9.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jsoup</groupId>
-      <artifactId>jsoup</artifactId>
-      <version>1.6.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.derby</groupId>
@@ -53,6 +41,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  
   <build>
     <resources>
       <resource>
@@ -65,7 +54,8 @@
       <resource>
         <directory>src/main/resources</directory>
       </resource>
-    </resources>  
+    </resources>
+      
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
