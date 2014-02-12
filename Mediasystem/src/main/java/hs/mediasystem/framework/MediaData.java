@@ -11,12 +11,12 @@ import javafx.collections.ObservableList;
 
 public class MediaData extends Entity {
   public final StringProperty uri = stringProperty("uri");
-  public final LongProperty fileLength = longProperty();
+  public final LongProperty fileLength = longProperty("fileLength");
   public final ObjectProperty<Long> osHash = object("osHash");
-  public final IntegerProperty resumePosition = integerProperty();
-  public final BooleanProperty viewed = booleanProperty();
+  public final IntegerProperty resumePosition = integerProperty("resumePosition");
+  public final BooleanProperty viewed = booleanProperty("viewed");
 
-  public final ObjectProperty<ObservableList<Identifier>> identifiers = list(Identifier.class);
+  public final ObjectProperty<ObservableList<Identifier>> identifiers = list("identifiers", Identifier.class);
 
   public MediaData setAll(String uri, long fileLength, Long osHash, int resumePosition, boolean viewed, ObservableList<Identifier> identifiers) {
     this.uri.set(uri);

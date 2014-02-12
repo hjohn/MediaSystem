@@ -15,7 +15,7 @@ public class Actor extends Entity {
   public final ObjectProperty<LocalDate> birthDate = object("birthDate");
   public final ObjectProperty<Actor> father = object("father");
 
-  public final ObjectProperty<ObservableList<Casting>> castings = list(Casting.class);
+  public final ObjectProperty<ObservableList<Casting>> castings = list("castings", Casting.class);
 
   public Actor(String name) {
     this.name.set(name);

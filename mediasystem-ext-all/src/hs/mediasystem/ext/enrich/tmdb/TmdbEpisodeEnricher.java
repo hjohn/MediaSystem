@@ -4,7 +4,6 @@ import hs.mediasystem.dao.Source;
 import hs.mediasystem.entity.Enricher;
 import hs.mediasystem.entity.EntityContext;
 import hs.mediasystem.entity.EntityEnricher;
-import hs.mediasystem.entity.LoadState;
 import hs.mediasystem.entity.SourceKey;
 import hs.mediasystem.ext.media.serie.Episode;
 import hs.mediasystem.ext.media.serie.Serie;
@@ -80,7 +79,6 @@ public class TmdbEpisodeEnricher implements Enricher<Episode, String> {
 
       episode.background.set(backgroundSource == null ? episode.serie.get().background.get() : new SourceImageHandle(backgroundSource, createImageKey(episodeInfo, "background")));
       episode.image.set(posterSource == null ? null : new SourceImageHandle(posterSource, createImageKey(episodeInfo, "poster")));
-      episode.setLoadState(LoadState.FULL);
     }
   }
 

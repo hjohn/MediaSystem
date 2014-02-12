@@ -18,8 +18,8 @@ public class Media extends Entity {
   public final StringProperty description = stringProperty("description");
   public final ObjectProperty<LocalDate> releaseDate = object("releaseDate");
   public final ObjectProperty<String[]> genres = object("genres");
-  public final DoubleProperty rating = doubleProperty();
-  public final IntegerProperty runtime = integerProperty();
+  public final DoubleProperty rating = doubleProperty("rating");
+  public final IntegerProperty runtime = integerProperty("runtime");
 
   public StringProperty titleProperty() {
     return title;
@@ -29,8 +29,8 @@ public class Media extends Entity {
   public final ObjectProperty<ImageHandle> background = object("background");
   public final ObjectProperty<ImageHandle> banner = object("banner");
 
-  public final ObjectProperty<ObservableList<Casting>> castings = list(Casting.class);
-  public final ObjectProperty<ObservableList<Identifier>> identifiers = list(Identifier.class);
+  public final ObjectProperty<ObservableList<Casting>> castings = list("castings", Casting.class);
+  public final ObjectProperty<ObservableList<Identifier>> identifiers = list("identifiers", Identifier.class);
 
   public Media setTitles(String initialTitle, String initialSubtitle) {
     title.set(initialTitle == null ? "" : initialTitle);

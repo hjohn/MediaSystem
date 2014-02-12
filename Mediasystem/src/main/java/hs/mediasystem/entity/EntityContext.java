@@ -4,6 +4,7 @@ import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.persist.PersistTask;
 import hs.mediasystem.persist.Persister;
 import hs.mediasystem.util.AutoReentrantLock;
+import hs.mediasystem.util.ClassInheritanceDepthComparator;
 import hs.mediasystem.util.LifoBlockingDeque;
 import hs.mediasystem.util.Task;
 import hs.mediasystem.util.Task.TaskRunnable;
@@ -44,6 +45,9 @@ public class EntityContext {
 
   private final PersistQueue persistQueue;
 
+  /**
+   * Lock which protects the Entity related maps.
+   */
   private final AutoReentrantLock lock = new AutoReentrantLock();
 
   // TODO consider making entities weakly linked here
@@ -169,7 +173,7 @@ public class EntityContext {
         .compute(source, (k, v) -> {
           List<EnricherHolder> list = v == null ? new ArrayList<>() : v;
 
-          list.add(new EnricherHolder(function, source, priority));
+          list.add(new EnricherHolder(function, entityClass, source, priority));
           list.sort(new Comparator<EnricherHolder>() {
             @Override
             public int compare(EnricherHolder o1, EnricherHolder o2) {
@@ -262,6 +266,8 @@ public class EntityContext {
     }
   }
 
+  private final Map<Entity, Task> activeTasks = new HashMap<>();  // Only access on Update thread
+
   /**
    * Queues the given entity for enrichment in the background.  This must be called from the Update thread.
    *
@@ -269,8 +275,6 @@ public class EntityContext {
    */
   protected <T extends Entity> void queueForEnrichment(T entity) {
     ensureRunsOnUpdateThread();
-
-    System.out.println("Enrichment needed for " + entity + ", loadState = " + entity.getLoadState());
 
     try(AutoReentrantLock o = lock.lock()) {
       Class<?> cls = entity.getClass();
@@ -288,11 +292,26 @@ public class EntityContext {
         cls = cls.getSuperclass();
       }
 
-      enricherHolders.sort((e1, e2) -> Double.compare(e1.getPriority(), e2.getPriority()));
+      enricherHolders.sort((e1, e2) -> {
+        int result = ClassInheritanceDepthComparator.INSTANCE.compare(e1.entityClass, e2.entityClass);
+
+        return result == 0 ? Double.compare(e1.getPriority(), e2.getPriority()) : result;
+      });
 
       Map<EntitySource, Object> keysBySource = keysBySourceByEntity.get(entity);
 
-      Task enrichTask = new Task();
+      /*
+       * A task is created or steps are appended to an active task.  Because the
+       * appending process happens on the Update thread, and the last step of an
+       * enrich Task always runs on that same thread, this is safe.
+       *
+       * The last step of each enricher series will remove this Task from
+       * activeTasks if no steps from another serie were added (in other words,
+       * it will only remove the active task if it is the FINAL step).
+       */
+
+      boolean running = activeTasks.containsKey(entity);
+      Task enrichTask = activeTasks.computeIfAbsent(entity, e -> new Task());  // On Update thread
 
       for(EnricherHolder holder : enricherHolders) {
         @SuppressWarnings("unchecked")
@@ -301,82 +320,101 @@ public class EntityContext {
         enrichTask.addStep(getExecutor(), new TaskRunnable() {
           @Override
           public void run(Task parent) {
-            if(entity.getLoadState() != LoadState.FULL && keysBySource.containsKey(holder.getSource())) {
+            if(keysBySource.containsKey(holder.getSource())) {
               enricher.enrich(EntityContext.this, parent, entity, keysBySource.get(holder.getSource()));
             }
           }
         });
       }
 
-      if(enrichTask.hasSteps()) {
-        enrichTask.addStep(getUpdateExecutor(), p -> entity.clearQueuedForEnrichment());
-        getExecutor().execute(enrichTask);
+      if(!enricherHolders.isEmpty()) {
+        enrichTask.addStep(getUpdateExecutor(), p -> {
+          if(!enrichTask.hasSteps()) {  // Check if this step is the last step or if more steps have been added in the mean time
+            activeTasks.remove(entity);  // On Update thread
+          }
+        });
+
+        if(!running) {
+          getExecutor().execute(enrichTask);
+        }
       }
       else {
+        if(!enrichTask.hasSteps()) {
+          activeTasks.remove(entity);  // On Update thread
+        }
         System.out.println("[WARN] No Enrichers for: " + entity);
       }
     }
   }
 
   protected <P extends Entity, E extends Entity> void queueListProvide(P parentEntity, Class<E> itemClass, ObjectProperty<ObservableList<E>> property) {
+    ensureRunsOnUpdateThread();
+
     System.out.println("List Provide needed for " + parentEntity + "(" + parentEntity.getClass() + "): " + itemClass);
 
-    try(AutoReentrantLock o = lock.lock()) {
-      Task enrichTask = new Task();
-      Class<? extends Entity> cls = parentEntity.getClass();
+    boolean running = activeTasks.containsKey(parentEntity);
+    Task enrichTask = activeTasks.computeIfAbsent(parentEntity, e -> new Task());  // On Update thread
 
-      for(;;) {
-        Map<Class<? extends Entity>, Map<EntitySource, ListProvider<?, ?>>> listProvidersBySourceByEntityClass = listProvidersBySourceByEntityClassByParentEntityClass.get(cls);
+    enrichTask.addStep(getExecutor(), p -> {
+      try(AutoReentrantLock o = lock.lock()) {
+        Class<? extends Entity> cls = parentEntity.getClass();
 
-        if(listProvidersBySourceByEntityClass != null) {
-          Map<EntitySource, ListProvider<?, ?>> listProvidersBySource = listProvidersBySourceByEntityClass.get(itemClass);
+        for(;;) {
+          Map<Class<? extends Entity>, Map<EntitySource, ListProvider<?, ?>>> listProvidersBySourceByEntityClass = listProvidersBySourceByEntityClassByParentEntityClass.get(cls);
 
-          if(listProvidersBySource != null) {
-            Iterator<Map.Entry<EntitySource, ListProvider<?, ?>>> iterator = listProvidersBySource
-              .entrySet()
-              .stream()
-              .sorted((e1, e2) -> Double.compare(e1.getKey().getPriority(), e2.getKey().getPriority()))
-              .iterator();
+          if(listProvidersBySourceByEntityClass != null) {
+            Map<EntitySource, ListProvider<?, ?>> listProvidersBySource = listProvidersBySourceByEntityClass.get(itemClass);
 
-            while(iterator.hasNext()) {
-              Map.Entry<EntitySource, ListProvider<?, ?>> e = iterator.next();
-              @SuppressWarnings("unchecked")
-              ListProvider<P, Object> function = (ListProvider<P, Object>)e.getValue();
+            if(listProvidersBySource != null) {
+              Iterator<Map.Entry<EntitySource, ListProvider<?, ?>>> iterator = listProvidersBySource
+                .entrySet()
+                .stream()
+                .sorted((e1, e2) -> Double.compare(e1.getKey().getPriority(), e2.getKey().getPriority()))
+                .iterator();
 
-              Map<EntitySource, Object> keysBySource = keysBySourceByEntity.get(parentEntity);
+              while(iterator.hasNext()) {
+                Map.Entry<EntitySource, ListProvider<?, ?>> e = iterator.next();
+                @SuppressWarnings("unchecked")
+                ListProvider<P, Object> function = (ListProvider<P, Object>)e.getValue();
 
-              if(keysBySource != null) {
-                Object key = keysBySource.get(e.getKey());
+                Map<EntitySource, Object> keysBySource = keysBySourceByEntity.get(parentEntity);
 
-                if(key != null) {
-                  enrichTask.addStep(getExecutor(), p -> {
-                    if(property.get() == null) {
-                      function.provide(EntityContext.this, p, parentEntity, key);
-                    }
-                  });
+                if(keysBySource != null) {
+                  Object key = keysBySource.get(e.getKey());
+
+                  if(key != null) {
+                    enrichTask.addStep(getExecutor(), p2 -> {
+                      if(property.get() == null) {
+                        function.provide(EntityContext.this, p2, parentEntity, key);
+                      }
+                    });
+                  }
                 }
               }
             }
+
+            break;
           }
 
-          break;
+          if(!Entity.class.isAssignableFrom(cls.getSuperclass())) {
+            break;
+          }
+
+          @SuppressWarnings("unchecked")
+          Class<? extends Entity> entitySuperClass = (Class<? extends Entity>)cls.getSuperclass();
+          cls = entitySuperClass;
         }
-
-        if(!Entity.class.isAssignableFrom(cls.getSuperclass())) {
-          break;
-        }
-
-        @SuppressWarnings("unchecked")
-        Class<? extends Entity> entitySuperClass = (Class<? extends Entity>)cls.getSuperclass();
-        cls = entitySuperClass;
       }
+    });
 
-      if(!enrichTask.hasSteps()) {
-        System.out.println("[WARN] No ListProviders for: " + itemClass + " in " + parentEntity + "; " + property);
+    enrichTask.addStep(getUpdateExecutor(), p -> {
+      if(!enrichTask.hasSteps()) {  // Check if this step is the last step or if more steps have been added in the mean time
+        activeTasks.remove(parentEntity);  // On Update thread
       }
-      else {
-        getExecutor().execute(enrichTask);
-      }
+    });
+
+    if(!running) {
+      getExecutor().execute(enrichTask);
     }
   }
 
@@ -392,17 +430,23 @@ public class EntityContext {
 
   public static class EnricherHolder {
     private final Enricher<?, ?> enricher;
+    private final Class<?> entityClass;
     private final EntitySource source;
     private final double priority;
 
-    public EnricherHolder(Enricher<?, ?> enricher, EntitySource source, double priority) {
+    public EnricherHolder(Enricher<?, ?> enricher, Class<?> entityClass, EntitySource source, double priority) {
       this.enricher = enricher;
+      this.entityClass = entityClass;
       this.source = source;
       this.priority = priority;
     }
 
     public Enricher<?, ?> getEnricher() {
       return enricher;
+    }
+
+    public Class<?> getEntityClass() {
+      return entityClass;
     }
 
     public EntitySource getSource() {

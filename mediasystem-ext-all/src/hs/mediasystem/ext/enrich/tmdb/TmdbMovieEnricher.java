@@ -4,7 +4,6 @@ import hs.mediasystem.dao.Source;
 import hs.mediasystem.entity.Enricher;
 import hs.mediasystem.entity.EntityContext;
 import hs.mediasystem.entity.EntityEnricher;
-import hs.mediasystem.entity.LoadState;
 import hs.mediasystem.ext.media.movie.Movie;
 import hs.mediasystem.framework.SourceImageHandle;
 import hs.mediasystem.util.Task;
@@ -95,7 +94,6 @@ public class TmdbMovieEnricher implements Enricher<Movie, String> {
       List<String> genres = movieInfo.path("genres").findValuesAsText("name");
 
       movie.genres.set(genres.toArray(new String[genres.size()]));
-      movie.setLoadState(LoadState.FULL);
     }
   }
 

@@ -6,7 +6,6 @@ import hs.mediasystem.entity.Enricher;
 import hs.mediasystem.entity.EntityContext;
 import hs.mediasystem.entity.EntityEnricher;
 import hs.mediasystem.entity.EntitySource;
-import hs.mediasystem.entity.LoadState;
 import hs.mediasystem.entity.SourceKey;
 import hs.mediasystem.util.Task;
 
@@ -108,7 +107,7 @@ public class MediaItemEnricher implements Enricher<MediaItem, Object> {
 
     /*
      * Add any new identifiers to the Entity and finalize the enrichment of MediaItem by creating
-     * the Media and setting the LoadState:
+     * the Media:
      */
 
     parent.addStep(context.getUpdateExecutor(), p -> {
@@ -128,7 +127,6 @@ public class MediaItemEnricher implements Enricher<MediaItem, Object> {
 
       if(!keys.isEmpty()) {
         mediaItem.media.set(context.add(mediaItem.dataType.get(), keys.toArray(new SourceKey[keys.size()])));
-        mediaItem.setLoadState(LoadState.FULL);
       }
       else {
         System.out.println("[INFO] " + getClass().getName() + ": Unable to identify: " + mediaItem.getUri());

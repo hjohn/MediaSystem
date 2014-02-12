@@ -4,7 +4,6 @@ import hs.mediasystem.dao.Source;
 import hs.mediasystem.entity.Enricher;
 import hs.mediasystem.entity.EntityContext;
 import hs.mediasystem.entity.EntityEnricher;
-import hs.mediasystem.entity.LoadState;
 import hs.mediasystem.framework.Person;
 import hs.mediasystem.framework.SourceImageHandle;
 import hs.mediasystem.util.Task;
@@ -65,8 +64,6 @@ public class TmdbPersonEnricher implements Enricher<Person, String> {
       if(photoSource != null) {
         person.photo.set(new SourceImageHandle(photoSource, "Person:/" + node.get("name").asText()));
       }
-
-      person.setLoadState(LoadState.FULL);
     }
   }
 }

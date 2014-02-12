@@ -23,6 +23,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -55,8 +56,6 @@ public class EntityTest {
             entity.father.set(context.add(Actor.class, new SourceKey(TMDB, "5002")));
 
             System.out.println(">>> Enriched Person 5001");
-
-            entity.setLoadState(LoadState.FULL);
           }
           else if(id.toString().equals("5002")) {
             entity.name.set("Jonathan Doe");
@@ -65,8 +64,6 @@ public class EntityTest {
             entity.birthPlace.set("New York");
 
             System.out.println(">>> Enriched Person 5002");
-
-            entity.setLoadState(LoadState.FULL);
           }
           else {
             System.out.println(">>> TMDB: Failed Enrich for " + entity + " [" + id + "]");
@@ -81,15 +78,12 @@ public class EntityTest {
         parent.addStep(context.getUpdateExecutor(), p -> {
           if(id.toString().equals("301")) {
             t.biography.set("Biography from DB");
-            t.setLoadState(LoadState.SPARSE);
           }
           else if(id.toString().equals("302")) {
             t.biography.set("Biography from DB");
-            t.setLoadState(LoadState.FULL);
           }
           else if(id.toString().equals("304")) {
             t.getContext().associate(t, new SourceKey(TMDB, "5001"));
-            t.setLoadState(LoadState.SPARSE);
           }
           else {
             System.out.println(">>> DB: Failed Enrich for " + t + " [" + id + "]");
@@ -166,6 +160,7 @@ public class EntityTest {
     assertEquals("Biography", p.biography.get());
   }
 
+  @Ignore("Currently support for multiple enrichers not needed in real code")
   @Test
   public void shouldNotUseSecondaryProviderWhenPrimaryProviderSucceeds() {
     Actor p = context.add(Actor.class, new SourceKey(DB, "302"), new SourceKey(TMDB, "5001"));
@@ -209,9 +204,8 @@ public class EntityTest {
 
     runNowOnUpdateThread(() -> {
       p.name.set("John Doe");
+      assertNull(p.castings.get());
     });
-
-    assertNull(p.castings.get());
 
     waitUntilIdle();
 

@@ -16,5 +16,5 @@ public class Person extends Entity {
   public final ObjectProperty<LocalDate> birthDate = object("birthDate");
   public final ObjectProperty<ImageHandle> photo = object("photo");
 
-  public final ObjectProperty<ObservableList<Casting>> castings = list(Casting.class);
+  public final ObjectProperty<ObservableList<Casting>> castings = list("castings", Casting.class);
 }

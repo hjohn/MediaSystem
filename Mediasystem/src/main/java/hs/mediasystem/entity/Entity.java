@@ -40,35 +40,14 @@ public class Entity {
   }
 
   private EntityContext context;
-  private LoadState loadState = LoadState.SPARSE;
-  private boolean queuedForEnrichment;
-
-  void setContext(EntityContext context) {
-    this.context = context;
-  }
+  private boolean enrichTriggered;
 
   public EntityContext getContext() {
     return context;
   }
 
-  public LoadState getLoadState() {
-    return loadState;
-  }
-
-  public void setLoadState(LoadState loadState) {
-    this.loadState = loadState;
-  }
-
-  void clearQueuedForEnrichment() {
-    queuedForEnrichment = false;
-  }
-
-  private void setQueuedForEnrichment() {
-    queuedForEnrichment = true;
-  }
-
-  private boolean isQueuedForEnrichment() {
-    return queuedForEnrichment;
+  void setContext(EntityContext context) {
+    this.context = context;
   }
 
   private void queueAsDirty(Property<?> property) {
@@ -77,15 +56,20 @@ public class Entity {
     }
   }
 
-  private void queueForEnrichment(Property<?> property, Object value, boolean setCalled, EnrichTrigger enrichTrigger) {
-    if(context != null && !isQueuedForEnrichment() && enrichTrigger.shouldEnrich(value, setCalled || property.isBound())) {
-      System.out.println("[FINE] Enrich Triggered by access (" + enrichTrigger + ") of: " + getClass().getName() + "." + property.getName());
-
-      context.ensureRunsOnUpdateThread();
-
-      setQueuedForEnrichment();
+  private void checkForEnrichment(Property<?> property, Object value, boolean setCalled, EnrichTrigger enrichTrigger) {
+    if(!enrichTriggered && context != null && enrichTrigger.shouldEnrich(value, setCalled || property.isBound())) {
+      enrichTriggered = true;
       context.queueForEnrichment(this);
+
+      System.out.println("[FINE] Entity: Enrich Triggered by access (" + enrichTrigger + ") of: " + getClass().getName() + "." + property.getName() + ": " + this);
     }
+  }
+
+  private <P extends Entity, E extends Entity> void queueListProvide(P parentEntity, Class<E> itemClass, ObjectProperty<ObservableList<E>> property) {
+    context.ensureRunsOnUpdateThread();
+    checkForEnrichment(property, null, false, EnrichTrigger.IS_NULL);
+
+    getContext().queueListProvide(parentEntity, itemClass, property);
   }
 
   protected <P> ObjectProperty<P> object(String name, EnrichTrigger enrichTrigger) {
@@ -100,7 +84,7 @@ public class Entity {
       @Override
       public P get() {
         P value = super.get();
-        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        checkForEnrichment(this, value, setCalled, enrichTrigger);
         return value;
       }
 
@@ -128,7 +112,7 @@ public class Entity {
       @Override
       public String get() {
         String value = super.get();
-        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        checkForEnrichment(this, value, setCalled, enrichTrigger);
         return value;
       }
 
@@ -144,20 +128,16 @@ public class Entity {
     return stringProperty(name, initialValue, DEFAULT_ENRICH_TRIGGER);
   }
 
-  protected StringProperty stringProperty(EnrichTrigger enrichTrigger) {
-    return stringProperty(null, null, enrichTrigger);
+  protected StringProperty stringProperty(String name, EnrichTrigger enrichTrigger) {
+    return stringProperty(name, null, enrichTrigger);
   }
 
   protected StringProperty stringProperty(String name) {
     return stringProperty(name, null, DEFAULT_ENRICH_TRIGGER);
   }
 
-//  protected StringProperty stringProperty() {
-//    return stringProperty(null, null, DEFAULT_ENRICH_TRIGGER);
-//  }
-
-  protected IntegerProperty integerProperty(int initialValue, EnrichTrigger enrichTrigger) {
-    return new SimpleIntegerProperty(initialValue) {
+  protected IntegerProperty integerProperty(String name, int initialValue, EnrichTrigger enrichTrigger) {
+    return new SimpleIntegerProperty(Entity.this, name, initialValue) {
       private boolean setCalled;
 
       @Override
@@ -168,7 +148,7 @@ public class Entity {
       @Override
       public int get() {
         int value = super.get();
-        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        checkForEnrichment(this, value, setCalled, enrichTrigger);
         return value;
       }
 
@@ -180,16 +160,16 @@ public class Entity {
     };
   }
 
-  protected IntegerProperty integerProperty(EnrichTrigger enrichTrigger) {
-    return integerProperty(0, enrichTrigger);
+  protected IntegerProperty integerProperty(String name, EnrichTrigger enrichTrigger) {
+    return integerProperty(name, 0, enrichTrigger);
   }
 
-  protected IntegerProperty integerProperty() {
-    return integerProperty(0, DEFAULT_ENRICH_TRIGGER);
+  protected IntegerProperty integerProperty(String name) {
+    return integerProperty(name, 0, DEFAULT_ENRICH_TRIGGER);
   }
 
-  protected LongProperty longProperty(long initialValue, EnrichTrigger enrichTrigger) {
-    return new SimpleLongProperty(initialValue) {
+  protected LongProperty longProperty(String name, long initialValue, EnrichTrigger enrichTrigger) {
+    return new SimpleLongProperty(Entity.this, name, initialValue) {
       private boolean setCalled;
 
       @Override
@@ -200,7 +180,7 @@ public class Entity {
       @Override
       public long get() {
         long value = super.get();
-        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        checkForEnrichment(this, value, setCalled, enrichTrigger);
         return value;
       }
 
@@ -212,16 +192,16 @@ public class Entity {
     };
   }
 
-  protected LongProperty longProperty(EnrichTrigger enrichTrigger) {
-    return longProperty(0L, enrichTrigger);
+  protected LongProperty longProperty(String name, EnrichTrigger enrichTrigger) {
+    return longProperty(name, 0L, enrichTrigger);
   }
 
-  protected LongProperty longProperty() {
-    return longProperty(0L, DEFAULT_ENRICH_TRIGGER);
+  protected LongProperty longProperty(String name) {
+    return longProperty(name, 0L, DEFAULT_ENRICH_TRIGGER);
   }
 
-  protected BooleanProperty booleanProperty(boolean initialValue, EnrichTrigger enrichTrigger) {
-    return new SimpleBooleanProperty(initialValue) {
+  protected BooleanProperty booleanProperty(String name, boolean initialValue, EnrichTrigger enrichTrigger) {
+    return new SimpleBooleanProperty(Entity.this, name, initialValue) {
       private boolean setCalled;
 
       @Override
@@ -232,7 +212,7 @@ public class Entity {
       @Override
       public boolean get() {
         boolean value = super.get();
-        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        checkForEnrichment(this, value, setCalled, enrichTrigger);
         return value;
       }
 
@@ -244,16 +224,16 @@ public class Entity {
     };
   }
 
-  protected BooleanProperty booleanProperty(EnrichTrigger enrichTrigger) {
-    return booleanProperty(false, enrichTrigger);
+  protected BooleanProperty booleanProperty(String name, EnrichTrigger enrichTrigger) {
+    return booleanProperty(name, false, enrichTrigger);
   }
 
-  protected BooleanProperty booleanProperty() {
-    return booleanProperty(false, DEFAULT_ENRICH_TRIGGER);
+  protected BooleanProperty booleanProperty(String name) {
+    return booleanProperty(name, false, DEFAULT_ENRICH_TRIGGER);
   }
 
-  protected FloatProperty floatProperty(float initialValue, EnrichTrigger enrichTrigger) {
-    return new SimpleFloatProperty(initialValue) {
+  protected FloatProperty floatProperty(String name, float initialValue, EnrichTrigger enrichTrigger) {
+    return new SimpleFloatProperty(Entity.this, name, initialValue) {
       private boolean setCalled;
 
       @Override
@@ -264,7 +244,7 @@ public class Entity {
       @Override
       public float get() {
         float value = super.get();
-        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        checkForEnrichment(this, value, setCalled, enrichTrigger);
         return value;
       }
 
@@ -276,16 +256,16 @@ public class Entity {
     };
   }
 
-  protected FloatProperty floatProperty(EnrichTrigger enrichTrigger) {
-    return floatProperty(0.0f, enrichTrigger);
+  protected FloatProperty floatProperty(String name, EnrichTrigger enrichTrigger) {
+    return floatProperty(name, 0.0f, enrichTrigger);
   }
 
-  protected FloatProperty floatProperty() {
-    return floatProperty(0.0f, DEFAULT_ENRICH_TRIGGER);
+  protected FloatProperty floatProperty(String name) {
+    return floatProperty(name, 0.0f, DEFAULT_ENRICH_TRIGGER);
   }
 
-  protected DoubleProperty doubleProperty(double initialValue, EnrichTrigger enrichTrigger) {
-    return new SimpleDoubleProperty(initialValue) {
+  protected DoubleProperty doubleProperty(String name, double initialValue, EnrichTrigger enrichTrigger) {
+    return new SimpleDoubleProperty(Entity.this, name, initialValue) {
       private boolean setCalled;
 
       @Override
@@ -296,7 +276,7 @@ public class Entity {
       @Override
       public double get() {
         double value = super.get();
-        queueForEnrichment(this, value, setCalled, enrichTrigger);
+        checkForEnrichment(this, value, setCalled, enrichTrigger);
         return value;
       }
 
@@ -308,16 +288,16 @@ public class Entity {
     };
   }
 
-  protected DoubleProperty doubleProperty(EnrichTrigger enrichTrigger) {
-    return doubleProperty(0.0, enrichTrigger);
+  protected DoubleProperty doubleProperty(String name, EnrichTrigger enrichTrigger) {
+    return doubleProperty(name, 0.0, enrichTrigger);
   }
 
-  protected DoubleProperty doubleProperty() {
-    return doubleProperty(0.0, DEFAULT_ENRICH_TRIGGER);
+  protected DoubleProperty doubleProperty(String name) {
+    return doubleProperty(name, 0.0, DEFAULT_ENRICH_TRIGGER);
   }
 
-  protected <E extends Entity> ObjectProperty<ObservableList<E>> list(Class<E> itemClass) {
-    return new SimpleObjectProperty<ObservableList<E>>() {
+  protected <E extends Entity> ObjectProperty<ObservableList<E>> list(String name, Class<E> itemClass) {
+    return new SimpleObjectProperty<ObservableList<E>>(Entity.this, name) {
       private boolean enricherCalled;
 
       @Override
@@ -331,7 +311,7 @@ public class Entity {
 
         if(value == null && !enricherCalled && getContext() != null) {
           enricherCalled = true;
-          getContext().queueListProvide(Entity.this, itemClass, this);
+          queueListProvide(Entity.this, itemClass, this);
         }
 
         return value;
