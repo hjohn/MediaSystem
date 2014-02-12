@@ -53,7 +53,7 @@
   -fx-hgap: 5;
 }
 
-.seasons .label {
+.tabs .label {
   -fx-text-fill: color-focused-text;
   -fx-label-padding: 5 10 5 10;
 

@@ -57,7 +57,7 @@ public class TreeListPane extends BorderPane {
   private final TreeView<MediaNode> treeView = new TreeView<>();
 
   private final Filter filter = new Filter() {{
-    getStyleClass().add("seasons");
+    getStyleClass().add("tabs");
   }};
 
   private final Provider<Set<MediaNodeCellProvider>> mediaNodeCellsProvider;
