@@ -3,6 +3,8 @@ package hs.mediasystem.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -15,10 +17,11 @@ import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.LongBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 
 public class MapBindings {
-  public static StringBinding selectString(final ObservableValue<?> root, final Object... steps) {
+  public static StringBinding selectString(final Observable root, final Object... steps) {
     return new StringBinding() {
       private final Helper helper;
 
@@ -45,7 +48,7 @@ public class MapBindings {
     };
   }
 
-  public static IntegerBinding selectInteger(final ObservableValue<?> root, final Object... steps) {
+  public static IntegerBinding selectInteger(final Observable root, final Object... steps) {
     return new IntegerBinding() {
       private final Helper helper;
 
@@ -72,7 +75,7 @@ public class MapBindings {
     };
   }
 
-  public static LongBinding selectLong(final ObservableValue<?> root, final Object... steps) {
+  public static LongBinding selectLong(final Observable root, final Object... steps) {
     return new LongBinding() {
       private final Helper helper;
 
@@ -99,7 +102,7 @@ public class MapBindings {
     };
   }
 
-  public static DoubleBinding selectDouble(final ObservableValue<?> root, final Object... steps) {
+  public static DoubleBinding selectDouble(final Observable root, final Object... steps) {
     return new DoubleBinding() {
       private final Helper helper;
 
@@ -126,7 +129,7 @@ public class MapBindings {
     };
   }
 
-  public static BooleanBinding selectBoolean(final ObservableValue<?> root, final Object... steps) {
+  public static BooleanBinding selectBoolean(final Observable root, final Object... steps) {
     return new BooleanBinding() {
       private final Helper helper;
 
@@ -153,7 +156,7 @@ public class MapBindings {
     };
   }
 
-  public static <T> ObjectBinding<T> select(final ObservableValue<?> root, final Object... steps) {
+  public static <T> ObjectBinding<T> select(final Observable root, final Object... steps) {
     return new ObjectBinding<T>() {
       private final Helper helper;
 
@@ -180,7 +183,7 @@ public class MapBindings {
   }
 
   private static class Helper {
-    private final ObservableValue<?>[] observableValues;
+    private final Observable[] observables;
     private final Property[] properties;
     private final InvalidationListener listener = new InvalidationListener() {
       @Override
@@ -189,54 +192,102 @@ public class MapBindings {
       }
     };
     private final WeakInvalidationListener observer = new WeakInvalidationListener(listener);
-    private final ObservableValue<?> root;
+    private final Observable root;
     private final Object[] steps;
     private final Binding<?> binding;
 
-    public Helper(Binding<?> binding, final ObservableValue<?> root, final Object... steps) {
+    public Helper(Binding<?> binding, final Observable root, final Object... steps) {
       this.binding = binding;
       this.root = root;
-      this.steps = steps;
-      observableValues = new ObservableValue<?>[steps.length + 1];
-      properties = new Property[steps.length];
+      this.steps = expandSteps(root, steps);
+      observables = new Observable[this.steps.length + 1];
+      properties = new Property[this.steps.length];
+    }
+
+    private static Object[] expandSteps(Observable root, Object[] steps) {
+      List<Object> expandedSteps = new ArrayList<>();
+      int indicesRequired = root instanceof ObservableValue ? 0 : 1;
+
+      for(int i = 0; i < steps.length; i++) {
+        Object step = steps[i];
+
+        if(indicesRequired-- <= 0) {
+          if(!(step instanceof String)) {
+            throw new IllegalArgumentException("expected String at step " + i + ": " + step);
+          }
+
+          indicesRequired = 0;
+
+          for(String subStep : ((String)step).split("\\.")) {
+            if(!subStep.matches("[_a-z][_A-Za-z0-9]*(\\[\\])?")) {
+              throw new IllegalArgumentException("invalid step format at step " + i + ": " + step);
+            }
+
+            expandedSteps.add(subStep);
+
+            if(subStep.endsWith("[]")) {
+              indicesRequired++;
+            }
+          }
+        }
+        else {
+          expandedSteps.add(step);
+        }
+      }
+
+      if(indicesRequired > 0) {
+        throw new IllegalArgumentException("insufficient indices specified in steps: missing " + indicesRequired + " indices");
+      }
+
+      return expandedSteps.toArray(new Object[expandedSteps.size()]);
     }
 
     private void unregisterListeners() {
-      for(int index = 0; index < observableValues.length; index++) {
-        if(observableValues[index] == null) {
+      for(int index = 0; index < observables.length; index++) {
+        if(observables[index] == null) {
           break;
         }
-        observableValues[index].removeListener(this.observer);
-        observableValues[index] = null;
+        observables[index].removeListener(this.observer);
+        observables[index] = null;
       }
     }
 
     protected Object computeValue() {
-      ObservableValue<?> observableValue = root;
+      Observable observable = root;
+      boolean indexedStep = false;
 
       for(int index = 0; index <= steps.length; index++) {
-        observableValues[index] = observableValue;
-        observableValue.addListener(observer);
+        observables[index] = observable;
+        observable.addListener(observer);
 
         if(index == steps.length) {
           break;
         }
 
-        Object value = observableValue.getValue();
+        Object value = observable instanceof ObservableValue ? ((ObservableValue<?>)observable).getValue() : observable;
+
+        if(indexedStep && observable instanceof ObservableValue && !(value instanceof Observable)) {
+          throw new RuntimeBindException("map or list expected at step " + (index - 1) + ": " + steps[index - 1] + " : " + observable);
+        }
+
+        indexedStep = steps[index] instanceof String && ((String)steps[index]).endsWith("[]") && observable instanceof ObservableValue ? true : false;
 
         try {
           if(properties[index] == null || !value.getClass().equals(properties[index].getBeanClass())) {
             properties[index] = new Property(value.getClass(), steps[index]);
           }
 
-          observableValue = properties[index].getObservableValue(value);
+          observable = properties[index].getObservable(value);
+        }
+        catch(RuntimeBindException e) {
+          throw e;
         }
         catch(RuntimeException e) {
           return null;
         }
       }
 
-      return observableValue.getValue();
+      return ((ObservableValue<?>)observable).getValue();
     }
   }
 
@@ -249,14 +300,41 @@ public class MapBindings {
 
     public Property(Class<?> cls, Object name) {
       this.cls = cls;
-      this.name = name;
+
+      if(name instanceof String) {
+        String s = (String)name;
+
+        if(s.endsWith("[]")) {
+          this.name = s.substring(0, s.length() - 2);
+        }
+        else {
+          this.name = name;
+        }
+      }
+      else {
+        this.name = name;
+      }
     }
 
     @SuppressWarnings("unchecked")
-    public ObservableValue<?> getObservableValue(Object bean) {
+    public Observable getObservable(Object bean) {
       try {
         if(bean instanceof ObservableMap) {
           return Bindings.valueAt((ObservableMap<Object, ?>)bean, name);
+        }
+
+        if(bean instanceof ObservableList) {
+          if(!(name instanceof Integer)) {
+            throw new RuntimeBindException("index for ObservableList (" + bean + ") must be of type Integer: " + name.getClass());
+          }
+
+          int index = (Integer)name;
+
+          if(index < 0) {
+            throw new RuntimeBindException("index for ObservableList (" + bean + ") cannot be negative: " + index);
+          }
+
+          return Bindings.valueAt((ObservableList<?>)bean, index);
         }
 
         if(name instanceof String) {
@@ -269,7 +347,7 @@ public class MapBindings {
             }
           }
 
-          return method != null ? (ObservableValue<?>)method.invoke(bean) : (ObservableValue<?>)field.get(bean);
+          return method != null ? (Observable)method.invoke(bean) : (Observable)field.get(bean);
         }
 
         throw new IllegalArgumentException("expected string: " + name);

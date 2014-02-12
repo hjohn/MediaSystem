@@ -17,6 +17,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 
 import org.junit.Before;
@@ -40,7 +41,9 @@ public class MapBindingsTest {
     private final ObjectProperty<Episode> episode = new SimpleObjectProperty<>();
     public ObjectProperty<Episode> episodeProperty() { return episode; }
 
-    private final ObservableMap<Class<?>, Object> map = FXCollections.observableHashMap();
+    public final ObservableList<String> list = FXCollections.observableArrayList("A", "B", "C");
+
+    public final ObservableMap<Class<?>, Object> map = FXCollections.observableHashMap();
     private final ObjectProperty<ObservableMap<Class<?>, Object>> dataMap = new SimpleObjectProperty<>(map);
     public ObjectProperty<ObservableMap<Class<?>, Object>> dataMapProperty() { return dataMap; }
 
@@ -102,15 +105,99 @@ public class MapBindingsTest {
   }
 
   @Test
+  public void shouldGetEpisodeNumberWithCombinedStep() {
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "episode.episodeNumber");
+
+    assertEquals(21, select.get());
+  }
+
+  @Test(expected = RuntimeBindException.class)
+  public void shouldThrowExceptionWhenMapExpectedButNotEncountered() {
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "episode[]", "episodeNumber");  // episode is not a map
+
+    assertNull(select.get());
+  }
+
+  /*
+   * Check bad step formats
+   */
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowExceptionWithInvalidStepFormat1() {
+    MapBindings.select(file1.videoProperty(), "[]");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowExceptionWithInvalidStepFormat2() {
+    MapBindings.select(file1.videoProperty(), "3Property");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowExceptionWithInvalidStepFormat3() {
+    MapBindings.select(file1.videoProperty(), ".a.b.c");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowExceptionWithInvalidStepFormat4() {
+    MapBindings.select(file1.videoProperty(), "");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowExceptionWithInvalidStepFormat5() {
+    MapBindings.select(file1.videoProperty(), 2);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowExceptionWithInvalidStepFormat6() {
+    MapBindings.select(file1.videoProperty(), (Object)null);
+  }
+
+  /*
+   * List Tests
+   */
+
+  @Test
+  public void shouldGetListValue() {
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "list[]", 1);
+
+    assertEquals("B", select.get());
+  }
+
+  @Test
+  public void shouldGetNullWhenListIndexOutOfRange() {
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "list[]", 15);
+
+    assertNull(select.get());
+  }
+
+  @Test(expected = RuntimeBindException.class)
+  public void shouldThrowExceptionWhenListIndexIsNegative() {
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "list[]", -1);
+
+    assertNull(select.get());
+  }
+
+  @Test(expected = RuntimeBindException.class)
+  public void shouldThrowExceptionWhenListIndexIsNotInteger() {
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "list[]", "a");
+
+    select.get();
+  }
+
+  /*
+   * Map Tests
+   */
+
+  @Test
   public void shouldGetMapValue() {
-    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "dataMap", YouTube.class, "rating");
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "dataMap[]", YouTube.class, "rating");
 
     assertEquals(9, select.get());
   }
 
   @Test
   public void shouldUpdateBindingWhenMapChanges() {
-    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "dataMap", YouTube.class, "rating");
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "dataMap[]", YouTube.class, "rating");
 
     assertEquals(9, select.get());
 
@@ -123,8 +210,32 @@ public class MapBindingsTest {
   }
 
   @Test
+  public void shouldGetMapValueDirectly() {
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "map[]", YouTube.class, "rating");
+
+    assertEquals(9, select.get());
+  }
+
+  @Test
+  public void shouldSelectFromMap() {
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty().get().map, YouTube.class, "rating");
+
+    assertEquals(9, select.get());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowExceptionWhenMapKeyIsMissing() {
+    MapBindings.select(file1.videoProperty(), "map[]");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowExceptionWhenMapKeyIsMissingWhenRootIsMap() {
+    MapBindings.select(file1.videoProperty().get().map);
+  }
+
+  @Test
   public void shouldUpdateBindingWhenVideoChanges() {
-    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "dataMap", YouTube.class, "rating");
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "dataMap[]", YouTube.class, "rating");
 
     assertEquals(9, select.get());
 
@@ -137,7 +248,7 @@ public class MapBindingsTest {
 
   @Test
   public void shouldUpdateBindingWhenMapKeyChanges() {
-    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "dataMap", YouTube.class, "rating");
+    ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "map[]", YouTube.class, "rating");
 
     assertEquals(9, select.get());
 
