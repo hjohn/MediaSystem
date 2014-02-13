@@ -31,7 +31,7 @@ public class PlaybackLayout implements Layout<Location, PlaybackOverlayPresentat
   public Node createView(PlaybackOverlayPresentation presentation) {
     PlaybackOverlayPane view = new PlaybackOverlayPane();
 
-    view.mediaItem.bindBidirectional(presentation.mediaItem);
+    view.media.bindBidirectional(presentation.media);
     view.player.bindBidirectional(presentation.player);
     view.overlayVisible.bindBidirectional(presentation.overlayVisible);
 

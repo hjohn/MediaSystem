@@ -2,7 +2,6 @@ package hs.mediasystem.ext.media.youtube;
 
 import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ public class YouTubeMediaTree implements MediaRoot {
     FEEDS.add(new Feed("Most Recent Comedy", "https://gdata.youtube.com/feeds/api/standardfeeds/most_recent_Comedy"));
   }
 
-  private List<MediaItem> children;
+  private List<Media> children;
 
   public static class Feed {
     private final String name;
@@ -50,13 +49,12 @@ public class YouTubeMediaTree implements MediaRoot {
   }
 
   @Override
-  public List<? extends MediaItem> getItems() {
+  public List<? extends Media> getItems() {
     if(children == null) {
       children = new ArrayList<>();
 
       for(Feed feed : FEEDS) {
-        Media media = new YouTubeFeedItem(feed.getName());
-        children.add(new YouTubeFeed(YouTubeMediaTree.this, feed.getUrl(), feed, media));
+        children.add(new YouTubeFeed(YouTubeMediaTree.this, feed.getUrl(), feed));
       }
     }
 
@@ -83,11 +81,5 @@ public class YouTubeMediaTree implements MediaRoot {
   @Override
   public Map<String, Object> getMediaProperties() {
     return Collections.unmodifiableMap(MEDIA_PROPERTIES);
-  }
-
-  static class YouTubeFeedItem extends Media {
-    public YouTubeFeedItem(String name) {
-      setTitle(name);
-    }
   }
 }

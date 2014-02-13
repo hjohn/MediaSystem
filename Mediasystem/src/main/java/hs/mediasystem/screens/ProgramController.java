@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.actions.PresentationActionEvent;
 import hs.mediasystem.framework.player.PlayerEvent;
 import hs.mediasystem.screens.collection.CollectionPresentation;
@@ -186,7 +186,7 @@ public class ProgramController {
           // TODO this is a bit hacky, but makes it easy for now to call legacy play() function
           PlaybackLocation playbackLocation = (PlaybackLocation)event.getLocation();
 
-          play(playbackLocation.getMediaItem());
+          play(playbackLocation.getMedia());
         }
         else {
           setLocation(event.getLocation());
@@ -438,13 +438,13 @@ public class ProgramController {
     displayOnMainStage(node);
   }
 
-  private MediaItem currentMediaItem;
+  private Media currentMedia;
 
-  public MediaItem getCurrentMediaItem() {
-    return currentMediaItem;
+  public Media getCurrentMedia() {
+    return currentMedia;
   }
 
-  private synchronized void play(final MediaItem mediaItem) {
+  private synchronized void play(final Media media) {
     if(playerPresentation == null) {
       Dialogs.show(scene, new InformationDialog("No video player was configured.\nUnable to play the selected item."));
       return;
@@ -452,8 +452,8 @@ public class ProgramController {
 
     Integer resumePosition = 0;
 
-    if(mediaItem.mediaData.get() != null) {
-      resumePosition = Dialogs.showAndWait(scene, new ResumeDialog(mediaItem));
+    if(media.getMediaItem().mediaData.get() != null) {
+      resumePosition = Dialogs.showAndWait(scene, new ResumeDialog(media.getMediaItem()));
 
       if(resumePosition == null) {
         return;
@@ -467,13 +467,13 @@ public class ProgramController {
     timeline.setOnFinished(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
-        startPlay(mediaItem, finalResumePosition * 1000L);
+        startPlay(media, finalResumePosition * 1000L);
       }
     });
     timeline.play();
   }
 
-  private void startPlay(final MediaItem mediaItem, long positionMillis) {
+  private void startPlay(final Media media, long positionMillis) {
     sceneManager.setPlayerRoot(playerPresentation.getPlayer().getDisplayComponent());
     playerPresentation.getPlayer().onPlayerEvent().set(new EventHandler<PlayerEvent>() {
       @Override
@@ -490,10 +490,10 @@ public class ProgramController {
       }
     });
     playerPresentation.getPlayer().positionProperty().set(0);
-    playerPresentation.play(mediaItem.getUri(), positionMillis);
-    currentMediaItem = mediaItem;
+    playerPresentation.play(media.getMediaItem().getUri(), positionMillis);
+    currentMedia = media;
 
-    setLocation(new PlaybackLocation(getLocation(), mediaItem, positionMillis));
+    setLocation(new PlaybackLocation(getLocation(), media, positionMillis));
 
     informationBorder.setVisible(false);
   }

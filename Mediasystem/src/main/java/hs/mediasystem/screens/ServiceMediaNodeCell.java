@@ -20,7 +20,7 @@ public class ServiceMediaNodeCell {
     }
 
     if(node != null) {
-      Class<?> dataType = node.getDataType();
+      Class<?> dataType = node.getMedia().getClass();
 
       if(!dataType.equals(currentDataType)) {
         currentDataType = dataType;

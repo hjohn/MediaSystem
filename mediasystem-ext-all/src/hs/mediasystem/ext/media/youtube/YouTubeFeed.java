@@ -26,29 +26,29 @@ import com.google.gdata.data.youtube.YouTubeMediaContent;
 import com.google.gdata.data.youtube.YouTubeMediaGroup;
 import com.google.gdata.util.ServiceException;
 
-public class YouTubeFeed extends MediaItem implements MediaRoot {
+public class YouTubeFeed extends Media implements MediaRoot {
   private static final Id ID = new Id("youTubeFeed");
 
   private final Feed feed;
   private final YouTubeMediaTree mediaRoot;
 
-  private List<MediaItem> children;
+  private List<Media> children;
 
-  public YouTubeFeed(YouTubeMediaTree mediaTree, String uri, Feed feed, Media media) {
-    super(uri, feed.getName(), Media.class);
+  public YouTubeFeed(YouTubeMediaTree mediaTree, String uri, Feed feed) {
+    super(new MediaItem(uri));
 
-    this.media.set(media);
+    this.externalTitle.set(feed.getName());
     this.mediaRoot = mediaTree;
     this.feed = feed;
   }
 
   @Override
   public String getRootName() {
-    return getTitle();
+    return title.get();
   }
 
   @Override
-  public List<? extends MediaItem> getItems() {
+  public List<? extends Media> getItems() {
     if(children == null) {
       YouTubeService service = new YouTubeService("MediaSystem");
       String feedUrl = feed.getUrl();
@@ -61,14 +61,14 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
           YouTubeMediaGroup mediaGroup = videoEntry.getMediaGroup();
 
           for(YouTubeMediaContent mediaContent : mediaGroup.getYouTubeContents()) {
-            YouTubeVideo youTube = new YouTubeVideo(videoEntry.getTitle().getPlainText());
+            YouTubeVideo youTubeVideo = new YouTubeVideo(mediaContent.getUrl().replaceAll("https://", "http://"), videoEntry.getTitle().getPlainText());
 
-            youTube.description.set(mediaGroup.getDescription().getPlainTextContent());
+            youTubeVideo.description.set(mediaGroup.getDescription().getPlainTextContent());
             if(videoEntry.getRating() != null) {
-              youTube.rating.set(videoEntry.getRating().getAverage() * 2);
+              youTubeVideo.rating.set(videoEntry.getRating().getAverage() * 2);
             }
-            youTube.releaseDate.set(LocalDateTime.ofEpochSecond(videoEntry.getPublished().getValue(), 0, ZoneOffset.ofTotalSeconds(videoEntry.getPublished().getTzShift() * 60)).toLocalDate());
-            youTube.runtime.set(mediaGroup.getYouTubeContents().get(0).getDuration() / 60);
+            youTubeVideo.releaseDate.set(LocalDateTime.ofEpochSecond(videoEntry.getPublished().getValue(), 0, ZoneOffset.ofTotalSeconds(videoEntry.getPublished().getTzShift() * 60)).toLocalDate());
+            youTubeVideo.runtime.set(mediaGroup.getYouTubeContents().get(0).getDuration() / 60);
 
             List<MediaThumbnail> thumbnails = videoEntry.getMediaGroup().getThumbnails();
             MediaThumbnail bestThumbnail = null;
@@ -83,13 +83,9 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
 
             String url = bestThumbnail == null ? null : bestThumbnail.getUrl();
 
-            youTube.image.set(new SourceImageHandle(new URLImageSource(url), "YouTubeMediaTree:/" + videoEntry.getId()));
+            youTubeVideo.image.set(new SourceImageHandle(new URLImageSource(url), "YouTubeMediaTree:/" + videoEntry.getId()));
 
-            MediaItem child = new MediaItem(mediaContent.getUrl().replaceAll("https://", "http://"), youTube.title.get(), Media.class);
-
-            child.media.set(youTube);
-
-            children.add(child);
+            children.add(youTubeVideo);
             break;
           }
         }
@@ -103,8 +99,10 @@ public class YouTubeFeed extends MediaItem implements MediaRoot {
   }
 
   public static class YouTubeVideo extends Media {
-    public YouTubeVideo(String title) {
-      setTitle(title);
+    public YouTubeVideo(String uri, String title) {
+      super(new MediaItem(uri));
+
+      this.externalTitle.set(title);
     }
   }
 

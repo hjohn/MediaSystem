@@ -27,10 +27,10 @@ public class NosMediaTree implements MediaRoot {
   private static final Id ID = new Id("nosRoot");
   private static final String URL = "http://tv.nos.nl";
 
-  private List<MediaItem> children;
+  private List<Media> children;
 
-  private static List<MediaItem> getElements() {
-    List<MediaItem> list = new ArrayList<>();
+  private static List<Media> getElements() {
+    List<Media> list = new ArrayList<>();
 
     try {
       Document doc = Jsoup.connect(URL).get();
@@ -50,15 +50,11 @@ public class NosMediaTree implements MediaRoot {
         String meta = element.select("div p").text();
         String videoUrl = videoUrls.get(element.attr("id"));
 
-        Media media = new NosItem(title, meta);
+        Media media = new NosItem(videoUrl, title, meta);
 
         media.image.set(new SourceImageHandle(new URLImageSource(thumbUrl), "NosMediaTree:/" + title));
 
-        MediaItem mediaItem = new MediaItem(videoUrl, title, Media.class);
-
-        mediaItem.media.set(media);
-
-        list.add(mediaItem);
+        list.add(media);
       }
     }
     catch(IOException e) {
@@ -69,7 +65,7 @@ public class NosMediaTree implements MediaRoot {
   }
 
   @Override
-  public List<? extends MediaItem> getItems() {
+  public List<? extends Media> getItems() {
     if(children == null) {
       children = getElements();
     }
@@ -106,8 +102,11 @@ public class NosMediaTree implements MediaRoot {
   }
 
   public static class NosItem extends Media {
-    public NosItem(String title, String meta) {
-      setTitles(title, meta);
+    public NosItem(String videoUrl, String title, String meta) {
+      super(new MediaItem(videoUrl));
+
+      this.externalTitle.set(title);
+      this.subtitle.set(meta);
     }
   }
 }

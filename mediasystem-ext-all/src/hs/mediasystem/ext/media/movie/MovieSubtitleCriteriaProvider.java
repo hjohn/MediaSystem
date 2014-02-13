@@ -2,7 +2,6 @@ package hs.mediasystem.ext.media.movie;
 
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 
 import java.util.HashMap;
@@ -14,9 +13,8 @@ import javax.inject.Named;
 public class MovieSubtitleCriteriaProvider implements SubtitleCriteriaProvider {
 
   @Override
-  public Map<String, Object> getCriteria(MediaItem mediaItem) {
-    Media media = mediaItem.getMedia();
-    MediaData mediaData = mediaItem.mediaData.get();
+  public Map<String, Object> getCriteria(Media media) {
+    MediaData mediaData = media.getMediaItem().mediaData.get();
 
     Map<String, Object> criteria = new HashMap<>();
 

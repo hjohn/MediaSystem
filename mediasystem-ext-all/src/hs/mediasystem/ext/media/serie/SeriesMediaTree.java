@@ -6,6 +6,7 @@ import hs.mediasystem.entity.EntityContext;
 import hs.mediasystem.entity.SourceKey;
 import hs.mediasystem.framework.FileEntitySource;
 import hs.mediasystem.framework.Id;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.ScanException;
@@ -31,7 +32,7 @@ public class SeriesMediaTree implements MediaRoot {
   private final EntityContext entityContext;
   private final List<Path> roots;
 
-  private List<MediaItem> children;
+  private List<Media> children;
 
   @Inject
   public SeriesMediaTree(FileEntitySource fileEntitySource, EntityContext entityContext, SettingsStore settingsStore) {
@@ -44,7 +45,7 @@ public class SeriesMediaTree implements MediaRoot {
   }
 
   @Override
-  public List<? extends MediaItem> getItems() {
+  public List<? extends Media> getItems() {
     if(children == null) {
       children = new ArrayList<>();
 
@@ -53,17 +54,22 @@ public class SeriesMediaTree implements MediaRoot {
           List<LocalInfo> scanResults = new SerieScanner().scan(root);
 
           for(LocalInfo localInfo : scanResults) {
-            SerieItem mediaItem = entityContext.add(SerieItem.class, new Supplier<SerieItem>() {
-              @Override
-              public SerieItem get() {
-                return new SerieItem(SeriesMediaTree.this, localInfo.getUri(), localInfo.getTitle(), fileEntitySource);
-              }
-            }, new SourceKey(fileEntitySource, localInfo.getUri()));
+            Serie child = entityContext.add(
+              Serie.class,
+              () -> {
+                Serie serie = new Serie(SeriesMediaTree.this, new MediaItem(localInfo.getUri()), fileEntitySource);
 
-            mediaItem.properties.put("releaseYear", localInfo.getReleaseYear());
-            mediaItem.properties.put("imdbNumber", localInfo.getCode());
+                serie.localTitle.set(localInfo.getTitle());
+                serie.subtitle.set(localInfo.getSubtitle());
+                serie.localReleaseYear.set(localInfo.getReleaseYear() == null ? null : localInfo.getReleaseYear().toString());
+                serie.imdbNumber.set(localInfo.getCode());
 
-            children.add(mediaItem);
+                return serie;
+              },
+              new SourceKey(fileEntitySource, localInfo.getUri())
+            );
+
+            children.add(child);
           }
         }
         catch(ScanException e) {

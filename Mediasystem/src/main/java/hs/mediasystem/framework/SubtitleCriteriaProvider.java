@@ -11,6 +11,6 @@ public interface SubtitleCriteriaProvider {
   static final String OPEN_SUBTITLES_HASH = "long:oshash";
   static final String FILE_LENGTH = "long:fileLength";
 
-  Map<String, Object> getCriteria(MediaItem mediaItem);
+  Map<String, Object> getCriteria(Media media);
   Class<?> getMediaType();
 }

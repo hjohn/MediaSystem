@@ -5,6 +5,6 @@ import hs.mediasystem.framework.Media;
 public class MovieGroup extends Media {
 
   public MovieGroup(String title) {
-    setTitle(title);
+    this.localTitle.set(title);
   }
 }

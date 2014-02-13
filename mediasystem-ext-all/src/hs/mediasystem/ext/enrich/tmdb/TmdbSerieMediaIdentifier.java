@@ -2,9 +2,9 @@ package hs.mediasystem.ext.enrich.tmdb;
 
 import hs.mediasystem.dao.Identifier.MatchType;
 import hs.mediasystem.dao.ProviderId;
+import hs.mediasystem.ext.media.serie.Serie;
 import hs.mediasystem.framework.Identifier;
-import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.MediaItemIdentifier;
+import hs.mediasystem.framework.MediaIdentifier;
 import hs.mediasystem.util.Levenshtein;
 
 import java.time.LocalDate;
@@ -20,19 +20,19 @@ import javax.inject.Named;
 import org.codehaus.jackson.JsonNode;
 
 @Named
-public class TmdbSerieMediaItemIdentifier extends MediaItemIdentifier {
+public class TmdbSerieMediaIdentifier extends MediaIdentifier<Serie> {
   private final TheMovieDatabase tmdb;
 
   @Inject
-  public TmdbSerieMediaItemIdentifier(TheMovieDatabase tmdb) {
+  public TmdbSerieMediaIdentifier(TheMovieDatabase tmdb) {
     super("TMDB", "Serie");
 
     this.tmdb = tmdb;
   }
 
   @Override
-  public Identifier identify(MediaItem mediaItem) {
-    SearchResult searchResult = searchForSerie(mediaItem);
+  public Identifier identify(Serie serie) {
+    SearchResult searchResult = searchForSerie(serie);
 
     if(searchResult != null) {
       return new Identifier().setAll(
@@ -45,13 +45,12 @@ public class TmdbSerieMediaItemIdentifier extends MediaItemIdentifier {
     return null;
   }
 
-  private SearchResult searchForSerie(MediaItem mediaItem) {
+  private SearchResult searchForSerie(Serie serie) {
     synchronized(TheMovieDatabase.class) {
-      String title = mediaItem.title.get();
-      String subtitle = mediaItem.subtitle.get() == null ? "" : mediaItem.subtitle.get();
-      String imdb = (String)mediaItem.properties.get("imdbNumber");
-      Integer year = (Integer)mediaItem.properties.get("releaseYear");
-      int seq = Integer.parseInt(mediaItem.sequence.get() == null ? "1" : mediaItem.sequence.get());
+      String title = serie.localTitle.get();
+      String subtitle = serie.subtitle.get() == null ? "" : serie.subtitle.get();
+      String imdb = serie.imdbNumber.get();
+      Integer year = serie.localReleaseYear.get() == null ? null : Integer.parseInt(serie.localReleaseYear.get());
       int tmdbId = -1;
       float matchAccuracy = 1.0f;
       MatchType matchType = MatchType.ID;
@@ -76,9 +75,6 @@ public class TmdbSerieMediaItemIdentifier extends MediaItemIdentifier {
         for(String variation : variations) {
           String searchString = variation;
 
-          if(seq > 1) {
-            searchString += " " + seq;
-          }
           if(subtitle.length() > 0) {
             searchString += " " + subtitle;
           }

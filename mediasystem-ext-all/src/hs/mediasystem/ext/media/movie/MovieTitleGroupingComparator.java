@@ -1,19 +1,17 @@
 package hs.mediasystem.ext.media.movie;
 
-import hs.mediasystem.framework.MediaItem;
-
 import java.util.Comparator;
 
-public class MovieTitleGroupingComparator implements Comparator<MediaItem> {
-  public static final Comparator<MediaItem> INSTANCE = new MovieTitleGroupingComparator();
+public class MovieTitleGroupingComparator implements Comparator<Movie> {
+  public static final Comparator<Movie> INSTANCE = new MovieTitleGroupingComparator();
 
   @Override
-  public int compare(MediaItem o1, MediaItem o2) {
-    int result = o1.getTitle().compareTo(o2.getTitle());
+  public int compare(Movie o1, Movie o2) {
+    int result = o1.localTitle.get().compareTo(o2.localTitle.get());
 
     if(result == 0) {
-      Integer s1 = Integer.parseInt(o1.sequence.get() == null ? "0" : o1.sequence.get());
-      Integer s2 = Integer.parseInt(o2.sequence.get() == null ? "0" : o2.sequence.get());
+      Integer s1 = o1.sequence.get() == null ? 0 : o1.sequence.get();
+      Integer s2 = o2.sequence.get() == null ? 0 : o2.sequence.get();
 
       result = Integer.compare(s1, s2);
 

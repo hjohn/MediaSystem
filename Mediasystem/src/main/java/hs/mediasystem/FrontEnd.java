@@ -18,7 +18,7 @@ import hs.mediasystem.entity.EntityPersister;
 import hs.mediasystem.framework.DatabaseCache;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaDataPersister;
-import hs.mediasystem.framework.MediaItemEnricher;
+import hs.mediasystem.framework.MediaEnricher;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.PlayerFactory;
@@ -169,7 +169,7 @@ public class FrontEnd extends Application {
       }
     });
 
-    injector.register(MediaItemEnricher.class);
+    injector.register(MediaEnricher.class);
     injector.register(MediaDataPersister.class);
 
     injector.register(DatabaseCache.class);

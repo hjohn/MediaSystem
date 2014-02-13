@@ -13,7 +13,7 @@ public interface MediaRoot {
   Id getId();
 
   String getRootName();
-  List<? extends MediaItem> getItems();
+  List<? extends Media> getItems();
   MediaRoot getParent();
   Map<String, Object> getMediaProperties();
 }

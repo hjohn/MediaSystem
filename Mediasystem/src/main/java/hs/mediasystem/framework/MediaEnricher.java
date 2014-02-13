@@ -19,15 +19,15 @@ import javafx.collections.ObservableList;
 
 import javax.inject.Inject;
 
-@EntityEnricher(entityClass = MediaItem.class, sourceClass = FileEntitySource.class, priority = 1.0)
-public class MediaItemEnricher implements Enricher<MediaItem, Object> {
+@EntityEnricher(entityClass = Media.class, sourceClass = FileEntitySource.class, priority = 1.0)
+public class MediaEnricher implements Enricher<Media, Object> {
   private final DatabaseEntitySource databaseEntitySource;
   private final MediaDataDao mediaDataDao;
-  private final Set<MediaItemIdentifier> mediaItemIdentifiers;
+  private final Set<MediaIdentifier<?>> mediaItemIdentifiers;
   private final SourceMatcher sourceMatcher;
 
   @Inject
-  public MediaItemEnricher(DatabaseEntitySource databaseEntitySource, MediaDataDao mediaDataDao, Set<MediaItemIdentifier> mediaItemIdentifiers, SourceMatcher sourceMatcher) {
+  public MediaEnricher(DatabaseEntitySource databaseEntitySource, MediaDataDao mediaDataDao, Set<MediaIdentifier<?>> mediaItemIdentifiers, SourceMatcher sourceMatcher) {
     this.databaseEntitySource = databaseEntitySource;
     this.mediaDataDao = mediaDataDao;
     this.mediaItemIdentifiers = mediaItemIdentifiers;
@@ -35,10 +35,11 @@ public class MediaItemEnricher implements Enricher<MediaItem, Object> {
   }
 
   @Override
-  public void enrich(EntityContext context, Task parent, MediaItem mediaItem, Object key) {
+  public void enrich(EntityContext context, Task parent, Media media, Object key) {
     List<Identifier> newIdentifiers = new ArrayList<>();
+    MediaItem mediaItem = media.getMediaItem();
 
-    hs.mediasystem.dao.MediaData dbMediaData = fetchMediaData(mediaItem);
+    hs.mediasystem.dao.MediaData dbMediaData = fetchMediaData(media);
     MediaData mediaData = context.add(MediaData.class, new SourceKey(databaseEntitySource, dbMediaData.getId()));
 
     /*
@@ -78,19 +79,30 @@ public class MediaItemEnricher implements Enricher<MediaItem, Object> {
      */
 
     // TODO only execute when needed, update condition:
-    parent.addStep(context.getSlowExecutor(), () -> dbMediaData.getIdentifiers().isEmpty(), p -> {
-      String mediaType = mediaItem.getDataType().getSimpleName();
+    parent.addStep(context.getSlowExecutor(), () -> {
+      for(MediaIdentifier<?> mediaItemIdentifier : mediaItemIdentifiers) {
+        if(mediaData.findIdentifier(mediaItemIdentifier.getMediaType(), mediaItemIdentifier.getSource()) == null) {
+          return true;
+        }
+      }
 
-      for(MediaItemIdentifier mediaItemIdentifier : mediaItemIdentifiers) {
+      return false;
+    }, p -> {
+      String mediaType = media.getClass().getSimpleName();
+
+      for(MediaIdentifier<?> mediaItemIdentifier : mediaItemIdentifiers) {
         if(mediaItemIdentifier.getMediaType().equals(mediaType)) {
           Identifier identifier = mediaData.findIdentifier(mediaType, mediaItemIdentifier.getSource());
 
           if(identifier == null) { // TODO add lastupdated check here!
             try {
-              identifier = mediaItemIdentifier.identify(mediaItem);
+              @SuppressWarnings("unchecked")
+              MediaIdentifier<Media> castedMediaItemIdentifier = (MediaIdentifier<Media>)mediaItemIdentifier;
+
+              identifier = castedMediaItemIdentifier.identify(media);
             }
             catch(RuntimeException e) {
-              System.out.println("[WARN] " + getClass().getName() + ": " + mediaItemIdentifier + ": Error identifying: " + mediaItem);
+              System.out.println("[WARN] " + getClass().getName() + ": " + mediaItemIdentifier + ": Error identifying: " + media);
               e.printStackTrace(System.out);
             }
 
@@ -98,7 +110,7 @@ public class MediaItemEnricher implements Enricher<MediaItem, Object> {
               newIdentifiers.add(identifier);
             }
             else {
-              System.out.println("[INFO] " + getClass().getName() + ": " + mediaItemIdentifier + ": Identification failed (not found): " + mediaItem);
+              System.out.println("[INFO] " + getClass().getName() + ": " + mediaItemIdentifier + ": Identification failed (not found): " + media);
             }
           }
         }
@@ -106,8 +118,8 @@ public class MediaItemEnricher implements Enricher<MediaItem, Object> {
     });
 
     /*
-     * Add any new identifiers to the Entity and finalize the enrichment of MediaItem by creating
-     * the Media:
+     * Add any new identifiers to the Entity and finalize the enrichment of Media by
+     * associating it with the new keys.
      */
 
     parent.addStep(context.getUpdateExecutor(), p -> {
@@ -126,7 +138,7 @@ public class MediaItemEnricher implements Enricher<MediaItem, Object> {
       }
 
       if(!keys.isEmpty()) {
-        mediaItem.media.set(context.add(mediaItem.dataType.get(), keys.toArray(new SourceKey[keys.size()])));
+        context.associate(media, keys.toArray(new SourceKey[keys.size()]));
       }
       else {
         System.out.println("[INFO] " + getClass().getName() + ": Unable to identify: " + mediaItem.getUri());
@@ -134,7 +146,9 @@ public class MediaItemEnricher implements Enricher<MediaItem, Object> {
     });
   }
 
-  private hs.mediasystem.dao.MediaData fetchMediaData(MediaItem mediaItem) {
+  private hs.mediasystem.dao.MediaData fetchMediaData(Media media) {
+    MediaItem mediaItem = media.getMediaItem();
+
     hs.mediasystem.dao.MediaData mediaData = mediaDataDao.getMediaDataByUri(mediaItem.getUri());
 
     if(mediaData == null) {

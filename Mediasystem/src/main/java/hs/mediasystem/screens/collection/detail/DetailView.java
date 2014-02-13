@@ -34,14 +34,12 @@ public class DetailView extends StackPane {
   public final ObjectProperty<MediaNode> content = new SimpleObjectProperty<>();
 
   private final ObjectBinding<Media> media = MapBindings.select(content, "media");
-  private final ObjectProperty<Media> derivedMedia = new SimpleObjectProperty<>();
-
   private final ObjectProperty<Object> finalContent = new SimpleObjectProperty<>();
 
   private final InvalidationListener finalContentUpdater = new InvalidationListener() {
     @Override
     public void invalidated(Observable observable) {
-      finalContent.set(media.get() == null ? derivedMedia.get() : media.get());
+      finalContent.set(media.get());
     }
   };
 
@@ -58,23 +56,11 @@ public class DetailView extends StackPane {
   public DetailView(Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts, boolean interactive, AreaLayout areaLayout) {
 
     /*
-     * Change listener on content to update derivedMedia in case the MediaNode set in the content property is unidentified.
-     */
-
-    content.addListener(new ChangeListener<MediaNode>() {
-      @Override
-      public void changed(ObservableValue<? extends MediaNode> observableValue, MediaNode old, MediaNode current) {
-        derivedMedia.set(current == null ? null : new MediaNode.SpecialItem(current.getId() + " (unidentified)"));
-      }
-    });
-
-    /*
      * Listeners for media and derivedMedia to update the finalContent property.  These are triggered when the content
      * property changes (as both properties bind to the content property) and may result in the finalContent to change.
      */
 
     media.addListener(finalContentUpdater);
-    derivedMedia.addListener(finalContentUpdater);
 
     /*
      * Change listener on finalContent to select an appropriate layout and update the UI.

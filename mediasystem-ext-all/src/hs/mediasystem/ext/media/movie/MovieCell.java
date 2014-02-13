@@ -14,9 +14,8 @@ public class MovieCell extends DuoLineCell implements MediaNodeCell {
   public void attach(MediaNode mediaNode) {
     binder.unbindAll();
 
-    binder.bind(titleProperty(), mediaNode.title);
-    binder.bind(subtitleProperty(), mediaNode.subtitle);
-    binder.bind(extraInfoProperty(), MediaItemFormatter.releaseYearBinding(mediaNode));
+    binder.bind(titleProperty(), mediaNode.getMedia().title);
+    binder.bind(subtitleProperty(), mediaNode.getMedia().subtitle);
 
     collectionSizeProperty().set(mediaNode.getChildren().size());
 

@@ -1,16 +1,16 @@
 package hs.mediasystem.screens.playback;
 
-import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.screens.Location;
 
 public class PlaybackLocation implements Location {
   private final Location parent;
-  private final MediaItem mediaItem;
+  private final Media media;
   private final long startMillis;
 
-  public PlaybackLocation(Location parent, MediaItem mediaItem, long startMillis) {
+  public PlaybackLocation(Location parent, Media media, long startMillis) {
     this.parent = parent;
-    this.mediaItem = mediaItem;
+    this.media = media;
     this.startMillis = startMillis;
   }
 
@@ -34,8 +34,8 @@ public class PlaybackLocation implements Location {
     return Type.PLAYBACK;
   }
 
-  public MediaItem getMediaItem() {
-    return mediaItem;
+  public Media getMedia() {
+    return media;
   }
 
   public long getStartMillis() {

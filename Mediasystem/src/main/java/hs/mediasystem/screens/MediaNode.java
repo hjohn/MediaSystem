@@ -2,7 +2,6 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
-import hs.mediasystem.framework.MediaItem;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,86 +9,45 @@ import java.util.List;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableMap;
 
 public class MediaNode {
   public final ObjectProperty<MediaData> mediaData;
   public final ObjectProperty<Media> media;
 
-  private final MediaItem mediaItem;
-
-  public MediaItem getMediaItem() { return mediaItem; }
-
-  public final StringProperty serieName;
-  public final StringProperty title;
-  public final StringProperty sequence;
-  public final StringProperty subtitle;
-  public final ObjectProperty<ObservableMap<String, Object>> properties;
+  public final Media getMedia() { return media.get(); }
 
   private final String id;
   private final String shortTitle;
   private final boolean isLeaf;
-  private final Class<?> dataType;
 
   private final List<MediaNode> children;
 
   private MediaNode parent;
 
-  public MediaNode(MediaItem mediaItem) {
-    assert mediaItem != null;
+  public MediaNode(Media media) {
+    assert media.getMediaItem() != null;
 
-    this.id = "mediaItem[" + mediaItem.getUri() + "]";
-    this.mediaItem = mediaItem;
-    this.serieName = mediaItem.serieName;
-    this.title = mediaItem.title;
-    this.sequence = mediaItem.sequence;
-    this.subtitle = mediaItem.subtitle;
-    this.mediaData = mediaItem.mediaData;
-    this.media = mediaItem.media;
-    this.properties = new SimpleObjectProperty<>(mediaItem.properties);
-
+    this.id = "mediaItem[" + media.getMediaItem().getUri() + "]";
+    this.media = new SimpleObjectProperty<>(media);
+    this.mediaData = media.getMediaItem().mediaData;
     this.shortTitle = "";
     this.isLeaf = true;
-    this.dataType = mediaItem.getDataType();
     this.children = new ArrayList<>();
   }
 
   public MediaNode(String id, String title, String shortTitle, boolean isLeaf, List<MediaNode> children) {
     Media media = new SpecialItem(title);
 
-    this.children = children == null ? new ArrayList<>() : new ArrayList<>(children);
-    this.mediaItem = null;
-
-    this.serieName = new SimpleStringProperty();
-    this.title = new SimpleStringProperty(title);
-    this.sequence = new SimpleStringProperty();
-    this.subtitle = new SimpleStringProperty();
-    ObservableMap<String, Object> observableHashMap = FXCollections.observableHashMap();
-    this.properties =  new SimpleObjectProperty<>(observableHashMap);
-
-    ObservableMap<Class<?>, Object> data = FXCollections.observableHashMap();
-
-    data.put(Media.class, media);
-
     this.id = id;
+    this.media = new SimpleObjectProperty<>(media);
     this.mediaData = new SimpleObjectProperty<>(this, "mediaData");
     this.shortTitle = shortTitle == null ? media.title.get() : shortTitle;
-    this.media = new SimpleObjectProperty<>();
-    this.media.set(media);
-
     this.isLeaf = isLeaf;
-    this.dataType = Media.class;
+    this.children = children == null ? new ArrayList<>() : new ArrayList<>(children);
   }
 
   public MediaNode(String id, String title, String shortTitle, boolean isLeaf) {
     this(id, title, shortTitle, isLeaf, null);
-  }
-
-  public Class<?> getDataType() {
-    return dataType;
   }
 
   public String getId() {
@@ -143,10 +101,6 @@ public class MediaNode {
     return isLeaf;
   }
 
-  public Media getMedia() {
-    return media.get();
-  }
-
   @Override
   public String toString() {
     return "MediaNode[id='" + id + "', instance=" + hashCode() + "]";
@@ -154,7 +108,7 @@ public class MediaNode {
 
   public static class SpecialItem extends Media {
     public SpecialItem(String rootName) {
-      setTitle(rootName);
+      localTitle.set(rootName);
     }
   }
 }

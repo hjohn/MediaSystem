@@ -1,7 +1,7 @@
 package hs.mediasystem.screens.playback;
 
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.framework.SubtitleProvider;
 import hs.mediasystem.framework.player.Player;
@@ -46,7 +46,7 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
     }
   };
 
-  public final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
+  public final ObjectProperty<Media> media = new SimpleObjectProperty<>();
   public final ObjectProperty<Player> player = new SimpleObjectProperty<>();
   public final BooleanProperty overlayVisible = new SimpleBooleanProperty(true);
 
@@ -61,7 +61,7 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
   @Inject
   public PlaybackOverlayPresentation(Set<SubtitleProvider> subtitleProviders, Set<SubtitleCriteriaProvider> subtitleCriteriaProviders, final ProgramController controller, final PlayerPresentation playerPresentation) {
     this.player.set(playerPresentation.getPlayer());
-    this.mediaItem.set(controller.getCurrentMediaItem());
+    this.media.set(controller.getCurrentMedia());
 
     this.subtitleProviders = subtitleProviders;
     this.subtitleCriteriaProviders = subtitleCriteriaProviders;
@@ -93,7 +93,7 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
 
       private void updatePositionAndViewed() {
         Player player = PlaybackOverlayPresentation.this.player.get();
-        MediaData mediaData = mediaItem.get().mediaData.get();
+        MediaData mediaData = media.get().getMediaItem().mediaData.get();
 
         if(mediaData != null) {
           long length = player.getLength();
@@ -103,7 +103,7 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
             long timeViewed = totalTimeViewed + location.get().getStartMillis();
 
             if(!mediaData.viewed.get() && timeViewed >= length * 9 / 10) {  // 90% viewed?
-              System.out.println("[CONFIG] PlaybackOverlayPresentation - Marking as viewed: " + mediaItem.get());
+              System.out.println("[CONFIG] PlaybackOverlayPresentation - Marking as viewed: " + media.get());
 
               mediaData.viewed.set(true);
             }
@@ -117,7 +117,7 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
               }
 
               if(Math.abs(mediaData.resumePosition.get() - resumePosition) > 10) {
-                System.out.println("[CONFIG] PlaybackOverlayPresentation - Setting resume position to " + position + " ms: " + mediaItem.get());
+                System.out.println("[CONFIG] PlaybackOverlayPresentation - Setting resume position to " + position + " ms: " + media.get());
 
                 mediaData.resumePosition.set(resumePosition);
               }
@@ -163,14 +163,14 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
         public List<Option> get() {
           return new ArrayList<Option>() {{
             final SubtitleSelector subtitleSelector = new SubtitleSelector(findSubtitleProviders("movie"));
-            final SubtitleCriteriaProvider subtitleCriteriaProvider = findSubtitleCriteriaProvider(mediaItem.get().getMedia().getClass());  // TODO NPE, getMedia() can be null when not identified (when downloading subs)
+            final SubtitleCriteriaProvider subtitleCriteriaProvider = findSubtitleCriteriaProvider(media.get().getClass());
 
-            subtitleSelector.query(subtitleCriteriaProvider.getCriteria(mediaItem.get()));
+            subtitleSelector.query(subtitleCriteriaProvider.getCriteria(media.get()));
 
             subtitleSelector.subtitleProviderProperty().addListener(new ChangeListener<SubtitleProvider>() {
               @Override
               public void changed(ObservableValue<? extends SubtitleProvider> observableValue, SubtitleProvider oldValue, SubtitleProvider newValue) {
-                subtitleSelector.query(subtitleCriteriaProvider.getCriteria(mediaItem.get()));
+                subtitleSelector.query(subtitleCriteriaProvider.getCriteria(media.get()));
               }
             });
 

@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-public abstract class AbstractMediaGroup implements MediaGroup {
+public abstract class AbstractMediaGroup<T> implements MediaGroup<T> {
   private final String id;
   private final String title;
   private final boolean showTopLevelExpanded;

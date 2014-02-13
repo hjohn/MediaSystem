@@ -115,7 +115,7 @@ public class TmdbPersonCreditsListProvider implements ListProvider<Person, Strin
 
     Media media = context.add(mediaClass, new SourceKey(source, node.get("id").asText()));
 
-    media.setTitle(title);
+    media.externalTitle.set(title);
 
     Source<byte[]> largestImageSource = tmdb.createSource(tmdb.createImageURL(node.path("poster_path").getTextValue(), "original"));  // This shouldn't be slow, so safe to run on Update thread
 

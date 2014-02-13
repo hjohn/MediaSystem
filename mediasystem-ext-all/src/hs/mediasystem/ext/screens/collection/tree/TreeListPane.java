@@ -151,7 +151,7 @@ public class TreeListPane extends BorderPane {
         if(oldLabel != null) {
           oldLabel.setText(((MediaNodeTreeItem)oldValue.getUserData()).getValue().getShortTitle());
         }
-        label.setText(((MediaNodeTreeItem)value.getUserData()).getValue().getMedia().title.get());
+        label.setText(((MediaNodeTreeItem)value.getUserData()).getValue().media.get().title.get());
 
         refilter();
       }

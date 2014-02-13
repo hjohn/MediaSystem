@@ -1,6 +1,6 @@
 package hs.mediasystem.screens.playback;
 
-import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.player.AudioTrack;
 import hs.mediasystem.framework.player.Subtitle;
 import hs.mediasystem.util.GridPaneUtil;
@@ -35,8 +35,8 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 public class PlaybackInfoBorders extends StackPane {
-  private final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
-  public ObjectProperty<MediaItem> mediaItemProperty() { return mediaItem; }
+  private final ObjectProperty<Media> media = new SimpleObjectProperty<>();
+  public ObjectProperty<Media> mediaProperty() { return media; }
 
   private final StringProperty formattedTime = new SimpleStringProperty();
 

@@ -7,6 +7,7 @@ import hs.mediasystem.entity.SourceKey;
 import hs.mediasystem.framework.EpisodeScanner;
 import hs.mediasystem.framework.FileEntitySource;
 import hs.mediasystem.framework.Id;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.ScanException;
@@ -32,7 +33,7 @@ public class MoviesMediaTree implements MediaRoot {
   private final EntityContext entityContext;
   private final FileEntitySource fileEntitySource;
 
-  private List<MediaItem> children;
+  private List<Movie> children;
 
   @Inject
   public MoviesMediaTree(FileEntitySource fileEntitySource, EntityContext entityContext, SettingsStore settingsStore) {
@@ -45,7 +46,7 @@ public class MoviesMediaTree implements MediaRoot {
   }
 
   @Override
-  public List<? extends MediaItem> getItems() {
+  public List<? extends Media> getItems() {
     if(children == null) {
       children = new ArrayList<>();
 
@@ -54,19 +55,24 @@ public class MoviesMediaTree implements MediaRoot {
           List<LocalInfo> scanResults = new EpisodeScanner(new MovieDecoder(), 1).scan(root);
 
           for(final LocalInfo localInfo : scanResults) {
-            MediaItem mediaItem = entityContext.add(MediaItem.class, new Supplier<MediaItem>() {
+            Movie movie = entityContext.add(Movie.class, new Supplier<Movie>() {
               @Override
-              public MediaItem get() {
-                return new MediaItem(localInfo.getUri(), null, localInfo.getTitle(), localInfo.getEpisode() == null ? null : "" + localInfo.getEpisode(), localInfo.getSubtitle(), Movie.class);
+              public Movie get() {
+                Movie movie = new Movie(new MediaItem(localInfo.getUri()));
+
+                movie.localTitle.set(localInfo.getTitle());
+                movie.sequence.set(localInfo.getEpisode() == null ? null : localInfo.getEpisode());
+                movie.subtitle.set(localInfo.getSubtitle());
+                movie.imdbNumber.set(localInfo.getCode());
+                movie.localReleaseYear.set(localInfo.getReleaseYear() == null ? null : localInfo.getReleaseYear().toString());
+
+                return movie;
               }
             }, new SourceKey(fileEntitySource, localInfo.getUri()));
 
-            mediaItem.properties.put("releaseYear", localInfo.getReleaseYear());
-            mediaItem.properties.put("imdbNumber", localInfo.getCode());
-
             // TODO think about pre-loading full items...
 
-            children.add(mediaItem);
+            children.add(movie);
           }
         }
         catch(ScanException e) {

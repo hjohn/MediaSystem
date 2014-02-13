@@ -1,13 +1,12 @@
 package hs.mediasystem.framework;
 
-
 import java.util.Comparator;
 
-public class StandardTitleComparator implements Comparator<MediaItem> {
-  public static final Comparator<MediaItem> INSTANCE = new StandardTitleComparator();
+public class StandardTitleComparator implements Comparator<Media> {
+  public static final Comparator<Media> INSTANCE = new StandardTitleComparator();
 
   @Override
-  public int compare(MediaItem o1, MediaItem o2) {
-    return o1.getTitle().compareTo(o2.getTitle());
+  public int compare(Media o1, Media o2) {
+    return o1.localTitle.get().compareTo(o2.localTitle.get());
   }
 }

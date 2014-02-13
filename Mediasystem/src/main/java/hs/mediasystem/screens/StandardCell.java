@@ -10,7 +10,6 @@ public class StandardCell extends DuoLineCell implements MediaNodeCell {
   public void attach(MediaNode mediaNode) {
     binder.bind(titleProperty(), MapBindings.selectString(mediaNode.media, "title"));
     binder.bind(subtitleProperty(), MapBindings.selectString(mediaNode.media, "subtitle"));
-    binder.bind(extraInfoProperty(), MediaItemFormatter.releaseYearBinding(mediaNode));
 
     collectionSizeProperty().set(mediaNode.getChildren().size());
 

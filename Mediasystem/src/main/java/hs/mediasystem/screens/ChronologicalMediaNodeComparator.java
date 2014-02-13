@@ -1,6 +1,6 @@
 package hs.mediasystem.screens;
 
-import hs.mediasystem.framework.ChronologicalMediaItemComparator;
+import hs.mediasystem.framework.ChronologicalMediaComparator;
 
 import java.util.Comparator;
 
@@ -9,6 +9,6 @@ public class ChronologicalMediaNodeComparator implements Comparator<MediaNode> {
 
   @Override
   public int compare(MediaNode o1, MediaNode o2) {
-    return ChronologicalMediaItemComparator.INSTANCE.compare(o1.getMediaItem(), o2.getMediaItem());
+    return ChronologicalMediaComparator.INSTANCE.compare(o1.getMedia(), o2.getMedia());
   }
 }

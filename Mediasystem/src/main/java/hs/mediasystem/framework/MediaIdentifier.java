@@ -1,10 +1,10 @@
 package hs.mediasystem.framework;
 
-public abstract class MediaItemIdentifier {
+public abstract class MediaIdentifier<T> {
   private final String source;
   private final String mediaType;
 
-  public MediaItemIdentifier(String source, String mediaType) {
+  public MediaIdentifier(String source, String mediaType) {
     this.source = source;
     this.mediaType = mediaType;
   }
@@ -17,5 +17,5 @@ public abstract class MediaItemIdentifier {
     return mediaType;
   }
 
-  public abstract Identifier identify(MediaItem mediaItem);
+  public abstract Identifier identify(T media);
 }

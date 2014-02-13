@@ -7,16 +7,14 @@ import javax.inject.Named;
 
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 
 @Named
 public class EpisodeSubtitleCriteriaProvider implements SubtitleCriteriaProvider {
 
   @Override
-  public Map<String, Object> getCriteria(MediaItem mediaItem) {
-    Media media = mediaItem.getMedia();
-    MediaData mediaData = mediaItem.mediaData.get();
+  public Map<String, Object> getCriteria(Media media) {
+    MediaData mediaData = media.getMediaItem().mediaData.get();
 
     Map<String, Object> criteria = new HashMap<>();
 

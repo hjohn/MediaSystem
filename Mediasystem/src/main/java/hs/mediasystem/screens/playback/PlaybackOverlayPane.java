@@ -1,7 +1,7 @@
 package hs.mediasystem.screens.playback;
 
 import hs.mediasystem.beans.AsyncImageProperty;
-import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
@@ -52,7 +52,7 @@ public class PlaybackOverlayPane extends StackPane {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
 
-  public final ObjectProperty<MediaItem> mediaItem = new SimpleObjectProperty<>();
+  public final ObjectProperty<Media> media = new SimpleObjectProperty<>();
   public final ObjectProperty<Player> player = new SimpleObjectProperty<>();
   public final BooleanProperty overlayVisible = new SimpleBooleanProperty(true);
 
@@ -65,7 +65,7 @@ public class PlaybackOverlayPane extends StackPane {
 
   private final GridPane detailsOverlay = GridPaneUtil.create(new double[] {5, 20, 5, 65, 5}, new double[] {45, 50, 5});
 
-  private final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(mediaItem, "media", "image");
+  private final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(media, "image");
   private final AsyncImageProperty poster = new AsyncImageProperty();
 
   private final PlaybackInfoBorders borders = new PlaybackInfoBorders(playerBindings);
@@ -124,7 +124,7 @@ public class PlaybackOverlayPane extends StackPane {
 
     setFocusTraversable(true);
 
-    borders.mediaItemProperty().bind(mediaItem);
+    borders.mediaProperty().bind(media);
 
     detailsOverlay.setId("video-overlay");
     detailsOverlay.add(new ScaledImageView() {{
@@ -143,9 +143,9 @@ public class PlaybackOverlayPane extends StackPane {
       setId("video-overlay_info");
       setBottom(new HBox() {{
         getChildren().add(new VBox() {{
-          final StringBinding serieName = MapBindings.selectString(mediaItem, "serieName");
-          final StringBinding title = MapBindings.selectString(mediaItem, "title");
-          final StringBinding subtitle = MapBindings.selectString(mediaItem, "subtitle");
+          final StringBinding serieName = MapBindings.selectString(media, "serie", "title");
+          final StringBinding title = MapBindings.selectString(media, "title");
+          final StringBinding subtitle = MapBindings.selectString(media, "subtitle");
 
           HBox.setHgrow(this, Priority.ALWAYS);
           getChildren().add(new Label() {{

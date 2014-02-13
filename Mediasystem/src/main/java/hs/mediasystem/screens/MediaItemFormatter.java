@@ -18,28 +18,6 @@ public class MediaItemFormatter {
   private static final ThreadSafeDateFormat DATE_FORMAT = new ThreadSafeDateFormat(DateFormat.getDateInstance(DateFormat.MEDIUM));
   private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
 
-  public static StringBinding releaseYearBinding(final MediaNode node) {
-    return new StringBinding() {
-      final ObjectBinding<LocalDate> selectReleaseDate = MapBindings.select(node.media, "releaseDate");
-      final ObjectBinding<Integer> selectReleaseYear = MapBindings.select(node.properties, "releaseYear");
-
-      {
-        bind(selectReleaseDate, selectReleaseYear);
-      }
-
-      @Override
-      protected String computeValue() {
-        String releaseTime = selectReleaseDate.get() == null ? null : String.format("%tY", selectReleaseDate.get());
-
-        if(releaseTime == null) {
-          releaseTime = selectReleaseYear.get() == null ? "" : "" + selectReleaseYear.get();
-        }
-
-        return releaseTime;
-      }
-    };
-  }
-
   public static StringBinding releaseTimeBinding(final ObservableValue<Media> media) {
     return new StringBinding() {
       final ObjectBinding<LocalDate> selectReleaseDate = MapBindings.select(media, "releaseDate");

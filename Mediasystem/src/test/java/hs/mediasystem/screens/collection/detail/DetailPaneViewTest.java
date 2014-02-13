@@ -4,7 +4,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import hs.mediasystem.entity.Movie;
+import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.MediaNode;
@@ -49,13 +49,15 @@ public class DetailPaneViewTest {
 
   @Test
   public void shouldUpdateMediaAfterIdentification() {
-    MediaItem mediaItem = new MediaItem("", "Some Title", Movie.class);
+    Media media = new Media(new MediaItem("")) {{
+      localTitle.set("Some Title");
+    }};
 
     /*
      * Check if setting the content results in a new layout being created:
      */
 
-    view.content.set(new MediaNode(mediaItem));
+    view.content.set(new MediaNode(media));
 
     verify(layout, times(1)).createView(any(DetailPanePresentation.class));
   }

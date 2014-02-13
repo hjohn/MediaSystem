@@ -7,7 +7,6 @@ import hs.mediasystem.MediaRootType;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
-import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.SettingUpdater;
 import hs.mediasystem.framework.SettingsStore;
@@ -88,12 +87,12 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
   /**
    * The current active group set.
    */
-  public final ObjectProperty<MediaGroup> groupSet = new SimpleObjectProperty<>();
+  public final ObjectProperty<MediaGroup<?>> groupSet = new SimpleObjectProperty<>();
 
   /**
    * All available group sets that are available to choose from.
    */
-  public final ObservableList<MediaGroup> availableGroupSets = FXCollections.observableArrayList();
+  public final ObservableList<MediaGroup<?>> availableGroupSets = FXCollections.observableArrayList();
 
   /**
    * The filter to apply to the collection.
@@ -111,7 +110,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
      */
 
     SettingUpdater<UserLayout<MediaRoot, CollectionSelectorPresentation>> userLayoutSettingUpdater = new SettingUpdater<>(settingsStore, new UserLayoutStringConverter());
-    SettingUpdater<MediaGroup> mediaGroupSettingUpdater = new SettingUpdater<>(settingsStore, new MediaGroupStringConverter(availableGroupSets));
+    SettingUpdater<MediaGroup<?>> mediaGroupSettingUpdater = new SettingUpdater<>(settingsStore, new MediaGroupStringConverter(availableGroupSets));
 
     layout.addListener(userLayoutSettingUpdater);
     groupSet.addListener(mediaGroupSettingUpdater);
@@ -139,7 +138,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
          * Update available group sets and sort them.
          */
 
-        List<MediaGroup> mediaGroups = new ArrayList<>(injector.getInstances(MediaGroup.class, AnnotationDescriptor.describe(MediaRootType.class, new Value("value", current.getMediaRoot().getClass()))));
+        List<MediaGroup<?>> mediaGroups = new ArrayList<>(injector.<MediaGroup<?>>getInstances(MediaGroup.class, AnnotationDescriptor.describe(MediaRootType.class, new Value("value", current.getMediaRoot().getClass()))));
 
         if(mediaGroups.isEmpty()) {
 
@@ -147,14 +146,14 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
            * Provide a default if none are found.
            */
 
-          mediaGroups.add(new AbstractMediaGroup("alpha", "Alphabetically", false) {
+          mediaGroups.add(new AbstractMediaGroup<Media>("alpha", "Alphabetically", false) {
             @Override
-            public List<MediaNode> getMediaNodes(MediaRoot mediaRoot, List<? extends MediaItem> mediaItems) {
-              Collections.sort(mediaItems, StandardTitleComparator.INSTANCE);
+            public List<MediaNode> getMediaNodes(MediaRoot mediaRoot, List<? extends Media> items) {
+              Collections.sort(items, StandardTitleComparator.INSTANCE);
               List<MediaNode> nodes = new ArrayList<>();
 
-              for(MediaItem mediaItem : mediaItems) {
-                nodes.add(new MediaNode(mediaItem));
+              for(Media item : items) {
+                nodes.add(new MediaNode(item));
               }
 
               return nodes;
@@ -162,9 +161,9 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
           });
         }
 
-        Collections.sort(mediaGroups, new Comparator<MediaGroup>() {
+        Collections.sort(mediaGroups, new Comparator<MediaGroup<?>>() {
           @Override
-          public int compare(MediaGroup o1, MediaGroup o2) {
+          public int compare(MediaGroup<?> o1, MediaGroup<?> o2) {
             return o1.getTitle().compareTo(o2.getTitle());
           }
         });
@@ -181,7 +180,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
          * Restore the last selected MediaGroup for this MediaRoot.
          */
 
-        MediaGroup selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSets.get(0));
+        MediaGroup<?> selectedMediaGroup = mediaGroupSettingUpdater.getStoredValue(availableGroupSets.get(0));
 
         groupSet.set(selectedMediaGroup);
 
@@ -225,18 +224,20 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
   }
 
   private void createMediaNodes(@SuppressWarnings("unused") Observable observable) {
-    expandTopLevelWrapper.set(groupSet.get().showTopLevelExpanded());
+    @SuppressWarnings("unchecked")
+    MediaGroup<Media> mediaGroup = (MediaGroup<Media>)groupSet.get();
+    expandTopLevelWrapper.set(mediaGroup.showTopLevelExpanded());
 
-    List<MediaItem> filteredItems = new ArrayList<>();
+    List<Media> filteredItems = new ArrayList<>();
     InclusionFilter inclusionFilter = this.inclusionFilter.get();
 
-    for(MediaItem mediaItem : mediaRoot.get().getItems()) {
-      if(inclusionFilter == null || inclusionFilter.test(mediaItem)) {
-        filteredItems.add(mediaItem);
+    for(Media media : mediaRoot.get().getItems()) {
+      if(inclusionFilter == null || inclusionFilter.test(media)) {
+        filteredItems.add(media);
       }
     }
 
-    mediaNodesWrapper.setAll(groupSet.get().getMediaNodes(mediaRoot.get(), filteredItems));
+    mediaNodesWrapper.setAll(mediaGroup.getMediaNodes(mediaRoot.get(), filteredItems));
   }
 
   /**
@@ -244,11 +245,11 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
    * a drill down or playback depending on the type of node.
    */
   public void handleMediaNodeSelectEvent(MediaNodeEvent event) {
-    if(event.getMediaNode().getMediaItem() instanceof MediaRoot) {
-      Event.fireEvent(event.getTarget(), new LocationChangeEvent(new CollectionLocation((MediaRoot)event.getMediaNode().getMediaItem())));
+    if(event.getMediaNode().getMedia() instanceof MediaRoot) {
+      Event.fireEvent(event.getTarget(), new LocationChangeEvent(new CollectionLocation((MediaRoot)event.getMediaNode().getMedia())));
     }
     else {
-      Event.fireEvent(event.getTarget(), new LocationChangeEvent(new PlaybackLocation(null, event.getMediaNode().getMediaItem(), 0)));
+      Event.fireEvent(event.getTarget(), new LocationChangeEvent(new PlaybackLocation(null, event.getMediaNode().getMedia(), 0)));
     }
     event.consume();
   }
@@ -285,16 +286,16 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
   /**
    * Converter for storing the MediaGroup as a Setting
    */
-  class MediaGroupStringConverter extends StringConverter<MediaGroup> {
-    private final ObservableList<MediaGroup> availableGroupSets;
+  class MediaGroupStringConverter extends StringConverter<MediaGroup<?>> {
+    private final ObservableList<MediaGroup<?>> availableGroupSets;
 
-    public MediaGroupStringConverter(ObservableList<MediaGroup> availableGroupSets) {
+    public MediaGroupStringConverter(ObservableList<MediaGroup<?>> availableGroupSets) {
       this.availableGroupSets = availableGroupSets;
     }
 
     @Override
-    public MediaGroup fromString(String id) {
-      for(MediaGroup mediaGroup : availableGroupSets) {
+    public MediaGroup<?> fromString(String id) {
+      for(MediaGroup<?> mediaGroup : availableGroupSets) {
         if(mediaGroup.getId().equals(id)) {
           return mediaGroup;
         }
@@ -304,7 +305,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
     }
 
     @Override
-    public String toString(MediaGroup mediaGroup) {
+    public String toString(MediaGroup<?> mediaGroup) {
       return mediaGroup.getId();
     }
   }
@@ -330,7 +331,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
     }
   }
 
-  public static class InclusionFilter implements Predicate<MediaItem> {
+  public static class InclusionFilter implements Predicate<Media> {
     private final Integer afterYear;
     private final Integer beforeYear;
     private final boolean includeViewed;
@@ -366,9 +367,9 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
     }
 
     @Override
-    public boolean test(MediaItem mediaItem) {
+    public boolean test(Media media) {
       if(!includeViewed || !includeNotViewed) {
-        MediaData mediaData = mediaItem.mediaData.get();
+        MediaData mediaData = media.getMediaItem().mediaData.get();
 
         if(mediaData == null) {
 
@@ -389,9 +390,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
       }
 
       if(afterYear != null || beforeYear != null) {
-        Media media = mediaItem.media.get();
-
-        if(media == null || media.releaseDate.get() == null) {
+        if(media.releaseDate.get() == null) {
 
           /*
            * Asked to filter on Year, but Year is unknown.
@@ -410,9 +409,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
       }
 
       if(genres != null && !genres.isEmpty()) {
-        Media media = mediaItem.media.get();
-
-        if(media == null || media.genres.get() == null) {
+        if(media.genres.get() == null) {
 
           /*
            * Asked to filter on Genre, but Genres are unknown.
