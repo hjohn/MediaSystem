@@ -1,7 +1,6 @@
 package hs.mediasystem.framework;
 
 import java.util.List;
-import java.util.Map;
 
 public interface MediaRoot {
 
@@ -15,5 +14,4 @@ public interface MediaRoot {
   String getRootName();
   List<? extends Media> getItems();
   MediaRoot getParent();
-  Map<String, Object> getMediaProperties();
 }

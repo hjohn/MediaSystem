@@ -16,9 +16,7 @@ import hs.mediasystem.framework.MediaRoot;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableList;
@@ -101,10 +99,5 @@ public class Serie extends Media implements MediaRoot {
   @Override
   public MediaRoot getParent() {
     return mediaRoot;
-  }
-  
-  @Override
-  public Map<String, Object> getMediaProperties() {
-    return new HashMap<>();
   }
 }

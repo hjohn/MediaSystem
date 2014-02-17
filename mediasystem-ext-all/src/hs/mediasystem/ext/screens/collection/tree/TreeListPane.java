@@ -1,15 +1,24 @@
 package hs.mediasystem.ext.screens.collection.tree;
 
+import hs.mediasystem.framework.descriptors.Descriptor;
+import hs.mediasystem.framework.descriptors.DescriptorSet;
+import hs.mediasystem.framework.descriptors.DescriptorSet.Attribute;
+import hs.mediasystem.framework.descriptors.EntityDescriptors;
+import hs.mediasystem.framework.descriptors.EntityDescriptors.TextType;
+import hs.mediasystem.screens.DuoLineCell;
 import hs.mediasystem.screens.Filter;
 import hs.mediasystem.screens.MediaNode;
-import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.MediaNodeEvent;
-import hs.mediasystem.screens.ServiceMediaNodeCell;
 import hs.mediasystem.util.Events;
+import hs.mediasystem.util.MapBindings;
+import hs.mediasystem.util.WeakBinder;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -18,6 +27,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -36,11 +46,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
 import javafx.util.Callback;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 public class TreeListPane extends BorderPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
@@ -59,8 +67,6 @@ public class TreeListPane extends BorderPane {
   private final Filter filter = new Filter() {{
     getStyleClass().add("tabs");
   }};
-
-  private final Provider<Set<MediaNodeCellProvider>> mediaNodeCellsProvider;
 
   private final InvalidationListener invalidateTreeListener = new InvalidationListener() {
     @Override
@@ -82,9 +88,7 @@ public class TreeListPane extends BorderPane {
   private boolean treeValid = true;
 
   @Inject
-  public TreeListPane(Provider<Set<MediaNodeCellProvider>> mediaNodeCellsProvider) {
-    this.mediaNodeCellsProvider = mediaNodeCellsProvider;
-
+  public TreeListPane() {
     focusedMediaNode.addListener(new ChangeListener<MediaNode>() {
       @Override
       public void changed(ObservableValue<? extends MediaNode> observable, MediaNode old, MediaNode current) {
@@ -262,23 +266,94 @@ public class TreeListPane extends BorderPane {
   }
 
   private final class MediaItemTreeCell extends TreeCell<MediaNode> {
-    private final ServiceMediaNodeCell mediaNodeCell = new ServiceMediaNodeCell(mediaNodeCellsProvider.get());
+    private final DuoLineCell duoLineCell = new DuoLineCell();
+    private final WeakBinder binder = new WeakBinder();
+    private final StringProperty[] bindTargets = {duoLineCell.titleProperty(), duoLineCell.extraInfoProperty()};
 
     @Override
     protected void updateItem(final MediaNode mediaNode, boolean empty) {
       super.updateItem(mediaNode, empty);
 
-      mediaNodeCell.configureGraphic(mediaNode);
+      binder.unbindAll();
 
-      Region node = mediaNodeCell.getGraphic();
-
-      if(node != null) {
-        double maxWidth = treeView.getWidth() - 35;
-        node.setMaxWidth(maxWidth);  // WORKAROUND for being unable to restrict cells to the width of the view
-        node.setPrefWidth(maxWidth);
+      if(empty) {
+        setGraphic(null);
+        return;
       }
 
-      setGraphic(node);
+      EntityDescriptors mediaProperties = mediaNode.getMedia().getEntityDescriptors();
+
+      DescriptorSet set = mediaProperties == null ? null : mediaProperties.getDescriptorSets().stream().filter(p -> p.getAttributes().contains(Attribute.PREFERRED)).findFirst().orElse(null);
+
+      if(mediaProperties == null || set == null) {
+        binder.bind(duoLineCell.titleProperty(), mediaNode.media.get().title);
+        duoLineCell.extraInfoProperty().set("");
+        duoLineCell.subtitleProperty().set("");
+        duoLineCell.viewedProperty().set(false);
+        duoLineCell.ratingProperty().set(0);
+      }
+      else {
+
+        /*
+         * Figure out which information is redundant:
+         */
+
+        Set<Descriptor> redundantProperties = new HashSet<>();
+        TreeItem<MediaNode> treeItem = getTreeItem().getParent();
+
+        while(treeItem != null) {
+          EntityDescriptors paretMediaProperties = treeItem.getValue().getMedia().getEntityDescriptors();
+
+          if(paretMediaProperties != null) {
+            for(Descriptor descriptor : paretMediaProperties.getDescriptors()) {
+              redundantProperties.add(descriptor);
+              redundantProperties.addAll(descriptor.getElements());
+            }
+          }
+
+          treeItem = treeItem.getParent();
+        }
+
+        /*
+         * Set-up the bindings with relevant information:
+         */
+
+        int target = 0;
+
+        for(Descriptor property : set.getDescriptors()) {
+          if(property.getType() instanceof TextType) {
+            binder.bind(bindTargets[target++], MapBindings.select(mediaNode.media, property.getName()));
+            redundantProperties.add(property);
+          }
+        }
+
+        List<Descriptor> properties = mediaProperties.getDescriptors().stream()
+          .filter(p -> !redundantProperties.contains(p) && Collections.disjoint(redundantProperties, p.getElements()))
+          .filter(p -> p.getType() instanceof TextType)
+          .sorted((a, b) -> Double.compare(b.getUniqueness(), a.getUniqueness()))
+          .collect(Collectors.toList());
+
+        for(Descriptor property : properties) {
+          if(target >= bindTargets.length) {
+            break;
+          }
+
+          binder.bind(bindTargets[target++], MapBindings.select(mediaNode.media, property.getName()));
+        }
+
+        binder.bind(duoLineCell.subtitleProperty(), MapBindings.selectString(mediaNode.media, "subtitle"));
+        binder.bind(duoLineCell.viewedProperty(), MapBindings.selectBoolean(mediaNode.mediaData, "viewed"));
+        binder.bind(duoLineCell.ratingProperty(), MapBindings.selectDouble(mediaNode.media, "rating").divide(10));
+      }
+
+      duoLineCell.collectionSizeProperty().set(mediaNode.getChildren().size());
+
+      double maxWidth = treeView.getWidth() - 35;
+
+      duoLineCell.setMaxWidth(maxWidth);  // WORKAROUND for being unable to restrict cells to the width of the view
+      duoLineCell.setPrefWidth(maxWidth);
+
+      setGraphic(duoLineCell);
     }
   }
 

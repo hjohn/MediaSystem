@@ -5,10 +5,7 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaRoot;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Named;
 
@@ -74,12 +71,5 @@ public class YouTubeMediaTree implements MediaRoot {
   @Override
   public MediaRoot getParent() {
     return null;
-  }
-
-  private static final Map<String, Object> MEDIA_PROPERTIES = new HashMap<>();
-
-  @Override
-  public Map<String, Object> getMediaProperties() {
-    return Collections.unmodifiableMap(MEDIA_PROPERTIES);
   }
 }

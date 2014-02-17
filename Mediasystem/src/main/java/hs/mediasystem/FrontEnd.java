@@ -16,7 +16,6 @@ import hs.mediasystem.entity.EntityEnricher;
 import hs.mediasystem.entity.EntityListProvider;
 import hs.mediasystem.entity.EntityPersister;
 import hs.mediasystem.framework.DatabaseCache;
-import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaDataPersister;
 import hs.mediasystem.framework.MediaEnricher;
 import hs.mediasystem.framework.SettingsStore;
@@ -24,12 +23,9 @@ import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.framework.player.PlayerFactory;
 import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.screens.AbstractSetting;
-import hs.mediasystem.screens.MediaNodeCell;
-import hs.mediasystem.screens.MediaNodeCellProvider;
 import hs.mediasystem.screens.MessagePaneTaskExecutor;
 import hs.mediasystem.screens.ProgramController;
 import hs.mediasystem.screens.SettingGroup;
-import hs.mediasystem.screens.StandardCell;
 import hs.mediasystem.screens.collection.CollectionLayout;
 import hs.mediasystem.screens.collection.detail.MediaLayout;
 import hs.mediasystem.screens.collection.detail.PersonLayout;
@@ -195,23 +191,6 @@ public class FrontEnd extends Application {
 
     injector.registerInstance(new MediaLayout());
     injector.registerInstance(new PersonLayout());
-
-    injector.registerInstance(new MediaNodeCellProvider() {
-      @Override
-      public MediaNodeCell get() {
-        return new StandardCell();
-      }
-
-      @Override
-      public MediaNodeCellProvider.Type getType() {
-        return MediaNodeCellProvider.Type.HORIZONTAL;
-      }
-
-      @Override
-      public Class<?> getMediaType() {
-        return Media.class;
-      }
-    });
 
     injector.registerInstance(new SettingGroup("video", null, "Video", 0));
 

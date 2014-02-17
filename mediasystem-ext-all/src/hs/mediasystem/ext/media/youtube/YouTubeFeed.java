@@ -18,10 +18,7 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -146,18 +143,5 @@ public class YouTubeFeed extends Media implements MediaRoot {
   @Override
   public MediaRoot getParent() {
     return mediaRoot;
-  }
-
-  private static final Map<String, Object> MEDIA_PROPERTIES = new HashMap<>();
-
-  static {
-    MEDIA_PROPERTIES.put("image.poster", null);
-    MEDIA_PROPERTIES.put("image.poster.aspectRatios", new double[] {16.0 / 9.0, 4.0 / 3.0});
-    MEDIA_PROPERTIES.put("image.poster.hasIdentifyingTitle", false);
-  }
-
-  @Override
-  public Map<String, Object> getMediaProperties() {
-    return Collections.unmodifiableMap(MEDIA_PROPERTIES);
   }
 }
