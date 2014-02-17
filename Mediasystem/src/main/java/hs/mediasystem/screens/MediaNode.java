@@ -2,6 +2,7 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
+import hs.mediasystem.framework.descriptors.EntityDescriptors;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,8 +36,8 @@ public class MediaNode {
     this.children = new ArrayList<>();
   }
 
-  public MediaNode(String id, String title, String shortTitle, boolean isLeaf, List<MediaNode> children) {
-    Media media = new SpecialItem(title);
+  public MediaNode(String id, String title, String shortTitle, boolean isLeaf, List<MediaNode> children, EntityDescriptors entityDescriptors) {
+    Media media = new SpecialItem(entityDescriptors, title);
 
     this.id = id;
     this.media = new SimpleObjectProperty<>(media);
@@ -46,8 +47,16 @@ public class MediaNode {
     this.children = children == null ? new ArrayList<>() : new ArrayList<>(children);
   }
 
+  public MediaNode(String id, String title, String shortTitle, boolean isLeaf, List<MediaNode> children) {
+    this(id, title, shortTitle, isLeaf, children, null);
+  }
+
+  public MediaNode(String id, String title, String shortTitle, boolean isLeaf, EntityDescriptors entityDescriptors) {
+    this(id, title, shortTitle, isLeaf, null, entityDescriptors);
+  }
+
   public MediaNode(String id, String title, String shortTitle, boolean isLeaf) {
-    this(id, title, shortTitle, isLeaf, null);
+    this(id, title, shortTitle, isLeaf, null, null);
   }
 
   public String getId() {
@@ -107,7 +116,9 @@ public class MediaNode {
   }
 
   public static class SpecialItem extends Media {
-    public SpecialItem(String rootName) {
+    public SpecialItem(EntityDescriptors entityDescriptors, String rootName) {
+      super(entityDescriptors);
+
       localTitle.set(rootName);
     }
   }

@@ -7,6 +7,11 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.SourceImageHandle;
+import hs.mediasystem.framework.descriptors.AbstractEntityDescriptors;
+import hs.mediasystem.framework.descriptors.Descriptor;
+import hs.mediasystem.framework.descriptors.DescriptorSet;
+import hs.mediasystem.framework.descriptors.DescriptorSet.Attribute;
+import hs.mediasystem.framework.descriptors.EntityDescriptors;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gdata.client.youtube.YouTubeService;
 import com.google.gdata.data.media.mediarss.MediaThumbnail;
 import com.google.gdata.data.youtube.VideoEntry;
@@ -28,6 +35,18 @@ import com.google.gdata.util.ServiceException;
 
 public class YouTubeFeed extends Media implements MediaRoot {
   private static final Id ID = new Id("youTubeFeed");
+  private static final EntityDescriptors DESCRIPTORS = new AbstractEntityDescriptors() {{
+    initializeDescriptors(
+      new Descriptor("title", 0.99999, new TextType(TextType.SubType.STRING, TextType.Size.TITLE))
+    );
+
+    initializeSets(
+      new DescriptorSet(
+        ImmutableList.of(getDescriptor("title")),
+        ImmutableSet.of(Attribute.SORTABLE, Attribute.PREFERRED, Attribute.CONCISE)
+      )
+    );
+  }};
 
   private final Feed feed;
   private final YouTubeMediaTree mediaRoot;
@@ -35,7 +54,7 @@ public class YouTubeFeed extends Media implements MediaRoot {
   private List<Media> children;
 
   public YouTubeFeed(YouTubeMediaTree mediaTree, String uri, Feed feed) {
-    super(new MediaItem(uri));
+    super(DESCRIPTORS, new MediaItem(uri));
 
     this.externalTitle.set(feed.getName());
     this.mediaRoot = mediaTree;
@@ -99,8 +118,21 @@ public class YouTubeFeed extends Media implements MediaRoot {
   }
 
   public static class YouTubeVideo extends Media {
+    private static final EntityDescriptors DESCRIPTORS = new AbstractEntityDescriptors() {{
+      initializeDescriptors(
+        new Descriptor("title", 0.99999, new TextType(TextType.SubType.STRING, TextType.Size.TITLE))
+      );
+
+      initializeSets(
+        new DescriptorSet(
+          ImmutableList.of(getDescriptor("title")),
+          ImmutableSet.of(Attribute.SORTABLE, Attribute.PREFERRED, Attribute.CONCISE)
+        )
+      );
+    }};
+
     public YouTubeVideo(String uri, String title) {
-      super(new MediaItem(uri));
+      super(DESCRIPTORS, new MediaItem(uri));
 
       this.externalTitle.set(title);
     }

@@ -1,6 +1,7 @@
 package hs.mediasystem.framework;
 
 import hs.mediasystem.entity.Entity;
+import hs.mediasystem.framework.descriptors.EntityDescriptors;
 import hs.mediasystem.util.ImageHandle;
 
 import java.time.LocalDate;
@@ -35,18 +36,24 @@ public abstract class Media extends Entity {
   public final ObjectProperty<ObservableList<Casting>> castings = list("castings", Casting.class);
   public final ObjectProperty<ObservableList<Identifier>> identifiers = list("identifiers", Identifier.class);
 
+  private final EntityDescriptors entityDescriptors;
   private final MediaItem mediaItem;
 
-  public Media(MediaItem mediaItem) {
+  public Media(EntityDescriptors entityDescriptors, MediaItem mediaItem) {
     this.mediaItem = mediaItem;
+    this.entityDescriptors = entityDescriptors;
 
     this.releaseYear.bind(Bindings.when(releaseDate.isNull()).then(localReleaseYear).otherwise(Bindings.format("%tY", releaseDate)));
     this.title.bind(Bindings.when(externalTitle.isNull()).then(localTitle).otherwise(externalTitle));
     this.titleWithContext.bind(title);
   }
 
-  public Media() {
-    this(null);
+  public Media(EntityDescriptors mediaProperties) {
+    this(mediaProperties, null);
+  }
+
+  public EntityDescriptors getEntityDescriptors() {
+    return entityDescriptors;
   }
 
   /**

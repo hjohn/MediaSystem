@@ -6,6 +6,11 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.SourceImageHandle;
+import hs.mediasystem.framework.descriptors.AbstractEntityDescriptors;
+import hs.mediasystem.framework.descriptors.Descriptor;
+import hs.mediasystem.framework.descriptors.DescriptorSet;
+import hs.mediasystem.framework.descriptors.DescriptorSet.Attribute;
+import hs.mediasystem.framework.descriptors.EntityDescriptors;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,6 +26,9 @@ import javax.inject.Named;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 @Named
 public class NosMediaTree implements MediaRoot {
@@ -102,8 +110,21 @@ public class NosMediaTree implements MediaRoot {
   }
 
   public static class NosItem extends Media {
+    private static final EntityDescriptors DESCRIPTORS = new AbstractEntityDescriptors() {{
+      initializeDescriptors(
+        new Descriptor("title", 0.99999, new TextType(TextType.SubType.STRING, TextType.Size.TITLE))
+      );
+
+      initializeSets(
+        new DescriptorSet(
+          ImmutableList.of(getDescriptor("title")),
+          ImmutableSet.of(Attribute.SORTABLE, Attribute.PREFERRED, Attribute.CONCISE)
+        )
+      );
+    }};
+
     public NosItem(String videoUrl, String title, String meta) {
-      super(new MediaItem(videoUrl));
+      super(DESCRIPTORS, new MediaItem(videoUrl));
 
       this.externalTitle.set(title);
       this.subtitle.set(meta);

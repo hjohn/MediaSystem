@@ -7,6 +7,11 @@ import hs.mediasystem.framework.FileEntitySource;
 import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
+import hs.mediasystem.framework.descriptors.EntityDescriptors;
+import hs.mediasystem.framework.descriptors.AbstractEntityDescriptors;
+import hs.mediasystem.framework.descriptors.Descriptor;
+import hs.mediasystem.framework.descriptors.DescriptorSet;
+import hs.mediasystem.framework.descriptors.DescriptorSet.Attribute;
 import hs.mediasystem.framework.MediaRoot;
 
 import java.nio.file.Paths;
@@ -16,11 +21,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 public class Serie extends Media implements MediaRoot {
+  private static final EntityDescriptors DESCRIPTORS = new AbstractEntityDescriptors() {{
+    Descriptor titleProperty = new Descriptor("title", 0.99999, new TextType(TextType.SubType.STRING, TextType.Size.TITLE));
+
+    initializeDescriptors(
+      titleProperty,
+      new Descriptor("media.image", 0.99999, new ImageType(), titleProperty)
+    );
+
+    initializeSets(
+      new DescriptorSet(
+        ImmutableList.of(getDescriptor("title")),
+        ImmutableSet.of(Attribute.PREFERRED, Attribute.SORTABLE, Attribute.CONCISE)
+      )
+    );
+  }};
+
   private final SeriesMediaTree mediaRoot;
   private final Id id;
   private final FileEntitySource fileEntitySource;
@@ -28,7 +48,7 @@ public class Serie extends Media implements MediaRoot {
   private List<Media> children;
 
   public Serie(SeriesMediaTree mediaTree, MediaItem mediaItem, FileEntitySource fileEntitySource) {
-    super(mediaItem);
+    super(DESCRIPTORS, mediaItem);
 
     this.id = new Id("serie");
     this.mediaRoot = mediaTree;

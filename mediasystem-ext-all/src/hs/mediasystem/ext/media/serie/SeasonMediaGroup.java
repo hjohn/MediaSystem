@@ -1,6 +1,12 @@
 package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.MediaRootType;
+import hs.mediasystem.framework.descriptors.Descriptor;
+import hs.mediasystem.framework.descriptors.EntityDescriptors.TextType.Size;
+import hs.mediasystem.framework.descriptors.EntityDescriptors.TextType.SubType;
+import hs.mediasystem.framework.descriptors.AbstractEntityDescriptors;
+import hs.mediasystem.framework.descriptors.DescriptorSet;
+import hs.mediasystem.framework.descriptors.DescriptorSet.Attribute;
 import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.screens.AbstractMediaGroup;
 import hs.mediasystem.screens.MediaNode;
@@ -10,6 +16,9 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Named;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 @Named @MediaRootType(Serie.class)
 public class SeasonMediaGroup extends AbstractMediaGroup<Episode> {
@@ -41,7 +50,18 @@ public class SeasonMediaGroup extends AbstractMediaGroup<Episode> {
       String seasonName = determineSeasonName(episode);
 
       if(seasonNode == null || !seasonName.equals(previousSeasonName)) {
-        seasonNode = new MediaNode("season[" + seasonName + "]", seasonName, determineShortSeasonName(episode), false);
+        seasonNode = new MediaNode("season[" + seasonName + "]", seasonName, determineShortSeasonName(episode), false, new AbstractEntityDescriptors() {{
+          initializeDescriptors(
+            new Descriptor("seasonName", new TextType(SubType.STRING, Size.WORD), Episode.DESCRIPTORS.getDescriptor("season"))
+          );
+
+          initializeSets(
+            new DescriptorSet(
+              ImmutableList.of(getDescriptor("seasonName")),
+              ImmutableSet.of(Attribute.PREFERRED, Attribute.SORTABLE, Attribute.CONCISE)
+            )
+          );
+        }});
 
         nodes.add(seasonNode);
       }
