@@ -112,7 +112,7 @@ public class NosMediaTree implements MediaRoot {
     public NosItem(String videoUrl, String title, String meta) {
       super(DESCRIPTORS, new MediaItem(videoUrl));
 
-      this.externalTitle.set(title);
+      this.initialTitle.set(title);
       this.subtitle.set(meta);
     }
   }

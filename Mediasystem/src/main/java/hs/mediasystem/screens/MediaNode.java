@@ -119,7 +119,7 @@ public class MediaNode {
     public SpecialItem(EntityDescriptors entityDescriptors, String rootName) {
       super(entityDescriptors);
 
-      localTitle.set(rootName);
+      initialTitle.set(rootName);
     }
   }
 }

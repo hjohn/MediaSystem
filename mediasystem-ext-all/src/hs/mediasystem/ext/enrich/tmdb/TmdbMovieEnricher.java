@@ -63,7 +63,7 @@ public class TmdbMovieEnricher implements Enricher<Movie, String> {
     public void run(Task parent) {
       String imdbId = movieInfo.path("imdb_id").getTextValue();
 
-      movie.externalTitle.set(movieInfo.get("title").asText());
+      movie.enrichedTitle.set(movieInfo.get("title").asText());
       movie.description.set(movieInfo.path("overview").getTextValue());
       movie.tagLine.set(movieInfo.path("tagline").getTextValue());
       movie.rating.set(movieInfo.path("vote_average").getDoubleValue());

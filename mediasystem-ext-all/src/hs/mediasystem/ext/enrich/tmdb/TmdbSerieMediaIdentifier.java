@@ -47,7 +47,7 @@ public class TmdbSerieMediaIdentifier extends MediaIdentifier<Serie> {
 
   private SearchResult searchForSerie(Serie serie) {
     synchronized(TheMovieDatabase.class) {
-      String title = serie.localTitle.get();
+      String title = serie.initialTitle.get();
       String subtitle = serie.subtitle.get() == null ? "" : serie.subtitle.get();
       String imdb = serie.imdbNumber.get();
       Integer year = serie.localReleaseYear.get() == null ? null : Integer.parseInt(serie.localReleaseYear.get());

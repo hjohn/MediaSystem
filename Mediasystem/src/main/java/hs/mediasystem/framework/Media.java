@@ -25,8 +25,8 @@ public abstract class Media extends Entity {
   public final StringProperty imdbNumber = stringProperty("imdbNumber");
   public final StringProperty releaseYear = stringProperty("releaseYear");
 
-  public final StringProperty externalTitle = stringProperty("externalTitle");
-  public final StringProperty localTitle = stringProperty("localTitle");
+  public final StringProperty enrichedTitle = stringProperty("enrichedTitle");
+  public final StringProperty initialTitle = stringProperty("initialTitle");
   public final StringProperty localReleaseYear = stringProperty("localReleaseYear");
 
   public final ObjectProperty<ImageHandle> image = object("image");
@@ -44,7 +44,7 @@ public abstract class Media extends Entity {
     this.entityDescriptors = entityDescriptors;
 
     this.releaseYear.bind(Bindings.when(releaseDate.isNull()).then(localReleaseYear).otherwise(Bindings.format("%tY", releaseDate)));
-    this.title.bind(Bindings.when(externalTitle.isNull()).then(localTitle).otherwise(externalTitle));
+    this.title.bind(Bindings.when(enrichedTitle.isNull()).then(initialTitle).otherwise(enrichedTitle));
     this.titleWithContext.bind(title);
   }
 
@@ -67,6 +67,6 @@ public abstract class Media extends Entity {
 
   @Override
   public String toString() {
-    return "Media['" + localTitle.get() + "', mediaItem: " + mediaItem + "]";
+    return "Media['" + initialTitle.get() + "', mediaItem: " + mediaItem + "]";
   }
 }

@@ -7,6 +7,6 @@ public class MovieGroup extends Media {
   public MovieGroup(String title) {
     super(null);
 
-    this.localTitle.set(title);
+    this.initialTitle.set(title);
   }
 }

@@ -55,7 +55,7 @@ public class SeriesMediaTree implements MediaRoot {
               () -> {
                 Serie serie = new Serie(SeriesMediaTree.this, new MediaItem(localInfo.getUri()), fileEntitySource);
 
-                serie.localTitle.set(localInfo.getTitle());
+                serie.initialTitle.set(localInfo.getTitle());
                 serie.subtitle.set(localInfo.getSubtitle());
                 serie.localReleaseYear.set(localInfo.getReleaseYear() == null ? null : localInfo.getReleaseYear().toString());
                 serie.imdbNumber.set(localInfo.getCode());

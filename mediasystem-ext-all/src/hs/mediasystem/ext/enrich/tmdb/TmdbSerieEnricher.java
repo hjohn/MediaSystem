@@ -61,7 +61,7 @@ public class TmdbSerieEnricher implements Enricher<Serie, String> {
 
     @Override
     public void run(Task parent) {
-      serie.externalTitle.set(serieInfo.get("name").asText());
+      serie.enrichedTitle.set(serieInfo.get("name").asText());
       serie.description.set(serieInfo.path("overview").getTextValue());
       serie.rating.set(serieInfo.path("vote_average").getDoubleValue());
       serie.runtime.set(serieInfo.path("episode_run_time").path(0).getIntValue());

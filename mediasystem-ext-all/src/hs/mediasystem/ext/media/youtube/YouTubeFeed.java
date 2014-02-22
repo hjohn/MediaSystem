@@ -53,7 +53,7 @@ public class YouTubeFeed extends Media implements MediaRoot {
   public YouTubeFeed(YouTubeMediaTree mediaTree, String uri, Feed feed) {
     super(DESCRIPTORS, new MediaItem(uri));
 
-    this.externalTitle.set(feed.getName());
+    this.initialTitle.set(feed.getName());
     this.mediaRoot = mediaTree;
     this.feed = feed;
   }
@@ -131,7 +131,7 @@ public class YouTubeFeed extends Media implements MediaRoot {
     public YouTubeVideo(String uri, String title) {
       super(DESCRIPTORS, new MediaItem(uri));
 
-      this.externalTitle.set(title);
+      this.initialTitle.set(title);
     }
   }
 

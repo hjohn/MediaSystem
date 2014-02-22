@@ -7,7 +7,7 @@ public class MovieTitleGroupingComparator implements Comparator<Movie> {
 
   @Override
   public int compare(Movie o1, Movie o2) {
-    int result = o1.localTitle.get().compareTo(o2.localTitle.get());
+    int result = o1.initialTitle.get().compareTo(o2.initialTitle.get());
 
     if(result == 0) {
       Integer s1 = o1.sequence.get() == null ? 0 : o1.sequence.get();

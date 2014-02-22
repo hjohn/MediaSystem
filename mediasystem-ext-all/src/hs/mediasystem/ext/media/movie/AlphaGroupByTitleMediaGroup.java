@@ -32,9 +32,9 @@ public class AlphaGroupByTitleMediaGroup extends AbstractMediaGroup<Movie> {
        * the previous item, otherwise just add it normally.
        */
 
-      if(previousNode != null && movie.localTitle.get().equals(previousNode.media.get().localTitle.get())) {
+      if(previousNode != null && movie.initialTitle.get().equals(previousNode.media.get().initialTitle.get())) {
         if(groupNode == null) {
-          groupNode = new MediaNode("titleGroup[" + movie.localTitle.get() + "]", movie.localTitle.get(), null, false);
+          groupNode = new MediaNode("titleGroup[" + movie.initialTitle.get() + "]", movie.initialTitle.get(), null, false);
 
           nodes.set(nodes.size() - 1, groupNode);
 

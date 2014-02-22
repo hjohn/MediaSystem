@@ -57,7 +57,7 @@ public class MoviesMediaTree implements MediaRoot {
               public Movie get() {
                 Movie movie = new Movie(new MediaItem(localInfo.getUri()));
 
-                movie.localTitle.set(localInfo.getTitle());
+                movie.initialTitle.set(localInfo.getTitle());
                 movie.sequence.set(localInfo.getEpisode() == null ? null : localInfo.getEpisode());
                 movie.subtitle.set(localInfo.getSubtitle());
                 movie.imdbNumber.set(localInfo.getCode());

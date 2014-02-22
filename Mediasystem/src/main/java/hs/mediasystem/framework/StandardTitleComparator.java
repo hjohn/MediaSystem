@@ -7,6 +7,6 @@ public class StandardTitleComparator implements Comparator<Media> {
 
   @Override
   public int compare(Media o1, Media o2) {
-    return o1.localTitle.get().compareTo(o2.localTitle.get());
+    return o1.initialTitle.get().compareTo(o2.initialTitle.get());
   }
 }

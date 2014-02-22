@@ -50,7 +50,7 @@ public class DetailPaneViewTest {
   @Test
   public void shouldUpdateMediaAfterIdentification() {
     Media media = new Media(null, new MediaItem("")) {{
-      localTitle.set("Some Title");
+      initialTitle.set("Some Title");
     }};
 
     /*
