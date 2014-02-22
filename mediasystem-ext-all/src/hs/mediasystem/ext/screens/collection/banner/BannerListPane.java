@@ -223,7 +223,7 @@ public class BannerListPane extends BorderPane {
 
       binder.unbindAll();
 
-      if(empty) {
+      if(empty || mediaNode == null) {
         setGraphic(null);
         return;
       }
