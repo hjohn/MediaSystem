@@ -75,7 +75,7 @@ public class Task implements Runnable {
     }
   }
 
-  public final void addStep(Task task) {
+  private void addStep(Task task) {
     task.parent = this;
     steps.add(task);
   }
