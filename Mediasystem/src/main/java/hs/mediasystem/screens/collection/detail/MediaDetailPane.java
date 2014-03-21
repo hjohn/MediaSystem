@@ -16,6 +16,9 @@ import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;
 import hs.mediasystem.util.SizeFormatter;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.DoubleBinding;
@@ -37,11 +40,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.scene.image.Image;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 public class MediaDetailPane extends DetailPane<Media> {
   protected final ObjectBinding<ImageHandle> posterHandle = MapBindings.select(content, "image");
@@ -115,16 +120,29 @@ public class MediaDetailPane extends DetailPane<Media> {
     add("title-area", 4, createRating());
     add("title-area", 5, createGenresField());
 
-    ScaledImageView image = new ScaledImageView() {{
+    ScaledImageView imageView = new ScaledImageView() {{
       getStyleClass().add("poster-image");
       imageProperty().bind(poster);
       setPreserveRatio(true);
       setSmooth(true);
       setAlignment(Pos.TOP_CENTER);
     }};
-    VBox.setVgrow(image, Priority.ALWAYS);
 
-    add("title-image-area", 1, image);
+    Timeline fadeInTimeline = new Timeline(
+      new KeyFrame(Duration.ZERO, new KeyValue(imageView.opacityProperty(), 0)),
+      new KeyFrame(Duration.seconds(0.3), new KeyValue(imageView.opacityProperty(), 1))
+    );
+
+    imageView.imageProperty().addListener(new ChangeListener<Image>() {
+      @Override
+      public void changed(ObservableValue<? extends Image> observable, Image oldValue, Image newValue) {
+        fadeInTimeline.playFromStart();
+      }
+    });
+
+    VBox.setVgrow(imageView, Priority.ALWAYS);
+
+    add("title-image-area", 1, imageView);
 
     add("description-area", 6, createPlotBlock());
     add("description-area", 7, createMiscelaneousFieldsBlock(createReleaseDateBlock(), createRuntimeBlock()));
