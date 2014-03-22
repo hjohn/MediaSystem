@@ -91,9 +91,16 @@ public class ImageCache {
      */
 
     if(needsCompletion) {
-      Image image = imageSupplier.get();
+      Image image = null;
 
-      futureImage.complete(image);
+      try {
+        image = imageSupplier.get();
+
+        futureImage.complete(image);
+      }
+      catch(Exception e) {
+        futureImage.completeExceptionally(e);
+      }
 
       if(image == null) {
         synchronized(CACHE) {
