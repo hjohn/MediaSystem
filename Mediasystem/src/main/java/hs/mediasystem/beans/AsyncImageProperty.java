@@ -1,14 +1,18 @@
 package hs.mediasystem.beans;
 
+import hs.mediasystem.util.AutoReentrantLock;
 import hs.mediasystem.util.ImageCache;
 import hs.mediasystem.util.ImageHandle;
-import hs.mediasystem.util.Task;
-import hs.mediasystem.util.Task.TaskRunnable;
 import hs.subtitle.DefaultThreadFactory;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -19,10 +23,26 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.image.Image;
 
+/**
+ * Image property that loads the given ImageHandle in the background.<p>
+ *
+ * - When ImageHandle changes, Image is set to null and stays null for
+ *   the settling duration plus the time to load a new Image.
+ * - The background loading process will never set Image to a value that
+ *   does not correspond to the current ImageHandle (when for example it
+ *   was changed again before the loading completed).
+ */
 public class AsyncImageProperty extends SimpleObjectProperty<Image> {
+  private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
   private static final ThreadPoolExecutor SLOW_EXECUTOR = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new DefaultThreadFactory("AsyncImageProperty[Slow]", true));
   private static final ThreadPoolExecutor FAST_EXECUTOR = new ThreadPoolExecutor(3, 3, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new DefaultThreadFactory("AsyncImageProperty[Fast]", true));
-  private static final long NANOS_PER_MS = 1000L * 1000L;
+
+  private static Executor JAVAFX_UPDATE_EXECUTOR = new Executor() {
+    @Override
+    public void execute(Runnable command) {
+      Platform.runLater(command);
+    }
+  };
 
   static {
     SLOW_EXECUTOR.allowCoreThreadTimeOut(true);
@@ -32,17 +52,34 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
   private final ObjectProperty<ImageHandle> imageHandle = new SimpleObjectProperty<>();
   public ObjectProperty<ImageHandle> imageHandleProperty() { return imageHandle; }
 
-  private final long settlingNanos;
+  private final AutoReentrantLock backgroundLoadLock = new AutoReentrantLock();
 
-  private boolean taskQueued;
+  /**
+   * Contains the ImageHandle to load next, or null if the settling time has not expired yet.
+   */
+  private volatile ImageHandle imageHandleToLoad;     // Must hold backgroundLoadLock to access
+  private volatile boolean backgroundLoadInProgress;  // Must hold backgroundLoadLock to access
+
+  private ScheduledFuture<?> futureTaskAfterSettling; // Must be on JavaFX thread to access
 
   public AsyncImageProperty(long settlingMillis) {
-    this.settlingNanos = settlingMillis * NANOS_PER_MS;
-
     imageHandle.addListener(new ChangeListener<ImageHandle>() {
       @Override
       public void changed(ObservableValue<? extends ImageHandle> observable, ImageHandle oldValue, ImageHandle value) {
-        loadImageInBackground(imageHandle.getValue());
+        set(null);
+
+        if(futureTaskAfterSettling != null) {
+          futureTaskAfterSettling.cancel(true);
+          futureTaskAfterSettling = null;
+        }
+
+        if(value != null) {
+          futureTaskAfterSettling = SCHEDULED_EXECUTOR_SERVICE.schedule(
+            () -> setNewImageToLoad(new WeakReference<>(AsyncImageProperty.this), value),
+            settlingMillis,
+            TimeUnit.MILLISECONDS
+          );
+        }
       }
     });
   }
@@ -51,101 +88,89 @@ public class AsyncImageProperty extends SimpleObjectProperty<Image> {
     this(500);
   }
 
-  private void loadImageInBackground(final ImageHandle imageHandle) {
-    set(null);
-
-    synchronized(FAST_EXECUTOR) {
-      if(!taskQueued && imageHandle != null) {
-        taskQueued = true;
-
-        /*
-         * A Task is created here that first determines if the source is fast or slow (which
-         * can take several milliseconds or can even block on a monitor).  The background
-         * loading step is then added to be executed on the fast or slow Executor.
-         */
-
-        Task task = new Task(p -> {
-          Executor chosenExecutor = imageHandle.isFastSource() ? FAST_EXECUTOR : SLOW_EXECUTOR;
-
-          p.addStep(chosenExecutor, new BackgroundLoader(this, imageHandle, System.nanoTime() + settlingNanos));
-        });
-
-        FAST_EXECUTOR.execute(task);
+  private void loadImageInBackgroundIfNeeded() {
+    try(AutoReentrantLock lock = backgroundLoadLock.lock()) {
+      if(!backgroundLoadInProgress && imageHandleToLoad != null) {
+        backgroundLoadInProgress = true;
+        loadImageInBackground(new WeakReference<>(this), imageHandleToLoad);
+        imageHandleToLoad = null;
       }
     }
   }
 
-  private static final class BackgroundLoader implements TaskRunnable {
-    private final ImageHandle imageHandle;
-    private final WeakReference<AsyncImageProperty> asyncImagePropertyReference;
-    private final long loadAfterNanos;
+  /**
+   * Sets a new image to load (typically called after the settling delay expired).<p>
+   *
+   * Declared static so all references to instances must be by weak reference.
+   *
+   * @param propertyRef a weak reference to an instance of this class
+   * @param imageHandle the image to load
+   */
+  private static void setNewImageToLoad(WeakReference<AsyncImageProperty> propertyRef, ImageHandle imageHandle) {
+    AsyncImageProperty property = propertyRef.get();
 
-    BackgroundLoader(AsyncImageProperty asyncImageProperty, ImageHandle imageHandle, long loadAfterNanos) {
-      this.loadAfterNanos = loadAfterNanos;
-      this.asyncImagePropertyReference = new WeakReference<>(asyncImageProperty);
-      this.imageHandle = imageHandle;
-    }
-
-    @Override
-    public void run(Task currentTask) {
-      sleepUntil(loadAfterNanos);
-
-      final AsyncImageProperty asyncImagePropery = asyncImagePropertyReference.get();
-
-      if(asyncImagePropery == null) {
-        return;
+    if(property != null) {
+      try(AutoReentrantLock lock = property.backgroundLoadLock.lock()) {
+        property.imageHandleToLoad = imageHandle;
+        property.loadImageInBackgroundIfNeeded();
       }
+    }
+  }
 
-      try {
-        Image image = null;
+  /**
+   * Triggers the process that loads an image in the background.<p>
+   *
+   * Declared static so all references to instances must be by weak reference.
+   *
+   * @param propertyRef a weak reference to an instance of this class
+   * @param imageHandle the image to load
+   */
+  private static void loadImageInBackground(WeakReference<AsyncImageProperty> propertyRef, ImageHandle imageHandle) {
+    CompletableFuture
+      .supplyAsync(() -> imageHandle.isFastSource() ? FAST_EXECUTOR : SLOW_EXECUTOR, FAST_EXECUTOR)
+      .thenCompose(executor -> CompletableFuture.supplyAsync(() -> getImage(propertyRef, imageHandle), executor))
+      .whenCompleteAsync((image, e) -> {
+        AsyncImageProperty property = propertyRef.get();
 
-        if(imageHandle.equals(asyncImagePropery.imageHandle.get())) {
+        if(property != null) {
           try {
-            image = ImageCache.loadImageUptoMaxSize(imageHandle, 1920, 1200);
-          }
-          catch(Exception e) {
-            System.out.println("[WARN] AsyncImageProperty - Exception while loading " + imageHandle + " in background: " + e);
-            e.printStackTrace(System.out);
-          }
-        }
-
-        final Image finalImage = image;
-
-        Platform.runLater(new Runnable() {
-          @Override
-          public void run() {
-            asyncImagePropery.set(finalImage);
-
-            ImageHandle handle = asyncImagePropery.imageHandle.get();
-
-            if(handle == null || !handle.equals(imageHandle)) {
-              asyncImagePropery.loadImageInBackground(handle);
+            if(e == null && imageHandle.equals(property.imageHandle.get())) {
+              property.set(image);
             }
           }
-        });
-      }
-      finally {
-        synchronized(FAST_EXECUTOR) {
-          asyncImagePropery.taskQueued = false;
+          finally {
+            try(AutoReentrantLock lock = property.backgroundLoadLock.lock()) {
+              property.backgroundLoadInProgress = false;
+              property.loadImageInBackgroundIfNeeded();
+            }
+          }
         }
-      }
+
+        if(e != null && !(e.getCause() instanceof CancellationException)) {
+          System.out.println("[WARN] AsyncImageProperty - Exception while loading " + imageHandle + " in background: " + e);
+        }
+      }, JAVAFX_UPDATE_EXECUTOR);
+  }
+
+  /**
+   * Gets an Image from the Cache.<p>
+   *
+   * Declared static so all references to instances must be by weak reference.
+   *
+   * @param propertyRef a weak reference to an instance of this class
+   * @param imageHandle the image to load
+   */
+  private static Image getImage(WeakReference<AsyncImageProperty> propertyRef, ImageHandle imageHandle) {
+    final AsyncImageProperty asyncImagePropery = propertyRef.get();
+
+    /*
+     * Check if AsyncImageProperty still exists and its imageHandle hasn't changed:
+     */
+
+    if(asyncImagePropery != null && imageHandle.equals(asyncImagePropery.imageHandle.get())) {
+      return ImageCache.loadImageUptoMaxSize(imageHandle, 1920, 1200);
     }
 
-    private static void sleepUntil(long nanos) {
-      for(;;) {
-        long nanosLeft = nanos - System.nanoTime();
-
-        if(nanosLeft <= 0) {
-          break;
-        }
-
-        try {
-          Thread.sleep(nanosLeft / NANOS_PER_MS + 1);
-        }
-        catch(InterruptedException e) {
-          // Ignore
-        }
-      }
-    }
+    throw new CancellationException();
   }
 }
