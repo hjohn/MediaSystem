@@ -48,7 +48,7 @@ public class DetailPaneViewTest {
   }
 
   @Test
-  public void shouldUpdateMediaAfterIdentification() {
+  public void shouldUpdateMediaAfterIdentification() throws InterruptedException {
     Media media = new Media(null, new MediaItem("")) {{
       initialTitle.set("Some Title");
     }};
@@ -58,6 +58,8 @@ public class DetailPaneViewTest {
      */
 
     view.content.set(new MediaNode(media));
+
+    Thread.sleep(700);  // Content switch is delayed by default
 
     verify(layout, times(1)).createView(any(DetailPanePresentation.class));
   }

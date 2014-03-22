@@ -1,5 +1,6 @@
 package hs.mediasystem.screens.collection.detail;
 
+import hs.mediasystem.beans.DelayedObjectProperty;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.screens.AreaLayout;
 import hs.mediasystem.screens.Layout;
@@ -8,6 +9,10 @@ import hs.mediasystem.util.MapBindings;
 
 import java.util.Set;
 
+import javafx.animation.Animation.Status;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.ObjectBinding;
@@ -17,6 +22,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
+import javafx.util.Duration;
 
 /**
  * Provides a view with details on the current (selected) content.<p>
@@ -33,7 +39,8 @@ public class DetailView extends StackPane {
    */
   public final ObjectProperty<MediaNode> content = new SimpleObjectProperty<>();
 
-  private final ObjectBinding<Media> media = MapBindings.select(content, "media");
+  private final ObjectProperty<MediaNode> delayedContent = new DelayedObjectProperty<>(content, 500);
+  private final ObjectBinding<Media> media = MapBindings.select(delayedContent, "media");
   private final ObjectProperty<Object> finalContent = new SimpleObjectProperty<>();
 
   private final InvalidationListener finalContentUpdater = new InvalidationListener() {
@@ -54,6 +61,29 @@ public class DetailView extends StackPane {
    * @param areaLayout an AreaLayout providing the base layout of the view area
    */
   public DetailView(Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts, boolean interactive, AreaLayout areaLayout) {
+    Timeline fadeOutTimeline = new Timeline(
+      new KeyFrame(Duration.seconds(0.3), new KeyValue(opacityProperty(), 0))
+    );
+
+    Timeline fadeInTimeline = new Timeline(
+      new KeyFrame(Duration.seconds(0.3), new KeyValue(opacityProperty(), 1))
+    );
+
+    content.addListener(new ChangeListener<MediaNode>() {
+      @Override
+      public void changed(ObservableValue<? extends MediaNode> observable, MediaNode oldValue, MediaNode newValue) {
+        if(fadeOutTimeline.getStatus() != Status.RUNNING) {
+          fadeOutTimeline.playFromStart();
+        }
+      }
+    });
+
+    delayedContent.addListener(new ChangeListener<MediaNode>() {
+      @Override
+      public void changed(ObservableValue<? extends MediaNode> observable, MediaNode oldValue, MediaNode newValue) {
+        fadeInTimeline.playFromStart();
+      }
+    });
 
     /*
      * Listeners for media and derivedMedia to update the finalContent property.  These are triggered when the content
