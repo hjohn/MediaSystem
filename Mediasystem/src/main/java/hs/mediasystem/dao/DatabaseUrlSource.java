@@ -3,8 +3,11 @@ package hs.mediasystem.dao;
 import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Database.Transaction;
 import hs.mediasystem.db.Record;
+import hs.mediasystem.util.Throwables;
 import hs.mediasystem.util.WeakValueMap;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.SQLException;
 
 public final class DatabaseUrlSource implements Source<byte[]> {
@@ -59,7 +62,12 @@ public final class DatabaseUrlSource implements Source<byte[]> {
     try(Transaction transaction = database.beginReadOnlyTransaction()) {
       Record record = transaction.selectUnique("url", "images", "url = ?", url);
 
-      source = record == null ? new URLImageSource(url) : null;
+      try {
+        source = record == null ? new URLImageSource(new URL(url)) : null;
+      }
+      catch(MalformedURLException e) {
+        System.out.println("[WARN] " + getClass().getName() + "::getSource - URL malformed: " + Throwables.formatAsOneLine(e));
+      }
     }
 
     return source;

@@ -97,9 +97,9 @@ public class YouTubeFeed extends Media implements MediaRoot {
               }
             }
 
-            String url = bestThumbnail == null ? null : bestThumbnail.getUrl();
-
-            youTubeVideo.image.set(new SourceImageHandle(new URLImageSource(url), "YouTubeMediaTree:/" + videoEntry.getId()));
+            if(bestThumbnail != null) {
+              youTubeVideo.image.set(new SourceImageHandle(new URLImageSource(new URL(bestThumbnail.getUrl())), "YouTubeMediaTree:/" + videoEntry.getId()));
+            }
 
             children.add(youTubeVideo);
             break;

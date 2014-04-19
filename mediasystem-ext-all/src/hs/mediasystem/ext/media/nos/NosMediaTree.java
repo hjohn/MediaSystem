@@ -13,6 +13,7 @@ import hs.mediasystem.framework.descriptors.DescriptorSet.Attribute;
 import hs.mediasystem.framework.descriptors.EntityDescriptors;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +33,7 @@ import com.google.common.collect.ImmutableSet;
 @Named
 public class NosMediaTree implements MediaRoot {
   private static final Id ID = new Id("nosRoot");
-  private static final String URL = "http://tv.nos.nl";
+  private static final String BASE_URL = "http://tv.nos.nl";
 
   private List<Media> children;
 
@@ -40,7 +41,7 @@ public class NosMediaTree implements MediaRoot {
     List<Media> list = new ArrayList<>();
 
     try {
-      Document doc = Jsoup.connect(URL).get();
+      Document doc = Jsoup.connect(BASE_URL).get();
 
       Map<String, String> videoUrls = new HashMap<>();
 
@@ -52,7 +53,7 @@ public class NosMediaTree implements MediaRoot {
       }
 
       for(Element element : doc.select("a")) {
-        String thumbUrl = URL + "/browser/" + element.select("div img").attr("src");
+        URL thumbUrl = new URL(BASE_URL + "/browser/" + element.select("div img").attr("src"));
         String title = element.select("div h3").text();
         String meta = element.select("div p").text();
         String videoUrl = videoUrls.get(element.attr("id"));

@@ -1,13 +1,14 @@
 package hs.mediasystem.ext.enrich.tmdb;
 
 import hs.mediasystem.dao.DatabaseUrlSource;
-import hs.mediasystem.dao.Downloader;
 import hs.mediasystem.dao.Source;
 import hs.mediasystem.db.Database;
 import hs.mediasystem.framework.Cache;
 import hs.mediasystem.util.CryptoUtil;
 import hs.mediasystem.util.LifoBlockingDeque;
 import hs.mediasystem.util.RateLimiter;
+import hs.mediasystem.util.io.RuntimeIOException;
+import hs.mediasystem.util.io.URLs;
 
 import java.io.IOException;
 import java.net.URL;
@@ -65,17 +66,10 @@ public class TheMovieDatabase {
         sb.append(URLEncoder.encode(parameters[i + 1], "UTF-8"));
       }
 
-      URL url = new URL("http://api.themoviedb.org/" + query + "?api_key=" + apiKey + sb.toString());
-      byte[] data = readURL(url);
-
-      if(data == null) {
-        throw new RuntimeException(getClass().getName() + "::query: Failed to read URL: " + url);
-      }
-
-      return objectMapper.readTree(data);
+      return objectMapper.readTree(getURL(new URL("http://api.themoviedb.org/" + query + "?api_key=" + apiKey + sb.toString())));
     }
-    catch(IOException e) {
-      throw new RuntimeException(getClass().getName() + "::query: Exception executing query: " + query + "; parameters=" + Arrays.toString(parameters), e);
+    catch(RuntimeIOException | IOException e) {
+      throw new RuntimeException("While executing query: " + query + "; parameters=" + Arrays.toString(parameters), e);
     }
   }
 
@@ -122,17 +116,15 @@ public class TheMovieDatabase {
     }
   }
 
-  private byte[] readURL(URL url) {
+  private byte[] getURL(URL url) {
     byte[] data = cache.lookup(url.toExternalForm());
 
     if(data == null) {
       RATE_LIMITER.acquire();
-      data = Downloader.tryReadURL(url.toExternalForm());
+      data = URLs.readAllBytes(url);
 
-      if(data != null) {
-        System.out.println("[FINE] [TMDB] [CACHE] Store: " + url);
-        cache.store(url.toExternalForm(), data);
-      }
+      System.out.println("[FINE] [TMDB] [CACHE] Store: " + url);
+      cache.store(url.toExternalForm(), data);
     }
 
     return data;
