@@ -12,10 +12,9 @@ import hs.mediasystem.framework.Casting;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.Person;
 import hs.mediasystem.framework.SourceImageHandle;
-import hs.mediasystem.util.Task;
-import hs.mediasystem.util.Task.TaskRunnable;
 
 import java.util.Iterator;
+import java.util.concurrent.CompletableFuture;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -36,39 +35,26 @@ public class TmdbMediaCreditsListProvider implements ListProvider<Media, String>
   }
 
   @Override
-  public void provide(EntityContext context, Task parent, Media media, String key) {
-    parent.addStep(TheMovieDatabase.EXECUTOR, new TaskRunnable() {
-      @Override
-      public void run(Task parent) {
-        try {
-          JsonNode node = queryCredits(media, key);
+  public CompletableFuture<Void> provide(EntityContext context, Media media, String key) {
+    return CompletableFuture
+      .supplyAsync(() -> queryCredits(media, key), TheMovieDatabase.EXECUTOR)
+      .thenAcceptAsync(node -> {
+        ObservableList<Casting> castings = FXCollections.observableArrayList();
 
-          parent.addStep(context.getUpdateExecutor(), new TaskRunnable() {
-            @Override
-            public void run(Task parent) {
-              ObservableList<Casting> castings = FXCollections.observableArrayList();
+        for(Iterator<JsonNode> i = node.path("cast").iterator(); i.hasNext(); ) {
+          JsonNode cast = i.next();
 
-              for(Iterator<JsonNode> i = node.path("cast").iterator(); i.hasNext(); ) {
-                JsonNode cast = i.next();
-
-                castings.add(createCasting(context, media, cast, "Actor"));
-              }
-
-              for(Iterator<JsonNode> i = node.path("guest_stars").iterator(); i.hasNext(); ) {
-                JsonNode cast = i.next();
-
-                castings.add(createCasting(context, media, cast, "Guest Star"));
-              }
-
-              media.castings.set(castings);
-            }
-          });
+          castings.add(createCasting(context, media, cast, "Actor"));
         }
-        catch(RuntimeException e) {
-          System.out.println("[WARN] Unable to get Castings from TMDB for: " + media + "[" + key + "]: " + e.getMessage());
+
+        for(Iterator<JsonNode> i = node.path("guest_stars").iterator(); i.hasNext(); ) {
+          JsonNode cast = i.next();
+
+          castings.add(createCasting(context, media, cast, "Guest Star"));
         }
-      }
-    });
+
+        media.castings.set(castings);
+      }, context.getUpdateExecutor());
   }
 
   private JsonNode queryCredits(Media media, String key) {

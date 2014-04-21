@@ -7,12 +7,12 @@ import hs.mediasystem.persist.PersistQueue;
 import hs.mediasystem.persist.Persister;
 import hs.mediasystem.test.JavaFXRunningRule;
 import hs.mediasystem.util.MapBindings;
-import hs.mediasystem.util.Task;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -44,67 +44,58 @@ public class EntityTest {
 
     context.registerEnricher(Actor.class, TMDB, 9.0, new Enricher<Actor, Object>() {
       @Override
-      public void enrich(EntityContext context, Task parent, Actor entity, Object id) {
-        System.out.println(">>> TMDB: Enrich for " + entity + " [" + id + "]");
-
-        parent.addStep(context.getUpdateExecutor(), p -> {
-          if(id.toString().equals("5001")) {
-            entity.name.set("John Doe");
-            entity.biography.set("Biography");
-            entity.birthDate.set(LocalDate.now().minus(28, ChronoUnit.YEARS));
-            entity.birthPlace.set("Seatle");
-            entity.father.set(context.add(Actor.class, new SourceKey(TMDB, "5002")));
-
-            System.out.println(">>> Enriched Person 5001");
-          }
-          else if(id.toString().equals("5002")) {
-            entity.name.set("Jonathan Doe");
-            entity.biography.set("Father's Biography");
-            entity.birthDate.set(LocalDate.now().minus(55, ChronoUnit.YEARS));
-            entity.birthPlace.set("New York");
-
-            System.out.println(">>> Enriched Person 5002");
-          }
-          else {
-            System.out.println(">>> TMDB: Failed Enrich for " + entity + " [" + id + "]");
-          }
-        });
+      public CompletableFuture<Void> enrich(EntityContext context, Actor entity, Object id) {
+        return CompletableFuture
+          .runAsync(() -> {
+            if(id.toString().equals("5001")) {
+              entity.name.set("John Doe");
+              entity.biography.set("Biography");
+              entity.birthDate.set(LocalDate.now().minus(28, ChronoUnit.YEARS));
+              entity.birthPlace.set("Seatle");
+              entity.father.set(context.add(Actor.class, new SourceKey(TMDB, "5002")));
+            }
+            else if(id.toString().equals("5002")) {
+              entity.name.set("Jonathan Doe");
+              entity.biography.set("Father's Biography");
+              entity.birthDate.set(LocalDate.now().minus(55, ChronoUnit.YEARS));
+              entity.birthPlace.set("New York");
+            }
+          }, context.getUpdateExecutor());
       }
     });
 
     context.registerEnricher(Actor.class, DB, 1.0, new Enricher<Actor, Object>() {
       @Override
-      public void enrich(EntityContext context, Task parent, Actor t, Object id) {
-        parent.addStep(context.getUpdateExecutor(), p -> {
-          if(id.toString().equals("301")) {
-            t.biography.set("Biography from DB");
-          }
-          else if(id.toString().equals("302")) {
-            t.biography.set("Biography from DB");
-          }
-          else if(id.toString().equals("304")) {
-            t.getContext().associate(t, new SourceKey(TMDB, "5001"));
-          }
-          else {
-            System.out.println(">>> DB: Failed Enrich for " + t + " [" + id + "]");
-          }
-        });
+      public CompletableFuture<Void> enrich(EntityContext context, Actor t, Object id) {
+        return CompletableFuture
+          .runAsync(() -> {
+            if(id.toString().equals("301")) {
+              t.biography.set("Biography from DB");
+            }
+            else if(id.toString().equals("302")) {
+              t.biography.set("Biography from DB");
+            }
+            else if(id.toString().equals("304")) {
+              t.getContext().associate(t, new SourceKey(TMDB, "5001"));
+            }
+          }, context.getUpdateExecutor());
       }
     });
 
     context.registerListProvider(Actor.class, DB, Casting.class, new ListProvider<Actor, Object>() {
       @Override
-      public void provide(EntityContext context, Task parent, Actor person, Object key) {
-        System.out.println(">>> DB: List Provider Casting: " + key);
-
+      public CompletableFuture<Void> provide(EntityContext context, Actor person, Object key) {
         if(key.toString().equals("303")) {
-          parent.addStep(context.getUpdateExecutor(), p -> {
-            person.castings.set(FXCollections.observableArrayList(
-              new Casting(context.add(Media.class, new SourceKey(DB, "M1")), person, "Actor", "Han Solo", 1),
-              new Casting(context.add(Media.class, new SourceKey(DB, "M2")), person, "Actor", "Indiana Jones", 0)
-            ));
-          });
+          return CompletableFuture
+            .runAsync(() -> {
+              person.castings.set(FXCollections.observableArrayList(
+                new Casting(context.add(Media.class, new SourceKey(DB, "M1")), person, "Actor", "Han Solo", 1),
+                new Casting(context.add(Media.class, new SourceKey(DB, "M2")), person, "Actor", "Indiana Jones", 0)
+              ));
+            }, context.getUpdateExecutor());
         }
+
+        return CompletableFuture.completedFuture(null);
       }
     });
 

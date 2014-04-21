@@ -1,7 +1,7 @@
 package hs.mediasystem.entity;
 
-import hs.mediasystem.util.Task;
+import java.util.concurrent.CompletableFuture;
 
 public interface ListProvider<P extends Entity, K> {
-  void provide(EntityContext context, Task enrichTask, P parentEntity, K key);
+  CompletableFuture<Void> provide(EntityContext context, P parentEntity, K key);
 }

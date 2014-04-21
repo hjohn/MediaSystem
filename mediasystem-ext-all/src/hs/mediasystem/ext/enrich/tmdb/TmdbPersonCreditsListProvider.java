@@ -11,8 +11,6 @@ import hs.mediasystem.framework.Casting;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.Person;
 import hs.mediasystem.framework.SourceImageHandle;
-import hs.mediasystem.util.Task;
-import hs.mediasystem.util.Task.TaskRunnable;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,6 +18,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -40,72 +39,59 @@ public class TmdbPersonCreditsListProvider implements ListProvider<Person, Strin
   }
 
   @Override
-  public void provide(EntityContext context, Task parent, Person person, String key) {
-    parent.addStep(TheMovieDatabase.EXECUTOR, new TaskRunnable() {
-      @Override
-      public void run(Task parent) {
-        try {
-          JsonNode node = tmdb.query("3/person/" + key + "/combined_credits");
+  public CompletableFuture<Void> provide(EntityContext context, Person person, String key) {
+    return CompletableFuture
+      .supplyAsync(() -> tmdb.query("3/person/" + key + "/combined_credits"), TheMovieDatabase.EXECUTOR)
+      .thenAcceptAsync(node -> {
+        ObservableList<Casting> castings = FXCollections.observableArrayList();
+        Map<Media, Casting> castingsByMedia = new HashMap<>();
 
-          parent.addStep(context.getUpdateExecutor(), new TaskRunnable() {
-            @Override
-            public void run(Task parent) {
-              ObservableList<Casting> castings = FXCollections.observableArrayList();
-              Map<Media, Casting> castingsByMedia = new HashMap<>();
+        for(Iterator<JsonNode> i = node.path("cast").iterator(); i.hasNext(); ) {
+          JsonNode cast = i.next();
+          Casting casting = createCasting(context, person, cast, "Actor");
 
-              for(Iterator<JsonNode> i = node.path("cast").iterator(); i.hasNext(); ) {
-                JsonNode cast = i.next();
-                Casting casting = createCasting(context, person, cast, "Actor");
+          Casting existingCasting = castingsByMedia.get(casting.media.get());
 
-                Casting existingCasting = castingsByMedia.get(casting.media.get());
+          if(existingCasting != null) {
 
-                if(existingCasting != null) {
+            /*
+             * Casting looks to be for a Media seen before -- combine it.
+             */
 
-                  /*
-                   * Casting looks to be for a Media seen before -- combine it.
-                   */
+            String characterNames = existingCasting.characterName.get();
 
-                  String characterNames = existingCasting.characterName.get();
+            if(characterNames == null) {
+              characterNames = "";
+            }
 
-                  if(characterNames == null) {
-                    characterNames = "";
-                  }
+            Set<String> set = new LinkedHashSet<>(Arrays.asList(characterNames.split("/")));
 
-                  Set<String> set = new LinkedHashSet<>(Arrays.asList(characterNames.split("/")));
+            set.add(casting.characterName.get());
 
-                  set.add(casting.characterName.get());
+            StringBuilder sb = new StringBuilder();
 
-                  StringBuilder sb = new StringBuilder();
-
-                  for(String characterName : set) {
-                    if(sb.length() > 0) {
-                      sb.append(" / ");
-                    }
-
-                    if(characterName != null && !characterName.isEmpty()) {
-                      sb.append(characterName);
-                    }
-                  }
-
-                  if(sb.length() > 0) {
-                    existingCasting.characterName.set(sb.toString());
-                  }
-                }
-                else {
-                  castings.add(casting);
-                  castingsByMedia.put(casting.media.get(), casting);
-                }
+            for(String characterName : set) {
+              if(sb.length() > 0) {
+                sb.append(" / ");
               }
 
-              person.castings.set(castings);
+              if(characterName != null && !characterName.isEmpty()) {
+                sb.append(characterName);
+              }
             }
-          });
+
+            if(sb.length() > 0) {
+              existingCasting.characterName.set(sb.toString());
+            }
+          }
+          else {
+            castings.add(casting);
+            castingsByMedia.put(casting.media.get(), casting);
+          }
         }
-        catch(RuntimeException e) {
-          System.out.println("[WARN] Unable to get Castings from TMDB for: " + person + "[" + key + "]: " + e.getMessage());
-        }
-      }
-    });
+
+        person.castings.set(castings);
+      });
   }
 
   private Casting createCasting(EntityContext context, Person person, JsonNode node, String role) {

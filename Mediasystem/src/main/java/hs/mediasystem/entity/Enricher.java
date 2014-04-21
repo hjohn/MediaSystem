@@ -1,7 +1,7 @@
 package hs.mediasystem.entity;
 
-import hs.mediasystem.util.Task;
+import java.util.concurrent.CompletableFuture;
 
 public interface Enricher<E extends Entity, K> {
-  void enrich(EntityContext context, Task currentTask, E entity, K key);
+  CompletableFuture<Void> enrich(EntityContext context, E entity, K key);
 }

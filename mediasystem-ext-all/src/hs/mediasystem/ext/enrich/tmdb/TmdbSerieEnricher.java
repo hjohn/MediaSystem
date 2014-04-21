@@ -6,10 +6,9 @@ import hs.mediasystem.entity.EntityContext;
 import hs.mediasystem.entity.EntityEnricher;
 import hs.mediasystem.ext.media.serie.Serie;
 import hs.mediasystem.framework.SourceImageHandle;
-import hs.mediasystem.util.Task;
-import hs.mediasystem.util.Task.TaskRunnable;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
@@ -25,28 +24,20 @@ public class TmdbSerieEnricher implements Enricher<Serie, String> {
   }
 
   @Override
-  public void enrich(EntityContext context, Task parent, Serie serie, String tmdbId) {
-    parent.addStep(TheMovieDatabase.EXECUTOR, new TaskRunnable() {
-      @Override
-      public void run(Task parent) {
-        try {
-          JsonNode serieInfo = tmdb.query("3/tv/" + tmdbId);
+  public CompletableFuture<Void> enrich(EntityContext context, Serie serie, String tmdbId) {
+    return CompletableFuture
+      .supplyAsync(() -> {
+        JsonNode serieInfo = tmdb.query("3/tv/" + tmdbId);
 
-          Source<byte[]> backgroundSource = tmdb.createSource(tmdb.createImageURL(serieInfo.path("backdrop_path").getTextValue(), "original"));
-          Source<byte[]> posterSource = tmdb.createSource(tmdb.createImageURL(serieInfo.path("poster_path").getTextValue(), "original"));
+        Source<byte[]> backgroundSource = tmdb.createSource(tmdb.createImageURL(serieInfo.path("backdrop_path").getTextValue(), "original"));
+        Source<byte[]> posterSource = tmdb.createSource(tmdb.createImageURL(serieInfo.path("poster_path").getTextValue(), "original"));
 
-          parent.addStep(context.getUpdateExecutor(), new UpdateTask(serie, serieInfo, backgroundSource, posterSource));
-        }
-        catch(RuntimeException e) {
-          e.printStackTrace();
-
-          System.out.println("[WARN] TmdbMovieProvider: unable to enrich Movie [id=" + tmdbId + "]: " + e.getMessage());
-        }
-      }
-    });
+        return new UpdateTask(serie, serieInfo, backgroundSource, posterSource);
+      }, TheMovieDatabase.EXECUTOR)
+      .thenAcceptAsync(updateTask -> updateTask.run(), context.getUpdateExecutor());
   }
 
-  private class UpdateTask implements TaskRunnable {
+  private class UpdateTask {
     private final Serie serie;
     private final JsonNode serieInfo;
     private final Source<byte[]> backgroundSource;
@@ -59,8 +50,7 @@ public class TmdbSerieEnricher implements Enricher<Serie, String> {
       this.posterSource = posterSource;
     }
 
-    @Override
-    public void run(Task parent) {
+    public void run() {
       serie.enrichedTitle.set(serieInfo.get("name").asText());
       serie.description.set(serieInfo.path("overview").getTextValue());
       serie.rating.set(serieInfo.path("vote_average").getDoubleValue());

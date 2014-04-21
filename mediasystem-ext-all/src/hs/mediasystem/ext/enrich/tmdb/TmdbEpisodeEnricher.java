@@ -1,13 +1,13 @@
 package hs.mediasystem.ext.enrich.tmdb;
 
+import java.util.concurrent.CompletableFuture;
+
 import hs.mediasystem.dao.Source;
 import hs.mediasystem.entity.Enricher;
 import hs.mediasystem.entity.EntityContext;
 import hs.mediasystem.entity.EntityEnricher;
 import hs.mediasystem.ext.media.serie.Episode;
 import hs.mediasystem.framework.SourceImageHandle;
-import hs.mediasystem.util.Task;
-import hs.mediasystem.util.Task.TaskRunnable;
 
 import javax.inject.Inject;
 
@@ -23,29 +23,21 @@ public class TmdbEpisodeEnricher implements Enricher<Episode, String> {
   }
 
   @Override
-  public void enrich(EntityContext context, Task parent, Episode episode, String tmdbId) {
-    parent.addStep(TheMovieDatabase.EXECUTOR, new TaskRunnable() {
-      @Override
-      public void run(Task parent) {
-        try {
-          String[] id = tmdbId.split(";");
-          JsonNode episodeInfo = tmdb.query("3/tv/" + id[0] + "/season/" + id[1] + "/episode/" + id[2]);
+  public CompletableFuture<Void> enrich(EntityContext context, Episode episode, String tmdbId) {
+    return CompletableFuture
+      .supplyAsync(() -> {
+        String[] id = tmdbId.split(";");
+        JsonNode episodeInfo = tmdb.query("3/tv/" + id[0] + "/season/" + id[1] + "/episode/" + id[2]);
 
-          Source<byte[]> backgroundSource = tmdb.createSource(tmdb.createImageURL(episodeInfo.path("backdrop_path").getTextValue(), "original"));
-          Source<byte[]> posterSource = tmdb.createSource(tmdb.createImageURL(episodeInfo.path("still_path").getTextValue(), "original"));
+        Source<byte[]> backgroundSource = tmdb.createSource(tmdb.createImageURL(episodeInfo.path("backdrop_path").getTextValue(), "original"));
+        Source<byte[]> posterSource = tmdb.createSource(tmdb.createImageURL(episodeInfo.path("still_path").getTextValue(), "original"));
 
-          parent.addStep(context.getUpdateExecutor(), new UpdateTask(episode, episodeInfo, backgroundSource, posterSource));
-        }
-        catch(RuntimeException e) {
-          e.printStackTrace();
-
-          System.out.println("[WARN] TmdbEpisodeEnricher: unable to enrich Episode [id=" + tmdbId + "]: " + e.getMessage());
-        }
-      }
-    });
+        return new UpdateTask(episode, episodeInfo, backgroundSource, posterSource);
+      }, TheMovieDatabase.EXECUTOR)
+      .thenAcceptAsync(updateTask -> updateTask.run(), context.getUpdateExecutor());
   }
 
-  private class UpdateTask implements TaskRunnable {
+  private class UpdateTask {
     private final Episode episode;
     private final JsonNode episodeInfo;
     private final Source<byte[]> backgroundSource;
@@ -59,8 +51,7 @@ public class TmdbEpisodeEnricher implements Enricher<Episode, String> {
     }
 
     // TODO add support for specials / episode ranges
-    @Override
-    public void run(Task parent) {
+    public void run() {
       episode.enrichedTitle.set(episodeInfo.get("name").asText());
       episode.description.set(episodeInfo.path("overview").getTextValue());
       episode.rating.set(episodeInfo.path("vote_average").getDoubleValue());

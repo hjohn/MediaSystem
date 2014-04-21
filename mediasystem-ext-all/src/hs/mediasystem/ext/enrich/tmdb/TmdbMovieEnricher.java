@@ -6,10 +6,9 @@ import hs.mediasystem.entity.EntityContext;
 import hs.mediasystem.entity.EntityEnricher;
 import hs.mediasystem.ext.media.movie.Movie;
 import hs.mediasystem.framework.SourceImageHandle;
-import hs.mediasystem.util.Task;
-import hs.mediasystem.util.Task.TaskRunnable;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
@@ -25,28 +24,20 @@ public class TmdbMovieEnricher implements Enricher<Movie, String> {
   }
 
   @Override
-  public void enrich(EntityContext context, Task parent, Movie movie, String tmdbId) {
-    parent.addStep(TheMovieDatabase.EXECUTOR, new TaskRunnable() {
-      @Override
-      public void run(Task parent) {
-        try {
-          JsonNode movieInfo = tmdb.query("3/movie/" + tmdbId);
+  public CompletableFuture<Void> enrich(EntityContext context, Movie movie, String tmdbId) {
+    return CompletableFuture
+      .supplyAsync(() -> {
+        JsonNode movieInfo = tmdb.query("3/movie/" + tmdbId);
 
-          Source<byte[]> backgroundSource = tmdb.createSource(tmdb.createImageURL(movieInfo.path("backdrop_path").getTextValue(), "original"));
-          Source<byte[]> posterSource = tmdb.createSource(tmdb.createImageURL(movieInfo.path("poster_path").getTextValue(), "original"));
+        Source<byte[]> backgroundSource = tmdb.createSource(tmdb.createImageURL(movieInfo.path("backdrop_path").getTextValue(), "original"));
+        Source<byte[]> posterSource = tmdb.createSource(tmdb.createImageURL(movieInfo.path("poster_path").getTextValue(), "original"));
 
-          parent.addStep(context.getUpdateExecutor(), new UpdateTask(movie, movieInfo, backgroundSource, posterSource));
-        }
-        catch(RuntimeException e) {
-          e.printStackTrace();
-
-          System.out.println("[WARN] TmdbMovieProvider: unable to enrich Movie [id=" + tmdbId + "]: " + e.getMessage());
-        }
-      }
-    });
+        return new UpdateTask(movie, movieInfo, backgroundSource, posterSource);
+      }, TheMovieDatabase.EXECUTOR)
+      .thenAcceptAsync(updateTask -> updateTask.run(), context.getUpdateExecutor());
   }
 
-  private class UpdateTask implements TaskRunnable {
+  private class UpdateTask {
     private final Movie movie;
     private final JsonNode movieInfo;
     private final Source<byte[]> backgroundSource;
@@ -59,8 +50,7 @@ public class TmdbMovieEnricher implements Enricher<Movie, String> {
       this.posterSource = posterSource;
     }
 
-    @Override
-    public void run(Task parent) {
+    public void run() {
       String imdbId = movieInfo.path("imdb_id").getTextValue();
 
       movie.enrichedTitle.set(movieInfo.get("title").asText());

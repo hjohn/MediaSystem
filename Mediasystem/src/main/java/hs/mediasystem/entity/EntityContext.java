@@ -6,8 +6,7 @@ import hs.mediasystem.persist.Persister;
 import hs.mediasystem.util.AutoReentrantLock;
 import hs.mediasystem.util.ClassInheritanceDepthComparator;
 import hs.mediasystem.util.LifoBlockingDeque;
-import hs.mediasystem.util.Task;
-import hs.mediasystem.util.Task.TaskRunnable;
+import hs.mediasystem.util.Throwables;
 import hs.subtitle.DefaultThreadFactory;
 
 import java.util.ArrayList;
@@ -17,7 +16,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -266,7 +268,7 @@ public class EntityContext {
     }
   }
 
-  private final Map<Entity, Task> activeTasks = new HashMap<>();  // Only access on Update thread
+  private final Map<Entity, CompletableFuture<Void>> activeCompletionChains = new HashMap<>();  // Only access on Update thread
 
   /**
    * Queues the given entity for enrichment in the background.  This must be called from the Update thread.
@@ -292,130 +294,155 @@ public class EntityContext {
         cls = cls.getSuperclass();
       }
 
+      if(enricherHolders.isEmpty()) {
+        System.out.println("[WARN] " + getClass().getName() + "::queueForEnrichment - No Enrichers for: " + entity);
+        return;
+      }
+
       enricherHolders.sort((e1, e2) -> {
         int result = ClassInheritanceDepthComparator.INSTANCE.compare(e1.entityClass, e2.entityClass);
 
         return result == 0 ? Double.compare(e1.getPriority(), e2.getPriority()) : result;
       });
 
-      Map<EntitySource, Object> keysBySource = keysBySourceByEntity.get(entity);
-
       /*
-       * A task is created or steps are appended to an active task.  Because the
-       * appending process happens on the Update thread, and the last step of an
-       * enrich Task always runs on that same thread, this is safe.
+       * For each Entity being enriched, the last step of a CompletableFuture
+       * chain is kept track of.  Multiple different enrichments on the same
+       * Entity are chained together to prevent parallel modification of one
+       * Entity.
        *
-       * The last step of each enricher series will remove this Task from
-       * activeTasks if no steps from another serie were added (in other words,
-       * it will only remove the active task if it is the FINAL step).
+       * The last step of each sub-chain checks if the chain has ended and,
+       * if so, removes it from the active chains.
        */
 
-      boolean running = activeTasks.containsKey(entity);
-      Task enrichTask = activeTasks.computeIfAbsent(entity, e -> new Task());  // On Update thread
+      CompletableFuture<Void> currentStage = activeCompletionChains.getOrDefault(entity, CompletableFuture.completedFuture(null));  // On Update thread
+      Map<EntitySource, Object> keysBySource = keysBySourceByEntity.get(entity);
 
       for(EnricherHolder holder : enricherHolders) {
         @SuppressWarnings("unchecked")
         Enricher<T, Object> enricher = (Enricher<T, Object>)holder.getEnricher();
 
-        enrichTask.addStep(getExecutor(), new TaskRunnable() {
-          @Override
-          public void run(Task parent) {
-            if(keysBySource.containsKey(holder.getSource())) {
-              enricher.enrich(EntityContext.this, parent, entity, keysBySource.get(holder.getSource()));
+        currentStage = currentStage
+          .thenApplyAsync(v -> {  // Look up the key for the source for the compose step.  The parameter v is not used, it only needs to trigger of the previous step (thenSupply methods donot exist)
+            try(AutoReentrantLock o2 = lock.lock()) {
+              if(keysBySource.containsKey(holder.getSource())) {
+                return keysBySource.get(holder.getSource());
+              }
+
+              throw new NoSuchElementException(holder.getSource() + "-key not found for: " + entity);  // Skip normal steps as there is no key
             }
-          }
-        });
+          }, getExecutor())
+          .thenCompose(key -> enricher.enrich(EntityContext.this, entity, key))  // Composes the enricher step with the given key
+          .handle((v, throwable) -> {  // Log problems in previous steps, and allow the completion change to continue normally
+            if(throwable != null) {
+              System.out.println("[WARN] " + getClass().getName() + "::queueForEnrichment - Exception for " + entity + ": " + Throwables.formatAsOneLine(throwable.getCause()));
+            }
+
+            return null;  // Continue normally
+          });
       }
 
-      if(!enricherHolders.isEmpty()) {
-        enrichTask.addStep(getUpdateExecutor(), p -> {
-          if(!enrichTask.hasSteps()) {  // Check if this step is the last step or if more steps have been added in the mean time
-            activeTasks.remove(entity);  // On Update thread
-          }
-        });
-
-        if(!running) {
-          getExecutor().execute(enrichTask);
-        }
-      }
-      else {
-        if(!enrichTask.hasSteps()) {
-          activeTasks.remove(entity);  // On Update thread
-        }
-        System.out.println("[WARN] No Enrichers for: " + entity);
-      }
+      updateActiveCompletionChains(currentStage, entity);
     }
   }
 
   protected <P extends Entity, E extends Entity> void queueListProvide(P parentEntity, Class<E> itemClass, ObjectProperty<ObservableList<E>> property) {
     ensureRunsOnUpdateThread();
 
-    System.out.println("List Provide needed for " + parentEntity + "(" + parentEntity.getClass() + "): " + itemClass);
+    CompletableFuture<Void> currentStage = activeCompletionChains.getOrDefault(parentEntity, CompletableFuture.completedFuture(null));  // On Update thread
 
-    boolean running = activeTasks.containsKey(parentEntity);
-    Task enrichTask = activeTasks.computeIfAbsent(parentEntity, e -> new Task());  // On Update thread
+    /*
+     * The actual list provide is run as a compose step because necessary keys
+     * may still be in the process of being added by earlier steps in the chain.
+     *
+     * The list provide step created here will therefore check for those keys
+     * only after the previous stages complete.
+     */
 
-    enrichTask.addStep(getExecutor(), p -> {
-      try(AutoReentrantLock o = lock.lock()) {
-        Class<? extends Entity> cls = parentEntity.getClass();
+    currentStage = currentStage.thenComposeAsync(v -> createListProvideChain(parentEntity, itemClass, property), getExecutor());
 
-        for(;;) {
-          Map<Class<? extends Entity>, Map<EntitySource, ListProvider<?, ?>>> listProvidersBySourceByEntityClass = listProvidersBySourceByEntityClassByParentEntityClass.get(cls);
+    updateActiveCompletionChains(currentStage, parentEntity);
+  }
 
-          if(listProvidersBySourceByEntityClass != null) {
-            Map<EntitySource, ListProvider<?, ?>> listProvidersBySource = listProvidersBySourceByEntityClass.get(itemClass);
+  private <P extends Entity, E extends Entity> CompletionStage<Void> createListProvideChain(P parentEntity, Class<E> itemClass, ObjectProperty<ObservableList<E>> property) {
+    CompletionStage<Void> currentStage = CompletableFuture.completedFuture(null);
 
-            if(listProvidersBySource != null) {
-              Iterator<Map.Entry<EntitySource, ListProvider<?, ?>>> iterator = listProvidersBySource
-                .entrySet()
-                .stream()
-                .sorted((e1, e2) -> Double.compare(e1.getKey().getPriority(), e2.getKey().getPriority()))
-                .iterator();
+    try(AutoReentrantLock o = lock.lock()) {
+      Class<? extends Entity> cls = parentEntity.getClass();
 
-              while(iterator.hasNext()) {
-                Map.Entry<EntitySource, ListProvider<?, ?>> e = iterator.next();
-                @SuppressWarnings("unchecked")
-                ListProvider<P, Object> function = (ListProvider<P, Object>)e.getValue();
+      for(;;) {
+        Map<Class<? extends Entity>, Map<EntitySource, ListProvider<?, ?>>> listProvidersBySourceByEntityClass = listProvidersBySourceByEntityClassByParentEntityClass.get(cls);
 
-                Map<EntitySource, Object> keysBySource = keysBySourceByEntity.get(parentEntity);
+        if(listProvidersBySourceByEntityClass != null) {
+          Map<EntitySource, ListProvider<?, ?>> listProvidersBySource = listProvidersBySourceByEntityClass.get(itemClass);
 
-                if(keysBySource != null) {
-                  Object key = keysBySource.get(e.getKey());
+          if(listProvidersBySource != null) {
+            Iterator<Map.Entry<EntitySource, ListProvider<?, ?>>> iterator = listProvidersBySource
+              .entrySet()
+              .stream()
+              .sorted((e1, e2) -> Double.compare(e1.getKey().getPriority(), e2.getKey().getPriority()))
+              .iterator();
 
-                  if(key != null) {
-                    enrichTask.addStep(getExecutor(), p2 -> {
+            while(iterator.hasNext()) {
+              Map.Entry<EntitySource, ListProvider<?, ?>> e = iterator.next();
+              @SuppressWarnings("unchecked")
+              ListProvider<P, Object> function = (ListProvider<P, Object>)e.getValue();
+
+              Map<EntitySource, Object> keysBySource = keysBySourceByEntity.get(parentEntity);
+
+              if(keysBySource != null) {
+                Object key = keysBySource.get(e.getKey());
+
+                if(key != null) {
+                  currentStage = currentStage
+                    .thenApplyAsync(v -> {  // Check if List was provided already.  The parameter v is not used, it only needs to trigger of the previous step (thenSupply methods donot exist)
                       if(property.get() == null) {
-                        function.provide(EntityContext.this, p2, parentEntity, key);
+                        return null;
                       }
+
+                      throw new RuntimeException("Property is not null, List was already provided: " + property);
+                    }, getExecutor())
+                    .thenCompose(v -> function.provide(EntityContext.this, parentEntity, key))  // Composes the provide step.  The parameter v is not used, it only needs to trigger of the previous step (thenSupply methods donot exist)
+                    .handle((v, t) -> {  // Log problems in previous steps, and allow the completion change to continue normally
+                      if(t != null) {
+                        System.out.println("[WARN] " + getClass().getName() + "::queueListProvide - Exception for " + property + ": " + Throwables.formatAsOneLine(t.getCause()));
+                      }
+
+                      return null;  // Continue normally
                     });
-                  }
                 }
               }
             }
-
-            break;
           }
 
-          if(!Entity.class.isAssignableFrom(cls.getSuperclass())) {
-            break;
-          }
-
-          @SuppressWarnings("unchecked")
-          Class<? extends Entity> entitySuperClass = (Class<? extends Entity>)cls.getSuperclass();
-          cls = entitySuperClass;
+          break;
         }
-      }
-    });
 
-    enrichTask.addStep(getUpdateExecutor(), p -> {
-      if(!enrichTask.hasSteps()) {  // Check if this step is the last step or if more steps have been added in the mean time
-        activeTasks.remove(parentEntity);  // On Update thread
-      }
-    });
+        if(!Entity.class.isAssignableFrom(cls.getSuperclass())) {
+          break;
+        }
 
-    if(!running) {
-      getExecutor().execute(enrichTask);
+        @SuppressWarnings("unchecked")
+        Class<? extends Entity> entitySuperClass = (Class<? extends Entity>)cls.getSuperclass();
+        cls = entitySuperClass;
+      }
     }
+
+    return currentStage;
+  }
+
+  /**
+   * Updates the active completion chains with a new chain.  It will append a final step that checks
+   * if the chain can be removed from the active chains upon completion.
+   */
+  private void updateActiveCompletionChains(CompletableFuture<Void> finalStage, Entity entity) {
+    finalStage.thenAcceptAsync(v -> {
+      if(activeCompletionChains.get(entity).equals(finalStage)) {
+        activeCompletionChains.remove(entity);
+      }
+    }, getUpdateExecutor());
+
+    activeCompletionChains.put(entity, finalStage);
   }
 
   public void ensureRunsOnUpdateThread() {

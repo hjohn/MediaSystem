@@ -1,13 +1,13 @@
 package hs.mediasystem.ext.enrich.tmdb;
 
+import java.util.concurrent.CompletableFuture;
+
 import hs.mediasystem.dao.Source;
 import hs.mediasystem.entity.Enricher;
 import hs.mediasystem.entity.EntityContext;
 import hs.mediasystem.entity.EntityEnricher;
 import hs.mediasystem.framework.Person;
 import hs.mediasystem.framework.SourceImageHandle;
-import hs.mediasystem.util.Task;
-import hs.mediasystem.util.Task.TaskRunnable;
 
 import javax.inject.Inject;
 
@@ -23,27 +23,19 @@ public class TmdbPersonEnricher implements Enricher<Person, String> {
   }
 
   @Override
-  public void enrich(EntityContext context, Task parent, Person person, String tmdbId) {
-    parent.addStep(TheMovieDatabase.EXECUTOR, new TaskRunnable() {
-      @Override
-      public void run(Task parent) {
-        try {
-          JsonNode node = tmdb.query("3/person/" + tmdbId);
+  public CompletableFuture<Void> enrich(EntityContext context, Person person, String tmdbId) {
+    return CompletableFuture
+      .supplyAsync(() -> {
+        JsonNode node = tmdb.query("3/person/" + tmdbId);
 
-          Source<byte[]> photoSource = tmdb.createSource(tmdb.createImageURL(node.path("profile_path").getTextValue(), "original"));
+        Source<byte[]> photoSource = tmdb.createSource(tmdb.createImageURL(node.path("profile_path").getTextValue(), "original"));
 
-          parent.addStep(context.getUpdateExecutor(), new UpdateTask(person, node, photoSource));
-        }
-        catch(RuntimeException e) {
-          e.printStackTrace();
-
-          System.out.println("[WARN] TmdbPersonEnricher: unable to enrich Person [id=" + tmdbId + "]: " + e.getMessage());
-        }
-      }
-    });
+        return new UpdateTask(person, node, photoSource);
+      }, TheMovieDatabase.EXECUTOR)
+      .thenAcceptAsync(updateTask -> updateTask.run(), context.getUpdateExecutor());
   }
 
-  private class UpdateTask implements TaskRunnable {
+  private class UpdateTask {
     private final Person person;
     private final JsonNode node;
     private final Source<byte[]> photoSource;
@@ -54,8 +46,7 @@ public class TmdbPersonEnricher implements Enricher<Person, String> {
       this.photoSource = photoSource;
     }
 
-    @Override
-    public void run(Task parent) {
+    public void run() {
       person.name.set(node.get("name").asText());
       person.biography.set(node.path("biography").getTextValue());
       person.birthPlace.set(node.path("place_of_birth").getTextValue());
