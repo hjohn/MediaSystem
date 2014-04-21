@@ -51,10 +51,19 @@ public class Episode extends Media {
   public Episode(MediaItem mediaItem) {
     super(DESCRIPTORS, mediaItem);
 
-    this.episodeRange.bind(Bindings.when(this.endEpisode.isEqualTo(this.episode)).then(this.episode.asString()).otherwise(Bindings.concat(this.episode, "-", this.endEpisode)));
+    this.episodeRange.bind(
+      Bindings.when(this.episode.isNull())
+        .then("")
+        .otherwise(
+          Bindings.when(this.endEpisode.isEqualTo(this.episode))
+            .then(this.episode.asString())
+            .otherwise(Bindings.concat(this.episode, "-", this.endEpisode))
+        )
+    );
     this.seasonAndEpisode.bind(Bindings.concat(season, "x", episodeRange));
 
     this.titleWithContext.bind(Bindings.concat(MapBindings.selectString(serie, "title"), " ", this.season, "x", this.episodeRange));
+    this.background.bind(MapBindings.select(serie, "background"));
   }
 
   public Episode() {
