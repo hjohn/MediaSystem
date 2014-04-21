@@ -1,6 +1,6 @@
 package hs.mediasystem.framework;
 
-import hs.mediasystem.dao.LocalInfo;
+import hs.mediasystem.util.io.RuntimeIOException;
 
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
@@ -15,38 +15,29 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class EpisodeScanner implements Scanner<LocalInfo> {
+public class EpisodeScanner {
   private static final Pattern EXTENSION_PATTERN = Pattern.compile("(?i).+\\.(avi|flv|mkv|mov|mp4|mpg|mpeg)");
   private static final Set<FileVisitOption> FOLLOW_LINKS = new HashSet<FileVisitOption>() {{
     add(FileVisitOption.FOLLOW_LINKS);
   }};
 
-  private final Decoder decoder;
   private final int maxDepth;
 
-  public EpisodeScanner(Decoder decoder, int maxDepth) {
-    this.decoder = decoder;
+  public EpisodeScanner(int maxDepth) {
     this.maxDepth = maxDepth;
   }
 
-  @Override
-  public List<LocalInfo> scan(Path scanPath) {
+  public List<Path> scan(Path scanPath) {
     try {
-      final List<LocalInfo> results = new ArrayList<>();
+      final List<Path> results = new ArrayList<>();
 
       Files.walkFileTree(scanPath, FOLLOW_LINKS, maxDepth, new SimpleFileVisitor<Path>() {
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
           if(!attrs.isDirectory() && file.getFileName().toString().matches(EXTENSION_PATTERN.pattern())) {
-            LocalInfo localInfo = decoder.decode(file);
-
-            if(localInfo != null) {
-              results.add(localInfo);
-            }
-            else {
-              System.err.println("EpisodeScanner: Could not decode as episode: " + file);
-            }
+            results.add(file);
           }
+
           return FileVisitResult.CONTINUE;
         }
       });
@@ -54,7 +45,7 @@ public class EpisodeScanner implements Scanner<LocalInfo> {
       return results;
     }
     catch(IOException e) {
-      throw new ScanException("Problem scanning \"" + scanPath + "\": " + e.getMessage(), e);
+      throw new RuntimeIOException("Exception while scanning \"" + scanPath + "\"", e);
     }
   }
 }

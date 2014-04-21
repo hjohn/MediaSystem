@@ -1,6 +1,5 @@
 package hs.mediasystem.ext.media.movie;
 
-import hs.mediasystem.dao.LocalInfo;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.entity.EntityContext;
 import hs.mediasystem.entity.SourceKey;
@@ -10,9 +9,12 @@ import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.framework.ScanException;
+import hs.mediasystem.framework.NameDecoder;
+import hs.mediasystem.framework.NameDecoder.DecodeResult;
+import hs.mediasystem.framework.NameDecoder.Hint;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.util.PathStringConverter;
+import hs.mediasystem.util.Throwables;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import javax.inject.Inject;
 
 public class MoviesMediaTree implements MediaRoot {
   private static final Id ID = new Id("movieRoot");
+  private static final NameDecoder NAME_DECODER = new NameDecoder(Hint.MOVIE);
 
   private final List<Path> roots;
   private final EntityContext entityContext;
@@ -49,32 +52,43 @@ public class MoviesMediaTree implements MediaRoot {
 
       for(Path root : roots) {
         try {
-          List<LocalInfo> scanResults = new EpisodeScanner(new MovieDecoder(), 1).scan(root);
+          List<Path> scanResults = new EpisodeScanner(1).scan(root);
 
-          for(final LocalInfo localInfo : scanResults) {
+          for(final Path path : scanResults) {
+            DecodeResult result = NAME_DECODER.decode(path.getFileName().toString());
+
+            String title = result.getTitle();
+            String sequence = result.getSequence();
+            String subtitle = result.getSubtitle();
+            Integer year = result.getReleaseYear();
+
+            String imdb = result.getCode();
+            String imdbNumber = imdb != null && !imdb.isEmpty() ? String.format("tt%07d", Integer.parseInt(imdb)) : null;
+
+            Integer episode = sequence == null ? null : Integer.parseInt(sequence);
+
             Movie movie = entityContext.add(Movie.class, new Supplier<Movie>() {
               @Override
               public Movie get() {
-                Movie movie = new Movie(new MediaItem(localInfo.getUri()));
+                Movie movie = new Movie(new MediaItem(path.toString()));
 
-                movie.initialTitle.set(localInfo.getTitle());
-                movie.sequence.set(localInfo.getEpisode() == null ? null : localInfo.getEpisode());
-                movie.subtitle.set(localInfo.getSubtitle());
-                movie.imdbNumber.set(localInfo.getCode());
-                movie.localReleaseYear.set(localInfo.getReleaseYear() == null ? null : localInfo.getReleaseYear().toString());
+                movie.initialTitle.set(title);
+                movie.sequence.set(episode == null ? null : episode);
+                movie.subtitle.set(subtitle);
+                movie.imdbNumber.set(imdbNumber);
+                movie.localReleaseYear.set(year == null ? null : year.toString());
 
                 return movie;
               }
-            }, new SourceKey(fileEntitySource, localInfo.getUri()));
+            }, new SourceKey(fileEntitySource, path.toString()));
 
             // TODO think about pre-loading full items...
 
             children.add(movie);
           }
         }
-        catch(ScanException e) {
-          System.err.println("[WARN] MoviesMediaTree: " + e.getMessage());  // TODO add to some high level user error reporting facility
-          e.printStackTrace();
+        catch(RuntimeException e) {
+          System.out.println("[WARN] " + getClass().getName() + "::getItems - Exception while getting items for \"" + root + "\": " + Throwables.formatAsOneLine(e));   // TODO add to some high level user error reporting facility
         }
       }
     }

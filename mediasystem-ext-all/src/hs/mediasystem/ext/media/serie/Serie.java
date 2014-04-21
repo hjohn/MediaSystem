@@ -1,23 +1,28 @@
 package hs.mediasystem.ext.media.serie;
 
-import hs.mediasystem.dao.LocalInfo;
 import hs.mediasystem.entity.SourceKey;
 import hs.mediasystem.framework.EpisodeScanner;
 import hs.mediasystem.framework.FileEntitySource;
 import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
-import hs.mediasystem.framework.descriptors.EntityDescriptors;
+import hs.mediasystem.framework.MediaRoot;
+import hs.mediasystem.framework.NameDecoder;
+import hs.mediasystem.framework.NameDecoder.DecodeResult;
+import hs.mediasystem.framework.NameDecoder.Hint;
 import hs.mediasystem.framework.descriptors.AbstractEntityDescriptors;
 import hs.mediasystem.framework.descriptors.Descriptor;
 import hs.mediasystem.framework.descriptors.DescriptorSet;
 import hs.mediasystem.framework.descriptors.DescriptorSet.Attribute;
-import hs.mediasystem.framework.MediaRoot;
+import hs.mediasystem.framework.descriptors.EntityDescriptors;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -38,6 +43,9 @@ public class Serie extends Media implements MediaRoot {
       )
     );
   }};
+
+  private static final Pattern SEASON_EPISODE_PATTERN = Pattern.compile("(?:([0-9]+)(?:,([0-9]+)(?:-([0-9]+))?([ab])?)?)?");
+  private static final NameDecoder NAME_DECODER = new NameDecoder(Hint.EPISODE, Hint.MOVIE);
 
   private final SeriesMediaTree mediaRoot;
   private final Id id;
@@ -60,26 +68,45 @@ public class Serie extends Media implements MediaRoot {
   @Override
   public List<? extends Media> getItems() {
     if(children == null) {
-      List<LocalInfo> scanResults = new EpisodeScanner(new EpisodeDecoder(title.get()), 2).scan(Paths.get(getMediaItem().getUri()));
+      List<Path> scanResults = new EpisodeScanner(2).scan(Paths.get(getMediaItem().getUri()));
 
       children = new ArrayList<>();
 
-      for(LocalInfo localInfo : scanResults) {
-        Episode episode = getContext().add(Episode.class, new Supplier<Episode>() {
-          @Override
-          public Episode get() {
-            Episode episode = new Episode(new MediaItem(localInfo.getUri()));
+      for(Path path : scanResults) {
+        DecodeResult result = NAME_DECODER.decode(path.getFileName().toString());
+        Matcher seasonEpisodeMatcher = SEASON_EPISODE_PATTERN.matcher(result.getSequence() == null ? "" : result.getSequence());
 
-            episode.serie.set(Serie.this);
-            episode.season.set(localInfo.getSeason());
-            episode.episode.set(localInfo.getEpisode());
-            episode.endEpisode.set(localInfo.getEndEpisode());
+        if(seasonEpisodeMatcher.matches()) {  // Should always match
+          String title = result.getTitle();
+          String subtitle = result.getSubtitle();
+          Integer season = seasonEpisodeMatcher.group(1) == null ? null : Integer.valueOf(seasonEpisodeMatcher.group(1));
+          Integer episode = seasonEpisodeMatcher.group(2) == null ? null : Integer.valueOf(seasonEpisodeMatcher.group(2));
+          Integer endEpisode = seasonEpisodeMatcher.group(3) == null ? episode : Integer.valueOf(seasonEpisodeMatcher.group(3));
 
-            return episode;
-          }
-        }, new SourceKey(fileEntitySource, localInfo.getUri()));
+          Episode item = getContext().add(Episode.class, new Supplier<Episode>() {
+            @Override
+            public Episode get() {
+              Episode item = new Episode(new MediaItem(path.toString()));
 
-        children.add(episode);
+              item.serie.set(Serie.this);
+              item.season.set(season);
+              item.episode.set(episode);
+              item.endEpisode.set(endEpisode);
+
+              if(episode != null) {
+                item.initialTitle.set(subtitle != null ? subtitle : title);
+              }
+              else {  
+                item.initialTitle.set(title);
+                item.subtitle.set(subtitle);
+              }
+
+              return item;
+            }
+          }, new SourceKey(fileEntitySource, path.toString()));
+
+          children.add(item);
+        }
       }
     }
 

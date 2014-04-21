@@ -12,7 +12,6 @@ import hs.mediasystem.framework.descriptors.EntityDescriptors.TextType;
 import hs.mediasystem.framework.descriptors.StaticEntityDescriptors;
 import hs.mediasystem.util.MapBindings;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 
@@ -43,9 +42,9 @@ public class Episode extends Media {
 
   public final ObjectProperty<Serie> serie = object("serie");
 
-  public final IntegerProperty season = integerProperty("season");
-  public final IntegerProperty episode = integerProperty("episode");
-  public final IntegerProperty endEpisode = integerProperty("endEpisode");
+  public final ObjectProperty<Integer> season = object("season");
+  public final ObjectProperty<Integer> episode = object("episode");
+  public final ObjectProperty<Integer> endEpisode = object("endEpisode");
   public final StringProperty episodeRange = stringProperty("episodeRange");
   public final StringProperty seasonAndEpisode = stringProperty("seasonAndEpisode");
 

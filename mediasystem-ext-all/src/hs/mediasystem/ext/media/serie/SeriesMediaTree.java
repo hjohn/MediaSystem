@@ -1,6 +1,5 @@
 package hs.mediasystem.ext.media.serie;
 
-import hs.mediasystem.dao.LocalInfo;
 import hs.mediasystem.dao.Setting.PersistLevel;
 import hs.mediasystem.entity.EntityContext;
 import hs.mediasystem.entity.SourceKey;
@@ -9,9 +8,12 @@ import hs.mediasystem.framework.Id;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaItem;
 import hs.mediasystem.framework.MediaRoot;
-import hs.mediasystem.framework.ScanException;
+import hs.mediasystem.framework.NameDecoder;
 import hs.mediasystem.framework.SettingsStore;
+import hs.mediasystem.framework.NameDecoder.DecodeResult;
+import hs.mediasystem.framework.NameDecoder.Hint;
 import hs.mediasystem.util.PathStringConverter;
+import hs.mediasystem.util.Throwables;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import javax.inject.Inject;
 
 public class SeriesMediaTree implements MediaRoot {
   private static final Id ID = new Id("serieRoot");
+  private static final NameDecoder NAME_DECODER = new NameDecoder(Hint.MOVIE);
 
   private final FileEntitySource fileEntitySource;
   private final EntityContext entityContext;
@@ -47,30 +50,31 @@ public class SeriesMediaTree implements MediaRoot {
 
       for(Path root : roots) {
         try {
-          List<LocalInfo> scanResults = new SerieScanner().scan(root);
+          List<Path> scanResults = new SerieScanner().scan(root);
 
-          for(LocalInfo localInfo : scanResults) {
+          for(Path path : scanResults) {
+            DecodeResult result = NAME_DECODER.decode(path.getFileName().toString());
+
             Serie child = entityContext.add(
               Serie.class,
               () -> {
-                Serie serie = new Serie(SeriesMediaTree.this, new MediaItem(localInfo.getUri()), fileEntitySource);
+                Serie serie = new Serie(SeriesMediaTree.this, new MediaItem(path.toString()), fileEntitySource);
 
-                serie.initialTitle.set(localInfo.getTitle());
-                serie.subtitle.set(localInfo.getSubtitle());
-                serie.localReleaseYear.set(localInfo.getReleaseYear() == null ? null : localInfo.getReleaseYear().toString());
-                serie.imdbNumber.set(localInfo.getCode());
+                serie.initialTitle.set(result.getTitle());
+                serie.subtitle.set(result.getSubtitle());
+                serie.localReleaseYear.set(result.getReleaseYear() == null ? null : result.getReleaseYear().toString());
+                serie.imdbNumber.set(result.getCode());
 
                 return serie;
               },
-              new SourceKey(fileEntitySource, localInfo.getUri())
+              new SourceKey(fileEntitySource, path.toString())
             );
 
             children.add(child);
           }
         }
-        catch(ScanException e) {
-          System.err.println("[WARN] SeriesMediaTree: " + e.getMessage());  // TODO add to some high level user error reporting facility
-          e.printStackTrace();
+        catch(RuntimeException e) {
+          System.out.println("[WARN] " + getClass().getName() + "::getItems - Exception while getting items for \"" + root + "\": " + Throwables.formatAsOneLine(e));   // TODO add to some high level user error reporting facility
         }
       }
     }
