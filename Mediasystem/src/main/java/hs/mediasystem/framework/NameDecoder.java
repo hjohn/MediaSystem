@@ -4,7 +4,6 @@ import hs.mediasystem.framework.NameDecoder.Parts.Group;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,7 +33,7 @@ public class NameDecoder {
   private static final String NOT_PRECEDED_BY_DIGIT = "(?<!\\d)";
   private static final String NOT_SUCCEEDED_BY_DIGIT_OR_LETTER = "(?!(?:\\d|\\p{L}))";
 
-  private static final Set<Pattern> EPISODE_PATTERNS = new LinkedHashSet<Pattern>() {{
+  private static final Set<Pattern> EPISODE_SEQUENCE_PATTERNS = new LinkedHashSet<Pattern>() {{
     add(Pattern.compile("(.*?)" + "-" + SEASON + "x" + EPISODE + "-" + "(.*?)"));
     add(Pattern.compile("(.*?)" + "\\(" + SEASON + "x" + EPISODE + "\\)" + "(.*?)"));
     add(Pattern.compile("(.*?)" + "\\[" + SEASON + "x" + EPISODE + "\\]" + "(.*?)"));
@@ -51,7 +50,7 @@ public class NameDecoder {
     add(Pattern.compile("(.*?)" + NOT_PRECEDED_BY_DIGIT + "[Ss]" + SEASON + "()()" + NOT_SUCCEEDED_BY_DIGIT_OR_LETTER + "(.*?)")); // Season Only
   }};
 
-  private static final Set<Pattern> MOVIE_PATTERNS = new LinkedHashSet<Pattern>() {{
+  private static final Set<Pattern> MOVIE_SEQUENCE_PATTERNS = new LinkedHashSet<Pattern>() {{
     add(Pattern.compile("(.*?)" + "- " + SEASON + "()()(( [-\\[]|$).*?)"));
   }};
 
@@ -60,17 +59,18 @@ public class NameDecoder {
   public enum Hint {EPISODE, MOVIE}
 
   public NameDecoder(Hint... hints) {
-    Set<Hint> hintSet = new HashSet<>(Arrays.asList(hints));
+    for(Hint hint : hints) {
+      if(hint == Hint.EPISODE) {
+        sequencePatternsToCheck.addAll(EPISODE_SEQUENCE_PATTERNS);
+      }
+      if(hint == Hint.MOVIE) {
+        sequencePatternsToCheck.addAll(MOVIE_SEQUENCE_PATTERNS);
+      }
+    }
 
-    if(hintSet.contains(Hint.EPISODE)) {
-      sequencePatternsToCheck.addAll(EPISODE_PATTERNS);
-    }
-    if(hintSet.contains(Hint.MOVIE)) {
-      sequencePatternsToCheck.addAll(MOVIE_PATTERNS);
-    }
     if(sequencePatternsToCheck.isEmpty()) {
-      sequencePatternsToCheck.addAll(EPISODE_PATTERNS);
-      sequencePatternsToCheck.addAll(MOVIE_PATTERNS);
+      sequencePatternsToCheck.addAll(EPISODE_SEQUENCE_PATTERNS);
+      sequencePatternsToCheck.addAll(MOVIE_SEQUENCE_PATTERNS);
     }
   }
 
@@ -181,6 +181,10 @@ public class NameDecoder {
   private String[] splitExtension(String input) {
     String[] parts = input.split("\\.");
     int extensionStart = parts.length - 1;
+
+    if(extensionStart == 0) {
+      return new String[] {input, ""};
+    }
 
     while(KNOWN_DOUBLE_EXTENSIONS.contains(parts[extensionStart - 1].toLowerCase())) {
       extensionStart--;
