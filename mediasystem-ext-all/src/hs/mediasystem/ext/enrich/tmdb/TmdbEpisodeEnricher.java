@@ -29,10 +29,9 @@ public class TmdbEpisodeEnricher implements Enricher<Episode, String> {
         String[] id = tmdbId.split(";");
         JsonNode episodeInfo = tmdb.query("3/tv/" + id[0] + "/season/" + id[1] + "/episode/" + id[2]);
 
-        Source<byte[]> backgroundSource = tmdb.createSource(tmdb.createImageURL(episodeInfo.path("backdrop_path").getTextValue(), "original"));
         Source<byte[]> posterSource = tmdb.createSource(tmdb.createImageURL(episodeInfo.path("still_path").getTextValue(), "original"));
 
-        return new UpdateTask(episode, episodeInfo, backgroundSource, posterSource);
+        return new UpdateTask(episode, episodeInfo, posterSource);
       }, TheMovieDatabase.EXECUTOR)
       .thenAcceptAsync(updateTask -> updateTask.run(), context.getUpdateExecutor());
   }
@@ -40,13 +39,11 @@ public class TmdbEpisodeEnricher implements Enricher<Episode, String> {
   private class UpdateTask {
     private final Episode episode;
     private final JsonNode episodeInfo;
-    private final Source<byte[]> backgroundSource;
     private final Source<byte[]> posterSource;
 
-    UpdateTask(Episode episode, JsonNode episodeInfo, Source<byte[]> backgroundSource, Source<byte[]> posterSource) {
+    UpdateTask(Episode episode, JsonNode episodeInfo, Source<byte[]> posterSource) {
       this.episode = episode;
       this.episodeInfo = episodeInfo;
-      this.backgroundSource = backgroundSource;
       this.posterSource = posterSource;
     }
 
@@ -57,7 +54,6 @@ public class TmdbEpisodeEnricher implements Enricher<Episode, String> {
       episode.rating.set(episodeInfo.path("vote_average").getDoubleValue());
       episode.releaseDate.set(TheMovieDatabase.parseDateOrNull(episodeInfo.path("air_date").getTextValue()));
 
-      episode.background.set(backgroundSource == null ? episode.serie.get().background.get() : new SourceImageHandle(backgroundSource, createImageKey(episodeInfo, "background")));
       episode.image.set(posterSource == null ? null : new SourceImageHandle(posterSource, createImageKey(episodeInfo, "poster")));
     }
   }
