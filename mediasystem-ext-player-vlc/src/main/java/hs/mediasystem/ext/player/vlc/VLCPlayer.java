@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -34,7 +35,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.image.PixelFormat;
-import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritablePixelFormat;
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.player.MediaPlayer;
@@ -57,8 +57,8 @@ public class VLCPlayer implements Player {
 
   private final MediaPlayer mediaPlayer;
   private final Object canvas;
+  private final AtomicInteger frameNumber = new AtomicInteger();
 
-  private PixelWriter pixelWriter;
   private volatile boolean videoOutputStarted;
 
   public VLCPlayer(Mode mode, String... args) {
@@ -92,8 +92,6 @@ public class VLCPlayer implements Player {
       final ResizableWritableImageView canvas = new ResizableWritableImageView(16, 16);
       final WritablePixelFormat<ByteBuffer> byteBgraInstance = PixelFormat.getByteBgraPreInstance();
 
-      pixelWriter = canvas.getPixelWriter();
-
       DirectMediaPlayer mp = factory.newDirectMediaPlayer(
         new BufferFormatCallback() {
           @Override
@@ -104,7 +102,6 @@ public class VLCPlayer implements Player {
               @Override
               public void run() {
                 canvas.resize(width, height);
-                pixelWriter = canvas.getPixelWriter();
               }
             });
 
@@ -112,14 +109,26 @@ public class VLCPlayer implements Player {
           }
         },
         new RenderCallback() {
+          AtomicReference<ByteBuffer> currentByteBuffer = new AtomicReference<>();
+
           @Override
           public void display(DirectMediaPlayer mp, Memory[] memory, final BufferFormat bufferFormat) {
-            final ByteBuffer byteBuffer = memory[0].getByteBuffer(0, memory[0].size());
+            final int renderFrameNumber = frameNumber.incrementAndGet();
+
+            currentByteBuffer.set(memory[0].getByteBuffer(0, memory[0].size()));
 
             Platform.runLater(new Runnable() {
               @Override
               public void run() {
-                pixelWriter.setPixels(0, 0, bufferFormat.getWidth(), bufferFormat.getHeight(), byteBgraInstance, byteBuffer, bufferFormat.getPitches()[0]);
+                ByteBuffer byteBuffer = currentByteBuffer.get();
+                int actualFrameNumber = frameNumber.get();
+
+                if(renderFrameNumber == actualFrameNumber) {
+                  canvas.getPixelWriter().setPixels(0, 0, bufferFormat.getWidth(), bufferFormat.getHeight(), byteBgraInstance, byteBuffer, bufferFormat.getPitches()[0]);
+                }
+                else {
+                  System.out.println("[FINE] " + VLCPlayer.this.getClass().getSimpleName() + " - Skipped late frame " + renderFrameNumber + " (actual = " + actualFrameNumber + ")");
+                }
               }
             });
           }
@@ -368,6 +377,14 @@ public class VLCPlayer implements Player {
 
   @Override
   public void play(String uri, long positionInMillis) {
+    frameNumber.set(0);
+
+    if(canvas instanceof ResizableWritableImageView) {
+      ResizableWritableImageView resizableWritableImageView = (ResizableWritableImageView)canvas;
+
+      resizableWritableImageView.clear();
+    }
+
     position.update(0);
     audioDelay.update();
     audioTrack.update();
