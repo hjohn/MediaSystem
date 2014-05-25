@@ -27,7 +27,7 @@ public class DialogPane<R> extends StackPane {
     getStylesheets().add("dialog/dialog.css");
     getStyleClass().add("dialog");
 
-    addEventHandler(NavigationEvent.NAVIGATION_ANCESTOR, new EventHandler<NavigationEvent>() {
+    stackPane.addEventHandler(NavigationEvent.NAVIGATION_ANCESTOR, new EventHandler<NavigationEvent>() {
       @Override
       public void handle(NavigationEvent event) {
         close();

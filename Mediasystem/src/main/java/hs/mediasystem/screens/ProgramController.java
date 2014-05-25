@@ -197,8 +197,14 @@ public class ProgramController {
     scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
       @Override
       public void handle(KeyEvent event) {
+        Node focusOwner = scene.getFocusOwner();
+
         if(BACK_SPACE.match(event)) {
-          scene.getFocusOwner().fireEvent(new NavigationEvent(NavigationEvent.NAVIGATION_BACK));
+          if(focusOwner == null) {
+            focusOwner = scene.getRoot();
+          }
+
+          focusOwner.fireEvent(new NavigationEvent(NavigationEvent.NAVIGATION_BACK));  // TODO NPE here when nothing has focus (like on Info panel when there are no links)
           event.consume();
         }
         else if(KEY_CTRL_ALT_S.match(event)) {
@@ -215,10 +221,9 @@ public class ProgramController {
         }
         else if(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
           if(KEY_S.match(event)) {
-            scene.getFocusOwner().fireEvent(new NavigationEvent(NavigationEvent.NAVIGATION_EXIT));
+            focusOwner.fireEvent(new NavigationEvent(NavigationEvent.NAVIGATION_EXIT));
             event.consume();
           }
-
         }
 
         if(!event.isConsumed()) {
