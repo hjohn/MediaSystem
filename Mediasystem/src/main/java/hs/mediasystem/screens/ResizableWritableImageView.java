@@ -1,12 +1,19 @@
 package hs.mediasystem.screens;
 
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelFormat;
+import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 
 public class ResizableWritableImageView extends ImageView {
   private final DoubleProperty width = new SimpleDoubleProperty();
@@ -18,6 +25,8 @@ public class ResizableWritableImageView extends ImageView {
   public final double getHeight() { return height.get(); }
   public final void setHeight(double height) { this.height.set(height); }
   public final DoubleProperty heightProperty() { return height; }
+
+  private final DelegatingPixelWriter pixelWriter = new DelegatingPixelWriter();
 
   public ResizableWritableImageView(double w, double h) {
     width.addListener(new InvalidationListener() {
@@ -45,7 +54,12 @@ public class ResizableWritableImageView extends ImageView {
   }
 
   public PixelWriter getPixelWriter() {
-    return ((WritableImage)getImage()).getPixelWriter();
+    return pixelWriter;
+  }
+
+  public void clear() {
+    updateImageSize();
+    System.out.println("CLEARED CANVAS!");
   }
 
   private void updateImageSize() {
@@ -59,6 +73,53 @@ public class ResizableWritableImageView extends ImageView {
       h = 1;
     }
 
-    setImage(new WritableImage(w, h));
+    WritableImage writableImage = new WritableImage(w, h);
+
+    setImage(writableImage);
+
+    pixelWriter.setPixelWriter(writableImage.getPixelWriter());
+  }
+
+  private static class DelegatingPixelWriter implements PixelWriter {
+    private PixelWriter pixelWriter;
+
+    void setPixelWriter(PixelWriter pixelWriter) {
+      this.pixelWriter = pixelWriter;
+    }
+
+    @Override
+    public PixelFormat<?> getPixelFormat() {
+      return pixelWriter.getPixelFormat();
+    }
+
+    @Override
+    public void setArgb(int x, int y, int argb) {
+      pixelWriter.setArgb(x, y, argb);
+    }
+
+    @Override
+    public void setColor(int x, int y, Color c) {
+      pixelWriter.setColor(x, y, c);
+    }
+
+    @Override
+    public <T extends Buffer> void setPixels(int x, int y, int w, int h, PixelFormat<T> pixelformat, T buffer, int scanlineStride) {
+      pixelWriter.setPixels(x, y, w, h, pixelformat, buffer, scanlineStride);
+    }
+
+    @Override
+    public void setPixels(int x, int y, int w, int h, PixelFormat<ByteBuffer> pixelformat, byte[] buffer, int offset, int scanlineStride) {
+      pixelWriter.setPixels(x, y, w, h, pixelformat, buffer, offset, scanlineStride);
+    }
+
+    @Override
+    public void setPixels(int x, int y, int w, int h, PixelFormat<IntBuffer> pixelformat, int[] buffer, int offset, int scanlineStride) {
+      pixelWriter.setPixels(x, y, w, h, pixelformat, buffer, offset, scanlineStride);
+    }
+
+    @Override
+    public void setPixels(int dstx, int dsty, int w, int h, PixelReader reader, int srcx, int srcy) {
+      pixelWriter.setPixels(dstx, dsty, w, h, reader, srcx, srcy);
+    }
   }
 }
