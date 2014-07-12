@@ -36,11 +36,12 @@ public abstract class Media extends Entity {
   public final ObjectProperty<ObservableList<Casting>> castings = list("castings", Casting.class);
   public final ObjectProperty<ObservableList<Identifier>> identifiers = list("identifiers", Identifier.class);
 
+  public final ObjectProperty<MediaItem> mediaItem = object("mediaItem");
+
   private final EntityDescriptors entityDescriptors;
-  private final MediaItem mediaItem;
 
   public Media(EntityDescriptors entityDescriptors, MediaItem mediaItem) {
-    this.mediaItem = mediaItem;
+    this.mediaItem.set(mediaItem);
     this.entityDescriptors = entityDescriptors;
 
     this.releaseYear.bind(Bindings.when(releaseDate.isNull()).then(localReleaseYear).otherwise(Bindings.format("%tY", releaseDate)));
@@ -62,11 +63,11 @@ public abstract class Media extends Entity {
    * @return the associated MediaItem if any
    */
   public MediaItem getMediaItem() {
-    return mediaItem;
+    return mediaItem.get();
   }
 
   @Override
   public String toString() {
-    return "Media['" + initialTitle.get() + "', mediaItem: " + mediaItem + "]";
+    return "Media['" + initialTitle.get() + "', mediaItem: " + mediaItem.get() + "]";
   }
 }
