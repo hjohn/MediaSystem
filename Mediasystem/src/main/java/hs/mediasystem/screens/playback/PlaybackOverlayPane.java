@@ -143,9 +143,9 @@ public class PlaybackOverlayPane extends StackPane {
       setId("video-overlay_info");
       setBottom(new HBox() {{
         getChildren().add(new VBox() {{
-          final StringBinding serieName = MapBindings.selectString(media, "serie", "title");
-          final StringBinding title = MapBindings.selectString(media, "title");
-          final StringBinding subtitle = MapBindings.selectString(media, "subtitle");
+          final StringBinding serieName = MapBindings.get(media).thenOrDefault("serie", null).then("title").asStringBinding();
+          final StringBinding title = MapBindings.get(media).then("title").asStringBinding();
+          final StringBinding subtitle = MapBindings.get(media).then("subtitle").asStringBinding();
 
           HBox.setHgrow(this, Priority.ALWAYS);
           getChildren().add(new Label() {{
