@@ -54,8 +54,6 @@ public class PersistQueue {
         @Override
         public void run() {
           try {
-            System.out.println("[FINE] Persister - Persisting: " + persistable);
-
             task.persist();
 
             synchronized(futures) {

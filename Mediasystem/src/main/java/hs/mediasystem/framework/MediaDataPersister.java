@@ -20,8 +20,6 @@ public class MediaDataPersister implements Persister<MediaData, Integer> {
   // TODO this whole concept is not thread-safe... MediaData might get modified while reading values here
   @Override
   public void persist(MediaData mediaData, Integer key) {
-    System.out.println(getClass().getName() + ": Persist of MediaData id=" + key + "; uri=" + mediaData.uri.get());
-
     hs.mediasystem.dao.MediaData dbMediaData = mediaDataDao.getMediaData(key);
 
     dbMediaData.setViewed(mediaData.viewed.get());

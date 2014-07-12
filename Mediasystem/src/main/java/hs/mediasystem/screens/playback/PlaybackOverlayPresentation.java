@@ -117,8 +117,6 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
               }
 
               if(Math.abs(mediaData.resumePosition.get() - resumePosition) > 10) {
-                System.out.println("[CONFIG] PlaybackOverlayPresentation - Setting resume position to " + position + " ms: " + media.get());
-
                 mediaData.resumePosition.set(resumePosition);
               }
             }
