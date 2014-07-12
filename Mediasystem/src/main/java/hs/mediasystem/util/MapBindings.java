@@ -16,6 +16,7 @@ import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.LongBinding;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -182,6 +183,10 @@ public class MapBindings {
     };
   }
 
+  public static Builder get(Observable root) {
+    return new Builder(root);
+  }
+
   private static class Helper {
     private final Observable[] observables;
     private final Property[] properties;
@@ -193,7 +198,7 @@ public class MapBindings {
     };
     private final WeakInvalidationListener observer = new WeakInvalidationListener(listener);
     private final Observable root;
-    private final Object[] steps;
+    private final Step[] steps;
     private final Binding<?> binding;
 
     public Helper(Binding<?> binding, final Observable root, final Object... steps) {
@@ -204,7 +209,7 @@ public class MapBindings {
       properties = new Property[this.steps.length];
     }
 
-    private static Object[] expandSteps(Observable root, Object[] steps) {
+    private static Step[] expandSteps(Observable root, Object[] steps) {
       List<Object> expandedSteps = new ArrayList<>();
       int indicesRequired = root instanceof ObservableValue ? 0 : 1;
 
@@ -212,6 +217,11 @@ public class MapBindings {
         Object step = steps[i];
 
         if(indicesRequired-- <= 0) {
+          if(step instanceof Step) {
+            expandedSteps.add(step);
+            continue;
+          }
+
           if(!(step instanceof String)) {
             throw new IllegalArgumentException("expected String at step " + i + ": " + step);
           }
@@ -223,15 +233,17 @@ public class MapBindings {
               throw new IllegalArgumentException("invalid step format at step " + i + ": " + step);
             }
 
-            expandedSteps.add(subStep);
-
             if(subStep.endsWith("[]")) {
+              expandedSteps.add(new Then(subStep.substring(0, subStep.length() - 2)));
               indicesRequired++;
+            }
+            else {
+              expandedSteps.add(new Then(subStep));
             }
           }
         }
         else {
-          expandedSteps.add(step);
+          expandedSteps.add(new IndexLookup(step, i));
         }
       }
 
@@ -239,7 +251,7 @@ public class MapBindings {
         throw new IllegalArgumentException("insufficient indices specified in steps: missing " + indicesRequired + " indices");
       }
 
-      return expandedSteps.toArray(new Object[expandedSteps.size()]);
+      return expandedSteps.toArray(new Step[expandedSteps.size()]);
     }
 
     private void unregisterListeners() {
@@ -254,7 +266,6 @@ public class MapBindings {
 
     protected Object computeValue() {
       Observable observable = root;
-      boolean indexedStep = false;
 
       for(int index = 0; index <= steps.length; index++) {
         observables[index] = observable;
@@ -265,12 +276,6 @@ public class MapBindings {
         }
 
         Object value = observable instanceof ObservableValue ? ((ObservableValue<?>)observable).getValue() : observable;
-
-        if(indexedStep && observable instanceof ObservableValue && !(value instanceof Observable)) {
-          throw new RuntimeBindException("map or list expected at step " + (index - 1) + ": " + steps[index - 1] + " : " + observable);
-        }
-
-        indexedStep = steps[index] instanceof String && ((String)steps[index]).endsWith("[]") && observable instanceof ObservableValue ? true : false;
 
         try {
           if(properties[index] == null || !value.getClass().equals(properties[index].getBeanClass())) {
@@ -293,66 +298,18 @@ public class MapBindings {
 
   private static class Property {
     private final Class<?> cls;
-    private final Object name;
+    private final Step step;
 
-    private Method method;
-    private Field field;
-
-    public Property(Class<?> cls, Object name) {
+    public Property(Class<?> cls, Step name) {
       this.cls = cls;
-
-      if(name instanceof String) {
-        String s = (String)name;
-
-        if(s.endsWith("[]")) {
-          this.name = s.substring(0, s.length() - 2);
-        }
-        else {
-          this.name = name;
-        }
-      }
-      else {
-        this.name = name;
-      }
+      this.step = name;
     }
 
-    @SuppressWarnings("unchecked")
     public Observable getObservable(Object bean) {
       try {
-        if(bean instanceof ObservableMap) {
-          return Bindings.valueAt((ObservableMap<Object, ?>)bean, name);
-        }
-
-        if(bean instanceof ObservableList) {
-          if(!(name instanceof Integer)) {
-            throw new RuntimeBindException("index for ObservableList (" + bean + ") must be of type Integer: " + name.getClass());
-          }
-
-          int index = (Integer)name;
-
-          if(index < 0) {
-            throw new RuntimeBindException("index for ObservableList (" + bean + ") cannot be negative: " + index);
-          }
-
-          return Bindings.valueAt((ObservableList<?>)bean, index);
-        }
-
-        if(name instanceof String) {
-          if(method == null && field == null) {
-            try {
-              method = cls.getMethod(name + "Property");
-            }
-            catch(NoSuchMethodException e) {
-              field = cls.getField((String)name);
-            }
-          }
-
-          return method != null ? (Observable)method.invoke(bean) : (Observable)field.get(bean);
-        }
-
-        throw new IllegalArgumentException("expected string: " + name);
+        return step.execute(cls, bean);
       }
-      catch(NoSuchFieldException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+      catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
         e.printStackTrace();
         return null;
       }
@@ -360,6 +317,159 @@ public class MapBindings {
 
     public Class<?> getBeanClass() {
       return cls;
+    }
+  }
+
+  private interface Step {
+    Observable execute(Class<?> cls, Object bean) throws IllegalAccessException, InvocationTargetException;
+  }
+
+  private static class Then implements Step {
+    private final String propertyName;
+
+    private Method method;
+    private Field field;
+
+    public Then(String propertyName) {
+      this.propertyName = propertyName;
+    }
+
+    @Override
+    public Observable execute(Class<?> cls, Object bean) throws IllegalAccessException, InvocationTargetException {
+      if(method == null && field == null) {
+        try {
+          method = cls.getMethod(propertyName + "Property");
+        }
+        catch(NoSuchMethodException e) {
+          try {
+            field = cls.getField(propertyName);
+          }
+          catch(NoSuchFieldException e2) {
+            throw new RuntimeBindException("No such property found: " + propertyName + " in class: " + cls);
+          }
+        }
+      }
+
+      return method != null ? (Observable)method.invoke(bean) : (Observable)field.get(bean);
+    }
+  }
+
+  private static class IndexLookup implements Step {
+    private final Object obj;
+    private final int stepNumber;
+
+    public IndexLookup(Object obj, int stepNumber) {
+      this.obj = obj;
+      this.stepNumber = stepNumber;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Observable execute(Class<?> cls, Object bean) throws IllegalAccessException, InvocationTargetException {
+      if(bean instanceof ObservableMap) {
+        return Bindings.valueAt((ObservableMap<Object, ?>)bean, obj);
+      }
+
+      if(bean instanceof ObservableList) {
+        if(!(obj instanceof Integer)) {
+          throw new RuntimeBindException("index for ObservableList (" + bean + ") must be of type Integer: " + obj.getClass());
+        }
+
+        int index = (Integer)obj;
+
+        if(index < 0) {
+          throw new RuntimeBindException("index for ObservableList (" + bean + ") cannot be negative: " + index);
+        }
+
+        return Bindings.valueAt((ObservableList<?>)bean, index);
+      }
+
+      throw new RuntimeBindException("map or list expected at step " + (stepNumber - 1) + ", but got: " + cls + ": " + bean);
+    }
+  }
+
+  public static class Builder {
+    private final Observable root;
+    private final List<Object> steps = new ArrayList<>();
+
+    public Builder(Observable root) {
+      this.root = root;
+    }
+
+    public Builder then(String propertyName) {
+      steps.add(propertyName);
+      return this;
+    }
+
+    public Builder thenOrDefault(String propertyName, Object defaultValue) {
+      steps.add(new ThenOrDefault(propertyName, defaultValue));
+      return this;
+    }
+
+    public Builder lookup(Object valueOrIndex) {
+      steps.add(new IndexLookup(valueOrIndex, steps.size()));
+      return this;
+    }
+
+    public StringBinding asStringBinding() {
+      return MapBindings.selectString(root, steps.toArray(new Object[steps.size()]));
+    }
+
+    public <T> ObjectBinding<T> asObjectBinding() {
+      return MapBindings.select(root, steps.toArray(new Object[steps.size()]));
+    }
+
+    private static class ThenOrDefault implements Step {
+      private final String propertyName;
+      private final Object defaultValue;
+
+      private Method method;
+      private Field field;
+
+      public ThenOrDefault(String propertyName, Object defaultValue) {
+        this.propertyName = propertyName;
+        this.defaultValue = defaultValue;
+      }
+
+      @Override
+      public Observable execute(Class<?> cls, Object bean) throws IllegalAccessException, InvocationTargetException {
+        if(method == null && field == null) {
+          try {
+            method = cls.getMethod(propertyName + "Property");
+          }
+          catch(NoSuchMethodException e) {
+            try {
+              field = cls.getField(propertyName);
+            }
+            catch(NoSuchFieldException e2) {
+              return new ObservableValue<Object>() {
+                @Override
+                public void addListener(InvalidationListener listener) {
+                }
+
+                @Override
+                public void removeListener(InvalidationListener listener) {
+                }
+
+                @Override
+                public void addListener(ChangeListener<? super Object> listener) {
+                }
+
+                @Override
+                public void removeListener(ChangeListener<? super Object> listener) {
+                }
+
+                @Override
+                public Object getValue() {
+                  return defaultValue;
+                }
+              };
+            }
+          }
+        }
+
+        return method != null ? (Observable)method.invoke(bean) : (Observable)field.get(bean);
+      }
     }
   }
 }

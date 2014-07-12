@@ -115,7 +115,7 @@ public class MapBindingsTest {
   public void shouldThrowExceptionWhenMapExpectedButNotEncountered() {
     ObjectBinding<Object> select = MapBindings.select(file1.videoProperty(), "episode[]", "episodeNumber");  // episode is not a map
 
-    assertNull(select.get());
+    select.get();
   }
 
   /*
@@ -392,4 +392,44 @@ public class MapBindingsTest {
 
     assertEquals(1, mock.getListenerCount());
   }
+
+  /*
+   * Builder tests
+   */
+
+  @Test
+  public void shouldGetTitleWithBuilder() {
+    StringBinding stringBinding = MapBindings.get(file1.videoProperty()).then("title").asStringBinding();
+
+    assertEquals("Alice", stringBinding.get());
+  }
+
+  @Test
+  public void shouldGetDefaultWithBuilder() {
+    StringBinding stringBinding = MapBindings.get(file1.videoProperty()).thenOrDefault("nonExistingField", "Alice").asStringBinding();
+
+    assertEquals("Alice", stringBinding.get());
+  }
+
+  @Test
+  public void shouldGetNullDefaultWithBuilder() {
+    StringBinding stringBinding = MapBindings.get(file1.videoProperty()).thenOrDefault("nonExistingField", null).asStringBinding();
+
+    assertNull(stringBinding.get());
+  }
+
+  @Test
+  public void shouldGetListValueWithBuilder() {
+    ObjectBinding<Object> select = MapBindings.get(file1.videoProperty()).then("list").lookup(1).asObjectBinding();
+
+    assertEquals("B", select.get());
+  }
+
+  @Test
+  public void shouldGetMapValueWithBuilder() {
+    ObjectBinding<Object> select = MapBindings.get(file1.videoProperty()).then("dataMap").lookup(YouTube.class).then("rating").asObjectBinding();
+
+    assertEquals(9, select.get());
+  }
+
 }
