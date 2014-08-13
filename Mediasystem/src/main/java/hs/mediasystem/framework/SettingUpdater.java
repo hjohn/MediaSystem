@@ -37,7 +37,7 @@ public class SettingUpdater<T> implements ChangeListener<T> {
 
   @Override
   public void changed(ObservableValue<? extends T> observable, T oldValue, T newValue) {
-    if(valueProperty != null) {
+    if(valueProperty != null && newValue != null) {  // TODO allow nulls?
       valueProperty.set(converter.toString(newValue));
     }
   }

@@ -2,20 +2,21 @@ package hs.mediasystem.framework;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 public class MediaItem {
   public final ObjectProperty<MediaData> mediaData = new SimpleObjectProperty<>();
-
-  private final String uri;
+  public final StringProperty uri = new SimpleStringProperty();
 
   public MediaItem(String uri) {
     assert uri != null;
 
-    this.uri = uri;
+    this.uri.set(uri);
   }
 
   public String getUri() {
-    return uri;
+    return uri.get();
   }
 
   public void reloadMetaData() {
