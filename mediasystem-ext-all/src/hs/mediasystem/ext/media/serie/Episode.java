@@ -40,7 +40,40 @@ public class Episode extends Media {
     );
   }
 
+  public enum Type {
+
+    /**
+     * A regular episode.
+     */
+    EPISODE,
+
+    /**
+     * A special episode, in character, that should be viewed before or
+     * after a specific episode in the series.
+     */
+    SPECIAL,
+
+    /**
+     * Other media belonging to the series that cannot be classified, like extras, cast
+     * interviews, bloopers, etc.  These donot necessarily fit with the serie storyline
+     * or have to be in character.
+     */
+    OTHER
+  }
+
+  public enum SpecialPosition {
+    BEFORE, AFTER;
+  }
+
   public final ObjectProperty<Serie> serie = object("serie");
+
+  public final ObjectProperty<Type> type = object("type");
+  public final ObjectProperty<SpecialPosition> specialPosition = object("specialPosition");
+
+  /**
+   * Describes to which group this item belongs when {@link Type} is OTHER, null otherwise.
+   */
+  public final StringProperty group = stringProperty("group");
 
   public final ObjectProperty<Integer> season = object("season");
   public final ObjectProperty<Integer> episode = object("episode");

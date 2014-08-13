@@ -1,6 +1,8 @@
 package hs.mediasystem.ext.media.serie;
 
 import hs.mediasystem.entity.SourceKey;
+import hs.mediasystem.ext.media.serie.Episode.SpecialPosition;
+import hs.mediasystem.ext.media.serie.Episode.Type;
 import hs.mediasystem.framework.EpisodeScanner;
 import hs.mediasystem.framework.FileEntitySource;
 import hs.mediasystem.framework.Id;
@@ -82,6 +84,10 @@ public class Serie extends Media implements MediaRoot {
           Integer season = seasonEpisodeMatcher.group(1) == null ? null : Integer.valueOf(seasonEpisodeMatcher.group(1));
           Integer episode = seasonEpisodeMatcher.group(2) == null ? null : Integer.valueOf(seasonEpisodeMatcher.group(2));
           Integer endEpisode = seasonEpisodeMatcher.group(3) == null ? episode : Integer.valueOf(seasonEpisodeMatcher.group(3));
+          SpecialPosition specialPosition = seasonEpisodeMatcher.group(4) == null ? null : seasonEpisodeMatcher.group(4).equals("a") ? SpecialPosition.AFTER : SpecialPosition.BEFORE;
+          Type type = specialPosition != null ? Type.SPECIAL :
+                              episode != null ? Type.EPISODE :
+                                                Type.OTHER;
 
           Episode item = getContext().add(Episode.class, new Supplier<Episode>() {
             @Override
@@ -89,16 +95,21 @@ public class Serie extends Media implements MediaRoot {
               Episode item = new Episode(new MediaItem(path.toString()));
 
               item.serie.set(Serie.this);
+              item.type.set(type);
+              item.specialPosition.set(specialPosition);
               item.season.set(season);
               item.episode.set(episode);
               item.endEpisode.set(endEpisode);
 
-              if(episode != null) {
+              switch(type) {
+              case SPECIAL:
+              case EPISODE:
                 item.initialTitle.set(subtitle != null ? subtitle : title);
-              }
-              else {  
+                break;
+              case OTHER:
                 item.initialTitle.set(title);
                 item.subtitle.set(subtitle);
+                break;
               }
 
               return item;
