@@ -63,7 +63,6 @@ public class DetailAndListLayout implements UserLayout<MediaRoot, CollectionSele
     listPane.focusedMediaNode.bindBidirectional(presentation.focusedMediaNode);
     listPane.expandTopLevel.bindBidirectional(presentation.expandTopLevel);
     listPane.onNodeSelected.bindBidirectional(presentation.onSelect);
-    listPane.onNodeAlternateSelect.set(presentation.onInfoSelect);
 
     pane.placeLeft(detailPane);
     pane.placeRight(listPane);

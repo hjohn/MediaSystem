@@ -52,14 +52,12 @@ import javax.inject.Inject;
 
 public class TreeListPane extends BorderPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
-  private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
   private static final KeyCombination LEFT = new KeyCodeCombination(KeyCode.LEFT);
   private static final KeyCombination RIGHT = new KeyCodeCombination(KeyCode.RIGHT);
 
   public final ObservableList<MediaNode> mediaNodes = FXCollections.observableArrayList();
   public final ObjectProperty<MediaNode> focusedMediaNode = new SimpleObjectProperty<>();
   public final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected = new SimpleObjectProperty<>();
-  public final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect = new SimpleObjectProperty<>();
   public final BooleanProperty expandTopLevel = new SimpleBooleanProperty();
 
   private final TreeView<MediaNode> treeView = new TreeView<>();
@@ -111,9 +109,6 @@ public class TreeListPane extends BorderPane {
           if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
             itemSelected(event, focusedItem);
           }
-          else if(event.getButton() == MouseButton.SECONDARY && event.getClickCount() == 1) {
-            Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(treeView, focusedItem.getValue()), event);
-          }
         }
       }
     });
@@ -137,9 +132,6 @@ public class TreeListPane extends BorderPane {
           if(focusedItem != null) {
             if(ENTER.match(event)) {
               itemSelected(event, focusedItem);
-            }
-            else if(KEY_I.match(event)) {
-              Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(treeView, focusedItem.getValue()), event);
             }
           }
         }

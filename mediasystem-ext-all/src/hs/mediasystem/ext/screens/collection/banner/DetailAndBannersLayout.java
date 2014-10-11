@@ -62,7 +62,6 @@ public class DetailAndBannersLayout implements UserLayout<MediaRoot, CollectionS
 
     listPane.focusedMediaNode.bindBidirectional(presentation.focusedMediaNode);
     listPane.onNodeSelected.bindBidirectional(presentation.onSelect);
-    listPane.onNodeAlternateSelect.set(presentation.onInfoSelect);
 
     pane.placeLeft(detailPane);
     pane.placeRight(listPane);

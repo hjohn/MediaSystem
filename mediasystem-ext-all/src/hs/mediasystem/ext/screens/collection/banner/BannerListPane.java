@@ -47,12 +47,10 @@ import javax.inject.Inject;
 
 public class BannerListPane extends BorderPane {
   private static final KeyCombination ENTER = new KeyCodeCombination(KeyCode.ENTER);
-  private static final KeyCombination KEY_I = new KeyCodeCombination(KeyCode.I);
 
   public final ObservableList<MediaNode> mediaNodes = FXCollections.observableArrayList();
   public final ObjectProperty<MediaNode> focusedMediaNode = new SimpleObjectProperty<>();
   public final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeSelected = new SimpleObjectProperty<>();
-  public final ObjectProperty<EventHandler<MediaNodeEvent>> onNodeAlternateSelect = new SimpleObjectProperty<>();
 
   private final TableColumn<DuoMediaNode, MediaNode> leftColumn = new TableColumn<>("Left");
   private final TableColumn<DuoMediaNode, MediaNode> rightColumn = new TableColumn<>("Right");
@@ -132,9 +130,6 @@ public class BannerListPane extends BorderPane {
           if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
             itemSelected(event, focusedNode);
           }
-          else if(event.getButton() == MouseButton.SECONDARY && event.getClickCount() == 1) {
-            Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(tableView, focusedNode), event);
-          }
         }
       }
     });
@@ -147,9 +142,6 @@ public class BannerListPane extends BorderPane {
         if(focusedNode != null) {
           if(ENTER.match(event)) {
             itemSelected(event, focusedNode);
-          }
-          else if(KEY_I.match(event)) {
-            Events.dispatchEvent(onNodeAlternateSelect, new MediaNodeEvent(tableView, focusedNode), event);
           }
         }
       }

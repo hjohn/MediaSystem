@@ -4,6 +4,7 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.actions.PresentationActionEvent;
 import hs.mediasystem.framework.player.PlayerEvent;
 import hs.mediasystem.screens.collection.CollectionPresentation;
+import hs.mediasystem.screens.collection.CollectionSelectorPresentation;
 import hs.mediasystem.screens.main.MainScreenLocation;
 import hs.mediasystem.screens.playback.PlaybackLocation;
 import hs.mediasystem.screens.playback.PlaybackOverlayPane;
@@ -299,6 +300,9 @@ public class ProgramController {
     addKeyMapping(CollectionPresentation.class, new KeyCodeCombination(KeyCode.F), "hs.mediasystem.screens.collection.CollectionActions.FILTER_SHOW_DIALOG");
     addKeyMapping(CollectionPresentation.class, new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), "hs.mediasystem.screens.collection.CollectionActions.GROUP_SET_NEXT");
 
+    addKeyMapping(CollectionSelectorPresentation.class, new KeyCodeCombination(KeyCode.V), "hs.mediasystem.screens.collection.CollectionSelectorActions.VIEWED_TOGGLE");
+    addKeyMapping(CollectionSelectorPresentation.class, new KeyCodeCombination(KeyCode.I), "hs.mediasystem.screens.collection.CollectionSelectorActions.INFORMATION_SHOW_DIALOG");
+
     addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT9), "hs.mediasystem.screens.playback.PlayerActions.VOLUME_DECREASE");
     addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT0), "hs.mediasystem.screens.playback.PlayerActions.VOLUME_INCREASE");
     addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.M), "hs.mediasystem.screens.playback.PlayerActions.MUTE");
@@ -370,13 +374,14 @@ public class ProgramController {
   }
 
   private boolean handleUserDefinedKeysForPresentation(KeyEvent event, Object presentation) {
-    System.out.println("Handling user defined key... " + event);
     Map<KeyCombination, EventHandler<PresentationActionEvent<?>>> eventHandlersByKeyCombination = eventHandlersByKeyCombinationByPresentation.get(presentation.getClass());
 
     if(eventHandlersByKeyCombination != null) {
       for(KeyCombination keyCombination : eventHandlersByKeyCombination.keySet()) {
         if(keyCombination.match(event)) {
           EventHandler<PresentationActionEvent<?>> handler = eventHandlersByKeyCombination.get(keyCombination);
+
+          System.out.println("[INFO] ProgramController#handleUserDefinedKeys - Key: " + keyCombination + " -> " + handler.getClass().getName() + "." + handler);
 
           handler.handle(new PresentationActionEvent<>(presentation, event));
           return true;

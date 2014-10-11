@@ -9,7 +9,6 @@ import hs.mediasystem.screens.collection.detail.DetailView;
 import hs.mediasystem.util.AreaPane;
 import hs.mediasystem.util.DialogPane;
 import hs.mediasystem.util.GridPaneUtil;
-import hs.mediasystem.util.javafx.Dialogs;
 
 import java.util.Set;
 
@@ -35,7 +34,6 @@ public class CollectionSelectorPresentation {
   public final BooleanProperty expandTopLevel = new SimpleBooleanProperty();
 
   public final ObjectProperty<EventHandler<MediaNodeEvent>> onSelect = new SimpleObjectProperty<>();
-  public final EventHandler<MediaNodeEvent> onInfoSelect = new InfoEventHandler();  // TODO ugly
 
   private final Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts;
 
@@ -44,7 +42,9 @@ public class CollectionSelectorPresentation {
     this.layouts = layouts;
   }
 
-  private DialogPane<?> createInformationDialog(final MediaNode mediaNode, Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts) {
+  public DialogPane<?> createInformationDialog() {
+    final MediaNode mediaNode = focusedMediaNode.get();
+
     DetailView detailPane = new DetailView(layouts, true, new AreaLayout() {
       @Override
       public void layout(AreaPane areaPane) {
@@ -95,13 +95,5 @@ public class CollectionSelectorPresentation {
     dialogPane.getChildren().add(detailPane);
 
     return dialogPane;
-  }
-
-  class InfoEventHandler implements EventHandler<MediaNodeEvent> {
-    @Override
-    public void handle(MediaNodeEvent event) {
-      Dialogs.show(event, createInformationDialog(event.getMediaNode(), layouts));
-      event.consume();
-    }
   }
 }
