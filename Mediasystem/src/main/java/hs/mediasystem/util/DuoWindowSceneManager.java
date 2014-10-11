@@ -157,6 +157,7 @@ public class DuoWindowSceneManager implements SceneManager {
 
   private void destroyPlayerFrame() {
     if(playerFrame != null) {
+      playerFrame.removeAll();
       playerFrame.dispose();
       playerFrame = null;
     }
