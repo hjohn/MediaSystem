@@ -13,6 +13,18 @@ public class TablePane extends GridPane {
     return this;
   }
 
+  public TablePane add(Node node, int columnSpan) {
+    getChildren().add(node);
+    GridPane.setConstraints(node, column, row, columnSpan, 1);
+    column += columnSpan;
+    return this;
+  }
+
+  public TablePane nextColumn() {
+    column++;
+    return this;
+  }
+
   public TablePane nextRow() {
     column = 0;
     row++;
