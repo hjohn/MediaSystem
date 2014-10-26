@@ -78,6 +78,10 @@ public class DialogPane<R> extends StackPane {
 
   @SuppressWarnings("unchecked")
   public R showDialog(Scene scene, boolean synchronous) {
+    if(scene == null) {
+      throw new IllegalStateException("scene cannot be null");
+    }
+
     this.synchronous = synchronous;
     this.scene = scene;
     this.oldFocusOwner = scene.getFocusOwner();
