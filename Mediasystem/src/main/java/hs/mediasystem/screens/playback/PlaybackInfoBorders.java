@@ -26,7 +26,6 @@ import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -66,6 +65,10 @@ public class PlaybackInfoBorders extends StackPane {
     }};
 
     final GridPane grid = GridPaneUtil.create(new double[] {0.5, 3, 26, 7.5, 26, 7.5, 26, 3, 0.5}, new double[] {50, 45, 4.5, 0.5});
+
+    // Prevent GridPane from becoming bigger than its container when children donot fit in the allocated grid slots:
+    grid.setMinSize(1, 1);
+    grid.setPrefSize(1, 1);
 
     grid.add(positionLabel, 1, 2, 2, 1);
     grid.add(timeLabel, 6, 2, 2, 1);
@@ -211,12 +214,18 @@ public class PlaybackInfoBorders extends StackPane {
         HBox.setHgrow(this, Priority.ALWAYS);
         getStyleClass().add("osd");
 
-        getChildren().add(new BorderPane() {{
-          setLeft(new Label(title));
-          setRight(new Label() {{
-            textProperty().bind(valueText);
-          }});
-        }});
+        GridPane gridPane = GridPaneUtil.create(new double[] {30, 5, 65}, new double[] {100});
+
+        getChildren().add(gridPane);
+
+        Label titleLabel = new Label(title);
+        GridPane.setValignment(titleLabel, VPos.TOP);
+
+        gridPane.add(titleLabel, 0, 0);
+        gridPane.add(new Label() {{
+          textProperty().bind(valueText);
+          setWrapText(true);
+        }}, 2, 0);
 
         if(value != null) {
           RangeBar bar = new RangeBar(min, max, origin);
