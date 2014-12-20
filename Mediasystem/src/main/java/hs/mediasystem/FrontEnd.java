@@ -58,6 +58,8 @@ import java.util.Properties;
 import java.util.Set;
 
 import javafx.application.Application;
+import javafx.application.ConditionalFeature;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
@@ -84,7 +86,10 @@ public class FrontEnd extends Application {
 
   @Override
   public void start(Stage primaryStage) throws MalformedURLException {
+    JavaFXDefaults.setup();
+
     System.out.println("javafx.runtime.version: " + System.getProperties().get("javafx.runtime.version"));
+    System.out.println("TWO_LEVEL_FOCUS: " + Platform.isSupported(ConditionalFeature.TWO_LEVEL_FOCUS));
 
     setUserAgentStylesheet(STYLESHEET_CASPIAN);
 

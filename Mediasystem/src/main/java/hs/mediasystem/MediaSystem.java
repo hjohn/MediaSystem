@@ -330,8 +330,9 @@ public class MediaSystem {
       System.out.println("[INFO] File 'logging.properties' not found, using defaults");
     }
 
-
+    System.setProperty("prism.text", "t2k");
     System.setProperty("prism.lcdtext", "false");
+
 //    System.setProperty("prism.verbose", "true");
 //    System.setProperty("prism.dirtyopts", "false");
 
