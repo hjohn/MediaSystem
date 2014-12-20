@@ -222,7 +222,7 @@
   -fx-stroke-width: 1;
 }
 
-.star:disabled {
+.background .star {
   -fx-fill: linear-gradient(from 0% 0% to 0% 100%, derive(-c-star-disabled, -25%) 0%, derive(-c-star-disabled, 75%) 33%, derive(-c-star-disabled, -25%) 100%);
   -fx-stroke: -c-star-disabled;
 }
