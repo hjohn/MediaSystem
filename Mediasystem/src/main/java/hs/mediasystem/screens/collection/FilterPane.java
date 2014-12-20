@@ -66,6 +66,7 @@ public class FilterPane extends BorderPane {
 
   public FilterPane() {
     getStylesheets().add(getClass().getResource("FilterPane.css").toExternalForm());
+    getStyleClass().add("media-look");
 
     setTop(new Label("Filter") {{
       getStyleClass().add("title");
@@ -74,6 +75,7 @@ public class FilterPane extends BorderPane {
 
     setCenter(new TablePane() {{
       getStyleClass().add("filters");
+      getStyleClass().add("input-fields");
 
       add(new Label("Viewed"));
       add(new CheckBox() {{

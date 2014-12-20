@@ -31,6 +31,9 @@
   -c-bg-control: derive(-c-base-25, -75%);
   -c-bg-combobox-cell: rgba(0, 0, 0, 0.8);
   -c-bg-combobox-focused-cell: derive(rgba(173, 216, 230, 0.8), -50%);
+  
+  -fx-cell-focus-color: -c-bg-combobox-focused-cell;
+  -fx-cell-ifocus-color: derive(-fx-focus-color, -60%);
 
   color-main: -c-base;
   
@@ -61,6 +64,7 @@
   -fx-font-weight: normal;
   
   -fx-focus-color: rgb(255, 255, 0);
+  -fx-accent: -fx-focus-color;
 }
 
 /*
@@ -266,39 +270,39 @@
  * ComboBox: MediaLook
  */
 
-.combo-box {
+.media-look .combo-box {
   -fx-background-color: -c-bg-control;
   -fx-border-color: -c-border-control;
   -fx-border-width: 1;
 }
 
-.combo-box .arrow-button {
+.media-look .combo-box .arrow-button {
   -fx-background-color: -c-bg-control; 
   -fx-border-color: transparent, -c-border-control;
   -fx-border-width: 1, 1;
   -fx-border-insets: 0, 1;
 }
 
-.combo-box .list-cell {
+.media-look .combo-box .list-cell {
   -fx-text-fill: -c-text-highlight;
 }
 
-.combo-box-popup .list-view {
+.media-look .combo-box-popup .list-view {
   -fx-background-color: -c-bg-transparent;   
   -fx-border-color: -c-border-tab;
   -fx-border-width: 1 1 1 1;
 }
 
-.combo-box-popup .list-view .list-cell {
+.media-look .combo-box-popup .list-view .list-cell {
   -fx-text-fill: -c-text;
 }
 
-.combo-box-popup .list-view .list-cell:focused {
+.media-look .combo-box-popup .list-view .list-cell:focused {
   -fx-background-color: -c-bg-combobox-focused-cell;
   -fx-text-fill: -c-text-focused;
 }
 
-.combo-box-base > .arrow-button > .arrow {
+.media-look .combo-box-base > .arrow-button > .arrow {
   -fx-background-color: -c-border-control;
 }
 
@@ -306,11 +310,11 @@
  * CheckBox: MediaLook
  */
 
-.check-box {
+.media-look .check-box {
   -fx-text-fill: -c-text;
 }
 
-.check-box > .box {
+.media-look .check-box > .box {
   -fx-background-color: -c-bg-control;
   -fx-background-insets: 0;
   -fx-background-radius: 0;
@@ -321,17 +325,156 @@
   -fx-border-width: 1;
 }
 
-.check-box:selected > .box > .mark {
+.media-look .check-box:selected > .box > .mark {
   -fx-background-color: -c-text-highlight;
+}
+
+/*
+ * Button: MediaLook
+ */
+ 
+.media-look .button {
+  -fx-background-color: -c-bg-control;
+  -fx-background-insets: 0;
+  -fx-background-radius: 0;
+
+  -fx-text-fill: -c-text-highlight;
+
+  -fx-border-color: -c-border-control;
+  -fx-border-width: 1;
+  -fx-border-insets: 0;
+  -fx-border-radius: 0;
+}
+
+/*
+ * List: MediaLook
+ */
+ 
+.media-look .list-view {
+  -fx-background-color: -c-bg-control;
+  -fx-background-insets: 0;
+  -fx-background-radius: 0;
+
+  -fx-border-color: -c-border-control;
+  -fx-border-width: 1;
+  -fx-border-insets: 0;
+  -fx-border-radius: 0;
+}
+
+.media-look .list-view .list-cell {
+  -fx-text-fill: -c-text-highlight;
+}
+
+.media-look .list-view .list-cell:focused {
+  -fx-background-color: -fx-cell-focus-color;
+  -fx-text-fill: -c-text-focused;
+}
+
+/*
+ * Slider: MediaLook
+ */
+ 
+.media-look .slider {
+  -fx-border-color: -c-border-control;
+  -fx-border-width: 0;
+  -fx-border-insets: 1;
+  -fx-border-radius: 0;
+}
+
+.media-look .slider:focused,
+.media-look .slider.focused
+{
+  -fx-background-color: transparent;
 }
 
 /*
  * MediaLook: Focus
  */
  
-.check-box.focused > .box, .combo-box-base.focused {
+.media-look .check-box.focused > .box, 
+.media-look .combo-box-base.focused, 
+.media-look .button.focused,
+.media-look .list-view.focused:external-focus,  /* without mouse focus */
+.media-look .list-view:focused:external-focus   /* with mouse focus */
+{
   -fx-border-color: -fx-focus-color, -c-border-control;
   -fx-border-width: 3, 1;
   -fx-border-insets: -5.4, 0;
   -fx-border-radius: 5.4, 0;
+}
+
+.media-look .slider.focused:external-focus,
+.media-look .slider:focused:external-focus
+{
+  -fx-border-color: -fx-focus-color, transparent;
+  -fx-border-width: 3, 1;
+  -fx-border-insets: -5.4, 0;
+  -fx-border-radius: 5.4, 0;
+}
+
+.media-look .slider.focused:internal-focus *.thumb,
+.media-look .slider:focused:internal-focus *.thumb
+{
+  -fx-background-color:
+        -fx-focus-color,
+        derive(-fx-color,-36%),
+        derive(-fx-color,73%),
+        linear-gradient(to bottom, derive(-fx-color,-19%),derive(-fx-color,61%));
+  -fx-background-radius: 17.4, 14, 13, 12;
+  -fx-background-insets: -3.4, 0, 1, 2;
+}
+
+.media-look .list-view:internal-focus .list-cell:focused,
+.media-look .combo-box-popup .list-view .list-cell:filled:selected
+{
+  -fx-background-color: -fx-focus-color, -fx-cell-ifocus-color !important;
+  -fx-background-insets: 0, 1 !important;
+}
+
+/*
+ * Keyboard shortcut styling
+ */
+ 
+.label.shortcut {
+  -base: rgb(255, 245, 230);
+  -fx-border-width: 1;
+  -fx-border-radius: 3;
+  -fx-border-insets: 1 1 3 1;
+  -fx-border-color: linear-gradient(from 100% 100% to 0% 0%, -base, derive(-base, -30%));
+  -fx-background-radius: 5, 0;
+  -fx-background-insets: 0, 2 2 4 2;
+  -fx-background-color: linear-gradient(from 100% 0% to 0% 100%, derive(-base, -25%), derive(-base, -50%)), linear-gradient(from 0% 0% to 0% 100%, derive(-base, -15%), derive(-base, -25%));
+  -fx-font-family: "Arial";
+  -fx-font-size: 10px;
+  -fx-font-weight: bold;
+  -fx-text-fill: black;
+  -fx-label-padding: 0 5 2 2;
+  -fx-alignment: top-left;
+}
+
+.dialog.media-look .input-fields,
+.dialog .media-look .input-fields
+{
+  -fx-hgap: 8px;
+  -fx-vgap: 8px;
+  -fx-spacing: 8px;
+}
+
+.dialog.media-look,
+.dialog .media-look
+{
+  -fx-hgap: 16px;
+  -fx-vgap: 16px;
+  -fx-spacing: 16px;
+}
+
+.enabled-look .label:disabled,
+.enabled-look .button:disabled,
+.enabled-look .list-view:disabled,
+.enabled-look .tree-view:disabled,
+.enabled-look .list-cell:disabled,
+.enabled-look .tree-cell:disabled,
+.enabled-look .scroll-bar:disabled
+{
+  -fx-opacity: 1;
 }
