@@ -24,7 +24,7 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
 public class BackgroundPane extends StackPane {
-  private static final Duration SETTLE_DURATION = Duration.millis(500);  // TODO this helps "prevent" null images being shown between series and serie switches, but not always... should be resolved on a series/serie level instead
+  private static final Duration SETTLE_DURATION = Duration.millis(1000);  // TODO this helps "prevent" null images being shown between series and serie switches, but not always... should be resolved on a series/serie level instead
   private static final Image EMPTY_IMAGE = new Image(new ByteArrayInputStream(new byte[0]));
 
   private final ObjectProperty<MediaNode> mediaNode = new SimpleObjectProperty<>();
@@ -116,10 +116,7 @@ public class BackgroundPane extends StackPane {
          * in the early stages of an animation, restart it to allow the background to 'settle'.
          */
 
-        if(timeline.getStatus() == Animation.Status.STOPPED) {
-          timeline.play();
-        }
-        else if(timeline.getCurrentTime().lessThan(SETTLE_DURATION)) {
+        if(timeline.getStatus() == Animation.Status.STOPPED || timeline.getCurrentTime().lessThan(SETTLE_DURATION)) {
           timeline.playFromStart();
         }
       }

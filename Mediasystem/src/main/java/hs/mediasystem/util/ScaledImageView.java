@@ -93,9 +93,12 @@ public class ScaledImageView extends Region {
           imageView.setViewport(new Rectangle2D(xOffset, 0, viewportWidth, viewportHeight));
         }
       }
-
-      bounds = imageView.getLayoutBounds();
     }
+    else {
+      imageView.setViewport(null);
+    }
+
+    bounds = imageView.getLayoutBounds();
 
     layoutInArea(imageView, insets.getLeft(), insets.getTop(), getWidth() - insetsWidth, getHeight() - insetsHeight, 0, alignment.get().getHpos(), alignment.get().getVpos());
 
