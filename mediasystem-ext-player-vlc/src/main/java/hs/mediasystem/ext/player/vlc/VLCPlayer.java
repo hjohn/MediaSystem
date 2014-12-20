@@ -144,10 +144,27 @@ public class VLCPlayer implements Player {
       private boolean videoAdjusted;
 
       @Override
-      public void timeChanged(MediaPlayer mediaPlayer, final long newTime) {
+      public void timeChanged(final MediaPlayer mediaPlayer, final long newTime) {
         position.update(newTime);
+        final int currentSubtitleId = mediaPlayer.getSpu();
+
+        if(currentSubtitleId > 0 && currentSubtitleId != getSubtitle().getId()) {
+          System.out.println("[INFO] VLCPlayer: Subtitle changed externally to " + currentSubtitleId + ", updating to match");
+
+          Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+              updateSubtitles();
+              Subtitle subtitle = getSubtitleInternal();
+
+              setSubtitle(subtitle);
+            }
+          });
+        }
+
         if(!videoAdjusted) {
           mediaPlayer.setAdjustVideo(true);
+          videoAdjusted = true;
         }
       }
 
@@ -189,8 +206,13 @@ public class VLCPlayer implements Player {
       public void mediaParsedChanged(MediaPlayer mediaPlayer, int parsed) {
         System.out.println("[FINE] VLCPlayer: Event[mediaParsedChanged]: " + parsed);
         if(parsed == 1) {
-          updateSubtitles();
-          audioTrack.update();
+          Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+              updateSubtitles();
+              audioTrack.update();
+            }
+          });
         }
       }
 
@@ -356,7 +378,6 @@ public class VLCPlayer implements Player {
 
   @Override
   public ObservableList<Subtitle> getSubtitles() {
-    updateSubtitles();
     return FXCollections.unmodifiableObservableList(subtitles);
   }
 
@@ -437,6 +458,8 @@ public class VLCPlayer implements Player {
         subtitles.add(new Subtitle(spuDescription.id(), spuDescription.description()));
       }
     }
+
+    System.out.println("[FINE] VLCPlayer.updateSubtitles(), now available: " + subtitles);
   }
 
   private final UpdatableLongProperty length;
