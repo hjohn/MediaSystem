@@ -14,6 +14,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import uk.co.caprica.vlcj.logger.Logger;
+import uk.co.caprica.vlcj.logger.Logger.Level;
 import javafx.beans.property.ObjectProperty;
 
 import com.sun.jna.NativeLibrary;
@@ -43,6 +45,7 @@ public abstract class AbstractVLCPlayerFactory implements PlayerFactory {
     }
 
     NativeLibrary.addSearchPath("libvlc", libVlcPathProperty.get().toString());
+    Logger.setLevel(Level.INFO);
 
     List<String> args = new ArrayList<>();
     Section vlcArgsSection = ini.getSection("vlc.args");
