@@ -27,6 +27,6 @@ public class Dialogs {
   }
 
   private static Scene extractSceneFromEvent(Event event) {
-    return ((Node)event.getTarget()).getScene();
+    return event.getTarget() instanceof Scene ? (Scene)event.getTarget() : ((Node)event.getTarget()).getScene();
   }
 }
