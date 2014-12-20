@@ -5,6 +5,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.sun.javafx.tk.Toolkit;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
@@ -25,27 +27,22 @@ public class SceneUtil {
     scene.setEventDispatcher(new EventDispatcher() {
       @Override
       public Event dispatchEvent(Event event, EventDispatchChain tail) {
-        long millis = System.currentTimeMillis();
         Thread fxThread = Thread.currentThread();
 
         ScheduledFuture<?> future = EVENT_TIMEOUT_EXECUTOR.schedule(new Runnable() {
           @Override
           public void run() {
-            System.out.println("[WARN] Slow Event Handling, trace:");
+            if(!Toolkit.getToolkit().isNestedLoopRunning()) {
+              System.out.println("[WARN] Slow Event Handling, trace:");
 
-            for(StackTraceElement element : fxThread.getStackTrace()) {
-              System.out.println("[WARN]   -- " + element);
+              for(StackTraceElement element : fxThread.getStackTrace()) {
+                System.out.println("[WARN]   -- " + element);
+              }
             }
           }
         }, 1000, TimeUnit.MILLISECONDS);
 
         Event returnedEvent = eventDispatcher.dispatchEvent(event, tail);
-
-        millis = System.currentTimeMillis() - millis;
-
-        if(millis >= 100) {
-          System.out.println("[WARN] Slow Event Handling: " + millis + " ms for event: " + event);
-        }
 
         future.cancel(false);
 
