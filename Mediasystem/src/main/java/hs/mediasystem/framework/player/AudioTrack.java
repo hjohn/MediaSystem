@@ -18,4 +18,9 @@ public class AudioTrack {
   public int getId() {
     return id;
   }
+
+  @Override
+  public String toString() {
+    return "('" + description + "', AudioTrack[id=" + id + "])";
+  }
 }
