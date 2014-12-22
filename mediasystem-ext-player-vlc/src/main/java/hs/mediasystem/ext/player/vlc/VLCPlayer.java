@@ -19,7 +19,10 @@ import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -148,7 +151,7 @@ public class VLCPlayer implements Player {
         position.update(newTime);
         final int currentSubtitleId = mediaPlayer.getSpu();
 
-        if(currentSubtitleId > 0 && currentSubtitleId != getSubtitle().getId()) {
+        if(currentSubtitleId > 0 && currentSubtitleId != getSubtitleInternal().getId()) {
           System.out.println("[INFO] VLCPlayer: Subtitle changed externally to " + currentSubtitleId + ", updating to match");
 
           Platform.runLater(new Runnable() {
@@ -210,6 +213,7 @@ public class VLCPlayer implements Player {
             @Override
             public void run() {
               updateSubtitles();
+              updateAudioTracks();
               audioTrack.update();
             }
           });
@@ -353,7 +357,7 @@ public class VLCPlayer implements Player {
   }
 
   public void setAudioTrackInternal(AudioTrack audioTrack) {
-    mediaPlayer.setAudioTrack(getAudioTracks().indexOf(audioTrack));
+    mediaPlayer.setAudioTrack(audioTrack.getId());
   }
 
   public Subtitle getSubtitleInternal() {
@@ -381,20 +385,12 @@ public class VLCPlayer implements Player {
     return FXCollections.unmodifiableObservableList(subtitles);
   }
 
-  private final List<AudioTrack> audioTracks = new ArrayList<>();
+  private final ObservableList<AudioTrack> audioTracks = FXCollections.observableArrayList();
 
   @Override
   public ObservableList<AudioTrack> getAudioTracks() {
-    if(audioTracks.isEmpty()) {
-      for(TrackDescription description : mediaPlayer.getAudioDescriptions()) {
-        audioTracks.add(new AudioTrack(description.id(), description.description()));
-      }
-    }
-
-    return FXCollections.observableArrayList(audioTracks.isEmpty() ? NO_AUDIO_TRACKS : audioTracks);
+    return FXCollections.unmodifiableObservableList(audioTracks);
   }
-
-  private static final List<AudioTrack> NO_AUDIO_TRACKS = new ArrayList<>();
 
   @Override
   public void play(String uri, long positionInMillis) {
@@ -460,6 +456,37 @@ public class VLCPlayer implements Player {
     }
 
     System.out.println("[FINE] VLCPlayer.updateSubtitles(), now available: " + subtitles);
+  }
+
+  private void updateAudioTracks() {
+    Set<Integer> foundIds = new HashSet<>();
+
+    /*
+     * Update the AudioTracks observable list in place, with minimal disturbances:
+     */
+
+    next:
+    for(TrackDescription description : mediaPlayer.getAudioDescriptions()) {
+      foundIds.add(description.id());
+
+      for(AudioTrack audioTrack : audioTracks) {
+        if(audioTrack.getId() == description.id()) {
+          continue next;
+        }
+      }
+
+      audioTracks.add(new AudioTrack(description.id(), description.description()));
+    }
+
+    for(Iterator<AudioTrack> iterator = audioTracks.iterator(); iterator.hasNext();) {
+      AudioTrack audioTrack = iterator.next();
+
+      if(!foundIds.contains(audioTrack.getId())) {
+        iterator.remove();
+      }
+    }
+
+    System.out.println("[FINE] VLCPlayer.updateAudioTracks(), now available: " + audioTracks);
   }
 
   private final UpdatableLongProperty length;
