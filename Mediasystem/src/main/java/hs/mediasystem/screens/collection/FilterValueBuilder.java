@@ -1,41 +1,19 @@
 package hs.mediasystem.screens.collection;
 
-import hs.mediasystem.framework.actions.PresentationActionEvent;
+import hs.mediasystem.framework.actions.ValueBuilder;
 import hs.mediasystem.util.DialogPane;
 import hs.mediasystem.util.javafx.Dialogs;
-import javafx.event.EventHandler;
+import javafx.event.Event;
 
-import javax.inject.Named;
+public class FilterValueBuilder implements ValueBuilder<CollectionPresentation.InclusionFilter> {
 
-@Named
-public enum CollectionActions implements EventHandler<PresentationActionEvent<CollectionPresentation>> {
-  GROUP_SET_NEXT(event -> {
-    CollectionPresentation presentation = event.getPresentation();
-    int index = presentation.availableGroupSets.indexOf(presentation.groupSet.get()) + 1;
-
-    if(index >= presentation.availableGroupSets.size()) {
-      index = 0;
-    }
-
-    presentation.groupSet.set(presentation.availableGroupSets.get(index));
-  }),
-  GROUP_SET_PREVIOUS(event -> {
-    CollectionPresentation presentation = event.getPresentation();
-    int index = presentation.availableGroupSets.indexOf(presentation.groupSet.get()) - 1;
-
-    if(index < 0) {
-      index = presentation.availableGroupSets.size() - 1;
-    }
-
-    presentation.groupSet.set(presentation.availableGroupSets.get(index));
-  }),
-  FILTER_SHOW_DIALOG(event -> {
-    CollectionPresentation presentation = event.getPresentation();
+  @Override
+  public CollectionPresentation.InclusionFilter build(Event event, CollectionPresentation.InclusionFilter currentValue) {
     FilterPane filterPane = new FilterPane();
 
-    presentation.inclusionFilter.set(Dialogs.showAndWait(event, new DialogPane<CollectionPresentation.InclusionFilter>() {
+    return Dialogs.showAndWait(event, new DialogPane<CollectionPresentation.InclusionFilter>() {
       {
-        CollectionPresentation.InclusionFilter inclusionFilter = presentation.inclusionFilter.get();
+        CollectionPresentation.InclusionFilter inclusionFilter = currentValue;
 
         getChildren().add(filterPane);
 
@@ -102,17 +80,6 @@ public enum CollectionActions implements EventHandler<PresentationActionEvent<Co
 
         return new CollectionPresentation.InclusionFilter(year1, year2, filterPane.includeViewed.get(), filterPane.includeNotViewed.get(), filterPane.matchGenres);
       }
-    }));
-  });
-
-  private final EventHandler<PresentationActionEvent<CollectionPresentation>> eventHandler;
-
-  CollectionActions(EventHandler<PresentationActionEvent<CollectionPresentation>> eventHandler) {
-    this.eventHandler = eventHandler;
-  }
-
-  @Override
-  public void handle(PresentationActionEvent<CollectionPresentation> event) {
-    eventHandler.handle(event);
+    });
   }
 }

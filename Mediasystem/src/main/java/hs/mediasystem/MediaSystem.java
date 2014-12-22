@@ -332,6 +332,7 @@ public class MediaSystem {
 
     System.setProperty("prism.text", "t2k");
     System.setProperty("prism.lcdtext", "false");
+    System.setProperty("com.sun.javafx.twoLevelFocus", "true");
 
 //    System.setProperty("prism.verbose", "true");
 //    System.setProperty("prism.dirtyopts", "false");

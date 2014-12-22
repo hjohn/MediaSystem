@@ -1,6 +1,7 @@
 package hs.mediasystem.framework;
 
 import hs.mediasystem.entity.Entity;
+import hs.mediasystem.framework.actions.Expose;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
@@ -14,6 +15,7 @@ public class MediaData extends Entity {
   public final LongProperty fileLength = longProperty("fileLength");
   public final ObjectProperty<Long> osHash = object("osHash");
   public final IntegerProperty resumePosition = integerProperty("resumePosition");
+  @Expose
   public final BooleanProperty viewed = booleanProperty("viewed");
 
   public final ObjectProperty<ObservableList<Identifier>> identifiers = list("identifiers", Identifier.class);

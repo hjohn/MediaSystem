@@ -1,9 +1,11 @@
 package hs.mediasystem.util;
 
 import hs.mediasystem.screens.NavigationEvent;
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -17,53 +19,26 @@ import javafx.util.Duration;
 import com.sun.javafx.tk.Toolkit;
 
 public class DialogPane<R> extends StackPane {
-  private final StackPane stackPane = new StackPane();
-
-  private Scene scene;
-  private Node oldFocusOwner;
+  private DialogGlass dialogGlass;
   private boolean synchronous;
+
+  private final EventHandler<NavigationEvent> eventHandler = new EventHandler<NavigationEvent>() {
+    @Override
+    public void handle(NavigationEvent event) {
+      close();
+
+      if(event.getEventType() == NavigationEvent.NAVIGATION_BACK) {
+        event.consume();
+      }
+    }
+  };
 
   public DialogPane() {
     getStylesheets().add("dialog/dialog.css");
     getStyleClass().add("dialog");
 
-    stackPane.addEventHandler(NavigationEvent.NAVIGATION_ANCESTOR, new EventHandler<NavigationEvent>() {
-      @Override
-      public void handle(NavigationEvent event) {
-        close();
-
-        if(event.getEventType() == NavigationEvent.NAVIGATION_BACK) {
-          event.consume();
-        }
-      }
-    });
-
     setMaxWidth(Region.USE_PREF_SIZE);
     setMaxHeight(Region.USE_PREF_SIZE);
-  }
-
-  protected void setParentEffect(Parent parent) {
-    ColorAdjust colorAdjust = new ColorAdjust();
-
-    parent.setDisable(true);
-
-    Timeline fadeOut = new Timeline(
-      new KeyFrame(Duration.ZERO,
-        new KeyValue(colorAdjust.brightnessProperty(), 0)
-      ),
-      new KeyFrame(Duration.seconds(1),
-        new KeyValue(colorAdjust.brightnessProperty(), -0.5)
-      )
-    );
-
-    parent.setEffect(colorAdjust);
-
-    fadeOut.play();
-  }
-
-  protected void removeParentEffect(Parent parent) {
-    parent.setDisable(false);
-    parent.setEffect(null);
   }
 
   /**
@@ -83,20 +58,18 @@ public class DialogPane<R> extends StackPane {
     }
 
     this.synchronous = synchronous;
-    this.scene = scene;
-    this.oldFocusOwner = scene.getFocusOwner();
 
     StackPane.setMargin(this, new Insets(40, 40, 40, 40));
 
     Parent root = scene.getRoot();
 
-    stackPane.getChildren().add(root);
-    stackPane.getChildren().add(this);
+    dialogGlass = new DialogGlass(scene, root);
+    dialogGlass.addEventHandler(NavigationEvent.NAVIGATION_ANCESTOR, eventHandler);
+    dialogGlass.setDialog(this);
 
-    scene.setRoot(stackPane);
+    Event.fireEvent(this, new DialogEvent(true));
 
     onShow();
-    setParentEffect(root);
     requestFocus();
 
     if(synchronous) {
@@ -107,16 +80,11 @@ public class DialogPane<R> extends StackPane {
   }
 
   public void close() {
-    Parent originalRoot = (Parent)stackPane.getChildren().remove(0);
+    dialogGlass.removeEventHandler(NavigationEvent.NAVIGATION_ANCESTOR, eventHandler);
+    dialogGlass.remove();
+    dialogGlass = null;
 
-    scene.setRoot(originalRoot);
-    removeParentEffect(originalRoot);
-
-    scene = null;
-
-    if(oldFocusOwner != null) {
-      oldFocusOwner.requestFocus();
-    }
+    Event.fireEvent(this, new DialogEvent(false));
 
     if(synchronous) {
       Toolkit.getToolkit().exitNestedEventLoop(this, getResult());
@@ -132,6 +100,90 @@ public class DialogPane<R> extends StackPane {
 
     if(initialFocusNode != null) {
       initialFocusNode.requestFocus();
+    }
+  }
+
+  private static class DialogGlass extends StackPane {
+    private final ColorAdjust colorAdjust = new ColorAdjust();
+    private final Timeline fade;
+
+    private Parent child;
+    private Node oldFocusOwner;
+    private StackPane fadingPane;
+
+    public DialogGlass(Scene scene, Parent root) {
+      this.child = root;
+
+      scene.setRoot(this);
+
+      fadingPane = new StackPane(child);
+      fadingPane.setEffect(colorAdjust);
+
+      getChildren().add(fadingPane);
+
+      oldFocusOwner = scene.getFocusOwner();
+
+      fade = new Timeline(
+        new KeyFrame(
+          Duration.ZERO,
+          new KeyValue(colorAdjust.brightnessProperty(), -0.5)
+        ),
+        new KeyFrame(
+          Duration.seconds(1.5),
+          "center",
+          new KeyValue(colorAdjust.brightnessProperty(), 0)
+        ),
+        new KeyFrame(
+          Duration.seconds(1.51),
+          event -> {
+            fadingPane.getChildren().clear();
+
+            Parent parent = DialogGlass.this.getParent();
+
+            if(parent != null && parent.getParent() instanceof DialogGlass) {
+              ((DialogGlass)parent.getParent()).child = child;
+              ((DialogGlass)parent.getParent()).fadingPane.getChildren().setAll(child);
+            }
+            else {
+              child.getStyleClass().remove("root");  // WORKAROUND RT-39159
+              scene.setRoot(child);
+            }
+          },
+          new KeyValue(colorAdjust.brightnessProperty(), 0)
+        )
+      );
+    }
+
+    public void setDialog(DialogPane<?> dialogPane) {
+      child.getStyleClass().add("enabled-look");
+      child.setDisable(true);
+
+      if(getChildren().size() > 1) {
+        getChildren().remove(1);
+      }
+
+      getChildren().add(dialogPane);
+
+      fade.setRate(-1.0);
+      fade.playFrom("center");
+    }
+
+    public void remove() {
+      child.setDisable(false);
+      child.getStyleClass().remove("enabled-look");
+
+      if(getChildren().size() > 1) {
+        getChildren().remove(1);
+      }
+
+      if(oldFocusOwner != null) {
+        oldFocusOwner.requestFocus();
+      }
+
+      fade.setRate(3.0);
+      if(fade.getStatus() != Animation.Status.RUNNING) {
+        fade.playFromStart();
+      }
     }
   }
 }

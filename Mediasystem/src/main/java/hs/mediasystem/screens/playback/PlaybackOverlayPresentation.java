@@ -4,24 +4,13 @@ import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
 import hs.mediasystem.framework.SubtitleCriteriaProvider;
 import hs.mediasystem.framework.SubtitleProvider;
+import hs.mediasystem.framework.actions.Expose;
 import hs.mediasystem.framework.player.Player;
 import hs.mediasystem.screens.MainLocationPresentation;
 import hs.mediasystem.screens.ProgramController;
-import hs.mediasystem.screens.optiondialog.ListOption;
-import hs.mediasystem.screens.optiondialog.ListViewOption;
-import hs.mediasystem.screens.optiondialog.NumericOption;
-import hs.mediasystem.screens.optiondialog.Option;
-import hs.mediasystem.screens.optiondialog.OptionDialogPane;
-import hs.mediasystem.screens.optiondialog.OptionGroup;
-import hs.mediasystem.util.StringBinding;
-import hs.mediasystem.util.StringConverter;
+import hs.mediasystem.util.DialogPane;
 import hs.mediasystem.util.javafx.Dialogs;
-import hs.subtitle.SubtitleDescriptor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Set;
 
 import javafx.beans.binding.Bindings;
@@ -32,34 +21,27 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
+import javafx.event.Event;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 public class PlaybackOverlayPresentation extends MainLocationPresentation<PlaybackLocation> {
-  private static final Comparator<SubtitleProvider> SUBTITLE_PROVIDER_COMPARATOR = new Comparator<SubtitleProvider>() {
-    @Override
-    public int compare(SubtitleProvider o1, SubtitleProvider o2) {
-      return o1.getName().compareTo(o2.getName());
-    }
-  };
 
   public final ObjectProperty<Media> media = new SimpleObjectProperty<>();
   public final ObjectProperty<Player> player = new SimpleObjectProperty<>();
+  @Expose
   public final BooleanProperty overlayVisible = new SimpleBooleanProperty(true);
 
   // TODO this binding is ugly, but it prevents a permanent reference to Player...
   private final LongBinding position = Bindings.selectLong(player, "position");
 
-  private final ObjectProperty<SubtitleDescriptor> selectedSubtitleForDownload = new SimpleObjectProperty<>(this, "selectedSubtitleForDownload");
   private final Set<SubtitleProvider> subtitleProviders;
   private final Set<SubtitleCriteriaProvider> subtitleCriteriaProviders;
-  private final PlayerBindings playerBindings = new PlayerBindings(player);
+  private final ProgramController controller;
 
   @Inject
   public PlaybackOverlayPresentation(Set<SubtitleProvider> subtitleProviders, Set<SubtitleCriteriaProvider> subtitleCriteriaProviders, final ProgramController controller, final PlayerPresentation playerPresentation) {
+    this.controller = controller;
     this.player.set(playerPresentation.getPlayer());
     this.media.set(controller.getCurrentMedia());
 
@@ -124,18 +106,6 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
         }
       }
     });
-
-    selectedSubtitleForDownload.addListener(new ChangeListener<SubtitleDescriptor>() {
-      @Override
-      public void changed(ObservableValue<? extends SubtitleDescriptor> observable, SubtitleDescriptor oldValue, SubtitleDescriptor newValue) {
-        if(newValue != null) {
-          SubtitleDownloadService service = controller.getSubtitleDownloadService();
-
-          service.setSubtitleDescriptor(newValue);
-          service.restart();
-        }
-      }
-    });
   }
 
   @Override
@@ -145,79 +115,11 @@ public class PlaybackOverlayPresentation extends MainLocationPresentation<Playba
     player.set(null);
   }
 
-  public void handleOptionsSelectEvent(ActionEvent event) {
-    Player player = this.player.get();
-
-    List<Option> options = FXCollections.observableArrayList(
-      new NumericOption(player.volumeProperty(), "Volume", 1, 0, 100, playerBindings.formattedVolume),
-      new ListOption<>("Subtitle", player.subtitleProperty(), player.getSubtitles(), playerBindings.formattedSubtitle),
-      new ListOption<>("Audio Track", player.audioTrackProperty(), player.getAudioTracks(), playerBindings.formattedAudioTrack),
-      new NumericOption(player.rateProperty(), "Playback Speed", 0.1, 0.1, 4.0, playerBindings.formattedRate),
-      new NumericOption(player.audioDelayProperty(), "Audio Delay", 100, -1200000, 1200000, playerBindings.formattedAudioDelay),
-      new NumericOption(player.subtitleDelayProperty(), "Subtitle Delay", 100, -1200000, 1200000, playerBindings.formattedSubtitleDelay),
-      new NumericOption(player.brightnessProperty(), "Brightness Adjustment", 0.01, 0, 2, playerBindings.formattedBrightness),
-      new OptionGroup("Download subtitle...", new Provider<List<Option>>() {
-        @Override
-        public List<Option> get() {
-          return new ArrayList<Option>() {{
-            final SubtitleSelector subtitleSelector = new SubtitleSelector(findSubtitleProviders("movie"));
-            final SubtitleCriteriaProvider subtitleCriteriaProvider = findSubtitleCriteriaProvider(media.get().getClass());
-
-            subtitleSelector.query(subtitleCriteriaProvider.getCriteria(media.get()));
-
-            subtitleSelector.subtitleProviderProperty().addListener(new ChangeListener<SubtitleProvider>() {
-              @Override
-              public void changed(ObservableValue<? extends SubtitleProvider> observableValue, SubtitleProvider oldValue, SubtitleProvider newValue) {
-                subtitleSelector.query(subtitleCriteriaProvider.getCriteria(media.get()));
-              }
-            });
-
-            ListOption<SubtitleProvider> provider = new ListOption<>("Subtitle Provider", subtitleSelector.subtitleProviderProperty(), FXCollections.observableList(subtitleSelector.getSubtitleProviders()), new StringBinding(subtitleSelector.subtitleProviderProperty()) {
-              @Override
-              protected String computeValue() {
-                return subtitleSelector.subtitleProviderProperty().get().getName();
-              }
-            });
-
-            provider.getBottomLabel().textProperty().bind(subtitleSelector.statusTextProperty());
-
-            add(provider);
-            add(new ListViewOption<>("Subtitles for Download", selectedSubtitleForDownload, subtitleSelector.getSubtitles(), new StringConverter<SubtitleDescriptor>() {
-              @Override
-              public String toString(SubtitleDescriptor descriptor) {
-                return descriptor.getMatchType().name() + ": " + descriptor.getName() + " (" + descriptor.getLanguageName() + ") [" + descriptor.getType() + "]";
-              }
-            }));
-          }};
-        }
-      })
-    );
-
-    Dialogs.show(event, new OptionDialogPane("Video - Options", options));
+  @Expose
+  public void chooseSubtitle(Event event) {
+    Dialogs.show(event, new DialogPane<Void>() {{
+      getChildren().add(new SubtitleDownloadPane(media.get(), subtitleProviders, subtitleCriteriaProviders, controller.getSubtitleDownloadService()));
+    }});
     event.consume();
-  }
-
-  private List<SubtitleProvider> findSubtitleProviders(String mediaType) {
-    List<SubtitleProvider> matchingSubtitleProviders = new ArrayList<>();
-
-    for(SubtitleProvider provider : subtitleProviders) {
-      if(provider.getMediaTypes().contains(mediaType)) {
-        matchingSubtitleProviders.add(provider);
-      }
-    }
-
-    Collections.sort(matchingSubtitleProviders, SUBTITLE_PROVIDER_COMPARATOR);
-
-    return matchingSubtitleProviders;
-  }
-
-  private SubtitleCriteriaProvider findSubtitleCriteriaProvider(Class<?> cls) {
-    for(SubtitleCriteriaProvider provider : subtitleCriteriaProviders) {
-      if(provider.getMediaType().equals(cls)) {
-        return provider;
-      }
-    }
-
-    return null;
   }
 }

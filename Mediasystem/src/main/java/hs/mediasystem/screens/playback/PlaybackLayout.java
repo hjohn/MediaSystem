@@ -35,8 +35,6 @@ public class PlaybackLayout implements Layout<Location, PlaybackOverlayPresentat
     view.player.bindBidirectional(presentation.player);
     view.overlayVisible.bindBidirectional(presentation.overlayVisible);
 
-    view.onOptionsSelect.set(presentation::handleOptionsSelectEvent);
-
     return view;
   }
 }

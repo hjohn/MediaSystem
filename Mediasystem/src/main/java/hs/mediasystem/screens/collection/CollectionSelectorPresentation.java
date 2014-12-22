@@ -1,5 +1,6 @@
 package hs.mediasystem.screens.collection;
 
+import hs.mediasystem.framework.actions.Expose;
 import hs.mediasystem.screens.AreaLayout;
 import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.MediaNode;
@@ -9,6 +10,7 @@ import hs.mediasystem.screens.collection.detail.DetailView;
 import hs.mediasystem.util.AreaPane;
 import hs.mediasystem.util.DialogPane;
 import hs.mediasystem.util.GridPaneUtil;
+import hs.mediasystem.util.javafx.Dialogs;
 
 import java.util.Set;
 
@@ -18,6 +20,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
@@ -28,6 +31,7 @@ import javafx.scene.layout.VBox;
 import javax.inject.Inject;
 
 public class CollectionSelectorPresentation {
+  @Expose
   public final ObjectProperty<MediaNode> focusedMediaNode = new SimpleObjectProperty<>();
   public final ObservableList<MediaNode> mediaNodes = FXCollections.observableArrayList();
   public final ObjectProperty<Node> defaultInputFocus = new SimpleObjectProperty<>();
@@ -40,6 +44,11 @@ public class CollectionSelectorPresentation {
   @Inject
   public CollectionSelectorPresentation(Set<Layout<? extends Object, ? extends DetailPanePresentation>> layouts) {
     this.layouts = layouts;
+  }
+
+  @Expose
+  public void showInformationDialog(Event event) {
+    Dialogs.show(event, createInformationDialog());
   }
 
   public DialogPane<?> createInformationDialog() {

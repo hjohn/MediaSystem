@@ -46,7 +46,6 @@ public class CollectionLayout implements Layout<Location, CollectionPresentation
     view.expandTopLevel.bind(presentation.expandTopLevel);
 
     view.onSelect.set(presentation::handleMediaNodeSelectEvent);
-    view.onOptionsSelect.set(presentation::handleOptionsSelectEvent);
 
     presentation.mediaRoot.addListener(new ChangeListener<MediaRoot>() {
       @Override

@@ -11,7 +11,7 @@ import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.SettingUpdater;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.framework.StandardTitleComparator;
-import hs.mediasystem.framework.actions.PresentationActionEvent;
+import hs.mediasystem.framework.actions.Expose;
 import hs.mediasystem.screens.AbstractMediaGroup;
 import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.LocationChangeEvent;
@@ -20,13 +20,7 @@ import hs.mediasystem.screens.MediaGroup;
 import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.UserLayout;
-import hs.mediasystem.screens.optiondialog.ActionOption;
-import hs.mediasystem.screens.optiondialog.ListOption;
-import hs.mediasystem.screens.optiondialog.Option;
-import hs.mediasystem.screens.optiondialog.OptionDialogPane;
 import hs.mediasystem.screens.playback.PlaybackLocation;
-import hs.mediasystem.util.StringBinding;
-import hs.mediasystem.util.javafx.Dialogs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,9 +42,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.util.StringConverter;
 
 import javax.inject.Inject;
@@ -77,6 +69,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
   /**
    * The current active layout.
    */
+  @Expose(values = "suitableLayouts")
   public final ObjectProperty<UserLayout<MediaRoot, CollectionSelectorPresentation>> layout = new SimpleObjectProperty<>();
 
   /**
@@ -87,6 +80,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
   /**
    * The current active group set.
    */
+  @Expose(values = "availableGroupSets")
   public final ObjectProperty<MediaGroup<?>> groupSet = new SimpleObjectProperty<>();
 
   /**
@@ -97,6 +91,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
   /**
    * The filter to apply to the collection.
    */
+  @Expose(valueBuilder = FilterValueBuilder.class)
   public final ObjectProperty<InclusionFilter> inclusionFilter = new SimpleObjectProperty<>();
 
   private final List<UserLayout<MediaRoot, CollectionSelectorPresentation>> layouts;
@@ -251,35 +246,6 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
     else {
       Event.fireEvent(event.getTarget(), new LocationChangeEvent(new PlaybackLocation(null, event.getMediaNode().getMedia(), 0)));
     }
-    event.consume();
-  }
-
-  /**
-   * EventHandler for showing the Options dialog.
-   */
-  public void handleOptionsSelectEvent(ActionEvent event) {
-    List<? extends Option> options = FXCollections.observableArrayList(
-      new ListOption<>("Sorting/Grouping", groupSet, availableGroupSets, new StringBinding(groupSet) {
-        @Override
-        protected String computeValue() {
-          return groupSet.get().getTitle();
-        }
-      }),
-      new ListOption<>("View", layout, suitableLayouts, new StringBinding(layout) {
-        @Override
-        protected String computeValue() {
-          return layout.get().getTitle();
-        }
-      }),
-      new ActionOption("Filter", new EventHandler<Event>() {
-        @Override
-        public void handle(Event event) {
-          CollectionActions.FILTER_SHOW_DIALOG.handle(new PresentationActionEvent<>(CollectionPresentation.this, event));
-        }
-      })
-    );
-
-    Dialogs.show(event, new OptionDialogPane("Media - Options", options));
     event.consume();
   }
 

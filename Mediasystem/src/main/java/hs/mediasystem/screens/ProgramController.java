@@ -1,23 +1,27 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.config.KeyMappingsConfiguration;
+import hs.mediasystem.controls.TablePane;
 import hs.mediasystem.framework.Media;
-import hs.mediasystem.framework.actions.PresentationActionEvent;
+import hs.mediasystem.framework.actions.ActionTarget;
+import hs.mediasystem.framework.actions.ActionTargetProvider;
+import hs.mediasystem.framework.actions.controls.ActiveControlsProvider;
+import hs.mediasystem.framework.actions.controls.NodeFactory;
 import hs.mediasystem.framework.player.PlayerEvent;
-import hs.mediasystem.screens.collection.CollectionPresentation;
-import hs.mediasystem.screens.collection.CollectionSelectorPresentation;
 import hs.mediasystem.screens.main.MainScreenLocation;
 import hs.mediasystem.screens.playback.PlaybackLocation;
 import hs.mediasystem.screens.playback.PlaybackOverlayPane;
-import hs.mediasystem.screens.playback.PlaybackOverlayPresentation;
 import hs.mediasystem.screens.playback.PlayerPresentation;
 import hs.mediasystem.screens.playback.SubtitleDownloadService;
+import hs.mediasystem.util.DialogPane;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.SceneUtil;
 import hs.mediasystem.util.annotation.Nullable;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.javafx.Dialogs;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,6 +51,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyCombination.Modifier;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -64,22 +69,28 @@ import javax.inject.Singleton;
 public class ProgramController {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
   private static final KeyCombination KEY_S = new KeyCodeCombination(KeyCode.S);
+  private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
   private static final KeyCombination KEY_CTRL_ALT_S = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN);
-  private static final KeyCombination KEY_OPEN_BRACKET = new KeyCodeCombination(KeyCode.OPEN_BRACKET);
-  private static final KeyCombination KEY_CLOSE_BRACKET = new KeyCodeCombination(KeyCode.CLOSE_BRACKET);
 
   private static final MainScreenLocation MAIN_SCREEN_LOCATION = new MainScreenLocation();
 
   private final Scene scene;
   private final StackPane sceneRoot = new StackPane();
   private final BorderPane videoPane = new BorderPane();
-  private final BorderPane contentBorderPane = new BorderPane();
+  private final PresentationPane contentPresentationPane = new PresentationPane() {
+    @Override
+    public Object getPresentation() {
+      return activePresentation;
+    }
+  };
   private final BorderPane informationBorderPane = new BorderPane();
   private final BorderPane messageBorderPane = new BorderPane();
   private final Ini ini;
   private final SubtitleDownloadService subtitleDownloadService = new SubtitleDownloadService();
   private final SceneManager sceneManager;
   private final PlayerPresentation playerPresentation;
+  private final ActionTargetProvider actionControlFactory;
+  private final ActiveControlsProvider activeControlsProvider;
 
   private final VBox messagePane = new VBox() {{
     getStylesheets().add("status-messages.css");
@@ -89,7 +100,7 @@ public class ProgramController {
 
   private final InformationBorder informationBorder;
 
-  private final Map<Class<?>, Map<KeyCombination, EventHandler<PresentationActionEvent<?>>>> eventHandlersByKeyCombinationByPresentation = new HashMap<>();
+  private final Map<KeyCodeCombination, List<String>> actionKeysByKeyCodeCombination;
 
   private ResizableWritableImageView videoCanvas;
 
@@ -124,15 +135,19 @@ public class ProgramController {
   private Layout<? extends Location, MainLocationPresentation<Location>> currentLayout;
   private MainLocationPresentation<Location> activePresentation;
 
+  private boolean optionsVisible;
+
   @Inject
-  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder, Provider<Set<Layout<? extends Location, ? extends MainLocationPresentation<? extends Location>>>> mainLocationLayoutsProvider) {
+  public ProgramController(Ini ini, final SceneManager sceneManager, @Nullable final PlayerPresentation playerPresentation, InformationBorder informationBorder, Provider<Set<Layout<? extends Location, ? extends MainLocationPresentation<? extends Location>>>> mainLocationLayoutsProvider, KeyMappingsConfiguration keyMappingsConfiguration, ActionTargetProvider actionControlFactory, ActiveControlsProvider activeControlsProvider) {
     this.ini = ini;
     this.sceneManager = sceneManager;
     this.playerPresentation = playerPresentation;
     this.informationBorder = informationBorder;
+    this.actionControlFactory = actionControlFactory;
+    this.activeControlsProvider = activeControlsProvider;
     this.scene = SceneUtil.createScene(sceneRoot);
 
-    sceneRoot.getChildren().addAll(videoPane, contentBorderPane, informationBorderPane, messageBorderPane);
+    sceneRoot.getChildren().addAll(videoPane, contentPresentationPane, informationBorderPane, messageBorderPane);
 
     Object displayComponent = playerPresentation == null ? null : playerPresentation.getPlayer().getDisplayComponent();
 
@@ -147,7 +162,7 @@ public class ProgramController {
       videoPane.heightProperty().addListener(videoSizeInvalidationListener);
     }
 
-    initializeKeyMappings();
+    actionKeysByKeyCodeCombination = keyMappingsConfiguration.getNewKeyMappings();
 
     sceneManager.setScene(scene);
 
@@ -220,6 +235,13 @@ public class ProgramController {
           sceneManager.setScreenNumber(screenNumber);
           event.consume();
         }
+        else if(KEY_O.match(event)) {
+          if(!optionsVisible) {
+            optionsVisible = true;
+            handleOptions(event);
+            event.consume();
+          }
+        }
         else if(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
           if(KEY_S.match(event)) {
             focusOwner.fireEvent(new NavigationEvent(NavigationEvent.NAVIGATION_EXIT));
@@ -246,6 +268,7 @@ public class ProgramController {
       @Override
       public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
         if(newValue == State.SUCCEEDED && playerPresentation != null) {
+          System.out.println("[INFO] Download of subtitle succeeded, setting subtitle to: " + subtitleDownloadService.getValue());
           playerPresentation.showSubtitle(subtitleDownloadService.getValue());
         }
       }
@@ -281,66 +304,23 @@ public class ProgramController {
     });
   }
 
-  @SuppressWarnings("unchecked")
-  private EventHandler<PresentationActionEvent<?>> findEventHandler(String eventHandlerName) {
-    int lastDot = eventHandlerName.lastIndexOf('.');
+  private KeyCodeCombination keyEventToKeyCodeCombination(KeyEvent event) {
+    List<Modifier> modifiers = new ArrayList<>();
 
-    try {
-      @SuppressWarnings("rawtypes")
-      Class<? extends Enum> enumClass = Class.forName(eventHandlerName.substring(0, lastDot)).asSubclass(Enum.class);
-
-      return (EventHandler<PresentationActionEvent<?>>)Enum.valueOf(enumClass, eventHandlerName.substring(lastDot + 1));
+    if(event.isControlDown()) {
+      modifiers.add(KeyCombination.CONTROL_DOWN);
     }
-    catch(ClassNotFoundException | IllegalArgumentException e) {
-      return null;
+    if(event.isAltDown()) {
+      modifiers.add(KeyCombination.ALT_DOWN);
     }
-  }
-
-  private void initializeKeyMappings() {
-    addKeyMapping(CollectionPresentation.class, new KeyCodeCombination(KeyCode.F), "hs.mediasystem.screens.collection.CollectionActions.FILTER_SHOW_DIALOG");
-    addKeyMapping(CollectionPresentation.class, new KeyCodeCombination(KeyCode.V, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), "hs.mediasystem.screens.collection.CollectionActions.GROUP_SET_NEXT");
-
-    addKeyMapping(CollectionSelectorPresentation.class, new KeyCodeCombination(KeyCode.V), "hs.mediasystem.screens.collection.CollectionSelectorActions.VIEWED_TOGGLE");
-    addKeyMapping(CollectionSelectorPresentation.class, new KeyCodeCombination(KeyCode.I), "hs.mediasystem.screens.collection.CollectionSelectorActions.INFORMATION_SHOW_DIALOG");
-
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT9), "hs.mediasystem.screens.playback.PlayerActions.VOLUME_DECREASE");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT0), "hs.mediasystem.screens.playback.PlayerActions.VOLUME_INCREASE");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.M), "hs.mediasystem.screens.playback.PlayerActions.MUTE");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.SPACE), "hs.mediasystem.screens.playback.PlayerActions.PAUSE");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.LEFT), "hs.mediasystem.screens.playback.PlayerActions.SKIP_BACKWARD_10S");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD4), "hs.mediasystem.screens.playback.PlayerActions.SKIP_BACKWARD_10S");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.RIGHT), "hs.mediasystem.screens.playback.PlayerActions.SKIP_FORWARD_10S");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD6), "hs.mediasystem.screens.playback.PlayerActions.SKIP_FORWARD_10S");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DOWN), "hs.mediasystem.screens.playback.PlayerActions.SKIP_BACKWARD_60S");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD2), "hs.mediasystem.screens.playback.PlayerActions.SKIP_BACKWARD_60S");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.UP), "hs.mediasystem.screens.playback.PlayerActions.SKIP_FORWARD_60S");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.NUMPAD8), "hs.mediasystem.screens.playback.PlayerActions.SKIP_FORWARD_60S");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT1), "hs.mediasystem.screens.playback.PlayerActions.BRIGHTNESS_DECREASE");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.DIGIT2), "hs.mediasystem.screens.playback.PlayerActions.BRIGHTNESS_INCREASE");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.Z), "hs.mediasystem.screens.playback.PlayerActions.SUBTITLE_DELAY_DECREASE");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.X), "hs.mediasystem.screens.playback.PlayerActions.SUBTITLE_DELAY_INCREASE");
-    addKeyMapping(PlayerPresentation.class, KEY_OPEN_BRACKET, "hs.mediasystem.screens.playback.PlayerActions.RATE_DECREASE");
-    addKeyMapping(PlayerPresentation.class, KEY_CLOSE_BRACKET, "hs.mediasystem.screens.playback.PlayerActions.RATE_INCREASE");
-    addKeyMapping(PlayerPresentation.class, new KeyCodeCombination(KeyCode.J), "hs.mediasystem.screens.playback.PlayerActions.SUBTITLE_NEXT");
-    addKeyMapping(PlaybackOverlayPresentation.class, new KeyCodeCombination(KeyCode.I), "hs.mediasystem.screens.playback.PlaybackOverlayActions.VISIBILITY");
-  }
-
-  private void addKeyMapping(Class<?> presentationClass, KeyCombination keyCombination, String eventHandlerName) {
-    EventHandler<PresentationActionEvent<?>> eventHandler = findEventHandler(eventHandlerName);
-
-    if(eventHandler == null) {
-      System.out.println("[WARN] Cannot find associated EventHandler for key combination [" + keyCombination + "]: " + eventHandlerName);
+    if(event.isShiftDown()) {
+      modifiers.add(KeyCombination.SHIFT_DOWN);
     }
-    else {
-      Map<KeyCombination, EventHandler<PresentationActionEvent<?>>> eventHandlersByKeyCombination = eventHandlersByKeyCombinationByPresentation.get(presentationClass);
-
-      if(eventHandlersByKeyCombination == null) {
-        eventHandlersByKeyCombination = new HashMap<>();
-        eventHandlersByKeyCombinationByPresentation.put(presentationClass, eventHandlersByKeyCombination);
-      }
-
-      eventHandlersByKeyCombination.put(keyCombination, eventHandler);
+    if(event.isMetaDown()) {
+      modifiers.add(KeyCombination.META_DOWN);
     }
+
+    return new KeyCodeCombination(event.getCode(), modifiers.toArray(new Modifier[modifiers.size()]));
   }
 
   private void handleUserDefinedKeys(KeyEvent event) {
@@ -358,7 +338,8 @@ public class ProgramController {
         PresentationPane pane = (PresentationPane)currentEventChainNode;
         Object presentation = pane.getPresentation();
 
-        if(handleUserDefinedKeysForPresentation(event, presentation)) {
+        if(handleNewKeyMappings(event, presentation)) {
+          event.consume();
           return;
         }
       }
@@ -366,30 +347,118 @@ public class ProgramController {
       currentEventChainNode = currentEventChainNode instanceof Node ? ((Node)currentEventChainNode).getParent() : null;
     }
 
-    if(handleUserDefinedKeysForPresentation(event, activePresentation)) {
-      return;
+    if(handleNewKeyMappings(event, playerPresentation)) {
+      event.consume();
     }
-
-    handleUserDefinedKeysForPresentation(event, playerPresentation);
   }
 
-  private boolean handleUserDefinedKeysForPresentation(KeyEvent event, Object presentation) {
-    Map<KeyCombination, EventHandler<PresentationActionEvent<?>>> eventHandlersByKeyCombination = eventHandlersByKeyCombinationByPresentation.get(presentation.getClass());
+  private boolean handleNewKeyMappings(KeyEvent event, Object presentation) {
+    if(!event.getCode().isModifierKey()) {
+      List<String> actionKeys = actionKeysByKeyCodeCombination.get(keyEventToKeyCodeCombination(event));
 
-    if(eventHandlersByKeyCombination != null) {
-      for(KeyCombination keyCombination : eventHandlersByKeyCombination.keySet()) {
-        if(keyCombination.match(event)) {
-          EventHandler<PresentationActionEvent<?>> handler = eventHandlersByKeyCombination.get(keyCombination);
+      if(actionKeys != null) {
+        for(String actionKey : actionKeys) {
+          String propertyName = actionKey.substring(0, actionKey.indexOf(":"));
 
-          System.out.println("[INFO] ProgramController#handleUserDefinedKeys - Key: " + keyCombination + " -> " + handler.getClass().getName() + "." + handler);
-
-          handler.handle(new PresentationActionEvent<>(presentation, event));
-          return true;
+          for(ActionTarget actionTarget : actionControlFactory.getActionTargets(presentation)) {
+            if(actionTarget.getMemberName().equals(propertyName)) {
+              actionTarget.doAction(actionKey.substring(actionKey.indexOf(":") + 1), presentation, event);
+              return true;
+            }
+          }
         }
       }
     }
 
     return false;
+  }
+
+  private void handleOptions(KeyEvent event) {
+
+    /*
+     * Handling of options:
+     * - Check up the chain from the event target to find relevant presentations
+     * - Check each presentation in turn for potential actions
+     */
+
+    EventTarget currentEventChainNode = event.getTarget();
+
+    TablePane tablePane = new TablePane();
+
+    tablePane.getStyleClass().add("input-fields");
+
+    while(currentEventChainNode != null) {
+      if(currentEventChainNode instanceof PresentationPane) {
+        PresentationPane pane = (PresentationPane)currentEventChainNode;
+        Object presentation = pane.getPresentation();
+
+        addControls(tablePane, presentation);
+      }
+
+      currentEventChainNode = currentEventChainNode instanceof Node ? ((Node)currentEventChainNode).getParent() : null;
+    }
+
+    if(getActiveScreen().getClass() == PlaybackOverlayPane.class) {
+      addControls(tablePane, playerPresentation);
+    }
+
+    DialogPane<Void> dialogPane = new DialogPane<Void>() {{
+      getChildren().add(tablePane);
+    }};
+
+    dialogPane.getStyleClass().add("media-look");
+
+    Dialogs.showAndWait(event, dialogPane);
+
+    optionsVisible = false;
+  }
+
+  private void addControls(TablePane tablePane, Object presentation) {
+    for(NodeFactory controlFactory : activeControlsProvider.getControlFactories(presentation)) {
+      String propertyName = controlFactory.getPropertyName();
+
+      HBox hbox = createShortCut(propertyName);
+
+      if(controlFactory.getLabel() != null) {
+        hbox.getChildren().add(0, new Label(controlFactory.getLabel()));
+      }
+
+      tablePane.add(hbox);
+
+      Node[] nodes = controlFactory.createNode(presentation);
+
+      for(int i = 0; i < nodes.length; i++) {
+        Node node = nodes[i];
+        int columnSpan = 1;
+
+        if(i == nodes.length - 1) {
+          columnSpan = 5 - nodes.length;
+        }
+
+        tablePane.add(node, columnSpan);
+      }
+
+      tablePane.nextRow();
+    }
+  }
+
+  private HBox createShortCut(String propertyName) {
+    HBox hbox = new HBox();
+
+    for(Map.Entry<KeyCodeCombination, List<String>> entry : actionKeysByKeyCodeCombination.entrySet()) {
+      for(String actionKey : entry.getValue()) {
+        if(actionKey.substring(0, actionKey.indexOf(":")).equals(propertyName)) {
+          for(String label : entry.getKey().toString().split("\\+")) {
+            Label keyLabel = new Label(label);
+
+            keyLabel.getStyleClass().add("shortcut");
+            hbox.getChildren().add(keyLabel);
+          }
+        }
+      }
+    }
+
+    return hbox;
   }
 
   public Ini getIni() {
@@ -423,7 +492,7 @@ public class ProgramController {
 
     timeline.play();
 
-    contentBorderPane.setCenter(node);
+    contentPresentationPane.getChildren().setAll(node);
     scene.setFill(background);
 
     Platform.runLater(new Runnable() {
@@ -435,7 +504,7 @@ public class ProgramController {
   }
 
   public Node getActiveScreen() {
-    return contentBorderPane.getCenter();
+    return contentPresentationPane.getChildren().get(0);
   }
 
   public void showMainScreen() {

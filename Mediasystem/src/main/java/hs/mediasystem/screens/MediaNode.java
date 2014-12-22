@@ -2,6 +2,7 @@ package hs.mediasystem.screens;
 
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.MediaData;
+import hs.mediasystem.framework.actions.Expose;
 import hs.mediasystem.framework.descriptors.EntityDescriptors;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public class MediaNode {
+  @Expose
   public final ObjectProperty<MediaData> mediaData;
   public final ObjectProperty<Media> media;
 

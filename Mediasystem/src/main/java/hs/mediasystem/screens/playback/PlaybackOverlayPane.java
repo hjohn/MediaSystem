@@ -3,7 +3,6 @@ package hs.mediasystem.screens.playback;
 import hs.mediasystem.beans.AsyncImageProperty;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.player.Player;
-import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
@@ -50,16 +49,10 @@ import javafx.util.Duration;
 
 public class PlaybackOverlayPane extends StackPane {
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
-  private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
 
   public final ObjectProperty<Media> media = new SimpleObjectProperty<>();
   public final ObjectProperty<Player> player = new SimpleObjectProperty<>();
   public final BooleanProperty overlayVisible = new SimpleBooleanProperty(true);
-
-  /**
-   * Triggered when options is chosen.
-   */
-  public final ObjectProperty<EventHandler<ActionEvent>> onOptionsSelect = new SimpleObjectProperty<>();
 
   private final PlayerBindings playerBindings = new PlayerBindings(player);
 
@@ -115,9 +108,6 @@ public class PlaybackOverlayPane extends StackPane {
       public void handle(KeyEvent event) {
         if(BACK_SPACE.match(event)) {
           event.consume();
-        }
-        else if(KEY_O.match(event)) {
-          Events.dispatchEvent(onOptionsSelect, new ActionEvent(event.getSource(), event.getTarget()), event);
         }
       }
     });

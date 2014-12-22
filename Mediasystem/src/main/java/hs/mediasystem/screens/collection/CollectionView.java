@@ -6,7 +6,6 @@ import hs.mediasystem.screens.MediaNode;
 import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.PresentationPane;
 import hs.mediasystem.screens.UserLayout;
-import hs.mediasystem.util.Events;
 import hs.mediasystem.util.GridPaneUtil;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -18,12 +17,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 
@@ -42,7 +36,6 @@ import javafx.scene.layout.StackPane;
  * - a method for selecting a node by id
  */
 public class CollectionView extends PresentationPane {
-  private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
 
   /**
    * The MediaNodes to display.
@@ -69,11 +62,6 @@ public class CollectionView extends PresentationPane {
    */
   public final ObjectProperty<EventHandler<MediaNodeEvent>> onSelect = new SimpleObjectProperty<>();
 
-  /**
-   * Triggered when options is chosen.
-   */
-  public final ObjectProperty<EventHandler<ActionEvent>> onOptionsSelect = new SimpleObjectProperty<>();
-
   private final BackgroundPane backgroundPane = new BackgroundPane();
   private final StackPane collectionSelectorPane = new StackPane();
 
@@ -92,15 +80,6 @@ public class CollectionView extends PresentationPane {
     }}, 0, 1);
 
     getChildren().addAll(stage, collectionSelectorPane);
-
-    addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-      @Override
-      public void handle(KeyEvent event) {
-        if(KEY_O.match(event)) {
-          Events.dispatchEvent(onOptionsSelect, new ActionEvent(event.getSource(), event.getTarget()), event);
-        }
-      }
-    });
 
     backgroundPane.mediaNodeProperty().bind(focusedMediaNode);
 
