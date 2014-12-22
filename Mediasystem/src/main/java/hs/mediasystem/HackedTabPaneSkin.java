@@ -4,8 +4,6 @@ import java.lang.reflect.Field;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Side;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyEvent;
 
@@ -57,7 +55,6 @@ public class HackedTabPaneSkin extends TabPaneSkin {
       super(paramTabPane);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected void callAction(String direction) {
       Side side = getControl().getSide();
@@ -73,38 +70,38 @@ public class HackedTabPaneSkin extends TabPaneSkin {
       }
       else {
         TabPane localTabPane;
-        if("TraverseNext".equals(direction) || side == Side.TOP && "TraverseDown".equals(direction) || side == Side.BOTTOM && "TraverseUp".equals(direction)
-                                              || side == Side.LEFT && "TraverseLeft".equals(direction) || side == Side.RIGHT && "TraverseRight".equals(direction)) {
-          localTabPane = getControl();
-          TabPaneSkin localTabPaneSkin = (TabPaneSkin)localTabPane.getSkin();
-          if(localTabPaneSkin.getSelectedTabContentRegion() != null) {
-            localTabPaneSkin.getSelectedTabContentRegion().getImpl_traversalEngine().getTopLeftFocusableNode();
-            if(localTabPaneSkin.getSelectedTabContentRegion().getImpl_traversalEngine().registeredNodes.isEmpty()) {
-              Parent localParent = null;
-              localParent = getFirstPopulatedInnerTraversalEngine(localTabPaneSkin.getSelectedTabContentRegion().getChildren());
-              if(localParent != null) {
-                int i = 0;
-                for(Node localNode : localParent.getImpl_traversalEngine().registeredNodes) {
-                  if(!localNode.isFocused() && localNode.impl_isTreeVisible() && !localNode.isDisabled()) {
-                    localNode.requestFocus();
-                    i = 1;
-                    break;
-                  }
-                }
-                if(i == 0) {
-                  avoidCallingSuper(direction);
-                }
-              }
-              else {
-                avoidCallingSuper(direction);
-              }
-            }
-          }
-          else {
-            avoidCallingSuper(direction);
-          }
-        }
-        else if("Ctrl_Tab".equals(direction) || "Ctrl_Page_Down".equals(direction)) {
+//        if("TraverseNext".equals(direction) || side == Side.TOP && "TraverseDown".equals(direction) || side == Side.BOTTOM && "TraverseUp".equals(direction)
+//                                              || side == Side.LEFT && "TraverseLeft".equals(direction) || side == Side.RIGHT && "TraverseRight".equals(direction)) {
+//          localTabPane = getControl();
+//          TabPaneSkin localTabPaneSkin = (TabPaneSkin)localTabPane.getSkin();
+//          if(localTabPaneSkin.getSelectedTabContentRegion() != null) {
+//            localTabPaneSkin.getSelectedTabContentRegion().getImpl_traversalEngine().getTopLeftFocusableNode();
+//            if(localTabPaneSkin.getSelectedTabContentRegion().getImpl_traversalEngine().registeredNodes.isEmpty()) {
+//              Parent localParent = null;
+//              localParent = getFirstPopulatedInnerTraversalEngine(localTabPaneSkin.getSelectedTabContentRegion().getChildren());
+//              if(localParent != null) {
+//                int i = 0;
+//                for(Node localNode : localParent.getImpl_traversalEngine().registeredNodes) {
+//                  if(!localNode.isFocused() && localNode.impl_isTreeVisible() && !localNode.isDisabled()) {
+//                    localNode.requestFocus();
+//                    i = 1;
+//                    break;
+//                  }
+//                }
+//                if(i == 0) {
+//                  avoidCallingSuper(direction);
+//                }
+//              }
+//              else {
+//                avoidCallingSuper(direction);
+//              }
+//            }
+//          }
+//          else {
+//            avoidCallingSuper(direction);
+//          }
+//        }
+        if("Ctrl_Tab".equals(direction) || "Ctrl_Page_Down".equals(direction)) {
           localTabPane = getControl();
           if(localTabPane.getSelectionModel().getSelectedIndex() == localTabPane.getTabs().size() - 1) {
             localTabPane.getSelectionModel().selectFirst();

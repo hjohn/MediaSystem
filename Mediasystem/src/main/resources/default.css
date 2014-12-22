@@ -78,31 +78,6 @@
   -fx-skin: "hs.mediasystem.controls.TreeCellSkin";
 }
 
-/*
- * Applying MediaLook skins to some controls.  The goal of these skins is to alter their
- * behavior to better support simple navigation (two level focus), and also to change
- * some of the default action keys.
- *
- * In the default setup, some controls respond to SPACE and some controls to ENTER for
- * triggering their behavior.  Pressing OK on the remote control is mapped to ENTER and
- * the controls that donot react to this must be made consistent.
- *
- * - Buttons and CheckBoxes respond to ENTER for select/toggle
- * - ComboBoxes only consume navigation keys when they are showing (dropdown is open)
- */
- 
-.combo-box {
-  -fx-skin: "hs.mediasystem.controls.MediaLookComboBoxSkin";
-}
-
-.button {
-  -fx-skin: "hs.mediasystem.controls.MediaLookButtonSkin";
-}
-
-.check-box {
-  -fx-skin: "hs.mediasystem.controls.MediaLookCheckBoxSkin";
-}
-
 .scroll-pane {
   -fx-background-color: transparent;
 }

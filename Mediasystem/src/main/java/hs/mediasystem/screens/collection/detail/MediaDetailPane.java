@@ -11,7 +11,6 @@ import hs.mediasystem.screens.collection.detail.CastingsRow.Type;
 import hs.mediasystem.screens.optiondialog.OptionButton;
 import hs.mediasystem.screens.optiondialog.OptionCheckBox;
 import hs.mediasystem.util.Events;
-import hs.mediasystem.util.HackedTab;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.ScaledImageView;
@@ -363,7 +362,7 @@ public class MediaDetailPane extends DetailPane<Media> {
         }
       };
 
-      tab.setContent(new HackedTab(new VBox() {{
+      tab.setContent(new VBox() {{
         getChildren().add(new Label() {{
           getStyleClass().add("field");
           textProperty().bind(formattedName);
@@ -424,7 +423,7 @@ public class MediaDetailPane extends DetailPane<Media> {
             });
           }});
         }}, null));
-      }}));
+      }});
     }
   }
 }
