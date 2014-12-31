@@ -1,21 +1,25 @@
 package hs.mediasystem.util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public class Throwables {
-  public static String formatAsOneLine(Throwable t) {
-    StringBuilder sb = new StringBuilder();
-    Throwable current = t;
+
+  public static String formatAsOneLine(Throwable throwable) {
+    StringBuilder builder = new StringBuilder();
+    Throwable current = throwable;
 
     for(;;) {
-      sb.append(current.getClass().getName());
+      builder.append(current.getClass().getName());
 
       if(current.getMessage() != null) {
-        sb.append(" [");
-        sb.append(current.getMessage());
-        sb.append("]");
+        builder.append(" [");
+        builder.append(current.getMessage());
+        builder.append("]");
       }
 
-      sb.append(" @ ");
-      sb.append(current.getStackTrace()[0]);
+      builder.append(" @ ");
+      builder.append(current.getStackTrace()[0]);
 
       current = current.getCause();
 
@@ -23,9 +27,17 @@ public class Throwables {
         break;
       }
 
-      sb.append(" --> ");
+      builder.append(" --> ");
     }
 
-    return sb.toString();
+    return builder.toString();
+  }
+
+  public static String toString(Throwable throwable) {
+    StringWriter stringWriter = new StringWriter();
+
+    throwable.printStackTrace(new PrintWriter(stringWriter));
+
+    return stringWriter.toString();
   }
 }
