@@ -6,6 +6,7 @@ import hs.mediasystem.dao.SettingsDao;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -23,8 +24,9 @@ import javax.inject.Singleton;
 
 @Singleton
 public class SettingsStore {
-  private final SettingPersister settingPersister;
+  private static final Logger LOGGER = Logger.getLogger(SettingsStore.class.getName());
 
+  private final SettingPersister settingPersister;
   private final Map<String, Setting> settings = new HashMap<>();
 
   @Inject
@@ -36,11 +38,11 @@ public class SettingsStore {
       settings.put(setting.getSystem() + "/" + setting.getKey(), setting);
     }
 
-    System.out.println("[FINE] SettingsStore - Loaded " + settings.size() + " settings");
+    LOGGER.info("SettingsStore - Loaded " + settings.size() + " settings");
   }
 
   public void storeSetting(String system, PersistLevel level, String key, String value) {
-    System.out.println("[FINE] SettingsStore#storeSetting - " + system + " + " + key + " <= " + value);
+    LOGGER.fine("SettingsStore#storeSetting - " + system + " + " + key + " <= " + value);
     getValueProperty(system, level, key).set(value);
   }
 

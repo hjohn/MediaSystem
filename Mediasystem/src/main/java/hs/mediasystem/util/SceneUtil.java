@@ -4,6 +4,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import com.sun.javafx.tk.Toolkit;
 
@@ -17,6 +18,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 
 public class SceneUtil {
+  private static final Logger LOGGER = Logger.getLogger(SceneUtil.class.getName());
   private static final ScheduledExecutorService EVENT_TIMEOUT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 
   public static Scene createScene(Parent root) {
@@ -33,10 +35,10 @@ public class SceneUtil {
           @Override
           public void run() {
             if(!Toolkit.getToolkit().isNestedLoopRunning()) {
-              System.out.println("[WARN] Slow Event Handling, trace:");
+              LOGGER.warning("Slow Event Handling, trace:");
 
               for(StackTraceElement element : fxThread.getStackTrace()) {
-                System.out.println("[WARN]   -- " + element);
+                LOGGER.warning("  -- " + element);
               }
             }
           }
@@ -62,7 +64,7 @@ public class SceneUtil {
           newValue.getStyleClass().add("focused");
           newValue.fireEvent(new FocusEvent(true));
 
-          System.out.println("[INFO] Focus set to: " + newValue);
+          LOGGER.info("Focus set to: " + newValue);
         }
       }
     });

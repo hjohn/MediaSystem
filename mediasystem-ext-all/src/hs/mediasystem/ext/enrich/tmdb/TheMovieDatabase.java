@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,6 +35,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 public class TheMovieDatabase {
   static final Executor EXECUTOR = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LifoBlockingDeque<Runnable>());
 
+  private static final Logger LOGGER = Logger.getLogger(TheMovieDatabase.class.getName());
   private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
   private static final RateLimiter RATE_LIMITER = new RateLimiter(15, 10);
 
@@ -48,7 +50,7 @@ public class TheMovieDatabase {
   public TheMovieDatabase(Cache cache, Database database) {  // TODO we have Cache, no need for Database
     this.cache = cache;
     this.database = database;
-    this.apiKey = CryptoUtil.decrypt("8AF22323DB8C0F235B38F578B7E09A61DB6F971EED59DE131E4EF70003CE84B483A778EBD28200A031F035F4209B61A4", "-MediaSystem-");
+    this.apiKey = CryptoUtil.decrypt("8AF22323DB8C0F235B38F578B7E09A61DB6F971EED59DE131E4EF70003CE84B483A778EBD28200A031F035F4209B61A4", "-MediaSystem-"); // Yes, I know you can still get the key.
   }
 
   public JsonNode query(String query, String... parameters) {
@@ -65,6 +67,8 @@ public class TheMovieDatabase {
         sb.append("=");
         sb.append(URLEncoder.encode(parameters[i + 1], "UTF-8"));
       }
+
+      LOGGER.info("Querying TMDB: " + query + " with parameters: " + Arrays.toString(parameters));
 
       return objectMapper.readTree(getURL(new URL("http://api.themoviedb.org/" + query + "?api_key=" + apiKey + sb.toString())));
     }

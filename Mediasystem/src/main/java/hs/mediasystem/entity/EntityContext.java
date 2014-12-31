@@ -24,6 +24,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -36,6 +37,8 @@ import javafx.collections.ObservableList;
  */
 // TODO remove dependency on javafx.application.Platform
 public class EntityContext {
+  private static final Logger LOGGER = Logger.getLogger(EntityContext.class.getName());
+
   private final ThreadPoolExecutor primaryExecutor = new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, new LifoBlockingDeque<Runnable>());
   private final ThreadPoolExecutor secondaryExecutor = new ThreadPoolExecutor(2, 2, 5, TimeUnit.SECONDS, new LifoBlockingDeque<Runnable>());
   private final Executor updateExecutor = new Executor() {
@@ -295,7 +298,7 @@ public class EntityContext {
       }
 
       if(enricherHolders.isEmpty()) {
-        System.out.println("[WARN] " + getClass().getName() + "::queueForEnrichment - No Enrichers for: " + entity);
+        LOGGER.warning("No Enrichers for: " + entity);
         return;
       }
 
@@ -335,7 +338,7 @@ public class EntityContext {
           .thenCompose(key -> enricher.enrich(EntityContext.this, entity, key))  // Composes the enricher step with the given key
           .handle((v, throwable) -> {  // Log problems in previous steps, and allow the completion change to continue normally
             if(throwable != null) {
-              System.out.println("[WARN] " + getClass().getName() + "::queueForEnrichment - Exception for " + entity + ": " + Throwables.formatAsOneLine(throwable.getCause()));
+              LOGGER.warning("Exception for " + entity + ": " + Throwables.formatAsOneLine(throwable.getCause()));
             }
 
             return null;  // Continue normally
@@ -403,9 +406,9 @@ public class EntityContext {
                       throw new RuntimeException("Property is not null, List was already provided: " + property);
                     }, getExecutor())
                     .thenCompose(v -> function.provide(EntityContext.this, parentEntity, key))  // Composes the provide step.  The parameter v is not used, it only needs to trigger of the previous step (thenSupply methods donot exist)
-                    .handle((v, t) -> {  // Log problems in previous steps, and allow the completion change to continue normally
-                      if(t != null) {
-                        System.out.println("[WARN] " + getClass().getName() + "::queueListProvide - Exception for " + property + ": " + Throwables.formatAsOneLine(t.getCause()));
+                    .handle((v, throwable) -> {  // Log problems in previous steps, and allow the completion change to continue normally
+                      if(throwable != null) {
+                        LOGGER.warning("Exception for " + property + ": " + Throwables.formatAsOneLine(throwable.getCause()));
                       }
 
                       return null;  // Continue normally

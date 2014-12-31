@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -67,6 +68,7 @@ import javax.inject.Singleton;
 
 @Singleton
 public class ProgramController {
+  private static final Logger LOGGER = Logger.getLogger(ProgramController.class.getName());
   private static final KeyCombination BACK_SPACE = new KeyCodeCombination(KeyCode.BACK_SPACE);
   private static final KeyCombination KEY_S = new KeyCodeCombination(KeyCode.S);
   private static final KeyCombination KEY_O = new KeyCodeCombination(KeyCode.O);
@@ -113,7 +115,7 @@ public class ProgramController {
     @Override
     public void invalidated(Observable observable) {
       if(videoCanvas != null) {
-        System.out.println("[FINE] ProgramController: CanvasSize: " + videoCanvas.getWidth() + "x" + videoCanvas.getHeight() + " PaneSize: " + videoPane.getWidth() + "x" + videoPane.getHeight());
+        LOGGER.info("ProgramController: CanvasSize: " + videoCanvas.getWidth() + "x" + videoCanvas.getHeight() + " PaneSize: " + videoPane.getWidth() + "x" + videoPane.getHeight());
 
         double scaleX = videoPane.getWidth() / videoCanvas.getWidth();
         double scaleY = videoPane.getHeight() / videoCanvas.getHeight();
@@ -268,7 +270,7 @@ public class ProgramController {
       @Override
       public void changed(ObservableValue<? extends State> observableValue, State oldValue, State newValue) {
         if(newValue == State.SUCCEEDED && playerPresentation != null) {
-          System.out.println("[INFO] Download of subtitle succeeded, setting subtitle to: " + subtitleDownloadService.getValue());
+          LOGGER.info("Download of subtitle succeeded, setting subtitle to: " + subtitleDownloadService.getValue());
           playerPresentation.showSubtitle(subtitleDownloadService.getValue());
         }
       }
@@ -277,7 +279,7 @@ public class ProgramController {
     location.addListener(new ChangeListener<Location>() {
       @Override
       public void changed(ObservableValue<? extends Location> observable, Location old, Location current) {
-        System.out.println("[INFO] Changing Location" + (old == null ? "" : " from " + old.getId()) + " to " + current.getId());
+        LOGGER.info("Changing Location" + (old == null ? "" : " from " + old.getId()) + " to " + current.getId());
 
         @SuppressWarnings("unchecked")
         Layout<? extends Location, MainLocationPresentation<Location>> layout = (Layout<? extends Location, MainLocationPresentation<Location>>)Layout.findMostSuitableLayout(mainLocationLayoutsProvider.get(), current.getClass());
@@ -584,7 +586,7 @@ public class ProgramController {
   public final void registerWorker(final Worker<?> worker) {
     final Node node = createMessage(worker);
 
-    System.out.println("[FINE] ProgramController.registerService() - registering new service: " + worker);
+    LOGGER.fine("ProgramController.registerService() - registering new service: " + worker);
 
     worker.stateProperty().addListener(new ChangeListener<State>() {
       @Override

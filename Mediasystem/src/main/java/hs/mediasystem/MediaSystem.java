@@ -243,85 +243,19 @@ package hs.mediasystem;
 // - Check Hash against DB
 // - No Hash match, must be new file (NEW ENTRY)
 
-import hs.mediasystem.util.Log;
-import hs.mediasystem.util.Log.LinePrinter;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 import javafx.application.Application;
 
 public class MediaSystem {
+  private static final Logger LOGGER = Logger.getLogger(MediaSystem.class.getName());
+
   public static void main(String[] args) throws SecurityException, FileNotFoundException, IOException {
     ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
-
-    Log.initialize(new LinePrinter() {
-      private static final int METHOD_COLUMN = 120;
-      private static final int METHOD_TAB_STOP = 24;
-
-      private final long startTime = System.currentTimeMillis();
-      private final String pad = String.format("%" + METHOD_COLUMN + "s", "");
-      private final Map<Level, String> levelMap = new HashMap<Level, String>() {{
-        put(Level.SEVERE, "!");
-        put(Level.WARNING, "?");
-        put(Level.INFO, "*");
-        put(Level.CONFIG, "+");
-        put(Level.FINE, " ");
-        put(Level.FINER, "-");
-        put(Level.FINEST, "=");
-      }};
-
-      @Override
-      public void print(PrintStream printStream, Level level, String textParm, String method) {
-        if(method.startsWith(" -- uk.co.caprica.vlcj.Info.<init>")) {
-          return;
-        }
-
-        String text = textParm;
-
-        StringBuilder builder = new StringBuilder();
-        long sinceStart = System.currentTimeMillis() - startTime;
-
-        boolean stackTrace = method.startsWith(" -- java.lang.Throwable$WrappedPrintStream.println(");
-        boolean stackTraceHeader = stackTrace && !text.startsWith("Caused by:") && !text.startsWith("\t");
-
-        if(stackTraceHeader) {
-          text = "\r\n" + text;
-          stackTrace = false;
-        }
-
-        if(!stackTrace) {
-          Runtime runtime = Runtime.getRuntime();
-          long usedMemory = runtime.totalMemory() - runtime.freeMemory();
-
-          builder.append(String.format("%1s%9.3f\u2502%3d\u2502%02x\u2502 ", translateLevel(level), ((double)sinceStart) / 1000, usedMemory / 1024 / 1024, Thread.currentThread().getId()));
-        }
-        builder.append(text);
-
-        if(!stackTrace && !stackTraceHeader) {
-          if(builder.length() < METHOD_COLUMN) {
-            builder.append(pad.substring(0, METHOD_COLUMN - builder.length()));
-          }
-          else {
-            builder.append(pad.substring(0, METHOD_TAB_STOP - builder.length() % METHOD_TAB_STOP));
-          }
-          builder.append(method);
-        }
-        builder.append("\r\n");
-
-        printStream.print(builder.toString());
-      }
-
-      private String translateLevel(Level level) {
-        return levelMap.get(level);
-      }
-    });
 
     try(FileInputStream stream = new FileInputStream("logging.properties")) {
       LogManager.getLogManager().readConfiguration(stream);
@@ -329,6 +263,8 @@ public class MediaSystem {
     catch(FileNotFoundException e) {
       System.out.println("[INFO] File 'logging.properties' not found, using defaults");
     }
+
+    LOGGER.info("Starting up...");
 
     System.setProperty("prism.text", "t2k");
     System.setProperty("prism.lcdtext", "false");

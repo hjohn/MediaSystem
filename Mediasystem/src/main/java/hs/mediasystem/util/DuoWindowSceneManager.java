@@ -59,11 +59,9 @@ public class DuoWindowSceneManager implements SceneManager {
     Paint paint = scene.getFill();
 
     if(paint instanceof Color && ((Color)paint).getOpacity() == 1.0) {
-      System.out.println(">>> Switching to normal stage");
       displayOnStage(mainStage, transparentStage);
     }
     else {
-      System.out.println(">>> Switching to transparent stage");
       displayOnStage(transparentStage, mainStage);
     }
   }

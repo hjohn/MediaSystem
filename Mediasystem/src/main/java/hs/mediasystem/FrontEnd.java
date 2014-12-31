@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
@@ -71,6 +72,7 @@ import javax.inject.Provider;
 import javax.sql.ConnectionPoolDataSource;
 
 public class FrontEnd extends Application {
+  private static final Logger LOGGER = Logger.getLogger(FrontEnd.class.getName());
   private static final Comparator<PlayerFactory> PLAYER_FACTORY_COMPARATOR = new Comparator<PlayerFactory>() {
     @Override
     public int compare(PlayerFactory o1, PlayerFactory o2) {
@@ -88,8 +90,8 @@ public class FrontEnd extends Application {
   public void start(Stage primaryStage) throws MalformedURLException {
     JavaFXDefaults.setup();
 
-    System.out.println("javafx.runtime.version: " + System.getProperties().get("javafx.runtime.version"));
-    System.out.println("TWO_LEVEL_FOCUS: " + Platform.isSupported(ConditionalFeature.TWO_LEVEL_FOCUS));
+    LOGGER.info("javafx.runtime.version: " + System.getProperties().get("javafx.runtime.version"));
+    LOGGER.info("Platform.isSupported(ConditionalFeature.TWO_LEVEL_FOCUS): " + Platform.isSupported(ConditionalFeature.TWO_LEVEL_FOCUS));
 
     setUserAgentStylesheet(STYLESHEET_CASPIAN);
 
@@ -229,7 +231,7 @@ public class FrontEnd extends Application {
       }
     });
 
-    System.out.println("Creating controller...");
+    LOGGER.fine("Creating controller...");
 
     injector.register(MessagePaneTaskExecutor.class);
 

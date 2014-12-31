@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -24,6 +25,7 @@ import javafx.beans.property.Property;
 public class ActionTargetProvider {
   private static final Map<Class<?>, List<ExposedMember>> exposedPropertiesByClass = new HashMap<>();
   private static final Map<Member, ExposedMember> exposedPropertiesByMember = new HashMap<>();
+  private static final Logger LOGGER = Logger.getLogger(ActionTargetProvider.class.getName());
 
   public List<ActionTarget> getActionTargets(Object presentation) {
     return createActionTargetsRecursively(presentation, Collections.emptyList());
@@ -33,7 +35,7 @@ public class ActionTargetProvider {
     List<ActionTarget> actionTargets = new ArrayList<>();
 
     for(ExposedMember exposedMember : findExposedMembers(root.getClass())) {
-      System.err.println("Attempting property : " + exposedMember.getMember() + " ---> " + exposedMember.getMember().getType());
+      LOGGER.fine("Attempting property : " + exposedMember.getMember() + " ---> " + exposedMember.getMember().getType());
 
       if(Property.class.isAssignableFrom(exposedMember.getMember().getType())) {
         Object property = exposedMember.getMember().get(root);

@@ -1,9 +1,12 @@
 package hs.mediasystem.util;
 
-import java.util.logging.StreamHandler;
+import java.io.OutputStream;
+import java.util.logging.ConsoleHandler;
 
-public class SystemOutConsoleHandler extends StreamHandler {
-  public SystemOutConsoleHandler() {
-    setOutputStream(System.out);
+public class SystemOutConsoleHandler extends ConsoleHandler {
+
+  @Override
+  protected synchronized void setOutputStream(OutputStream out) throws SecurityException {
+    super.setOutputStream(System.out);
   }
 }

@@ -9,11 +9,14 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
 public class DatabaseUpdater {
+  private static final Logger LOGGER = Logger.getLogger(DatabaseUpdater.class.getName());
+
   private final Provider<Connection> connectionProvider;
   private final DatabaseStatementTranslator translator;
 
@@ -36,13 +39,13 @@ public class DatabaseUpdater {
             break;
           }
 
-          System.out.println("[INFO] Updating database to version " + version);
+          LOGGER.info("Updating database to version " + version);
 
           applyUpdateScript(version, sqlStream);
         }
       }
 
-      System.out.println("[INFO] Database up to date at version " + version);
+      LOGGER.info("Database up to date at version " + version);
     }
     catch(IOException | SQLException e) {
       throw new RuntimeException(e);
@@ -77,7 +80,7 @@ public class DatabaseUpdater {
             sqlStatement = translator.translate(sqlStatement.substring(0, sqlStatement.length() - 1));  // strip off semi-colon
 
             try(PreparedStatement statement = connection.prepareStatement(sqlStatement)) {
-              System.out.println("[FINE] " + sqlStatement);
+              LOGGER.fine(sqlStatement);
               statement.execute();
             }
             catch(SQLException e) {
@@ -109,7 +112,7 @@ public class DatabaseUpdater {
       try(ResultSet rs1 = dbm.getTables(null, null, "dbinfo", null);
           ResultSet rs2 = dbm.getTables(null, null, "DBINFO", null)) {
         if(!rs1.next() && !rs2.next()) {
-          System.out.println("[FINE] DatabaseUpdater.getDatabaseVersion() - no dbinfo table exists, returning version 0");
+          LOGGER.fine("no dbinfo table exists, returning version 0");
           return 0;
         }
       }

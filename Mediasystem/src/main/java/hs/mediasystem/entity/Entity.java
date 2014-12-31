@@ -1,6 +1,7 @@
 package hs.mediasystem.entity;
 
 import java.util.function.BiFunction;
+import java.util.logging.Logger;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -20,6 +21,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 
 public class Entity {
+  private static final Logger LOGGER = Logger.getLogger(Entity.class.getName());
   private static final EnrichTrigger DEFAULT_ENRICH_TRIGGER = EnrichTrigger.IS_NOT_SET;
 
   public enum EnrichTrigger {
@@ -61,7 +63,7 @@ public class Entity {
       enrichTriggered = true;
       context.queueForEnrichment(this);
 
-      System.out.println("[FINE] Entity: Enrich Triggered by access (" + enrichTrigger + ") of: " + getClass().getName() + "." + property.getName() + ": " + this);
+      LOGGER.fine("Enrich Triggered by access (" + enrichTrigger + ") of: " + getClass().getName() + "." + property.getName() + ": " + this);
     }
   }
 
