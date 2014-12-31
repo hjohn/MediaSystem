@@ -19,7 +19,7 @@ public class Movie extends Media {
     initializeDescriptors(
       new Descriptor("title", 0.99999, new TextType(TextType.SubType.STRING, TextType.Size.TITLE)),
       new Descriptor("releaseDate", 0.9999, new TextType(TextType.SubType.DATE, TextType.Size.WORD)),
-      new Descriptor("releaseYear", 0.98, new TextType(TextType.SubType.STRING, TextType.Size.WORD))
+      new Descriptor("releaseYear", 0.98, new TextType(TextType.SubType.NUMERIC, TextType.Size.WORD))
     );
 
     initializeSets(

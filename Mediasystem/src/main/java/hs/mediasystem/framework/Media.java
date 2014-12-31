@@ -23,7 +23,7 @@ public abstract class Media extends Entity {
   public final DoubleProperty rating = doubleProperty("rating");
   public final IntegerProperty runtime = integerProperty("runtime");
   public final StringProperty imdbNumber = stringProperty("imdbNumber");
-  public final StringProperty releaseYear = stringProperty("releaseYear");
+  public final IntegerProperty releaseYear = integerProperty("releaseYear");
 
   public final StringProperty enrichedTitle = stringProperty("enrichedTitle");
   public final StringProperty initialTitle = stringProperty("initialTitle");
@@ -44,7 +44,11 @@ public abstract class Media extends Entity {
     this.mediaItem.set(mediaItem);
     this.entityDescriptors = entityDescriptors;
 
-    this.releaseYear.bind(Bindings.when(releaseDate.isNull()).then(localReleaseYear).otherwise(Bindings.format("%tY", releaseDate)));
+    this.releaseYear.bind(Bindings.createIntegerBinding(() -> {
+      return releaseDate.get() == null && localReleaseYear.get() == null ? 0 :
+                                               releaseDate.get() == null ? Integer.parseInt(localReleaseYear.get()) : releaseDate.get().getYear();
+    }, releaseDate, localReleaseYear));
+
     this.title.bind(Bindings.when(enrichedTitle.isNull()).then(initialTitle).otherwise(enrichedTitle));
     this.titleWithContext.bind(title);
   }

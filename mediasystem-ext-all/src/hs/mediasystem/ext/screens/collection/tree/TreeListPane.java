@@ -314,7 +314,7 @@ public class TreeListPane extends BorderPane {
 
         for(Descriptor property : set.getDescriptors()) {
           if(property.getType() instanceof TextType) {
-            binder.bind(bindTargets[target++], MapBindings.select(mediaNode.media, property.getName()));
+            binder.bind(bindTargets[target++], MapBindings.select(mediaNode.media, property.getName()).asString());
             redundantProperties.add(property);
           }
         }
