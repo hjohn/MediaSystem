@@ -8,6 +8,7 @@ import hs.mediasystem.entity.SourceKey;
 import hs.mediasystem.ext.media.movie.Movie;
 import hs.mediasystem.ext.media.serie.Serie;
 import hs.mediasystem.framework.Casting;
+import hs.mediasystem.framework.Casting.MediaType;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.Person;
 import hs.mediasystem.framework.SourceImageHandle;
@@ -48,7 +49,7 @@ public class TmdbPersonCreditsListProvider implements ListProvider<Person, Strin
 
         for(Iterator<JsonNode> i = node.path("cast").iterator(); i.hasNext(); ) {
           JsonNode cast = i.next();
-          Casting casting = createCasting(context, person, cast, "Actor");
+          Casting casting = createCasting(context, person, cast);
 
           Casting existingCasting = castingsByMedia.get(casting.media.get());
 
@@ -91,18 +92,21 @@ public class TmdbPersonCreditsListProvider implements ListProvider<Person, Strin
         }
 
         person.castings.set(castings);
-      });
+      }, context.getUpdateExecutor());
   }
 
-  private Casting createCasting(EntityContext context, Person person, JsonNode node, String role) {
-    Class<? extends Media> mediaClass = node.get("media_type").asText().equals("tv") ? Serie.class : Movie.class;
-    String titleFieldName = node.get("media_type").asText().equals("tv") ? "name" : "title";
+  private Casting createCasting(EntityContext context, Person person, JsonNode node) {
+    MediaType mediaType = node.get("media_type").asText().equals("tv") ? MediaType.TV : MediaType.MOVIE;
+
+    Class<? extends Media> mediaClass = mediaType == MediaType.TV ? Serie.class : Movie.class;
+    String titleFieldName = mediaType == MediaType.TV ? "name" : "title";
     String title = node.get(titleFieldName).asText();
 
     Media media = context.add(mediaClass, new SourceKey(source, node.get("id").asText()));
 
     media.initialTitle.set(title);
     media.enrichedTitle.set(title);
+    media.releaseDate.set(TheMovieDatabase.parseDateOrNull((mediaType == MediaType.TV ? node.path("first_air_date") : node.path("release_date")).getTextValue()));
 
     Source<byte[]> largestImageSource = tmdb.createSource(tmdb.createImageURL(node.path("poster_path").getTextValue(), "original"));  // This shouldn't be slow, so safe to run on Update thread
 
@@ -110,13 +114,18 @@ public class TmdbPersonCreditsListProvider implements ListProvider<Person, Strin
       media.image.set(new SourceImageHandle(largestImageSource, createImageKey(node, title, "poster")));
     }
 
+    String character = node.path("character").getTextValue();
+    String role = character.trim().matches("(?i).*\\b(as )?(himself|herself)\\b.*") ? "Self" : "Actor";
+
     Casting casting = new Casting();
 
     casting.media.set(media);
     casting.person.set(person);
-    casting.characterName.set(node.path("character").getTextValue());
+    casting.characterName.set(character);
     casting.index.set(0);  // TODO no order, need to think of a nice casting order
     casting.role.set(role);
+    casting.mediaType.set(mediaType);
+    casting.episodeCount.set(mediaType  == MediaType.TV ? node.path("episode_count").getIntValue() : 0);
 
     return casting;
   }

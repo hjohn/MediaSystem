@@ -12,6 +12,7 @@ import hs.mediasystem.framework.Casting;
 import hs.mediasystem.framework.Media;
 import hs.mediasystem.framework.Person;
 import hs.mediasystem.framework.SourceImageHandle;
+import hs.mediasystem.framework.Casting.MediaType;
 
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
@@ -74,6 +75,8 @@ public class TmdbMediaCreditsListProvider implements ListProvider<Media, String>
   }
 
   private Casting createCasting(EntityContext context, Media media, JsonNode cast, String role) {
+    MediaType mediaType = media instanceof Movie ? MediaType.MOVIE : MediaType.TV;
+
     Person person = context.add(Person.class, new SourceKey(source, cast.get("id").asText()));
 
     person.name.set(cast.get("name").asText());
@@ -91,6 +94,9 @@ public class TmdbMediaCreditsListProvider implements ListProvider<Media, String>
     casting.characterName.set(cast.path("character").getTextValue());
     casting.index.set(cast.get("order").asInt());
     casting.role.set(role);
+    casting.mediaType.set(mediaType);
+
+    // episode count is normally also set, but it is not available (directly atleast) from this JSON response
 
     return casting;
   }
