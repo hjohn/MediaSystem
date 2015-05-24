@@ -1,0 +1,1 @@
+ALTER TABLE images ADD COLUMN creationtime timestamp NOT NULL DEFAULT now();

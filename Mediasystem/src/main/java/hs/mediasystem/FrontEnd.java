@@ -1,8 +1,10 @@
 package hs.mediasystem;
 
+import hs.ddif.AnnotationDescriptor;
 import hs.ddif.Injector;
 import hs.ddif.JustInTimeDiscoveryPolicy;
 import hs.ddif.PluginManager;
+import hs.ddif.Value;
 import hs.mediasystem.beans.BeanUtils;
 import hs.mediasystem.dao.Setting;
 import hs.mediasystem.db.ConnectionPool;
@@ -68,6 +70,7 @@ import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.sql.ConnectionPoolDataSource;
 
@@ -111,6 +114,7 @@ public class FrontEnd extends Application {
     final Injector injector = new Injector(new JustInTimeDiscoveryPolicy());
 
     injector.registerInstance(injector);
+    injector.registerInstance(7 * 24 * 60 * 60, AnnotationDescriptor.describe(Named.class, new Value("value", "DatabaseCache.expirationSeconds")));
 
     injector.register(new Provider<Connection>() {
       @Override

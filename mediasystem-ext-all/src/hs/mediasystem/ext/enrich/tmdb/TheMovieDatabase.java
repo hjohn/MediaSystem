@@ -54,6 +54,10 @@ public class TheMovieDatabase {
   }
 
   public JsonNode query(String query, String... parameters) {
+    return queryInternal(true, query, parameters);
+  }
+
+  private JsonNode queryInternal(boolean useCache, String query, String... parameters) {
     if(parameters.length % 2 != 0) {
       throw new IllegalArgumentException("Uneven number of vararg 'parameters': must provide pairs of name/value");
     }
@@ -70,7 +74,9 @@ public class TheMovieDatabase {
 
       LOGGER.info("Querying TMDB: " + query + " with parameters: " + Arrays.toString(parameters));
 
-      return objectMapper.readTree(getURL(new URL("http://api.themoviedb.org/" + query + "?api_key=" + apiKey + sb.toString())));
+      URL url = new URL("http://api.themoviedb.org/" + query + "?api_key=" + apiKey + sb.toString());
+
+      return objectMapper.readTree(useCache ? getURL(url) : getURLdirect(url));
     }
     catch(RuntimeIOException | IOException e) {
       throw new RuntimeException("While executing query: " + query + "; parameters=" + Arrays.toString(parameters), e);
@@ -101,7 +107,7 @@ public class TheMovieDatabase {
 
   private JsonNode getConfiguration() {
     if(configuration == null) {
-      configuration = query("3/configuration");
+      configuration = queryInternal(false, "3/configuration");
     }
 
     return configuration;
@@ -124,13 +130,18 @@ public class TheMovieDatabase {
     byte[] data = cache.lookup(url.toExternalForm());
 
     if(data == null) {
-      RATE_LIMITER.acquire();
-      data = URLs.readAllBytes(url);
+      data = getURLdirect(url);
 
       System.out.println("[FINE] [TMDB] [CACHE] Store: " + url);
       cache.store(url.toExternalForm(), data);
     }
 
     return data;
+  }
+
+  private static byte[] getURLdirect(URL url) {
+    RATE_LIMITER.acquire();
+
+    return URLs.readAllBytes(url);
   }
 }

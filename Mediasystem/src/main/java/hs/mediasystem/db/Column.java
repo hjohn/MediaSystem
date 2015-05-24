@@ -11,6 +11,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
@@ -21,6 +22,12 @@ public @interface Column {
   public static class DefaultConverter implements DataTypeConverter<Object, Object> {
     @Override
     public Object toStorageType(Object input) {
+      if(input instanceof LocalDateTime) {
+        LocalDateTime localDateTime = (LocalDateTime)input;
+
+        return java.util.Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+      }
+
       return input;
     }
 
