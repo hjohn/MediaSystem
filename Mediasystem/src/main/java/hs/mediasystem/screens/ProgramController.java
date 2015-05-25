@@ -302,6 +302,15 @@ public class ProgramController {
         }
 
         activePresentation.location.set(location.get());
+
+        Node node = contentPresentationPane.getChildren().get(0);
+
+        Platform.runLater(new Runnable() {
+          @Override
+          public void run() {
+            node.requestFocus();
+          }
+        });
       }
     });
   }
@@ -496,13 +505,6 @@ public class ProgramController {
 
     contentPresentationPane.getChildren().setAll(node);
     scene.setFill(background);
-
-    Platform.runLater(new Runnable() {
-      @Override
-      public void run() {
-        node.requestFocus();
-      }
-    });
   }
 
   public Node getActiveScreen() {

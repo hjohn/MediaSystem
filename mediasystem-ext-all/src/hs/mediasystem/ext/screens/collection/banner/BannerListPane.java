@@ -7,6 +7,7 @@ import hs.mediasystem.util.Events;
 import hs.mediasystem.util.ImageHandle;
 import hs.mediasystem.util.MapBindings;
 import hs.mediasystem.util.WeakBinder;
+import hs.mediasystem.util.javafx.TwoLevelFocus;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -173,6 +174,7 @@ public class BannerListPane extends BorderPane {
   @Override
   public void requestFocus() {
     tableView.requestFocus();
+    TwoLevelFocus.setInternalFocus(tableView);
   }
 
   private void itemSelected(Event event, MediaNode focusedNode) {
