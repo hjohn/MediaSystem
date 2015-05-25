@@ -7,7 +7,6 @@ import hs.mediasystem.screens.MediaNodeEvent;
 import hs.mediasystem.screens.PresentationPane;
 import hs.mediasystem.screens.UserLayout;
 import hs.mediasystem.util.GridPaneUtil;
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -67,8 +66,6 @@ public class CollectionView extends PresentationPane {
 
   private CollectionSelectorPresentation currentCollectionSelectorPresentation;
 
-  private boolean focusValid;
-
   public CollectionView() {
     getStylesheets().add("collection/collection-view.css");
 
@@ -113,19 +110,6 @@ public class CollectionView extends PresentationPane {
         }
       }
     });
-
-    /*
-     * Listener for when the collection of MediaNodes changes.  When this happens, the currently
-     * focused MediaNode may not be the same instance anymore as the same node in the new
-     * collection.  If it still exists however it can be reselected by id in the next layout pass.
-     */
-
-    mediaNodes.addListener((Observable o) -> {
-      if(focusValid) {
-        focusValid = false;
-        requestLayout();
-      }
-    });
   }
 
   @Override
@@ -138,41 +122,5 @@ public class CollectionView extends PresentationPane {
     if(currentCollectionSelectorPresentation != null) {
       currentCollectionSelectorPresentation.defaultInputFocus.get().requestFocus();
     }
-  }
-
-  @Override
-  protected void layoutChildren() {
-    super.layoutChildren();
-
-    if(!focusValid) {
-      String id = null;
-
-      if(focusedMediaNode.get() != null) {
-        id = focusedMediaNode.get().getId();
-      }
-
-      selectMediaNodeById(id);
-      focusValid = true;
-    }
-  }
-
-  private void selectMediaNodeById(String id) {
-    MediaNode nodeToSelect = null;
-
-    if(id != null) {
-      for(MediaNode mediaNode : mediaNodes) {
-        nodeToSelect = mediaNode.findMediaNodeById(id);
-
-        if(nodeToSelect != null) {
-          break;
-        }
-      }
-    }
-
-    if(nodeToSelect == null && !mediaNodes.isEmpty()) {
-      nodeToSelect = mediaNodes.get(0);
-    }
-
-    focusedMediaNode.set(nodeToSelect);
   }
 }

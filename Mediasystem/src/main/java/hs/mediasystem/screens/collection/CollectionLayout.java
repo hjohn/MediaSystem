@@ -1,7 +1,6 @@
 package hs.mediasystem.screens.collection;
 
 import hs.mediasystem.dao.Setting.PersistLevel;
-import hs.mediasystem.framework.MediaRoot;
 import hs.mediasystem.framework.SettingsStore;
 import hs.mediasystem.screens.Layout;
 import hs.mediasystem.screens.Location;
@@ -47,13 +46,27 @@ public class CollectionLayout implements Layout<Location, CollectionPresentation
 
     view.onSelect.set(presentation::handleMediaNodeSelectEvent);
 
-    presentation.mediaRoot.addListener(new ChangeListener<MediaRoot>() {
+    presentation.layout.addListener(new ChangeListener<Layout<?, ?>>() {
       @Override
-      public void changed(ObservableValue<? extends MediaRoot> observable, MediaRoot old, MediaRoot current) {
+      public void changed(ObservableValue<? extends Layout<?, ?>> observable, Layout<?, ?> old, Layout<?, ?> current) {
+
+        /*
+         * When layout changes, select the last selected node:
+         */
+
         String id = settingsStore.getSetting("MediaSystem:Collection", presentation.mediaRoot.get().getId().toString("LastSelected", presentation.mediaRoot.get().getRootName()));
 
         if(id != null) {
-          view.focusedMediaNode.set(new MediaNode(id, null, null, true));
+          MediaNode nodeToSelect = null;
+
+          for(MediaNode mediaNode : presentation.mediaNodes) {
+            nodeToSelect = mediaNode.findMediaNodeById(id);
+
+            if(nodeToSelect != null) {
+              view.focusedMediaNode.set(nodeToSelect);
+              break;
+            }
+          }
         }
       }
     });
