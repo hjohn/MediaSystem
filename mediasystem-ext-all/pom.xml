@@ -12,17 +12,16 @@
   </properties>
 
   <build>
-    <sourceDirectory>src</sourceDirectory>
     <resources>
       <resource>
-        <directory>src</directory>
+        <directory>src/main/java</directory>
         <includes>
           <include>**/*.png</include>
           <include>**/*.css</include>
         </includes>
       </resource>
     </resources>
-    
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
