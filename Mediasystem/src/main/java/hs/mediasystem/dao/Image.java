@@ -2,6 +2,7 @@ package hs.mediasystem.dao;
 
 import hs.mediasystem.db.Column;
 import hs.mediasystem.db.DatabaseObject;
+import hs.mediasystem.db.Id;
 import hs.mediasystem.db.Table;
 
 import java.time.LocalDateTime;
@@ -9,7 +10,7 @@ import java.time.LocalDateTime;
 @Table(name = "images")
 public class Image extends DatabaseObject {
 
-  @Column
+  @Id @Column
   private String url;
 
   @Column

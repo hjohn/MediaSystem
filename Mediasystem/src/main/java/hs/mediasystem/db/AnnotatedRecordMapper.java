@@ -73,7 +73,7 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
       if(id != null) {
         idColumn = c;
       }
-      else if(column != null) {
+      if(column != null) {
         columns.add(c);
       }
 

@@ -4,33 +4,22 @@ import hs.mediasystem.dao.Image;
 import hs.mediasystem.db.Database;
 import hs.mediasystem.db.Database.Transaction;
 
-import java.time.LocalDateTime;
-
 import javax.inject.Inject;
-import javax.inject.Named;
 
-public class DatabaseCache implements Cache {
+public class DatabaseCache implements Cache<byte[]> {
   private final Database database;
-  private final int maxAgeInSeconds;
 
   @Inject
-  public DatabaseCache(Database database, @Named("DatabaseCache.expirationSeconds") int maxAgeInSeconds) {
+  public DatabaseCache(Database database) {
     this.database = database;
-    this.maxAgeInSeconds = maxAgeInSeconds;
   }
 
   @Override
-  public byte[] lookup(String key) {
+  public CacheEntry<byte[]> lookup(String key) {
     try(Transaction transaction = database.beginReadOnlyTransaction()) {
       Image image = transaction.selectUnique(Image.class, "url=?", key);
 
-      LocalDateTime oldestAllowed = LocalDateTime.now().minusSeconds(maxAgeInSeconds);
-
-      if(image != null && image.getCreationTime().isAfter(oldestAllowed)) {
-        return image.getImage();
-      }
-
-      return null;
+      return image == null ? null : new CacheEntry<>(image.getImage(), image.getCreationTime());
     }
   }
 
