@@ -356,16 +356,7 @@ public class CollectionPresentation extends MainLocationPresentation<CollectionL
       }
 
       if(afterYear != null || beforeYear != null) {
-        if(media.releaseDate.get() == null) {
-
-          /*
-           * Asked to filter on Year, but Year is unknown.
-           */
-
-          return false;
-        }
-
-        int releaseYear = media.releaseDate.get().getYear();
+        int releaseYear = media.releaseYear.get();
         int afterYear = this.afterYear == null ? 0 : this.afterYear;
         int beforeYear = this.beforeYear == null ? Integer.MAX_VALUE : this.beforeYear;
 
