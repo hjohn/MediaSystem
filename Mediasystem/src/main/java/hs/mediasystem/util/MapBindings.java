@@ -345,12 +345,17 @@ public class MapBindings {
             field = cls.getField(propertyName);
           }
           catch(NoSuchFieldException e2) {
-            throw new RuntimeBindException("No such property found: " + propertyName + " in class: " + cls);
+            throw new RuntimeBindException("No such property found: '" + propertyName + "' in class: " + cls);
           }
         }
       }
 
       return method != null ? (Observable)method.invoke(bean) : (Observable)field.get(bean);
+    }
+
+    @Override
+    public String toString() {
+      return "Then[" + propertyName + "]";
     }
   }
 
@@ -381,10 +386,18 @@ public class MapBindings {
           throw new RuntimeBindException("index for ObservableList (" + bean + ") cannot be negative: " + index);
         }
 
-        return Bindings.valueAt((ObservableList<?>)bean, index);
+        ObservableList<?> observableList = (ObservableList<?>)bean;
+
+        // Special binding to avoid an IndexOutOfBoundsException being logspammed by JavaFX when the ObservableList is empty [JDK-8090660]
+        return Bindings.createObjectBinding(() -> observableList.isEmpty() ? null : observableList.get(index), observableList);
       }
 
       throw new RuntimeBindException("map or list expected at step " + (stepNumber - 1) + ", but got: " + cls + ": " + bean);
+    }
+
+    @Override
+    public String toString() {
+      return "IndexLookup[" + obj + "]";
     }
   }
 
