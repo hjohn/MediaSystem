@@ -22,7 +22,19 @@ public class TmdbEpisodeMediaIdentifier extends MediaIdentifier<Episode> {
 
   @Override
   public Identifier identify(Episode episode) {
-    String episodeKey = episode.getContext().getKey(source, episode.serie.get()) + ";" + episode.season.get() + ";" + episode.episodeRange.get();
+    Object key = episode.getContext().getKey(source, episode.serie.get());
+
+    if(key == null) {
+      throw new IllegalStateException("serie key cannot be null for: " + source + ": " + episode);
+    }
+    if(episode.season.get() == null) {
+      throw new IllegalStateException("season cannot be null for: " + source + ": " + episode);
+    }
+    if(episode.episodeRange.get() == null) {
+      throw new IllegalStateException("episodeRange cannot be null for: " + source + ": " + episode);
+    }
+
+    String episodeKey = key + ";" + episode.season.get() + ";" + episode.episodeRange.get();
 
     return new Identifier().setAll(
       new ProviderId("Episode", "TMDB", episodeKey),
