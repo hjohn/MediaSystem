@@ -3,9 +3,13 @@
   xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>hs.mediasystem</groupId>
+  <parent>
+    <groupId>hs.mediasystem</groupId>
+    <artifactId>mediasystem-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
   <artifactId>mediasystem-ext-all</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
