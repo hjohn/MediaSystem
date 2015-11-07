@@ -9,10 +9,13 @@ import hs.mediasystem.util.Levenshtein;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
-import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -21,6 +24,8 @@ import org.codehaus.jackson.JsonNode;
 
 @Named
 public class TmdbMovieMediaIdentifier extends MediaIdentifier<Movie> {
+  private static final Pattern TITLES = Pattern.compile("(.*?)(?: \\((.*?)\\))?");
+
   private final TheMovieDatabase tmdb;
 
   @Inject
@@ -32,116 +37,117 @@ public class TmdbMovieMediaIdentifier extends MediaIdentifier<Movie> {
 
   @Override
   public Identifier identify(Movie movie) {
-    SearchResult searchResult = searchForMovie(movie);
+    Match match = searchForMovie(movie);
 
-    if(searchResult != null) {
+    if(match != null) {
       return new Identifier().setAll(
-        new ProviderId("Movie", "TMDB", Integer.toString(searchResult.tmdbId)),
-        searchResult.matchType,
-        searchResult.matchAccuracy
+        new ProviderId("Movie", "TMDB", match.movie.get("id").asText()),
+        match.type,
+        (float)match.score / 100
       );
     }
 
     return null;
   }
 
-  private SearchResult searchForMovie(Movie movie) {
+  private Match searchForMovie(Movie movie) {
     synchronized(TheMovieDatabase.class) {
-      String title = movie.initialTitle.get();
-      String subtitle = movie.subtitle.get() == null ? "" : movie.subtitle.get();
       String imdb = movie.imdbNumber.get();
-      Integer year = movie.localReleaseYear.get() == null ? null : Integer.parseInt(movie.localReleaseYear.get());
-      int seq = movie.sequence.get() == null ? 1 : movie.sequence.get();
-      int tmdbMovieId = -1;
-      float matchAccuracy = 1.0f;
-      MatchType matchType = MatchType.ID;
 
       if(imdb == null) {
-        TreeSet<Score> scores = new TreeSet<>(new Comparator<Score>() {
-          @Override
-          public int compare(Score o1, Score o2) {
-            return Double.compare(o2.score, o1.score);
-          }
-        });
+        List<String> titleVariations = createVariations(movie.initialTitle.get());
 
-        List<String> variations = new ArrayList<>();
+        String subtitle = movie.subtitle.get() == null ? "" : movie.subtitle.get();
+        Integer year = movie.localReleaseYear.get() == null ? null : Integer.parseInt(movie.localReleaseYear.get());
+        int seq = movie.sequence.get() == null ? 1 : movie.sequence.get();
 
-        variations.add(title);
-        if(title.contains(", ")) {
-          int comma = title.indexOf(", ");
+        String postFix = (seq > 1 ? " " + seq : "") + (!subtitle.isEmpty() ? " " + subtitle : "");
+        String titleToMatch = (titleVariations.get(0) + postFix).toLowerCase();
 
-          variations.add(title.substring(comma + 2) + " " + title.substring(0, comma));
-        }
-
-        for(String variation : variations) {
-          String searchString = variation;
-
-          if(seq > 1) {
-            searchString += " " + seq;
-          }
-          if(subtitle.length() > 0) {
-            searchString += " " + subtitle;
-          }
-
-          System.out.println("[FINE] " + getClass().getName() + ": Looking to match: " + searchString + "; year = " + year);
-          JsonNode node = tmdb.query("3/search/movie", "query", searchString, "language", "en");
-
-          for(Iterator<JsonNode> nodeIterator = node.path("results").iterator(); nodeIterator.hasNext(); ) {
-            JsonNode resultNode = nodeIterator.next();
-
-            String nodeTitle = resultNode.path("title").asText();
-            String nodeOriginalTitle = resultNode.path("original_title").asText();
-
-            MatchType nameMatchType = MatchType.NAME;
-            LocalDate releaseDate = TheMovieDatabase.parseDateOrNull(resultNode.path("release_date").asText());
-            Integer movieYear = extractYear(releaseDate);
-            double score = 0;
-
-            if(year != null && movieYear != null) {
-              if(year.equals(movieYear)) {
-                nameMatchType = MatchType.NAME_AND_YEAR;
-                score += 45;
-              }
-              else if(Math.abs(year - movieYear) == 1) {
-                score += 5;
-              }
-            }
-
-            double matchScore = Levenshtein.compare(nodeTitle.toLowerCase(), searchString.toLowerCase());
-
-            score += matchScore * 55;
-
-            scores.add(new Score(resultNode, nameMatchType, score));
-            String name = nodeTitle + (nodeOriginalTitle != null ? " (" + nodeOriginalTitle + ")" : "");
-            System.out.println("[FINE] " + getClass().getName() + ": " + String.format("Match: %5.1f (%4.2f) YEAR: %s -- %s", score, matchScore, "" + releaseDate, name));
-          }
-
-          if(!scores.isEmpty()) {
-            Score bestScore = scores.first();
-
-            tmdbMovieId = bestScore.movie.get("id").asInt();
-            matchType = bestScore.matchType;
-            matchAccuracy = (float)(bestScore.score / 100);
-          }
-        }
-      }
-      else {
-        JsonNode node = tmdb.query("3/find/" + imdb, "external_source", "imdb_id");
-
-        for(Iterator<JsonNode> nodeIterator = node.path("movie_results").iterator(); nodeIterator.hasNext(); ) {
-          JsonNode resultNode = nodeIterator.next();
-
-          tmdbMovieId = resultNode.get("id").asInt();
-          break;
-        }
+        return titleVariations.stream()
+          .map(tv -> tv + postFix)
+          .peek(q -> System.out.println("[FINE] " + getClass().getName() + ": Looking to match: '" + q + "'; year = " + year))
+          .map(q -> tmdb.query("3/search/movie", "query", q, "language", "en"))
+          .flatMap(node -> StreamSupport.stream(node.path("results").spliterator(), false))
+          .flatMap(jsonNode -> Stream.of(jsonNode.path("title").asText(), jsonNode.path("original_title").asText())
+            .filter(t -> !t.isEmpty())
+            .distinct()
+            .map(t -> createMatch(jsonNode, titleToMatch, year, t))
+            .peek(m -> System.out.println("[FINE] " + getClass().getName() + ": " + m))
+          )
+          .max(Comparator.comparingDouble(Match::getScore))
+          .orElse(null);
       }
 
-      if(tmdbMovieId != -1) {
-        return new SearchResult(tmdbMovieId, matchType, matchAccuracy);
-      }
+      JsonNode node = tmdb.query("3/find/" + imdb, "external_source", "imdb_id");
 
-      return null;
+      return StreamSupport.stream(node.path("movie_results").spliterator(), false)
+        .findFirst()
+        .map(n -> new Match(n, MatchType.ID, 100))
+        .orElse(null);
     }
+  }
+
+  Match createMatch(JsonNode resultNode, String titleToMatch, Integer year, String nodeTitle) {
+    LocalDate releaseDate = TheMovieDatabase.parseDateOrNull(resultNode.path("release_date").asText());
+    Integer movieYear = extractYear(releaseDate);
+
+    MatchType nameMatchType = MatchType.NAME;
+    double score = 0;
+
+    if(year != null && movieYear != null) {
+      if(year.equals(movieYear)) {
+        nameMatchType = MatchType.NAME_AND_YEAR;
+        score += 45;
+      }
+      else if(Math.abs(year - movieYear) == 1) {
+        score += 5;
+      }
+    }
+
+    double matchScore = Levenshtein.compare(nodeTitle.toLowerCase(), titleToMatch);
+
+    score += matchScore * 55;
+
+    return new Match(resultNode, nameMatchType, score);
+  }
+
+  List<String> createVariations(String fullTitle) {
+    Matcher matcher = TITLES.matcher(fullTitle);
+
+    if(!matcher.matches()) {
+      throw new IllegalStateException("title did not match pattern: " + fullTitle);
+    }
+
+    String title = matcher.group(1);
+    String secondaryTitle = matcher.group(2);  // Translated title, or alternative title
+
+    List<String> variations = new ArrayList<>();
+
+    variations.add(title);
+    variations.addAll(createPronounVariations(title));
+
+    if(secondaryTitle != null) {
+      variations.add(secondaryTitle);
+      variations.addAll(createPronounVariations(secondaryTitle));
+    }
+
+    return variations;
+  }
+
+  private static List<String> createPronounVariations(String title) {
+    int comma = title.indexOf(", ");
+
+    if(comma < 0) {
+      return Collections.emptyList();
+    }
+
+    List<String> variations = new ArrayList<>();
+
+    variations.add(title.substring(comma + 2) + " " + title.substring(0, comma));  // With pronoun at start
+    variations.add(title.substring(0, comma));  // Without pronoun
+
+    return variations;
   }
 
   private static Integer extractYear(LocalDate date) {
@@ -152,32 +158,27 @@ public class TmdbMovieMediaIdentifier extends MediaIdentifier<Movie> {
     return date.getYear();
   }
 
-  private static class Score {
+  private static class Match {
     private final JsonNode movie;
-    private final MatchType matchType;
+    private final MatchType type;
     private final double score;
 
-    public Score(JsonNode movie, MatchType matchType, double score) {
+    public Match(JsonNode movie, MatchType matchType, double score) {
       this.movie = movie;
-      this.matchType = matchType;
+      this.type = matchType;
       this.score = score;
+    }
+
+    public double getScore() {
+      return score;
     }
 
     @Override
     public String toString() {
-      return String.format("Score[%10.2f, " + movie.path("title").asText() + " : " + movie.path("release_date").asText() + "]", score);
-    }
-  }
+      String nodeOriginalTitle = movie.path("original_title").asText();
+      String name = movie.path("title").asText() + (nodeOriginalTitle != null ? " (" + nodeOriginalTitle + ")" : "");
 
-  private static class SearchResult {
-    private final int tmdbId;
-    private final MatchType matchType;
-    private final float matchAccuracy;
-
-    public SearchResult(int tmdbId, MatchType matchType, double matchAccuracy) {
-      this.tmdbId = tmdbId;
-      this.matchType = matchType;
-      this.matchAccuracy = (float)matchAccuracy;
+      return String.format("Match[%6.2f, " + name + " : " + movie.path("release_date").asText() + "]", score);
     }
   }
 }
