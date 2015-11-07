@@ -44,12 +44,15 @@ import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.ini.Section;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -90,7 +93,7 @@ public class FrontEnd extends Application {
   private DatabaseStatementTranslator translator;
 
   @Override
-  public void start(Stage primaryStage) throws MalformedURLException {
+  public void start(Stage primaryStage) throws IOException {
     JavaFXDefaults.setup();
 
     LOGGER.info("javafx.runtime.version: " + System.getProperties().get("javafx.runtime.version"));
@@ -103,30 +106,121 @@ public class FrontEnd extends Application {
 
     sceneManager = new DuoWindowSceneManager("MediaSystem", screenNumber);
 
-    Section databaseIniSection = INI.getSection("database");
-
-    ConnectionPoolDataSource dataSource = databaseIniSection == null ? new SimpleConnectionPoolDataSource("jdbc:derby:db;create=true") : configureDataSource(databaseIniSection);
-    String databaseUrl = databaseIniSection == null ? "jdbc:derby:db;create=true" : databaseIniSection.get("url");
-
-    pool = new ConnectionPool(dataSource, 5);
-    translator = createDatabaseStatementTranslator(databaseUrl);
-
     final Injector injector = new Injector(new JustInTimeDiscoveryPolicy());
 
     injector.registerInstance(injector);
     injector.registerInstance(7 * 24 * 60 * 60, AnnotationDescriptor.describe(Named.class, new Value("value", "DatabaseCache.expirationSeconds")));
 
-    injector.register(new Provider<Connection>() {
+    configureDatabase(injector);
+
+    injector.register(new Provider<SceneManager>() {
       @Override
-      public Connection get() {
-        return pool.getConnection();
+      public SceneManager get() {
+        return sceneManager;
       }
     });
 
+    injector.register(new Provider<Ini>() {
+      @Override
+      public Ini get() {
+        return INI;
+      }
+    });
+
+    injector.register(MediaEnricher.class);
+    injector.register(MediaDataPersister.class);
+
+    injector.register(DatabaseCache.class);
+
+    EntityContext context = new EntityContext(new PersistQueue(3000));
+
+    injector.registerInstance(context);
+
+    loadPlugins(injector);
+
+    ObjectProperty<PlayerFactory> selectedPlayerFactory = configurePlayers(injector);
+
+    configureEntityContext(context, injector);
+
+    injector.registerInstance(new MediaLayout());
+    injector.registerInstance(new PersonLayout());
+
+    configureSettings(injector, selectedPlayerFactory);
+
+    LOGGER.fine("Creating controller...");
+
+    injector.register(MessagePaneTaskExecutor.class);
+
+    final ProgramController controller = injector.getInstance(ProgramController.class);
+
+    injector.register(PlaybackOverlayPane.class);
+
+    injector.register(PlaybackLayout.class);
+    injector.register(MainScreenLayout.class);
+    injector.register(CollectionLayout.class);
+
+    injector.getInstance(MessagePaneTaskExecutor.class);  // TODO Initalizes it and registers it with ProgramController, silly way of doing it, fix
+
+    controller.showMainScreen();
+  }
+
+  private void loadPlugins(final Injector injector) throws IOException {
     PluginManager pluginManager = new PluginManager(injector);
 
-    pluginManager.loadPluginAndScan(new File("../mediasystem-ext-player-vlc/target/mediasystem-ext-player-vlc-1.0.0-SNAPSHOT.jar").toURI().toURL());
+    Path pluginsPath = Paths.get("plugins");
 
+    if(Files.isDirectory(pluginsPath)) {
+      Files.find(pluginsPath, 10, (p, bfa) -> bfa.isRegularFile()).forEach(p -> {
+        try {
+          LOGGER.info("Loading plugin: " + p);
+          pluginManager.loadPluginAndScan(p.toUri().toURL());
+        }
+        catch(Exception e) {
+          throw new IllegalStateException(e);
+        }
+      });
+    }
+    else {
+      pluginManager.loadPluginAndScan(new File("../mediasystem-ext-player-vlc/target/mediasystem-ext-player-vlc-1.0.0-SNAPSHOT.jar").toURI().toURL());
+      pluginManager.loadPluginAndScan(new File("../mediasystem-ext-all/target/mediasystem-ext-all-1.0.0-SNAPSHOT.jar").toURI().toURL());
+    }
+  }
+
+  private void configureSettings(final Injector injector, ObjectProperty<PlayerFactory> selectedPlayerFactory) {
+    injector.registerInstance(new SettingGroup("video", null, "Video", 0));
+
+    injector.registerInstance(new AbstractSetting("video.player", "video", 0) {
+      @Override
+      public Option createOption(Set<hs.mediasystem.screens.Setting> settings) {
+        ObservableList<PlayerFactory> playerFactories = FXCollections.observableArrayList(injector.getInstances(PlayerFactory.class));
+
+        Collections.sort(playerFactories, PLAYER_FACTORY_COMPARATOR);
+
+        return new ListOption<>("Player", selectedPlayerFactory, playerFactories, new StringBinding(selectedPlayerFactory) {
+          @Override
+          protected String computeValue() {
+            return selectedPlayerFactory.get().getName();
+          }
+        });
+      }
+    });
+
+    injector.registerInstance(new AbstractSetting("information-bar.debug-mem", null, 0) {
+      @Override
+      public Option createOption(Set<hs.mediasystem.screens.Setting> settings) {
+        final BooleanProperty booleanProperty = injector.getInstance(SettingsStore.class).getBooleanProperty("MediaSystem:InformationBar", Setting.PersistLevel.PERMANENT, "Visible");
+
+        return new BooleanOption("Show Memory Use Information", booleanProperty, new StringBinding(booleanProperty) {
+          @Override
+          protected String computeValue() {
+            return booleanProperty.get() ? "Yes" : "No";
+          }
+        });
+      }
+    });
+  }
+
+  private ObjectProperty<PlayerFactory> configurePlayers(final Injector injector) {
     ObjectProperty<PlayerFactory> selectedPlayerFactory = injector.getInstance(SettingsStore.class).getProperty("MediaSystem:Video", Setting.PersistLevel.PERMANENT, "Player", new StringConverter<PlayerFactory>() {
       @Override
       public PlayerFactory fromString(String text) {
@@ -161,33 +255,31 @@ public class FrontEnd extends Application {
         return player;
       }
     });
+    return selectedPlayerFactory;
+  }
 
-    injector.register(new Provider<SceneManager>() {
+  private void configureDatabase(Injector injector) {
+    Section databaseIniSection = INI.getSection("database");
+
+    try {
+      Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+    }
+    catch(ClassNotFoundException e) {
+      throw new IllegalStateException(e);
+    }
+
+    ConnectionPoolDataSource dataSource = databaseIniSection == null ? new SimpleConnectionPoolDataSource("jdbc:derby:db;create=true") : configureDataSource(databaseIniSection);
+    String databaseUrl = databaseIniSection == null ? "jdbc:derby:db;create=true" : databaseIniSection.get("url");
+
+    pool = new ConnectionPool(dataSource, 5);
+    translator = createDatabaseStatementTranslator(databaseUrl);
+
+    injector.register(new Provider<Connection>() {
       @Override
-      public SceneManager get() {
-        return sceneManager;
+      public Connection get() {
+        return pool.getConnection();
       }
     });
-
-    injector.register(new Provider<Ini>() {
-      @Override
-      public Ini get() {
-        return INI;
-      }
-    });
-
-    injector.register(MediaEnricher.class);
-    injector.register(MediaDataPersister.class);
-
-    injector.register(DatabaseCache.class);
-
-    EntityContext context = new EntityContext(new PersistQueue(3000));
-
-    injector.registerInstance(context);
-
-    pluginManager.loadPluginAndScan(new File("../mediasystem-ext-all/target/mediasystem-ext-all-1.0.0-SNAPSHOT.jar").toURI().toURL());
-
-    configureEntityContext(context, injector);
 
     injector.register(new Provider<DatabaseStatementTranslator>() {
       @Override
@@ -199,57 +291,6 @@ public class FrontEnd extends Application {
     DatabaseUpdater updater = injector.getInstance(DatabaseUpdater.class);
 
     updater.updateDatabase();
-
-    injector.registerInstance(new MediaLayout());
-    injector.registerInstance(new PersonLayout());
-
-    injector.registerInstance(new SettingGroup("video", null, "Video", 0));
-
-    injector.registerInstance(new AbstractSetting("video.player", "video", 0) {
-      @Override
-      public Option createOption(Set<hs.mediasystem.screens.Setting> settings) {
-        ObservableList<PlayerFactory> playerFactories = FXCollections.observableArrayList(injector.getInstances(PlayerFactory.class));
-
-        Collections.sort(playerFactories, PLAYER_FACTORY_COMPARATOR);
-
-        return new ListOption<>("Player", selectedPlayerFactory, playerFactories, new StringBinding(selectedPlayerFactory) {
-          @Override
-          protected String computeValue() {
-            return selectedPlayerFactory.get().getName();
-          }
-        });
-      }
-    });
-
-    injector.registerInstance(new AbstractSetting("information-bar.debug-mem", null, 0) {
-      @Override
-      public Option createOption(Set<hs.mediasystem.screens.Setting> settings) {
-        final BooleanProperty booleanProperty = injector.getInstance(SettingsStore.class).getBooleanProperty("MediaSystem:InformationBar", Setting.PersistLevel.PERMANENT, "Visible");
-
-        return new BooleanOption("Show Memory Use Information", booleanProperty, new StringBinding(booleanProperty) {
-          @Override
-          protected String computeValue() {
-            return booleanProperty.get() ? "Yes" : "No";
-          }
-        });
-      }
-    });
-
-    LOGGER.fine("Creating controller...");
-
-    injector.register(MessagePaneTaskExecutor.class);
-
-    final ProgramController controller = injector.getInstance(ProgramController.class);
-
-    injector.register(PlaybackOverlayPane.class);
-
-    injector.register(PlaybackLayout.class);
-    injector.register(MainScreenLayout.class);
-    injector.register(CollectionLayout.class);
-
-    injector.getInstance(MessagePaneTaskExecutor.class);  // TODO Initalizes it and registers it with ProgramController, silly way of doing it, fix
-
-    controller.showMainScreen();
   }
 
   @Override
