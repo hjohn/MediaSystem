@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
@@ -249,7 +250,12 @@ public class FrontEnd extends Application {
       @Override
       public Player get() {
         if(player == null) {
-          player = selectedPlayerFactory.get().create(INI);
+          try {
+            player = selectedPlayerFactory.get().create(INI);
+          }
+          catch(Exception e) {
+            LOGGER.log(Level.WARNING, "Unable to create player using factory: " + selectedPlayerFactory.get(), e);
+          }
         }
 
         return player;
