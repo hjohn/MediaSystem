@@ -260,7 +260,7 @@ public final class AnnotatedRecordMapper<T> implements RecordMapper<T> {
       if(idColumn.getType() == int.class || idColumn.getType() == Integer.class) {
         idColumn.getAccessor().set(object, number.intValue());
       }
-      else {
+      else if(idColumn.getType() == long.class || idColumn.getType() == Long.class) {  // Derby returns generated keys even if nothing was generated, this extra check for long type here will prevent an exception here, see DERBY-6849
         idColumn.getAccessor().set(object, number.longValue());
       }
     }
