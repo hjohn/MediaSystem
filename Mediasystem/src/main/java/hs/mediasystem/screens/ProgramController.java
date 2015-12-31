@@ -16,7 +16,6 @@ import hs.mediasystem.screens.playback.SubtitleDownloadService;
 import hs.mediasystem.util.DialogPane;
 import hs.mediasystem.util.SceneManager;
 import hs.mediasystem.util.SceneUtil;
-import hs.mediasystem.util.annotation.Nullable;
 import hs.mediasystem.util.ini.Ini;
 import hs.mediasystem.util.javafx.Dialogs;
 
@@ -62,6 +61,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.util.Duration;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
