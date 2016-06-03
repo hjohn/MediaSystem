@@ -110,7 +110,7 @@ public class FrontEnd extends Application {
     final Injector injector = new Injector(new JustInTimeDiscoveryPolicy());
 
     injector.registerInstance(injector);
-    injector.registerInstance(7 * 24 * 60 * 60, AnnotationDescriptor.describe(Named.class, new Value("value", "TheMovieDatabase.expirationSeconds")));
+    injector.registerInstance(70 * 24 * 60 * 60, AnnotationDescriptor.describe(Named.class, new Value("value", "TheMovieDatabase.expirationSeconds")));
 
     configureDatabase(injector);
 
