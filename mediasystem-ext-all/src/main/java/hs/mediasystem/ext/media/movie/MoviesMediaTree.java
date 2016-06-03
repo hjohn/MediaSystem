@@ -33,8 +33,6 @@ public class MoviesMediaTree implements MediaRoot {
   private final EntityContext entityContext;
   private final FileEntitySource fileEntitySource;
 
-  private List<Movie> children;
-
   @Inject
   public MoviesMediaTree(FileEntitySource fileEntitySource, EntityContext entityContext, SettingsStore settingsStore) {
     this.fileEntitySource = fileEntitySource;
@@ -47,49 +45,47 @@ public class MoviesMediaTree implements MediaRoot {
 
   @Override
   public List<? extends Media> getItems() {
-    if(children == null) {
-      children = new ArrayList<>();
+    List<Movie> children = new ArrayList<>();
 
-      for(Path root : roots) {
-        try {
-          List<Path> scanResults = new EpisodeScanner(1).scan(root);
+    for(Path root : roots) {
+      try {
+        List<Path> scanResults = new EpisodeScanner(1).scan(root);
 
-          for(final Path path : scanResults) {
-            DecodeResult result = NAME_DECODER.decode(path.getFileName().toString());
+        for(final Path path : scanResults) {
+          DecodeResult result = NAME_DECODER.decode(path.getFileName().toString());
 
-            String title = result.getTitle();
-            String sequence = result.getSequence();
-            String subtitle = result.getSubtitle();
-            Integer year = result.getReleaseYear();
+          String title = result.getTitle();
+          String sequence = result.getSequence();
+          String subtitle = result.getSubtitle();
+          Integer year = result.getReleaseYear();
 
-            String imdb = result.getCode();
-            String imdbNumber = imdb != null && !imdb.isEmpty() ? String.format("tt%07d", Integer.parseInt(imdb)) : null;
+          String imdb = result.getCode();
+          String imdbNumber = imdb != null && !imdb.isEmpty() ? String.format("tt%07d", Integer.parseInt(imdb)) : null;
 
-            Integer episode = sequence == null ? null : Integer.parseInt(sequence);
+          Integer episode = sequence == null ? null : Integer.parseInt(sequence);
 
-            Movie movie = entityContext.add(Movie.class, new Supplier<Movie>() {
-              @Override
-              public Movie get() {
-                Movie movie = new Movie(new MediaItem(path.toString()));
+          Movie movie = entityContext.add(Movie.class, new Supplier<Movie>() {
+            @Override
+            public Movie get() {
+              Movie movie = new Movie(new MediaItem(path.toString()));
 
-                movie.initialTitle.set(title);
-                movie.sequence.set(episode == null ? null : episode);
-                movie.initialSubtitle.set(subtitle);
-                movie.initialImdbNumber.set(imdbNumber);
-                movie.localReleaseYear.set(year == null ? null : year.toString());
+              movie.initialTitle.set(title);
+              movie.sequence.set(episode == null ? null : episode);
+              movie.initialSubtitle.set(subtitle);
+              movie.initialImdbNumber.set(imdbNumber);
+              movie.localReleaseYear.set(year == null ? null : year.toString());
 
-                return movie;
-              }
-            }, new SourceKey(fileEntitySource, path.toString()));
+              return movie;
+            }
+          }, new SourceKey(fileEntitySource, path.toString()));
 
-            // TODO think about pre-loading full items...
+          // TODO think about pre-loading full items...
 
-            children.add(movie);
-          }
+          children.add(movie);
         }
-        catch(RuntimeException e) {
-          System.out.println("[WARN] " + getClass().getName() + "::getItems - Exception while getting items for \"" + root + "\": " + Throwables.formatAsOneLine(e));   // TODO add to some high level user error reporting facility
-        }
+      }
+      catch(RuntimeException e) {
+        System.out.println("[WARN] " + getClass().getName() + "::getItems - Exception while getting items for \"" + root + "\": " + Throwables.formatAsOneLine(e));   // TODO add to some high level user error reporting facility
       }
     }
 

@@ -31,8 +31,6 @@ public class SeriesMediaTree implements MediaRoot {
   private final EntityContext entityContext;
   private final List<Path> roots;
 
-  private List<Media> children;
-
   @Inject
   public SeriesMediaTree(FileEntitySource fileEntitySource, EntityContext entityContext, SettingsStore settingsStore) {
     this.fileEntitySource = fileEntitySource;
@@ -45,37 +43,35 @@ public class SeriesMediaTree implements MediaRoot {
 
   @Override
   public List<? extends Media> getItems() {
-    if(children == null) {
-      children = new ArrayList<>();
+    List<Media> children = new ArrayList<>();
 
-      for(Path root : roots) {
-        try {
-          List<Path> scanResults = new SerieScanner().scan(root);
+    for(Path root : roots) {
+      try {
+        List<Path> scanResults = new SerieScanner().scan(root);
 
-          for(Path path : scanResults) {
-            DecodeResult result = NAME_DECODER.decode(path.getFileName().toString());
+        for(Path path : scanResults) {
+          DecodeResult result = NAME_DECODER.decode(path.getFileName().toString());
 
-            Serie child = entityContext.add(
-              Serie.class,
-              () -> {
-                Serie serie = new Serie(SeriesMediaTree.this, new MediaItem(path.toString()), fileEntitySource);
+          Serie child = entityContext.add(
+            Serie.class,
+            () -> {
+              Serie serie = new Serie(SeriesMediaTree.this, new MediaItem(path.toString()), fileEntitySource);
 
-                serie.initialTitle.set(result.getTitle());
-                serie.initialSubtitle.set(result.getSubtitle());
-                serie.localReleaseYear.set(result.getReleaseYear() == null ? null : result.getReleaseYear().toString());
-                serie.initialImdbNumber.set(result.getCode());
+              serie.initialTitle.set(result.getTitle());
+              serie.initialSubtitle.set(result.getSubtitle());
+              serie.localReleaseYear.set(result.getReleaseYear() == null ? null : result.getReleaseYear().toString());
+              serie.initialImdbNumber.set(result.getCode());
 
-                return serie;
-              },
-              new SourceKey(fileEntitySource, path.toString())
-            );
+              return serie;
+            },
+            new SourceKey(fileEntitySource, path.toString())
+          );
 
-            children.add(child);
-          }
+          children.add(child);
         }
-        catch(RuntimeException e) {
-          System.out.println("[WARN] " + getClass().getName() + "::getItems - Exception while getting items for \"" + root + "\": " + Throwables.formatAsOneLine(e));   // TODO add to some high level user error reporting facility
-        }
+      }
+      catch(RuntimeException e) {
+        System.out.println("[WARN] " + getClass().getName() + "::getItems - Exception while getting items for \"" + root + "\": " + Throwables.formatAsOneLine(e));   // TODO add to some high level user error reporting facility
       }
     }
 
