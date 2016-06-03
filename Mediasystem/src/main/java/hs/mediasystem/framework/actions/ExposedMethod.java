@@ -22,14 +22,12 @@ public class ExposedMethod implements ExposedMember {
       try {
         getMember().getMethod().invoke(parent, event);
       }
-      catch(IllegalAccessException | InvocationTargetException e) {
-        throw new IllegalStateException(e);
+      catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        throw new IllegalStateException("action=" + action + ", member=" + member + ", object=" + parent + ", event=" + event, e);
       }
     }
     else {
       throw new IllegalArgumentException("Unknown action '" + action + "' for: " + getMember());
     }
   }
-
-
 }

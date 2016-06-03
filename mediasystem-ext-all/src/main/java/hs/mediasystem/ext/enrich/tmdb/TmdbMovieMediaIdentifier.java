@@ -52,28 +52,27 @@ public class TmdbMovieMediaIdentifier extends MediaIdentifier<Movie> {
 
   private Match searchForMovie(Movie movie) {
     synchronized(TheMovieDatabase.class) {
-      String imdb = movie.imdbNumber.get();
+      String imdb = movie.initialImdbNumber.get();
 
       if(imdb == null) {
         List<String> titleVariations = createVariations(movie.initialTitle.get());
 
-        String subtitle = movie.subtitle.get() == null ? "" : movie.subtitle.get();
+        String subtitle = movie.initialSubtitle.get() == null ? "" : movie.initialSubtitle.get();
         Integer year = movie.localReleaseYear.get() == null ? null : Integer.parseInt(movie.localReleaseYear.get());
         int seq = movie.sequence.get() == null ? 1 : movie.sequence.get();
 
         String postFix = (seq > 1 ? " " + seq : "") + (!subtitle.isEmpty() ? " " + subtitle : "");
-        String titleToMatch = (titleVariations.get(0) + postFix).toLowerCase();
 
         return titleVariations.stream()
           .map(tv -> tv + postFix)
           .peek(q -> System.out.println("[FINE] " + getClass().getName() + ": Looking to match: '" + q + "'; year = " + year))
-          .map(q -> tmdb.query("3/search/movie", "query", q, "language", "en"))
-          .flatMap(node -> StreamSupport.stream(node.path("results").spliterator(), false))
-          .flatMap(jsonNode -> Stream.of(jsonNode.path("title").asText(), jsonNode.path("original_title").asText())
-            .filter(t -> !t.isEmpty())
-            .distinct()
-            .map(t -> createMatch(jsonNode, titleToMatch, year, t))
-            .peek(m -> System.out.println("[FINE] " + getClass().getName() + ": " + m))
+          .flatMap(q -> StreamSupport.stream(tmdb.query("3/search/movie", "query", q, "language", "en").path("results").spliterator(), false)
+            .flatMap(jsonNode -> Stream.of(jsonNode.path("title").asText(), jsonNode.path("original_title").asText())
+              .filter(t -> !t.isEmpty())
+              .distinct()
+              .map(t -> createMatch(jsonNode, q.toLowerCase(), year, t))
+              .peek(m -> System.out.println("[FINE] " + getClass().getName() + ": " + m))
+            )
           )
           .max(Comparator.comparingDouble(Match::getScore))
           .orElse(null);

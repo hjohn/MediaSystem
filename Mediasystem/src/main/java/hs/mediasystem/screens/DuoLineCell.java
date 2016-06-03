@@ -1,5 +1,6 @@
 package hs.mediasystem.screens;
 
+import hs.mediasystem.controls.TablePane;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -14,12 +15,17 @@ import javafx.scene.layout.VBox;
 public class DuoLineCell extends HBox {
   private final IntegerProperty collectionSize = new SimpleIntegerProperty();
 
+  public StringProperty prefixProperty() { return prefix.textProperty(); }
   public StringProperty titleProperty() { return title.textProperty(); }
   public StringProperty subtitleProperty() { return subtitle.textProperty(); }
   public StringProperty extraInfoProperty() { return extraInfo.textProperty(); }
   public DoubleProperty ratingProperty() { return starRating.ratingProperty(); }
   public IntegerProperty collectionSizeProperty() { return collectionSize; }
   public BooleanProperty viewedProperty() { return viewedIndicator.visibleProperty(); }
+
+  private final Label prefix = new Label() {{
+    getStyleClass().add("prefix");
+  }};
 
   private final Label title = new Label() {{
     getStyleClass().add("title");
@@ -49,8 +55,12 @@ public class DuoLineCell extends HBox {
     getChildren().add(new Label(" items"));
   }};
 
-  private final VBox description = new VBox() {{
-    getChildren().addAll(title, subtitle);
+  private final TablePane description = new TablePane() {{
+    add(prefix);
+    add(title);
+    nextRow();
+    nextColumn();
+    add(subtitle);
   }};
 
   private final VBox info = new VBox() {{

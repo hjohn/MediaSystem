@@ -15,6 +15,7 @@ import javafx.beans.property.SimpleObjectProperty;
 public class MediaNode {
   @Expose
   public final ObjectProperty<MediaData> mediaData;
+  @Expose
   public final ObjectProperty<Media> media;
 
   public final Media getMedia() { return media.get(); }

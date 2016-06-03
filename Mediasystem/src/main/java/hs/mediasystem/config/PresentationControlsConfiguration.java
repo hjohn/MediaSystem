@@ -15,6 +15,7 @@ public class PresentationControlsConfiguration {
   static {
     activeActionsByPresentationClass.put(CollectionSelectorPresentation.class, new LinkedHashMap<String, String>() {{
       put("hs.mediasystem.framework.MediaData.viewed", "checkBox");
+      put("hs.mediasystem.framework.Media.refresh", "trigger");
     }});
 
     activeActionsByPresentationClass.put(CollectionPresentation.class, new LinkedHashMap<String, String>() {{

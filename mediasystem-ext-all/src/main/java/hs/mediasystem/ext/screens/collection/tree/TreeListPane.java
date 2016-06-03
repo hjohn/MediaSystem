@@ -280,6 +280,7 @@ public class TreeListPane extends BorderPane {
       if(mediaProperties == null || set == null) {
         binder.bind(duoLineCell.titleProperty(), mediaNode.media.get().title);
         duoLineCell.extraInfoProperty().set("");
+        duoLineCell.prefixProperty().set("");
         duoLineCell.subtitleProperty().set("");
         duoLineCell.viewedProperty().set(false);
         duoLineCell.ratingProperty().set(0);
@@ -333,6 +334,7 @@ public class TreeListPane extends BorderPane {
           binder.bind(bindTargets[target++], MapBindings.select(mediaNode.media, property.getName()));
         }
 
+        binder.bind(duoLineCell.prefixProperty(), MapBindings.selectString(mediaNode.media, "prefix"));
         binder.bind(duoLineCell.subtitleProperty(), MapBindings.selectString(mediaNode.media, "subtitle"));
         binder.bind(duoLineCell.viewedProperty(), MapBindings.selectBoolean(mediaNode.mediaData, "viewed"));
         binder.bind(duoLineCell.ratingProperty(), MapBindings.selectDouble(mediaNode.media, "rating").divide(10));

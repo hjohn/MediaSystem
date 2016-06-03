@@ -10,6 +10,7 @@ public class Resources {
     protected Object[][] getContents() {
       return new Object[][] {
         {"hs.mediasystem.framework.MediaData.viewed:checkBox.label", "Viewed"},
+        {"hs.mediasystem.framework.Media.refresh:trigger.label", "Refresh"},
         {"hs.mediasystem.screens.collection.CollectionPresentation.inclusionFilter:trigger.label", "Filter..."},
         {"hs.mediasystem.screens.collection.CollectionPresentation.layout:comboBox.label", "Layout"},
         {"hs.mediasystem.screens.collection.CollectionPresentation.groupSet:comboBox.label", "Sorting & Grouping"},

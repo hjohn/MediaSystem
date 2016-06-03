@@ -40,11 +40,11 @@ public class TmdbMovieMediaIdentifierTest {
     movie.initialTitle.set("Terminator, The");
     movie.localReleaseYear.set("2015");
     movie.sequence.set(5);
-    movie.subtitle.set("Genisys");
+    movie.initialSubtitle.set("Genisys");
 
     Identifier i = identifier.identify(movie);
 
-    assertEquals(0.846, i.matchAccuracy.get(), 0.01f);
+    assertEquals(0.945, i.matchAccuracy.get(), 0.01f);
     assertEquals(MatchType.NAME_AND_YEAR, i.matchType.get());
     assertEquals(new ProviderId("Movie", "TMDB", "80000"), i.providerId.get());
   }
@@ -83,7 +83,7 @@ public class TmdbMovieMediaIdentifierTest {
 
     movie.initialTitle.set("Michiel de Ruyter");
     movie.localReleaseYear.set("2015");
-    movie.imdbNumber.set("12345");
+    movie.initialImdbNumber.set("12345");
 
     Identifier i = identifier.identify(movie);
 

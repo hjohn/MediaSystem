@@ -38,6 +38,10 @@ public class MediaEnricher implements Enricher<Media, Object> {
 
   @Override
   public CompletableFuture<Void> enrich(EntityContext context, Media media, Object key) {
+    if(media.mediaItem.get().mediaData.get() != null) {
+      return optionallyIdentifyAndFinalize(context, media);
+    }
+
     return CompletableFuture
       .completedFuture(fetchMediaData(media))
       .thenAcceptAsync(dbMediaData -> updateEntity(context, media, dbMediaData), context.getUpdateExecutor())

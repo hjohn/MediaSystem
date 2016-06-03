@@ -49,7 +49,7 @@ public class TmdbSerieMediaIdentifier extends MediaIdentifier<Serie> {
     synchronized(TheMovieDatabase.class) {
       String title = serie.initialTitle.get();
       String subtitle = serie.subtitle.get() == null ? "" : serie.subtitle.get();
-      String imdb = serie.imdbNumber.get();
+      String imdb = serie.initialImdbNumber.get();
       Integer year = serie.localReleaseYear.get() == null ? null : Integer.parseInt(serie.localReleaseYear.get());
       int tmdbId = -1;
       float matchAccuracy = 1.0f;

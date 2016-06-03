@@ -74,8 +74,8 @@ public class MoviesMediaTree implements MediaRoot {
 
                 movie.initialTitle.set(title);
                 movie.sequence.set(episode == null ? null : episode);
-                movie.subtitle.set(subtitle);
-                movie.imdbNumber.set(imdbNumber);
+                movie.initialSubtitle.set(subtitle);
+                movie.initialImdbNumber.set(imdbNumber);
                 movie.localReleaseYear.set(year == null ? null : year.toString());
 
                 return movie;

@@ -52,6 +52,10 @@ public class Entity {
     this.context = context;
   }
 
+  protected void reidentify() {
+    context.queueForEnrichment(this);
+  }
+
   private void queueAsDirty(Property<?> property) {
     if(context != null) {
       context.queueAsDirty(this, property);

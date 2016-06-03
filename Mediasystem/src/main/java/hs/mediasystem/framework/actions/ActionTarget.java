@@ -70,6 +70,10 @@ public class ActionTarget {
       Object propertyValue = property == null ? root : ((Property<Object>)property).getValue();
 
       parent = propertyValue;
+
+      if(pathMember.getMethod() != null) {
+        break;
+      }
       property = pathMember.get(propertyValue);
     }
 

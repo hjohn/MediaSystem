@@ -52,7 +52,11 @@ public class ActionTargetProvider {
         }
       }
       else if(exposedMember instanceof ExposedMethod) {
-        actionTargets.add(new ActionTarget(exposedMember, Collections.unmodifiableList(currentPath)));
+        List<Member> childPath = new ArrayList<>(currentPath);
+
+        childPath.add(exposedMember.getMember());
+
+        actionTargets.add(new ActionTarget(exposedMember, Collections.unmodifiableList(childPath)));
       }
       else {
         throw new IllegalStateException("Unhandled exposed member: " + exposedMember.getMember().getType());

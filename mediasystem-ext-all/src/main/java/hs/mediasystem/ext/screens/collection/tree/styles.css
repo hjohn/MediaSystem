@@ -4,6 +4,12 @@
   -fx-border-width: 1;
 }
 
+.prefix {
+  -fx-font-size: 10;
+  -fx-min-width: 5ex;
+  -fx-alignment: center-right;
+}
+
 .title {
   -fx-font-size: 19;
   -fx-font-weight: bold;
