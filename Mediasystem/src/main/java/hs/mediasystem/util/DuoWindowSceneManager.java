@@ -3,8 +3,6 @@ package hs.mediasystem.util;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Frame;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 
 import javafx.beans.value.ChangeListener;
@@ -72,7 +70,7 @@ public class DuoWindowSceneManager implements SceneManager {
     newStage.setScene(scene);
     newStage.show();
 
-    setupStageLocation(newStage);
+    setupStageLocation(newStage, determineScreen());
 
     newStage.toFront();
     oldStage.hide();
@@ -86,7 +84,7 @@ public class DuoWindowSceneManager implements SceneManager {
        * AWT node, put on seperate window
        */
 
-      createPlayerFrame();
+      createPlayerFrame(determineScreen());
 
       playerFrame.removeAll();
       playerFrame.add((Component)playerDisplay, BorderLayout.CENTER);
@@ -108,16 +106,20 @@ public class DuoWindowSceneManager implements SceneManager {
   public void setScreenNumber(int screenNumber) {
     this.screenNumber = screenNumber;
 
-    setPlayerScreen();
+    Screen screen = determineScreen();
 
-    setupStageLocation(mainStage);
-    setupStageLocation(transparentStage);
+    setPlayerScreen(screen);
+    setupStageLocation(mainStage, screen);
+    setupStageLocation(transparentStage, screen);
   }
 
-  private void setupStageLocation(Stage stage) {
+  private Screen determineScreen() {
     ObservableList<Screen> screens = Screen.getScreens();
-    Screen screen = screens.size() <= screenNumber ? Screen.getPrimary() : screens.get(screenNumber);
 
+    return screens.size() <= screenNumber ? Screen.getPrimary() : screens.get(screenNumber);
+  }
+
+  private void setupStageLocation(Stage stage, Screen screen) {
     Rectangle2D bounds = screen.getBounds();
     boolean primary = screen.equals(Screen.getPrimary());    // WORKAROUND: this doesn't work nice in combination with full screen, so this hack is used to prevent going fullscreen when screen is not primary
 
@@ -137,19 +139,16 @@ public class DuoWindowSceneManager implements SceneManager {
     }
   }
 
-  private void createPlayerFrame() {
+  private void createPlayerFrame(Screen screen) {
     if(playerFrame == null) {
-      GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-      GraphicsDevice[] gs = ge.getScreenDevices();
-
-      GraphicsDevice graphicsDevice = (screenNumber >= 0 && screenNumber < gs.length) ? gs[screenNumber] : gs[0];
-
-      playerFrame = new Frame(graphicsDevice.getDefaultConfiguration());
+      playerFrame = new Frame();
       playerFrame.setLayout(new BorderLayout());
       playerFrame.setUndecorated(true);
       playerFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
       playerFrame.setBackground(new java.awt.Color(0, 0, 0));
       playerFrame.setVisible(true);
+
+      setPlayerScreen(screen);
     }
   }
 
@@ -161,16 +160,16 @@ public class DuoWindowSceneManager implements SceneManager {
     }
   }
 
-  private void setPlayerScreen() {
-    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    GraphicsDevice[] gs = ge.getScreenDevices();
-
-    GraphicsDevice graphicsDevice = (screenNumber >= 0 && screenNumber < gs.length) ? gs[screenNumber] : gs[0];
-
+  private void setPlayerScreen(Screen screen) {
     if(playerFrame != null) {
-      Rectangle rectangle = graphicsDevice.getDefaultConfiguration().getBounds();
+      Rectangle bounds = new Rectangle(
+        (int)screen.getBounds().getMinX(),
+        (int)screen.getBounds().getMinY(),
+        (int)screen.getBounds().getWidth(),
+        (int)screen.getBounds().getHeight()
+      );
 
-      playerFrame.setBounds(rectangle);
+      playerFrame.setBounds(bounds);
     }
   }
 }
