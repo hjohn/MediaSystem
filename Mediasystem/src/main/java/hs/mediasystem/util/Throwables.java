@@ -19,7 +19,15 @@ public class Throwables {
       }
 
       builder.append(" @ ");
-      builder.append(current.getStackTrace()[0]);
+
+      StackTraceElement[] stackTrace = current.getStackTrace();
+
+      if(stackTrace.length > 0) {
+        builder.append(stackTrace[0]);
+      }
+      else {
+        builder.append("<unknown element>");
+      }
 
       current = current.getCause();
 
