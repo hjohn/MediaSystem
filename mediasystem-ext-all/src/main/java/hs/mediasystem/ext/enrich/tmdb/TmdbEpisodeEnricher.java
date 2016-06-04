@@ -49,7 +49,7 @@ public class TmdbEpisodeEnricher implements Enricher<Episode, String> {
 
     // TODO add support for specials / episode ranges
     public void run() {
-      episode.enrichedTitle.set(episodeInfo.get("name").asText());
+      episode.initialTitle.set(episodeInfo.get("name").asText());  // Series generally have poor titles, prefer title found from DB
       episode.description.set(episodeInfo.path("overview").getTextValue());
       episode.rating.set(episodeInfo.path("vote_average").getDoubleValue());
       episode.releaseDate.set(TheMovieDatabase.parseDateOrNull(episodeInfo.path("air_date").getTextValue()));
