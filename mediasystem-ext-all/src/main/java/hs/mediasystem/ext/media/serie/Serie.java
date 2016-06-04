@@ -53,7 +53,6 @@ public class Serie extends Media implements MediaRoot {
   private final Id id;
   private final FileEntitySource fileEntitySource;
 
-  private List<Media> children;
 
   public Serie(SeriesMediaTree mediaTree, MediaItem mediaItem, FileEntitySource fileEntitySource) {
     super(DESCRIPTORS, mediaItem);
@@ -69,55 +68,52 @@ public class Serie extends Media implements MediaRoot {
 
   @Override
   public List<? extends Media> getItems() {
-    if(children == null) {
-      List<Path> scanResults = new EpisodeScanner(2).scan(Paths.get(getMediaItem().getUri()));
+    List<Path> scanResults = new EpisodeScanner(2).scan(Paths.get(getMediaItem().getUri()));
+    List<Media> children = new ArrayList<>();
 
-      children = new ArrayList<>();
+    for(Path path : scanResults) {
+      DecodeResult result = NAME_DECODER.decode(path.getFileName().toString());
+      Matcher seasonEpisodeMatcher = SEASON_EPISODE_PATTERN.matcher(result.getSequence() == null ? "" : result.getSequence());
 
-      for(Path path : scanResults) {
-        DecodeResult result = NAME_DECODER.decode(path.getFileName().toString());
-        Matcher seasonEpisodeMatcher = SEASON_EPISODE_PATTERN.matcher(result.getSequence() == null ? "" : result.getSequence());
+      if(seasonEpisodeMatcher.matches()) {  // Should always match
+        String title = result.getTitle();
+        String subtitle = result.getSubtitle();
+        Integer season = seasonEpisodeMatcher.group(1) == null ? null : Integer.valueOf(seasonEpisodeMatcher.group(1));
+        Integer episode = seasonEpisodeMatcher.group(2) == null ? null : Integer.valueOf(seasonEpisodeMatcher.group(2));
+        Integer endEpisode = seasonEpisodeMatcher.group(3) == null ? episode : Integer.valueOf(seasonEpisodeMatcher.group(3));
+        SpecialPosition specialPosition = seasonEpisodeMatcher.group(4) == null ? null : seasonEpisodeMatcher.group(4).equals("a") ? SpecialPosition.AFTER : SpecialPosition.BEFORE;
+        Type type = specialPosition != null ? Type.SPECIAL :
+                            episode != null ? Type.EPISODE :
+                                              Type.OTHER;
 
-        if(seasonEpisodeMatcher.matches()) {  // Should always match
-          String title = result.getTitle();
-          String subtitle = result.getSubtitle();
-          Integer season = seasonEpisodeMatcher.group(1) == null ? null : Integer.valueOf(seasonEpisodeMatcher.group(1));
-          Integer episode = seasonEpisodeMatcher.group(2) == null ? null : Integer.valueOf(seasonEpisodeMatcher.group(2));
-          Integer endEpisode = seasonEpisodeMatcher.group(3) == null ? episode : Integer.valueOf(seasonEpisodeMatcher.group(3));
-          SpecialPosition specialPosition = seasonEpisodeMatcher.group(4) == null ? null : seasonEpisodeMatcher.group(4).equals("a") ? SpecialPosition.AFTER : SpecialPosition.BEFORE;
-          Type type = specialPosition != null ? Type.SPECIAL :
-                              episode != null ? Type.EPISODE :
-                                                Type.OTHER;
+        Episode item = getContext().add(Episode.class, new Supplier<Episode>() {
+          @Override
+          public Episode get() {
+            Episode item = new Episode(new MediaItem(path.toString()));
 
-          Episode item = getContext().add(Episode.class, new Supplier<Episode>() {
-            @Override
-            public Episode get() {
-              Episode item = new Episode(new MediaItem(path.toString()));
+            item.serie.set(Serie.this);
+            item.type.set(type);
+            item.specialPosition.set(specialPosition);
+            item.season.set(season);
+            item.episode.set(episode);
+            item.endEpisode.set(endEpisode);
 
-              item.serie.set(Serie.this);
-              item.type.set(type);
-              item.specialPosition.set(specialPosition);
-              item.season.set(season);
-              item.episode.set(episode);
-              item.endEpisode.set(endEpisode);
-
-              switch(type) {
-              case SPECIAL:
-              case EPISODE:
-                item.initialTitle.set(subtitle != null ? subtitle : title);
-                break;
-              case OTHER:
-                item.initialTitle.set(title);
-                item.subtitle.set(subtitle);
-                break;
-              }
-
-              return item;
+            switch(type) {
+            case SPECIAL:
+            case EPISODE:
+              item.initialTitle.set(subtitle != null ? subtitle : title);
+              break;
+            case OTHER:
+              item.initialTitle.set(title);
+              item.initialSubtitle.set(subtitle);
+              break;
             }
-          }, new SourceKey(fileEntitySource, path.toString()));
 
-          children.add(item);
-        }
+            return item;
+          }
+        }, new SourceKey(fileEntitySource, path.toString()));
+
+        children.add(item);
       }
     }
 
