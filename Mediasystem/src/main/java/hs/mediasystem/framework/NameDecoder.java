@@ -4,6 +4,7 @@ import hs.mediasystem.framework.NameDecoder.Parts.Group;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -56,16 +57,18 @@ public class NameDecoder {
 
   private final Set<Pattern> sequencePatternsToCheck = new LinkedHashSet<>();
 
-  public enum Hint {EPISODE, MOVIE}
+  public enum Hint {EPISODE, FOLDER_NAMES, MOVIE}
+
+  private final EnumSet<Hint> hints = EnumSet.noneOf(Hint.class);
 
   public NameDecoder(Hint... hints) {
-    for(Hint hint : hints) {
-      if(hint == Hint.EPISODE) {
-        sequencePatternsToCheck.addAll(EPISODE_SEQUENCE_PATTERNS);
-      }
-      if(hint == Hint.MOVIE) {
-        sequencePatternsToCheck.addAll(MOVIE_SEQUENCE_PATTERNS);
-      }
+    this.hints.addAll(Arrays.asList(hints));
+
+    if(this.hints.contains(Hint.EPISODE)) {
+      sequencePatternsToCheck.addAll(EPISODE_SEQUENCE_PATTERNS);
+    }
+    if(this.hints.contains(Hint.MOVIE)) {
+      sequencePatternsToCheck.addAll(MOVIE_SEQUENCE_PATTERNS);
     }
 
     if(sequencePatternsToCheck.isEmpty()) {
@@ -83,7 +86,7 @@ public class NameDecoder {
     String code = null;
     String extension = null;
 
-    String[] nameAndExtension = splitExtension(input);
+    String[] nameAndExtension = hints.contains(Hint.FOLDER_NAMES) ? new String[] {input, ""} : splitExtension(input);
 
     String cleanedInput = cleanInput(nameAndExtension[0]);
     extension = nameAndExtension[1];
