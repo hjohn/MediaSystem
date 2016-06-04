@@ -25,7 +25,7 @@ import javax.inject.Inject;
 
 public class SeriesMediaTree implements MediaRoot {
   private static final Id ID = new Id("serieRoot");
-  private static final NameDecoder NAME_DECODER = new NameDecoder(Hint.MOVIE);
+  private static final NameDecoder NAME_DECODER = new NameDecoder(Hint.MOVIE, Hint.FOLDER_NAMES);
 
   private final FileEntitySource fileEntitySource;
   private final EntityContext entityContext;
